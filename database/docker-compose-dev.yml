@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  studio-lite-db:
+    container_name: studio-lite-db
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - docker.env
+    volumes:
+      - /data/postgres:/data/postgres

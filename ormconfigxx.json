@@ -1,0 +1,10 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "superdb",
+  "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",
+  "database": "studio-lite",
+  "entities": ["apps/apwei/src/app/database/entities/*.entity.ts"],
+  "synchronize": true
+}
