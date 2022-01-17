@@ -2,7 +2,7 @@ import {Body, Controller, Delete, Get, Param, Post, UseGuards} from '@nestjs/com
 import {UsersService} from "../../database/services/users.service";
 import User from "../../database/entities/user.entity";
 import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite/api-admin";
-import {ApiCreatedResponse, ApiParam, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags} from "@nestjs/swagger";
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 
 @Controller('admin/users')
@@ -21,6 +21,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get(':id')
   @ApiCreatedResponse({
     type: [UserFullDto],
