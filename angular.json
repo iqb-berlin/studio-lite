@@ -53,6 +53,75 @@
       },
       "tags": []
     },
+    "api-admin": {
+      "root": "libs/api-admin",
+      "sourceRoot": "libs/api-admin/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/api-admin/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/api-admin"],
+          "options": {
+            "jestConfig": "libs/api-admin/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
+    "api-auth": {
+      "root": "libs/api-auth",
+      "sourceRoot": "libs/api-auth/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/api-auth/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/api-auth"],
+          "options": {
+            "jestConfig": "libs/api-auth/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
+    "api-authoring": {
+      "root": "libs/api-authoring",
+      "sourceRoot": "libs/api-authoring/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/api-authoring/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/api-authoring"],
+          "options": {
+            "jestConfig": "libs/api-authoring/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
     "frontend": {
       "projectType": "application",
       "root": "apps/frontend",

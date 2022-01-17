@@ -17,7 +17,7 @@ import VeronaModule from "./entities/verona-module.entity";
             "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",
             "database": "studio-lite",
             "entities": [User],
-            "synchronize": true
+            "synchronize": false
           })
       }
     ),

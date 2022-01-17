@@ -5,6 +5,7 @@
   "scripts": {
     "ng": "nx",
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
+    "start-api-only": "nx serve api",
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test"
@@ -25,14 +26,17 @@
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.1.0",
     "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/swagger": "^5.1.5",
     "@nestjs/typeorm": "^8.0.2",
     "@nrwl/angular": "13.4.5",
+    "bcrypt": "^5.0.1",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.4.0",
+    "swagger-ui-express": "^4.3.0",
     "tslib": "^2.0.0",
     "typeorm": "^0.2.41",
     "zone.js": "~0.11.4"
@@ -57,6 +61,7 @@
     "@nrwl/node": "13.4.5",
     "@nrwl/tao": "13.4.5",
     "@nrwl/workspace": "13.4.5",
+    "@types/bcrypt": "^5.0.0",
     "@types/jest": "27.0.2",
     "@types/node": "14.14.33",
     "@types/passport-jwt": "^3.0.6",

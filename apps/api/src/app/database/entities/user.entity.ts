@@ -12,9 +12,11 @@ class User {
   public password: string;
 
   @Column()
-  public email: string;
+  public email: string | null;
 
-  @Column()
+  @Column({
+    name: 'is_admin'
+  })
   public isAdmin: boolean;
 }
 

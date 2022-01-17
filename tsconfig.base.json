@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@studio-lite/api-admin": ["libs/api-admin/src/index.ts"],
+      "@studio-lite/api-auth": ["libs/api-auth/src/index.ts"],
+      "@studio-lite/api-authoring": ["libs/api-authoring/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -10,8 +10,8 @@ const pool = new Pool({
 
 const sql = `
   CREATE EXTENSION IF NOT EXISTS pgcrypto;
-  INSERT INTO public.user (name, password, isAdmin)
-      VALUES ('mmee', encode(digest('yummy', 'sha1'), 'hex'), 'True');`;
+  INSERT INTO public.user (name, password, is_admin)
+      VALUES ('tobias', encode(digest('wedding', 'sha1'), 'hex'), 'True');`;
 
 pool.query(sql, function(err, result){
   console.log(err, result);

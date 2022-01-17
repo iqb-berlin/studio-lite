@@ -6,11 +6,11 @@ CREATE TABLE public.user
   name character varying(50) NOT NULL,
   password character varying(100) NOT NULL,
   email character varying(100),
-  isAdmin boolean NOT NULL DEFAULT false,
+  is_admin boolean DEFAULT false,
   PRIMARY KEY (id)
 );
 
-CREATE TABLE public.workspaceGroup
+CREATE TABLE public.workspace_group
 (
   id serial,
   name character varying(50) NOT NULL,
@@ -22,23 +22,23 @@ CREATE TABLE public.workspace
 (
   id serial,
   name character varying(50) NOT NULL,
-  groupId integer NOT NULL,
+  group_id integer NOT NULL,
   settings jsonb,
   PRIMARY KEY (id),
-  FOREIGN KEY (groupId) REFERENCES public.workspaceGroup (id) MATCH SIMPLE
+  FOREIGN KEY (group_id) REFERENCES public.workspace_group (id) MATCH SIMPLE
   ON UPDATE NO ACTION
   ON DELETE CASCADE
 );
 
-CREATE TABLE public.workspaceUser
+CREATE TABLE public.workspace_user
 (
-  workspaceId integer NOT NULL,
-  userId integer NOT NULL,
-  PRIMARY KEY (workspaceId, userId),
-  FOREIGN KEY (userId) REFERENCES public.user (id) MATCH SIMPLE
+  workspace_id integer NOT NULL,
+  user_id integer NOT NULL,
+  PRIMARY KEY (workspace_id, user_id),
+  FOREIGN KEY (user_id) REFERENCES public.user (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE CASCADE,
-  FOREIGN KEY (workspaceId) REFERENCES public.workspace (id) MATCH SIMPLE
+  FOREIGN KEY (workspace_id) REFERENCES public.workspace (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE CASCADE
 );
@@ -46,31 +46,31 @@ CREATE TABLE public.workspaceUser
 CREATE TABLE public.unit
 (
   id serial,
-  workspaceId integer NOT NULL,
-  lastChanged timestamp without time zone NOT NULL DEFAULT now(),
+  workspace_id integer NOT NULL,
+  last_changed timestamp without time zone NOT NULL DEFAULT now(),
   key character varying(20) NOT NULL,
   label character varying(100),
   metadata jsonb,
   definition bytea,
   variables jsonb,
-  responseScheme jsonb,
+  response_scheme jsonb,
   editor character varying(50),
   player character varying(50),
   schemer character varying(50),
   PRIMARY KEY (id),
-  FOREIGN KEY (workspaceId) REFERENCES public.workspace (id) MATCH SIMPLE
+  FOREIGN KEY (workspace_id) REFERENCES public.workspace (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE CASCADE
 );
 
-CREATE TABLE public.appConfig
+CREATE TABLE public.app_config
 (
   key character varying(50) NOT NULL,
   content jsonb,
   PRIMARY KEY (key)
 );
 
-CREATE TABLE public.module
+CREATE TABLE public.verona_module
 (
   key character varying(50) NOT NULL,
   metadata jsonb,

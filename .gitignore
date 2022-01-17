@@ -41,5 +41,6 @@ Thumbs.db
 .angular
 
 auth.constants.ts
+database.constants.ts
 docker.env
 apps/api/ormconfig.json

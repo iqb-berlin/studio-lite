@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('verona_module')
 class VeronaModule {
   @PrimaryGeneratedColumn()
   public key: string;
