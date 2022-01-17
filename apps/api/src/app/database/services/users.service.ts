@@ -45,16 +45,16 @@ export class UsersService {
     const user = await getConnection()
       .getRepository(User)
       .createQueryBuilder("user")
-      .where("user.name = :name, user.password = :password",
-        {name: name, password: UsersService.getPasswordHash(password)})
+      .where("user.name = :name",
+        {name: name})
       .getOne();
-    if (user) {
+    if (user && bcrypt.compareSync(password, user.password)) {
       return user.id
     }
     return null
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
   }
 

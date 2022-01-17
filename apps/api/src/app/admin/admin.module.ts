@@ -9,4 +9,4 @@ import {DatabaseModule} from "../database/database.module";
   ],
   controllers: [WorkSpacesController, UsersController]
 })
-export class SuperAdminModule {}
+export class AdminModule {}
