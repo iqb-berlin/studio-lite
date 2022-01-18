@@ -3,7 +3,7 @@ import {getConnection, Repository} from "typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
 import User from "../entities/user.entity";
 import * as bcrypt from 'bcrypt';
-import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite/api-admin";
+import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
 import {passwordHash} from "../../auth/auth.constants";
 
 @Injectable()
@@ -50,6 +50,19 @@ export class UsersService {
       .getOne();
     if (user && bcrypt.compareSync(password, user.password)) {
       return user.id
+    }
+    return null
+  }
+
+  async getUserIsAdmin(id: number): Promise<boolean | null> {
+    const user = await getConnection()
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .where("user.id = :id",
+        {id: id})
+      .getOne();
+    if (user) {
+      return user.isAdmin
     }
     return null
   }

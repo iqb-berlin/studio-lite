@@ -11,7 +11,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3333;
   const config = new DocumentBuilder()
     .setTitle('IQB Studio Lite')
-    .setDescription('The IQB Studio Lite API description')
+    .setDescription('The IQB Studio Lite API description and try-out')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

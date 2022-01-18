@@ -1,22 +1,29 @@
-import {Body, Controller, Delete, Get, Param, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
+import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
 import {UsersService} from "../../database/services/users.service";
-import User from "../../database/entities/user.entity";
-import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite/api-admin";
-import {ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags} from "@nestjs/swagger";
+import {AuthService} from "../../auth/service/auth.service";
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 
 @Controller('admin/users')
 export class UsersController {
   constructor(
-    private usersService: UsersService
+    private usersService: UsersService,
+    private authService: AuthService
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [UserInListDto],
   })
   @ApiTags('admin users')
-  async findAll(): Promise<UserInListDto[]> {
+  async findAll(@Request() req): Promise<UserInListDto[]> {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
     return this.usersService.findAll();
   }
 
@@ -27,23 +34,40 @@ export class UsersController {
     type: [UserFullDto],
   })
   @ApiTags('admin users')
-  async findOne(@Param('id') id: number): Promise<UserFullDto> {
+  async findOne(@Request() req, @Param('id') id: number): Promise<UserFullDto> {
+    console.log(req);
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
     return this.usersService.findOne(id);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiTags('admin users')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Request() req, @Param('id') id: number): Promise<void> {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
     return this.usersService.remove(id);
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new user in database',
     type: Number,
   })
   @ApiTags('admin users')
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(@Request() req, @Body() createUserDto: CreateUserDto) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
     return this.usersService.create(createUserDto)
   }
 }

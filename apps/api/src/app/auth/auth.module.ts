@@ -1,4 +1,4 @@
-import { AuthService } from './auth/auth.service';
+import { AuthService } from './service/auth.service';
 import { LocalStrategy } from './local.strategy';
 import {PassportModule} from "@nestjs/passport";
 import {Module} from "@nestjs/common";
