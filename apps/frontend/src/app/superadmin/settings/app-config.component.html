@@ -1,0 +1,48 @@
+<form [formGroup]="configForm" *ngIf="appConfig" fxFlex fxLayout="column" fxLayoutAlign="start stretch">
+  <p>Warnung auf der Startseite</p>
+  <div class="block-ident" fxLayout="column">
+    <mat-form-field>
+      <mat-label>Text</mat-label>
+      <input matInput formControlName="globalWarningText" placeholder="Warnung">
+    </mat-form-field>
+    <div fxLayout="row wrap" fxLayoutAlign="start center" fxLayoutGap="20px">
+      <p>Zeige Warnung bis</p>
+      <mat-form-field>
+        <mat-label>Datum</mat-label>
+        <input matInput formControlName="globalWarningExpiredDay" [matDatepicker]="picker">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-select placeholder="Stunde" formControlName="globalWarningExpiredHour">
+          <mat-option *ngFor="let m of expiredHours | keyvalue" [value]="m.key">
+            {{m.value}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <p *ngIf="warningIsExpired" class="warning-warning">Zeitpunkt ist in der Vergangenheit.</p>
+    </div>
+  </div>
+  <mat-form-field fxLayout="column">
+    <mat-label>Name der Anwendung</mat-label>
+    <input matInput formControlName="appTitle" placeholder="Name">
+  </mat-form-field>
+  <mat-form-field  fxLayout="column" fxLayoutAlign="start stretch">
+    <mat-label>Html-Inhalt für die Startseite rechts</mat-label>
+    <textarea matInput formControlName="introHtml"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="6"></textarea>
+  </mat-form-field>
+  <mat-form-field  fxLayout="column" fxLayoutAlign="start stretch">
+    <mat-label>Html-Inhalt für die Impressum-/Datenschutzseite</mat-label>
+    <textarea matInput formControlName="impressumHtml"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="6"></textarea>
+  </mat-form-field>
+  <div fxLayout="row" fxLayoutGap="30px" fxLayoutAlign="start start">
+    <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()">
+      Speichern
+    </button>
+    <div *ngIf="dataChanged" fxFlex>Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!</div>
+  </div>
+</form>

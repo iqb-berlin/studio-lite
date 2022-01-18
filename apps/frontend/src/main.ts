@@ -8,6 +8,22 @@ if (environment.production) {
   enableProdMode();
 }
 
-platformBrowserDynamic()
-  .bootstrapModule(AppModule)
-  .catch((err) => console.error(err));
+platformBrowserDynamic([
+  {
+    provide: 'SERVER_URL',
+    useValue: environment.backendUrl
+  },
+  {
+    provide: 'APP_PUBLISHER',
+    useValue: 'IQB - Institut zur Qualitätsentwicklung im Bildungswesen'
+  },
+  {
+    provide: 'APP_NAME',
+    useValue: 'Studio-Lite'
+  },
+  {
+    provide: 'APP_VERSION',
+    useValue: '2.0.0-beta'
+  }
+]).bootstrapModule(AppModule)
+  .catch(err => console.log(err));

@@ -1,0 +1,31 @@
+<div fxLayout="column" style="height: 100%">
+  <h1 mat-dialog-title>Einstellungen für den Arbeitsbereich</h1>
+
+  <mat-dialog-content>
+    <form [formGroup]="settingsForm" fxLayout="column">
+      <mat-form-field>
+        <mat-label>Voreingestellter Editor</mat-label>
+        <mat-select placeholder="Editor" formControlName="editorSelector">
+          <mat-option [value]=""></mat-option>
+          <mat-option *ngFor="let m of ds.editorList | keyvalue" [value]="m.key">
+            {{m.value.label}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Voreingestellter Player</mat-label>
+        <mat-select placeholder="Player" formControlName="playerSelector">
+          <mat-option [value]=""></mat-option>
+          <mat-option *ngFor="let m of ds.playerList | keyvalue" [value]="m.key">
+            {{m.value.label}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="settingsForm">
+      Speichern</button>
+    <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+  </mat-dialog-actions>
+</div>

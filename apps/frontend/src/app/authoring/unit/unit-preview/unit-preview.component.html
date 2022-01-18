@@ -1,0 +1,36 @@
+<div id="iFrameHost" class="preview-body">
+
+</div>
+<div id="pageFooter" fxLayout="row" fxLayoutAlign="space-between center">
+  <div fxLayout="row" fxLayoutAlign="space-between center">
+    <div class="statusVisual" fxLayout="row">
+      <div *ngFor="let sV of statusVisual" [style.background-color]="sV.color" [matTooltip]="sV.description">{{ sV.label }}</div>
+    </div>
+    <button mat-raised-button (click)="postNavigationDenied()"
+            [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
+            matTooltip="Sende die Nachricht 'Verweigerte Navigation'">Validieren</button>
+    <p>&nbsp;{{ playerName }}</p>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="space-between center" *ngIf="showPageNav" class="pageNav">
+    <div id="pageNavPrompt">
+      Wähle hier andere Seiten dieser Aufgabe:
+    </div>
+
+    <div *ngFor="let p of pageList">
+      <button *ngIf="p.type === '#previous'" (click)="gotoPage(p.type)" [disabled]="p.disabled" fxLayout="row" fxLayoutAlign="center center">
+        <i class="material-icons">chevron_left</i>
+      </button>
+      <button *ngIf="p.type === '#next'" (click)="gotoPage(p.type)" [disabled]="p.disabled" fxLayout="row" fxLayoutAlign="center center">
+        <i class="material-icons">chevron_right</i>
+      </button>
+      <div *ngIf="p.type === '#goto'" fxLayout="column">
+        <div class="pageNavEnabled" *ngIf="!p.disabled"></div>
+        <div class="pageNavDisabled" *ngIf="p.disabled"></div>
+        <button (click)="gotoPage(p.type, p.index)" [disabled]="p.disabled">{{ p.index }}</button>
+        <div class="pageNavEnabled" *ngIf="!p.disabled"></div>
+        <div class="pageNavDisabled" *ngIf="p.disabled"></div>
+      </div>
+    </div>
+  </div>
+</div>

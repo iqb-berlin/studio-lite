@@ -1,0 +1,87 @@
+<div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
+  <div class="spinner-container" *ngIf="dataLoading">
+      <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- ============================================= -->
+  <div class="object-list" fxLayout="column" fxFlex="50">
+    <div fxLayout="row">
+        <button mat-raised-button (click)="addObject()" matTooltip="Nutzer hinzufügen" matTooltipPosition="above">
+            <mat-icon>add</mat-icon>
+          </button>
+        <button mat-raised-button (click)="deleteObject()" matTooltip="Markierte Nutzer löschen" matTooltipPosition="above">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-raised-button (click)="changePassword()" matTooltip="Kennwort ändern" matTooltipPosition="above">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-raised-button (click)="changeSuperadminStatus()"
+                matTooltip="Superadmin-Status ändern" matTooltipPosition="above">
+          <mat-icon>edit</mat-icon>*
+        </button>
+    </div>
+
+    <mat-table [dataSource]="objectsDatasource" matSort class="scroll-area">
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-header-cell *matHeaderCellDef fxFlex="70px">
+          <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="tableselectionCheckbox.hasValue() && isAllSelected()"
+                        [indeterminate]="tableselectionCheckbox.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row" fxFlex="70px">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? tableselectionCheckbox.toggle(row) : null"
+                        [checked]="tableselectionCheckbox.isSelected(row)">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Name </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.name}} {{element.is_superadmin ? '*' : ''}}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectRow(row)"
+        [style.background]="tableselectionRow.isSelected(row) ? 'lightblue' : ''"></mat-row>
+    </mat-table>
+  </div>
+
+  <!-- ============================================= -->
+  <div class="object-list" fxLayout="column" fxFlex="40">
+
+    <div *ngIf="selectedUser.length === 0">
+      <div>Zugriffsrechte für Arbeitsbereich(e):</div>
+      <div>Bitte links einen Nutzer wählen</div>
+    </div>
+
+    <div *ngIf="selectedUser.length > 0" fxLayout="row" fxLayoutAlign="space-between center">
+      <div>Zugriffsrechte für {{ selectedUser }}:</div>
+        <button mat-raised-button (click)="saveWorkspaces()" matTooltip="Speichern"
+            matTooltipPosition="above" [disabled]="!pendingWorkspaceChanges">
+          <mat-icon>save</mat-icon>
+        </button>
+    </div>
+
+    <mat-table [dataSource]="WorkspacelistDatasource" class="scroll-area">
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-cell *matCellDef="let row" fxFlex="70px">
+          <mat-checkbox (change)="selectWorkspace(row)"
+                        [checked]="row.selected">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="group">
+        <mat-cell *matCellDef="let row"> {{row.ws_group_name}} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="label">
+        <mat-cell *matCellDef="let row"> {{row.label}} </mat-cell>
+      </ng-container>
+
+      <mat-row *matRowDef="let row; columns: displayedWorkspaceColumns;"></mat-row>
+    </mat-table>
+  </div>
+</div>

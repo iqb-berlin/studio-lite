@@ -1,0 +1,65 @@
+.authoring-body {
+  position: absolute;
+  width: 100%;
+  top: 70px;
+  bottom: 0;
+  padding: 0;
+}
+
+.unitdatacontainer {
+  background-color:white;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.import-units-log {
+  background-color:whitesmoke;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.navibar {
+  background-color:whitesmoke;
+  margin: 0;
+}
+
+.no-wrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+mat-selection-list {
+  overflow: auto;
+}
+
+.selected {
+  background-color: #3957f74f;
+}
+
+.mat-nav-list, .mat-button-toggle-group {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.mat-form-field, .mat-chip-list {
+  margin: 5px;
+}
+
+.mat-raised-button, .mat-button {
+  min-width: 20px;
+}
+
+mat-button-toggle {
+  margin: 4px;
+  color: blue;
+}
+
+.upload-message {
+  margin: 10px;
+  color: goldenrod;
+}
+
+.upload-message-ok-button {
+  margin: 10px;
+}

@@ -1,0 +1,70 @@
+<div class="authoring-body" fxLayout="row">
+  <div class="navibar" fxLayout="column" fxFlex="200px">
+    <div fxLayout="row" style="margin: 2px">
+      <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
+              [disabled]="!ds.unitMetadataChanged && !ds.unitDefinitionChanged" matTooltipPosition="above">
+        <mat-icon>close</mat-icon>
+      </button>
+      <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
+              [disabled]="!ds.unitMetadataChanged && !ds.unitDefinitionChanged" matTooltipPosition="above">
+        Speichern <mat-icon>save</mat-icon>
+      </button>
+    </div>
+    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
+    <mat-selection-list [multiple]="false" [(ngModel)]="selectedUnits" (ngModelChange)="onUnitSelectionChange()" fxFlex cdkScrollable>
+      <mat-list-option *ngFor="let unit of ds.unitList" [value]="unit.id" style="height: 24px;" class="no-wrap" [matTooltip]="unit.label"
+      [class]="unit.id === (ds.selectedUnit$ | async) ? 'selected' : 'not-selected'">
+        {{ unit.key }} - {{ unit.label }}
+      </mat-list-option>
+    </mat-selection-list>
+    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
+    <div fxLayout="row">
+      <button mat-raised-button (click)="addUnit()" matTooltip="Aufgabe hinzufügen" matTooltipPosition="above" fxFlex="33">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
+          <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-button [matMenuTriggerFor]="menu" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="settings()">
+          <mat-icon>settings</mat-icon>Einstellungen
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="copyUnit()">
+          <mat-icon>content_copy</mat-icon>Kopieren
+        </button>
+        <button mat-menu-item (click)="moveUnit()">
+          <mat-icon>swap_horiz</mat-icon>Verschieben
+        </button>
+        <button mat-menu-item (click)="hiddenFileInput.click()">
+          <mat-icon>input</mat-icon>Import
+        </button>
+        <button mat-menu-item (click)="exportUnit()">
+          <mat-icon>get_app</mat-icon>Export
+        </button>
+      </mat-menu>
+    </div>
+    <input #hiddenFileInput type="file" name="unit-file" accept=".xml,.voud,.zip" multiple [iqbFilesUploadInputFor]="fileUploadQueue" hidden="true"/>
+  </div>
+  <div [hidden]="fileUploadQueue.files.length<=0 && uploadMessages.length <= 0" class="import-units-log" fxFlex="40">
+    <div *ngFor="let msg of uploadMessages" class="upload-message">{{msg}}</div>
+    <iqb-files-upload-queue #fileUploadQueue
+                            [httpUrl]="uploadUrl"
+                            [fileAlias]="'unit-file'"
+                            [tokenName]="'t'"
+                            [token]="token"
+                            [folderName]="'p'"
+                            [folder]="uploadProcessId"
+                            (uploadCompleteEvent)="finishUnitUpload()">
+    </iqb-files-upload-queue>
+    <button mat-raised-button color="primary" *ngIf="fileUploadQueue.files.length <= 0" class="upload-message-ok-button"
+            (click)="clearUploadMessages()">OK</button>
+  </div>
+  <div fxFlex class="unitdatacontainer">
+    <router-outlet></router-outlet>
+  </div>
+</div>

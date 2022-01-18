@@ -1,0 +1,47 @@
+<div fxLayout="column" style="height: 100%">
+  <h1 mat-dialog-title>{{ data.title }}</h1>
+  <mat-checkbox (change)="updateUnitList()" [(ngModel)]="addTestcenterFiles">
+    Als Paket für Testcenter
+  </mat-checkbox>
+  <div *ngIf="unitsWithPlayer.length === 0 && addTestcenterFiles" class="tcMessage">Keine Aufgabe hat einen gültigen Player gesetzt.</div>
+  <div *ngIf="unitsWithPlayer.length !== ds.unitList.length && unitsWithPlayer.length > 0 && addTestcenterFiles" class="tcMessage">
+    Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
+  </div>
+  <mat-dialog-content fxFlex>
+    <mat-table [dataSource]="objectsDatasource" matSort>
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-header-cell *matHeaderCellDef fxFlex="70px">
+          <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                        [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row" fxFlex="70px">
+          <mat-checkbox (click)="$event.stopPropagation()" [disabled]="row.disabled"
+                        (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
+                        [checked]="tableSelectionCheckbox.isSelected(row)">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
+        <mat-cell *matCellDef="let element" [class]="element.disabled ? 'disabled-element' : ''"> {{element.key}}-{{element.label}} </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  </mat-dialog-content>
+
+  <mat-dialog-actions fxLayout="column">
+    <p *ngIf="!tableSelectionCheckbox.hasValue()">Bitte Aufgaben auswählen!</p>
+    <p *ngIf="tableSelectionCheckbox.selected.length === 1">Eine Aufgabe ausgewählt.</p>
+    <p *ngIf="tableSelectionCheckbox.selected.length > 1">{{tableSelectionCheckbox.selected.length}} Aufgaben ausgewählt.</p>
+    <div fxLayout="row">
+      <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="getResultData()" [disabled]="!tableSelectionCheckbox.hasValue()">
+        {{data.buttonLabel}}</button>
+      <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+    </div>
+  </mat-dialog-actions>
+</div>

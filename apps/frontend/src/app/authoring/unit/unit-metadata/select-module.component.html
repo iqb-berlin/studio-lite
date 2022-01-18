@@ -1,0 +1,18 @@
+<div [hidden]="listLength > 0">
+  <p>Kein {{ moduleType }} in diesem System verfügbar.</p>
+</div>
+<form [formGroup]="moduleForm" *ngIf="listLength > 0" fxFlex>
+  <p *ngIf="isEmpty">{{moduleType}} ist nicht definiert.</p>
+  <p *ngIf="!isValid">{{moduleType}} ist ungültig ({{selectedModuleId}}).</p>
+  <p *ngIf="moduleSubstitute">Der {{moduleType}} mit der Kennung "{{selectedModuleId}}" ist nicht in diesem System verfügbar.
+    Es wird statt dessen der {{moduleType}} "{{moduleSubstitute}}" benutzt.</p>
+  <div fxLayout="column">
+    <mat-form-field>
+      <mat-select [placeholder]="moduleType" formControlName="moduleSelector">
+        <mat-option *ngFor="let m of moduleList | keyvalue" [value]="m.key">
+          {{m.value.label}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</form>

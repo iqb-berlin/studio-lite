@@ -1,0 +1,79 @@
+<div class="page-body">
+  <!-- <div class="spinner-container" *ngIf="dataLoading">
+    <mat-spinner></mat-spinner>
+  </div> -->
+  <div fxLayout="row wrap" fxLayoutAlign="center stretch" style="padding: 30px;">
+    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="!mds.loginStatus">
+      <!-- - - - - - - - - - - - - - - - - -->
+      <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <mat-card-title>Anmelden</mat-card-title>
+        <mat-card-header *ngIf="mds.globalWarning">{{mds.globalWarning}}</mat-card-header>
+        <mat-card-content fxLayout="column">
+          <mat-form-field class="full-width">
+            <input matInput formControlName="name" placeholder="Anmeldename" (keyup.enter)="pw.focus()">
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
+          </mat-form-field>
+        </mat-card-content>
+        <p *ngIf="errorMessage" class="error-message">{{errorMessage}}</p>
+        <mat-card-actions>
+          <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
+        </mat-card-actions>
+      </form>
+    </mat-card>
+
+    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="mds.loginStatus">
+      <mat-card-title fxLayout="row" fxLayoutAlign="space-between center">
+        Arbeitsbereich wählen
+        <button mat-button *ngIf="mds.loginStatus.isSuperAdmin" [routerLink]="['/super-admin']"
+                matTooltip="Nutzer/Arbeitsbereiche">
+          <mat-icon>settings</mat-icon>
+        </button>
+      </mat-card-title>
+      <mat-card-header *ngIf="mds.globalWarning">{{mds.globalWarning}}</mat-card-header>
+      <mat-card-content>
+        <div fxLayoutGap="10px" fxLayout="column">
+          <p *ngIf="mds.loginStatus.workspaces.length === 0">
+            Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.
+          </p>
+          <div *ngFor="let wsg of mds.loginStatus.workspacesGrouped" fxLayout="column">
+            <h2>{{wsg.name}}</h2>
+            <button mat-raised-button color="primary" (click)="buttonGotoWorkspace(ws)" class="ws-button"
+                    *ngFor="let ws of wsg.workspaces">
+                    {{ws.name}}
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions fxLayout="row" fxLayoutAlign="space-between center">
+        <button mat-raised-button color="foreground" (click)="changePassword()" matTooltip="Kennwort ändern">
+          <mat-icon>account_box</mat-icon>Kennwort ändern
+        </button>
+        <button mat-raised-button color="foreground" (click)="logout()" matTooltip="Abmelden/Neu anmelden">
+          <mat-icon>logout</mat-icon>Abmelden
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card fxFlex="0 2 400px" fxLayout="column" class="status">
+      <mat-card-title>{{mds.appConfig?.app_title}}</mat-card-title>
+
+      <!-- - - - - - - - - - - - - - - - - -->
+      <mat-card-content>
+        <div [innerHTML]="mds.appConfig?.trusted_intro_html"></div>
+        <div *ngIf="mds.loginStatus">
+          <ul>
+            <li>Kennung der Anwendung: {{appName}}</li>
+            <li>Version: {{appVersion}}</li>
+            <li>angemeldet als: {{ mds.loginStatus.name }}</li>
+            <li *ngIf="mds.loginStatus.isSuperAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
+          </ul>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="foreground" [routerLink]="['/about']">Impressum/Datenschutz</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

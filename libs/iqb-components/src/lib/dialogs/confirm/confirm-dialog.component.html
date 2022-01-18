@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>{{ confirmdata.title }}</h1>
+
+<mat-dialog-content>
+  <p>
+    {{ confirmdata.content }}
+  </p>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button color="primary" [mat-dialog-close]="true">{{ confirmdata.confirmbuttonlabel }}</button>
+  <button mat-raised-button *ngIf="showcancel" [mat-dialog-close]="false">Abbrechen</button>
+</mat-dialog-actions>

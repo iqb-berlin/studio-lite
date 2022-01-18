@@ -1,0 +1,24 @@
+.mat-card {
+  margin: 10px;
+}
+.status {
+  background-color: lightgrey;
+}
+.error-message {
+  color: red;
+  padding: 5px;
+}
+.ws-button {
+  margin-left: 20px;
+  margin-bottom: 4px;
+}
+.mat-card-header {
+  background-color: salmon;
+  padding: 4px;
+}
+.mat-raised-button {
+  min-width: 160px;
+}
+.mat-raised-button .mat-icon {
+  margin-right: 10px;
+}

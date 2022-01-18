@@ -142,7 +142,10 @@
               "apps/frontend/src/favicon.ico",
               "apps/frontend/src/assets"
             ],
-            "styles": ["apps/frontend/src/styles.scss"],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
+              "apps/frontend/src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -243,6 +246,32 @@
       },
       "tags": [],
       "implicitDependencies": ["frontend"]
+    },
+    "iqb-components": {
+      "projectType": "library",
+      "root": "libs/iqb-components",
+      "sourceRoot": "libs/iqb-components/src",
+      "prefix": "studio-lite",
+      "architect": {
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/iqb-components"],
+          "options": {
+            "jestConfig": "libs/iqb-components/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/iqb-components/src/**/*.ts",
+              "libs/iqb-components/src/**/*.html"
+            ]
+          }
+        }
+      },
+      "tags": []
     }
   }
 }

@@ -1,0 +1,43 @@
+<div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
+  <div class="spinner-container" *ngIf="dataLoading">
+    <mat-spinner></mat-spinner>
+  </div>
+  <div fxLayout="column" fxFlex="0 1 1000px" class="object-list">
+    <div fxLayout="row">
+      <button fxFlex="88px" mat-raised-button (click)="hiddenfileinput.click()" matTooltip="hochladen/aktualisieren" matTooltipPosition="above">
+        <mat-icon>cloud_upload</mat-icon>
+      </button>
+      <button fxFlex="88px" mat-raised-button (click)="deleteFiles()" [disabled]="(selectedPlayers.length + selectedEditors.length) === 0"
+              matTooltip="Markierte löschen" matTooltipPosition="above">
+        <mat-icon>delete</mat-icon>
+      </button>
+
+      <input #hiddenfileinput type="file" name="verona-module" multiple [iqbFilesUploadInputFor]="fileUploadQueue" hidden="true"/>
+    </div>
+    <div class="scroll-area">
+      <iqb-files-upload-queue #fileUploadQueue
+                              [httpUrl]="uploadUrl"
+                              [fileAlias]="'verona-module'"
+                              [tokenName]="'t'"
+                              [token]="token"
+                              [folderName]="'i'"
+                              [folder]="'y'"
+                              (uploadCompleteEvent)="updateFileList()">
+      </iqb-files-upload-queue>
+      <div *ngIf="editorData.length > 0" fxLayout="column">
+        <h1>Editoren</h1>
+        <app-verona-modules-table (selectionChanged)="selectedEditors = $event"
+                                  [downloadPath]="serverUrl"
+                                  [objectList]="editorData"></app-verona-modules-table>
+      </div>
+      <div *ngIf="editorData.length === 0"><p><em>Keine Editoren verfügbar</em></p></div>
+      <div *ngIf="playerData.length > 0" fxLayout="column">
+        <h1>Player</h1>
+        <app-verona-modules-table (selectionChanged)="selectedPlayers = $event"
+                                  [downloadPath]="serverUrl"
+                                  [objectList]="playerData"></app-verona-modules-table>
+      </div>
+      <div *ngIf="playerData.length === 0"><p><em>Keine Player verfügbar</em></p></div>
+    </div>
+  </div>
+</div>
