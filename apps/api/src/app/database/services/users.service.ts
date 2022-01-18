@@ -5,6 +5,7 @@ import User from "../entities/user.entity";
 import * as bcrypt from 'bcrypt';
 import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
 import {passwordHash} from "../../auth/auth.constants";
+import WorkspaceUser from "../entities/workspace-user.entity";
 
 @Injectable()
 export class UsersService {
@@ -54,17 +55,30 @@ export class UsersService {
     return null
   }
 
-  async getUserIsAdmin(id: number): Promise<boolean | null> {
+  async getUserIsAdmin(userId: number): Promise<boolean | null> {
     const user = await getConnection()
       .getRepository(User)
       .createQueryBuilder("user")
       .where("user.id = :id",
-        {id: id})
+        {id: userId})
       .getOne();
     if (user) {
       return user.isAdmin
     }
     return null
+  }
+
+  async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
+    const wsUser = await getConnection()
+      .getRepository(WorkspaceUser)
+      .createQueryBuilder("ws_user")
+      .where("ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id",
+        {user_id: userId, ws_id: workspaceId})
+      .getOne();
+    if (wsUser) {
+      return true
+    }
+    return false
   }
 
   async remove(id: number): Promise<void> {

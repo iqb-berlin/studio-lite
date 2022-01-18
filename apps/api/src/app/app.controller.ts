@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import {LocalAuthGuard} from "./auth/local-auth.guard";
 import {AuthService} from "./auth/service/auth.service";
 import {JwtAuthGuard} from "./auth/jwt-auth.guard";
-import {ApiCreatedResponse, ApiParam, ApiQuery} from "@nestjs/swagger";
+import {ApiCreatedResponse, ApiParam, ApiQuery, ApiTags} from "@nestjs/swagger";
 import {UserInListDto} from "@studio-lite-lib/api-admin";
 
 @Controller()
@@ -15,6 +15,7 @@ export class AppController {
 ) {}
 
   @UseGuards(LocalAuthGuard)
+  @ApiTags('login')
   @ApiCreatedResponse({
     type: String
   })
@@ -23,16 +24,5 @@ export class AppController {
   @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.user);
-  }
-
-  @Get('doc')
-  getData() {
-    return this.appService.getData();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
   }
 }
