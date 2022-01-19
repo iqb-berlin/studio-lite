@@ -1,13 +1,21 @@
 import {Inject, Injectable} from '@angular/core';
-import {Observable, of, throwError} from "rxjs";
-import {catchError, shareReplay, map} from "rxjs/operators";
-import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
+import {BehaviorSubject, Observable, of, throwError} from "rxjs";
+import {catchError, shareReplay, map, switchMap} from "rxjs/operators";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
 import {AppHttpError, LoginData, LoginStatusResponseData} from "./backend.service";
+import {AuthDataDto} from "@studio-lite-lib/api-start";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  public static defaultAuthData = <AuthDataDto>{
+    userId: 0,
+    userName: 'unbekannt',
+    isAdmin: false,
+    workspaces: []
+  }
+  public authData = AuthService.defaultAuthData;
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
@@ -17,13 +25,23 @@ export class AuthService {
     const queryParams = new HttpParams()
       .set('username', name)
       .set('password', password);
-    return this.http.post<string>(`${this.serverUrl}login?${queryParams.toString()}`, undefined)
+    return this.http.post<string>(`${this.serverUrl}login?${queryParams.toString()}`, 'jojo')
       .pipe(
-        shareReplay(),
-        map((token: string) => {
-          localStorage.setItem("id_token", token);
+        switchMap(loginToken => {
+          localStorage.setItem("id_token", loginToken);
+          return this.getAuthData()
+            .pipe(
+              map(authData => {
+                this.authData = authData;
+                return
+              })
+            );
         })
       )
+  }
+
+  getAuthData(): Observable<AuthDataDto> {
+    return this.http.get<AuthDataDto>(`${this.serverUrl}login`)
   }
 
   logout(): Observable<boolean> {

@@ -1,13 +1,12 @@
 <div class="spinner-container" *ngIf="mds.dataLoading">
   <mat-spinner></mat-spinner>
 </div>
-<mat-toolbar>
+<div class="page-title" fxLayout="row" fxLayoutAlign="space-between center">
   <a [routerLink]="['/']">
     <img class="logo" src="assets/IQB-LogoA.png" matTooltip="Startseite"/>
   </a>
-  <span>{{ mds.appConfig?.appTitle }}</span>
-  <span *ngIf="mds.pageTitle">&nbsp;- {{ mds.pageTitle }}</span>
-  <span class="itp-fill-remaining-space"></span>
-</mat-toolbar>
+  <div>{{ mds.appConfig?.appTitle }}</div>
+  <div *ngIf="mds.pageTitle">{{ mds.pageTitle }}</div>
+</div>
 
 <router-outlet></router-outlet>

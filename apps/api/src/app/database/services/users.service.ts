@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
 import {passwordHash} from "../../auth/auth.constants";
 import WorkspaceUser from "../entities/workspace-user.entity";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 
 @Injectable()
 export class UsersService {
@@ -66,6 +67,22 @@ export class UsersService {
       return user.isAdmin
     }
     return null
+  }
+
+  async getUserName(userId: number): Promise<string> {
+    const user = await getConnection()
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .where("user.id = :id",
+        {id: userId})
+      .getOne();
+    return user.name
+  }
+
+  async getWorkspacesByUser(userId: number): Promise<WorkspaceGroupDto[]> {
+    console.log(`get workspaces for user id ${userId}`);
+    // todo grab from database
+    return []
   }
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {

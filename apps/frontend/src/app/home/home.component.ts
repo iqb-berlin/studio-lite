@@ -8,6 +8,7 @@ import { BackendService, WorkspaceData } from '../backend.service';
 import { MainDatastoreService } from '../maindatastore.service';
 import { ChangePasswordComponent } from './change-password.component';
 import {AuthService} from "../auth.service";
+import {WorkspaceDto} from "@studio-lite-lib/api-start";
 
 @Component({
   templateUrl: './home.component.html',
@@ -17,6 +18,7 @@ export class HomeComponent implements OnInit {
   loginForm: FormGroup;
   isError = false;
   errorMessage = '';
+  dataLoading = true;
 
   constructor(private fb: FormBuilder,
               @Inject('APP_VERSION') readonly appVersion: string,
@@ -26,7 +28,7 @@ export class HomeComponent implements OnInit {
               public confirmDialog: MatDialog,
               private changePasswordDialog: MatDialog,
               private snackBar: MatSnackBar,
-              private authService: AuthService,
+              public authService: AuthService,
               private router: Router) {
     this.loginForm = this.fb.group({
       name: this.fb.control('', [Validators.required, Validators.minLength(1)]),
@@ -37,25 +39,22 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.mds.pageTitle = 'Willkommen!';
-      this.bs.getStatus().subscribe(newStatus => {
-        this.mds.loginStatus = newStatus;
-      },
-      () => {
-        this.mds.loginStatus = null;
-      });
+      this.dataLoading = false;
     });
   }
 
   login(): void {
     this.isError = false;
     this.errorMessage = '';
+    this.dataLoading = true;
     if (this.loginForm && this.loginForm.valid) {
-      this.authService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(loginData => {
-        console.log(loginData);
-      },
+      this.authService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(() => {
+          this.dataLoading = false;
+        },
       err => {
         this.isError = true;
-        this.errorMessage = `${err.msg()}`;
+        this.dataLoading = false;
+        // this.errorMessage = `${err.msg()}`;
       });
     }
   }
@@ -103,7 +102,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  buttonGotoWorkspace(selectedWorkspace: WorkspaceData): void {
+  buttonGotoWorkspace(selectedWorkspace: WorkspaceDto): void {
     this.router.navigate([`/a/${selectedWorkspace.id}`]);
   }
 }

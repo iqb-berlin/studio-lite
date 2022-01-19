@@ -6,7 +6,13 @@
   top: 70px;
   bottom: 0;
   overflow-y: auto;
-  background: linear-gradient(175deg, rgba(10,97,133,1) 0%, rgba(7,70,94,1) 7%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%, rgba(1,201,241,1) 92%, rgba(237,178,255,1) 100%);
+  background: linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%, rgba(1,201,241,1) 92%, rgba(237,178,255,1) 100%);
+}
+
+.page-title {
+  color: white;
+  font-size: large;
+  padding-right: 20px;
 }
 
 .spinner-container {

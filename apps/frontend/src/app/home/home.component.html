@@ -1,9 +1,9 @@
 <div class="page-body">
-  <!-- <div class="spinner-container" *ngIf="dataLoading">
+  <div class="spinner-container" *ngIf="dataLoading">
     <mat-spinner></mat-spinner>
-  </div> -->
+  </div>
   <div fxLayout="row wrap" fxLayoutAlign="center stretch" style="padding: 30px;">
-    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="!mds.loginStatus">
+    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="authService.authData.userId === 0">
       <!-- - - - - - - - - - - - - - - - - -->
       <form [formGroup]="loginForm" (ngSubmit)="login()">
         <mat-card-title>Anmelden</mat-card-title>
@@ -23,10 +23,10 @@
       </form>
     </mat-card>
 
-    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="mds.loginStatus">
+    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="authService.authData.userId > 0">
       <mat-card-title fxLayout="row" fxLayoutAlign="space-between center">
         Arbeitsbereich wählen
-        <button mat-button *ngIf="mds.loginStatus.isSuperAdmin" [routerLink]="['/super-admin']"
+        <button mat-button *ngIf="authService.authData.isAdmin" [routerLink]="['/super-admin']"
                 matTooltip="Nutzer/Arbeitsbereiche">
           <mat-icon>settings</mat-icon>
         </button>
@@ -34,10 +34,10 @@
       <mat-card-header *ngIf="mds.globalWarning">{{mds.globalWarning}}</mat-card-header>
       <mat-card-content>
         <div fxLayoutGap="10px" fxLayout="column">
-          <p *ngIf="mds.loginStatus.workspaces.length === 0">
+          <p *ngIf="authService.authData.workspaces.length === 0">
             Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.
           </p>
-          <div *ngFor="let wsg of mds.loginStatus.workspacesGrouped" fxLayout="column">
+          <div *ngFor="let wsg of authService.authData.workspaces" fxLayout="column">
             <h2>{{wsg.name}}</h2>
             <button mat-raised-button color="primary" (click)="buttonGotoWorkspace(ws)" class="ws-button"
                     *ngFor="let ws of wsg.workspaces">
@@ -67,7 +67,7 @@
             <li>Kennung der Anwendung: {{appName}}</li>
             <li>Version: {{appVersion}}</li>
             <li>angemeldet als: {{ mds.loginStatus.name }}</li>
-            <li *ngIf="mds.loginStatus.isSuperAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
+            <li *ngIf="authService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
           </ul>
         </div>
       </mat-card-content>

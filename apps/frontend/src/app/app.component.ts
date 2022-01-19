@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { MainDatastoreService } from './maindatastore.service';
 import {AppConfig, BackendService} from './backend.service';
+import {AuthService} from "./auth.service";
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -15,6 +16,7 @@ export class AppComponent implements OnInit {
     public mds: MainDatastoreService,
     private bs: BackendService,
     private sanitizer: DomSanitizer,
+    private authService: AuthService,
     private titleService: Title
   ) {}
 
@@ -29,12 +31,12 @@ export class AppComponent implements OnInit {
           this.mds.globalWarning = this.mds.appConfig.globalWarningText();
         }
       });
-      this.bs.getStatus().subscribe(newStatus => {
-        this.mds.loginStatus = newStatus;
-      },
-      () => {
-        this.mds.loginStatus = null;
-      });
+      const token = localStorage.getItem('token_id');
+      if (token) {
+        this.authService.getAuthData().subscribe(authData => {
+          this.authService.authData = authData
+        })
+      }
 
       window.addEventListener('message', event => {
         this.mds.processMessagePost(event);

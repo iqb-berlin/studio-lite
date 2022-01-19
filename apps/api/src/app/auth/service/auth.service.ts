@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {JwtService} from "@nestjs/jwt";
 import {UsersService} from "../../database/services/users.service";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 
 @Injectable()
 export class AuthService {
@@ -29,4 +30,13 @@ export class AuthService {
     const isAdmin = await this.usersService.getUserIsAdmin(userId);
     return isAdmin ? isAdmin : false;
   }
+
+  async getMyName(id: number): Promise<string> {
+    return this.usersService.getUserName(id);
+  }
+
+  async getWorkspacesByUser(id: number): Promise<WorkspaceGroupDto[]> {
+    return this.usersService.getWorkspacesByUser(id);
+  }
+
 }

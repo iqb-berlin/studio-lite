@@ -1,1 +1,3 @@
-export * from './lib/api-auth';
+export {AuthDataDto, WorkspaceDto, WorkspaceGroupDto} from "./lib/dto/auth-data-dto";
+
+
