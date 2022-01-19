@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AppConfig, AppHttpError } from '../backend.service';
+import {ConfigFullDto} from "@studio-lite-lib/api-admin";
 
 @Injectable({
   providedIn: 'root'
@@ -199,7 +200,7 @@ export class BackendService {
       );
   }
 
-  setAppConfig(appConfig: AppConfig): Observable<boolean> {
+  setAppConfig(appConfig: ConfigFullDto): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.serverUrl}setConfig.php`, {
       t: localStorage.getItem('t'), c: JSON.stringify(appConfig)

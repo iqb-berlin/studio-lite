@@ -3,7 +3,9 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { SafeUrl } from '@angular/platform-browser';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {ConfigFullDto} from "@studio-lite-lib/api-admin";
+import {ApiProperty} from "@nestjs/swagger";
 
 export class AppHttpError {
   code: number | undefined;
@@ -123,9 +125,9 @@ export class BackendService {
       );
   }
 
-  getConfig(): Observable<AppConfig | null> {
+  getConfig(): Observable<ConfigFullDto | null> {
     return this.http
-      .put<AppConfig | null>(`${this.serverUrl}getConfig.php`, {})
+      .get<ConfigFullDto | null>(`${this.serverUrl}admin/config`, {})
       .pipe(
         catchError(() => of(null))
       );
@@ -170,13 +172,35 @@ export interface LoginData {
   workspacesGrouped: WorkspaceGroupData[];
 }
 
-export interface AppConfig {
-  app_title: string;
-  intro_html: string;
-  trusted_intro_html: SafeUrl | null;
-  impressum_html: string | null;
-  trusted_impressum_html: SafeUrl | null;
-  global_warning: string;
-  global_warning_expired_day: Date | null,
-  global_warning_expired_hour: number
+export class AppConfig {
+  readonly appTitle: string;
+  readonly introHtml: SafeUrl | undefined;
+  readonly imprintHtml: SafeUrl | undefined;
+  private readonly _globalWarningText: string;
+  private readonly _globalWarningExpiredDay: Date | undefined;
+  private readonly _globalWarningExpiredHour: number | undefined;
+
+  constructor(appConfig: ConfigFullDto, sanitizer: DomSanitizer) {
+    this.appTitle = appConfig.appTitle;
+    if (appConfig.introHtml) this.introHtml = sanitizer.bypassSecurityTrustHtml(appConfig.introHtml);
+    if (appConfig.imprintHtml) this.imprintHtml = sanitizer.bypassSecurityTrustHtml(appConfig.imprintHtml);
+    this._globalWarningText = appConfig.globalWarningText;
+    this._globalWarningExpiredDay = appConfig.globalWarningExpiredDay;
+    this._globalWarningExpiredHour = appConfig.globalWarningExpiredHour;
+  }
+
+  public static isExpired(checkDate: Date | undefined, checkHour: number | undefined): boolean {
+    if (checkDate) {
+      const calcTimePoint = new Date(checkDate);
+      calcTimePoint.setHours(calcTimePoint.getHours() + Number(checkHour ? checkHour : 0));
+      const now = new Date(Date.now());
+      return calcTimePoint < now;
+    }
+    return false
+  }
+
+  public globalWarningText(): string {
+    return this._globalWarningText && this._globalWarningExpiredDay &&
+      AppConfig.isExpired(this._globalWarningExpiredDay, this._globalWarningExpiredHour) ? this._globalWarningText : '';
+  }
 }

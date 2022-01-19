@@ -1,11 +1,11 @@
 <div class="page-body">
   <div fxLayout="row" fxLayoutAlign="center start">
     <mat-card fxFlex="0 2 500px">
-      <mat-card-title>{{mds.appConfig?.app_title}} - Impressum/Datenschutz</mat-card-title>
+      <mat-card-title>{{mds.appConfig?.appTitle}} - Impressum/Datenschutz</mat-card-title>
 
       <!-- - - - - - - - - - - - - - - - - -->
       <mat-card-content>
-        <div [innerHTML]="mds.appConfig?.trusted_impressum_html"></div>
+        <div [innerHTML]="mds.appConfig?.imprintHtml"></div>
         <!--<p>
             <em>Postanschrift:</em><br/>
             Humboldt-Universität zu Berlin<br/>

@@ -57,11 +57,11 @@
     </mat-card>
 
     <mat-card fxFlex="0 2 400px" fxLayout="column" class="status">
-      <mat-card-title>{{mds.appConfig?.app_title}}</mat-card-title>
+      <mat-card-title>{{mds.appConfig?.appTitle}}</mat-card-title>
 
       <!-- - - - - - - - - - - - - - - - - -->
       <mat-card-content>
-        <div [innerHTML]="mds.appConfig?.trusted_intro_html"></div>
+        <div [innerHTML]="mds.appConfig?.introHtml"></div>
         <div *ngIf="mds.loginStatus">
           <ul>
             <li>Kennung der Anwendung: {{appName}}</li>

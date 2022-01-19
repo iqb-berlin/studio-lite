@@ -14,16 +14,6 @@ export class MainDatastoreService {
   appConfig: AppConfig | null = null;
   dataLoading = false;
 
-  static warningIsExpired(appConfig: AppConfig | null): boolean {
-    if (appConfig && appConfig.global_warning_expired_day) {
-      const calcTimePoint = new Date(appConfig.global_warning_expired_day);
-      calcTimePoint.setHours(calcTimePoint.getHours() + Number(appConfig.global_warning_expired_hour));
-      const now = new Date(Date.now());
-      return calcTimePoint < now;
-    }
-    return false;
-  }
-
   processMessagePost(postData: MessageEvent): void {
     const msgData = postData.data;
     const msgType = msgData.type;

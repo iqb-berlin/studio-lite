@@ -2,9 +2,18 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { AppConfig, BackendService as MainDataService } from '../../backend.service';
+import {AppConfig, BackendService as MainDataService} from '../../backend.service';
 import { BackendService } from '../backend.service';
-import { MainDatastoreService } from '../../maindatastore.service';
+import {ConfigFullDto} from "@studio-lite-lib/api-admin";
+
+const defaultAppConfig = <ConfigFullDto>{
+  appTitle: 'IQB-Teststudio',
+  introHtml: '<p>nicht definiert</p>',
+  imprintHtml: '<p>nicht definiert</p>',
+  globalWarningText: '',
+  globalWarningExpiredHour: 0,
+  globalWarningExpiredDay: undefined
+};
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -18,16 +27,7 @@ import { MainDatastoreService } from '../../maindatastore.service';
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {
-  appConfig: AppConfig | null = {
-    global_warning: '',
-    global_warning_expired_hour: 0,
-    global_warning_expired_day: null,
-    app_title: 'IQB-Teststudio',
-    intro_html: '<p>nicht definiert</p>',
-    impressum_html: '<p>nicht definiert</p>',
-    trusted_impressum_html: null,
-    trusted_intro_html: null
-  };
+  appConfig = defaultAppConfig;
 
   configForm: FormGroup;
   dataChanged = false;
@@ -69,7 +69,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
     this.configForm = this.fb.group({
       appTitle: this.fb.control(''),
       introHtml: this.fb.control(''),
-      impressumHtml: this.fb.control(''),
+      imprintHtml: this.fb.control(''),
       globalWarningText: this.fb.control(''),
       globalWarningExpiredDay: this.fb.control(''),
       globalWarningExpiredHour: this.fb.control('')
@@ -89,46 +89,46 @@ export class AppConfigComponent implements OnInit, OnDestroy {
         this.configDataChangedSubscription = null;
       }
       if (appConfig && this.appConfig) {
-        if (appConfig.app_title) this.appConfig.app_title = appConfig.app_title;
-        if (appConfig.intro_html) this.appConfig.intro_html = appConfig.intro_html;
-        if (appConfig.impressum_html) this.appConfig.impressum_html = appConfig.impressum_html;
-        if (appConfig.global_warning) this.appConfig.global_warning = appConfig.global_warning;
-        if (appConfig.global_warning_expired_day) {
-          this.appConfig.global_warning_expired_day = appConfig.global_warning_expired_day;
+        if (appConfig.appTitle) this.appConfig.appTitle = appConfig.appTitle;
+        if (appConfig.introHtml) this.appConfig.introHtml = appConfig.introHtml;
+        if (appConfig.imprintHtml) this.appConfig.imprintHtml = appConfig.imprintHtml;
+        if (appConfig.globalWarningText) this.appConfig.globalWarningText = appConfig.globalWarningText;
+        if (appConfig.globalWarningExpiredDay) {
+          this.appConfig.globalWarningExpiredDay = appConfig.globalWarningExpiredDay;
         }
-        if (appConfig.global_warning_expired_hour) {
-          this.appConfig.global_warning_expired_hour = appConfig.global_warning_expired_hour;
+        if (appConfig.globalWarningExpiredHour) {
+          this.appConfig.globalWarningExpiredHour = appConfig.globalWarningExpiredHour;
         }
         if (this.configForm) {
           this.configForm.setValue({
-            appTitle: this.appConfig.app_title,
-            introHtml: this.appConfig.intro_html,
-            impressumHtml: this.appConfig.impressum_html,
-            globalWarningText: this.appConfig.global_warning,
-            globalWarningExpiredDay: this.appConfig.global_warning_expired_day,
-            globalWarningExpiredHour: this.appConfig.global_warning_expired_hour
+            appTitle: this.appConfig.appTitle,
+            introHtml: this.appConfig.introHtml,
+            imprintHtml: this.appConfig.imprintHtml,
+            globalWarningText: this.appConfig.globalWarningText,
+            globalWarningExpiredDay: this.appConfig.globalWarningExpiredDay,
+            globalWarningExpiredHour: this.appConfig.globalWarningExpiredHour
           }, { emitEvent: false });
         }
       }
-      this.warningIsExpired = MainDatastoreService.warningIsExpired(this.appConfig);
+      this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay, this.appConfig.globalWarningExpiredHour);
       if (this.configForm) {
         this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
           if (this.configForm && this.appConfig) {
-            this.appConfig.global_warning_expired_day = this.configForm.get('globalWarningExpiredDay')?.value;
-            this.appConfig.global_warning_expired_hour = this.configForm.get('globalWarningExpiredHour')?.value;
-            this.warningIsExpired = MainDatastoreService.warningIsExpired(this.appConfig);
+            this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
+            this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
+            this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay, this.appConfig.globalWarningExpiredHour);
             this.dataChanged = true;
           }
         })
       };
     },
     () => {
-      this.appConfig = null;
+      this.appConfig = defaultAppConfig;
       if (this.configForm) {
         this.configForm.setValue({
           appTitle: '',
           introHtml: '',
-          impressumHtml: '',
+          imprintHtml: '',
           globalWarningText: '',
           globalWarningExpiredDay: ''
         }, { emitEvent: false })
@@ -140,12 +140,12 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   saveData(): void {
     this.snackBar.open('tbd', 'coming soon', { duration: 3000 });
     if (this.appConfig && this.configForm) {
-      this.appConfig.app_title = this.configForm.get('appTitle')?.value;
-      this.appConfig.intro_html = this.configForm.get('introHtml')?.value;
-      this.appConfig.impressum_html = this.configForm.get('impressumHtml')?.value;
-      this.appConfig.global_warning = this.configForm.get('globalWarningText')?.value;
-      this.appConfig.global_warning_expired_day = this.configForm.get('globalWarningExpiredDay')?.value;
-      this.appConfig.global_warning_expired_hour = this.configForm.get('globalWarningExpiredHour')?.value;
+      this.appConfig.appTitle = this.configForm.get('appTitle')?.value;
+      this.appConfig.introHtml = this.configForm.get('introHtml')?.value;
+      this.appConfig.imprintHtml = this.configForm.get('imprintHtml')?.value;
+      this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
+      this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
+      this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
       this.bs.setAppConfig(this.appConfig).subscribe(isOk => {
           if (isOk) {
             this.snackBar.open(
