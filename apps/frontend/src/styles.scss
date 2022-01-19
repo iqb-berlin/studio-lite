@@ -1,4 +1,45 @@
-/* You can add global styles to this file, and also import other style files */
+@import "../../../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.page-body {
+  position: absolute;
+  width: 100%;
+  top: 70px;
+  bottom: 0;
+  overflow-y: auto;
+  background-image: linear-gradient(to bottom, #003333, #00465d, #005791, #005ebe, #8854d0);
+}
+
+.spinner-container {
+  bottom: 0;
+  height: 2em;
+  left: 0;
+  margin: auto;
+  overflow: visible;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 2em;
+  z-index: 999;
+}
+
+.mat-progress-spinner circle, .mat-spinner circle {
+  stroke: blueviolet!important;
+}
+
+iframe.unitHost {
+  width: 100%;
+  border: none;
+}
+
+.mat-tab-body-wrapper{
+  flex-grow: 1;
+}
+
+#iFrameHost > p {
+  margin: 20px;
+}
+
+.admin-tab-content {
+  overflow-x: auto;
+  height: calc(100% - 30px);
+}

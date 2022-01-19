@@ -139,12 +139,12 @@
             "tsConfig": "apps/frontend/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "apps/frontend/src/favicon.ico",
               "apps/frontend/src/assets"
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
-              "apps/frontend/src/styles.scss"
+              "apps/frontend/src/styles.scss",
+              "apps/frontend/src/iqb-theme3.scss"
             ],
             "scripts": []
           },

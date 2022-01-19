@@ -4,7 +4,8 @@ import { MainDatastoreService } from './maindatastore.service';
 import {AppConfig, BackendService} from './backend.service';
 
 @Component({
-  selector: 'studio-lite-root',
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
