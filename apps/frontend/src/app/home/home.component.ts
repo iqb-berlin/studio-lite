@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService, WorkspaceData } from '../backend.service';
 import { MainDatastoreService } from '../maindatastore.service';
 import { ChangePasswordComponent } from './change-password.component';
+import {AuthService} from "../auth.service";
 
 @Component({
   templateUrl: './home.component.html',
@@ -25,6 +26,7 @@ export class HomeComponent implements OnInit {
               public confirmDialog: MatDialog,
               private changePasswordDialog: MatDialog,
               private snackBar: MatSnackBar,
+              private authService: AuthService,
               private router: Router) {
     this.loginForm = this.fb.group({
       name: this.fb.control('', [Validators.required, Validators.minLength(1)]),
@@ -48,8 +50,8 @@ export class HomeComponent implements OnInit {
     this.isError = false;
     this.errorMessage = '';
     if (this.loginForm && this.loginForm.valid) {
-      this.bs.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(loginData => {
-        this.mds.loginStatus = loginData;
+      this.authService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(loginData => {
+        console.log(loginData);
       },
       err => {
         this.isError = true;
@@ -71,7 +73,7 @@ export class HomeComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        this.bs.logout().subscribe(
+        this.authService.logout().subscribe(
           () => {
             this.mds.loginStatus = null;
             this.router.navigateByUrl('/');

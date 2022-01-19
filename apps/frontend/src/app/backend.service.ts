@@ -86,26 +86,6 @@ export class BackendService {
       );
   }
 
-  login(name: string, password: string): Observable<LoginData> {
-    return this.http
-      .put<LoginStatusResponseData>(`${this.serverUrl}login.php`, { n: name, p: password })
-      .pipe(
-        catchError((err: HttpErrorResponse) => {
-          localStorage.removeItem('t');
-          return throwError(new AppHttpError(err));
-        }),
-        switchMap(authData => this.getWorkspaceList(authData))
-      );
-  }
-
-  logout(): Observable<boolean> {
-    return this.http
-      .put<boolean>(`${this.serverUrl}logout.php`, { t: localStorage.getItem('t') })
-      .pipe(
-        catchError(() => of(false))
-      );
-  }
-
   getStatus(): Observable<LoginData> {
     const storageEntry = localStorage.getItem('t');
     if (storageEntry === null) {
