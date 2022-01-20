@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AppConfig, AppHttpError } from '../backend.service';
-import {ConfigFullDto} from "@studio-lite-lib/api-admin";
+import {ConfigFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +12,11 @@ export class BackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
-  ) {
-    this.serverUrl += 'php_superadmin/';
-  }
+  ) {}
 
-  getUsers(): Observable<GetUserDataResponse[]> {
+  getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .post<GetUserDataResponse[]>(`${this.serverUrl}getUsers.php`, { t: localStorage.getItem('t') })
+      .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
@@ -59,16 +57,15 @@ export class BackendService {
       );
   }
 
-  getWorkspacesByUser(username: string): Observable<WorkspaceData[]> {
+  getWorkspacesByUser(userId: number): Observable<WorkspaceInListDto[]> {
     return this.http
-      .post<WorkspaceData[]>(`${this.serverUrl}getUserWorkspaces.php`,
-      { t: localStorage.getItem('t'), u: username })
+      .get<WorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
   }
 
-  setWorkspacesByUser(user: string, accessTo: IdLabelSelectedData[]): Observable<boolean> {
+  setWorkspacesByUser(user: number, accessTo: WorkspaceInListDto[]): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.serverUrl}setUserWorkspaces.php`,
       { t: localStorage.getItem('t'), u: user, w: accessTo })
@@ -209,12 +206,6 @@ export class BackendService {
         catchError(err => throwError(new AppHttpError(err)))
       );
   }
-}
-
-export interface GetUserDataResponse {
-  id: number;
-  name: string;
-  is_superadmin: boolean;
 }
 
 export interface IdLabelSelectedData {

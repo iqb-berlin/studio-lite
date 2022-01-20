@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -41,6 +40,8 @@ import { SettingsComponent } from './settings/settings.component';
 import { WorkspaceGroupsComponent } from './settings/workspace-groups.component';
 import { EditWorkspaceGroupComponent } from './settings/edit-workspace-group.component';
 import { AppConfigComponent } from './settings/app-config.component';
+import {HTTP_INTERCEPTORS} from "@angular/common/http";
+import {AuthInterceptor} from "./auth.interceptor";
 
 @NgModule({
   imports: [
@@ -54,7 +55,6 @@ import { AppConfigComponent } from './settings/app-config.component';
     MatSelectModule,
     MatCheckboxModule,
     MatSortModule,
-    HttpClientModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
     MatDialogModule,
@@ -92,7 +92,12 @@ import { AppConfigComponent } from './settings/app-config.component';
   providers: [
     BackendService,
     [
-      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
+      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+      {
+        provide: HTTP_INTERCEPTORS,
+        useClass: AuthInterceptor,
+        multi: true
+      }
     ]
   ],
   entryComponents: [

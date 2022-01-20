@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { MainDatastoreService } from '../maindatastore.service';
+import {AuthService} from "../auth.service";
 
 @Component({
   templateUrl: './superadmin.component.html',
   styleUrls: ['./superadmin.component.css']
 })
 export class SuperadminComponent {
-  isSuperadmin = false;
   navLinks = [
     { path: 'users', label: 'Nutzer' },
     { path: 'workspaces', label: 'Arbeitsbereiche' },
@@ -15,6 +15,6 @@ export class SuperadminComponent {
   ];
 
   constructor(
-    public mds: MainDatastoreService
+    public authService: AuthService
   ) { }
 }

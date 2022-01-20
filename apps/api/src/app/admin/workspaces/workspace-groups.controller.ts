@@ -35,7 +35,6 @@ export class WorkspaceGroupsController {
   })
   @ApiTags('admin workspaces')
   async findOne(@Request() req, @Param('id') id: number): Promise<WorkspaceGroupFullDto> {
-    console.log(req);
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();

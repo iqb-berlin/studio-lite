@@ -1,14 +1,16 @@
 import {Body, Controller, Delete, Get, Param, Post, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
+import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import {UsersService} from "../../database/services/users.service";
 import {AuthService} from "../../auth/service/auth.service";
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
+import {WorkspaceService} from "../../database/services/workspace.service";
 
 @Controller('admin/users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
+    private workspacesService: WorkspaceService,
     private authService: AuthService
   ) {}
 
@@ -35,12 +37,26 @@ export class UsersController {
   })
   @ApiTags('admin users')
   async findOne(@Request() req, @Param('id') id: number): Promise<UserFullDto> {
-    console.log(req);
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
     return this.usersService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Get(':id/workspaces')
+  @ApiCreatedResponse({
+    type: [UserFullDto],
+  })
+  @ApiTags('admin users')
+  async findOnesWorkspaces(@Request() req, @Param('id') id: number): Promise<WorkspaceInListDto[]> {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.workspacesService.findAll(id);
   }
 
   @Delete(':id')

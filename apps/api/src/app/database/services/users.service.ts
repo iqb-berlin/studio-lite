@@ -16,7 +16,10 @@ export class UsersService {
   ) {}
 
   async findAll(): Promise<UserInListDto[]> {
-    const users: User[] = await this.usersRepository.find();
+    const users: User[] = await this.usersRepository.find({
+      order: {
+        name: 'ASC'
+      }});
     const returnUsers: UserInListDto[] = [];
     users.forEach(user => returnUsers.push(<UserInListDto>{
       id: user.id,

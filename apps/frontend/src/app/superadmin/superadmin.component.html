@@ -1,8 +1,5 @@
 <div class="page-body">
-  <div class="adminbackground" *ngIf="mds.loginStatus?.isSuperAdmin">
-
-    <!--<p class="communication-error-message" *ngIf="!isAdmin">{{ notLoggedInMessage }}</p>-->
-
+  <div class="adminbackground" *ngIf="authService.authData.isAdmin">
     <nav mat-tab-nav-bar>
       <a mat-tab-link
           *ngFor="let link of navLinks"
@@ -12,11 +9,10 @@
         {{link.label}}
       </a>
     </nav>
-
     <router-outlet></router-outlet>
   </div>
 
-  <div class="adminbackground" *ngIf="!mds.loginStatus?.isSuperAdmin">
+  <div class="adminbackground" *ngIf="!authService.authData.isAdmin">
     <p class="communication-error-message">Bitte als Administrator/in mit Sonderrechten anmelden!</p>
   </div>
 </div>

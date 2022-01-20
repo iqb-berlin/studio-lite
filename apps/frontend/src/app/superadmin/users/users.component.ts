@@ -14,13 +14,14 @@ import {
   MessageType
 } from "@studio-lite/iqb-components";
 import {
-  BackendService, GetUserDataResponse, IdLabelSelectedData, WorkspaceData
+  BackendService, IdLabelSelectedData, WorkspaceData
 } from '../backend.service';
 import { NewuserComponent } from './newuser/newuser.component';
 import { NewpasswordComponent } from './newpassword/newpassword.component';
 import { MainDatastoreService } from '../../maindatastore.service';
 import { SuperadminPasswordRequestComponent } from
   '../superadmin-password-request/superadmin-password-request.component';
+import {UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 
 @Component({
   templateUrl: './users.component.html',
@@ -31,14 +32,14 @@ import { SuperadminPasswordRequestComponent } from
 })
 export class UsersComponent implements OnInit {
   dataLoading = false;
-  objectsDatasource = new MatTableDataSource<GetUserDataResponse>();
+  objectsDatasource = new MatTableDataSource<UserInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
-  tableselectionCheckbox = new SelectionModel <GetUserDataResponse>(true, []);
-  tableselectionRow = new SelectionModel <GetUserDataResponse>(false, []);
-  selectedUser = '';
+  tableselectionCheckbox = new SelectionModel <UserInListDto>(true, []);
+  tableselectionRow = new SelectionModel <UserInListDto>(false, []);
+  selectedUser = 0;
 
   pendingWorkspaceChanges = false;
-  WorkspacelistDatasource = new MatTableDataSource<WorkspaceData>();
+  WorkspacelistDatasource = new MatTableDataSource<WorkspaceInListDto>();
   displayedWorkspaceColumns = ['selectCheckbox', 'group', 'label'];
 
   @ViewChild(MatSort, { static: true }) sort = new MatSort();
@@ -57,9 +58,9 @@ export class UsersComponent implements OnInit {
     this.tableselectionRow.changed.subscribe(
       r => {
         if (r.added.length > 0) {
-          this.selectedUser = r.added[0].name;
+          this.selectedUser = r.added[0].id;
         } else {
-          this.selectedUser = '';
+          this.selectedUser = 0;
         }
 
         this.updateWorkspaceList();
@@ -192,7 +193,7 @@ export class UsersComponent implements OnInit {
           // =========================================================
           this.dataLoading = true;
           const usersToDelete: string[] = [];
-          selectedRows.forEach((r: GetUserDataResponse) => usersToDelete.push(r.name));
+          selectedRows.forEach((r: UserInListDto) => usersToDelete.push(r.name));
           this.bs.deleteUsers(usersToDelete).subscribe(
             respOk => {
               if (respOk) {
@@ -217,10 +218,10 @@ export class UsersComponent implements OnInit {
   // ***********************************************************************************
   updateWorkspaceList(): void {
     this.pendingWorkspaceChanges = false;
-    if (this.selectedUser.length > 0) {
+    if (this.selectedUser > 0) {
       this.dataLoading = true;
       this.bs.getWorkspacesByUser(this.selectedUser).subscribe(
-        (dataresponse: WorkspaceData[]) => {
+        (dataresponse: WorkspaceInListDto[]) => {
           this.WorkspacelistDatasource = new MatTableDataSource(dataresponse);
           this.dataLoading = false;
         }, () => {
@@ -242,7 +243,7 @@ export class UsersComponent implements OnInit {
 
   saveWorkspaces(): void {
     this.pendingWorkspaceChanges = false;
-    if (this.selectedUser.length > 0) {
+    if (this.selectedUser > 0) {
       this.dataLoading = true;
       if (this.WorkspacelistDatasource) {
         this.bs.setWorkspacesByUser(this.selectedUser, this.WorkspacelistDatasource.data).subscribe(
@@ -267,26 +268,24 @@ export class UsersComponent implements OnInit {
 
   // ***********************************************************************************
   updateObjectList(): void {
-    this.selectedUser = '';
+    this.selectedUser = 0;
     this.updateWorkspaceList();
 
-    if (this.mds.loginStatus && this.mds.loginStatus.isSuperAdmin) {
-      this.dataLoading = true;
-      this.bs.getUsers().subscribe(
-        (dataresponse: GetUserDataResponse[]) => {
-          this.objectsDatasource = new MatTableDataSource(dataresponse);
-          this.objectsDatasource.sort = this.sort;
-          this.tableselectionCheckbox.clear();
-          this.tableselectionRow.clear();
-          this.dataLoading = false;
-        }, () => {
-          // this.ass.updateAdminStatus('', '', [], err.label);
-          this.tableselectionCheckbox.clear();
-          this.tableselectionRow.clear();
-          this.dataLoading = false;
-        }
-      );
-    }
+    this.dataLoading = true;
+    this.bs.getUsers().subscribe(
+      (dataresponse: UserInListDto[]) => {
+        this.objectsDatasource = new MatTableDataSource(dataresponse);
+        this.objectsDatasource.sort = this.sort;
+        this.tableselectionCheckbox.clear();
+        this.tableselectionRow.clear();
+        this.dataLoading = false;
+      }, () => {
+        // this.ass.updateAdminStatus('', '', [], err.label);
+        this.tableselectionCheckbox.clear();
+        this.tableselectionRow.clear();
+        this.dataLoading = false;
+      }
+    )
   }
 
   changeSuperadminStatus(): void {
@@ -310,7 +309,7 @@ export class UsersComponent implements OnInit {
           title: 'Ändern des Superadmin-Status',
           content:
             `Für "${selectedRows[0].name}" den Status auf "
-            ${selectedRows[0].is_superadmin ? 'NICHT ' : ''}Superadmin" setzen?`,
+            ${selectedRows[0].isAdmin ? 'NICHT ' : ''}Superadmin" setzen?`,
           confirmbuttonlabel: 'Status ändern',
           showcancel: true
         }
@@ -320,7 +319,7 @@ export class UsersComponent implements OnInit {
         if ((typeof result !== 'undefined') && (result !== false)) {
           const passwdDialogRef = this.superadminPasswordDialog.open(SuperadminPasswordRequestComponent, {
             width: '600px',
-            data: `Superadmin-Status ${selectedRows[0].is_superadmin ? 'entziehen' : 'setzen'}`
+            data: `Superadmin-Status ${selectedRows[0].isAdmin ? 'entziehen' : 'setzen'}`
           });
 
           passwdDialogRef.afterClosed().subscribe(afterClosedResult => {
@@ -328,7 +327,7 @@ export class UsersComponent implements OnInit {
               if (afterClosedResult !== false) {
                 this.bs.setSuperUserStatus(
                   selectedRows[0].id,
-                  !selectedRows[0].is_superadmin,
+                  !selectedRows[0].isAdmin,
                   (<FormGroup>afterClosedResult).get('pw')?.value
                 ).subscribe(
                   respCode => {
@@ -371,7 +370,7 @@ export class UsersComponent implements OnInit {
       this.objectsDatasource.data.forEach(row => this.tableselectionCheckbox.select(row));
   }
 
-  selectRow(row: GetUserDataResponse): void {
+  selectRow(row: UserInListDto): void {
     this.tableselectionRow.select(row);
   }
 }

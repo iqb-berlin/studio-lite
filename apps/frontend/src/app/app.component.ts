@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
           this.mds.globalWarning = this.mds.appConfig.globalWarningText();
         }
       });
-      const token = localStorage.getItem('token_id');
+      const token = localStorage.getItem('id_token');
       if (token) {
         this.authService.getAuthData().subscribe(authData => {
           this.authService.authData = authData

@@ -39,7 +39,7 @@
 
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef mat-sort-header> Name </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.name}} {{element.is_superadmin ? '*' : ''}}</mat-cell>
+        <mat-cell *matCellDef="let element"> {{element.name}} {{element.isAdmin ? '*' : ''}}</mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
@@ -51,12 +51,12 @@
   <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="40">
 
-    <div *ngIf="selectedUser.length === 0">
+    <div *ngIf="selectedUser === 0">
       <div>Zugriffsrechte für Arbeitsbereich(e):</div>
       <div>Bitte links einen Nutzer wählen</div>
     </div>
 
-    <div *ngIf="selectedUser.length > 0" fxLayout="row" fxLayoutAlign="space-between center">
+    <div *ngIf="selectedUser > 0" fxLayout="row" fxLayoutAlign="space-between center">
       <div>Zugriffsrechte für {{ selectedUser }}:</div>
         <button mat-raised-button (click)="saveWorkspaces()" matTooltip="Speichern"
             matTooltipPosition="above" [disabled]="!pendingWorkspaceChanges">
@@ -74,11 +74,11 @@
       </ng-container>
 
       <ng-container matColumnDef="group">
-        <mat-cell *matCellDef="let row"> {{row.ws_group_name}} </mat-cell>
+        <mat-cell *matCellDef="let row"> {{row.groupId}} </mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="label">
-        <mat-cell *matCellDef="let row"> {{row.label}} </mat-cell>
+        <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
       </ng-container>
 
       <mat-row *matRowDef="let row; columns: displayedWorkspaceColumns;"></mat-row>

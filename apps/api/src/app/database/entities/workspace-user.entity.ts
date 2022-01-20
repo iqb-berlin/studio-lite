@@ -1,13 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
 class WorkspaceUser {
-  @Column({
+  @PrimaryColumn({
     name: 'workspace_id'
   })
   public workspaceId: number;
 
-  @Column({
+  @PrimaryColumn({
     name: 'user_id'
   })
   public userId: number;
