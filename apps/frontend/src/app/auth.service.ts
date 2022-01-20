@@ -25,7 +25,7 @@ export class AuthService {
     const queryParams = new HttpParams()
       .set('username', name)
       .set('password', password);
-    return this.http.post<string>(`${this.serverUrl}login?${queryParams.toString()}`, 'jojo')
+    return this.http.post<string>(`${this.serverUrl}auth-data?${queryParams.toString()}`, 'jojo')
       .pipe(
         switchMap(loginToken => {
           localStorage.setItem("id_token", loginToken);

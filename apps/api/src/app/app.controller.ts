@@ -16,7 +16,7 @@ export class AppController {
 ) {}
 
   @UseGuards(LocalAuthGuard)
-  @ApiTags('login')
+  @ApiTags('auth')
   @ApiCreatedResponse({
     type: String
   })
@@ -28,13 +28,13 @@ export class AppController {
     return `"${token}"`;
   }
 
-  @Get('login')
+  @Get('auth-data')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: AuthDataDto,
   })
-  @ApiTags('login')
+  @ApiTags('auth')
   async findCanDos(@Request() req): Promise<AuthDataDto> {
     return <AuthDataDto>{
       userId: req.user.id,
