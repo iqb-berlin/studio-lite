@@ -9,4 +9,7 @@ export class UserInListDto {
 
   @ApiProperty()
   isAdmin!: boolean;
+
+  @ApiProperty()
+  email: string | undefined;
 }

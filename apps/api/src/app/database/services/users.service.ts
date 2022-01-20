@@ -7,6 +7,7 @@ import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-ad
 import {passwordHash} from "../../auth/auth.constants";
 import WorkspaceUser from "../entities/workspace-user.entity";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {exhaustMap} from "rxjs";
 
 @Injectable()
 export class UsersService {
@@ -24,7 +25,8 @@ export class UsersService {
     users.forEach(user => returnUsers.push(<UserInListDto>{
       id: user.id,
       name: user.name,
-      isAdmin: user.isAdmin
+      isAdmin: user.isAdmin,
+      email: user.email
     }));
     return returnUsers;
   }
@@ -82,12 +84,6 @@ export class UsersService {
     return user.name
   }
 
-  async getWorkspacesByUser(userId: number): Promise<WorkspaceGroupDto[]> {
-    console.log(`get workspaces for user id ${userId}`);
-    // todo grab from database
-    return []
-  }
-
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     const wsUser = await getConnection()
       .getRepository(WorkspaceUser)
@@ -95,14 +91,21 @@ export class UsersService {
       .where("ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id",
         {user_id: userId, ws_id: workspaceId})
       .getOne();
-    if (wsUser) {
-      return true
-    }
-    return false
+    return !!wsUser;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number | number[]): Promise<void> {
     await this.usersRepository.delete(id);
+  }
+
+  async patch(userData: UserFullDto): Promise<void> {
+    const userRepository = await getConnection().getRepository(User);
+    const userToUpdate = await userRepository.findOne(userData.id);
+    if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
+    if (userData.name) userToUpdate.name = userData.name;
+    if (userData.email) userToUpdate.email = userData.email;
+    if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
+    await userRepository.save(userToUpdate);
   }
 
   private static getPasswordHash(stringToHash: string): string {

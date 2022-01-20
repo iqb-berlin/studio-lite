@@ -46,7 +46,7 @@ export class WorkspacesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
-  async remove(@Request() req, @Param('id') id: number): Promise<void> {
+  async remove(@Request() req, @Param('id') id: number | number[]): Promise<void> {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();

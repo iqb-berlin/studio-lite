@@ -12,7 +12,7 @@ export class WorkspaceGroupService {
   ) {}
 
   async findAll(): Promise<WorkspaceGroupInListDto[]> {
-    const workspaceGroups: WorkspaceGroup[] = await this.workspaceGroupsRepository.find();
+    const workspaceGroups: WorkspaceGroup[] = await this.workspaceGroupsRepository.find({order:{name: 'ASC'}});
     const returnWorkspaces: WorkspaceGroupInListDto[] = [];
     workspaceGroups.forEach(workspaceGroup => returnWorkspaces.push(<WorkspaceGroupInListDto>{
       id: workspaceGroup.id,

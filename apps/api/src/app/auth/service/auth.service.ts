@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import {JwtService} from "@nestjs/jwt";
 import {UsersService} from "../../database/services/users.service";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {WorkspaceService} from "../../database/services/workspace.service";
+import {WorkspaceGroupService} from "../../database/services/workspace-group.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private workspaceService: WorkspaceService,
+    private workspaceGroupService: WorkspaceGroupService,
     private jwtService: JwtService
 ) {}
 
@@ -34,9 +38,4 @@ export class AuthService {
   async getMyName(id: number): Promise<string> {
     return this.usersService.getUserName(id);
   }
-
-  async getWorkspacesByUser(id: number): Promise<WorkspaceGroupDto[]> {
-    return this.usersService.getWorkspacesByUser(id);
-  }
-
 }

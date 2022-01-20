@@ -42,6 +42,7 @@ import { EditWorkspaceGroupComponent } from './settings/edit-workspace-group.com
 import { AppConfigComponent } from './settings/app-config.component';
 import {HTTP_INTERCEPTORS} from "@angular/common/http";
 import {AuthInterceptor} from "./auth.interceptor";
+import {EditUserComponent} from "./users/edituser.component";
 
 @NgModule({
   imports: [
@@ -81,6 +82,7 @@ import {AuthInterceptor} from "./auth.interceptor";
     NewuserComponent,
     NewpasswordComponent,
     EditworkspaceComponent,
+    EditUserComponent,
     SuperadminPasswordRequestComponent,
     VeronaModulesComponent,
     VeronaModulesTableComponent,
@@ -103,6 +105,7 @@ import {AuthInterceptor} from "./auth.interceptor";
   entryComponents: [
     NewuserComponent,
     NewpasswordComponent,
+    EditUserComponent,
     EditworkspaceComponent,
     EditWorkspaceGroupComponent,
     SuperadminPasswordRequestComponent

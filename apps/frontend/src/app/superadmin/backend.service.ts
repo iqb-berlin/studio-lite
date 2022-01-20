@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import { AppConfig, AppHttpError } from '../backend.service';
-import {ConfigFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {ConfigFullDto, CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 
 @Injectable({
   providedIn: 'root'
@@ -24,16 +24,28 @@ export class BackendService {
 
   addUser(name: string, password: string): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}addUser.php`, { t: localStorage.getItem('t'), n: name, p: password })
+      .post<boolean>(`${this.serverUrl}admin/users`, <CreateUserDto>{
+        name: name, password: password, isAdmin: false, email: ''
+      })
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
   }
 
-  changePassword(name: string, password: string): Observable<boolean> {
+  changeUserData(newData: UserFullDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}setPassword.php`,
-      { t: localStorage.getItem('t'), n: name, p: password })
+      .patch(`${this.serverUrl}admin/users`,newData)
+      .pipe(
+        map(() => true)
+      );
+  }
+
+  changePassword(id: number, password: string): Observable<boolean> {
+    return this.http
+      .patch<boolean>(`${this.serverUrl}admin/users`,
+        <UserFullDto>{
+          id: id, password: password
+        })
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
@@ -49,11 +61,11 @@ export class BackendService {
       );
   }
 
-  deleteUsers(users: string[]): Observable<boolean> {
+  deleteUsers(users: number[]): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}deleteUsers.php`, { t: localStorage.getItem('t'), u: users })
+      .delete(`${this.serverUrl}admin/users/${users.join(';')}`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 
@@ -109,10 +121,10 @@ export class BackendService {
 
   deleteWorkspaces(workspaces: number[]): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}deleteWorkspaces.php`, { t: localStorage.getItem('t'), ws: workspaces })
+      .post(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`, undefined)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
+        map(() => true)
+      )
   }
 
   // *******************************************************************

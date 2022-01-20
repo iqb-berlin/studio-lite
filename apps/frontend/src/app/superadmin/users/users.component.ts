@@ -21,7 +21,8 @@ import { NewpasswordComponent } from './newpassword/newpassword.component';
 import { MainDatastoreService } from '../../maindatastore.service';
 import { SuperadminPasswordRequestComponent } from
   '../superadmin-password-request/superadmin-password-request.component';
-import {UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {EditUserComponent} from "./edituser.component";
 
 @Component({
   templateUrl: './users.component.html',
@@ -33,7 +34,7 @@ import {UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 export class UsersComponent implements OnInit {
   dataLoading = false;
   objectsDatasource = new MatTableDataSource<UserInListDto>();
-  displayedColumns = ['selectCheckbox', 'name'];
+  displayedColumns = ['selectCheckbox', 'name', 'email'];
   tableselectionCheckbox = new SelectionModel <UserInListDto>(true, []);
   tableselectionRow = new SelectionModel <UserInListDto>(false, []);
   selectedUser = 0;
@@ -50,6 +51,7 @@ export class UsersComponent implements OnInit {
     private newuserDialog: MatDialog,
     private newpasswordDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
+    private editUserDialog: MatDialog,
     private confirmDialog: MatDialog,
     private superadminPasswordDialog: MatDialog,
     private messsageDialog: MatDialog,
@@ -108,6 +110,64 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  changeData(): void {
+    const selectedRows = this.tableselectionRow.selected;
+    if (selectedRows.length === 0) {
+      this.messsageDialog.open(MessageDialogComponent, {
+        width: '400px',
+        data: <MessageDialogData>{
+          title: 'Nutzerdaten ändern',
+          content: 'Bitte markieren Sie erst einen Nutzer!',
+          type: MessageType.error
+        }
+      });
+    } else {
+      const dialogRef = this.editUserDialog.open(EditUserComponent, {
+        width: '600px',
+        data: {
+          title: 'Nutzerdaten ändern',
+          saveButtonLabel: 'Speichern',
+          name: selectedRows[0].name,
+          email: selectedRows[0].email,
+          isAdmin: selectedRows[0].isAdmin
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (typeof result !== 'undefined') {
+          if (result !== false) {
+            this.dataLoading = true;
+            const newPassword: string = (<FormGroup>result).get('password')?.value;
+            const newName: string = (<FormGroup>result).get('name')?.value;
+            const newEmail: string = (<FormGroup>result).get('email')?.value;
+            const newIsAdmin: boolean = (<FormGroup>result).get('isAdmin')?.value;
+            const changedData: UserFullDto = { id: selectedRows[0].id };
+            if (newName !== selectedRows[0].name) changedData.name = newName;
+            if (newEmail !== selectedRows[0].email) changedData.email = newEmail;
+            if (newPassword) changedData.password = newPassword;
+            if (newIsAdmin !== selectedRows[0].isAdmin) changedData.isAdmin = newIsAdmin;
+            this.bs.changeUserData(changedData).subscribe(
+              respOk => {
+                this.updateObjectList();
+                this.dataLoading = false;
+                if (respOk) {
+                  this.snackBar.open('Nutzerdaten geändert', '', { duration: 1000 });
+                } else {
+                  this.snackBar.open('Konnte Nutzerdaten nicht ändern', 'Fehler', { duration: 3000 });
+                }
+                this.dataLoading = false;
+              },
+              err => {
+                this.snackBar.open(`Konnte Nutzerdaten nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
+                this.dataLoading = false;
+              }
+            );
+          }
+        }
+      })
+    }
+  }
+
   changePassword(): void {
     let selectedRows = this.tableselectionRow.selected;
     if (selectedRows.length === 0) {
@@ -135,7 +195,7 @@ export class UsersComponent implements OnInit {
           if (result !== false) {
             this.dataLoading = true;
             this.bs.changePassword(
-              selectedRows[0].name,
+              selectedRows[0].id,
               (<FormGroup>result).get('pw')?.value
             ).subscribe(
               respOk => {
@@ -192,8 +252,8 @@ export class UsersComponent implements OnInit {
         if (result !== false) {
           // =========================================================
           this.dataLoading = true;
-          const usersToDelete: string[] = [];
-          selectedRows.forEach((r: UserInListDto) => usersToDelete.push(r.name));
+          const usersToDelete: number[] = [];
+          selectedRows.forEach((r: UserInListDto) => usersToDelete.push(r.id));
           this.bs.deleteUsers(usersToDelete).subscribe(
             respOk => {
               if (respOk) {

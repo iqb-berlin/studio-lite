@@ -1,4 +1,15 @@
-import {Body, Controller, Delete, Get, Param, Post, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards
+} from '@nestjs/common';
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import {UsersService} from "../../database/services/users.service";
@@ -59,16 +70,18 @@ export class UsersController {
     return this.workspacesService.findAll(id);
   }
 
-  @Delete(':id')
+  @Delete(':ids')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiTags('admin users')
-  async remove(@Request() req, @Param('id') id: number): Promise<void> {
+  async remove(@Request() req, @Param('ids') ids: string): Promise<void> {
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.usersService.remove(id);
+    return this.usersService.remove(idsAsNumberArray);
   }
 
   @Post()
@@ -85,5 +98,17 @@ export class UsersController {
       throw new UnauthorizedException();
     }
     return this.usersService.create(createUserDto)
+  }
+
+  @Patch()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin users')
+  async patch(@Request() req, @Body() userFullDto: UserFullDto) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.usersService.patch(userFullDto)
   }
 }

@@ -5,11 +5,14 @@ export class UserFullDto {
   id!: number;
 
   @ApiProperty()
-  name!: string;
+  name?: string;
 
   @ApiProperty()
-  isAdmin!: boolean;
+  isAdmin?: boolean;
 
   @ApiProperty()
-  email = '';
+  email?: string;
+
+  @ApiProperty()
+  password?: string;
 }

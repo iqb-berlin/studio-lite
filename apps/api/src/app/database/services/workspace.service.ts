@@ -5,6 +5,8 @@ import Workspace from "../entities/workspace.entity";
 import {CreateWorkspaceDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import User from "../entities/user.entity";
 import WorkspaceUser from "../entities/workspace-user.entity";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import WorkspaceGroup from "../entities/workspace-group.entity";
 
 @Injectable()
 export class WorkspaceService {
@@ -12,7 +14,9 @@ export class WorkspaceService {
     @InjectRepository(Workspace)
     private workspacesRepository: Repository<Workspace>,
     @InjectRepository(WorkspaceUser)
-    private workspaceUsersRepository: Repository<WorkspaceUser>
+    private workspaceUsersRepository: Repository<WorkspaceUser>,
+    @InjectRepository(WorkspaceGroup)
+    private workspaceGroupRepository: Repository<WorkspaceGroup>
   ) {}
 
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
@@ -35,6 +39,32 @@ export class WorkspaceService {
     return returnWorkspaces;
   }
 
+  async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
+    const workspaceGroups = await this.workspaceGroupRepository.find({order: {name: 'ASC'}});
+    const workspaces = await this.findAll(userId);
+    const myReturn: WorkspaceGroupDto[] = [];
+    workspaceGroups.forEach(workspaceGroup => {
+      let localWorkspaceGroup: WorkspaceGroupDto = undefined;
+      workspaces.forEach(workspace => {
+        if (workspaceGroup.id === workspace.groupId) {
+          if (localWorkspaceGroup) {
+            localWorkspaceGroup.workspaces.push(workspace)
+          } else {
+            localWorkspaceGroup = {
+              id: workspaceGroup.id,
+              name: workspaceGroup.name,
+              workspaces: [workspace]
+            }
+          }
+        }
+      });
+      if (localWorkspaceGroup) {
+        myReturn.push(localWorkspaceGroup)
+      }
+    })
+    return myReturn;
+  }
+
   async findOne(id: number): Promise<WorkspaceFullDto> {
     const workspace = await this.workspacesRepository.findOne(id);
     return <WorkspaceFullDto>{
@@ -51,7 +81,7 @@ export class WorkspaceService {
     return newWorkspace.id;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number | number[]): Promise<void> {
     await this.workspacesRepository.delete(id);
   }
 }

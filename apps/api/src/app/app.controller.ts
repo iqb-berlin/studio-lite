@@ -7,12 +7,14 @@ import {JwtAuthGuard} from "./auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags} from "@nestjs/swagger";
 import {WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import {AuthDataDto} from "@studio-lite-lib/api-start";
+import {WorkspaceService} from "./database/services/workspace.service";
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private authService: AuthService
+    private authService: AuthService,
+    private workspaceService: WorkspaceService
 ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -40,7 +42,7 @@ export class AppController {
       userId: req.user.id,
       userName: await this.authService.getMyName(req.user.id),
       isAdmin: await this.authService.isAdminUser(req),
-      workspaces: await this.authService.getWorkspacesByUser(req.user.id)
+      workspaces: await this.workspaceService.findAllGroupwise(req.user.id)
     }
   }
 }
