@@ -6,10 +6,10 @@
   <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="50">
     <div fxLayout="row">
-        <button mat-raised-button (click)="addObject()" matTooltip="Nutzer hinzufügen" matTooltipPosition="above">
+        <button mat-raised-button (click)="addObject()" matTooltip="Nutzer:in hinzufügen" matTooltipPosition="above">
             <mat-icon>add</mat-icon>
           </button>
-        <button mat-raised-button (click)="deleteObject()" matTooltip="Markierte Nutzer löschen" matTooltipPosition="above">
+        <button mat-raised-button (click)="deleteObject()" matTooltip="Markierte Nutzer:innen löschen" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>
         <button mat-raised-button (click)="changeData()" matTooltip="Nutzerdaten ändern" matTooltipPosition="above">
@@ -53,36 +53,24 @@
   <div class="object-list" fxLayout="column" fxFlex="40">
 
     <div *ngIf="selectedUser === 0">
-      <div>Zugriffsrechte für Arbeitsbereich(e):</div>
-      <div>Bitte links einen Nutzer wählen</div>
+      <div>Zugriffsrechte: Bitte links Nutzer:in wählen</div>
     </div>
 
     <div *ngIf="selectedUser > 0" fxLayout="row" fxLayoutAlign="space-between center">
-      <div>Zugriffsrechte für {{ selectedUser }}:</div>
+      <div>Zugriffsrechte für {{ tableselectionRow.selected[0]?.name }}:</div>
         <button mat-raised-button (click)="saveWorkspaces()" matTooltip="Speichern"
-            matTooltipPosition="above" [disabled]="!pendingWorkspaceChanges">
+            matTooltipPosition="above" [disabled]="!userWorkspaces?.hasChanged">
           <mat-icon>save</mat-icon>
         </button>
     </div>
 
-    <mat-table [dataSource]="WorkspacelistDatasource" class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-cell *matCellDef="let row" fxFlex="70px">
-          <mat-checkbox (change)="selectWorkspace(row)"
-                        [checked]="row.selected">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="group">
-        <mat-cell *matCellDef="let row"> {{row.groupId}} </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="label">
-        <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
-      </ng-container>
-
-      <mat-row *matRowDef="let row; columns: displayedWorkspaceColumns;"></mat-row>
-    </mat-table>
+    <div class="scroll-area" fxLayout="column">
+      <div class="workspace-group" fxLayout="column" *ngFor="let wsg of userWorkspaces?.entries">
+        <h3>{{wsg.name}}</h3>
+        <mat-checkbox *ngFor="let ws of wsg.workspaces" (change)="userWorkspaces?.updateHasChanged()"
+                      [(ngModel)]="ws.isChecked" [disabled]="selectedUser === 0">
+        {{ws.name}}</mat-checkbox>
+      </div>
+    </div>
   </div>
 </div>

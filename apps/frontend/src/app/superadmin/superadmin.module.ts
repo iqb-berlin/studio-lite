@@ -19,7 +19,7 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatBadgeModule } from '@angular/material/badge';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { ReactiveFormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import { IqbComponentsModule } from '@studio-lite/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
@@ -41,35 +41,37 @@ import { AppConfigComponent } from './settings/app-config.component';
 import {HTTP_INTERCEPTORS} from "@angular/common/http";
 import {AuthInterceptor} from "./auth.interceptor";
 import {EditUserComponent} from "./users/edituser.component";
+import {WorkspaceChecked} from "./workspaces/workspaceChecked";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SuperadminRoutingModule,
-    IqbFilesModule,
-    IqbComponentsModule,
-    MatTableModule,
-    MatTabsModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatSortModule,
-    ReactiveFormsModule,
-    MatProgressSpinnerModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatCardModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatToolbarModule,
-    MatSnackBarModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatBadgeModule,
-    FlexLayoutModule,
-    MatChipsModule
-  ],
+    imports: [
+        CommonModule,
+        SuperadminRoutingModule,
+        IqbFilesModule,
+        IqbComponentsModule,
+        MatTableModule,
+        MatTabsModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatSortModule,
+        ReactiveFormsModule,
+        MatProgressSpinnerModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatCardModule,
+        MatTooltipModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatToolbarModule,
+        MatSnackBarModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        MatBadgeModule,
+        FlexLayoutModule,
+        MatChipsModule,
+        FormsModule
+    ],
   exports: [
     SuperadminComponent
   ],

@@ -4,11 +4,12 @@ import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {AuthService} from "../../auth/service/auth.service";
 import {WorkspaceService} from "../../database/services/workspace.service";
 import {CreateWorkspaceDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 
 @Controller('admin/workspaces')
 export class WorkspacesController {
   constructor(
-    private workspacesService: WorkspaceService,
+    private workspaceService: WorkspaceService,
     private authService: AuthService
   ) {}
 
@@ -24,7 +25,22 @@ export class WorkspacesController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspacesService.findAll();
+    return this.workspaceService.findAll();
+  }
+
+  @Get('groupwise')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: [WorkspaceGroupDto],
+  })
+  @ApiTags('admin workspaces')
+  async findAllGroupwise(@Request() req): Promise<WorkspaceGroupDto[]> {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.workspaceService.findAllGroupwise();
   }
 
   @UseGuards(JwtAuthGuard)
@@ -39,7 +55,7 @@ export class WorkspacesController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspacesService.findOne(id);
+    return this.workspaceService.findOne(id);
   }
 
   @Delete(':id')
@@ -51,7 +67,7 @@ export class WorkspacesController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspacesService.remove(id);
+    return this.workspaceService.remove(id);
   }
 
   @Post()
@@ -67,6 +83,6 @@ export class WorkspacesController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspacesService.create(createWorkspaceDto)
+    return this.workspaceService.create(createWorkspaceDto)
   }
 }

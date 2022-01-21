@@ -39,6 +39,21 @@ export class WorkspaceService {
     return returnWorkspaces;
   }
 
+  async setWorkspacesByUser(userId: number, workspaces: number[]) {
+    await getConnection().createQueryBuilder()
+      .delete()
+      .from(WorkspaceUser)
+      .where("user_id = :id", { id: userId })
+      .execute();
+    for (const workspaceId of workspaces) {
+      const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+        userId: userId,
+        workspaceId: workspaceId
+      });
+      await this.workspaceUsersRepository.save(newWorkspaceUser);
+    }
+  }
+
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
     const workspaceGroups = await this.workspaceGroupRepository.find({order: {name: 'ASC'}});
     const workspaces = await this.findAll(userId);

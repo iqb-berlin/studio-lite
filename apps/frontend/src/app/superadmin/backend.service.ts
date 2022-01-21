@@ -4,6 +4,8 @@ import { Observable, throwError } from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import { AppConfig, AppHttpError } from '../backend.service';
 import {ConfigFullDto, CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {accessSync} from "fs";
 
 @Injectable({
   providedIn: 'root'
@@ -38,27 +40,6 @@ export class BackendService {
       );
   }
 
-  changePassword(id: number, password: string): Observable<boolean> {
-    return this.http
-      .patch<boolean>(`${this.serverUrl}admin/users`,
-        <UserFullDto>{
-          id: id, password: password
-        })
-      .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
-  }
-
-  setSuperUserStatus(userId: number, changeToSuperUser: boolean, password: string): Observable<boolean> {
-    return this.http
-      .put<boolean>(`${this.serverUrl}setSuperAdminStatus.php`, {
-      t: localStorage.getItem('t'), u: userId, s: changeToSuperUser ? 'true' : 'false', p: password
-    })
-      .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
-  }
-
   deleteUsers(users: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/users/${users.join(';')}`)
@@ -75,18 +56,17 @@ export class BackendService {
       );
   }
 
-  setWorkspacesByUser(user: number, accessTo: WorkspaceInListDto[]): Observable<boolean> {
+  setWorkspacesByUser(userId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}setUserWorkspaces.php`,
-      { t: localStorage.getItem('t'), u: user, w: accessTo })
+      .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${accessTo.join(';')}`, undefined)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 
-  getWorkspaces(): Observable<WorkspaceData[]> {
+  getWorkspacesGroupwise(): Observable<WorkspaceGroupDto[]> {
     return this.http
-      .post<WorkspaceData[]>(`${this.serverUrl}getWorkspaces.php`, { t: localStorage.getItem('t') })
+      .get<WorkspaceGroupDto[]>(`${this.serverUrl}admin/workspaces/groupwise`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );

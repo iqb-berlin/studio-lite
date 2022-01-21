@@ -293,6 +293,7 @@ export class WorkspacesComponent implements OnInit {
 
     if (this.mds.loginStatus && this.mds.loginStatus.isSuperAdmin) {
       this.dataLoading = true;
+      /*
       this.bs.getWorkspaces().subscribe(
         (dataresponse: WorkspaceData[]) => {
           this.objectsDatasource = new MatTableDataSource(dataresponse);
@@ -312,6 +313,7 @@ export class WorkspacesComponent implements OnInit {
       () => {
         this.workspaceGroups = [];
       });
+       */
     }
   }
 

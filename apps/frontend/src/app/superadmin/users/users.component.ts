@@ -14,13 +14,12 @@ import {
   MessageType
 } from "@studio-lite/iqb-components";
 import {
-  BackendService, IdLabelSelectedData, WorkspaceData
+  BackendService,
 } from '../backend.service';
 import { MainDatastoreService } from '../../maindatastore.service';
-import { SuperadminPasswordRequestComponent } from
-  '../superadmin-password-request/superadmin-password-request.component';
 import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import {EditUserComponent} from "./edituser.component";
+import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
 
 @Component({
   templateUrl: './users.component.html',
@@ -37,9 +36,7 @@ export class UsersComponent implements OnInit {
   tableselectionRow = new SelectionModel <UserInListDto>(false, []);
   selectedUser = 0;
 
-  pendingWorkspaceChanges = false;
-  WorkspacelistDatasource = new MatTableDataSource<WorkspaceInListDto>();
-  displayedWorkspaceColumns = ['selectCheckbox', 'group', 'label'];
+  userWorkspaces = new WorkspaceGroupToCheckCollection([]);
 
   @ViewChild(MatSort, { static: true }) sort = new MatSort();
 
@@ -62,7 +59,6 @@ export class UsersComponent implements OnInit {
         } else {
           this.selectedUser = 0;
         }
-
         this.updateWorkspaceList();
       }
     );
@@ -70,8 +66,8 @@ export class UsersComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.updateObjectList();
-      this.mds.pageTitle = 'Admin: Nutzer';
+      this.createWorkspaceList();
+      this.mds.pageTitle = 'Admin: Nutzer:innen';
     });
   }
 
@@ -123,7 +119,7 @@ export class UsersComponent implements OnInit {
         width: '400px',
         data: <MessageDialogData>{
           title: 'Nutzerdaten ändern',
-          content: 'Bitte markieren Sie erst einen Nutzer!',
+          content: 'Bitte markieren Sie erst eine/n Nutzer:in!',
           type: MessageType.error
         }
       });
@@ -182,24 +178,24 @@ export class UsersComponent implements OnInit {
       this.messsageDialog.open(MessageDialogComponent, {
         width: '400px',
         data: <MessageDialogData>{
-          title: 'Löschen von Nutzern',
-          content: 'Bitte markieren Sie erst Nutzer!',
+          title: 'Löschen von Nutzer:innen',
+          content: 'Bitte markieren Sie erst Nutzer:innen!',
           type: MessageType.error
         }
       });
     } else {
       let prompt = 'Soll';
       if (selectedRows.length > 1) {
-        prompt = `${prompt}en ${selectedRows.length} Nutzer `;
+        prompt = `${prompt}en ${selectedRows.length} Nutzer:innen `;
       } else {
-        prompt = `${prompt} Nutzer "${selectedRows[0].name}" `;
+        prompt = `${prompt} Nutzer:in "${selectedRows[0].name}" `;
       }
       const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: <ConfirmDialogData>{
-          title: 'Löschen von Nutzern',
+          title: 'Löschen von Nutzer:innen',
           content: `${prompt}gelöscht werden?`,
-          confirmbuttonlabel: 'Nutzer löschen',
+          confirmbuttonlabel: 'Löschen',
           showcancel: true
         }
       });
@@ -213,16 +209,16 @@ export class UsersComponent implements OnInit {
           this.bs.deleteUsers(usersToDelete).subscribe(
             respOk => {
               if (respOk) {
-                this.snackBar.open('Nutzer gelöscht', '', { duration: 1000 });
+                this.snackBar.open('Nutzer:in gelöscht', '', { duration: 1000 });
                 this.updateObjectList();
                 this.dataLoading = false;
               } else {
-                this.snackBar.open('Konnte Nutzer nicht löschen', 'Fehler', { duration: 3000 });
+                this.snackBar.open('Konnte Nutzer:in nicht löschen', 'Fehler', { duration: 3000 });
                 this.dataLoading = false;
               }
             },
             err => {
-              this.snackBar.open(`Konnte Nutzer nicht löschen (${err.code})`, 'Fehler', { duration: 3000 });
+              this.snackBar.open(`Konnte Nutzer:in nicht löschen (${err.code})`, 'Fehler', { duration: 3000 });
               this.dataLoading = false;
             }
           );
@@ -233,39 +229,33 @@ export class UsersComponent implements OnInit {
 
   // ***********************************************************************************
   updateWorkspaceList(): void {
-    this.pendingWorkspaceChanges = false;
+    if (this.userWorkspaces.hasChanged) {
+      this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
+    }
     if (this.selectedUser > 0) {
       this.dataLoading = true;
       this.bs.getWorkspacesByUser(this.selectedUser).subscribe(
         (dataresponse: WorkspaceInListDto[]) => {
-          this.WorkspacelistDatasource = new MatTableDataSource(dataresponse);
+          this.userWorkspaces.setChecks(dataresponse);
           this.dataLoading = false;
         }, () => {
-          // this.ass.updateAdminStatus('', '', [], err.label);
           this.dataLoading = false;
         }
       );
     } else {
-      this.WorkspacelistDatasource = new MatTableDataSource();
+      this.userWorkspaces.setChecks();
     }
-  }
-
-  selectWorkspace(ws?: IdLabelSelectedData): void {
-    if (ws) {
-      ws.selected = !ws.selected;
-    }
-    this.pendingWorkspaceChanges = true;
   }
 
   saveWorkspaces(): void {
-    this.pendingWorkspaceChanges = false;
     if (this.selectedUser > 0) {
-      this.dataLoading = true;
-      if (this.WorkspacelistDatasource) {
-        this.bs.setWorkspacesByUser(this.selectedUser, this.WorkspacelistDatasource.data).subscribe(
+      if (this.userWorkspaces.hasChanged) {
+        this.dataLoading = true;
+        this.bs.setWorkspacesByUser(this.selectedUser, this.userWorkspaces.getChecks()).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
+              this.userWorkspaces.setHasChangedTrue();
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
@@ -277,16 +267,12 @@ export class UsersComponent implements OnInit {
           }
         );
       }
-    } else {
-      this.WorkspacelistDatasource = new MatTableDataSource();
     }
   }
 
   // ***********************************************************************************
   updateObjectList(): void {
     this.selectedUser = 0;
-    this.updateWorkspaceList();
-
     this.dataLoading = true;
     this.bs.getUsers().subscribe(
       (dataresponse: UserInListDto[]) => {
@@ -304,74 +290,12 @@ export class UsersComponent implements OnInit {
     )
   }
 
-  changeSuperadminStatus(): void {
-    let selectedRows = this.tableselectionRow.selected;
-    if (selectedRows.length === 0) {
-      selectedRows = this.tableselectionCheckbox.selected;
-    }
-    if (selectedRows.length === 0) {
-      this.messsageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: 'Superadmin-Status ändern',
-          content: 'Bitte markieren Sie erst einen Nutzer!',
-          type: MessageType.error
-        }
-      });
-    } else {
-      const confirmDialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: <ConfirmDialogData>{
-          title: 'Ändern des Superadmin-Status',
-          content:
-            `Für "${selectedRows[0].name}" den Status auf "
-            ${selectedRows[0].isAdmin ? 'NICHT ' : ''}Superadmin" setzen?`,
-          confirmbuttonlabel: 'Status ändern',
-          showcancel: true
-        }
-      });
-
-      confirmDialogRef.afterClosed().subscribe(result => {
-        if ((typeof result !== 'undefined') && (result !== false)) {
-          const passwdDialogRef = this.superadminPasswordDialog.open(SuperadminPasswordRequestComponent, {
-            width: '600px',
-            data: `Superadmin-Status ${selectedRows[0].isAdmin ? 'entziehen' : 'setzen'}`
-          });
-
-          passwdDialogRef.afterClosed().subscribe(afterClosedResult => {
-            if (typeof afterClosedResult !== 'undefined') {
-              if (afterClosedResult !== false) {
-                this.bs.setSuperUserStatus(
-                  selectedRows[0].id,
-                  !selectedRows[0].isAdmin,
-                  (<FormGroup>afterClosedResult).get('pw')?.value
-                ).subscribe(
-                  respCode => {
-                    if (respCode === true) {
-                      this.snackBar.open('Status geändert', '', { duration: 1000 });
-                      this.updateObjectList();
-                    } else {
-                      this.snackBar.open(
-                        'Konnte Status nicht ändern (falsches Kennwort?)',
-                        'Fehler',
-                        { duration: 5000 }
-                      );
-                    }
-                  },
-                  err => {
-                    this.snackBar.open(
-                      `Konnte Status nicht ändern (Fehlercode ${err.code})`,
-                      'Fehler',
-                      { duration: 5000 }
-                    );
-                  }
-                );
-              }
-            }
-          });
-        }
-      });
-    }
+  createWorkspaceList(): void {
+    this.userWorkspaces = new WorkspaceGroupToCheckCollection([]);
+    this.bs.getWorkspacesGroupwise().subscribe(worksGroups => {
+      this.userWorkspaces = new WorkspaceGroupToCheckCollection(worksGroups);
+      this.updateObjectList()
+    })
   }
 
   isAllSelected(): boolean {

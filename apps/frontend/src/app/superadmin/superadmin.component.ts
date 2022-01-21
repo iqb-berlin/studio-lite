@@ -8,7 +8,7 @@ import {AuthService} from "../auth.service";
 })
 export class SuperadminComponent {
   navLinks = [
-    { path: 'users', label: 'Nutzer' },
+    { path: 'users', label: 'Nutzer:innen' },
     { path: 'workspaces', label: 'Arbeitsbereiche' },
     { path: 'v-modules', label: 'Editoren/Player' },
     { path: 'settings', label: 'Einstellungen' }

@@ -21,7 +21,7 @@ import {WorkspaceService} from "../../database/services/workspace.service";
 export class UsersController {
   constructor(
     private usersService: UsersService,
-    private workspacesService: WorkspaceService,
+    private workspaceService: WorkspaceService,
     private authService: AuthService
   ) {}
 
@@ -40,9 +40,9 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Get(':id')
   @ApiCreatedResponse({
     type: [UserFullDto],
   })
@@ -55,11 +55,11 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Get(':id/workspaces')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Get(':id/workspaces')
   @ApiCreatedResponse({
-    type: [UserFullDto],
+    type: [WorkspaceInListDto],
   })
   @ApiTags('admin users')
   async findOnesWorkspaces(@Request() req, @Param('id') id: number): Promise<WorkspaceInListDto[]> {
@@ -67,7 +67,26 @@ export class UsersController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspacesService.findAll(id);
+    return this.workspaceService.findAll(id);
+  }
+
+  @Patch(':id/workspaces/:workspaces')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: [WorkspaceInListDto],
+  })
+  @ApiTags('admin users')
+  async patchOnesWorkspaces(@Request() req,
+                           @Param('id') id: number,
+                           @Param('workspaces') workspaces: string) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    const idsAsNumberArray: number[] = [];
+    workspaces.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
+    return this.workspaceService.setWorkspacesByUser(id, idsAsNumberArray);
   }
 
   @Delete(':ids')
