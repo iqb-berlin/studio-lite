@@ -28,8 +28,6 @@ import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { UsersComponent } from './users/users.component';
 import { SuperadminComponent } from './superadmin.component';
 import { BackendService } from './backend.service';
-import { NewuserComponent } from './users/newuser/newuser.component';
-import { NewpasswordComponent } from './users/newpassword/newpassword.component';
 import { EditworkspaceComponent } from './workspaces/editworkspace.component';
 import { IqbFilesModule } from '../iqb-files';
 import { SuperadminPasswordRequestComponent } from
@@ -79,8 +77,6 @@ import {EditUserComponent} from "./users/edituser.component";
     WorkspacesComponent,
     UsersComponent,
     SuperadminComponent,
-    NewuserComponent,
-    NewpasswordComponent,
     EditworkspaceComponent,
     EditUserComponent,
     SuperadminPasswordRequestComponent,
@@ -103,8 +99,6 @@ import {EditUserComponent} from "./users/edituser.component";
     ]
   ],
   entryComponents: [
-    NewuserComponent,
-    NewpasswordComponent,
     EditUserComponent,
     EditworkspaceComponent,
     EditWorkspaceGroupComponent,

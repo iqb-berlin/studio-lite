@@ -22,13 +22,11 @@ export class BackendService {
       );
   }
 
-  addUser(name: string, password: string): Observable<boolean> {
+  addUser(newUser: CreateUserDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/users`, <CreateUserDto>{
-        name: name, password: password, isAdmin: false, email: ''
-      })
+      .post(`${this.serverUrl}admin/users`, newUser)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 

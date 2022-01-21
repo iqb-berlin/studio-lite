@@ -16,12 +16,10 @@ import {
 import {
   BackendService, IdLabelSelectedData, WorkspaceData
 } from '../backend.service';
-import { NewuserComponent } from './newuser/newuser.component';
-import { NewpasswordComponent } from './newpassword/newpassword.component';
 import { MainDatastoreService } from '../../maindatastore.service';
 import { SuperadminPasswordRequestComponent } from
   '../superadmin-password-request/superadmin-password-request.component';
-import {UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import {EditUserComponent} from "./edituser.component";
 
 @Component({
@@ -79,36 +77,44 @@ export class UsersComponent implements OnInit {
 
   // ***********************************************************************************
   addObject(): void {
-    const dialogRef = this.newuserDialog.open(NewuserComponent, {
+    const dialogRef = this.editUserDialog.open(EditUserComponent, {
       width: '600px',
       data: {
-        name: ''
+        newUser: true
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result !== 'undefined') {
         if (result !== false) {
-          this.bs.addUser(
-            (<FormGroup>result).get('name')?.value,
-            (<FormGroup>result).get('pw')?.value
-          ).subscribe(
+          this.dataLoading = true;
+          const userData: CreateUserDto = {
+            name: (<FormGroup>result).get('name')?.value,
+            password: (<FormGroup>result).get('password')?.value,
+            isAdmin: (<FormGroup>result).get('isAdmin')?.value,
+            email: (<FormGroup>result).get('email')?.value
+          };
+          this.bs.addUser(userData).subscribe(
             respOk => {
+              this.updateObjectList();
+              this.dataLoading = false;
               if (respOk) {
-                this.snackBar.open('Nutzer hinzugefügt', '', { duration: 1000 });
-                this.updateObjectList();
+                this.snackBar.open('Nutzer:in angelegt', '', { duration: 1000 });
               } else {
-                this.snackBar.open('Konnte Nutzer nicht hinzufügen', 'Fehler', { duration: 3000 });
+                this.snackBar.open('Konnte Nutzer:in nicht anlegen', 'Fehler', { duration: 3000 });
               }
+              this.dataLoading = false;
             },
             err => {
-              this.snackBar.open(`Konnte Nutzer nicht hinzufügen (${err.code})`, 'Fehler', { duration: 3000 });
+              this.snackBar.open(`Konnte Nutzer:in nicht anlegen (${err.code})`, 'Fehler', { duration: 3000 });
+              this.dataLoading = false;
             }
           );
         }
       }
-    });
+    })
   }
+
 
   changeData(): void {
     const selectedRows = this.tableselectionRow.selected;
@@ -125,8 +131,7 @@ export class UsersComponent implements OnInit {
       const dialogRef = this.editUserDialog.open(EditUserComponent, {
         width: '600px',
         data: {
-          title: 'Nutzerdaten ändern',
-          saveButtonLabel: 'Speichern',
+          newUser: false,
           name: selectedRows[0].name,
           email: selectedRows[0].email,
           isAdmin: selectedRows[0].isAdmin
@@ -165,55 +170,6 @@ export class UsersComponent implements OnInit {
           }
         }
       })
-    }
-  }
-
-  changePassword(): void {
-    let selectedRows = this.tableselectionRow.selected;
-    if (selectedRows.length === 0) {
-      selectedRows = this.tableselectionCheckbox.selected;
-    }
-    if (selectedRows.length === 0) {
-      this.messsageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: 'Kennwort ändern',
-          content: 'Bitte markieren Sie erst einen Nutzer!',
-          type: MessageType.error
-        }
-      });
-    } else {
-      const dialogRef = this.newpasswordDialog.open(NewpasswordComponent, {
-        width: '600px',
-        data: {
-          name: selectedRows[0].name
-        }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (typeof result !== 'undefined') {
-          if (result !== false) {
-            this.dataLoading = true;
-            this.bs.changePassword(
-              selectedRows[0].id,
-              (<FormGroup>result).get('pw')?.value
-            ).subscribe(
-              respOk => {
-                if (respOk) {
-                  this.snackBar.open('Kennwort geändert', '', { duration: 1000 });
-                } else {
-                  this.snackBar.open('Konnte Kennwort nicht ändern', 'Fehler', { duration: 3000 });
-                }
-                this.dataLoading = false;
-              },
-              err => {
-                this.snackBar.open(`Konnte Kennwort nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
-                this.dataLoading = false;
-              }
-            );
-          }
-        }
-      });
     }
   }
 
