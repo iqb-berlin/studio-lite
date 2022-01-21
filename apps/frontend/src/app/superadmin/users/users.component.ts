@@ -113,7 +113,10 @@ export class UsersComponent implements OnInit {
 
 
   changeData(): void {
-    const selectedRows = this.tableselectionRow.selected;
+    let selectedRows = this.tableselectionRow.selected;
+    if (selectedRows.length === 0) {
+      selectedRows = this.tableselectionCheckbox.selected;
+    }
     if (selectedRows.length === 0) {
       this.messsageDialog.open(MessageDialogComponent, {
         width: '400px',
@@ -201,7 +204,7 @@ export class UsersComponent implements OnInit {
       });
 
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false) {
+        if (result === true) {
           // =========================================================
           this.dataLoading = true;
           const usersToDelete: number[] = [];

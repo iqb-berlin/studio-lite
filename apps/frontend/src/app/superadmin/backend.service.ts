@@ -3,7 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import { AppConfig, AppHttpError } from '../backend.service';
-import {ConfigFullDto, CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {
+  ConfigFullDto,
+  CreateUserDto, CreateWorkspaceDto,
+  UserFullDto,
+  UserInListDto,
+  WorkspaceFullDto,
+  WorkspaceInListDto
+} from "@studio-lite-lib/api-admin";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 import {accessSync} from "fs";
 
@@ -72,37 +79,28 @@ export class BackendService {
       );
   }
 
-  addWorkspace(name: string, group: number): Observable<boolean> {
+  addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}addWorkspace.php`, {
-      t: localStorage.getItem('t'),
-      n: name,
-      wsg: group
-    })
+      .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 
-  changeWorkspace(wsId: number, wsName: string, wsGroup: number): Observable<boolean> {
+  changeWorkspace(workspaceData: WorkspaceFullDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}setWorkspace.php`, {
-      t: localStorage.getItem('t'),
-      ws_id: wsId,
-      ws_name: wsName,
-      ws_group: wsGroup
-    })
+      .patch<boolean>(`${this.serverUrl}admin/workspaces`, workspaceData)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 
   deleteWorkspaces(workspaces: number[]): Observable<boolean> {
     return this.http
-      .post(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`, undefined)
+      .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`)
       .pipe(
         map(() => true)
-      )
+      );
   }
 
   // *******************************************************************

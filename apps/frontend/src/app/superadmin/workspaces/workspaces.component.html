@@ -9,10 +9,12 @@
         <button mat-raised-button (click)="addObject()" matTooltip="Arbeitsbereich hinzufügen" matTooltipPosition="above">
             <mat-icon>add</mat-icon>
           </button>
-        <button mat-raised-button (click)="deleteObject()" matTooltip="Markierte/n Arbeitsbereich/e löschen" matTooltipPosition="above">
+        <button mat-raised-button (click)="deleteObject()" [disabled]="selectedWorkspaceId === 0 && this.tableselectionCheckbox.selected.length === 0"
+                matTooltip="Markierte/n Arbeitsbereich/e löschen" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>
-        <button mat-raised-button (click)="changeObject()" matTooltip="Arbeitsbereich umbenennen" matTooltipPosition="above">
+        <button mat-raised-button (click)="changeObject()" [disabled]="selectedWorkspaceId === 0 && this.tableselectionCheckbox.selected.length !== 1"
+                matTooltip="Arbeitsbereich umbenennen" matTooltipPosition="above">
           <mat-icon>edit</mat-icon>
         </button>
     </div>
@@ -58,7 +60,7 @@
     </div>
 
     <div *ngIf="selectedWorkspaceId > 0" fxLayout="row" fxLayoutAlign="space-between center">
-      <div>Zugriffsrechte für "{{ selectedWorkspaceName }}":</div>
+      <div>Zugriffsrechte für "{{ tableselectionRow.selected[0]?.label }}":</div>
         <button mat-raised-button (click)="saveUsers()" matTooltip="Speichern"
             matTooltipPosition="above" [disabled]="!pendingUserChanges">
           <mat-icon>save</mat-icon>

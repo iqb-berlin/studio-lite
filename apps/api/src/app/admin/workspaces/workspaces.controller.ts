@@ -1,4 +1,15 @@
-import {Body, Controller, Delete, Get, Param, Post, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards
+} from '@nestjs/common';
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {AuthService} from "../../auth/service/auth.service";
@@ -43,9 +54,9 @@ export class WorkspacesController {
     return this.workspaceService.findAllGroupwise();
   }
 
+  @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Get(':id')
   @ApiCreatedResponse({
     type: [WorkspaceFullDto],
   })
@@ -58,16 +69,18 @@ export class WorkspacesController {
     return this.workspaceService.findOne(id);
   }
 
-  @Delete(':id')
+  @Delete(':ids')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
-  async remove(@Request() req, @Param('id') id: number | number[]): Promise<void> {
+  async remove(@Request() req, @Param('ids') ids: string): Promise<void> {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspaceService.remove(id);
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
+    return this.workspaceService.remove(idsAsNumberArray);
   }
 
   @Post()
@@ -84,5 +97,17 @@ export class WorkspacesController {
       throw new UnauthorizedException();
     }
     return this.workspaceService.create(createWorkspaceDto)
+  }
+
+  @Patch()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin workspaces')
+  async patch(@Request() req, @Body() workspaceFullDto: WorkspaceFullDto) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.workspaceService.patch(workspaceFullDto)
   }
 }

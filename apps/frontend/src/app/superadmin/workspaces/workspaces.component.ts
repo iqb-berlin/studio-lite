@@ -16,6 +16,8 @@ import {
   MessageDialogData,
   MessageType
 } from "@studio-lite/iqb-components";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {CreateWorkspaceDto, WorkspaceFullDto} from "@studio-lite-lib/api-admin";
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -31,7 +33,6 @@ export class WorkspacesComponent implements OnInit {
   tableselectionCheckbox = new SelectionModel <WorkspaceData>(true, []);
   tableselectionRow = new SelectionModel <WorkspaceData>(false, []);
   selectedWorkspaceId = 0;
-  selectedWorkspaceName = '';
   workspaceGroups: WorkspaceGroupData[] = [];
 
   pendingUserChanges = false;
@@ -52,10 +53,8 @@ export class WorkspacesComponent implements OnInit {
       r => {
         if (r.added.length > 0) {
           this.selectedWorkspaceId = r.added[0].id;
-          this.selectedWorkspaceName = r.added[0].label;
         } else {
           this.selectedWorkspaceId = 0;
-          this.selectedWorkspaceName = '';
         }
         this.updateUserList();
       }
@@ -96,10 +95,10 @@ export class WorkspacesComponent implements OnInit {
         if (typeof result !== 'undefined') {
           if (result !== false) {
             this.dataLoading = true;
-            this.bs.addWorkspace(
-              (<FormGroup>result).get('name')?.value,
-              (<FormGroup>result).get('groupSelector')?.value
-            ).subscribe(
+            this.bs.addWorkspace(<CreateWorkspaceDto>{
+              name: (<FormGroup>result).get('name')?.value,
+              groupId: (<FormGroup>result).get('groupSelector')?.value
+            }).subscribe(
               respOk => {
                 if (respOk) {
                   this.snackBar.open('Arbeitsbereich hinzugefügt', '', { duration: 1000 });
@@ -151,11 +150,14 @@ export class WorkspacesComponent implements OnInit {
         if (typeof result !== 'undefined') {
           if (result !== false) {
             this.dataLoading = true;
-            this.bs.changeWorkspace(
-              selectedRows[0].id,
-              (<FormGroup>result).get('name')?.value,
-              (<FormGroup>result).get('groupSelector')?.value
-            ).subscribe(
+            const workspaceData = <WorkspaceFullDto>{
+              id: selectedRows[0].id,
+            };
+            const newName = (<FormGroup>result).get('name')?.value
+            const newWorkspaceGroup = (<FormGroup>result).get('groupSelector')?.value
+            if (newName !== selectedRows[0].label) workspaceData.name = newName;
+            if (newWorkspaceGroup !== selectedRows[0].ws_group_id) workspaceData.groupId = parseInt(newWorkspaceGroup);
+            this.bs.changeWorkspace(workspaceData).subscribe(
               respOk => {
                 if (respOk) {
                   this.snackBar.open('Arbeitsbereich geändert', '', { duration: 1000 });
@@ -208,7 +210,7 @@ export class WorkspacesComponent implements OnInit {
       });
 
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false) {
+        if (result === true) {
           // =========================================================
           this.dataLoading = true;
           const workspacesToDelete: number[] = [];
@@ -288,33 +290,40 @@ export class WorkspacesComponent implements OnInit {
   // ***********************************************************************************
   updateObjectList(): void {
     this.selectedWorkspaceId = 0;
-    this.selectedWorkspaceName = '';
     this.updateUserList();
 
-    if (this.mds.loginStatus && this.mds.loginStatus.isSuperAdmin) {
-      this.dataLoading = true;
-      /*
-      this.bs.getWorkspaces().subscribe(
-        (dataresponse: WorkspaceData[]) => {
-          this.objectsDatasource = new MatTableDataSource(dataresponse);
-          this.objectsDatasource.sort = this.sort;
-          this.tableselectionCheckbox.clear();
-          this.tableselectionRow.clear();
-          this.dataLoading = false;
-        }, () => {
-          this.tableselectionCheckbox.clear();
-          this.tableselectionRow.clear();
-          this.dataLoading = false;
-        }
-      );
-      this.bs.getWorkspaceGroupList().subscribe(wsg => {
-        this.workspaceGroups = wsg;
-      },
-      () => {
+    this.dataLoading = true;
+    this.bs.getWorkspacesGroupwise().subscribe(
+      (dataresponse: WorkspaceGroupDto[]) => {
+        const workspaces: WorkspaceData[] = [];
         this.workspaceGroups = [];
-      });
-       */
-    }
+        dataresponse.forEach(workspaceGroup => {
+          this.workspaceGroups.push(<WorkspaceGroupData>{
+            id: workspaceGroup.id,
+            label: workspaceGroup.name,
+            ws_count: workspaceGroup.workspaces.length
+          });
+          workspaceGroup.workspaces.forEach(workspace => {
+            workspaces.push(<WorkspaceData>{
+              id: workspace.id,
+              ws_group_name: workspaceGroup.name,
+              label: workspace.name,
+              ws_group_id: workspaceGroup.id,
+              selected: false
+            })
+          })
+        });
+        this.objectsDatasource = new MatTableDataSource(workspaces);
+        this.objectsDatasource.sort = this.sort;
+        this.tableselectionCheckbox.clear();
+        this.tableselectionRow.clear();
+        this.dataLoading = false;
+      }, () => {
+        this.tableselectionCheckbox.clear();
+        this.tableselectionRow.clear();
+        this.dataLoading = false;
+      }
+    );
   }
 
   isAllSelected(): boolean {

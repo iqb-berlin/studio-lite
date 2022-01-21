@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {getConnection, Repository} from "typeorm";
 import Workspace from "../entities/workspace.entity";
-import {CreateWorkspaceDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {CreateWorkspaceDto, UserFullDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import User from "../entities/user.entity";
 import WorkspaceUser from "../entities/workspace-user.entity";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
@@ -94,6 +94,14 @@ export class WorkspaceService {
     const newWorkspace = await this.workspacesRepository.create(workspace);
     await this.workspacesRepository.save(newWorkspace);
     return newWorkspace.id;
+  }
+
+  async patch(workspaceData: WorkspaceFullDto): Promise<void> {
+    const workspaceRepository = await getConnection().getRepository(Workspace);
+    const workspaceToUpdate = await workspaceRepository.findOne(workspaceData.id);
+    if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
+    if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
+    await workspaceRepository.save(workspaceToUpdate);
   }
 
   async remove(id: number | number[]): Promise<void> {

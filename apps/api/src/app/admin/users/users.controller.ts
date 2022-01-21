@@ -94,12 +94,12 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiTags('admin users')
   async remove(@Request() req, @Param('ids') ids: string): Promise<void> {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
     return this.usersService.remove(idsAsNumberArray);
   }
 

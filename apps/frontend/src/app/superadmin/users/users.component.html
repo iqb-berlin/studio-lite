@@ -9,10 +9,12 @@
         <button mat-raised-button (click)="addObject()" matTooltip="Nutzer:in hinzufügen" matTooltipPosition="above">
             <mat-icon>add</mat-icon>
           </button>
-        <button mat-raised-button (click)="deleteObject()" matTooltip="Markierte Nutzer:innen löschen" matTooltipPosition="above">
+        <button mat-raised-button (click)="deleteObject()" [disabled]="selectedUser === 0 && this.tableselectionCheckbox.selected.length === 0"
+                matTooltip="Markierte Nutzer:innen löschen" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>
-        <button mat-raised-button (click)="changeData()" matTooltip="Nutzerdaten ändern" matTooltipPosition="above">
+        <button mat-raised-button (click)="changeData()" [disabled]="selectedUser === 0 && this.tableselectionCheckbox.selected.length !== 1"
+                matTooltip="Nutzerdaten ändern" matTooltipPosition="above">
           <mat-icon>edit</mat-icon>
         </button>
     </div>

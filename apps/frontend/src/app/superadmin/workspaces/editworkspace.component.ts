@@ -4,15 +4,13 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   template: `
-    <form [formGroup]="editWorkspaceForm">
+    <form [formGroup]="editWorkspaceForm" fxLayout="column">
       <h1 mat-dialog-title>{{data.title}}</h1>
 
-      <mat-dialog-content>
-        <p>
-          <mat-form-field class="full-width">
-            <input matInput formControlName="name" placeholder="Name" [value]="data.name">
-          </mat-form-field>
-        </p>
+      <mat-dialog-content fxLayout="column">
+        <mat-form-field class="full-width">
+          <input matInput formControlName="name" placeholder="Name" [value]="data.name">
+        </mat-form-field>
         <mat-form-field>
           <mat-select placeholder="Gruppe" formControlName="groupSelector">
             <mat-option *ngFor="let wsg of data.groups" [value]="wsg.id">
