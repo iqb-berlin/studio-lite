@@ -11,7 +11,7 @@ export class UserFullDto {
   isAdmin?: boolean;
 
   @ApiProperty()
-  email?: string;
+  description?: string;
 
   @ApiProperty()
   password?: string;

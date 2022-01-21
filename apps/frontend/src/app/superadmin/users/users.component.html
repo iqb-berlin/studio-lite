@@ -38,9 +38,9 @@
         <mat-cell *matCellDef="let element"> {{element.name}} {{element.isAdmin ? '*' : ''}}</mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="email">
-        <mat-header-cell *matHeaderCellDef mat-sort-header> E-Mail </mat-header-cell>
-        <mat-cell *matCellDef="let row" style="color: gray"> {{row.email}} </mat-cell>
+      <ng-container matColumnDef="description">
+        <mat-header-cell *matHeaderCellDef mat-sort-header fxFlex="65%"> Notiz </mat-header-cell>
+        <mat-cell *matCellDef="let row" style="color: gray" fxFlex="65%"> {{row.description}} </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
@@ -51,24 +51,20 @@
 
   <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="40">
-
-    <div *ngIf="selectedUser === 0">
-      <div>Zugriffsrechte: Bitte links Nutzer:in wählen</div>
-    </div>
-
-    <div *ngIf="selectedUser > 0" fxLayout="row" fxLayoutAlign="space-between center">
-      <div>Zugriffsrechte für {{ tableselectionRow.selected[0]?.name }}:</div>
-        <button mat-raised-button (click)="saveWorkspaces()" matTooltip="Speichern"
-            matTooltipPosition="above" [disabled]="!userWorkspaces?.hasChanged">
-          <mat-icon>save</mat-icon>
-        </button>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <div *ngIf="selectedUser === 0">Zugriffsrechte: Bitte links Nutzer:in wählen</div>
+      <div *ngIf="selectedUser > 0" >Zugriffsrechte für {{ tableselectionRow.selected[0]?.name }}:</div>
+      <button mat-raised-button (click)="saveWorkspaces()" matTooltip="Speichern"
+          matTooltipPosition="above" [disabled]="!userWorkspaces?.hasChanged">
+        <mat-icon>save</mat-icon>
+      </button>
     </div>
 
     <div class="scroll-area" fxLayout="column">
       <div class="workspace-group" fxLayout="column" *ngFor="let wsg of userWorkspaces?.entries">
         <h3>{{wsg.name}}</h3>
         <mat-checkbox *ngFor="let ws of wsg.workspaces" (change)="userWorkspaces?.updateHasChanged()"
-                      [(ngModel)]="ws.isChecked" [disabled]="selectedUser === 0">
+                      [(ngModel)]="ws.isChecked" [disabled]="selectedUser === 0" style="margin-left: 20px">
         {{ws.name}}</mat-checkbox>
       </div>
     </div>

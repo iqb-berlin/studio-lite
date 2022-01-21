@@ -31,7 +31,7 @@ import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
 export class UsersComponent implements OnInit {
   dataLoading = false;
   objectsDatasource = new MatTableDataSource<UserInListDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'email'];
+  displayedColumns = ['selectCheckbox', 'name', 'description'];
   tableselectionCheckbox = new SelectionModel <UserInListDto>(true, []);
   tableselectionRow = new SelectionModel <UserInListDto>(false, []);
   selectedUser = 0;
@@ -88,7 +88,7 @@ export class UsersComponent implements OnInit {
             name: (<FormGroup>result).get('name')?.value,
             password: (<FormGroup>result).get('password')?.value,
             isAdmin: (<FormGroup>result).get('isAdmin')?.value,
-            email: (<FormGroup>result).get('email')?.value
+            description: (<FormGroup>result).get('description')?.value
           };
           this.bs.addUser(userData).subscribe(
             respOk => {
@@ -129,7 +129,7 @@ export class UsersComponent implements OnInit {
         data: {
           newUser: false,
           name: selectedRows[0].name,
-          email: selectedRows[0].email,
+          description: selectedRows[0].description,
           isAdmin: selectedRows[0].isAdmin
         }
       });
@@ -140,11 +140,11 @@ export class UsersComponent implements OnInit {
             this.dataLoading = true;
             const newPassword: string = (<FormGroup>result).get('password')?.value;
             const newName: string = (<FormGroup>result).get('name')?.value;
-            const newEmail: string = (<FormGroup>result).get('email')?.value;
+            const newDescription: string = (<FormGroup>result).get('description')?.value;
             const newIsAdmin: boolean = (<FormGroup>result).get('isAdmin')?.value;
             const changedData: UserFullDto = { id: selectedRows[0].id };
             if (newName !== selectedRows[0].name) changedData.name = newName;
-            if (newEmail !== selectedRows[0].email) changedData.email = newEmail;
+            if (newDescription !== selectedRows[0].description) changedData.description = newDescription;
             if (newPassword) changedData.password = newPassword;
             if (newIsAdmin !== selectedRows[0].isAdmin) changedData.isAdmin = newIsAdmin;
             this.bs.changeUserData(changedData).subscribe(

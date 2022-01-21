@@ -15,8 +15,8 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <input matInput formControlName="name" type="text" placeholder="Name" [value]="data.name"/>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>E-Mail</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="E-Mail" [value]="data.email"/>
+          <mat-label>Notiz</mat-label>
+          <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
         </mat-form-field>
         <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin">System-Administrator:in</mat-checkbox>
         <p>&nbsp;</p>
@@ -52,7 +52,7 @@ export class EditUserComponent {
     this.editUserForm = this.fb.group({
       name: this.fb.control(this.data.name,
         [Validators.required, Validators.pattern(/^[a-zäöüß]{3,}$/)]),
-      email: this.fb.control(this.data.email, [Validators.email]),
+      description: this.fb.control(this.data.description),
       isAdmin: this.fb.control(this.data.isAdmin),
       password: this.fb.control(this.data.password,
         data.newUser ?

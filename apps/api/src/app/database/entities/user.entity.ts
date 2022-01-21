@@ -12,7 +12,7 @@ class User {
   public password: string;
 
   @Column()
-  public email: string | null;
+  public description: string | null;
 
   @Column({
     name: 'is_admin'

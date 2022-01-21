@@ -26,7 +26,7 @@ export class UsersService {
       id: user.id,
       name: user.name,
       isAdmin: user.isAdmin,
-      email: user.email
+      description: user.description
     }));
     return returnUsers;
   }
@@ -37,7 +37,7 @@ export class UsersService {
       id: user.id,
       name: user.name,
       isAdmin: user.isAdmin,
-      email: user.email
+      description: user.description
     }
   }
 
@@ -103,7 +103,7 @@ export class UsersService {
     const userToUpdate = await userRepository.findOne(userData.id);
     if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
     if (userData.name) userToUpdate.name = userData.name;
-    if (userData.email) userToUpdate.email = userData.email;
+    if (userData.description) userToUpdate.description = userData.description;
     if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
     await userRepository.save(userToUpdate);
   }
