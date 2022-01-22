@@ -17,7 +17,7 @@ import {
   MessageType
 } from "@studio-lite/iqb-components";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
-import {CreateWorkspaceDto, WorkspaceFullDto} from "@studio-lite-lib/api-admin";
+import {CreateWorkspaceDto, UserInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-admin";
 import {UserToCheckCollection} from "../users/usersChecked";
 
 @Component({
@@ -237,13 +237,14 @@ export class WorkspacesComponent implements OnInit {
 
   // ***********************************************************************************
   updateUserList(): void {
-    /*
-    this.pendingUserChanges = false;
+    if (this.workspaceUsers.hasChanged) {
+      this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
+    }
     if (this.selectedWorkspaceId > 0) {
       this.dataLoading = true;
       this.bs.getUsersByWorkspace(this.selectedWorkspaceId).subscribe(
-        (dataresponse: IdLabelSelectedData[]) => {
-          this.UserlistDatasource = new MatTableDataSource(dataresponse);
+        (dataresponse: UserInListDto[]) => {
+          this.workspaceUsers.setChecks(dataresponse);
           this.dataLoading = false;
         }, () => {
           // this.ass.updateAdminStatus('', '', [], err.label);
@@ -251,22 +252,19 @@ export class WorkspacesComponent implements OnInit {
         }
       );
     } else {
-      this.UserlistDatasource = new MatTableDataSource();
+      this.workspaceUsers.setChecks();
     }
-
-     */
   }
 
   saveUsers(): void {
-    /*
-    this.pendingUserChanges = false;
     if (this.selectedWorkspaceId > 0) {
-      this.dataLoading = true;
-      if (this.UserlistDatasource) {
-        this.bs.setUsersByWorkspace(this.selectedWorkspaceId, this.UserlistDatasource.data).subscribe(
+      if (this.workspaceUsers.hasChanged) {
+        this.dataLoading = true;
+        this.bs.setUsersByWorkspace(this.selectedWorkspaceId, this.workspaceUsers.getChecks()).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
+              this.workspaceUsers.setHasChangedFalse();
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
@@ -278,11 +276,7 @@ export class WorkspacesComponent implements OnInit {
           }
         );
       }
-    } else {
-      this.UserlistDatasource = new MatTableDataSource();
     }
-
-     */
   }
 
   // ***********************************************************************************

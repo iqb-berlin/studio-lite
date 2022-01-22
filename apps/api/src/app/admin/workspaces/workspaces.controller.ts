@@ -119,11 +119,41 @@ export class WorkspacesController {
   @ApiCreatedResponse({
     type: [UserInListDto],
   })
-  @ApiTags('admin users')
+  @ApiTags('admin workspaces')
   async findOnesUsers(@Request() req, @Param('id') id: number): Promise<UserInListDto[]> {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
     return this.userService.findAll(id);
-  }}
+  }
+
+  @Patch(':id/users/:users')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin workspaces')
+  async patchOnesUsers(@Request() req,
+                       @Param('id') id: number,
+                       @Param('users') users: string) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    const idsAsNumberArray: number[] = [];
+    users.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
+    return this.userService.setUsersByWorkspace(id, idsAsNumberArray);
+  }
+
+  @Patch(':id/users')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin workspaces')
+  async patchOnesUsersNone(@Request() req,
+                       @Param('id') id: number) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.userService.setUsersByWorkspace(id, []);
+  }
+}

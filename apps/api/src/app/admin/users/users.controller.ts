@@ -73,9 +73,6 @@ export class UsersController {
   @Patch(':id/workspaces/:workspaces')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceInListDto],
-  })
   @ApiTags('admin users')
   async patchOnesWorkspaces(@Request() req,
                            @Param('id') id: number,

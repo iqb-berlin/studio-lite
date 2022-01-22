@@ -114,6 +114,21 @@ export class UsersService {
     await userRepository.save(userToUpdate);
   }
 
+  async setUsersByWorkspace(workspaceId: number, users: number[]) {
+    await getConnection().createQueryBuilder()
+      .delete()
+      .from(WorkspaceUser)
+      .where("workspace_id = :id", { id: workspaceId })
+      .execute();
+    for (const userId of users) {
+      const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+        userId: userId,
+        workspaceId: workspaceId
+      });
+      await this.workspaceUsersRepository.save(newWorkspaceUser);
+    }
+  }
+
   private static getPasswordHash(stringToHash: string): string {
     return bcrypt.hashSync(stringToHash, passwordHash.salt);
   }

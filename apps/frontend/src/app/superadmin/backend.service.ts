@@ -112,12 +112,11 @@ export class BackendService {
       );
   }
 
-  setUsersByWorkspace(workspace: number, accessing: IdLabelSelectedData[]): Observable<boolean> {
+  setUsersByWorkspace(workspaceId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}setWorkspaceUsers.php`,
-      { t: localStorage.getItem('t'), w: workspace, u: accessing })
+      .patch(`${this.serverUrl}admin/workspaces/${workspaceId}/users/${accessTo.join(';')}`, undefined)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 
