@@ -17,6 +17,10 @@
                 matTooltip="Arbeitsbereich umbenennen" matTooltipPosition="above">
           <mat-icon>edit</mat-icon>
         </button>
+      <button mat-raised-button (click)="editWorkspaceGroups()"
+              matTooltip="Gruppen für Arbeitsbereiche ändern" matTooltipPosition="above">
+        <mat-icon>settings</mat-icon>
+      </button>
     </div>
 
     <mat-table [dataSource]="objectsDatasource" matSort class="scroll-area">

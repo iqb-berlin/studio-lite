@@ -341,4 +341,8 @@ export class WorkspacesComponent implements OnInit {
   selectRow(row: WorkspaceData): void {
     this.tableselectionRow.select(row);
   }
+
+  editWorkspaceGroups() {
+    console.log('yoyo nix da');
+  }
 }

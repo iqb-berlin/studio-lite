@@ -70,20 +70,18 @@ export class UsersController {
     return this.workspaceService.findAll(id);
   }
 
-  @Patch(':id/workspaces/:workspaces')
+  @Patch(':id/workspaces')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiTags('admin users')
   async patchOnesWorkspaces(@Request() req,
-                           @Param('id') id: number,
-                           @Param('workspaces') workspaces: string) {
+                            @Param('id') id: number,
+                            @Body() workspaces: number[]) {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    const idsAsNumberArray: number[] = [];
-    workspaces.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
-    return this.workspaceService.setWorkspacesByUser(id, idsAsNumberArray);
+    return this.workspaceService.setWorkspacesByUser(id, workspaces);
   }
 
   @Delete(':ids')

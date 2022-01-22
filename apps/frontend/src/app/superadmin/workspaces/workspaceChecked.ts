@@ -5,10 +5,10 @@ export class WorkspaceChecked {
   public id: number;
   public name: string;
   public isChecked: boolean;
-  constructor(workspaceDto: WorkspaceDto, isChecked: boolean ) {
+  constructor(workspaceDto: WorkspaceDto ) {
     this.id = workspaceDto.id;
     this.name = workspaceDto.name;
-    this.isChecked = isChecked;
+    this.isChecked = false;
   }
 }
 
@@ -21,7 +21,7 @@ export class WorkspaceGroupToCheck {
     this.name = workspaceGroupDto.name;
     this.workspaces = [];
     workspaceGroupDto.workspaces.forEach(workspace => {
-      this.workspaces.push(new WorkspaceChecked(workspace, false))
+      this.workspaces.push(new WorkspaceChecked(workspace))
     })
   }
 }
@@ -72,7 +72,7 @@ export class WorkspaceGroupToCheckCollection {
     });
   }
 
-  setHasChangedTrue(): void {
+  setHasChangedFalse(): void {
     this.userWorkspacesIds = [];
     this.entries.forEach(workspaceGroup => {
       workspaceGroup.workspaces.forEach(workspace => {
