@@ -11,5 +11,5 @@ export class UserInListDto {
   isAdmin!: boolean;
 
   @ApiProperty()
-  description: string | undefined;
+  description?: string;
 }

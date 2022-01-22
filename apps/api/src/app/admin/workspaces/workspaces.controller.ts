@@ -14,13 +14,15 @@ import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {AuthService} from "../../auth/service/auth.service";
 import {WorkspaceService} from "../../database/services/workspace.service";
-import {CreateWorkspaceDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {UsersService} from "../../database/services/users.service";
 
 @Controller('admin/workspaces')
 export class WorkspacesController {
   constructor(
     private workspaceService: WorkspaceService,
+    private userService: UsersService,
     private authService: AuthService
   ) {}
 
@@ -110,4 +112,18 @@ export class WorkspacesController {
     }
     return this.workspaceService.patch(workspaceFullDto)
   }
-}
+
+  @Get(':id/users')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: [UserInListDto],
+  })
+  @ApiTags('admin users')
+  async findOnesUsers(@Request() req, @Param('id') id: number): Promise<UserInListDto[]> {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.userService.findAll(id);
+  }}

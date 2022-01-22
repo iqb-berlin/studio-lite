@@ -6,28 +6,34 @@ import * as bcrypt from 'bcrypt';
 import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
 import {passwordHash} from "../../auth/auth.constants";
 import WorkspaceUser from "../entities/workspace-user.entity";
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
-import {exhaustMap} from "rxjs";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>
+    private usersRepository: Repository<User>,
+    @InjectRepository(WorkspaceUser)
+    private workspaceUsersRepository: Repository<WorkspaceUser>
   ) {}
 
-  async findAll(): Promise<UserInListDto[]> {
-    const users: User[] = await this.usersRepository.find({
-      order: {
-        name: 'ASC'
-      }});
+  async findAll(workspaceId?: number): Promise<UserInListDto[]> {
+    const validUsers: number[] = [];
+    if (workspaceId) {
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find({ where: {workspaceId: workspaceId}});
+      workspaceUsers.forEach(wsU => validUsers.push(wsU.userId))
+    }
+    const users: User[] = await this.usersRepository.find({order: {name: 'ASC'}});
     const returnUsers: UserInListDto[] = [];
-    users.forEach(user => returnUsers.push(<UserInListDto>{
-      id: user.id,
-      name: user.name,
-      isAdmin: user.isAdmin,
-      description: user.description
-    }));
+    users.forEach(user => {
+      if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
+        returnUsers.push(<UserInListDto>{
+          id: user.id,
+          name: user.name,
+          isAdmin: user.isAdmin,
+          description: user.description
+        })
+      }
+    });
     return returnUsers;
   }
 
