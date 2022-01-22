@@ -52,35 +52,23 @@
   </div>
 
   <!-- ============================================= -->
-  <div fxLayout="column" fxFlex="40" class="object-list">
-
-    <div *ngIf="selectedWorkspaceId === 0">
-      <div>Zugriffsberechtigte für Arbeitsbereich:</div>
-      <div>Bitte links einen Arbeitsbereich wählen</div>
+  <div class="object-list" fxLayout="column" fxFlex="40">
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <div *ngIf="selectedWorkspaceId === 0">Zugriffsrechte: Bitte links Arbeitsbereich wählen</div>
+      <div *ngIf="selectedWorkspaceId > 0" >Zugriffsrechte für {{ tableselectionRow.selected[0]?.label }}:</div>
+      <button mat-raised-button (click)="saveUsers()" matTooltip="Speichern"
+              matTooltipPosition="above" [disabled]="!workspaceUsers?.hasChanged">
+        <mat-icon>save</mat-icon>
+      </button>
     </div>
 
-    <div *ngIf="selectedWorkspaceId > 0" fxLayout="row" fxLayoutAlign="space-between center">
-      <div>Zugriffsrechte für "{{ tableselectionRow.selected[0]?.label }}":</div>
-        <button mat-raised-button (click)="saveUsers()" matTooltip="Speichern"
-            matTooltipPosition="above" [disabled]="!pendingUserChanges">
-          <mat-icon>save</mat-icon>
-        </button>
+    <div class="scroll-area" fxLayout="column">
+      <div fxLayout="row" fxLayoutAlign="start start" *ngFor="let u of workspaceUsers.entries">
+        <mat-checkbox (change)="workspaceUsers?.updateHasChanged()" fxFlex="30%"
+                      [(ngModel)]="u.isChecked" [disabled]="selectedWorkspaceId === 0" style="margin-left: 20px;">
+          {{u.name}}</mat-checkbox>
+          <div style="color: gray; margin: 3px" fxFlex>{{u.description}}</div>
+      </div>
     </div>
-
-    <mat-table [dataSource]="UserlistDatasource" class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-cell *matCellDef="let row" fxFlex="70px">
-          <mat-checkbox (change)="selectUser(row)"
-                        [checked]="row.selected">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="name">
-        <mat-cell *matCellDef="let row"> {{row.label}} </mat-cell>
-      </ng-container>
-
-      <mat-row *matRowDef="let row; columns: displayedUserColumns;"></mat-row>
-    </mat-table>
   </div>
 </div>

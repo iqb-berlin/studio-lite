@@ -104,10 +104,9 @@ export class BackendService {
   }
 
   // *******************************************************************
-  getUsersByWorkspace(workspaceId: number): Observable<IdLabelSelectedData[]> {
+  getUsersByWorkspace(workspaceId: number): Observable<UserInListDto[]> {
     return this.http
-      .post<IdLabelSelectedData[]>(`${this.serverUrl}getWorkspaceUsers.php`,
-      { t: localStorage.getItem('t'), ws: workspaceId })
+      .get<UserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );

@@ -18,6 +18,7 @@ import {
 } from "@studio-lite/iqb-components";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 import {CreateWorkspaceDto, WorkspaceFullDto} from "@studio-lite-lib/api-admin";
+import {UserToCheckCollection} from "../users/usersChecked";
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -35,9 +36,7 @@ export class WorkspacesComponent implements OnInit {
   selectedWorkspaceId = 0;
   workspaceGroups: WorkspaceGroupData[] = [];
 
-  pendingUserChanges = false;
-  UserlistDatasource = new MatTableDataSource<IdLabelSelectedData>();
-  displayedUserColumns = ['selectCheckbox', 'name'];
+  workspaceUsers = new UserToCheckCollection([]);
 
   @ViewChild(MatSort, { static: true }) sort: MatSort | null = null;
 
@@ -63,7 +62,7 @@ export class WorkspacesComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.updateObjectList();
+      this.createUserList();
       this.mds.pageTitle = 'Admin: Arbeitsbereiche';
     });
   }
@@ -238,6 +237,7 @@ export class WorkspacesComponent implements OnInit {
 
   // ***********************************************************************************
   updateUserList(): void {
+    /*
     this.pendingUserChanges = false;
     if (this.selectedWorkspaceId > 0) {
       this.dataLoading = true;
@@ -253,16 +253,12 @@ export class WorkspacesComponent implements OnInit {
     } else {
       this.UserlistDatasource = new MatTableDataSource();
     }
-  }
 
-  selectUser(ws?: WorkspaceData): void {
-    if (ws) {
-      ws.selected = !ws.selected;
-    }
-    this.pendingUserChanges = true;
+     */
   }
 
   saveUsers(): void {
+    /*
     this.pendingUserChanges = false;
     if (this.selectedWorkspaceId > 0) {
       this.dataLoading = true;
@@ -285,6 +281,8 @@ export class WorkspacesComponent implements OnInit {
     } else {
       this.UserlistDatasource = new MatTableDataSource();
     }
+
+     */
   }
 
   // ***********************************************************************************
@@ -324,6 +322,14 @@ export class WorkspacesComponent implements OnInit {
         this.dataLoading = false;
       }
     );
+  }
+
+  createUserList(): void {
+    this.workspaceUsers = new UserToCheckCollection([]);
+    this.bs.getUsers().subscribe(users => {
+      this.workspaceUsers = new UserToCheckCollection(users);
+      this.updateObjectList()
+    })
   }
 
   isAllSelected(): boolean {
