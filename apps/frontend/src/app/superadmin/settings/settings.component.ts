@@ -5,14 +5,6 @@ import { Component } from '@angular/core';
     <div fxLayout="column" fxLayoutAlign="start stretch" class="admin-tab-content">
       <div fxLayout="row" class="div-row">
         <div fxFlex="48">
-          <mat-label>Gruppen der Arbeitsbereiche</mat-label>
-        </div>
-        <div fxFlex="48">
-          <app-workspace-groups></app-workspace-groups>
-        </div>
-      </div>
-      <div fxLayout="row" class="div-row">
-        <div fxFlex="48">
           <mat-label>Konfiguration der Anwendung</mat-label>
         </div>
         <div fxFlex="48">
