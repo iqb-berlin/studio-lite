@@ -4,29 +4,35 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BackendService, WorkspaceGroupData } from '../backend.service';
+import {BackendService, WorkspaceData, WorkspaceGroupData} from '../backend.service';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'app-workspace-groups',
   template: `
-    <mat-form-field class="example-chip-list">
-      <mat-label>Arbeitsbereiche - Gruppen</mat-label>
-      <mat-chip-list #chipList>
-        <mat-chip *ngFor="let wsg of workspaceGroups" (click)="changeName(wsg)" [matBadge]="wsg.ws_count"
-                  [removable]="wsg.ws_count === 0" (removed)="deleteWorkspaceGroup(wsg)"
-                  [matBadgeHidden]="wsg.ws_count === 0">
-          {{wsg.label}}
-          <mat-icon matChipRemove *ngIf="wsg.ws_count === 0">cancel</mat-icon>
-        </mat-chip><br/>
-        <input placeholder="Neue Gruppe..."
-               [matChipInputFor]="chipList"
-               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-               [matChipInputAddOnBlur]="addOnBlur"
-               (matChipInputTokenEnd)="add($event)">
-      </mat-chip-list>
-    </mat-form-field>
+    <mat-dialog-content fxLayout="column">
+      <h1>Arbeitsbereiche - Gruppen ändern</h1>
+      <p>Sie können nur Gruppen löschen, die keine Arbeitsbereiche enthalten.</p>
+      <mat-form-field class="example-chip-list">
+        <mat-label>Achtung: Änderungen werden sofort gespeichert.</mat-label>
+        <mat-chip-list #chipList>
+          <mat-chip *ngFor="let wsg of workspaceGroups" (click)="changeName(wsg)" [matBadge]="wsg.ws_count"
+                    [removable]="wsg.ws_count === 0" (removed)="deleteWorkspaceGroup(wsg)"
+                    [matBadgeHidden]="wsg.ws_count === 0">
+            {{wsg.label}}
+            <mat-icon matChipRemove *ngIf="wsg.ws_count === 0">cancel</mat-icon>
+          </mat-chip><br/>
+          <input placeholder="Neue Gruppe..."
+                 [matChipInputFor]="chipList"
+                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                 [matChipInputAddOnBlur]="addOnBlur"
+                 (matChipInputTokenEnd)="add($event)">
+        </mat-chip-list>
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-raised-button [mat-dialog-close]="true">Schließen</button>
+    </mat-dialog-actions>
   `,
   styles: ['.example-chip-list {width: 100%;}']
 })
@@ -48,11 +54,17 @@ export class WorkspaceGroupsComponent implements OnInit {
   }
 
   updateList(): void {
-    this.bs.getWorkspaceGroupList().subscribe(wsGroups => {
-      this.workspaceGroups = wsGroups;
-    },
-    () => {
-      this.workspaceGroups = [];
+    this.workspaceGroups = [];
+    this.bs.getWorkspacesGroupwise().subscribe(
+      (dataresponse: WorkspaceGroupDto[]) => {
+        dataresponse.forEach(workspaceGroup => {
+          const workspaces: WorkspaceData[] = [];
+          this.workspaceGroups.push(<WorkspaceGroupData>{
+            id: workspaceGroup.id,
+            label: workspaceGroup.name,
+            ws_count: workspaceGroup.workspaces.length
+          });
+        });
     });
   }
 
@@ -71,12 +83,8 @@ export class WorkspaceGroupsComponent implements OnInit {
             wsg.id,
             (<FormGroup>result).get('name')?.value
           ).subscribe(
-            respOk => {
-              if (respOk) {
-                this.updateList();
-              } else {
-                this.snackBar.open('Konnte Gruppe nicht ändern', 'Fehler', { duration: 3000 });
-              }
+            (respOk) => {
+              this.updateList();
             },
             err => {
               this.snackBar.open(`Konnte Gruppe nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });

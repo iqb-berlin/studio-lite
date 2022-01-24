@@ -59,23 +59,17 @@ export class WorkspaceService {
     const workspaces = await this.findAll(userId);
     const myReturn: WorkspaceGroupDto[] = [];
     workspaceGroups.forEach(workspaceGroup => {
-      let localWorkspaceGroup: WorkspaceGroupDto = undefined;
+      const localWorkspaceGroup = <WorkspaceGroupDto>{
+        id: workspaceGroup.id,
+        name: workspaceGroup.name,
+        workspaces: []
+      }
       workspaces.forEach(workspace => {
         if (workspaceGroup.id === workspace.groupId) {
-          if (localWorkspaceGroup) {
             localWorkspaceGroup.workspaces.push(workspace)
-          } else {
-            localWorkspaceGroup = {
-              id: workspaceGroup.id,
-              name: workspaceGroup.name,
-              workspaces: [workspace]
-            }
-          }
         }
       });
-      if (localWorkspaceGroup) {
-        myReturn.push(localWorkspaceGroup)
-      }
+      myReturn.push(localWorkspaceGroup)
     })
     return myReturn;
   }

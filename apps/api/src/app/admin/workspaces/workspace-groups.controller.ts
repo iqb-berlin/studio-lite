@@ -1,9 +1,24 @@
-import {Body, Controller, Delete, Get, Param, Post, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards
+} from '@nestjs/common';
 import {AuthService} from "../../auth/service/auth.service";
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {WorkspaceGroupService} from "../../database/services/workspace-group.service";
-import {CreateWorkspaceGroupDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto} from "@studio-lite-lib/api-admin";
+import {
+  CreateWorkspaceGroupDto,
+  WorkspaceGroupFullDto,
+  WorkspaceGroupInListDto
+} from "@studio-lite-lib/api-admin";
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
@@ -27,9 +42,9 @@ export class WorkspaceGroupsController {
     return this.workspaceGroupService.findAll();
   }
 
+  @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Get(':id')
   @ApiCreatedResponse({
     type: [WorkspaceGroupFullDto],
   })
@@ -52,6 +67,18 @@ export class WorkspaceGroupsController {
       throw new UnauthorizedException();
     }
     return this.workspaceGroupService.remove(id);
+  }
+
+  @Patch()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin workspaces')
+  async patch(@Request() req, @Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    return this.workspaceGroupService.patch(workspaceGroupFullDto)
   }
 
   @Post()

@@ -35,8 +35,8 @@ import { SuperadminPasswordRequestComponent } from
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { VeronaModulesTableComponent } from './verona-modules/verona-modules-table.component';
 import { SettingsComponent } from './settings/settings.component';
-import { WorkspaceGroupsComponent } from './settings/workspace-groups.component';
-import { EditWorkspaceGroupComponent } from './settings/edit-workspace-group.component';
+import { WorkspaceGroupsComponent } from './workspaces/workspace-groups.component';
+import { EditWorkspaceGroupComponent } from './workspaces/edit-workspace-group.component';
 import { AppConfigComponent } from './settings/app-config.component';
 import {HTTP_INTERCEPTORS} from "@angular/common/http";
 import {AuthInterceptor} from "./auth.interceptor";

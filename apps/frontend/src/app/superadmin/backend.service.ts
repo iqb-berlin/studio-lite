@@ -5,10 +5,10 @@ import {catchError, map} from 'rxjs/operators';
 import { AppConfig, AppHttpError } from '../backend.service';
 import {
   ConfigFullDto,
-  CreateUserDto, CreateWorkspaceDto,
+  CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
   UserFullDto,
   UserInListDto,
-  WorkspaceFullDto,
+  WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   WorkspaceInListDto
 } from "@studio-lite-lib/api-admin";
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
@@ -145,9 +145,9 @@ export class BackendService {
       );
   }
 
-  getWorkspaceGroupList(): Observable<WorkspaceGroupData[]> {
+  getWorkspaceGroupList(): Observable<WorkspaceGroupInListDto[]> {
     return this.http
-      .post<WorkspaceGroupData[]>(`${this.serverUrl}getWorkspaceGroups.php`, { t: localStorage.getItem('t') })
+      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/workspace-groups`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
@@ -155,9 +155,9 @@ export class BackendService {
 
   addWorkspaceGroup(name: string): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}addWorkspaceGroup.php`, {
-      t: localStorage.getItem('t'), n: name
-    })
+      .post<boolean>(`${this.serverUrl}admin/workspace-groups`, <CreateWorkspaceGroupDto>{
+        name: name
+      })
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
@@ -165,19 +165,15 @@ export class BackendService {
 
   deleteWorkspaceGroup(id: number): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}deleteWorkspaceGroup.php`, {
-      t: localStorage.getItem('t'), wsg: id
-    })
-      .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
+      .delete(`${this.serverUrl}admin/workspace-groups/${id}`)
+      .pipe(map(()=>false))
   }
 
   renameWorkspaceGroup(id: number, newName: string): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}setWorkspaceGroup.php`, {
-      t: localStorage.getItem('t'), wsg_id: id, wsg_name: newName
-    })
+      .patch<boolean>(`${this.serverUrl}admin/workspace-groups`, <WorkspaceGroupFullDto>{
+        id: id, name: newName
+      })
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );

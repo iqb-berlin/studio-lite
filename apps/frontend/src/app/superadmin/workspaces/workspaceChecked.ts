@@ -34,7 +34,7 @@ export class WorkspaceGroupToCheckCollection {
   constructor(workspaceGroups: WorkspaceGroupDto[] ) {
     this.entries = [];
     workspaceGroups.forEach(workspaceGroup => {
-      this.entries.push(new WorkspaceGroupToCheck(workspaceGroup))
+      if (workspaceGroup.workspaces.length > 0) this.entries.push(new WorkspaceGroupToCheck(workspaceGroup))
     })
   }
 

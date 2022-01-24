@@ -19,6 +19,7 @@ import {
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 import {CreateWorkspaceDto, UserInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-admin";
 import {UserToCheckCollection} from "../users/usersChecked";
+import {WorkspaceGroupsComponent} from "./workspace-groups.component";
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -45,6 +46,7 @@ export class WorkspacesComponent implements OnInit {
     private bs: BackendService,
     private editworkspaceDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
+    private workspaceGroupsDialog: MatDialog,
     private messsageDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
@@ -343,6 +345,13 @@ export class WorkspacesComponent implements OnInit {
   }
 
   editWorkspaceGroups() {
-    console.log('yoyo nix da');
+    const dialogRef = this.workspaceGroupsDialog.open(WorkspaceGroupsComponent, {
+      width: '600px',
+      minHeight: '400px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.updateObjectList();
+    });
   }
 }

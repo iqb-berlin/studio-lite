@@ -5,8 +5,8 @@ export class WorkspaceGroupFullDto {
   id!: number;
 
   @ApiProperty({example: 'VERA2002'})
-  name!: string;
+  name?: string;
 
   @ApiProperty()
-  settings = {};
+  settings? = {};
 }
