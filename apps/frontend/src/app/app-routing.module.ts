@@ -8,7 +8,7 @@ const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'about', component: AboutComponent },
   {
-    path: 'super-admin',
+    path: 'admin',
     loadChildren: () => import('./superadmin/superadmin.module').then(module => module.SuperadminModule)
   },
   {

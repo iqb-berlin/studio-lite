@@ -44,11 +44,8 @@ export class AuthService {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`)
   }
 
-  logout(): Observable<boolean> {
-    return this.http
-      .put<boolean>(`${this.serverUrl}logout.php`, { t: localStorage.getItem('t') })
-      .pipe(
-        catchError(() => of(false))
-      );
+  logout(): void {
+    localStorage.removeItem("id_token");
+    this.authData = AuthService.defaultAuthData;
   }
 }

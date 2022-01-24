@@ -26,7 +26,7 @@
     <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="authService.authData.userId > 0">
       <mat-card-title fxLayout="row" fxLayoutAlign="space-between center">
         Arbeitsbereich wählen
-        <button mat-button *ngIf="authService.authData.isAdmin" [routerLink]="['/super-admin']"
+        <button mat-button *ngIf="authService.authData.isAdmin" [routerLink]="['/admin']"
                 matTooltip="Nutzer/Arbeitsbereiche">
           <mat-icon>settings</mat-icon>
         </button>

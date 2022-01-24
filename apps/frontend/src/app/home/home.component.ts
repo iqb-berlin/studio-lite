@@ -1,5 +1,5 @@
-import { Router } from '@angular/router';
-import { Component, Inject, OnInit } from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,16 +9,19 @@ import { MainDatastoreService } from '../maindatastore.service';
 import { ChangePasswordComponent } from './change-password.component';
 import {AuthService} from "../auth.service";
 import {WorkspaceDto} from "@studio-lite-lib/api-start";
+import {Subscription} from "rxjs";
 
 @Component({
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   isError = false;
   errorMessage = '';
   dataLoading = true;
+  private routingSubscription: Subscription | null = null;
+  redirectTo = '';
 
   constructor(private fb: FormBuilder,
               @Inject('APP_VERSION') readonly appVersion: string,
@@ -29,6 +32,7 @@ export class HomeComponent implements OnInit {
               private changePasswordDialog: MatDialog,
               private snackBar: MatSnackBar,
               public authService: AuthService,
+              private route: ActivatedRoute,
               private router: Router) {
     this.loginForm = this.fb.group({
       name: this.fb.control('', [Validators.required, Validators.minLength(1)]),
@@ -37,6 +41,10 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
+      console.log(queryParams);
+      this.redirectTo = queryParams['redirectTo'];
+    });
     setTimeout(() => {
       this.mds.pageTitle = 'Willkommen!';
       this.dataLoading = false;
@@ -50,6 +58,10 @@ export class HomeComponent implements OnInit {
     if (this.loginForm && this.loginForm.valid) {
       this.authService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(() => {
           this.dataLoading = false;
+          console.log(this.redirectTo);
+          if (this.redirectTo) {
+            this.router.navigate([this.redirectTo]);
+          }
         },
       err => {
         this.isError = true;
@@ -71,13 +83,8 @@ export class HomeComponent implements OnInit {
       }
     });
     dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
-        this.authService.logout().subscribe(
-          () => {
-            this.mds.loginStatus = null;
-            this.router.navigateByUrl('/');
-          }
-        );
+      if (result === true) {
+        this.authService.logout();
       }
     });
   }
@@ -104,5 +111,11 @@ export class HomeComponent implements OnInit {
 
   buttonGotoWorkspace(selectedWorkspace: WorkspaceDto): void {
     this.router.navigate([`/a/${selectedWorkspace.id}`]);
+  }
+
+  ngOnDestroy(): void {
+    if (this.routingSubscription !== null) {
+      this.routingSubscription.unsubscribe();
+    }
   }
 }
