@@ -12,7 +12,7 @@ import {
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite/iqb-components";
+} from "@studio-lite-lib/iqb-components";
 
 @Component({
   templateUrl: './verona-modules.component.html',

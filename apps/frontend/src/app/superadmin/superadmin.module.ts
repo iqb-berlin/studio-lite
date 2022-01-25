@@ -21,7 +21,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
-import { IqbComponentsModule } from '@studio-lite/iqb-components';
+import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
 import { SuperadminRoutingModule } from './superadmin-routing.module';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
@@ -29,8 +29,6 @@ import { UsersComponent } from './users/users.component';
 import { SuperadminComponent } from './superadmin.component';
 import { BackendService } from './backend.service';
 import { EditworkspaceComponent } from './workspaces/editworkspace.component';
-import { SuperadminPasswordRequestComponent } from
-  './superadmin-password-request/superadmin-password-request.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { VeronaModulesTableComponent } from './verona-modules/verona-modules-table.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -78,7 +76,6 @@ import {EditUserComponent} from "./users/edituser.component";
     SuperadminComponent,
     EditworkspaceComponent,
     EditUserComponent,
-    SuperadminPasswordRequestComponent,
     VeronaModulesComponent,
     VeronaModulesTableComponent,
     SettingsComponent,
@@ -100,8 +97,7 @@ import {EditUserComponent} from "./users/edituser.component";
   entryComponents: [
     EditUserComponent,
     EditworkspaceComponent,
-    EditWorkspaceGroupComponent,
-    SuperadminPasswordRequestComponent
+    EditWorkspaceGroupComponent
   ]
 })
 export class SuperadminModule { }

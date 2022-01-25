@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { FormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import {BackendService, IdLabelSelectedData, WorkspaceData, WorkspaceGroupData} from '../backend.service';
+import {BackendService, WorkspaceData, WorkspaceGroupData} from '../backend.service';
 import { EditworkspaceComponent } from './editworkspace.component';
 import { MainDatastoreService } from '../../maindatastore.service';
 import {
@@ -15,9 +15,8 @@ import {
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite/iqb-components";
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
-import {CreateWorkspaceDto, UserInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-admin";
+} from "@studio-lite-lib/iqb-components";
+import {WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
 import {UserToCheckCollection} from "../users/usersChecked";
 import {WorkspaceGroupsComponent} from "./workspace-groups.component";
 

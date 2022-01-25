@@ -37,6 +37,7 @@ import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component
 import { SelectModuleComponent } from './unit/unit-metadata/select-module.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
+import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
 
 @NgModule({
   imports: [
@@ -64,7 +65,8 @@ import { EditSettingsComponent } from './dialogs/edit-settings.component';
     MatTableModule,
     MatCheckboxModule,
     FormsModule,
-    MatTabsModule
+    MatTabsModule,
+    IqbComponentsModule
   ],
   declarations: [
     AuthoringComponent,

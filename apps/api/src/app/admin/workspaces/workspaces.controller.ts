@@ -14,8 +14,7 @@ import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {AuthService} from "../../auth/service/auth.service";
 import {WorkspaceService} from "../../database/services/workspace.service";
-import {CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 import {UsersService} from "../../database/services/users.service";
 
 @Controller('admin/workspaces')

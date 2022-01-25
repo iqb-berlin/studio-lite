@@ -1,9 +1,8 @@
 import {Inject, Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, of, throwError} from "rxjs";
-import {catchError, shareReplay, map, switchMap} from "rxjs/operators";
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
-import {AppHttpError, LoginData, LoginStatusResponseData} from "./backend.service";
-import {AuthDataDto} from "@studio-lite-lib/api-start";
+import {Observable} from "rxjs";
+import {map, switchMap} from "rxjs/operators";
+import {HttpClient, HttpParams} from "@angular/common/http";
+import {AuthDataDto} from "@studio-lite-lib/api-dto";
 
 @Injectable({
   providedIn: 'root'

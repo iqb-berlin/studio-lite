@@ -5,8 +5,7 @@ import {LocalAuthGuard} from "./auth/local-auth.guard";
 import {AuthService} from "./auth/service/auth.service";
 import {JwtAuthGuard} from "./auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags} from "@nestjs/swagger";
-import {WorkspaceInListDto} from "@studio-lite-lib/api-admin";
-import {AuthDataDto, ChangePasswordDto} from "@studio-lite-lib/api-start";
+import {AuthDataDto, ChangePasswordDto} from "@studio-lite-lib/api-dto";
 import {WorkspaceService} from "./database/services/workspace.service";
 import {UsersService} from "./database/services/users.service";
 

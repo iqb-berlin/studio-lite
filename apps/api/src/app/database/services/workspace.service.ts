@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {getConnection, Repository} from "typeorm";
 import Workspace from "../entities/workspace.entity";
-import {CreateWorkspaceDto, UserFullDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 import User from "../entities/user.entity";
 import WorkspaceUser from "../entities/workspace-user.entity";
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 import WorkspaceGroup from "../entities/workspace-group.entity";
 
 @Injectable()

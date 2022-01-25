@@ -15,10 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@studio-lite-lib/api-admin": ["libs/api-admin/src/index.ts"],
-      "@studio-lite-lib/api-authoring": ["libs/api-authoring/src/index.ts"],
-      "@studio-lite-lib/api-start": ["libs/api-start/src/index.ts"],
-      "@studio-lite/iqb-components": ["libs/iqb-components/src/index.ts"]
+      "@studio-lite-lib/api-dto": ["libs/api-dto/src/index.ts"],
+      "@studio-lite-lib/iqb-components": ["libs/iqb-components/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

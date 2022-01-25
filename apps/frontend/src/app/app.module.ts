@@ -28,7 +28,7 @@ import { BackendService } from './backend.service';
 import { AboutComponent } from './about/about.component';
 import { HomeComponent } from './home/home.component';
 import { ChangePasswordComponent } from './home/change-password.component';
-import { IqbComponentsModule } from "@studio-lite/iqb-components";
+import { IqbComponentsModule } from "@studio-lite-lib/iqb-components";
 import {AuthInterceptor} from "./auth.interceptor";
 
 @NgModule({

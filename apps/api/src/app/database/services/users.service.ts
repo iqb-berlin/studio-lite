@@ -3,7 +3,7 @@ import {getConnection, Repository} from "typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
 import User from "../entities/user.entity";
 import * as bcrypt from 'bcrypt';
-import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-admin";
+import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-dto";
 import {passwordHash} from "../../auth/auth.constants";
 import WorkspaceUser from "../entities/workspace-user.entity";
 

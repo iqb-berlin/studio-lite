@@ -5,9 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Component, Inject, OnDestroy, OnInit
 } from '@angular/core';
-// import { saveAs } from 'file-saver';
 import { Subscription } from 'rxjs';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite/iqb-components';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MainDatastoreService } from '../maindatastore.service';
 import { BackendService, UnitShortData, WorkspaceSettings } from './backend.service';
 import { DatastoreService } from './datastore.service';

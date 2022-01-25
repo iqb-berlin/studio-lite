@@ -18,7 +18,7 @@ import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
-} from "@studio-lite-lib/api-admin";
+} from "@studio-lite-lib/api-dto";
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {

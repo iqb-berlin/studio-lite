@@ -1,14 +1,14 @@
 import {ActivatedRoute, Router} from '@angular/router';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite/iqb-components';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService, WorkspaceData } from '../backend.service';
 import { MainDatastoreService } from '../maindatastore.service';
 import { ChangePasswordComponent } from './change-password.component';
 import {AuthService} from "../auth.service";
-import {WorkspaceDto} from "@studio-lite-lib/api-start";
+import {WorkspaceDto} from "@studio-lite-lib/api-dto";
 import {Subscription} from "rxjs";
 
 @Component({

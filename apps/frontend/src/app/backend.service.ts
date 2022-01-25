@@ -4,9 +4,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {ConfigFullDto} from "@studio-lite-lib/api-admin";
-import {ApiProperty} from "@nestjs/swagger";
-import {ChangePasswordDto} from "@studio-lite-lib/api-start";
+import {ChangePasswordDto, ConfigFullDto} from "@studio-lite-lib/api-dto";
 
 export class AppHttpError {
   code: number | undefined;

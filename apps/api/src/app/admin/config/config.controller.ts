@@ -1,6 +1,6 @@
 import {Controller, Get } from '@nestjs/common';
 import {ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {ConfigFullDto} from "@studio-lite-lib/api-admin";
+import {ConfigFullDto} from "@studio-lite-lib/api-dto";
 
 @Controller('admin/config')
 export class ConfigController {

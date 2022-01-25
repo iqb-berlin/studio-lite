@@ -12,12 +12,12 @@ import {
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite/iqb-components";
+} from "@studio-lite-lib/iqb-components";
 import {
   BackendService,
 } from '../backend.service';
 import { MainDatastoreService } from '../../maindatastore.service';
-import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 import {EditUserComponent} from "./edituser.component";
 import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
 

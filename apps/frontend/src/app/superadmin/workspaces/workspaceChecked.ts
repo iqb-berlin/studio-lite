@@ -1,5 +1,4 @@
-import {WorkspaceDto, WorkspaceGroupDto} from "@studio-lite-lib/api-start";
-import {WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {WorkspaceDto, WorkspaceGroupDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 
 export class WorkspaceChecked {
   public id: number;

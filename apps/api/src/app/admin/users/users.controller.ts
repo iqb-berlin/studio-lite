@@ -11,7 +11,7 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-admin";
+import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 import {UsersService} from "../../database/services/users.service";
 import {AuthService} from "../../auth/service/auth.service";
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";

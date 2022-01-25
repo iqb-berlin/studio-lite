@@ -1,3 +1,5 @@
+export {AuthDataDto, WorkspaceDto, WorkspaceGroupDto} from "./lib/dto/auth-data-dto";
+export {ChangePasswordDto} from "./lib/dto/change-password-dto";
 export {ConfigFullDto} from "./lib/dto/config/config-full-dto";
 export {WorkspaceGroupInListDto} from "./lib/dto/workspace-group/workspace-group-in-list-dto";
 export {WorkspaceGroupFullDto} from "./lib/dto/workspace-group/workspace-group-full-dto";

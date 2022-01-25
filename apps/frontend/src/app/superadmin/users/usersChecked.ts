@@ -1,4 +1,4 @@
-import {UserInListDto} from "@studio-lite-lib/api-admin";
+import {UserInListDto} from "@studio-lite-lib/api-dto";
 
 export class UserChecked {
   public id: number;

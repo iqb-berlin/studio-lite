@@ -6,7 +6,7 @@ import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {BackendService, WorkspaceData, WorkspaceGroupData} from '../backend.service';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
+import {WorkspaceGroupDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   template: `

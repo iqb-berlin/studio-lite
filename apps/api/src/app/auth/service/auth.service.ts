@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {JwtService} from "@nestjs/jwt";
 import {UsersService} from "../../database/services/users.service";
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
 import {WorkspaceService} from "../../database/services/workspace.service";
 import {WorkspaceGroupService} from "../../database/services/workspace-group.service";
 

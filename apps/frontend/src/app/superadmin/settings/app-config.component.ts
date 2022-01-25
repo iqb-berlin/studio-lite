@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import {AppConfig, BackendService as MainDataService} from '../../backend.service';
 import { BackendService } from '../backend.service';
-import {ConfigFullDto} from "@studio-lite-lib/api-admin";
+import {ConfigFullDto} from "@studio-lite-lib/api-dto";
 
 const defaultAppConfig = <ConfigFullDto>{
   appTitle: 'IQB-Teststudio',

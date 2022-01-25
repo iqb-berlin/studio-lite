@@ -4,11 +4,9 @@ import {getConnection, Repository} from "typeorm";
 import WorkspaceGroup from "../entities/workspace-group.entity";
 import {
   CreateWorkspaceGroupDto,
-  WorkspaceFullDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
-} from "@studio-lite-lib/api-admin";
-import Workspace from "../entities/workspace.entity";
+} from "@studio-lite-lib/api-dto";
 
 @Injectable()
 export class WorkspaceGroupService {

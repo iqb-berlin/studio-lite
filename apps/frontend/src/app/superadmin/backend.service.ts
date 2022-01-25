@@ -9,10 +9,9 @@ import {
   UserFullDto,
   UserInListDto,
   WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
-  WorkspaceInListDto
-} from "@studio-lite-lib/api-admin";
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-start";
-import {accessSync} from "fs";
+  WorkspaceInListDto,
+  WorkspaceGroupDto
+} from "@studio-lite-lib/api-dto";
 
 @Injectable({
   providedIn: 'root'
