@@ -18,8 +18,8 @@ import { Component, Directive, ElementRef, EventEmitter, HostListener,
     }
 
 
-    @Input('iqbFilesUploadInputFor')
-    set filesUploadQueue(value: any) {
+    @Input()
+    set iqbFilesUploadInputFor(value: any) {
         if (value) {
             this._queue = value;
         }
