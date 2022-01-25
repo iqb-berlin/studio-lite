@@ -34,7 +34,6 @@ import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
-import { IqbFilesModule } from '../iqb-files';
 import { SelectModuleComponent } from './unit/unit-metadata/select-module.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
@@ -65,8 +64,7 @@ import { EditSettingsComponent } from './dialogs/edit-settings.component';
     MatTableModule,
     MatCheckboxModule,
     FormsModule,
-    MatTabsModule,
-    IqbFilesModule
+    MatTabsModule
   ],
   declarations: [
     AuthoringComponent,

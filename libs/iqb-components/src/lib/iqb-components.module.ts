@@ -12,6 +12,11 @@ import { ConfirmDialogComponent, ConfirmDialogData } from './dialogs/confirm/con
 import { MessageDialogComponent, MessageDialogData, MessageType } from './dialogs/message/message-dialog.component';
 import { BytesPipe } from './pipes/bytes.pipe';
 import { ErrorHandler, IqbComponentsConfig, ServerError } from './iqb-components.classes';
+import {IqbFilesUploadComponent} from "./iqb-files/iqbFilesUpload/iqbFilesUpload.component";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatCardModule} from "@angular/material/card";
+import {IqbFilesUploadQueueComponent} from "./iqb-files/iqbFilesUploadQueue/iqbFilesUploadQueue.component";
+import {IqbFilesUploadInputForDirective} from "./iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive";
 
 @NgModule({
   imports: [
@@ -23,7 +28,9 @@ import { ErrorHandler, IqbComponentsConfig, ServerError } from './iqb-components
     MatExpansionModule,
     FormsModule,
     MatInputModule,
-    HttpClientModule
+    HttpClientModule,
+    MatProgressBarModule,
+    MatCardModule,
   ],
   entryComponents: [
     ConfirmDialogComponent,
@@ -32,12 +39,17 @@ import { ErrorHandler, IqbComponentsConfig, ServerError } from './iqb-components
   declarations: [
     ConfirmDialogComponent,
     MessageDialogComponent,
-    BytesPipe
+    BytesPipe,
+    IqbFilesUploadComponent,
+    IqbFilesUploadQueueComponent,
+    IqbFilesUploadInputForDirective
   ],
   exports: [
     ConfirmDialogComponent,
     MessageDialogComponent,
-    BytesPipe
+    BytesPipe,
+    IqbFilesUploadQueueComponent,
+    IqbFilesUploadInputForDirective
   ]
 })
 export class IqbComponentsModule {
@@ -61,6 +73,8 @@ export class IqbComponentsModule {
 export {
   ConfirmDialogComponent,
   MessageDialogComponent,
+  IqbFilesUploadQueueComponent,
+  IqbFilesUploadInputForDirective,
   ServerError,
   ErrorHandler,
   BytesPipe,

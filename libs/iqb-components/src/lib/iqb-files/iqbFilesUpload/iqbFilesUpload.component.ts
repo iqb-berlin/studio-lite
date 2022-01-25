@@ -12,7 +12,7 @@ import { UploadStatus } from '../iqb-files-classes';
   selector: 'iqb-files-upload',
   templateUrl: './iqbFilesUpload.component.html',
   exportAs: 'iqbFilesUpload',
-  styleUrls: ['./../iqb-files.scss']
+  styleUrls: ['../iqb-files.scss']
 })
 
 export class IqbFilesUploadComponent implements OnInit {

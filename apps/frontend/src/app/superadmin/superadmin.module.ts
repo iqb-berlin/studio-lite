@@ -29,7 +29,6 @@ import { UsersComponent } from './users/users.component';
 import { SuperadminComponent } from './superadmin.component';
 import { BackendService } from './backend.service';
 import { EditworkspaceComponent } from './workspaces/editworkspace.component';
-import { IqbFilesModule } from '../iqb-files';
 import { SuperadminPasswordRequestComponent } from
   './superadmin-password-request/superadmin-password-request.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
@@ -41,13 +40,11 @@ import { AppConfigComponent } from './settings/app-config.component';
 import {HTTP_INTERCEPTORS} from "@angular/common/http";
 import {AuthInterceptor} from "./auth.interceptor";
 import {EditUserComponent} from "./users/edituser.component";
-import {WorkspaceChecked} from "./workspaces/workspaceChecked";
 
 @NgModule({
     imports: [
         CommonModule,
         SuperadminRoutingModule,
-        IqbFilesModule,
         IqbComponentsModule,
         MatTableModule,
         MatTabsModule,
