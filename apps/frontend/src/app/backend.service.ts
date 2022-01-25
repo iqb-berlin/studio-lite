@@ -6,6 +6,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {ConfigFullDto} from "@studio-lite-lib/api-admin";
 import {ApiProperty} from "@nestjs/swagger";
+import {ChangePasswordDto} from "@studio-lite-lib/api-start";
 
 export class AppHttpError {
   code: number | undefined;
@@ -115,11 +116,8 @@ export class BackendService {
 
   setUserPassword(oldPassword: string, newPassword: string): Observable<boolean> {
     return this.http
-      .put<boolean>(`${this.serverUrl}setUserPassword.php`, {
-      t: localStorage.getItem('t'),
-      old: oldPassword,
-      new: newPassword
-    })
+      .patch<boolean>(`${this.serverUrl}password`, <ChangePasswordDto>{
+        oldPassword: oldPassword, newPassword: newPassword})
       .pipe(
         catchError(() => of(false))
       );

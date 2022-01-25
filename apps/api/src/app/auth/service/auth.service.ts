@@ -38,4 +38,8 @@ export class AuthService {
   async getMyName(id: number): Promise<string> {
     return this.usersService.getUserName(id);
   }
+
+  async setMyPassword(id: number, oldPassword: string, newPassword: string): Promise<boolean> {
+    return this.usersService.setPassword(id, oldPassword, newPassword);
+  }
 }

@@ -97,8 +97,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   changePassword() : void {
     const dialogRef = this.changePasswordDialog.open(ChangePasswordComponent, {
-      width: '400px',
-      height: '700px'
+      width: '400px'
     });
 
     dialogRef.afterClosed().subscribe(result => {

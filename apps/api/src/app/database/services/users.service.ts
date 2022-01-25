@@ -90,6 +90,25 @@ export class UsersService {
     return user.name
   }
 
+  async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
+    const userRepository = await getConnection().getRepository(User);
+    const userForName = await userRepository
+      .createQueryBuilder("user")
+      .where("user.id = :id",
+        {id: userId})
+      .getOne();
+    if (userForName) {
+      const userForId = await this.getUserByNameAndPassword(userForName.name, oldPassword);
+      if (userForId) {
+        const userToUpdate = await userRepository.findOne(userForId);
+        userToUpdate.password = UsersService.getPasswordHash(newPassword);
+        await userRepository.save(userToUpdate);
+        return true
+      }
+    }
+    return false
+  }
+
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     const wsUser = await getConnection()
       .getRepository(WorkspaceUser)
