@@ -48,6 +48,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.mds.pageTitle = 'Willkommen!';
       this.dataLoading = false;
+      const token = localStorage.getItem('id_token');
+      if (token) {
+        this.authService.getAuthData().subscribe(authData => {
+          this.authService.authData = authData
+        })
+      }
     });
   }
 
@@ -111,6 +117,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   buttonGotoWorkspace(selectedWorkspace: WorkspaceDto): void {
     this.router.navigate([`/a/${selectedWorkspace.id}`]);
+  }
+
+  scrollTo(targetElementId: string): void {
+    const targetElement = document.getElementById(targetElementId);
+    if (targetElement) targetElement.scrollIntoView();
   }
 
   ngOnDestroy(): void {

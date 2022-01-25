@@ -1,79 +1,70 @@
-<div class="page-body">
-  <div class="spinner-container" *ngIf="dataLoading">
-    <mat-spinner></mat-spinner>
-  </div>
-  <div fxLayout="row wrap" fxLayoutAlign="center stretch" style="padding: 30px;">
-    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="authService.authData.userId === 0">
+<div class="page-body" fxLayout="row" fxLayoutAlign="center stretch">
+    <div fxFlex="0 0 500px" fxLayout="column" *ngIf="authService.authData.userId === 0" class="box-left">
       <!-- - - - - - - - - - - - - - - - - -->
       <form [formGroup]="loginForm" (ngSubmit)="login()">
-        <mat-card-title>Anmelden</mat-card-title>
-        <mat-card-header *ngIf="mds.globalWarning">{{mds.globalWarning}}</mat-card-header>
-        <mat-card-content fxLayout="column">
+        <h1>Anmelden</h1>
+        <h2 *ngIf="mds.globalWarning" class="warning">{{mds.globalWarning}}</h2>
+        <div fxLayout="column">
           <mat-form-field class="full-width">
             <input matInput formControlName="name" placeholder="Anmeldename" (keyup.enter)="pw.focus()">
           </mat-form-field>
           <mat-form-field class="full-width">
             <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
           </mat-form-field>
-        </mat-card-content>
+        </div>
         <p *ngIf="errorMessage" class="error-message">{{errorMessage}}</p>
-        <mat-card-actions>
-          <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
-        </mat-card-actions>
+        <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
       </form>
-    </mat-card>
+    </div>
 
-    <mat-card fxFlex="0 0 400px" fxLayout="column" *ngIf="authService.authData.userId > 0">
-      <mat-card-title fxLayout="row" fxLayoutAlign="space-between center">
+    <div fxFlex="0 0 500px" fxLayout="column" class="box-left" *ngIf="authService.authData.userId > 0">
+      <h1 fxLayout="row" fxLayoutAlign="space-between center">
         Arbeitsbereich wählen
         <button mat-button *ngIf="authService.authData.isAdmin" [routerLink]="['/admin']"
                 matTooltip="Nutzer/Arbeitsbereiche">
           <mat-icon>settings</mat-icon>
         </button>
-      </mat-card-title>
-      <mat-card-header *ngIf="mds.globalWarning">{{mds.globalWarning}}</mat-card-header>
-      <mat-card-content>
-        <div fxLayoutGap="10px" fxLayout="column">
-          <p *ngIf="authService.authData.workspaces.length === 0">
-            Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.
-          </p>
-          <div *ngFor="let wsg of authService.authData.workspaces" fxLayout="column">
-            <h2>{{wsg.name}}</h2>
-            <button mat-raised-button color="primary" (click)="buttonGotoWorkspace(ws)" class="ws-button"
+      </h1>
+      <h2 *ngIf="mds.globalWarning" class="warning">{{mds.globalWarning}}</h2>
+      <div fxFlex *ngIf="authService.authData.workspaces.length === 0">
+        <p>Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.</p>
+      </div>
+      <div *ngIf="authService.authData.workspaces.length > 0" fxLayout="row wrap">
+            <button mat-button *ngFor="let wsg of authService.authData.workspaces"
+            (click)="scrollTo('iosaihoihlnkk_' + wsg.id)">{{wsg.name}}</button>
+      </div>
+      <div fxFlex *ngIf="authService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
+        <div *ngFor="let wsg of authService.authData.workspaces" fxLayout="column">
+          <h2 [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</h2>
+          <div fxLayout="column" fxLayoutAlign="start start">
+            <button mat-button (click)="buttonGotoWorkspace(ws)"
                     *ngFor="let ws of wsg.workspaces">
-                    {{ws.name}}
+              {{ws.name}}
             </button>
           </div>
         </div>
-      </mat-card-content>
-      <mat-card-actions fxLayout="row" fxLayoutAlign="space-between center">
+      </div>
+      <div fxLayout="row" fxLayoutAlign="space-between center">
         <button mat-raised-button color="foreground" (click)="changePassword()" matTooltip="Kennwort ändern">
           <mat-icon>account_box</mat-icon>Kennwort ändern
         </button>
         <button mat-raised-button color="foreground" (click)="logout()" matTooltip="Abmelden/Neu anmelden">
-          <mat-icon>logout</mat-icon>Abmelden
+          <mat-icon>exit_to_app</mat-icon>Abmelden
         </button>
-      </mat-card-actions>
-    </mat-card>
+      </div>
+    </div>
 
-    <mat-card fxFlex="0 2 400px" fxLayout="column" class="status">
-      <mat-card-title>{{mds.appConfig?.appTitle}}</mat-card-title>
-
-      <!-- - - - - - - - - - - - - - - - - -->
-      <mat-card-content>
-        <div [innerHTML]="mds.appConfig?.introHtml"></div>
-        <div *ngIf="mds.loginStatus">
-          <ul>
-            <li>Kennung der Anwendung: {{appName}}</li>
-            <li>Version: {{appVersion}}</li>
-            <li>angemeldet als: {{ mds.loginStatus.name }}</li>
-            <li *ngIf="authService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
-          </ul>
-        </div>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="foreground" [routerLink]="['/about']">Impressum/Datenschutz</button>
-      </mat-card-actions>
-    </mat-card>
+    <div fxFlex="0 2 500px" fxLayout="column" class="box-right">
+      <h1>{{mds.appConfig?.appTitle}}</h1>
+      <div [innerHTML]="mds.appConfig?.introHtml" class="scroll-area"></div>
+      <div *ngIf="mds.loginStatus">
+        <ul>
+          <li>Kennung der Anwendung: {{appName}}</li>
+          <li>Version: {{appVersion}}</li>
+          <li>angemeldet als: {{ mds.loginStatus.name }}</li>
+          <li *ngIf="authService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
+        </ul>
+      </div>
+      <button mat-raised-button color="foreground" [routerLink]="['/about']">Impressum/Datenschutz</button>
+    </div>
   </div>
-</div>

@@ -69,7 +69,9 @@ export class WorkspaceService {
             localWorkspaceGroup.workspaces.push(workspace)
         }
       });
-      myReturn.push(localWorkspaceGroup)
+      if (!userId || localWorkspaceGroup.workspaces.length > 0) {
+        myReturn.push(localWorkspaceGroup)
+      }
     })
     return myReturn;
   }

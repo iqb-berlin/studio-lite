@@ -1,9 +1,22 @@
-.mat-card {
+.home-body {
+  margin: 0 15px 15px 15px;
+  height: calc(100% - 65px);
+  background-color: darkolivegreen;
+}
+
+.box-right, .box-left {
+  padding: 20px;
   margin: 10px;
 }
-.status {
+
+.box-right {
   background-color: lightgrey;
 }
+
+.box-left {
+  background: white;
+}
+
 .error-message {
   color: red;
   padding: 5px;
@@ -12,13 +25,44 @@
   margin-left: 20px;
   margin-bottom: 4px;
 }
-.mat-card-header {
+
+.warning {
   background-color: salmon;
   padding: 4px;
 }
+
+h1 {
+  font-weight: normal;
+  font-size: 1.2em;
+}
+
+h2 {
+  padding: 0;
+  border-top: gray solid 1px;
+  border-bottom: gray solid 1px;
+  font-weight: normal;
+  margin-bottom: 2px;
+}
+
+.scroll-area .mat-button {
+  line-height: 24px;
+}
+
 .mat-raised-button {
   min-width: 160px;
 }
 .mat-raised-button .mat-icon {
   margin-right: 10px;
+}
+.workspace-list {
+  /* max-height: calc(100% - 100px); */
+}
+.fix-height {
+  height: calc(100% - 70px);
+  /* background-color: darkkhaki; */
+  overflow-y: auto;
+}
+.scroll-area {
+  /* background-color: mediumaquamarine; */
+  overflow-y: auto;
 }
