@@ -1,7 +1,10 @@
 .home-body {
-  margin: 0 15px 15px 15px;
-  height: calc(100% - 65px);
-  background-color: darkolivegreen;
+  position: absolute;
+  width: 100%;
+  top: 70px;
+  bottom: 0;
+  overflow-y: auto;
+  max-height: calc(100% - 65px);
 }
 
 .box-right, .box-left {
@@ -37,9 +40,8 @@ h1 {
 }
 
 h2 {
-  padding: 0;
-  border-top: gray solid 1px;
-  border-bottom: gray solid 1px;
+  padding: 2px 6px;
+  background-color: lightgray;
   font-weight: normal;
   margin-bottom: 2px;
 }

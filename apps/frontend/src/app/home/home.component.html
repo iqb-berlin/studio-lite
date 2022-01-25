@@ -1,4 +1,4 @@
-<div class="page-body" fxLayout="row" fxLayoutAlign="center stretch">
+<div class="home-body" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxFlex="0 0 500px" fxLayout="column" *ngIf="authService.authData.userId === 0" class="box-left">
       <!-- - - - - - - - - - - - - - - - - -->
       <form [formGroup]="loginForm" (ngSubmit)="login()">
@@ -49,7 +49,7 @@
           <mat-icon>account_box</mat-icon>Kennwort ändern
         </button>
         <button mat-raised-button color="foreground" (click)="logout()" matTooltip="Abmelden/Neu anmelden">
-          <mat-icon>exit_to_app</mat-icon>Abmelden
+          <mat-icon>logout</mat-icon>Abmelden
         </button>
       </div>
     </div>
