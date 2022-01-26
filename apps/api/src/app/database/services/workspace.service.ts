@@ -92,11 +92,10 @@ export class WorkspaceService {
   }
 
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
-    const workspaceRepository = await getConnection().getRepository(Workspace);
-    const workspaceToUpdate = await workspaceRepository.findOne(workspaceData.id);
+    const workspaceToUpdate = await this.workspacesRepository.findOne(workspaceData.id);
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
     if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
-    await workspaceRepository.save(workspaceToUpdate);
+    await this.workspacesRepository.save(workspaceToUpdate);
   }
 
   async remove(id: number | number[]): Promise<void> {

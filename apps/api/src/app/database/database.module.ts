@@ -9,6 +9,7 @@ import WorkspaceGroup from "./entities/workspace-group.entity";
 import {WorkspaceGroupService} from "./services/workspace-group.service";
 import WorkspaceUser from "./entities/workspace-user.entity";
 import {WorkspaceUserService} from "./services/workspace-user.service";
+import {VeronaModulesService} from "./services/verona-modules.service";
 
 @Module({
   imports: [
@@ -25,18 +26,19 @@ import {WorkspaceUserService} from "./services/workspace-user.service";
             "username": "superdb",
             "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",
             "database": "studio-lite",
-            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser],
+            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule],
             "synchronize": false
           })
       }
     ),
-    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser])
+    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule])
   ],
   providers: [
     UsersService,
     WorkspaceService,
     WorkspaceGroupService,
-    WorkspaceUserService
+    WorkspaceUserService,
+    VeronaModulesService
   ],
   exports: [
     User,
@@ -47,7 +49,8 @@ import {WorkspaceUserService} from "./services/workspace-user.service";
     UsersService,
     WorkspaceService,
     WorkspaceGroupService,
-    WorkspaceUserService
+    WorkspaceUserService,
+    VeronaModulesService
   ]
 })
 export class DatabaseModule {}
