@@ -34,6 +34,7 @@
     "@nestjs/typeorm": "^8.0.2",
     "@nrwl/angular": "13.4.5",
     "bcrypt": "^5.0.1",
+    "cheerio": "^1.0.0-rc.10",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

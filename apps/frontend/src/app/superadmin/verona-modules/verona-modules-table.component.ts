@@ -43,7 +43,6 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
   public updateList() {
     this.bs.getVeronaModuleList(this.type).subscribe(
       (fileData: VeronaModuleInListDto[]) => {
-        console.log(fileData);
         if (fileData) {
           this.objectsDatasource = new MatTableDataSource(fileData);
           this.objectsDatasource.sort = this.sort;
