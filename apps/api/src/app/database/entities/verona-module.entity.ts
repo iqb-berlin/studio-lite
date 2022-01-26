@@ -1,9 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
 import {VeronaModuleMetadataDto} from "@studio-lite-lib/api-dto";
 
 @Entity('verona_module')
 class VeronaModule {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   public key: string;
 
   @Column({
@@ -11,8 +11,21 @@ class VeronaModule {
   })
   public metadata: VeronaModuleMetadataDto;
 
-  @Column()
-  public file: string;
+  @Column({
+    type: 'bytea'
+  })
+  public file: Uint8Array;
+
+  @Column({
+    name: 'file_size'
+  })
+  public fileSize: number;
+
+  @Column({
+    type: 'timestamp with time zone',
+    name: 'file_datetime'
+  })
+  public fileDateTime: VeronaModuleMetadataDto;
 
 }
 

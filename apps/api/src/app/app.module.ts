@@ -5,12 +5,14 @@ import { AppService } from './app.service';
 import { AdminModule } from './admin/admin.module';
 import {AuthModule} from "./auth/auth.module";
 import { DatabaseModule } from './database/database.module';
+import {MulterModule} from "@nestjs/platform-express";
 
 @Module({
   imports: [
     AdminModule,
     AuthModule,
-    DatabaseModule
+    DatabaseModule,
+    MulterModule
   ],
   controllers: [AppController],
   providers: [AppService],

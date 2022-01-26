@@ -1,46 +1,41 @@
--- noinspection SqlNoDataSourceInspectionForFile
-
-CREATE TABLE public.user
+create table public."user"
 (
-  id serial,
-  name character varying(50) NOT NULL,
-  password character varying(100) NOT NULL,
-  email character varying(100),
-  is_admin boolean DEFAULT false,
-  PRIMARY KEY (id)
+  id          serial
+    primary key,
+  name        varchar(50)  not null,
+  password    varchar(100) not null,
+  is_admin    boolean default false,
+  description text
 );
 
-CREATE TABLE public.workspace_group
+create table public.workspace_group
 (
-  id serial,
-  name character varying(50) NOT NULL,
-  settings jsonb,
-  PRIMARY KEY (id)
+  id       serial
+    primary key,
+  name     varchar(50) not null,
+  settings jsonb
 );
 
-CREATE TABLE public.workspace
+create table public.workspace
 (
-  id serial,
-  name character varying(50) NOT NULL,
-  group_id integer NOT NULL,
-  settings jsonb,
-  PRIMARY KEY (id),
-  FOREIGN KEY (group_id) REFERENCES public.workspace_group (id) MATCH SIMPLE
-  ON UPDATE NO ACTION
-  ON DELETE CASCADE
+  id       serial
+    primary key,
+  name     varchar(50) not null,
+  group_id integer     not null
+    references workspace_group
+      on delete cascade,
+  settings jsonb
 );
 
-CREATE TABLE public.workspace_user
+create table workspace_user
 (
-  workspace_id integer NOT NULL,
-  user_id integer NOT NULL,
-  PRIMARY KEY (workspace_id, user_id),
-  FOREIGN KEY (user_id) REFERENCES public.user (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE CASCADE,
-  FOREIGN KEY (workspace_id) REFERENCES public.workspace (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE CASCADE
+  workspace_id integer not null
+    references workspace
+      on delete cascade,
+  user_id      integer not null
+    references "user"
+      on delete cascade,
+  primary key (workspace_id, user_id)
 );
 
 CREATE TABLE public.unit
@@ -70,10 +65,12 @@ CREATE TABLE public.app_config
   PRIMARY KEY (key)
 );
 
-CREATE TABLE public.verona_module
+create table public.verona_module
 (
-  key character varying(50) NOT NULL,
-  metadata jsonb,
-  file bytea,
-  PRIMARY KEY (key)
+  key           varchar(50) not null
+    primary key,
+  metadata      jsonb,
+  file          bytea,
+  file_size     integer                  default 0,
+  file_datetime timestamp with time zone default now()
 );

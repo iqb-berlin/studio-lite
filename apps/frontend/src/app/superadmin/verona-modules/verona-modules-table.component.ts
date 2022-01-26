@@ -1,11 +1,12 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild
+  Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import { VeronaModuleData } from '../backend.service';
+import {BackendService} from '../backend.service';
+import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -13,33 +14,47 @@ import { VeronaModuleData } from '../backend.service';
   templateUrl: './verona-modules-table.component.html'
 })
 export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy {
-  @Input() objectList!: VeronaModuleData[];
+  @Input() type!: 'player' | 'editor' | 'schemer';
   @Input() downloadPath = '';
   @Output() selectionChanged = new EventEmitter();
   @ViewChild(MatSort) sort: MatSort | null = null;
-  objectsDatasource = new MatTableDataSource<VeronaModuleData>();
-  tableSelectionCheckboxes = new SelectionModel <VeronaModuleData>(true, []);
+  objectsDatasource = new MatTableDataSource<VeronaModuleInListDto>();
+  tableSelectionCheckboxes = new SelectionModel <VeronaModuleInListDto>(true, []);
   timeZone = 'Europe/Berlin';
-  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'verona-version', 'filedatetime', 'filesize'];
+  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'verona-version']; // , 'filedatetime', 'filesize'];
   private selectionChangedSubscription: Subscription | undefined;
 
-  constructor() {
+  constructor(
+    @Inject('SERVER_URL') public serverUrl: string,
+    private bs: BackendService) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 
   ngOnInit(): void {
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {
-      this.selectionChanged.emit(this.tableSelectionCheckboxes.selected.map(element => element.id));
+      this.selectionChanged.emit({
+        type: this.type, selectedModules: this.tableSelectionCheckboxes.selected});
     });
+    setTimeout(() => {
+      this.updateList();
+    })
+  }
+
+  public updateList() {
+    this.bs.getVeronaModuleList(this.type).subscribe(
+      (fileData: VeronaModuleInListDto[]) => {
+        console.log(fileData);
+        if (fileData) {
+          this.objectsDatasource = new MatTableDataSource(fileData);
+          this.objectsDatasource.sort = this.sort;
+        } else {
+          this.objectsDatasource = new MatTableDataSource();
+        }
+      });
   }
 
   ngOnChanges(): void {
-    if (this.objectList && this.objectList.length > 0) {
-      this.objectsDatasource = new MatTableDataSource(this.objectList);
-      this.objectsDatasource.sort = this.sort;
-    } else {
-      this.objectsDatasource = new MatTableDataSource();
-    }
+    this.updateList();
   }
 
   isAllSelected(): boolean {

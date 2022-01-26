@@ -7,7 +7,7 @@
       <button fxFlex="88px" mat-raised-button (click)="hiddenfileinput.click()" matTooltip="hochladen/aktualisieren" matTooltipPosition="above">
         <mat-icon>cloud_upload</mat-icon>
       </button>
-      <button fxFlex="88px" mat-raised-button (click)="deleteFiles()" [disabled]="(selectedPlayers.length + selectedEditors.length) === 0"
+      <button fxFlex="88px" mat-raised-button (click)="deleteFiles()" [disabled]="(selectedModules.length) === 0"
               matTooltip="Markierte löschen" matTooltipPosition="above">
         <mat-icon>delete</mat-icon>
       </button>
@@ -17,27 +17,25 @@
     <div class="scroll-area">
       <iqb-files-upload-queue #fileUploadQueue
                               [httpUrl]="uploadUrl"
-                              [fileAlias]="'verona-module'"
-                              [tokenName]="'t'"
+                              [fileAlias]="'file'"
+                              [tokenName]="'file'"
                               [token]="token"
                               [folderName]="'i'"
                               [folder]="'y'"
-                              (uploadCompleteEvent)="updateFileList()">
+                              (uploadCompleteEvent)="updateTables()">
       </iqb-files-upload-queue>
-      <div *ngIf="editorData.length > 0" fxLayout="column">
+      <div fxLayout="column">
         <h1>Editoren</h1>
-        <app-verona-modules-table (selectionChanged)="selectedEditors = $event"
+        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   [downloadPath]="serverUrl"
-                                  [objectList]="editorData"></app-verona-modules-table>
+                                  type="editor"></app-verona-modules-table>
       </div>
-      <div *ngIf="editorData.length === 0"><p><em>Keine Editoren verfügbar</em></p></div>
-      <div *ngIf="playerData.length > 0" fxLayout="column">
+      <div fxLayout="column">
         <h1>Player</h1>
-        <app-verona-modules-table (selectionChanged)="selectedPlayers = $event"
+        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   [downloadPath]="serverUrl"
-                                  [objectList]="playerData"></app-verona-modules-table>
+                                  type="player"></app-verona-modules-table>
       </div>
-      <div *ngIf="playerData.length === 0"><p><em>Keine Player verfügbar</em></p></div>
     </div>
   </div>
 </div>

@@ -10,7 +10,7 @@ import {
   UserInListDto,
   WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   WorkspaceInListDto,
-  WorkspaceGroupDto
+  WorkspaceGroupDto, VeronaModuleInListDto
 } from "@studio-lite-lib/api-dto";
 
 @Injectable({
@@ -128,11 +128,11 @@ export class BackendService {
       );
   }
 
-  getVeronaModuleList(): Observable<VeronaModuleData[]> {
+  getVeronaModuleList(type: string): Observable<VeronaModuleInListDto[]> {
     return this.http
-      .post<VeronaModuleData[]>(`${this.serverUrl}getVeronaModuleList.php`, { t: localStorage.getItem('t') })
+      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => [])
       );
   }
 

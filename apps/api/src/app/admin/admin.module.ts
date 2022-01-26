@@ -6,11 +6,13 @@ import {WorkspacesController} from "./workspaces/workspaces.controller";
 import {WorkspaceGroupsController} from "./workspaces/workspace-groups.controller";
 import {ConfigController} from "./config/config.controller";
 import {VeronaModulesController} from "./verona-modules/verona-modules.controller";
+import {MulterModule} from "@nestjs/platform-express";
 
 @Module({
   imports: [
     DatabaseModule,
-    AuthModule
+    AuthModule,
+    MulterModule
   ],
   controllers: [
     WorkspacesController,

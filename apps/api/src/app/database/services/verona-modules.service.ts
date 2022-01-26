@@ -23,4 +23,12 @@ export class VeronaModulesService {
     });
     return returnVeronaModules
   }
+
+  async upload(fileData: Buffer) {
+    const newFile = await this.veronaModulesRepository.create({
+      key: 'sosososo',
+      file: fileData
+    })
+    await this.veronaModulesRepository.save(newFile);
+  }
 }

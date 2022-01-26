@@ -4,7 +4,7 @@ import {
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BackendService, VeronaModuleData } from '../backend.service';
+import { BackendService } from '../backend.service';
 import { MainDatastoreService } from '../../maindatastore.service';
 import {
   ConfirmDialogComponent,
@@ -13,6 +13,8 @@ import {
   MessageDialogData,
   MessageType
 } from "@studio-lite-lib/iqb-components";
+import {VeronaModulesTableComponent} from "./verona-modules-table.component";
+import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   templateUrl: './verona-modules.component.html',
@@ -23,12 +25,7 @@ import {
 })
 export class VeronaModulesComponent implements OnInit {
   dataLoading = false;
-  editorData: VeronaModuleData[] = [];
-  playerData: VeronaModuleData[] = [];
-  selectedEditors: string[] = [];
-  selectedPlayers: string[] = [];
-
-  // for FileUpload
+  selectedModules: VeronaModuleInListDto[] = [];
   uploadUrl = '';
   token: string | undefined;
 
@@ -42,48 +39,44 @@ export class VeronaModulesComponent implements OnInit {
     private messsageDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
-    this.uploadUrl = `${this.serverUrl}php_superadmin/uploadVeronaModule.php`;
+    this.uploadUrl = `${this.serverUrl}admin/verona-modules`;
   }
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.mds.pageTitle = 'Admin: Player/Editoren';
-      this.updateFileList();
+      this.mds.pageTitle = 'Admin: Verona-Module';
       const t = localStorage.getItem('t');
       this.token = t ? t : '';
     });
   }
 
-  updateFileList(): void {
-    this.dataLoading = true;
-    this.editorData = [];
-    this.playerData = [];
-    this.selectedPlayers = [];
-    this.selectedEditors = [];
-    this.bs.getVeronaModuleList().subscribe(
-      (fileData: VeronaModuleData[]) => {
-        if (fileData) {
-          fileData.forEach(fd => {
-            if (fd.isEditor) {
-              this.editorData.push(fd);
-            } else if (fd.isPlayer) {
-              this.playerData.push(fd);
-            }
-          });
-        }
-        this.dataLoading = false;
-      }, () => {
-        this.dataLoading = false;
+  updateTables() {
+    const subTables: NodeListOf<Element> = document.querySelectorAll('app-verona-modules-table');
+    if (subTables) {
+      subTables.forEach((tab: unknown) => {
+        (tab as VeronaModulesTableComponent).updateList()
+      });
+    }
+  }
+
+  changeSelectedModules(selection: {type: string; selectedModules: VeronaModuleInListDto[]}) {
+    const newSelection: VeronaModuleInListDto[] = [];
+    this.selectedModules.forEach(m => {
+      if (m.metadata.type !== selection.type) {
+        newSelection.push(m);
       }
-    );
+    });
+    selection.selectedModules.forEach(m => {
+      newSelection.push(m)
+    });
+    this.selectedModules = newSelection;
   }
 
   deleteFiles(): void {
-    const filesToDelete = this.selectedEditors.concat(this.selectedPlayers);
-    if (filesToDelete.length > 0) {
+    if (this.selectedModules.length > 0) {
       let prompt = 'Sie haben ';
-      if (filesToDelete.length > 1) {
-        prompt = `${prompt + filesToDelete.length} Dateien ausgewählt. Sollen`;
+      if (this.selectedModules.length > 1) {
+        prompt = `${prompt + this.selectedModules.length} Dateien ausgewählt. Sollen`;
       } else {
         prompt += ' eine Datei ausgewählt. Soll';
       }
@@ -101,10 +94,10 @@ export class VeronaModulesComponent implements OnInit {
         if (result !== false) {
           // =========================================================
           this.dataLoading = true;
-          this.bs.deleteVeronaModules(filesToDelete).subscribe(
+          this.bs.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
             (deletefilesresponse: string) => {
               this.snackBar.open(deletefilesresponse, '', { duration: 1000 });
-              this.updateFileList();
+              this.updateTables();
             }, err => {
               this.snackBar.open(err.msg(), '', { duration: 3000 });
             }

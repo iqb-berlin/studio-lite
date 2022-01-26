@@ -1,9 +1,21 @@
-import {Controller, Get, Param, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UnauthorizedException,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
+} from '@nestjs/common';
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
 import {VeronaModulesService} from "../../database/services/verona-modules.service";
 import {AuthService} from "../../auth/service/auth.service";
+import {FileInterceptor} from "@nestjs/platform-express";
+import {Express} from "express";
 
 @Controller('admin/verona-modules')
 export class VeronaModulesController {
@@ -20,10 +32,6 @@ export class VeronaModulesController {
   })
   @ApiTags('admin verona-modules')
   async findAll(@Request() req): Promise<VeronaModuleInListDto[]> {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
     return this.veronaModuleService.findAll();
   }
 
@@ -35,12 +43,18 @@ export class VeronaModulesController {
   })
   @ApiTags('admin verona-modules')
   async findAllByType(@Request() req, @Param('type') type: string): Promise<VeronaModuleInListDto[]> {
+    return this.veronaModuleService.findAll(type);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  async addAvatar(@Request() req, @UploadedFile() file) {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.veronaModuleService.findAll(type);
+    return this.veronaModuleService.upload(file.buffer);
   }
-
-
 }
