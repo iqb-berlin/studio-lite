@@ -1,9 +1,9 @@
 <div class="home-body" fxLayout="row" fxLayoutAlign="center stretch">
-    <div fxFlex="0 0 500px" fxLayout="column" *ngIf="authService.authData.userId === 0" class="box-left">
+    <div fxFlex="0 0 500px" fxLayout="column" *ngIf="appService.authData.userId === 0" class="box-left">
       <!-- - - - - - - - - - - - - - - - - -->
       <form [formGroup]="loginForm" (ngSubmit)="login()">
         <h1>Anmelden</h1>
-        <h2 *ngIf="mds.globalWarning" class="warning">{{mds.globalWarning}}</h2>
+        <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
         <div fxLayout="column">
           <mat-form-field class="full-width">
             <input matInput formControlName="name" placeholder="Anmeldename" (keyup.enter)="pw.focus()">
@@ -17,24 +17,24 @@
       </form>
     </div>
 
-    <div fxFlex="0 0 500px" fxLayout="column" class="box-left" *ngIf="authService.authData.userId > 0">
+    <div fxFlex="0 0 500px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
       <h1 fxLayout="row" fxLayoutAlign="space-between center">
         Arbeitsbereich wählen
-        <button mat-button *ngIf="authService.authData.isAdmin" [routerLink]="['/admin']"
+        <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
                 matTooltip="Nutzer/Arbeitsbereiche">
           <mat-icon>settings</mat-icon>
         </button>
       </h1>
-      <h2 *ngIf="mds.globalWarning" class="warning">{{mds.globalWarning}}</h2>
-      <div fxFlex *ngIf="authService.authData.workspaces.length === 0">
+      <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
+      <div fxFlex *ngIf="appService.authData.workspaces.length === 0">
         <p>Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.</p>
       </div>
-      <div *ngIf="authService.authData.workspaces.length > 0" fxLayout="row wrap">
-            <button mat-button *ngFor="let wsg of authService.authData.workspaces"
+      <div *ngIf="appService.authData.workspaces.length > 0" fxLayout="row wrap">
+            <button mat-button *ngFor="let wsg of appService.authData.workspaces"
             (click)="scrollTo('iosaihoihlnkk_' + wsg.id)">{{wsg.name}}</button>
       </div>
-      <div fxFlex *ngIf="authService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
-        <div *ngFor="let wsg of authService.authData.workspaces" fxLayout="column">
+      <div fxFlex *ngIf="appService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
+        <div *ngFor="let wsg of appService.authData.workspaces" fxLayout="column">
           <h2 [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</h2>
           <div fxLayout="column" fxLayoutAlign="start start">
             <button mat-button (click)="buttonGotoWorkspace(ws)"
@@ -55,14 +55,14 @@
     </div>
 
     <div fxFlex="0 2 500px" fxLayout="column" class="box-right">
-      <h1>{{mds.appConfig?.appTitle}}</h1>
-      <div [innerHTML]="mds.appConfig?.introHtml" class="scroll-area"></div>
-      <div *ngIf="mds.loginStatus">
+      <h1>{{appService.appConfig?.appTitle}}</h1>
+      <div [innerHTML]="appService.appConfig?.introHtml" class="scroll-area"></div>
+      <div *ngIf="appService.authData.userId === 0">
         <ul>
           <li>Kennung der Anwendung: {{appName}}</li>
           <li>Version: {{appVersion}}</li>
-          <li>angemeldet als: {{ mds.loginStatus.name }}</li>
-          <li *ngIf="authService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
+          <li>angemeldet als: {{ appService.authData.userName }}</li>
+          <li *ngIf="appService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
         </ul>
       </div>
       <button mat-raised-button color="foreground" [routerLink]="['/about']">Impressum/Datenschutz</button>

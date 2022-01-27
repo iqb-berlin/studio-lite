@@ -4,14 +4,13 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { DatastoreService } from '../datastore.service';
-import { MainDatastoreService } from '../../maindatastore.service';
+import { AppService } from '../../app.service';
 import { BackendService, UnitShortData } from '../backend.service';
 
 @Component({
   templateUrl: './select-unit.component.html'
 })
 export class SelectUnitComponent implements OnInit {
-  dataLoading = false;
   objectsDatasource = new MatTableDataSource<UnitShortData>();
   displayedColumns = ['selectCheckbox', 'name'];
   tableSelectionCheckbox = new SelectionModel <UnitShortData>(true, []);
@@ -19,7 +18,7 @@ export class SelectUnitComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private bs: BackendService,
-    private mds: MainDatastoreService,
+    private mds: AppService,
     private ds: DatastoreService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }

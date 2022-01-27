@@ -4,7 +4,7 @@ import {
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
-import { MainDatastoreService } from '../../../maindatastore.service';
+import { AppService } from '../../../app.service';
 import { DatastoreService } from '../../datastore.service';
 import { UnitComponent } from '../unit.component';
 
@@ -32,7 +32,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
     private bs: BackendService,
     private ds: DatastoreService,
     private snackBar: MatSnackBar,
-    private mds: MainDatastoreService
+    private mds: AppService
   ) {
     this.postMessageSubscription = this.mds.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;

@@ -1,10 +1,36 @@
 import { Component } from '@angular/core';
-import { MainDatastoreService } from '../maindatastore.service';
-import {AuthService} from "../auth.service";
 
 @Component({
-  templateUrl: './superadmin.component.html',
-  styleUrls: ['./superadmin.component.css']
+  template: `
+    <div class="page-body">
+      <div class="admin-background">
+        <nav mat-tab-nav-bar>
+          <a mat-tab-link
+             *ngFor="let link of navLinks"
+             [routerLink]="link.path"
+             routerLinkActive #rla="routerLinkActive"
+             [active]="rla.isActive">
+            {{link.label}}
+          </a>
+        </nav>
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .admin-background {
+      box-shadow: 5px 10px 20px black;
+      background-color: white;
+      padding: 25px;
+      margin: 0 15px 15px 15px;
+      height: calc(100% - 65px);
+    }
+
+    .communication-error-message {
+      color: red;
+      padding: 10px 50px;
+    }
+  `]
 })
 export class SuperadminComponent {
   navLinks = [
@@ -13,8 +39,4 @@ export class SuperadminComponent {
     { path: 'v-modules', label: 'Editoren/Player' },
     { path: 'settings', label: 'Einstellungen' }
   ];
-
-  constructor(
-    public authService: AuthService
-  ) { }
 }

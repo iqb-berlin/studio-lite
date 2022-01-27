@@ -2,9 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import {AppConfig, BackendService as MainDataService} from '../../backend.service';
-import { BackendService } from '../backend.service';
 import {ConfigFullDto} from "@studio-lite-lib/api-dto";
+import {BackendService} from "../backend.service";
+import {AppConfig} from "../../app.classes";
 
 const defaultAppConfig = <ConfigFullDto>{
   appTitle: 'IQB-Teststudio',
@@ -63,8 +63,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
-    private mbs: MainDataService,
-    private bs: BackendService
+    private backendService: BackendService
   ) {
     this.configForm = this.fb.group({
       appTitle: this.fb.control(''),
@@ -83,7 +82,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   }
 
   updateFormFields(): void {
-    this.mbs.getConfig().subscribe(appConfig => {
+    this.backendService.getConfig().subscribe(appConfig => {
       if (this.configDataChangedSubscription !== null) {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
@@ -146,7 +145,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
-      this.bs.setAppConfig(this.appConfig).subscribe(isOk => {
+      this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
           if (isOk) {
             this.snackBar.open(
               'Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!', 'Info', { duration: 3000 }

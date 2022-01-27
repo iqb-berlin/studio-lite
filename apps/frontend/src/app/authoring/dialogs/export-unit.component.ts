@@ -10,7 +10,7 @@ import {
   ExportUnitSelectionData,
   ModuleDataForExport
 } from '../backend.service';
-import { MainDatastoreService } from '../../maindatastore.service';
+import { AppService } from '../../app.service';
 import { DatastoreService } from '../datastore.service';
 
 export interface UnitExtendedData {
@@ -28,7 +28,6 @@ export interface UnitExtendedData {
   ]
 })
 export class ExportUnitComponent implements OnInit {
-  dataLoading = false;
   objectsDatasource = new MatTableDataSource<UnitExtendedData>();
   displayedColumns = ['selectCheckbox', 'name'];
   tableSelectionCheckbox = new SelectionModel <UnitExtendedData>(true, []);
@@ -38,9 +37,9 @@ export class ExportUnitComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private mds: MainDatastoreService,
+    private appService: AppService,
     public ds: DatastoreService,
-    private bs: BackendService,
+    private backendService: BackendService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
 
@@ -105,11 +104,11 @@ export class ExportUnitComponent implements OnInit {
           });
         }
       } else {
-        this.mds.dataLoading = true;
+        this.appService.dataLoading = true;
         const getMetadataSubscriptions: Observable<UnitMetadata>[] = [];
         this.ds.unitList.forEach(
           ud => {
-            getMetadataSubscriptions.push(this.bs.getUnitMetadata(this.ds.selectedWorkspace, ud.id));
+            getMetadataSubscriptions.push(this.backendService.getUnitMetadata(this.ds.selectedWorkspace, ud.id));
           }
         );
         forkJoin(getMetadataSubscriptions)
@@ -131,7 +130,7 @@ export class ExportUnitComponent implements OnInit {
                 ud.disabled = this.unitsWithPlayer.indexOf(ud.id) < 0;
               });
             }
-            this.mds.dataLoading = false;
+            this.appService.dataLoading = false;
           });
       }
     } else {

@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import { MainDatastoreService } from './maindatastore.service';
-import {AppConfig, BackendService} from './backend.service';
-import {AuthService} from "./auth.service";
+import { AppService } from './app.service';
+import { BackendService} from './backend.service';
+import {AppConfig} from "./app.classes";
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -13,33 +13,32 @@ import {AuthService} from "./auth.service";
 
 export class AppComponent implements OnInit {
   constructor(
-    public mds: MainDatastoreService,
-    private bs: BackendService,
+    public appService: AppService,
+    private backendService: BackendService,
     private sanitizer: DomSanitizer,
-    private authService: AuthService,
     private titleService: Title
   ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.mds.dataLoading = true;
-      this.bs.getConfig().subscribe(newConfig => {
+      this.appService.dataLoading = true;
+      this.backendService.getConfig().subscribe(newConfig => {
         if (newConfig) {
-          this.mds.appConfig = new AppConfig(newConfig, this.sanitizer);
-          this.titleService.setTitle(this.mds.appConfig.appTitle);
-          this.mds.dataLoading = false;
-          this.mds.globalWarning = this.mds.appConfig.globalWarningText();
+          this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
+          this.titleService.setTitle(this.appService.appConfig.appTitle);
+          this.appService.dataLoading = false;
+          this.appService.globalWarning = this.appService.appConfig.globalWarningText();
         }
       });
       const token = localStorage.getItem('id_token');
       if (token) {
-        this.authService.getAuthData().subscribe(authData => {
-          this.authService.authData = authData
+        this.backendService.getAuthData().subscribe(authData => {
+          this.appService.authData = authData
         })
       }
 
       window.addEventListener('message', event => {
-        this.mds.processMessagePost(event);
+        this.appService.processMessagePost(event);
       }, false);
     });
   }

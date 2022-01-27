@@ -1,9 +1,4 @@
 <div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
-  <div class="spinner-container" *ngIf="dataLoading">
-      <mat-spinner></mat-spinner>
-  </div>
-
-  <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="50">
     <div fxLayout="row">
         <button mat-raised-button (click)="addObject()" matTooltip="Arbeitsbereich hinzufügen" matTooltipPosition="above">
@@ -41,12 +36,12 @@
 
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef mat-sort-header> Name </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.label}} </mat-cell>
+        <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="group">
         <mat-header-cell *matHeaderCellDef mat-sort-header> Gruppe </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.ws_group_name}} </mat-cell>
+        <mat-cell *matCellDef="let element"> {{element.groupName}} </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
@@ -55,11 +50,10 @@
     </mat-table>
   </div>
 
-  <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="40">
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <div *ngIf="selectedWorkspaceId === 0">Zugriffsrechte: Bitte links Arbeitsbereich wählen</div>
-      <div *ngIf="selectedWorkspaceId > 0" >Zugriffsrechte für {{ tableselectionRow.selected[0]?.label }}:</div>
+      <div *ngIf="selectedWorkspaceId > 0" >Zugriffsrechte für {{ tableselectionRow.selected[0]?.name }}:</div>
       <button mat-raised-button (click)="saveUsers()" matTooltip="Speichern"
               matTooltipPosition="above" [disabled]="!workspaceUsers?.hasChanged">
         <mat-icon>save</mat-icon>

@@ -1,4 +1,5 @@
 import {WorkspaceDto, WorkspaceGroupDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
+import {WorkspaceData} from "../../authoring/backend.service";
 
 export class WorkspaceChecked {
   public id: number;
@@ -80,4 +81,10 @@ export class WorkspaceGroupToCheckCollection {
     });
     this.hasChanged = false;
   }
+}
+
+export interface WorkspaceGroupData {
+  id: number;
+  name: string;
+  workspaceCount: number;
 }

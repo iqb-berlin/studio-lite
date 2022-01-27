@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { MainDatastoreService } from '../maindatastore.service';
+import { AppService } from '../app.service';
 import { BackendService, UnitShortData, WorkspaceSettings } from './backend.service';
 import { DatastoreService } from './datastore.service';
 
@@ -33,9 +33,9 @@ export class AuthoringComponent implements OnInit, OnDestroy {
 
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
-    private mds: MainDatastoreService,
+    private appService: AppService,
     public ds: DatastoreService,
-    private bs: BackendService,
+    private backendService: BackendService,
     private bsSuper: SuperAdminBackendService,
     private newUnitDialog: MatDialog,
     private selectUnitDialog: MatDialog,
@@ -67,9 +67,9 @@ export class AuthoringComponent implements OnInit, OnDestroy {
         this.ds.playerList = {};
         this.ds.defaultEditor = '';
         this.ds.defaultPlayer = '';
-        this.bs.getWorkspaceData(this.ds.selectedWorkspace).subscribe(
+        this.backendService.getWorkspaceData(this.ds.selectedWorkspace).subscribe(
           wResponse => {
-            this.mds.pageTitle = `${wResponse.group}: ${wResponse.label}`;
+            this.appService.appConfig.setPageTitle(`${wResponse.group}: ${wResponse.label}`);
             if (wResponse.editors) {
               this.ds.editorList = wResponse.editors;
             }
@@ -93,7 +93,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
   }
 
   updateUnitList(unitToSelect?: number): void {
-    this.bs.getUnitList(this.ds.selectedWorkspace).subscribe(
+    this.backendService.getUnitList(this.ds.selectedWorkspace).subscribe(
       uResponse => {
         this.ds.unitList = uResponse;
         const selectedUnit = unitToSelect || this.ds.selectedUnit$.getValue();
@@ -115,7 +115,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
         }
       },
       err => {
-        this.mds.errorMessage = err.msg();
+        this.appService.errorMessage = err.msg();
         this.ds.unitList = [];
         this.ds.selectedUnit$.next(0);
         this.router.navigate([`/a/${this.ds.selectedWorkspace}`]);
@@ -144,8 +144,8 @@ export class AuthoringComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result !== 'undefined') {
         if (result !== false) {
-          this.mds.dataLoading = true;
-          this.bs.addUnit(
+          this.appService.dataLoading = true;
+          this.backendService.addUnit(
             this.ds.selectedWorkspace,
             (<FormGroup>result).get('key')?.value.trim(),
             (<FormGroup>result).get('label')?.value,
@@ -159,11 +159,11 @@ export class AuthoringComponent implements OnInit, OnDestroy {
               } else {
                 this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
               }
-              this.mds.dataLoading = false;
+              this.appService.dataLoading = false;
             },
             err => {
               this.snackBar.open(`Konnte Aufgabe nicht hinzufügen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.mds.dataLoading = false;
+              this.appService.dataLoading = false;
             }
           );
         }
@@ -184,7 +184,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result !== 'undefined') {
         if (result !== false) {
-          this.bs.deleteUnits(
+          this.backendService.deleteUnits(
             this.ds.selectedWorkspace,
             (result as UnitShortData[]).map(ud => ud.id)
           ).subscribe(
@@ -195,12 +195,12 @@ export class AuthoringComponent implements OnInit, OnDestroy {
                 this.snackBar.open('Aufgabe(n) gelöscht', '', { duration: 1000 });
               } else {
                 this.snackBar.open('Konnte Aufgabe(n) nicht löschen.', 'Fehler', { duration: 3000 });
-                this.mds.dataLoading = false;
+                this.appService.dataLoading = false;
               }
             },
             err => {
               this.snackBar.open(`Konnte Aufgabe(n) nicht löschen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.mds.dataLoading = false;
+              this.appService.dataLoading = false;
             }
           );
         }
@@ -225,7 +225,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
           const dialogComponent = dialogRef.componentInstance;
           const wsSelected = dialogComponent.selectForm ? dialogComponent.selectForm.get('wsSelector') : false;
           if (wsSelected) {
-            this.bs.moveUnits(
+            this.backendService.moveUnits(
               this.ds.selectedWorkspace,
               (dialogComponent.tableSelectionCheckbox.selected as UnitShortData[]).map(ud => ud.id),
               wsSelected.value
@@ -252,7 +252,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
   copyUnit(): void {
     const myUnitId = this.ds.selectedUnit$.getValue();
     if (myUnitId > 0) {
-      this.bs.getUnitMetadata(
+      this.backendService.getUnitMetadata(
         this.ds.selectedWorkspace,
         myUnitId
       ).subscribe(
@@ -270,8 +270,8 @@ export class AuthoringComponent implements OnInit, OnDestroy {
             dialogRef.afterClosed().subscribe(result => {
               if (typeof result !== 'undefined') {
                 if (result !== false) {
-                  this.mds.dataLoading = true;
-                  this.bs.copyUnit(
+                  this.appService.dataLoading = true;
+                  this.backendService.copyUnit(
                     this.ds.selectedWorkspace,
                     myUnitId,
                     (<FormGroup>result).get('key')?.value,
@@ -285,12 +285,12 @@ export class AuthoringComponent implements OnInit, OnDestroy {
                       } else {
                         this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
                       }
-                      this.mds.dataLoading = false;
+                      this.appService.dataLoading = false;
                     },
                     err => {
                       this.snackBar.open(`Konnte Aufgabe nicht hinzufügen (${err.msg()})`,
                         'Fehler', { duration: 3000 });
-                      this.mds.dataLoading = false;
+                      this.appService.dataLoading = false;
                     }
                   );
                 }
@@ -301,7 +301,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
         err => {
           this.snackBar.open(`Fehler beim Laden der Aufgabeneigenschaften (${err.msg()})`,
             'Fehler', { duration: 3000 });
-          this.mds.dataLoading = false;
+          this.appService.dataLoading = false;
         }
       );
     } else {
@@ -321,7 +321,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        this.bs.downloadUnits(
+        this.backendService.downloadUnits(
           this.ds.selectedWorkspace,
           result
         ).subscribe(
@@ -349,7 +349,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        this.bs.setWorkspaceSettings(
+        this.backendService.setWorkspaceSettings(
           this.ds.selectedWorkspace,
           <WorkspaceSettings>{
             defaultEditor: result.controls.editorSelector.value,
@@ -380,8 +380,8 @@ export class AuthoringComponent implements OnInit, OnDestroy {
 
   finishUnitUpload() : void {
     this.uploadMessages = [];
-    this.mds.dataLoading = true;
-    this.bs.startUnitUploadProcessing(this.ds.selectedWorkspace, this.uploadProcessId).subscribe(
+    this.appService.dataLoading = true;
+    this.backendService.startUnitUploadProcessing(this.ds.selectedWorkspace, this.uploadProcessId).subscribe(
       okdata => {
         let okCount = 0;
         okdata.forEach(uploadInfo => {
@@ -400,12 +400,12 @@ export class AuthoringComponent implements OnInit, OnDestroy {
             this.selectedUnits = [];
           }
         });
-        this.mds.dataLoading = false;
+        this.appService.dataLoading = false;
       },
       err => {
         this.uploadMessages.push(`${err.code}: ${err.info}`);
         this.snackBar.open(`Problem: Konnte Aufgabendateien nicht hochladen: ${err.msg()}`, '', { duration: 3000 });
-        this.mds.dataLoading = false;
+        this.appService.dataLoading = false;
       }
     );
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();

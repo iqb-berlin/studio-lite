@@ -5,7 +5,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../backend.service';
-import { MainDatastoreService } from '../../maindatastore.service';
+import { AppService } from '../../app.service';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
@@ -25,15 +25,14 @@ import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
 })
 export class VeronaModulesComponent implements OnInit {
   @ViewChildren(VeronaModulesTableComponent) moduleTables!: QueryList<VeronaModulesTableComponent>;
-  dataLoading = false;
   selectedModules: VeronaModuleInListDto[] = [];
   uploadUrl = '';
   token: string | undefined;
 
   constructor(
     @Inject('SERVER_URL') public serverUrl: string,
-    private mds: MainDatastoreService,
-    private bs: BackendService,
+    private appService: AppService,
+    private backendService: BackendService,
     private newItemAuthoringToolDialog: MatDialog,
     private editItemAuthoringToolDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
@@ -45,7 +44,7 @@ export class VeronaModulesComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.mds.pageTitle = 'Admin: Verona-Module';
+      this.appService.appConfig.setPageTitle('Admin: Verona-Module');
       const t = localStorage.getItem('t');
       this.token = t ? t : '';
     });
@@ -55,6 +54,7 @@ export class VeronaModulesComponent implements OnInit {
     this.moduleTables.forEach(tab => {
       tab.updateList()
     });
+    this.appService.dataLoading = false;
   }
 
   changeSelectedModules(selection: {type: string; selectedModules: VeronaModuleInListDto[]}) {
@@ -91,16 +91,15 @@ export class VeronaModulesComponent implements OnInit {
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false) {
           // =========================================================
-          this.dataLoading = true;
-          this.bs.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
+          this.appService.dataLoading = true;
+          this.backendService.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
             (deleteFilesOk: boolean) => {
               if (deleteFilesOk) {
                 this.snackBar.open('Verona-Modul(e) hochgeladen', '', {duration: 1000});
                 this.updateTables();
-                this.dataLoading = false;
               } else {
                 this.snackBar.open('Konnte Verona-Modul(e) nicht hochladen', '', {duration: 3000});
-                this.dataLoading = false;
+                this.appService.dataLoading = false;
               }
             });
           // =========================================================

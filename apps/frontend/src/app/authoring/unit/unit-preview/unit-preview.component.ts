@@ -7,7 +7,7 @@ import {
   PageData,
   StatusVisual
 } from './unit-preview.classes';
-import { MainDatastoreService } from '../../../maindatastore.service';
+import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { DatastoreService } from '../../datastore.service';
 import { UnitComponent } from '../unit.component';
@@ -47,7 +47,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
   pageList: PageData[] = [];
 
   constructor(
-    private mds: MainDatastoreService,
+    private mds: AppService,
     private snackBar: MatSnackBar,
     private bs: BackendService,
     private ds: DatastoreService

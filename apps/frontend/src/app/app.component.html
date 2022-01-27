@@ -1,12 +1,12 @@
-<div class="spinner-container" *ngIf="mds.dataLoading">
+<div class="spinner-container" *ngIf="appService.dataLoading">
   <mat-spinner></mat-spinner>
 </div>
 <div class="page-title" fxLayout="row" fxLayoutAlign="space-between center">
   <a [routerLink]="['/']">
     <img class="logo" src="assets/IQB-LogoA.png" matTooltip="Startseite"/>
   </a>
-  <div>{{ mds.appConfig?.appTitle }}</div>
-  <div *ngIf="mds.pageTitle">{{ mds.pageTitle }}</div>
+  <div>{{ appService.appConfig?.appTitle }}</div>
+  <div *ngIf="appService.appConfig?.pageTitle">{{ appService.appConfig?.pageTitle }}</div>
 </div>
 
 <router-outlet></router-outlet>

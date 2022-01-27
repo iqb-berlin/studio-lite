@@ -9,7 +9,7 @@
     <mat-form-field>
       <mat-select placeholder="Ziel-Arbeitsbereich" formControlName="wsSelector">
         <mat-option *ngFor="let ws of workspaceList" [value]="ws.id">
-          {{ws.ws_group_name}}: {{ws.name}}
+          {{ws.groupName}}: {{ws.name}}
         </mat-option>
       </mat-select>
     </mat-form-field>

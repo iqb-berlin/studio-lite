@@ -1,9 +1,4 @@
 <div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
-  <div class="spinner-container" *ngIf="dataLoading">
-      <mat-spinner></mat-spinner>
-  </div>
-
-  <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="50">
     <div fxLayout="row">
         <button mat-raised-button (click)="addObject()" matTooltip="Nutzer:in hinzufügen" matTooltipPosition="above">
@@ -51,7 +46,6 @@
     </mat-table>
   </div>
 
-  <!-- ============================================= -->
   <div class="object-list" fxLayout="column" fxFlex="40">
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <div *ngIf="selectedUser === 0">Zugriffsrechte: Bitte links Nutzer:in wählen</div>

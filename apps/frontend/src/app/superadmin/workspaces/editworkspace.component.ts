@@ -14,7 +14,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
         <mat-form-field>
           <mat-select placeholder="Gruppe" formControlName="groupSelector">
             <mat-option *ngFor="let wsg of data.groups" [value]="wsg.id">
-              {{wsg.label}}
+              {{wsg.name}}
             </mat-option>
           </mat-select>
         </mat-form-field>

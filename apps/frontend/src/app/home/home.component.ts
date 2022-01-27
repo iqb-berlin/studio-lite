@@ -4,10 +4,9 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BackendService, WorkspaceData } from '../backend.service';
-import { MainDatastoreService } from '../maindatastore.service';
+import { BackendService } from '../backend.service';
+import { AppService } from '../app.service';
 import { ChangePasswordComponent } from './change-password.component';
-import {AuthService} from "../auth.service";
 import {WorkspaceDto} from "@studio-lite-lib/api-dto";
 import {Subscription} from "rxjs";
 
@@ -19,19 +18,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   isError = false;
   errorMessage = '';
-  dataLoading = true;
   private routingSubscription: Subscription | null = null;
   redirectTo = '';
 
   constructor(private fb: FormBuilder,
               @Inject('APP_VERSION') readonly appVersion: string,
               @Inject('APP_NAME') readonly appName: string,
-              public mds: MainDatastoreService,
-              private bs: BackendService,
+              public appService: AppService,
+              private backendService: BackendService,
               public confirmDialog: MatDialog,
               private changePasswordDialog: MatDialog,
               private snackBar: MatSnackBar,
-              public authService: AuthService,
               private route: ActivatedRoute,
               private router: Router) {
     this.loginForm = this.fb.group({
@@ -46,12 +43,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.redirectTo = queryParams['redirectTo'];
     });
     setTimeout(() => {
-      this.mds.pageTitle = 'Willkommen!';
-      this.dataLoading = false;
+      this.appService.appConfig.setPageTitle('Willkommen!');
+      this.appService.dataLoading = false;
       const token = localStorage.getItem('id_token');
       if (token) {
-        this.authService.getAuthData().subscribe(authData => {
-          this.authService.authData = authData
+        this.backendService.getAuthData().subscribe(authData => {
+          this.appService.authData = authData
         })
       }
     });
@@ -60,10 +57,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   login(): void {
     this.isError = false;
     this.errorMessage = '';
-    this.dataLoading = true;
+    this.appService.dataLoading = true;
     if (this.loginForm && this.loginForm.valid) {
-      this.authService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(() => {
-          this.dataLoading = false;
+      this.backendService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(() => {
+          this.appService.dataLoading = false;
           console.log(this.redirectTo);
           if (this.redirectTo) {
             this.router.navigate([this.redirectTo]);
@@ -71,7 +68,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         },
       err => {
         this.isError = true;
-        this.dataLoading = false;
+        this.appService.dataLoading = false;
         // this.errorMessage = `${err.msg()}`;
       });
     }
@@ -90,7 +87,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
-        this.authService.logout();
+        this.backendService.logout();
       }
     });
   }
@@ -102,7 +99,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        this.bs.setUserPassword(result.controls.pw_old.value, result.controls.pw_new1.value).subscribe(
+        this.backendService.setUserPassword(result.controls.pw_old.value, result.controls.pw_new1.value).subscribe(
           respOk => {
             this.snackBar.open(
               respOk ? 'Neues Kennwort gespeichert' : 'Konnte Kennwort nicht ändern.',

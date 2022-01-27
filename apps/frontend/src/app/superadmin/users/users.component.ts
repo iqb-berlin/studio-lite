@@ -16,7 +16,7 @@ import {
 import {
   BackendService,
 } from '../backend.service';
-import { MainDatastoreService } from '../../maindatastore.service';
+import { AppService } from '../../app.service';
 import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 import {EditUserComponent} from "./edituser.component";
 import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
@@ -29,7 +29,6 @@ import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
   ]
 })
 export class UsersComponent implements OnInit {
-  dataLoading = false;
   objectsDatasource = new MatTableDataSource<UserInListDto>();
   displayedColumns = ['selectCheckbox', 'name', 'description'];
   tableselectionCheckbox = new SelectionModel <UserInListDto>(true, []);
@@ -41,10 +40,10 @@ export class UsersComponent implements OnInit {
   @ViewChild(MatSort, { static: true }) sort = new MatSort();
 
   constructor(
-    private mds: MainDatastoreService,
-    private bs: BackendService,
-    private newuserDialog: MatDialog,
-    private newpasswordDialog: MatDialog,
+    private appService: AppService,
+    private backendService: BackendService,
+    private newUserDialog: MatDialog,
+    private newPasswordDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private editUserDialog: MatDialog,
     private confirmDialog: MatDialog,
@@ -67,7 +66,7 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createWorkspaceList();
-      this.mds.pageTitle = 'Admin: Nutzer:innen';
+      this.appService.appConfig.setPageTitle('Admin: Nutzer:innen');
     });
   }
 
@@ -83,27 +82,25 @@ export class UsersComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result !== 'undefined') {
         if (result !== false) {
-          this.dataLoading = true;
+          this.appService.dataLoading = true;
           const userData: CreateUserDto = {
             name: (<FormGroup>result).get('name')?.value,
             password: (<FormGroup>result).get('password')?.value,
             isAdmin: (<FormGroup>result).get('isAdmin')?.value,
             description: (<FormGroup>result).get('description')?.value
           };
-          this.bs.addUser(userData).subscribe(
+          this.backendService.addUser(userData).subscribe(
             respOk => {
-              this.updateObjectList();
-              this.dataLoading = false;
+              this.updateUserList();
               if (respOk) {
                 this.snackBar.open('Nutzer:in angelegt', '', { duration: 1000 });
               } else {
                 this.snackBar.open('Konnte Nutzer:in nicht anlegen', 'Fehler', { duration: 3000 });
               }
-              this.dataLoading = false;
             },
             err => {
               this.snackBar.open(`Konnte Nutzer:in nicht anlegen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.dataLoading = false;
+              this.appService.dataLoading = false;
             }
           );
         }
@@ -140,7 +137,7 @@ export class UsersComponent implements OnInit {
       dialogRef.afterClosed().subscribe(result => {
         if (typeof result !== 'undefined') {
           if (result !== false) {
-            this.dataLoading = true;
+            this.appService.dataLoading = true;
             const newPassword: string = (<FormGroup>result).get('password')?.value;
             const newName: string = (<FormGroup>result).get('name')?.value;
             const newDescription: string = (<FormGroup>result).get('description')?.value;
@@ -150,20 +147,18 @@ export class UsersComponent implements OnInit {
             if (newDescription !== selectedRows[0].description) changedData.description = newDescription;
             if (newPassword) changedData.password = newPassword;
             if (newIsAdmin !== selectedRows[0].isAdmin) changedData.isAdmin = newIsAdmin;
-            this.bs.changeUserData(changedData).subscribe(
+            this.backendService.changeUserData(changedData).subscribe(
               respOk => {
-                this.updateObjectList();
-                this.dataLoading = false;
+                this.updateUserList();
                 if (respOk) {
                   this.snackBar.open('Nutzerdaten geändert', '', { duration: 1000 });
                 } else {
                   this.snackBar.open('Konnte Nutzerdaten nicht ändern', 'Fehler', { duration: 3000 });
                 }
-                this.dataLoading = false;
               },
               err => {
                 this.snackBar.open(`Konnte Nutzerdaten nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
-                this.dataLoading = false;
+                this.appService.dataLoading = false;
               }
             );
           }
@@ -206,23 +201,22 @@ export class UsersComponent implements OnInit {
       dialogRef.afterClosed().subscribe(result => {
         if (result === true) {
           // =========================================================
-          this.dataLoading = true;
+          this.appService.dataLoading = true;
           const usersToDelete: number[] = [];
           selectedRows.forEach((r: UserInListDto) => usersToDelete.push(r.id));
-          this.bs.deleteUsers(usersToDelete).subscribe(
+          this.backendService.deleteUsers(usersToDelete).subscribe(
             respOk => {
               if (respOk) {
                 this.snackBar.open('Nutzer:in gelöscht', '', { duration: 1000 });
-                this.updateObjectList();
-                this.dataLoading = false;
+                this.updateUserList();
               } else {
                 this.snackBar.open('Konnte Nutzer:in nicht löschen', 'Fehler', { duration: 3000 });
-                this.dataLoading = false;
+                this.appService.dataLoading = false;
               }
             },
             err => {
               this.snackBar.open(`Konnte Nutzer:in nicht löschen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.dataLoading = false;
+              this.appService.dataLoading = false;
             }
           );
         }
@@ -236,13 +230,13 @@ export class UsersComponent implements OnInit {
       this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
     }
     if (this.selectedUser > 0) {
-      this.dataLoading = true;
-      this.bs.getWorkspacesByUser(this.selectedUser).subscribe(
+      this.appService.dataLoading = true;
+      this.backendService.getWorkspacesByUser(this.selectedUser).subscribe(
         (dataresponse: WorkspaceInListDto[]) => {
           this.userWorkspaces.setChecks(dataresponse);
-          this.dataLoading = false;
+          this.appService.dataLoading = false;
         }, () => {
-          this.dataLoading = false;
+          this.appService.dataLoading = false;
         }
       );
     } else {
@@ -253,8 +247,8 @@ export class UsersComponent implements OnInit {
   saveWorkspaces(): void {
     if (this.selectedUser > 0) {
       if (this.userWorkspaces.hasChanged) {
-        this.dataLoading = true;
-        this.bs.setWorkspacesByUser(this.selectedUser, this.userWorkspaces.getChecks()).subscribe(
+        this.appService.dataLoading = true;
+        this.backendService.setWorkspacesByUser(this.selectedUser, this.userWorkspaces.getChecks()).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
@@ -262,11 +256,11 @@ export class UsersComponent implements OnInit {
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
-            this.dataLoading = false;
+            this.appService.dataLoading = false;
           },
           err => {
             this.snackBar.open(`Konnte Zugriffsrechte nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
-            this.dataLoading = false;
+            this.appService.dataLoading = false;
           }
         );
       }
@@ -274,30 +268,30 @@ export class UsersComponent implements OnInit {
   }
 
   // ***********************************************************************************
-  updateObjectList(): void {
+  updateUserList(): void {
     this.selectedUser = 0;
-    this.dataLoading = true;
-    this.bs.getUsers().subscribe(
+    this.appService.dataLoading = true;
+    this.backendService.getUsers().subscribe(
       (dataresponse: UserInListDto[]) => {
         this.objectsDatasource = new MatTableDataSource(dataresponse);
         this.objectsDatasource.sort = this.sort;
         this.tableselectionCheckbox.clear();
         this.tableselectionRow.clear();
-        this.dataLoading = false;
+        this.appService.dataLoading = false;
       }, () => {
         // this.ass.updateAdminStatus('', '', [], err.label);
         this.tableselectionCheckbox.clear();
         this.tableselectionRow.clear();
-        this.dataLoading = false;
+        this.appService.dataLoading = false;
       }
     )
   }
 
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceGroupToCheckCollection([]);
-    this.bs.getWorkspacesGroupwise().subscribe(worksGroups => {
+    this.backendService.getWorkspacesGroupwise().subscribe(worksGroups => {
       this.userWorkspaces = new WorkspaceGroupToCheckCollection(worksGroups);
-      this.updateObjectList()
+      this.updateUserList()
     })
   }
 

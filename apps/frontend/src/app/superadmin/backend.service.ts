@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import { AppConfig, AppHttpError } from '../backend.service';
+import { AppHttpError } from '../backend.service';
 import {
   ConfigFullDto,
   CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
@@ -119,15 +119,6 @@ export class BackendService {
       );
   }
 
-  // todo: replace with getPlayers
-  getItemPlayerFiles(): Observable<GetFileResponseData[]> {
-    return this.http
-      .post<GetFileResponseData[]>(`${this.serverUrl}getItemPlayerFiles.php`, { t: localStorage.getItem('t') })
-      .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
-  }
-
   getVeronaModuleList(type: string): Observable<VeronaModuleInListDto[]> {
     return this.http
       .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
@@ -178,6 +169,14 @@ export class BackendService {
       );
   }
 
+  getConfig(): Observable<ConfigFullDto | null> {
+    return this.http
+      .get<ConfigFullDto | null>(`${this.serverUrl}admin/settings/config`, {})
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
   setAppConfig(appConfig: ConfigFullDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)
@@ -185,45 +184,4 @@ export class BackendService {
         map(() => true)
       )
   }
-}
-
-export interface IdLabelSelectedData {
-  id: number;
-  label: string;
-  selected: boolean;
-}
-
-export interface WorkspaceData {
-  id: number;
-  label: string;
-  ws_group_id: number;
-  ws_group_name: string;
-  selected: boolean;
-}
-
-export interface GetFileResponseData {
-  filename: string;
-  filesize: number;
-  filesizestr: string;
-  filedatetime: string;
-  filedatetimestr: string;
-  selected: boolean;
-}
-
-export interface VeronaModuleData {
-  id: string;
-  name: string;
-  filesizeStr: string;
-  filesize: number;
-  fileDatetime: number;
-  apiVersion: string;
-  isPlayer: boolean;
-  isEditor: boolean;
-  description: string;
-}
-
-export interface WorkspaceGroupData {
-  id: number;
-  label: string;
-  ws_count: number;
 }

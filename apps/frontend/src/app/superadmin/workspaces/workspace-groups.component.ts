@@ -4,9 +4,10 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {BackendService, WorkspaceData, WorkspaceGroupData} from '../backend.service';
+import { BackendService } from '../backend.service';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
 import {WorkspaceGroupDto} from "@studio-lite-lib/api-dto";
+import {WorkspaceGroupData} from "./workspaceChecked";
 
 @Component({
   template: `
@@ -16,12 +17,13 @@ import {WorkspaceGroupDto} from "@studio-lite-lib/api-dto";
       <mat-form-field class="example-chip-list">
         <mat-label>Achtung: Änderungen werden sofort gespeichert.</mat-label>
         <mat-chip-list #chipList>
-          <mat-chip *ngFor="let wsg of workspaceGroups" (click)="changeName(wsg)" [matBadge]="wsg.ws_count"
-                    [removable]="wsg.ws_count === 0" (removed)="deleteWorkspaceGroup(wsg)"
-                    [matBadgeHidden]="wsg.ws_count === 0">
-            {{wsg.label}}
-            <mat-icon matChipRemove *ngIf="wsg.ws_count === 0">cancel</mat-icon>
-          </mat-chip><br/>
+          <mat-chip *ngFor="let wsg of workspaceGroups" (click)="changeName(wsg)" [matBadge]="wsg.workspaceCount"
+                    [removable]="wsg.workspaceCount === 0" (removed)="deleteWorkspaceGroup(wsg)"
+                    [matBadgeHidden]="wsg.workspaceCount === 0">
+            {{wsg.name}}
+            <mat-icon matChipRemove *ngIf="wsg.workspaceCount === 0">cancel</mat-icon>
+          </mat-chip>
+          <br/>
           <input placeholder="Neue Gruppe..."
                  [matChipInputFor]="chipList"
                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -58,11 +60,10 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.bs.getWorkspacesGroupwise().subscribe(
       (dataresponse: WorkspaceGroupDto[]) => {
         dataresponse.forEach(workspaceGroup => {
-          const workspaces: WorkspaceData[] = [];
           this.workspaceGroups.push(<WorkspaceGroupData>{
             id: workspaceGroup.id,
-            label: workspaceGroup.name,
-            ws_count: workspaceGroup.workspaces.length
+            name: workspaceGroup.name,
+            workspaceCount: workspaceGroup.workspaces.length
           });
         });
     });
@@ -72,7 +73,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     const dialogRef = this.editWorkspaceGroupDialog.open(EditWorkspaceGroupComponent, {
       width: '600px',
       data: {
-        name: wsg.label
+        name: wsg.name
       }
     });
 
