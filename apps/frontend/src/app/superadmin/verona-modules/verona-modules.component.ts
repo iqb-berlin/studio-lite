@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, Inject
+  Component, OnInit, Inject, ViewChild, ViewChildren, QueryList
 } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -24,6 +24,7 @@ import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
   ]
 })
 export class VeronaModulesComponent implements OnInit {
+  @ViewChildren(VeronaModulesTableComponent) moduleTables!: QueryList<VeronaModulesTableComponent>;
   dataLoading = false;
   selectedModules: VeronaModuleInListDto[] = [];
   uploadUrl = '';
@@ -51,12 +52,9 @@ export class VeronaModulesComponent implements OnInit {
   }
 
   updateTables() {
-    const subTables: NodeListOf<Element> = document.querySelectorAll('app-verona-modules-table');
-    if (subTables) {
-      subTables.forEach((tab: unknown) => {
-        (tab as VeronaModulesTableComponent).updateList()
-      });
-    }
+    this.moduleTables.forEach(tab => {
+      tab.updateList()
+    });
   }
 
   changeSelectedModules(selection: {type: string; selectedModules: VeronaModuleInListDto[]}) {

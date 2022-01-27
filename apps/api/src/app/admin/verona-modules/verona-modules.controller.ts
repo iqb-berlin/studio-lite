@@ -50,7 +50,7 @@ export class VeronaModulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
-  async addAvatar(@Request() req, @UploadedFile() file) {
+  async addModuleFile(@Request() req, @UploadedFile() file) {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();

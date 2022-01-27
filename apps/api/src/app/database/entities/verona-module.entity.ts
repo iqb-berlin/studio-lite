@@ -25,7 +25,7 @@ class VeronaModule {
     type: 'timestamp with time zone',
     name: 'file_datetime'
   })
-  public fileDateTime: VeronaModuleMetadataDto;
+  public fileDateTime: Date;
 
 }
 

@@ -1,6 +1,6 @@
-import {Injectable, NotAcceptableException, UnauthorizedException} from '@nestjs/common';
+import {Injectable, NotAcceptableException} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
-import { Repository} from "typeorm";
+import { getConnection, Repository} from "typeorm";
 import VeronaModule from "../entities/verona-module.entity";
 import {VeronaModuleInListDto, VeronaModuleMetadataDto} from "@studio-lite-lib/api-dto";
 import * as cheerio from "cheerio";
@@ -14,11 +14,16 @@ export class VeronaModulesService {
 
   async findAll(type?: string): Promise<VeronaModuleInListDto[]> {
     const veronaModules = await this.veronaModulesRepository.query(
-      'SELECT key, metadata from verona_module');
+      'SELECT key, metadata, file_size, file_datetime from verona_module');
     const returnVeronaModules: VeronaModuleInListDto[] = [];
     veronaModules.forEach(veronaModule => {
       if (!type || veronaModule.metadata.type === type) {
-        returnVeronaModules.push(veronaModule);
+        returnVeronaModules.push(<VeronaModuleInListDto>{
+          key: veronaModule.key,
+          metadata: veronaModule.metadata,
+          fileSize: veronaModule.file_size,
+          fileDateTime: veronaModule.file_datetime
+        });
       }
     });
     return returnVeronaModules
@@ -33,13 +38,32 @@ export class VeronaModulesService {
       const scriptContentAsJson = JSON.parse(scriptContentAsString);
       const veronaModuleMetadata = VeronaModuleMetadataDto.getFromJsonLd(scriptContentAsJson);
       if (veronaModuleMetadata) {
-        const newFile = await this.veronaModulesRepository.create({
-          key: `${veronaModuleMetadata.id}@${veronaModuleMetadata.version}`,
-          metadata: veronaModuleMetadata,
-          file: fileData,
-          fileSize: fileAsString.length
-        })
-        await this.veronaModulesRepository.save(newFile);
+        const moduleKey = VeronaModuleMetadataDto.getKey(veronaModuleMetadata);
+        const existingModule = await this.veronaModulesRepository.find({
+          where: {key: moduleKey},
+          select: ['key']
+        });
+        if (existingModule) {
+          await getConnection()
+            .createQueryBuilder()
+            .update(VeronaModule)
+            .set({
+              metadata: veronaModuleMetadata,
+              file: fileData,
+              fileDateTime: new Date().toISOString(),
+              fileSize: fileAsString.length
+            })
+            .where("key = :key", { key: moduleKey })
+            .execute();
+        } else {
+          const newFile = await this.veronaModulesRepository.create({
+            key: moduleKey,
+            metadata: veronaModuleMetadata,
+            file: fileData,
+            fileSize: fileAsString.length
+          });
+          await this.veronaModulesRepository.save(newFile);
+        }
         return
       }
     }
