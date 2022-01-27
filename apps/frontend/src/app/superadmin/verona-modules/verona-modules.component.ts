@@ -93,13 +93,16 @@ export class VeronaModulesComponent implements OnInit {
           // =========================================================
           this.dataLoading = true;
           this.bs.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
-            (deletefilesresponse: string) => {
-              this.snackBar.open(deletefilesresponse, '', { duration: 1000 });
-              this.updateTables();
-            }, err => {
-              this.snackBar.open(err.msg(), '', { duration: 3000 });
-            }
-          );
+            (deleteFilesOk: boolean) => {
+              if (deleteFilesOk) {
+                this.snackBar.open('Verona-Modul(e) hochgeladen', '', {duration: 1000});
+                this.updateTables();
+                this.dataLoading = false;
+              } else {
+                this.snackBar.open('Konnte Verona-Modul(e) nicht hochladen', '', {duration: 3000});
+                this.dataLoading = false;
+              }
+            });
           // =========================================================
         }
       });

@@ -1,3 +1,6 @@
+<p *ngIf="!hasObjects()">
+  Keine Module gespeichert.
+</p>
 <mat-table [dataSource]="objectsDatasource" *ngIf="hasObjects()" matSort class="admin-tab-content">
   <ng-container matColumnDef="selectCheckbox">
     <mat-header-cell *matHeaderCellDef fxFlex="60px">

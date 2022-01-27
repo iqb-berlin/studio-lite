@@ -1,5 +1,5 @@
 import {
-  Controller,
+  Controller, Delete,
   Get,
   Param,
   Post,
@@ -50,11 +50,26 @@ export class VeronaModulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiTags('admin verona-modules')
   async addModuleFile(@Request() req, @UploadedFile() file) {
     const isAdmin = await this.authService.isAdminUser(req);
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
     return this.veronaModuleService.upload(file.buffer);
+  }
+
+  @Delete(':keys')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin verona-modules')
+  async remove(@Request() req, @Param('keys') keys: string): Promise<void> {
+    const isAdmin = await this.authService.isAdminUser(req);
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+    const keysAsStringArray: string[] = [];
+    keys.split(';').forEach(s => keysAsStringArray.push(s));
+    return this.veronaModuleService.remove(keysAsStringArray);
   }
 }

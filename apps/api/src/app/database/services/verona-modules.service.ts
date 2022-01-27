@@ -43,7 +43,7 @@ export class VeronaModulesService {
           where: {key: moduleKey},
           select: ['key']
         });
-        if (existingModule) {
+        if (existingModule && existingModule.length > 0) {
           await getConnection()
             .createQueryBuilder()
             .update(VeronaModule)
@@ -68,5 +68,9 @@ export class VeronaModulesService {
       }
     }
     throw new NotAcceptableException('verona module metadata invalid');
+  }
+
+  async remove(key: string | string[]): Promise<void> {
+    await this.veronaModulesRepository.delete(key);
   }
 }

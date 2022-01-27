@@ -136,11 +136,11 @@ export class BackendService {
       );
   }
 
-  deleteVeronaModules(files: string[]): Observable<string> {
+  deleteVeronaModules(files: string[]): Observable<boolean> {
     return this.http
-      .post<string>(`${this.serverUrl}deleteVeronaModule.php`, { t: localStorage.getItem('t'), f: files })
+      .delete(`${this.serverUrl}admin/verona-modules/${files.join(';')}`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true)
       );
   }
 
