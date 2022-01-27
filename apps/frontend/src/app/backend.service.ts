@@ -106,7 +106,7 @@ export class BackendService {
 
   getConfig(): Observable<ConfigFullDto | null> {
     return this.http
-      .get<ConfigFullDto | null>(`${this.serverUrl}admin/config`, {})
+      .get<ConfigFullDto | null>(`${this.serverUrl}admin/settings/config`, {})
       .pipe(
         catchError(() => of(null))
       );
@@ -177,6 +177,6 @@ export class AppConfig {
 
   public globalWarningText(): string {
     return this._globalWarningText && this._globalWarningExpiredDay &&
-      AppConfig.isExpired(this._globalWarningExpiredDay, this._globalWarningExpiredHour) ? this._globalWarningText : '';
+      AppConfig.isExpired(this._globalWarningExpiredDay, this._globalWarningExpiredHour) ? '' : this._globalWarningText;
   }
 }

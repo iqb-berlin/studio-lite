@@ -4,10 +4,10 @@ import { Component } from '@angular/core';
   template: `
     <div fxLayout="column" fxLayoutAlign="start stretch" class="admin-tab-content">
       <div fxLayout="row" class="div-row">
-        <div fxFlex="48">
+        <div fxFlex="30">
           <mat-label>Konfiguration der Anwendung</mat-label>
         </div>
-        <div fxFlex="48">
+        <div fxFlex="70">
           <app-app-config></app-app-config>
         </div>
       </div>

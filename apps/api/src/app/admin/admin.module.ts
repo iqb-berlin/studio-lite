@@ -4,7 +4,7 @@ import {DatabaseModule} from "../database/database.module";
 import {AuthModule} from "../auth/auth.module";
 import {WorkspacesController} from "./workspaces/workspaces.controller";
 import {WorkspaceGroupsController} from "./workspaces/workspace-groups.controller";
-import {ConfigController} from "./config/config.controller";
+import {SettingController} from "./settings/setting.controller";
 import {VeronaModulesController} from "./verona-modules/verona-modules.controller";
 import {MulterModule} from "@nestjs/platform-express";
 
@@ -18,7 +18,7 @@ import {MulterModule} from "@nestjs/platform-express";
     WorkspacesController,
     UsersController,
     WorkspaceGroupsController,
-    ConfigController,
+    SettingController,
     VeronaModulesController
   ]
 })

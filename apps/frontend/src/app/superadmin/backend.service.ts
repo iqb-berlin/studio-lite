@@ -180,12 +180,10 @@ export class BackendService {
 
   setAppConfig(appConfig: ConfigFullDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}setConfig.php`, {
-      t: localStorage.getItem('t'), c: JSON.stringify(appConfig)
-    })
+      .patch(`${this.serverUrl}admin/settings/config`, appConfig)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
+        map(() => true)
+      )
   }
 }
 

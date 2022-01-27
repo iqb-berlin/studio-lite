@@ -12,7 +12,7 @@ const defaultAppConfig = <ConfigFullDto>{
   imprintHtml: '<p>nicht definiert</p>',
   globalWarningText: '',
   globalWarningExpiredHour: 0,
-  globalWarningExpiredDay: undefined
+  globalWarningExpiredDay: new Date()
 };
 
 @Component({
@@ -71,7 +71,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       introHtml: this.fb.control(''),
       imprintHtml: this.fb.control(''),
       globalWarningText: this.fb.control(''),
-      globalWarningExpiredDay: this.fb.control(''),
+      globalWarningExpiredDay: this.fb.control(new Date()),
       globalWarningExpiredHour: this.fb.control('')
     });
   }

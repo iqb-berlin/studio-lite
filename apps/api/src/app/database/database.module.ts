@@ -10,6 +10,8 @@ import {WorkspaceGroupService} from "./services/workspace-group.service";
 import WorkspaceUser from "./entities/workspace-user.entity";
 import {WorkspaceUserService} from "./services/workspace-user.service";
 import {VeronaModulesService} from "./services/verona-modules.service";
+import Setting from "./entities/setting.entity";
+import {SettingService} from "./services/setting.service";
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import {VeronaModulesService} from "./services/verona-modules.service";
     WorkspaceGroup,
     WorkspaceUser,
     VeronaModule,
+    Setting,
     TypeOrmModule.forRootAsync({
         useFactory: () => ({
             "type": "postgres",
@@ -26,19 +29,20 @@ import {VeronaModulesService} from "./services/verona-modules.service";
             "username": "superdb",
             "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",
             "database": "studio-lite",
-            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule],
+            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting],
             "synchronize": false
           })
       }
     ),
-    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule])
+    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting])
   ],
   providers: [
     UsersService,
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceUserService,
-    VeronaModulesService
+    VeronaModulesService,
+    SettingService
   ],
   exports: [
     User,
@@ -46,10 +50,12 @@ import {VeronaModulesService} from "./services/verona-modules.service";
     WorkspaceUser,
     WorkspaceGroup,
     VeronaModule,
+    Setting,
     UsersService,
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceUserService,
+    SettingService,
     VeronaModulesService
   ]
 })

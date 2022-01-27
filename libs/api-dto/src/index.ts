@@ -2,7 +2,7 @@ export {VeronaModuleMetadataDto} from "./lib/dto/verona-module/verona-module-met
 export {VeronaModuleInListDto} from "./lib/dto/verona-module/verona-module-in-list-dto";
 export {AuthDataDto, WorkspaceDto, WorkspaceGroupDto} from "./lib/dto/auth-data-dto";
 export {ChangePasswordDto} from "./lib/dto/change-password-dto";
-export {ConfigFullDto} from "./lib/dto/config/config-full-dto";
+export {ConfigFullDto} from "./lib/dto/setting/config-full-dto";
 export {WorkspaceGroupInListDto} from "./lib/dto/workspace-group/workspace-group-in-list-dto";
 export {WorkspaceGroupFullDto} from "./lib/dto/workspace-group/workspace-group-full-dto";
 export {CreateWorkspaceGroupDto} from "./lib/dto/workspace-group/create-workspace-group-dto";

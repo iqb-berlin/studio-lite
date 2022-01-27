@@ -32,6 +32,7 @@
 .warning {
   background-color: salmon;
   padding: 4px;
+  font-size: smaller;
 }
 
 h1 {
