@@ -7,6 +7,6 @@ export class CreateWorkspaceDto {
   @ApiProperty({example: 463})
   groupId!: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   settings = {};
 }

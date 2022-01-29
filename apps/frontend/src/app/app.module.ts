@@ -25,7 +25,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
 import { BackendService } from './backend.service';
-import { AboutComponent } from './about/about.component';
+import { AboutComponent } from './home/about.component';
 import { HomeComponent } from './home/home.component';
 import { ChangePasswordComponent } from './home/change-password.component';
 import { IqbComponentsModule } from "@studio-lite-lib/iqb-components";

@@ -38,25 +38,30 @@ create table workspace_user
   primary key (workspace_id, user_id)
 );
 
-CREATE TABLE public.unit
+create table public.unit
 (
-  id serial,
-  workspace_id integer NOT NULL,
-  last_changed timestamp without time zone NOT NULL DEFAULT now(),
-  key character varying(20) NOT NULL,
-  label character varying(100),
-  metadata jsonb,
-  definition bytea,
-  variables jsonb,
-  response_scheme jsonb,
-  editor character varying(50),
-  player character varying(50),
-  schemer character varying(50),
-  PRIMARY KEY (id),
-  FOREIGN KEY (workspace_id) REFERENCES public.workspace (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE CASCADE
+  id                      serial
+    primary key,
+  workspace_id            integer                                not null
+    references workspace
+      on delete cascade,
+  key                     varchar(20)                            not null,
+  name                    varchar(100),
+  group_name              varchar(50),
+  metadata                jsonb,
+  player                  varchar(50),
+  editor                  varchar(50),
+  definition_id           integer
+    constraint unit_definition_id_fk
+      references unit_definition
+      on delete cascade,
+  variables               jsonb,
+  last_changed_definition timestamp with time zone default now(),
+  schemer                 varchar(50),
+  scheme                  jsonb,
+  last_changed_scheme     timestamp with time zone default now()
 );
+
 
 CREATE TABLE public.app_config
 (

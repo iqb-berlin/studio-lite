@@ -110,9 +110,7 @@ export class UsersService {
   }
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
-    const wsUser = await getConnection()
-      .getRepository(WorkspaceUser)
-      .createQueryBuilder("ws_user")
+    const wsUser = await this.workspaceUsersRepository.createQueryBuilder("ws_user")
       .where("ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id",
         {user_id: userId, ws_id: workspaceId})
       .getOne();

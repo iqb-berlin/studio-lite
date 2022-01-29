@@ -3,7 +3,6 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {getConnection, Repository} from "typeorm";
 import Workspace from "../entities/workspace.entity";
 import {CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
-import User from "../entities/user.entity";
 import WorkspaceUser from "../entities/workspace-user.entity";
 import WorkspaceGroup from "../entities/workspace-group.entity";
 

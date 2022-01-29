@@ -1,3 +1,6 @@
+export {WorkspaceSettingsDto} from "./lib/dto/workspace/workspace-settings-dto";
+export {CreateUnitDto} from "./lib/dto/unit/create-unit-dto";
+export {UnitInListDto} from "./lib/dto/unit/unit-in-list-dto";
 export {VeronaModuleMetadataDto} from "./lib/dto/verona-module/verona-module-metadata-dto";
 export {VeronaModuleInListDto} from "./lib/dto/verona-module/verona-module-in-list-dto";
 export {AuthDataDto, WorkspaceDto, WorkspaceGroupDto} from "./lib/dto/auth-data-dto";

@@ -12,11 +12,14 @@ import {WorkspaceUserService} from "./services/workspace-user.service";
 import {VeronaModulesService} from "./services/verona-modules.service";
 import Setting from "./entities/setting.entity";
 import {SettingService} from "./services/setting.service";
+import Unit from "./entities/unit.entity";
+import {UnitService} from "./services/unit.service";
 
 @Module({
   imports: [
     User,
     Workspace,
+    Unit,
     WorkspaceGroup,
     WorkspaceUser,
     VeronaModule,
@@ -29,29 +32,32 @@ import {SettingService} from "./services/setting.service";
             "username": "superdb",
             "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",
             "database": "studio-lite",
-            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting],
+            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting, Unit],
             "synchronize": false
           })
       }
     ),
-    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting])
+    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting, Unit])
   ],
   providers: [
     UsersService,
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceUserService,
+    UnitService,
     VeronaModulesService,
     SettingService
   ],
   exports: [
     User,
+    Unit,
     Workspace,
     WorkspaceUser,
     WorkspaceGroup,
     VeronaModule,
     Setting,
     UsersService,
+    UnitService,
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceUserService,
