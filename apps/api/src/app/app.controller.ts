@@ -1,13 +1,14 @@
-import {Controller, Request, Get, Post, UseGuards, UnauthorizedException, Patch, Body} from '@nestjs/common';
+import {Controller, Request, Get, Post, UseGuards, Patch, Body} from '@nestjs/common';
 
 import { AppService } from './app.service';
 import {LocalAuthGuard} from "./auth/local-auth.guard";
 import {AuthService} from "./auth/service/auth.service";
 import {JwtAuthGuard} from "./auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiCreatedResponse, ApiQuery, ApiTags} from "@nestjs/swagger";
 import {AuthDataDto, ChangePasswordDto} from "@studio-lite-lib/api-dto";
 import {WorkspaceService} from "./database/services/workspace.service";
 import {UsersService} from "./database/services/users.service";
+import {UserId, UserName} from "./auth/user.decorator";
 
 @Controller()
 export class AppController {
@@ -38,12 +39,12 @@ export class AppController {
     type: AuthDataDto,
   })
   @ApiTags('auth')
-  async findCanDos(@Request() req): Promise<AuthDataDto> {
+  async findCanDos(@UserId() userId: number, @UserName() userName: string): Promise<AuthDataDto> {
     return <AuthDataDto>{
-      userId: req.user.id,
-      userName: await this.authService.getMyName(req.user.id),
-      isAdmin: await this.authService.isAdminUser(req),
-      workspaces: await this.workspaceService.findAllGroupwise(req.user.id)
+      userId: userId,
+      userName: userName,
+      isAdmin: await this.authService.isAdminUser(userId),
+      workspaces: await this.workspaceService.findAllGroupwise(userId)
     }
   }
 

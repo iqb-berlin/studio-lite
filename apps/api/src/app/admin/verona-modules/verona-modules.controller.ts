@@ -4,7 +4,6 @@ import {
   Param,
   Post,
   Request,
-  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -13,15 +12,13 @@ import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
 import {VeronaModulesService} from "../../database/services/verona-modules.service";
-import {AuthService} from "../../auth/service/auth.service";
 import {FileInterceptor} from "@nestjs/platform-express";
-import {Express} from "express";
+import {IsAdminGuard} from "../is-admin.guard";
 
 @Controller('admin/verona-modules')
 export class VeronaModulesController {
   constructor(
-    private veronaModuleService: VeronaModulesService,
-    private authService: AuthService
+    private veronaModuleService: VeronaModulesService
   ) {}
 
   @Get()
@@ -31,7 +28,7 @@ export class VeronaModulesController {
     type: [VeronaModuleInListDto],
   })
   @ApiTags('admin verona-modules')
-  async findAll(@Request() req): Promise<VeronaModuleInListDto[]> {
+  async findAll(): Promise<VeronaModuleInListDto[]> {
     return this.veronaModuleService.findAll();
   }
 
@@ -47,27 +44,19 @@ export class VeronaModulesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   @ApiTags('admin verona-modules')
-  async addModuleFile(@Request() req, @UploadedFile() file) {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
+  async addModuleFile(@UploadedFile() file) {
     return this.veronaModuleService.upload(file.buffer);
   }
 
   @Delete(':keys')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin verona-modules')
-  async remove(@Request() req, @Param('keys') keys: string): Promise<void> {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
+  async remove(@Param('keys') keys: string): Promise<void> {
     const keysAsStringArray: string[] = [];
     keys.split(';').forEach(s => keysAsStringArray.push(s));
     return this.veronaModuleService.remove(keysAsStringArray);

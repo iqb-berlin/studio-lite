@@ -1,15 +1,14 @@
-import {Body, Controller, Get, Patch, Request, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Patch, UseGuards} from '@nestjs/common';
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {ConfigFullDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
+import {ConfigFullDto} from "@studio-lite-lib/api-dto";
 import {SettingService} from "../../database/services/setting.service";
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
-import {AuthService} from "../../auth/service/auth.service";
+import {IsAdminGuard} from "../is-admin.guard";
 
 @Controller('admin/settings')
 export class SettingController {
   constructor(
     private settingService: SettingService,
-    private authService: AuthService
   ) {}
 
   @Get('config')
@@ -22,14 +21,10 @@ export class SettingController {
   }
 
   @Patch('config')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin settings')
-  async patchConfig(@Request() req, @Body() settingData: ConfigFullDto) {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
+  async patchConfig(@Body() settingData: ConfigFullDto) {
     return this.settingService.patchConfig(settingData)
   }
 }

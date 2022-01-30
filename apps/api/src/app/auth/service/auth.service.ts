@@ -22,8 +22,7 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async isAdminUser(req): Promise<boolean> {
-    const userId = req.user.id;
+  async isAdminUser(userId: number): Promise<boolean> {
     const isAdmin = await this.usersService.getUserIsAdmin(userId);
     return isAdmin ? isAdmin : false;
   }
