@@ -27,8 +27,7 @@ export class AuthService {
     return isAdmin ? isAdmin : false;
   }
 
-  async canAccessWorkSpace(req, workspaceId: number): Promise<boolean> {
-    const userId = req.user.id;
+  async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     return this.usersService.canAccessWorkSpace(userId, workspaceId);
   }
 
