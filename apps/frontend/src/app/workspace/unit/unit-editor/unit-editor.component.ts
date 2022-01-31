@@ -6,7 +6,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import { UnitComponent } from '../unit.component';
 
 declare let srcDoc: any;
 
@@ -169,22 +168,23 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
               this.lastEditorId = editorId;
             },
             () => {
-              if (this.iFrameHostElement) {
-                this.iFrameHostElement.appendChild(
-                  UnitComponent.getMessageElement(`Für Editor "${editorData.label}" konnte kein Modul geladen werden.`)
-                );
-              }
-              this.lastEditorId = '';
+              // if (this.iFrameHostElement) {
+              // todo reactivate?
+               //   UnitComponent.getMessageElement(`Für Editor "${editorData.label}" konnte kein Modul geladen werden.`)
+               // );
+             // }
+              // this.lastEditorId = '';
             }
           );
         }
       } else {
-        this.iFrameHostElement.appendChild(
-          UnitComponent.getMessageElement(
-            editorId ? `Editor-Modul "${editorId}" nicht in Datenbank` : 'Kein Editor festgelegt.'
-          )
-        );
-        this.lastEditorId = '';
+//        this.iFrameHostElement.appendChild(
+ //         UnitComponent.getMessageElement(
+   //         editorId ? `Editor-Modul "${editorId}" nicht in Datenbank` : 'Kein Editor festgelegt.'
+     //     )
+       // );
+        // todo reactivate?
+        // this.lastEditorId = '';
       }
     }
   }

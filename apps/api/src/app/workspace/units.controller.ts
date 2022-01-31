@@ -1,8 +1,8 @@
-import {Body, Controller, Get, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, UseGuards} from '@nestjs/common';
 import {UnitService} from "../database/services/unit.service";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {CreateUnitDto, UnitInListDto} from "@studio-lite-lib/api-dto";
+import {CreateUnitDto, UnitInListDto, UnitMetadataDto} from "@studio-lite-lib/api-dto";
 import {WorkspaceGuard} from "./workspace.guard";
 import {WorkspaceId} from "./workspace.decorator";
 import {ApiImplicitParam} from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
@@ -18,11 +18,23 @@ export class UnitsController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
-    type: [UnitInListDto],
+    type: [UnitInListDto]
   })
   @ApiTags('workspace')
   async findAll(@WorkspaceId() workspaceId: number): Promise<UnitInListDto[]> {
     return this.unitService.findAll(workspaceId);
+  }
+
+  @Get(':id/metadata')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: UnitMetadataDto
+  })
+  @ApiTags('workspace unit')
+  async findOnesMetadata(@WorkspaceId() workspaceId: number, @Param('id') unitId: number): Promise<UnitMetadataDto> {
+    return this.unitService.findOnesMetadata(workspaceId, unitId);
   }
 
   @Post('units')
@@ -31,7 +43,7 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new unit in database',
-    type: Number,
+    type: Number
   })
   @ApiTags('workspace unit')
   async create(@WorkspaceId() workspaceId: number,

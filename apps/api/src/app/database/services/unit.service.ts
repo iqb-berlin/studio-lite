@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import Unit from "../entities/unit.entity";
-import {CreateUnitDto, UnitInListDto} from "@studio-lite-lib/api-dto";
+import {CreateUnitDto, UnitInListDto, UnitMetadataDto} from "@studio-lite-lib/api-dto";
 
 @Injectable()
 export class UnitService {
@@ -26,4 +26,11 @@ export class UnitService {
     return newUnit.id;
   }
 
+  async findOnesMetadata(workspaceId: number, unitId: number): Promise<UnitMetadataDto> {
+    const myUnit = await this.unitsRepository.find({
+      where: {workspaceId: workspaceId, id: unitId},
+      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'player', 'description']
+    });
+    return myUnit[0]
+  }
 }

@@ -23,7 +23,7 @@ const routes: Routes = [
       routes,
       {
         onSameUrlNavigation: 'reload',
-        relativeLinkResolution: 'legacy'
+        // relativeLinkResolution: 'legacy'
       }
       )
   ],

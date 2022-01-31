@@ -28,7 +28,6 @@ import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { MoveUnitComponent } from './dialogs/moveunit.component';
-import { UnitComponent } from './unit/unit.component';
 import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
@@ -73,7 +72,6 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
     NewUnitComponent,
     SelectUnitComponent,
     MoveUnitComponent,
-    UnitComponent,
     UnitMetadataComponent,
     UnitEditorComponent,
     SaveOrDiscardComponent,

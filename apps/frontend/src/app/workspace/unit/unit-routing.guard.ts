@@ -4,12 +4,12 @@ import { Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UnitComponent } from './unit.component';
 import { ConfirmDialogData, SaveOrDiscardComponent } from '../dialogs/save-or-discard.component';
 import { WorkspaceService } from '../workspace.service';
+import {WorkspaceComponent} from "../workspace.component";
 
 @Injectable()
-export class UnitRoutingCanDeactivateGuard implements CanDeactivate<UnitComponent> {
+export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceComponent> {
   constructor(
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,

@@ -2,7 +2,7 @@ import { catchError, map } from 'rxjs/operators';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
-import {CreateUnitDto, UnitInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
+import {CreateUnitDto, UnitInListDto, UnitMetadataDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
 import {AppHttpError} from "../app.classes";
 
 @Injectable({
@@ -96,10 +96,9 @@ export class BackendService {
     return this.http.get<Blob>(`${this.serverUrl}downloadUnits.php`, httpOptions);
   }
 
-  getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadata> {
+  getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto> {
     return this.http
-      .put<UnitMetadata>(`${this.serverUrl}getUnitMetadata.php`,
-      { t: localStorage.getItem('t'), ws: workspaceId, u: unitId })
+      .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );

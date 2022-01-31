@@ -108,7 +108,8 @@ export class ExportUnitComponent implements OnInit {
         const getMetadataSubscriptions: Observable<UnitMetadata>[] = [];
         this.ds.unitList.units().forEach(
           ud => {
-            getMetadataSubscriptions.push(this.backendService.getUnitMetadata(this.ds.selectedWorkspace, ud.id));
+            // getMetadataSubscriptions.push(this.backendService.getUnitMetadata(this.ds.selectedWorkspace, ud.id));
+            // todo reactivate?
           }
         );
         forkJoin(getMetadataSubscriptions)

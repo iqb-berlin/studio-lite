@@ -10,7 +10,6 @@ import {
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import { UnitComponent } from '../unit.component';
 
 declare let srcDoc: any;
 
@@ -225,21 +224,23 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
             },
             () => {
               if (this.iFrameHostElement) {
-                this.iFrameHostElement.appendChild(
-                  UnitComponent.getMessageElement(`Für Player "${playerData.label}" konnte kein Modul geladen werden.`)
-                );
+                // this.iFrameHostElement.appendChild(
+                  // UnitComponent.getMessageElement(`Für Player "${playerData.label}" konnte kein Modul geladen werden.`)
+                  // todo reactivate?
+                // );
               }
               this.lastPlayerId = '';
             }
           );
         }
       } else {
-        this.iFrameHostElement.appendChild(
-          UnitComponent.getMessageElement(
-            playerId ? `Player-Modul "${playerId}" nicht in Datenbank` : 'Kein Player festgelegt.'
-          )
-        );
-        this.lastPlayerId = '';
+        // this.iFrameHostElement.appendChild(
+        //  UnitComponent.getMessageElement(
+        //    playerId ? `Player-Modul "${playerId}" nicht in Datenbank` : 'Kein Player festgelegt.'
+        // todo reactivate?
+        //  )
+        // );
+        // this.lastPlayerId = '';
       }
     }
   }

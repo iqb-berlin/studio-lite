@@ -265,6 +265,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   copyUnit(): void {
     const myUnitId = this.ds.selectedUnit$.getValue();
+    /*
     if (myUnitId > 0) {
       this.backendService.getUnitMetadata(
         this.ds.selectedWorkspace,
@@ -321,6 +322,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     } else {
       this.snackBar.open('Bitte erst Aufgabe auswählen', 'Hinweis', { duration: 3000 });
     }
+
+     */
   }
 
   exportUnit(): void {

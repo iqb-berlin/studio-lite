@@ -21,6 +21,9 @@ class Unit {
   })
   public groupName: string;
 
+  @Column()
+  public description: string;
+
   @Column({
     type: 'jsonb',
     array: false,

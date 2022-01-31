@@ -1,4 +1,4 @@
-<form [formGroup]="unitForm" *ngIf="unitData" fxFlex>
+<form [formGroup]="unitForm" fxFlex>
   <div fxLayout="row wrap" style="margin: 10px" fxLayoutGap="50px" fxLayoutAlign="space-between start" fxFlex>
     <div fxLayout="column" fxFlex="1 0 300px">
       <mat-form-field>
@@ -20,18 +20,16 @@
       </mat-form-field>
     </div>
     <div fxLayout="column" fxFlex="1 0 300px">
-      <app-select-module [moduleList]="ds.editorList"
-                         [selectedModuleId]="unitData.editorid"
-                         moduleType="Editor"
-                         (selectionChanged)="editorChanged($event)">
-      </app-select-module>
-      <app-select-module [moduleList]="ds.playerList"
-                         [selectedModuleId]="unitData.playerid"
-                         moduleType="Player"
-                         (selectionChanged)="playerChanged($event)">
-      </app-select-module>
-      <p *ngIf="unitData.lastchanged > 0"><em>Letzte Änderung: {{ unitData.lastchanged * 1000 | date : 'dd.MM.yyyy HH:mm' : timeZone }}</em></p>
-      <p *ngIf="unitData.lastchanged === 0"><em>Zeitpunkt der letzten Änderung ist unbekannt.</em></p>
+      <div fxLayout="'row">
+        <div fxFlex="1">Editor für Unitdefinition</div>
+        <div #editor fxFlex="1"></div>
+        <button mat-raised-button matTooltip="Editor ändern"><mat-icon>edit</mat-icon></button>
+      </div>
+      <div fxLayout="'row">
+        <div fxFlex="1">Player für Voransicht</div>
+        <div #player fxFlex="1"></div>
+        <button mat-raised-button matTooltip="Editor ändern" (click)="click()"><mat-icon>edit</mat-icon></button>
+      </div>
     </div>
   </div>
 
