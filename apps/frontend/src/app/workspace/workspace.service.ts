@@ -5,13 +5,14 @@ import { Injectable } from '@angular/core';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
-  BackendService, ModulData, UnitMetadata, UnitShortData
+  BackendService, ModulData
 } from './backend.service';
+import {UnitInListDto} from "@studio-lite-lib/api-dto";
 
 @Injectable({
   providedIn: 'root'
 })
-export class DatastoreService {
+export class WorkspaceService {
   selectedWorkspace = 0;
   selectedUnit$ = new BehaviorSubject<number>(0);
   editorList: { [key: string]: ModulData; } | null = null;
@@ -24,11 +25,11 @@ export class DatastoreService {
   unitDefinitionOld = '';
   unitDefinitionNew = '';
   unitDefinitionChanged = false;
-  unitList: UnitShortData[] = [];
+  unitList: UnitInListDto[] = [];
 
   constructor(private bs: BackendService) {}
 
-  static unitKeyUniquenessValidator(unitId: number, unitList: UnitShortData[]): ValidatorFn {
+  static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const newKeyNormalised = control.value.toUpperCase().trim();
       let isUnique = true;

@@ -23,8 +23,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTabsModule } from '@angular/material/tabs';
 
-import { AuthoringRoutingModule } from './authoring-routing.module';
-import { AuthoringComponent } from './authoring.component';
+import { WorkspaceRoutingModule } from './workspace-routing.module';
+import { WorkspaceComponent } from './workspace.component';
 import { NewunitComponent } from './dialogs/newunit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { MoveUnitComponent } from './dialogs/moveunit.component';
@@ -45,7 +45,7 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
     MatIconModule,
     MatTooltipModule,
     FlexLayoutModule,
-    AuthoringRoutingModule,
+    WorkspaceRoutingModule,
     ReactiveFormsModule,
     MatSelectModule,
     MatListModule,
@@ -69,7 +69,7 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
     IqbComponentsModule
   ],
   declarations: [
-    AuthoringComponent,
+    WorkspaceComponent,
     NewunitComponent,
     SelectUnitComponent,
     MoveUnitComponent,
@@ -83,7 +83,7 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
     EditSettingsComponent
   ],
   exports: [
-    AuthoringComponent
+    WorkspaceComponent
   ],
   entryComponents: [
     NewunitComponent,
@@ -96,4 +96,4 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
     UnitRoutingCanDeactivateGuard
   ]
 })
-export class AuthoringModule { }
+export class WorkspaceModule { }

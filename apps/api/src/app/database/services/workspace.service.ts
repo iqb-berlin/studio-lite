@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {getConnection, Repository} from "typeorm";
 import Workspace from "../entities/workspace.entity";
-import {CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
+import {
+  CreateWorkspaceDto,
+  WorkspaceGroupDto,
+  WorkspaceFullDto,
+  WorkspaceInListDto,
+  WorkspaceDto
+} from "@studio-lite-lib/api-dto";
 import WorkspaceUser from "../entities/workspace-user.entity";
 import WorkspaceGroup from "../entities/workspace-group.entity";
 
@@ -17,6 +23,19 @@ export class WorkspaceService {
     private workspaceGroupRepository: Repository<WorkspaceGroup>
   ) {}
 
+  async find(workspaceId: number): Promise<WorkspaceFullDto> {
+    const workspaces = await this.workspacesRepository.find({
+      where: {id: workspaceId}
+    });
+    return <WorkspaceFullDto>{
+      id: workspaces[0].id,
+      name: workspaces[0].name,
+      groupId: workspaces[0].group.id,
+      groupName: workspaces[0].group.name,
+      settings: workspaces[0].settings
+    }
+  }
+
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
     const validWorkspaces: number[] = [];
     if (userId) {
@@ -30,7 +49,8 @@ export class WorkspaceService {
         returnWorkspaces.push(<WorkspaceInListDto>{
           id: workspace.id,
           name: workspace.name,
-          groupId: workspace.groupId
+          groupId: workspace.group.id,
+          groupName: workspace.group.name
         })
       }
     });
@@ -54,7 +74,11 @@ export class WorkspaceService {
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
     const workspaceGroups = await this.workspaceGroupRepository.find({order: {name: 'ASC'}});
-    const workspaces = await this.findAll(userId);
+    const workspaceIds: number[] = [];
+    if (userId) {
+      const workspaces = await this.findAll(userId);
+      workspaces.forEach(ws => workspaceIds.push(ws.id));
+    }
     const myReturn: WorkspaceGroupDto[] = [];
     workspaceGroups.forEach(workspaceGroup => {
       const localWorkspaceGroup = <WorkspaceGroupDto>{
@@ -62,12 +86,15 @@ export class WorkspaceService {
         name: workspaceGroup.name,
         workspaces: []
       }
-      workspaces.forEach(workspace => {
-        if (workspaceGroup.id === workspace.groupId) {
-            localWorkspaceGroup.workspaces.push(workspace)
+      workspaceGroup.workspaces.forEach(workspace => {
+        if (!userId || workspaceIds.indexOf(workspace.id) >= 0) {
+            localWorkspaceGroup.workspaces.push(<WorkspaceDto>{
+              id: workspace.id,
+              name: workspace.name
+            })
         }
       });
-      if (!userId || localWorkspaceGroup.workspaces.length > 0) {
+      if (localWorkspaceGroup.workspaces.length > 0) {
         myReturn.push(localWorkspaceGroup)
       }
     })
@@ -80,7 +107,8 @@ export class WorkspaceService {
       id: workspace.id,
       name: workspace.name,
       settings: workspace.settings,
-      groupId: workspace.groupId
+      groupId: workspace.group.id,
+      groupName: workspace.group.name
     }
   }
 
@@ -93,7 +121,12 @@ export class WorkspaceService {
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne(workspaceData.id);
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-    if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
+    if (workspaceData.groupId) {
+      const workspaceGroups = await this.workspaceGroupRepository.find({where: {id: workspaceData.groupId}});
+      if (workspaceGroups.length > 0) {
+        workspaceToUpdate.group = workspaceGroups[0];
+      }
+    }
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
