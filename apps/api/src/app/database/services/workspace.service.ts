@@ -6,8 +6,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto,
-  WorkspaceDto
+  WorkspaceInListDto
 } from "@studio-lite-lib/api-dto";
 import WorkspaceUser from "../entities/workspace-user.entity";
 import WorkspaceGroup from "../entities/workspace-group.entity";
@@ -23,19 +22,6 @@ export class WorkspaceService {
     private workspaceGroupRepository: Repository<WorkspaceGroup>
   ) {}
 
-  async find(workspaceId: number): Promise<WorkspaceFullDto> {
-    const workspaces = await this.workspacesRepository.find({
-      where: {id: workspaceId}
-    });
-    return <WorkspaceFullDto>{
-      id: workspaces[0].id,
-      name: workspaces[0].name,
-      groupId: workspaces[0].group.id,
-      groupName: workspaces[0].group.name,
-      settings: workspaces[0].settings
-    }
-  }
-
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
     const validWorkspaces: number[] = [];
     if (userId) {
@@ -49,8 +35,7 @@ export class WorkspaceService {
         returnWorkspaces.push(<WorkspaceInListDto>{
           id: workspace.id,
           name: workspace.name,
-          groupId: workspace.group.id,
-          groupName: workspace.group.name
+          groupId: workspace.groupId
         })
       }
     });
@@ -74,11 +59,7 @@ export class WorkspaceService {
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
     const workspaceGroups = await this.workspaceGroupRepository.find({order: {name: 'ASC'}});
-    const workspaceIds: number[] = [];
-    if (userId) {
-      const workspaces = await this.findAll(userId);
-      workspaces.forEach(ws => workspaceIds.push(ws.id));
-    }
+    const workspaces = await this.findAll(userId);
     const myReturn: WorkspaceGroupDto[] = [];
     workspaceGroups.forEach(workspaceGroup => {
       const localWorkspaceGroup = <WorkspaceGroupDto>{
@@ -86,15 +67,12 @@ export class WorkspaceService {
         name: workspaceGroup.name,
         workspaces: []
       }
-      workspaceGroup.workspaces.forEach(workspace => {
-        if (!userId || workspaceIds.indexOf(workspace.id) >= 0) {
-            localWorkspaceGroup.workspaces.push(<WorkspaceDto>{
-              id: workspace.id,
-              name: workspace.name
-            })
+      workspaces.forEach(workspace => {
+        if (workspaceGroup.id === workspace.groupId) {
+          localWorkspaceGroup.workspaces.push(workspace)
         }
       });
-      if (localWorkspaceGroup.workspaces.length > 0) {
+      if (!userId || localWorkspaceGroup.workspaces.length > 0) {
         myReturn.push(localWorkspaceGroup)
       }
     })
@@ -103,12 +81,13 @@ export class WorkspaceService {
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
     const workspace = await this.workspacesRepository.findOne(id);
+    const workspaceGroup = await this.workspaceGroupRepository.findOne( workspace.groupId);
     return <WorkspaceFullDto>{
       id: workspace.id,
       name: workspace.name,
-      settings: workspace.settings,
-      groupId: workspace.group.id,
-      groupName: workspace.group.name
+      groupId: workspace.groupId,
+      groupName: workspaceGroup.name,
+      settings: workspace.settings
     }
   }
 
@@ -121,12 +100,7 @@ export class WorkspaceService {
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne(workspaceData.id);
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-    if (workspaceData.groupId) {
-      const workspaceGroups = await this.workspaceGroupRepository.find({where: {id: workspaceData.groupId}});
-      if (workspaceGroups.length > 0) {
-        workspaceToUpdate.group = workspaceGroups[0];
-      }
-    }
+    if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 

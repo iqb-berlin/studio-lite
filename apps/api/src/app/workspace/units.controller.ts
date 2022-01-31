@@ -5,16 +5,18 @@ import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
 import {CreateUnitDto, UnitInListDto} from "@studio-lite-lib/api-dto";
 import {WorkspaceGuard} from "./workspace.guard";
 import {WorkspaceId} from "./workspace.decorator";
+import {ApiImplicitParam} from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
 
-@Controller('workspace/:workspace_id/units')
+@Controller('workspace/:workspace_id')
 export class UnitsController {
   constructor(
     private unitService: UnitService
   ) {}
 
-  @Get()
+  @Get('units')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [UnitInListDto],
   })
@@ -23,9 +25,10 @@ export class UnitsController {
     return this.unitService.findAll(workspaceId);
   }
 
-  @Post()
+  @Post('units')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new unit in database',
     type: Number,

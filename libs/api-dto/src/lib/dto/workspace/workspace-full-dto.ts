@@ -11,6 +11,9 @@ export class WorkspaceFullDto {
   @ApiProperty({example: 463})
   groupId?: number;
 
+  @ApiProperty({example: 'Hörverstehen'})
+  groupName?: string;
+
   @ApiProperty()
   settings?: WorkspaceSettingsDto;
 }
