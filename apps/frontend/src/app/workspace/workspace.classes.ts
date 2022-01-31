@@ -1,4 +1,4 @@
-import {UnitInListDto} from "@studio-lite-lib/api-dto";
+import {UnitInListDto, UnitMetadataDto} from "@studio-lite-lib/api-dto";
 
 export interface UnitGroup {
   name: string;

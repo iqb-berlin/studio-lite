@@ -5,7 +5,7 @@ export class UnitMetadataDto {
   id!: number;
 
   @ApiProperty()
-  key!: string;
+  key?: string;
 
   @ApiProperty()
   name?: string;
@@ -24,4 +24,13 @@ export class UnitMetadataDto {
 
   @ApiProperty()
   schemer?: string;
+
+  @ApiProperty()
+  lastChangedMetadata?: Date;
+
+  @ApiProperty()
+  lastChangedDefinition?: Date;
+
+  @ApiProperty()
+  lastChangedScheme?: Date;
 }

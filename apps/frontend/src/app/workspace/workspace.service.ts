@@ -5,9 +5,9 @@ import { Injectable } from '@angular/core';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
-  BackendService, ModulData
+  BackendService, ModulData, UnitMetadata
 } from './backend.service';
-import {UnitInListDto} from "@studio-lite-lib/api-dto";
+import {UnitInListDto, UnitMetadataDto} from "@studio-lite-lib/api-dto";
 import {UnitCollection} from "./workspace.classes";
 
 @Injectable({
@@ -22,13 +22,18 @@ export class WorkspaceService {
   defaultPlayer = '';
   unitMetadataOld: { editorid: any; description: any; id: any; label: any; key: any; lastchanged: any; playerid: any } | null = null;
   unitMetadataNew: { editorid: any; description: any; id: any; label: any; key: any; lastchanged: any; playerid: any } | null = null;
-  unitMetadataChanged = false;
   unitDefinitionOld = '';
   unitDefinitionNew = '';
   unitDefinitionChanged = false;
   unitList = new UnitCollection([]);
 
-  constructor(private bs: BackendService) {}
+  unitMetadata: UnitMetadataDto = {id: 0};
+  unitMetadataChanged = false;
+  private changedUnitMetadata: UnitMetadataDto = {id: 0};
+
+  constructor(private bs: BackendService) {
+
+  }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -70,13 +75,17 @@ export class WorkspaceService {
     return false;
   }
 
+  resetDataStore(): void {
+    this.setChangedUnitMetadata();
+  }
+
   saveUnitData(): Observable<boolean> {
     if (this.unitMetadataNew && this.unitMetadataOld) {
       const reloadUnitList = (this.unitMetadataNew.key !== this.unitMetadataOld.key) ||
         (this.unitMetadataNew.label !== this.unitMetadataOld.label);
       const saveSubscriptions: Observable<number | boolean>[] = [];
       if (this.unitMetadataChanged) {
-        saveSubscriptions.push(this.bs.setUnitMetadata(this.selectedWorkspace, this.unitMetadataNew));
+        saveSubscriptions.push(this.bs.setUnitMetadata(this.selectedWorkspace, this.changedUnitMetadata));
       }
       if (this.unitDefinitionChanged) {
         saveSubscriptions.push(this.bs.setUnitDefinition(
@@ -139,5 +148,15 @@ export class WorkspaceService {
       if (this.unitMetadataNew.playerid !== this.unitMetadataOld.playerid) return true;
     }
     return false;
+  }
+
+  setChangedUnitMetadata(unitData?: UnitMetadataDto): void {
+    if (unitData) {
+      this.changedUnitMetadata = unitData;
+      this.unitMetadataChanged = Object.keys(unitData).length > 1;
+    } else {
+      this.changedUnitMetadata = {id: 0};
+      this.unitMetadataChanged = false;
+    }
   }
 }

@@ -27,10 +27,20 @@ export class UnitService {
   }
 
   async findOnesMetadata(workspaceId: number, unitId: number): Promise<UnitMetadataDto> {
-    const myUnit = await this.unitsRepository.find({
+    return this.unitsRepository.findOne({
       where: {workspaceId: workspaceId, id: unitId},
-      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'player', 'description']
-    });
-    return myUnit[0]
+      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer',
+        'player', 'description', 'lastChangedMetadata', "lastChangedDefinition", 'lastChangedScheme']
+    })
+  }
+
+  async patchMetadata(workspaceId: number, unitId: number, newData: UnitMetadataDto): Promise<void> {
+    const unitToUpdate = await this.unitsRepository.findOne({
+      where: {workspaceId: workspaceId, id: unitId}});
+    if (newData.key) unitToUpdate.key = newData.key;
+    if (newData.name) unitToUpdate.name = newData.name;
+    if (newData.description) unitToUpdate.description = newData.description;
+    await this.unitsRepository.save(unitToUpdate);
+
   }
 }

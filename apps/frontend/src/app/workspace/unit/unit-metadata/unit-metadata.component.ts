@@ -1,12 +1,12 @@
 import {
-  Component, Input, OnChanges, OnDestroy, OnInit, EventEmitter, Output, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {Observable, of, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
-import {BackendService, UnitMetadata} from '../../backend.service';
-import {ActivatedRoute, ParamMap, Router} from "@angular/router";
-import {switchMap} from "rxjs/operators";
+import {BackendService} from '../../backend.service';
+import {ActivatedRoute, Router} from "@angular/router";
+import {UnitMetadataDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -14,7 +14,7 @@ import {switchMap} from "rxjs/operators";
     'mat-tab-body {height: 100%;}']
 })
 
-export class UnitMetadataComponent implements OnInit, OnDestroy, OnChanges {
+export class UnitMetadataComponent implements OnInit, OnDestroy {
   @ViewChild('#editor') editorDiv: HTMLDivElement | undefined;
   @ViewChild('#player') playerDiv: HTMLDivElement | undefined;
   private routingSubscription: Subscription | undefined;
@@ -27,14 +27,14 @@ export class UnitMetadataComponent implements OnInit, OnDestroy, OnChanges {
   constructor(
     private fb: FormBuilder,
     private bs: BackendService,
-    public ds: WorkspaceService,
+    public workspaceService: WorkspaceService,
     private router: Router,
     private route: ActivatedRoute
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
-      label: this.fb.control(''),
+      name: this.fb.control(''),
       description: this.fb.control('')
     });
   }
@@ -44,7 +44,6 @@ export class UnitMetadataComponent implements OnInit, OnDestroy, OnChanges {
       this.routingSubscription = this.route.parent.params.subscribe(params => {
         this.workspaceId = Number(params['ws']);
         this.unitId = Number(params['u']);
-
         this.readData();
       })
     }
@@ -59,23 +58,27 @@ export class UnitMetadataComponent implements OnInit, OnDestroy, OnChanges {
     this.bs.getUnitMetadata(this.workspaceId, this.unitId).subscribe(unitData => {
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        WorkspaceService.unitKeyUniquenessValidator(unitData.id, this.ds.unitList.units())]);
+        WorkspaceService.unitKeyUniquenessValidator(unitData.id, this.workspaceService.unitList.units())]);
       this.unitForm.setValue({
         key: unitData.key,
-        label: unitData.name,
+        name: unitData.name,
         description: unitData.description
       }, { emitEvent: false });
       if (this.editorDiv) this.editorDiv.innerText = unitData.editor ? unitData.editor : '';
       if (this.playerDiv) this.playerDiv.innerText = unitData.player ? unitData.player : '';
-
+      this.workspaceService.unitMetadata = unitData;
+      this.workspaceService.setChangedUnitMetadata();
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
-        console.log(this.unitForm.get('key')?.value);
-      })
+        const newUnitData: UnitMetadataDto = {id: this.unitId};
+        const newKey = this.unitForm.get('key')?.value;
+        if (newKey !== this.workspaceService.unitMetadata.key) newUnitData.key = newKey;
+        const newName = this.unitForm.get('name')?.value;
+        if (newName !== this.workspaceService.unitMetadata.name) newUnitData.name = newName;
+        const newDescription = this.unitForm.get('description')?.value;
+        if (newDescription !== this.workspaceService.unitMetadata.description) newUnitData.description = newDescription;
+        this.workspaceService.setChangedUnitMetadata(newUnitData);
+      });
     });
-  }
-
-  ngOnChanges(): void {
-    // if (this.unitForm) this.readData();
   }
 
   ngOnDestroy(): void {

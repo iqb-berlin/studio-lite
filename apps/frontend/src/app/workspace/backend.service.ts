@@ -113,20 +113,11 @@ export class BackendService {
       );
   }
 
-  setUnitMetadata(workspaceId: number, unitData: UnitMetadata): Observable<boolean> {
+  setUnitMetadata(workspaceId: number, unitData: UnitMetadataDto): Observable<boolean> {
     return this.http
-      .put<boolean>(`${this.serverUrl}setUnitMetadata.php`, {
-      t: localStorage.getItem('t'),
-      ws: workspaceId,
-      u: unitData.id,
-      k: unitData.key,
-      l: unitData.label,
-      d: unitData.description,
-      e: unitData.editorid,
-      p: unitData.playerid,
-      dt: unitData.playerid
-    })
+      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitData.id}/metadata`, unitData)
       .pipe(
+        map(() => true),
         catchError(() => of(false))
       );
   }

@@ -45,21 +45,23 @@ create table public.unit
   workspace_id            integer                                not null
     references workspace
       on delete cascade,
+  group_name              varchar(50),
+  description             text,
   key                     varchar(20)                            not null,
   name                    varchar(100),
-  group_name              varchar(50),
-  metadata                jsonb,
-  player                  varchar(50),
   editor                  varchar(50),
+  player                  varchar(50),
+  schemer                 varchar(50),
+  metadata                jsonb,
+  last_changed_metadata   timestamp with time zone default now(),
+  variables               jsonb,
   definition_id           integer
     constraint unit_definition_id_fk
       references unit_definition
       on delete cascade,
-  variables               jsonb,
   last_changed_definition timestamp with time zone default now(),
-  schemer                 varchar(50),
   scheme                  jsonb,
-  last_changed_scheme     timestamp with time zone default now()
+  last_changed_scheme     timestamp with time zone default now() not null
 );
 
 

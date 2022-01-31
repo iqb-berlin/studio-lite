@@ -73,6 +73,12 @@ class Unit {
     name: 'last_changed_scheme'
   })
   public lastChangedScheme: Date;
+
+  @Column({
+    type: 'timestamp with time zone',
+    name: 'last_changed_metadata'
+  })
+  public lastChangedMetadata: Date;
 }
 
 export default Unit;
