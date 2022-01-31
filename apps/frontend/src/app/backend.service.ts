@@ -1,33 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
 import { Injectable, Inject } from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpParams} from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {AuthDataDto, ChangePasswordDto, ConfigFullDto} from "@studio-lite-lib/api-dto";
 import {AppService} from "./app.service";
-
-export class AppHttpError {
-  code: number | undefined;
-  info: string | undefined;
-  constructor(errorObj?: HttpErrorResponse) {
-    if (errorObj) {
-      this.code = errorObj.status;
-      this.info = errorObj.message;
-      if (errorObj.status === 401) {
-        this.info = 'Zugriff verweigert - bitte (neu) anmelden!';
-      } else if (errorObj.status === 503) {
-        this.info = 'Server meldet Datenbankproblem.';
-      } else if (errorObj.error instanceof ErrorEvent) {
-        this.info = `Fehler: ${(<ErrorEvent>errorObj.error).message}`;
-      }
-    }
-  }
-
-  msg(): string {
-    return `${this.info} (Fehler ${this.code})`;
-  }
-}
 
 @Injectable({
   providedIn: 'root'

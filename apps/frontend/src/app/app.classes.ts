@@ -1,5 +1,6 @@
 import {DomSanitizer, SafeUrl, Title} from "@angular/platform-browser";
 import {ConfigFullDto} from "@studio-lite-lib/api-dto";
+import {HttpErrorResponse} from "@angular/common/http";
 
 export interface WorkspaceDataFlat {
   id: number;
@@ -7,6 +8,28 @@ export interface WorkspaceDataFlat {
   groupId: number;
   groupName: string;
   selected: boolean;
+}
+
+export class AppHttpError {
+  code: number | undefined;
+  info: string | undefined;
+  constructor(errorObj?: HttpErrorResponse) {
+    if (errorObj) {
+      this.code = errorObj.status;
+      this.info = errorObj.message;
+      if (errorObj.status === 401) {
+        this.info = 'Zugriff verweigert - bitte (neu) anmelden!';
+      } else if (errorObj.status === 503) {
+        this.info = 'Server meldet Datenbankproblem.';
+      } else if (errorObj.error instanceof ErrorEvent) {
+        this.info = `Fehler: ${(<ErrorEvent>errorObj.error).message}`;
+      }
+    }
+  }
+
+  msg(): string {
+    return `${this.info} (Fehler ${this.code})`;
+  }
 }
 
 export class AppConfig {

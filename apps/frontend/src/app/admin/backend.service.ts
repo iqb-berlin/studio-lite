@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Observable, of, throwError} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import { AppHttpError } from '../backend.service';
 import {
   ConfigFullDto,
   CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
@@ -12,6 +11,7 @@ import {
   WorkspaceInListDto,
   WorkspaceGroupDto, VeronaModuleInListDto
 } from "@studio-lite-lib/api-dto";
+import {AppHttpError} from "../app.classes";
 
 @Injectable({
   providedIn: 'root'

@@ -2,8 +2,8 @@ import { catchError, map } from 'rxjs/operators';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
-import { AppHttpError } from '../backend.service';
-import {UnitInListDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
+import {UnitInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
+import {AppHttpError} from "../app.classes";
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +12,7 @@ export class BackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
-  ) {
-    this.serverUrl += 'php_authoring/';
-  }
+  ) {}
 
   getUnitList(workspaceId: number): Observable <UnitInListDto[]> {
     return this.http
