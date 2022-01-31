@@ -3,6 +3,7 @@ import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
 import { AppHttpError } from '../backend.service';
+import {UnitInListDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 
 @Injectable({
   providedIn: 'root'
@@ -15,18 +16,18 @@ export class BackendService {
     this.serverUrl += 'php_authoring/';
   }
 
-  getUnitList(workspaceId: number): Observable <UnitShortData[]> {
+  getUnitList(workspaceId: number): Observable <UnitInListDto[]> {
     return this.http
-      .put<UnitShortData[]>(`${this.serverUrl}getUnitList.php`, { t: localStorage.getItem('t'), ws: workspaceId })
+      .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
   }
 
-  getWorkspaceData(workspaceId: number): Observable<WorkspaceData> {
+  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto> {
     return this.http
-      .put<WorkspaceData>(
-      `${this.serverUrl}getWorkspaceData.php`, { t: localStorage.getItem('t'), ws: workspaceId }
+      .get<WorkspaceFullDto>(
+      `${this.serverUrl}workspace/${workspaceId}`
     )
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
@@ -73,13 +74,13 @@ export class BackendService {
       return of(401);
     }
     return this.http
-      .put<UnitShortData[]>(`${this.serverUrl}moveUnits.php`,
+      .put<UnitInListDto[]>(`${this.serverUrl}moveUnits.php`,
       {
         t: authToken, ws: workspaceId, u: units, tws: targetWorkspace
       })
       .pipe(
         catchError(err => throwError(new AppHttpError(err))),
-        map((unMovableUnits: UnitShortData[]) => {
+        map((unMovableUnits: UnitInListDto[]) => {
           if (unMovableUnits.length === 0) return true;
           return unMovableUnits.length;
         })
@@ -179,13 +180,6 @@ export class BackendService {
         catchError(() => of(false))
       );
   }
-}
-
-// # # # # # # # # # # # # # # # # # # # # # # # # # #
-export interface UnitShortData {
-  id: number;
-  key: string;
-  label: string;
 }
 
 export interface UnitMetadata {

@@ -32,7 +32,7 @@ import { Component } from '@angular/core';
     }
   `]
 })
-export class SuperadminComponent {
+export class AdminComponent {
   navLinks = [
     { path: 'users', label: 'Nutzer:innen' },
     { path: 'workspaces', label: 'Arbeitsbereiche' },

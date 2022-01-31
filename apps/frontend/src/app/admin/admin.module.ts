@@ -23,10 +23,10 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
-import { SuperadminRoutingModule } from './superadmin-routing.module';
+import { AdminRoutingModule } from './admin-routing.module';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { UsersComponent } from './users/users.component';
-import { SuperadminComponent } from './superadmin.component';
+import { AdminComponent } from './admin.component';
 import { BackendService } from './backend.service';
 import { EditworkspaceComponent } from './workspaces/editworkspace.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
@@ -42,7 +42,7 @@ import {EditUserComponent} from "./users/edituser.component";
 @NgModule({
     imports: [
         CommonModule,
-        SuperadminRoutingModule,
+        AdminRoutingModule,
         IqbComponentsModule,
         MatTableModule,
         MatTabsModule,
@@ -68,12 +68,12 @@ import {EditUserComponent} from "./users/edituser.component";
         FormsModule
     ],
   exports: [
-    SuperadminComponent
+    AdminComponent
   ],
   declarations: [
     WorkspacesComponent,
     UsersComponent,
-    SuperadminComponent,
+    AdminComponent,
     EditworkspaceComponent,
     EditUserComponent,
     VeronaModulesComponent,
@@ -100,4 +100,4 @@ import {EditUserComponent} from "./users/edituser.component";
     EditWorkspaceGroupComponent
   ]
 })
-export class SuperadminModule { }
+export class AdminModule { }

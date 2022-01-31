@@ -9,7 +9,7 @@ import {
 } from './unit-preview.classes';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
-import { DatastoreService } from '../../datastore.service';
+import { WorkspaceService } from '../../workspace.service';
 import { UnitComponent } from '../unit.component';
 
 declare let srcDoc: any;
@@ -50,7 +50,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
     private mds: AppService,
     private snackBar: MatSnackBar,
     private bs: BackendService,
-    private ds: DatastoreService
+    private ds: WorkspaceService
   ) {
     this.postMessageSubscription = this.mds.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;
@@ -137,7 +137,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
     this.setResponsesStatus('none');
     this.setPageList([], '');
     if (this.unitId && this.unitId > 0) {
-      const playerValidation = DatastoreService.validModuleId(this.playerId, this.ds.playerList);
+      const playerValidation = WorkspaceService.validModuleId(this.playerId, this.ds.playerList);
       if (playerValidation === false) {
         this.buildPlayer(this.playerId); // creates error message
       } else {

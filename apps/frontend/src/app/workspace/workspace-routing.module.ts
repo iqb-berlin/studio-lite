@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AuthoringComponent } from './authoring.component';
+import { WorkspaceComponent } from './workspace.component';
 import { UnitComponent } from './unit/unit.component';
 import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: AuthoringComponent,
+    component: WorkspaceComponent,
     children: [
       {
         path: 'u/:u',
@@ -21,4 +21,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class AuthoringRoutingModule { }
+export class WorkspaceRoutingModule { }

@@ -9,16 +9,24 @@ const routes: Routes = [
   { path: 'about', component: AboutComponent },
   {
     path: 'admin',
-    loadChildren: () => import('./superadmin/superadmin.module').then(module => module.SuperadminModule)
+    loadChildren: () => import('./admin/admin.module').then(module => module.AdminModule)
   },
   {
     path: 'a/:ws',
-    loadChildren: () => import('./authoring/authoring.module').then(module => module.AuthoringModule)
+    loadChildren: () => import('./workspace/workspace.module').then(module => module.WorkspaceModule)
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { onSameUrlNavigation: 'reload', relativeLinkResolution: 'legacy' })],
+  imports: [
+    RouterModule.forRoot(
+      routes,
+      {
+        onSameUrlNavigation: 'reload',
+        relativeLinkResolution: 'legacy'
+      }
+      )
+  ],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

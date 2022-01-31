@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { DatastoreService } from '../datastore.service';
+import { WorkspaceService } from '../workspace.service';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -13,7 +13,7 @@ export class EditSettingsComponent {
 
   constructor(
     private fb: FormBuilder,
-    public ds: DatastoreService
+    public ds: WorkspaceService
   ) {
     this.settingsForm = this.fb.group({
       editorSelector: this.fb.control(this.ds.defaultEditor),

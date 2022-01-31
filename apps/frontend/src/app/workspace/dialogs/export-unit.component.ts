@@ -11,7 +11,7 @@ import {
   ModuleDataForExport
 } from '../backend.service';
 import { AppService } from '../../app.service';
-import { DatastoreService } from '../datastore.service';
+import { WorkspaceService } from '../workspace.service';
 
 export interface UnitExtendedData {
   id: number;
@@ -38,7 +38,7 @@ export class ExportUnitComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private appService: AppService,
-    public ds: DatastoreService,
+    public ds: WorkspaceService,
     private backendService: BackendService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
@@ -70,7 +70,7 @@ export class ExportUnitComponent implements OnInit {
       ud => <UnitExtendedData>{
         id: ud.id,
         key: ud.key,
-        label: ud.label,
+        label: ud.name,
         disabled: false
       }
     ));
@@ -117,7 +117,7 @@ export class ExportUnitComponent implements OnInit {
             this.usedPlayers = [];
             allMetadata.forEach(umd => {
               if (umd.playerid) {
-                const validPlayerId = DatastoreService.validModuleId(umd.playerid, this.ds.playerList);
+                const validPlayerId = WorkspaceService.validModuleId(umd.playerid, this.ds.playerList);
                 if (validPlayerId !== false) {
                   this.unitsWithPlayer.push(umd.id);
                   const playerIdToAdd = validPlayerId === true ? umd.playerid : validPlayerId;

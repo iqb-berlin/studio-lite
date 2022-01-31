@@ -4,7 +4,7 @@ import {
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ModulData } from '../../backend.service';
-import { DatastoreService } from '../../datastore.service';
+import { WorkspaceService } from '../../workspace.service';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -52,7 +52,7 @@ export class SelectModuleComponent implements OnInit, OnDestroy, OnChanges {
       this.isEmpty = false;
     }
     if (!this.isEmpty) {
-      const checkModuleId = DatastoreService.validModuleId(this.selectedModuleId, this.moduleList);
+      const checkModuleId = WorkspaceService.validModuleId(this.selectedModuleId, this.moduleList);
       if (checkModuleId === false) {
         this.isValid = false;
       } else if (checkModuleId === true) {

@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
-import { DatastoreService } from '../../datastore.service';
+import { WorkspaceService } from '../../workspace.service';
 import { UnitComponent } from '../unit.component';
 
 declare let srcDoc: any;
@@ -30,7 +30,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
     private bs: BackendService,
-    private ds: DatastoreService,
+    private ds: WorkspaceService,
     private snackBar: MatSnackBar,
     private mds: AppService
   ) {
@@ -98,7 +98,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   sendUnitDataToEditor(): void {
     if (this.unitId && this.unitId > 0) {
-      const editorValidation = DatastoreService.validModuleId(this.editorId, this.ds.editorList);
+      const editorValidation = WorkspaceService.validModuleId(this.editorId, this.ds.editorList);
       if (editorValidation === false) {
         this.buildEditor(this.editorId); // creates error message
       } else {

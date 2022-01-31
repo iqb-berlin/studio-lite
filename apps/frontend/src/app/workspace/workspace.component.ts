@@ -8,21 +8,22 @@ import {
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../app.service';
-import { BackendService, UnitShortData, WorkspaceSettings } from './backend.service';
-import { DatastoreService } from './datastore.service';
+import { BackendService, WorkspaceSettings } from './backend.service';
+import { WorkspaceService } from './workspace.service';
 
 import { NewunitComponent } from './dialogs/newunit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { MoveUnitComponent } from './dialogs/moveunit.component';
-import { BackendService as SuperAdminBackendService } from '../superadmin/backend.service';
+import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
+import {UnitInListDto} from "@studio-lite-lib/api-dto";
 
 @Component({
-  templateUrl: './authoring.component.html',
-  styleUrls: ['./authoring.component.css']
+  templateUrl: './workspace.component.html',
+  styleUrls: ['./workspace.component.css']
 })
-export class AuthoringComponent implements OnInit, OnDestroy {
+export class WorkspaceComponent implements OnInit, OnDestroy {
   private routingSubscription: Subscription | null = null;
   private selectedUnitSubscription: Subscription | null = null;
   selectedUnits: string[] = [];
@@ -34,7 +35,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
     private appService: AppService,
-    public ds: DatastoreService,
+    public ds: WorkspaceService,
     private backendService: BackendService,
     private bsSuper: SuperAdminBackendService,
     private newUnitDialog: MatDialog,
@@ -69,13 +70,15 @@ export class AuthoringComponent implements OnInit, OnDestroy {
         this.ds.defaultPlayer = '';
         this.backendService.getWorkspaceData(this.ds.selectedWorkspace).subscribe(
           wResponse => {
-            this.appService.appConfig.setPageTitle(`${wResponse.group}: ${wResponse.label}`);
-            if (wResponse.editors) {
+            this.appService.appConfig.setPageTitle(`${wResponse.groupName}: ${wResponse.name}`);
+/*            if (wResponse.editors) {
               this.ds.editorList = wResponse.editors;
             }
             if (wResponse.players) {
               this.ds.playerList = wResponse.players;
             }
+
+ */
             if (wResponse.settings) {
               this.ds.defaultEditor = wResponse.settings.defaultEditor;
               this.ds.defaultPlayer = wResponse.settings.defaultPlayer;
@@ -186,7 +189,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
         if (result !== false) {
           this.backendService.deleteUnits(
             this.ds.selectedWorkspace,
-            (result as UnitShortData[]).map(ud => ud.id)
+            (result as UnitInListDto[]).map(ud => ud.id)
           ).subscribe(
             ok => {
               // todo db-error?
@@ -227,7 +230,7 @@ export class AuthoringComponent implements OnInit, OnDestroy {
           if (wsSelected) {
             this.backendService.moveUnits(
               this.ds.selectedWorkspace,
-              (dialogComponent.tableSelectionCheckbox.selected as UnitShortData[]).map(ud => ud.id),
+              (dialogComponent.tableSelectionCheckbox.selected as UnitInListDto[]).map(ud => ud.id),
               wsSelected.value
             ).subscribe(
               moveResponse => {

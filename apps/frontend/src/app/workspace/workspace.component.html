@@ -12,9 +12,9 @@
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <mat-selection-list [multiple]="false" [(ngModel)]="selectedUnits" (ngModelChange)="onUnitSelectionChange()" fxFlex cdkScrollable>
-      <mat-list-option *ngFor="let unit of ds.unitList" [value]="unit.id" style="height: 24px;" class="no-wrap" [matTooltip]="unit.label"
+      <mat-list-option *ngFor="let unit of ds.unitList" [value]="unit.id" style="height: 24px;" class="no-wrap" [matTooltip]="unit.name ? unit.name : unit.id.toString()"
       [class]="unit.id === (ds.selectedUnit$ | async) ? 'selected' : 'not-selected'">
-        {{ unit.key }} - {{ unit.label }}
+        {{ unit.key }} - {{ unit.name }}
       </mat-list-option>
     </mat-selection-list>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->

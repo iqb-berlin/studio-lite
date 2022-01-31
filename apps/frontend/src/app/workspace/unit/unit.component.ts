@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DatastoreService } from '../datastore.service';
+import { WorkspaceService } from '../workspace.service';
 import { BackendService } from '../backend.service';
 
 @Component({
@@ -12,7 +12,7 @@ export class UnitComponent implements OnInit, OnDestroy {
   private routingSubscription: Subscription | undefined;
 
   constructor(
-    public ds: DatastoreService,
+    public ds: WorkspaceService,
     private bs: BackendService,
     private router: Router,
     private route: ActivatedRoute

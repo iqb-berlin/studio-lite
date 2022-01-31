@@ -6,14 +6,14 @@ import { map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UnitComponent } from './unit.component';
 import { ConfirmDialogData, SaveOrDiscardComponent } from '../dialogs/save-or-discard.component';
-import { DatastoreService } from '../datastore.service';
+import { WorkspaceService } from '../workspace.service';
 
 @Injectable()
 export class UnitRoutingCanDeactivateGuard implements CanDeactivate<UnitComponent> {
   constructor(
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,
-    public ds: DatastoreService
+    public ds: WorkspaceService
   ) { }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {

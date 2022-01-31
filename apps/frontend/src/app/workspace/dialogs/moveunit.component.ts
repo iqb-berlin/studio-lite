@@ -3,25 +3,25 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { UnitShortData } from '../backend.service';
 import { AppService } from '../../app.service';
-import { DatastoreService } from '../datastore.service';
+import { WorkspaceService } from '../workspace.service';
 import {WorkspaceDataFlat} from "../../app.classes";
+import {UnitInListDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   templateUrl: './moveunit.component.html'
 })
 export class MoveUnitComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<UnitShortData>();
+  objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
-  tableSelectionCheckbox = new SelectionModel <UnitShortData>(true, []);
+  tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
   workspaceList: WorkspaceDataFlat[] = [];
   selectForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private appService: AppService,
-    private ds: DatastoreService,
+    private ds: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.selectForm = this.fb.group({

@@ -3,23 +3,24 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { DatastoreService } from '../datastore.service';
+import { WorkspaceService } from '../workspace.service';
 import { AppService } from '../../app.service';
-import { BackendService, UnitShortData } from '../backend.service';
+import { BackendService } from '../backend.service';
+import {UnitInListDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   templateUrl: './select-unit.component.html'
 })
 export class SelectUnitComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<UnitShortData>();
+  objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
-  tableSelectionCheckbox = new SelectionModel <UnitShortData>(true, []);
+  tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
 
   constructor(
     private fb: FormBuilder,
     private bs: BackendService,
     private mds: AppService,
-    private ds: DatastoreService,
+    private ds: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
 
