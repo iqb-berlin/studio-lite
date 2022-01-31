@@ -2,7 +2,7 @@ import { catchError, map } from 'rxjs/operators';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
-import {UnitInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
+import {CreateUnitDto, UnitInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
 import {AppHttpError} from "../app.classes";
 
 @Injectable({
@@ -34,9 +34,9 @@ export class BackendService {
 
   addUnit(workspaceId: number, key: string, label: string, editor: string, player: string): Observable<number> {
     return this.http
-      .put<string>(`${this.serverUrl}addUnit.php`,
-      {
-        t: localStorage.getItem('t'), ws: workspaceId, k: key, l: label, e: editor, p: player
+      .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`,
+      <CreateUnitDto>{
+        key: key, name: label
       })
       .pipe(
         catchError(err => throwError(new AppHttpError(err))),

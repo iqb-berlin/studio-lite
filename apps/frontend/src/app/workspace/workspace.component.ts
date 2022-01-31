@@ -11,7 +11,7 @@ import { AppService } from '../app.service';
 import { BackendService, WorkspaceSettings } from './backend.service';
 import { WorkspaceService } from './workspace.service';
 
-import { NewunitComponent } from './dialogs/newunit.component';
+import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { MoveUnitComponent } from './dialogs/moveunit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
@@ -136,7 +136,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   addUnit(): void {
-    const dialogRef = this.newUnitDialog.open(NewunitComponent, {
+    const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
       width: '600px',
       data: {
         title: 'Neue Aufgabe',
@@ -262,7 +262,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       ).subscribe(
         newUnit => {
           if (newUnit.id === myUnitId) {
-            const dialogRef = this.newUnitDialog.open(NewunitComponent, {
+            const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
               width: '600px',
               data: {
                 title: `Aufgabe ${newUnit.key} in neue Aufgabe kopieren`,

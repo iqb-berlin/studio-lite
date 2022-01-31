@@ -25,7 +25,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
-import { NewunitComponent } from './dialogs/newunit.component';
+import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { MoveUnitComponent } from './dialogs/moveunit.component';
 import { UnitComponent } from './unit/unit.component';
@@ -70,7 +70,7 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
   ],
   declarations: [
     WorkspaceComponent,
-    NewunitComponent,
+    NewUnitComponent,
     SelectUnitComponent,
     MoveUnitComponent,
     UnitComponent,
@@ -86,7 +86,7 @@ import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
     WorkspaceComponent
   ],
   entryComponents: [
-    NewunitComponent,
+    NewUnitComponent,
     SelectUnitComponent,
     MoveUnitComponent,
     SaveOrDiscardComponent,

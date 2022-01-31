@@ -30,7 +30,7 @@ import { WorkspaceService } from '../workspace.service';
     </div>
   `
 })
-export class NewunitComponent {
+export class NewUnitComponent {
   newUnitForm: FormGroup;
 
   constructor(private fb: FormBuilder,
