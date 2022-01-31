@@ -42,7 +42,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy, OnChanges {
     if (this.unitData) {
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        WorkspaceService.unitKeyUniquenessValidator(this.unitData.id, this.ds.unitList)]);
+        WorkspaceService.unitKeyUniquenessValidator(this.unitData.id, this.ds.unitList.units())]);
       this.unitForm.setValue({
         key: this.unitData.key,
         label: this.unitData.label,

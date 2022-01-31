@@ -18,6 +18,7 @@ import { BackendService as SuperAdminBackendService } from '../admin/backend.ser
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import {UnitInListDto} from "@studio-lite-lib/api-dto";
+import {UnitCollection} from "./workspace.classes";
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -98,10 +99,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   updateUnitList(unitToSelect?: number): void {
     this.backendService.getUnitList(this.ds.selectedWorkspace).subscribe(
       uResponse => {
-        this.ds.unitList = uResponse;
+        this.ds.unitList = new UnitCollection(uResponse);
         const selectedUnit = unitToSelect || this.ds.selectedUnit$.getValue();
         let unitExists = false;
-        this.ds.unitList.forEach(u => {
+        this.ds.unitList.units().forEach(u => {
           if (u.id === selectedUnit) {
             unitExists = true;
           }
@@ -119,7 +120,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       },
       err => {
         this.appService.errorMessage = err.msg();
-        this.ds.unitList = [];
+        this.ds.unitList = new UnitCollection([]);
         this.ds.selectedUnit$.next(0);
         this.router.navigate([`/a/${this.ds.selectedWorkspace}`]);
       }

@@ -25,7 +25,7 @@ export class SelectUnitComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.objectsDatasource = new MatTableDataSource(this.ds.unitList);
+    this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units());
   }
 
   isAllSelected(): boolean {

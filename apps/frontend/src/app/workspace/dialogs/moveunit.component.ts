@@ -44,7 +44,7 @@ export class MoveUnitComponent implements OnInit {
         })
       });
     }
-    this.objectsDatasource = new MatTableDataSource(this.ds.unitList);
+    this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units());
     this.tableSelectionCheckbox.clear();
   }
 

@@ -39,7 +39,7 @@ export class NewunitComponent {
     this.newUnitForm = this.fb.group({
       key: this.fb.control('', [Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        WorkspaceService.unitKeyUniquenessValidator(0, this.ds.unitList)]),
+        WorkspaceService.unitKeyUniquenessValidator(0, this.ds.unitList.units())]),
       label: this.fb.control('')
     });
   }

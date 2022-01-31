@@ -11,12 +11,18 @@
       </button>
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <mat-selection-list [multiple]="false" [(ngModel)]="selectedUnits" (ngModelChange)="onUnitSelectionChange()" fxFlex cdkScrollable>
-      <mat-list-option *ngFor="let unit of ds.unitList" [value]="unit.id" style="height: 24px;" class="no-wrap" [matTooltip]="unit.name ? unit.name : unit.id.toString()"
-      [class]="unit.id === (ds.selectedUnit$ | async) ? 'selected' : 'not-selected'">
-        {{ unit.key }} - {{ unit.name }}
-      </mat-list-option>
-    </mat-selection-list>
+    <div fxFlex class="unit-list">
+      <mat-selection-list [multiple]="false"
+                          *ngFor="let unitGroup of ds.unitList.groups"
+                          [(ngModel)]="selectedUnits"
+                          (ngModelChange)="onUnitSelectionChange()">
+        <div class="unit-group-header">{{unitGroup.name}}</div>
+        <mat-list-option *ngFor="let unit of unitGroup.units" [value]="unit.id" style="height: 24px;" class="no-wrap" [matTooltip]="unit.name ? unit.name : unit.id.toString()"
+                         [class]="unit.id === (ds.selectedUnit$ | async) ? 'selected' : 'not-selected'">
+          {{ unit.key }} - {{ unit.name }}
+        </mat-list-option>
+      </mat-selection-list>
+    </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
       <button mat-raised-button (click)="addUnit()" matTooltip="Aufgabe hinzufügen" matTooltipPosition="above" fxFlex="33">

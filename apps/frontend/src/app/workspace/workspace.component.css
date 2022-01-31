@@ -29,8 +29,19 @@
   white-space: nowrap;
 }
 
-mat-selection-list {
+.unit-list {
   overflow: auto;
+}
+
+.unit-group-header {
+  color: whitesmoke;
+  background-color: lightslategray;
+  font-size: 16px;
+  padding: 2px;
+}
+
+.mat-list-item {
+  padding: 0 8px;
 }
 
 .selected {

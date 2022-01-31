@@ -66,7 +66,7 @@ export class ExportUnitComponent implements OnInit {
 
   ngOnInit(): void {
     this.tableSelectionCheckbox.clear();
-    this.objectsDatasource = new MatTableDataSource(this.ds.unitList.map(
+    this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units().map(
       ud => <UnitExtendedData>{
         id: ud.id,
         key: ud.key,
@@ -106,7 +106,7 @@ export class ExportUnitComponent implements OnInit {
       } else {
         this.appService.dataLoading = true;
         const getMetadataSubscriptions: Observable<UnitMetadata>[] = [];
-        this.ds.unitList.forEach(
+        this.ds.unitList.units().forEach(
           ud => {
             getMetadataSubscriptions.push(this.backendService.getUnitMetadata(this.ds.selectedWorkspace, ud.id));
           }

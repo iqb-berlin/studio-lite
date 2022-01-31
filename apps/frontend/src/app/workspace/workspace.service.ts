@@ -8,6 +8,7 @@ import {
   BackendService, ModulData
 } from './backend.service';
 import {UnitInListDto} from "@studio-lite-lib/api-dto";
+import {UnitCollection} from "./workspace.classes";
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,7 @@ export class WorkspaceService {
   unitDefinitionOld = '';
   unitDefinitionNew = '';
   unitDefinitionChanged = false;
-  unitList: UnitInListDto[] = [];
+  unitList = new UnitCollection([]);
 
   constructor(private bs: BackendService) {}
 
@@ -110,7 +111,7 @@ export class WorkspaceService {
                 .pipe(
                   catchError(() => []),
                   map(uResponse => {
-                    this.unitList = uResponse;
+                    this.unitList = new UnitCollection(uResponse);
                     return true;
                   })
                 );

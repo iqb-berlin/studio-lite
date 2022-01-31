@@ -4,7 +4,7 @@
     Als Paket für Testcenter
   </mat-checkbox>
   <div *ngIf="unitsWithPlayer.length === 0 && addTestcenterFiles" class="tcMessage">Keine Aufgabe hat einen gültigen Player gesetzt.</div>
-  <div *ngIf="unitsWithPlayer.length !== ds.unitList.length && unitsWithPlayer.length > 0 && addTestcenterFiles" class="tcMessage">
+  <div *ngIf="unitsWithPlayer.length !== ds.unitList.units().length && unitsWithPlayer.length > 0 && addTestcenterFiles" class="tcMessage">
     Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
   </div>
   <mat-dialog-content fxFlex>
