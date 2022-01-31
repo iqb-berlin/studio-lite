@@ -1,9 +1,9 @@
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, Router, RouterLinkActive} from '@angular/router';
 import { FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  Component, Inject, OnDestroy, OnInit
+  Component, Inject, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
@@ -19,12 +19,14 @@ import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import {UnitInListDto} from "@studio-lite-lib/api-dto";
 import {UnitCollection} from "./workspace.classes";
+import {MatTabNav} from "@angular/material/tabs";
 
 @Component({
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.css']
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
   private selectedUnitSubscription: Subscription | null = null;
   selectedUnits: string[] = [];
@@ -32,6 +34,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   token: string | undefined;
   uploadProcessId = '';
   uploadMessages: string[] = [];
+  navLinks = [
+    { path: 'metadata', label: 'Eigenschaften' },
+    { path: 'editor', label: 'Editor' },
+    { path: 'preview', label: 'Vorschau' }
+  ];
 
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
@@ -58,7 +65,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.routingSubscription = this.route.params.subscribe(params => {
         this.ds.selectedWorkspace = Number(params['ws']);
-        this.ds.selectedUnit$.next(0);
+        this.ds.selectedUnit$.next(Number(params['u']));
+        console.log(this.ds.selectedUnit$.getValue());
         this.ds.unitDefinitionOld = '';
         this.ds.unitDefinitionNew = '';
         this.ds.unitMetadataNew = null;
@@ -130,8 +138,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   onUnitSelectionChange(): void {
     if (this.selectedUnits.length > 0) {
       const unitId = this.selectedUnits[0];
+      const selectedTab = this.nav ? this.nav.selectedIndex : -1;
+      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab].path}` : '';
       this.selectedUnits = [];
-      this.router.navigate([`u/${unitId}`], { relativeTo: this.route });
+      this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
     }
   }
 
