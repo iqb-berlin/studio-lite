@@ -259,8 +259,10 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    this.iFrameHostElement = <HTMLElement>document.querySelector('#iFrameHost');
-    if (this.unitId && this.unitId > 0) this.sendUnitDataToPlayer();
+    setTimeout(() => {
+      this.iFrameHostElement = <HTMLElement>document.querySelector('#iFrameHost');
+      if (this.unitId && this.unitId > 0) this.sendUnitDataToPlayer();
+    })
   }
 
   ngOnChanges(): void {

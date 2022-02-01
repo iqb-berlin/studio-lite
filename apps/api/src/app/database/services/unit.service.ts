@@ -37,9 +37,12 @@ export class UnitService {
   async patchMetadata(workspaceId: number, unitId: number, newData: UnitMetadataDto): Promise<void> {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: {workspaceId: workspaceId, id: unitId}});
-    if (newData.key) unitToUpdate.key = newData.key;
-    if (newData.name) unitToUpdate.name = newData.name;
-    if (newData.description) unitToUpdate.description = newData.description;
+    const dataKeys = Object.keys(newData);
+    if (dataKeys.indexOf('key') >= 0) unitToUpdate.key = newData.key;
+    if (dataKeys.indexOf('name') >= 0) unitToUpdate.name = newData.name;
+    if (dataKeys.indexOf('description') >= 0) unitToUpdate.description = newData.description;
+    if (dataKeys.indexOf('editor') >= 0) unitToUpdate.editor = newData.editor;
+    if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     await this.unitsRepository.save(unitToUpdate);
   }
 

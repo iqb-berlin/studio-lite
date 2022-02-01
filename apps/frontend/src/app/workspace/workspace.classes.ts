@@ -82,6 +82,10 @@ export class ModuleCollection {
     return '?'
   }
 
+  hasEntries(): boolean {
+    return Object.keys(this.moduleData).length > 0;
+  }
+
   getEntries(): VeronaModuleInListDto[] {
     const regexPattern = /^([A-Za-z0-9_-]+)@(\d+)\.(\d+)/;
     const newList: {[key: string]: VeronaModuleInListDto} = {};
@@ -113,15 +117,16 @@ export class UnitMetadataStore {
 
   setPlayer(newPlayer: string) {
     if (newPlayer === this.originalData.player) {
-      if (this.changedData.player) this.changedData.player = undefined;
+      if (this.changedData.player) delete this.changedData.player;
     } else {
       this.changedData.player = newPlayer;
     }
+    console.log(this.changedData);
   }
 
   setEditor(newEditor: string) {
     if (newEditor === this.originalData.editor) {
-      if (this.changedData.editor) this.changedData.editor = undefined;
+      if (this.changedData.editor) delete this.changedData.editor;
     } else {
       this.changedData.editor = newEditor;
     }
@@ -129,17 +134,17 @@ export class UnitMetadataStore {
 
   setBasicData(newKey: string, newName: string, newDescription: string) {
     if (newKey === this.originalData.key) {
-      if (this.changedData.key) this.changedData.key = undefined;
+      if (this.changedData.key) delete this.changedData.key;
     } else {
       this.changedData.key = newKey;
     }
     if (newName === this.originalData.name) {
-      if (this.changedData.name) this.changedData.name = undefined;
+      if (this.changedData.name) delete this.changedData.name;
     } else {
       this.changedData.name = newName;
     }
     if (newDescription === this.originalData.description) {
-      if (this.changedData.description) this.changedData.description = undefined;
+      if (this.changedData.description) delete this.changedData.description;
     } else {
       this.changedData.description = newDescription;
     }
@@ -150,7 +155,8 @@ export class UnitMetadataStore {
   }
 
   isKeyOrNameChanged(): boolean {
-    return !!(this.changedData.key || this.changedData.name)
+    const dataKeys = Object.keys(this.changedData);
+    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0)
   }
 
   getChangedData(): UnitMetadataDto {
@@ -182,12 +188,12 @@ export class UnitDefinitionStore {
 
   setData(newVariables: string, newDefinition: string) {
     if (newVariables === this.originalData.variables) {
-      if (this.changedData.variables) this.changedData.variables = undefined;
+      if (this.changedData.variables) delete this.changedData.variables;
     } else {
       this.changedData.variables = newVariables;
     }
     if (newDefinition === this.originalData.definition) {
-      if (this.changedData.definition) this.changedData.definition = undefined;
+      if (this.changedData.definition) delete this.changedData.definition;
     } else {
       this.changedData.definition = newDefinition;
     }

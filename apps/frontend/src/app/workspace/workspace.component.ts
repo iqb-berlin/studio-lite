@@ -453,6 +453,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (result !== false) {
         if (this.workspaceService.unitMetadataStore) this.workspaceService.unitMetadataStore.restore()
         if (this.workspaceService.unitDefinitionStore) this.workspaceService.unitDefinitionStore.restore()
+        const unitId = this.workspaceService.selectedUnit$.getValue();
+        this.workspaceService.selectedUnit$.next(unitId);
       }
     });
   }

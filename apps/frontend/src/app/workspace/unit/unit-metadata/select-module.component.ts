@@ -13,12 +13,12 @@ import {ModuleCollection} from "../../workspace.classes";
   selector: 'app-select-module',
   templateUrl: './select-module.component.html'
 })
-export class SelectModuleComponent implements OnInit, OnDestroy, OnChanges {
+export class SelectModuleComponent implements OnDestroy {
   @Input() moduleList = new ModuleCollection([]);
-  @Input() selectedModuleId!: string;
+  selectedModuleId!: string;
   @Input() moduleType = '?';
   @Output() selectionChanged = new EventEmitter();
-  listLength = 0;
+  hasListEntries = false;
   moduleForm: FormGroup;
   isValid = false;
   isEmpty = false;
@@ -33,26 +33,19 @@ export class SelectModuleComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.setData();
-    });
-  }
-
-  ngOnChanges(): void {
-    if (this.moduleForm) this.setData();
+  setModule(newModule: string): void {
+    this.selectedModuleId = newModule;
+    this.setData();
   }
 
   private setData(): void {
     let newModuleSelectorValue = '';
     if (this.moduleFormDataChangedSubscription) this.moduleFormDataChangedSubscription.unsubscribe();
-    this.listLength = this.moduleList ? Object.keys(this.moduleList).length : 0;
+    this.hasListEntries = this.moduleList && this.moduleList.hasEntries();
     this.isValid = true;
     this.isEmpty = true;
     this.moduleSubstitute = '';
-    if (this.selectedModuleId) {
-      this.isEmpty = false;
-    }
+    this.isEmpty = !this.selectedModuleId;
     if (!this.isEmpty) {
       const checkModuleId = this.moduleList.isValid(this.selectedModuleId);
       if (checkModuleId === false) {

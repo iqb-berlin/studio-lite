@@ -1,7 +1,7 @@
-<div [hidden]="listLength > 0">
+<div [hidden]="hasListEntries">
   <p>Kein {{ moduleType }} in diesem System verfügbar.</p>
 </div>
-<form [formGroup]="moduleForm" *ngIf="listLength > 0" fxFlex>
+<form [formGroup]="moduleForm" *ngIf="hasListEntries" fxFlex>
   <p *ngIf="isEmpty">{{moduleType}} ist nicht definiert.</p>
   <p *ngIf="!isValid">{{moduleType}} ist ungültig ({{selectedModuleId}}).</p>
   <p *ngIf="moduleSubstitute">Der {{moduleType}} mit der Kennung "{{selectedModuleId}}" ist nicht in diesem System verfügbar.

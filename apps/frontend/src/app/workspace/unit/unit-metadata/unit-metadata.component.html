@@ -1,5 +1,5 @@
 <form [formGroup]="unitForm" fxFlex>
-  <div fxLayout="row wrap" style="margin: 10px" fxLayoutGap="50px" fxLayoutAlign="space-between start" fxFlex>
+  <div fxLayout="row wrap" style="margin: 10px" fxLayoutGap="10px" fxLayoutAlign="space-between stretch" fxFlex>
     <div fxLayout="column" fxFlex="1 0 300px">
       <mat-form-field>
         <mat-label>Kurzname</mat-label>
@@ -19,18 +19,19 @@
                   cdkAutosizeMinRows="6"></textarea>
       </mat-form-field>
     </div>
+    <div style="background-color: #f2f2f2" fxFlex="10px"></div>
     <div fxLayout="column" fxFlex="1 0 300px">
-      <div fxLayout="'row">
-        <div fxFlex="1">Editor für Unitdefinition</div>
+      <div fxLayout="row" fxLayoutAlign="space-between start">
+        <div fxFlex="40%">Editor für die Definition der Aufgabe</div>
         <app-select-module #editor [moduleList]="workspaceService.editorList"
-                           fxFlex="2"
+                           fxFlex="55%"
                            moduleType="Editor">
         </app-select-module>
       </div>
-      <div fxLayout="'row">
-        <div fxFlex="1">Player für Voransicht</div>
+      <div fxLayout="row" fxLayoutAlign="space-between start">
+        <div fxFlex="40%">Player für Voransicht</div>
         <app-select-module #player [moduleList]="workspaceService.playerList"
-                           fxFlex="2"
+                           fxFlex="55%"
                            moduleType="Player">
         </app-select-module>
       </div>

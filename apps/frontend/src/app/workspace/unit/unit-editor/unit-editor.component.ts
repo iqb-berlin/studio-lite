@@ -200,8 +200,10 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    this.iFrameHostElement = <HTMLElement>document.querySelector('#iFrameHostEditor');
-    if (this.unitId && this.unitId > 0) this.sendUnitDataToEditor();
+    setTimeout(() => {
+      this.iFrameHostElement = <HTMLElement>document.querySelector('#iFrameHostEditor');
+      if (this.unitId && this.unitId > 0) this.sendUnitDataToEditor();
+    })
   }
 
   ngOnChanges(): void {

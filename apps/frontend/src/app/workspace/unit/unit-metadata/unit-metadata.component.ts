@@ -17,8 +17,8 @@ import {UnitMetadataStore} from "../../workspace.classes";
 })
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
-  @ViewChild('#editor') editorSelector: SelectModuleComponent | undefined;
-  @ViewChild('#player') playerSelector: SelectModuleComponent | undefined;
+  @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
+  @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   private unitIdChangedSubscription: Subscription | undefined;
   private unitFormDataChangedSubscription: Subscription | undefined;
   private editorSelectionChangedSubscription: Subscription | undefined;
@@ -42,8 +42,10 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
-      this.readData();
+    setTimeout(() => {
+      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+        this.readData();
+      })
     })
   }
 
@@ -74,13 +76,13 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         description: unitMetadata.description
       }, {emitEvent: false});
       if (this.editorSelector) {
-        this.editorSelector.selectedModuleId = unitMetadata.editor ? unitMetadata.editor : '';
+        this.editorSelector.setModule(unitMetadata.editor ? unitMetadata.editor : '');
         this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setEditor(selectedValue)
         })
       }
       if (this.playerSelector) {
-        this.playerSelector.selectedModuleId = unitMetadata.player ? unitMetadata.player : '';
+        this.playerSelector.setModule(unitMetadata.player ? unitMetadata.player : '');
         this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setPlayer(selectedValue)
         })
