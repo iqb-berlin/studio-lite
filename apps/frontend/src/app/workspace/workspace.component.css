@@ -23,10 +23,11 @@
   margin: 0;
 }
 
-.no-wrap {
+.unit-list-entry {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 14px
 }
 
 .unit-list {
@@ -38,10 +39,6 @@
   background-color: lightslategray;
   font-size: 16px;
   padding: 2px;
-}
-
-.mat-list-item {
-  padding: 0 8px;
 }
 
 .selected {

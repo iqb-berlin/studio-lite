@@ -75,8 +75,12 @@ export class WorkspaceService {
     return false;
   }
 
-  resetDataStore(): void {
+  resetUnitData(): void {
     this.setChangedUnitMetadata();
+  }
+
+  loadModules(): void {
+    console.log('loadModules');
   }
 
   saveUnitData(): Observable<boolean> {

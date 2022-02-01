@@ -2,26 +2,27 @@
   <div class="navibar" fxLayout="column" fxFlex="200px">
     <div fxLayout="row" style="margin: 2px">
       <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
-              [disabled]="!ds.unitMetadataChanged && !ds.unitDefinitionChanged" matTooltipPosition="above">
+              [disabled]="!workspaceService.unitMetadataChanged && !workspaceService.unitDefinitionChanged" matTooltipPosition="above">
         <mat-icon>close</mat-icon>
       </button>
       <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
-              [disabled]="!ds.unitMetadataChanged && !ds.unitDefinitionChanged" matTooltipPosition="above">
+              [disabled]="!workspaceService.unitMetadataChanged && !workspaceService.unitDefinitionChanged" matTooltipPosition="above">
         Speichern <mat-icon>save</mat-icon>
       </button>
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxFlex class="unit-list">
-      <mat-selection-list [multiple]="false"
-                          *ngFor="let unitGroup of ds.unitList.groups"
-                          [(ngModel)]="selectedUnits"
-                          (ngModelChange)="onUnitSelectionChange()">
+      <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList.groups">
         <div class="unit-group-header">{{unitGroup.name}}</div>
-        <mat-list-option *ngFor="let unit of unitGroup.units" [value]="unit.id" style="height: 24px;" class="no-wrap" [matTooltip]="unit.name ? unit.name : unit.id.toString()"
-                         [class]="unit.id === (ds.selectedUnit$ | async) ? 'selected' : 'not-selected'">
-          {{ unit.key }} - {{ unit.name }}
-        </mat-list-option>
-      </mat-selection-list>
+        <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+                *ngFor="let unit of unitGroup.units"
+                class="unit-list-entry"
+                [matTooltip]="unit.name ? unit.name : unit.id.toString()"
+                (click)="selectUnit(unit.id)"
+                [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
+          {{ unit.key }}{{ unit.name ? ' - ' + unit.name : ''}}
+        </a>
+      </mat-nav-list>
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
@@ -61,8 +62,6 @@
     <iqb-files-upload-queue #fileUploadQueue
                             [httpUrl]="uploadUrl"
                             [fileAlias]="'unit-file'"
-                            [tokenName]="'t'"
-                            [token]="token"
                             [folderName]="'p'"
                             [folder]="uploadProcessId"
                             (uploadCompleteEvent)="finishUnitUpload()">
