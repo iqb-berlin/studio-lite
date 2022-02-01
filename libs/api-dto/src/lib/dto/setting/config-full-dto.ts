@@ -14,8 +14,8 @@ export class ConfigFullDto {
   globalWarningText = '';
 
   @ApiProperty()
-  globalWarningExpiredDay: Date | undefined;
+  globalWarningExpiredDay?: Date;
 
   @ApiProperty()
-  globalWarningExpiredHour: number | undefined;
+  globalWarningExpiredHour?: number;
 }

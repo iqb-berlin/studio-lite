@@ -1,14 +1,12 @@
 import {
-  BehaviorSubject, forkJoin, Observable, of
+  BehaviorSubject, forkJoin, lastValueFrom, Observable, of
 } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import {
-  BackendService, ModulData, UnitMetadata
-} from './backend.service';
-import {UnitInListDto, UnitMetadataDto} from "@studio-lite-lib/api-dto";
-import {UnitCollection} from "./workspace.classes";
+import { BackendService } from './backend.service';
+import {UnitInListDto} from "@studio-lite-lib/api-dto";
+import {ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore} from "./workspace.classes";
 
 @Injectable({
   providedIn: 'root'
@@ -16,24 +14,15 @@ import {UnitCollection} from "./workspace.classes";
 export class WorkspaceService {
   selectedWorkspace = 0;
   selectedUnit$ = new BehaviorSubject<number>(0);
-  editorList: { [key: string]: ModulData; } | null = null;
-  defaultEditor = '';
-  playerList: { [key: string]: ModulData; } | null = null;
-  defaultPlayer = '';
-  unitMetadataOld: { editorid: any; description: any; id: any; label: any; key: any; lastchanged: any; playerid: any } | null = null;
-  unitMetadataNew: { editorid: any; description: any; id: any; label: any; key: any; lastchanged: any; playerid: any } | null = null;
-  unitDefinitionOld = '';
-  unitDefinitionNew = '';
-  unitDefinitionChanged = false;
+  editorList = new ModuleCollection([]);
+  playerList = new ModuleCollection([]);
+  unitMetadataStore: UnitMetadataStore | undefined;
+  unitDefinitionStore: UnitDefinitionStore | undefined;
   unitList = new UnitCollection([]);
 
-  unitMetadata: UnitMetadataDto = {id: 0};
-  unitMetadataChanged = false;
-  private changedUnitMetadata: UnitMetadataDto = {id: 0};
-
-  constructor(private bs: BackendService) {
-
-  }
+  constructor(
+    private bs: BackendService
+  ) {}
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -51,116 +40,42 @@ export class WorkspaceService {
     };
   }
 
-  static validModuleId(moduleId: string, moduleList: { [key: string]: ModulData; } | null): boolean | string {
-    if (!moduleList) return false;
-    if (moduleList[moduleId]) return true;
-    const regexPattern = /^([A-Za-z0-9_-]+)@(\d+)\.(\d+)/;
-    const matches1 = regexPattern.exec(moduleId);
-    if (!matches1 || matches1.length !== 4) return false;
-    let bestMatchId = '';
-    let bestMatchMinor = +matches1[3];
-    Object.keys(moduleList).forEach(k => {
-      const matches2 = regexPattern.exec(k);
-      if (matches2 && matches2.length === 4) {
-        if ((matches2[1] === matches1[1]) && (matches2[2] === matches1[2])) {
-          const minor = +matches2[3];
-          if (minor > bestMatchMinor) {
-            bestMatchMinor = minor;
-            bestMatchId = k;
-          }
-        }
-      }
-    });
-    if (bestMatchId) return bestMatchId;
-    return false;
-  }
-
   resetUnitData(): void {
-    this.setChangedUnitMetadata();
+    this.unitMetadataStore = undefined;
+    this.unitDefinitionStore = undefined;
   }
 
-  loadModules(): void {
-    console.log('loadModules');
+  isChanged(): boolean {
+    return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
+      (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()))
   }
 
-  saveUnitData(): Observable<boolean> {
-    if (this.unitMetadataNew && this.unitMetadataOld) {
-      const reloadUnitList = (this.unitMetadataNew.key !== this.unitMetadataOld.key) ||
-        (this.unitMetadataNew.label !== this.unitMetadataOld.label);
-      const saveSubscriptions: Observable<number | boolean>[] = [];
-      if (this.unitMetadataChanged) {
-        saveSubscriptions.push(this.bs.setUnitMetadata(this.selectedWorkspace, this.changedUnitMetadata));
+  async saveUnitData(): Promise<boolean> {
+    let reloadUnitList = false;
+    let saveOk = true;
+    if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
+      saveOk = await lastValueFrom(this.bs.setUnitMetadata(
+        this.selectedWorkspace, this.unitMetadataStore.getChangedData()));
+      if (saveOk) {
+        reloadUnitList = this.unitMetadataStore.isKeyOrNameChanged();
+        this.unitMetadataStore.applyChanges()
       }
-      if (this.unitDefinitionChanged) {
-        saveSubscriptions.push(this.bs.setUnitDefinition(
-          this.selectedWorkspace, this.unitMetadataNew.id, this.unitDefinitionNew
-        ));
-      }
-      if (saveSubscriptions.length > 0) {
-        return forkJoin(saveSubscriptions).pipe(
-          switchMap(results => {
-            let isFailing = false;
-            results.forEach(r => {
-              if (r !== true) isFailing = true;
-            });
-            if (isFailing) return of(false);
-            if (this.unitMetadataNew) {
-              this.unitMetadataNew.lastchanged = Math.round(Date.now() / 1000);
-              this.unitMetadataOld = {
-                id: this.unitMetadataNew.id,
-                key: this.unitMetadataNew.key,
-                label: this.unitMetadataNew.label,
-                description: this.unitMetadataNew.description,
-                editorid: this.unitMetadataNew.editorid,
-                playerid: this.unitMetadataNew.playerid,
-                lastchanged: this.unitMetadataNew.lastchanged
-              };
-            }
-            this.unitMetadataChanged = false;
-            this.unitDefinitionOld = this.unitDefinitionNew;
-            this.unitDefinitionChanged = false;
-            if (reloadUnitList) {
-              return this.bs.getUnitList(this.selectedWorkspace)
-                .pipe(
-                  catchError(() => []),
-                  map(uResponse => {
-                    this.unitList = new UnitCollection(uResponse);
-                    return true;
-                  })
-                );
-            }
-            return of(true);
-          })
-        );
-      }
-      return of(true);
     }
-    return of(true);
-  }
-
-  setUnitDataChanged(): void {
-    this.unitMetadataChanged = this.getUnitMetaDataChanged();
-    this.unitDefinitionChanged = this.unitDefinitionNew !== this.unitDefinitionOld;
-  }
-
-  private getUnitMetaDataChanged(): boolean {
-    if (this.unitMetadataOld && this.unitMetadataNew) {
-      if (this.unitMetadataNew.key !== this.unitMetadataOld.key) return true;
-      if (this.unitMetadataNew.label !== this.unitMetadataOld.label) return true;
-      if (this.unitMetadataNew.description !== this.unitMetadataOld.description) return true;
-      if (this.unitMetadataNew.editorid !== this.unitMetadataOld.editorid) return true;
-      if (this.unitMetadataNew.playerid !== this.unitMetadataOld.playerid) return true;
+    if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
+      saveOk = await lastValueFrom(this.bs.setUnitDefinition(
+        this.selectedWorkspace, this.unitDefinitionStore.getChangedData()));
+      if (saveOk) this.unitDefinitionStore.applyChanges();
     }
-    return false;
-  }
-
-  setChangedUnitMetadata(unitData?: UnitMetadataDto): void {
-    if (unitData) {
-      this.changedUnitMetadata = unitData;
-      this.unitMetadataChanged = Object.keys(unitData).length > 1;
-    } else {
-      this.changedUnitMetadata = {id: 0};
-      this.unitMetadataChanged = false;
+    if (reloadUnitList) {
+      saveOk = await lastValueFrom(this.bs.getUnitList(this.selectedWorkspace)
+          .pipe(
+            map(uResponse => {
+              this.unitList = new UnitCollection(uResponse);
+              return true;
+            })
+          )
+      )
     }
+    return saveOk;
   }
 }

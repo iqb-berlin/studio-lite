@@ -118,7 +118,7 @@ export class ExportUnitComponent implements OnInit {
             this.usedPlayers = [];
             allMetadata.forEach(umd => {
               if (umd.playerid) {
-                const validPlayerId = WorkspaceService.validModuleId(umd.playerid, this.ds.playerList);
+                const validPlayerId = this.ds.playerList.isValid(umd.playerid);
                 if (validPlayerId !== false) {
                   this.unitsWithPlayer.push(umd.id);
                   const playerIdToAdd = validPlayerId === true ? umd.playerid : validPlayerId;

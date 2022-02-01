@@ -10,6 +10,8 @@ import {
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
+import {UnitDefinitionDto} from "@studio-lite-lib/api-dto";
+import {UnitDefinitionStore} from "../../workspace.classes";
 
 declare let srcDoc: any;
 
@@ -136,20 +138,19 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
     this.setResponsesStatus('none');
     this.setPageList([], '');
     if (this.unitId && this.unitId > 0) {
-      const playerValidation = WorkspaceService.validModuleId(this.playerId, this.ds.playerList);
+      const playerValidation = this.ds.playerList.isValid(this.playerId);
       if (playerValidation === false) {
         this.buildPlayer(this.playerId); // creates error message
       } else {
         if (playerValidation !== true) this.playerId = playerValidation;
         if ((this.playerId === this.lastPlayerId) && this.postMessageTarget) {
-          if (this.ds.unitDefinitionNew) {
-            this.postUnitDef(this.ds.unitDefinitionNew);
+          if (this.ds.unitDefinitionStore) {
+            this.postUnitDef(this.ds.unitDefinitionStore);
           } else {
             this.bs.getUnitDefinition(this.ds.selectedWorkspace, this.unitId).subscribe(
               ued => {
-                this.ds.unitDefinitionOld = ued;
-                this.ds.unitDefinitionNew = ued;
-                this.postUnitDef(ued);
+                this.ds.unitDefinitionStore = new UnitDefinitionStore(ued)
+                this.postUnitDef(this.ds.unitDefinitionStore);
               },
               err => {
                 this.snackBar.open(`Konnte Aufgabendefinition nicht laden (${err.code})`, 'Fehler', { duration: 3000 });
@@ -166,13 +167,14 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private postUnitDef(unitDef: string): void {
+  private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
+    const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       if (this.playerApiVersion === 1) {
         this.postMessageTarget.postMessage({
           type: 'vo.ToPlayer.DataTransfer',
           sessionId: this.sessionId,
-          unitDefinition: unitDef
+          unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
       } else {
         this.postMessageTarget.postMessage({
@@ -186,7 +188,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
           playerConfig: {
             stateReportPolicy: 'eager'
           },
-          unitDefinition: unitDef
+          unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
       }
     }
@@ -209,8 +211,8 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
       while (this.iFrameHostElement.lastChild) {
         this.iFrameHostElement.removeChild(this.iFrameHostElement.lastChild);
       }
-      if (playerId && this.ds.playerList && this.ds.playerList[playerId]) {
-        const playerData = this.ds.playerList[playerId];
+      if (playerId && this.ds.playerList && this.ds.playerList.isInList(playerId)) {
+        const playerData = this.ds.playerList.getFile(playerId);
         this.playerName = playerData.label;
         if (playerData.html) {
           this.setupPlayerIFrame(playerData.html);

@@ -22,13 +22,17 @@
     <div fxLayout="column" fxFlex="1 0 300px">
       <div fxLayout="'row">
         <div fxFlex="1">Editor für Unitdefinition</div>
-        <div #editor fxFlex="1"></div>
-        <button mat-raised-button matTooltip="Editor ändern"><mat-icon>edit</mat-icon></button>
+        <app-select-module #editor [moduleList]="workspaceService.editorList"
+                           fxFlex="2"
+                           moduleType="Editor">
+        </app-select-module>
       </div>
       <div fxLayout="'row">
         <div fxFlex="1">Player für Voransicht</div>
-        <div #player fxFlex="1"></div>
-        <button mat-raised-button matTooltip="Editor ändern" (click)="click()"><mat-icon>edit</mat-icon></button>
+        <app-select-module #player [moduleList]="workspaceService.playerList"
+                           fxFlex="2"
+                           moduleType="Player">
+        </app-select-module>
       </div>
     </div>
   </div>

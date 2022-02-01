@@ -41,6 +41,9 @@ export class UnitService {
     if (newData.name) unitToUpdate.name = newData.name;
     if (newData.description) unitToUpdate.description = newData.description;
     await this.unitsRepository.save(unitToUpdate);
+  }
 
+  async remove(id: number | number[]): Promise<void> {
+    await this.unitsRepository.delete(id);
   }
 }

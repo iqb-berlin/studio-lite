@@ -2,11 +2,11 @@
   <div class="navibar" fxLayout="column" fxFlex="200px">
     <div fxLayout="row" style="margin: 2px">
       <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
-              [disabled]="!workspaceService.unitMetadataChanged && !workspaceService.unitDefinitionChanged" matTooltipPosition="above">
+              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
         <mat-icon>close</mat-icon>
       </button>
       <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
-              [disabled]="!workspaceService.unitMetadataChanged && !workspaceService.unitDefinitionChanged" matTooltipPosition="above">
+              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
         Speichern <mat-icon>save</mat-icon>
       </button>
     </div>

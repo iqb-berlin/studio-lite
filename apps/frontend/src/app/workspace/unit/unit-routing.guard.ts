@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogData, SaveOrDiscardComponent } from '../dialogs/save-or-discard.component';
 import { WorkspaceService } from '../workspace.service';
@@ -13,11 +13,11 @@ export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceCom
   constructor(
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,
-    public ds: WorkspaceService
+    public workspaceService: WorkspaceService
   ) { }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.ds.unitMetadataChanged || this.ds.unitDefinitionChanged) {
+    if (this.workspaceService.isChanged()) {
       const dialogRef = this.confirmDialog.open(SaveOrDiscardComponent, {
         width: '500px',
         height: '300px',
@@ -38,16 +38,15 @@ export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceCom
           if (result === 'NO') {
             return of(true);
           } // 'YES':
-          return this.ds.saveUnitData().pipe(
-            map(saveResult => {
-              if (saveResult === true) {
+          return this.workspaceService.saveUnitData()
+            .then(saveResult => {
+              if (saveResult) {
                 this.snackBar.open('Änderungen an Aufgabedaten gespeichert', '', { duration: 1000 });
                 return true;
               }
               this.snackBar.open('Problem: Konnte Aufgabendaten nicht speichern', '', { duration: 1000 });
               return false;
             })
-          );
         })
       );
     }

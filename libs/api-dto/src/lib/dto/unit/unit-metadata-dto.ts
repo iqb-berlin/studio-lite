@@ -25,12 +25,21 @@ export class UnitMetadataDto {
   @ApiProperty()
   schemer?: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time'
+  })
   lastChangedMetadata?: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time'
+  })
   lastChangedDefinition?: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time'
+  })
   lastChangedScheme?: Date;
 }

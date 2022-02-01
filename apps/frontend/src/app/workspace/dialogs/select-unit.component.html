@@ -24,7 +24,7 @@
 
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.key}}-{{element.label}} </mat-cell>
+        <mat-cell *matCellDef="let element"> {{element.key}}{{element.name ? ' - ' + element.name : ''}} </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

@@ -9,8 +9,8 @@
   <div fxLayout="column">
     <mat-form-field>
       <mat-select [placeholder]="moduleType" formControlName="moduleSelector">
-        <mat-option *ngFor="let m of moduleList | keyvalue" [value]="m.key">
-          {{m.value.label}}
+        <mat-option *ngFor="let m of moduleList.getEntries()" [value]="m.key">
+          {{m.key}}
         </mat-option>
       </mat-select>
     </mat-form-field>

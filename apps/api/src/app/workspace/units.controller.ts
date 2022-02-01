@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Patch, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post, UseGuards} from '@nestjs/common';
 import {UnitService} from "../database/services/unit.service";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
@@ -6,6 +6,7 @@ import {CreateUnitDto, UnitInListDto, UnitMetadataDto, WorkspaceFullDto} from "@
 import {WorkspaceGuard} from "./workspace.guard";
 import {WorkspaceId} from "./workspace.decorator";
 import {ApiImplicitParam} from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
+import {IsAdminGuard} from "../admin/is-admin.guard";
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -60,5 +61,16 @@ export class UnitsController {
   async create(@WorkspaceId() workspaceId: number,
                @Body() createUnitDto: CreateUnitDto) {
     return this.unitService.create(workspaceId, createUnitDto)
+  }
+
+  @Delete(':ids')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiTags('workspace unit')
+  async remove(@WorkspaceId() workspaceId: number,
+               @Param('ids') ids: string): Promise<void> {
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
+    return this.unitService.remove(idsAsNumberArray);
   }
 }

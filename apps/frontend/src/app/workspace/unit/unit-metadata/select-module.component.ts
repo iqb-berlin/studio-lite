@@ -5,6 +5,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ModulData } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
+import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
+import {ModuleCollection} from "../../workspace.classes";
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -12,7 +14,7 @@ import { WorkspaceService } from '../../workspace.service';
   templateUrl: './select-module.component.html'
 })
 export class SelectModuleComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() moduleList!: { [key: string]: ModulData; } | null;
+  @Input() moduleList = new ModuleCollection([]);
   @Input() selectedModuleId!: string;
   @Input() moduleType = '?';
   @Output() selectionChanged = new EventEmitter();
@@ -52,13 +54,13 @@ export class SelectModuleComponent implements OnInit, OnDestroy, OnChanges {
       this.isEmpty = false;
     }
     if (!this.isEmpty) {
-      const checkModuleId = WorkspaceService.validModuleId(this.selectedModuleId, this.moduleList);
+      const checkModuleId = this.moduleList.isValid(this.selectedModuleId);
       if (checkModuleId === false) {
         this.isValid = false;
       } else if (checkModuleId === true) {
         newModuleSelectorValue = this.selectedModuleId;
       } else if (this.moduleList) {
-        this.moduleSubstitute = this.moduleList[checkModuleId].label;
+        this.moduleSubstitute = this.moduleList.getName(checkModuleId);
       }
     }
     this.moduleFormDataChangedSubscription = this.moduleForm.valueChanges.subscribe(() => {

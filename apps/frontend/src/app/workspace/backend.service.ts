@@ -2,7 +2,13 @@ import { catchError, map } from 'rxjs/operators';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
-import {CreateUnitDto, UnitInListDto, UnitMetadataDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
+import {
+  CreateUnitDto, UnitDefinitionDto,
+  UnitInListDto,
+  UnitMetadataDto,
+  VeronaModuleInListDto,
+  WorkspaceFullDto
+} from "@studio-lite-lib/api-dto";
 import {AppHttpError} from "../app.classes";
 
 @Injectable({
@@ -32,12 +38,9 @@ export class BackendService {
       );
   }
 
-  addUnit(workspaceId: number, key: string, label: string, editor: string, player: string): Observable<number> {
+  addUnit(workspaceId: number, newUnit: CreateUnitDto): Observable<number> {
     return this.http
-      .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`,
-      <CreateUnitDto>{
-        key: key, name: label
-      })
+      .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`, newUnit)
       .pipe(
         catchError(err => throwError(new AppHttpError(err))),
         map(returnId => Number(returnId))
@@ -59,9 +62,10 @@ export class BackendService {
 
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
     return this.http
-      .put<boolean>(`${this.serverUrl}deleteUnits.php`, { t: localStorage.getItem('t'), ws: workspaceId, u: units })
+      .delete(`${this.serverUrl}workspace/${workspaceId}/${units.join(';')}`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -104,10 +108,9 @@ export class BackendService {
       );
   }
 
-  getUnitDefinition(workspaceId: number, unitId: number): Observable<string> {
+  getUnitDefinition(workspaceId: number, unitId: number): Observable<UnitDefinitionDto> {
     return this.http
-      .put<string>(`${this.serverUrl}getUnitDefinition.php`,
-      { t: localStorage.getItem('t'), ws: workspaceId, u: unitId })
+      .get<UnitDefinitionDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`)
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
@@ -134,17 +137,12 @@ export class BackendService {
       );
   }
 
-  setUnitDefinition(workspaceId: number,
-                    unitId: number, unitDef: string): Observable<boolean> {
+  setUnitDefinition(workspaceId: number, unitData: UnitDefinitionDto): Observable<boolean> {
     return this.http
-      .put<boolean>(`${this.serverUrl}setUnitDefinition.php`, {
-      t: localStorage.getItem('t'),
-      ws: workspaceId,
-      u: unitId,
-      ud: unitDef
-    })
+      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitData.id}/definition`, unitData)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -154,6 +152,14 @@ export class BackendService {
       { m: moduleId })
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
+      );
+  }
+
+  getModuleList(type: string): Observable<VeronaModuleInListDto[]> {
+    return this.http
+      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
+      .pipe(
+        catchError(() => of([]))
       );
   }
 

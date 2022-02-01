@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
+import {UnitDefinitionStore} from "../../workspace.classes";
 
 declare let srcDoc: any;
 
@@ -63,8 +64,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
             if (msgData.sessionId === this.sessionId) {
               if (this.editorApiVersion > 1) {
                 if (msgData.unitDefinition) {
-                  this.ds.unitDefinitionNew = msgData.unitDefinition;
-                  this.ds.setUnitDataChanged();
+                  this.ds.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
                 } else {
                   this.postMessageTarget.postMessage({
                     type: 'voeGetDefinitionRequest',
@@ -82,8 +82,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
 
           case 'vo.FromAuthoringModule.DataTransfer':
             if (msgData.sessionId === this.sessionId) {
-              this.ds.unitDefinitionNew = msgData.unitDefinition;
-              this.ds.setUnitDataChanged();
+              this.ds.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
             }
             break;
 
@@ -97,20 +96,19 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   sendUnitDataToEditor(): void {
     if (this.unitId && this.unitId > 0) {
-      const editorValidation = WorkspaceService.validModuleId(this.editorId, this.ds.editorList);
+      const editorValidation = this.ds.editorList.isValid(this.editorId);
       if (editorValidation === false) {
         this.buildEditor(this.editorId); // creates error message
       } else {
         if (editorValidation !== true) this.editorId = editorValidation;
         if ((this.editorId === this.lastEditorId) && this.postMessageTarget) {
-          if (this.ds.unitDefinitionNew) {
-            this.postUnitDef(this.ds.unitDefinitionNew);
+          if (this.ds.unitDefinitionStore) {
+            this.postUnitDef(this.ds.unitDefinitionStore);
           } else {
             this.bs.getUnitDefinition(this.ds.selectedWorkspace, this.unitId).subscribe(
               ued => {
-                this.ds.unitDefinitionNew = ued;
-                this.ds.unitDefinitionOld = ued;
-                this.postUnitDef(this.ds.unitDefinitionNew);
+                this.ds.unitDefinitionStore = new UnitDefinitionStore(ued)
+                this.postUnitDef(this.ds.unitDefinitionStore);
               },
               err => {
                 this.snackBar.open(`Konnte Aufgabendefinition nicht laden (${err.code})`, 'Fehler', { duration: 3000 });
@@ -127,13 +125,14 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private postUnitDef(unitDef: string): void {
+  private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
+    const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       if (this.editorApiVersion === 1) {
         this.postMessageTarget.postMessage({
           type: 'vo.ToAuthoringModule.DataTransfer',
           sessionId: this.sessionId,
-          unitDefinition: unitDef
+          unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
       } else {
         this.postMessageTarget.postMessage({
@@ -142,7 +141,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
           editorConfig: {
             definitionReportPolicy: 'eager'
           },
-          unitDefinition: unitDef
+          unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
       }
     }
@@ -155,8 +154,8 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
       while (this.iFrameHostElement.lastChild) {
         this.iFrameHostElement.removeChild(this.iFrameHostElement.lastChild);
       }
-      if (editorId && this.ds.editorList && this.ds.editorList[editorId]) {
-        const editorData = this.ds.editorList[editorId];
+      if (editorId && this.ds.editorList && this.ds.editorList.isInList(editorId)) {
+        const editorData = this.ds.editorList.getFile(editorId);
         if (editorData.html) {
           this.setupEditorIFrame(editorData.html);
           this.lastEditorId = editorId;

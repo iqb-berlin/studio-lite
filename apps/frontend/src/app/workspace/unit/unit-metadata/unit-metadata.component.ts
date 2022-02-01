@@ -7,6 +7,8 @@ import { WorkspaceService } from '../../workspace.service';
 import {BackendService} from '../../backend.service';
 import {ActivatedRoute, Router} from "@angular/router";
 import {UnitMetadataDto} from "@studio-lite-lib/api-dto";
+import {SelectModuleComponent} from "./select-module.component";
+import {UnitMetadataStore} from "../../workspace.classes";
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -15,12 +17,12 @@ import {UnitMetadataDto} from "@studio-lite-lib/api-dto";
 })
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
-  @ViewChild('#editor') editorDiv: HTMLDivElement | undefined;
-  @ViewChild('#player') playerDiv: HTMLDivElement | undefined;
-  private routingSubscription: Subscription | undefined;
+  @ViewChild('#editor') editorSelector: SelectModuleComponent | undefined;
+  @ViewChild('#player') playerSelector: SelectModuleComponent | undefined;
+  private unitIdChangedSubscription: Subscription | undefined;
   private unitFormDataChangedSubscription: Subscription | undefined;
-  workspaceId = 0;
-  unitId = 0;
+  private editorSelectionChangedSubscription: Subscription | undefined;
+  private playerSelectionChangedSubscription: Subscription | undefined;
   unitForm: FormGroup;
   timeZone = 'Europe/Berlin';
 
@@ -40,49 +42,63 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.route.parent) {
-      this.routingSubscription = this.route.parent.params.subscribe(params => {
-        this.workspaceId = Number(params['ws']);
-        this.unitId = Number(params['u']);
-        this.readData();
-      })
-    }
-  }
-
-  click() {
-    console.log(this.route.parent ? this.route.parent.params : '#')
+    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+      this.readData();
+    })
   }
 
   private readData(): void {
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
-    this.bs.getUnitMetadata(this.workspaceId, this.unitId).subscribe(unitData => {
+    if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
+    if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
+    if (this.workspaceService.unitMetadataStore) {
+      this.setupForm()
+    } else {
+      this.bs.getUnitMetadata(this.workspaceService.selectedWorkspace,
+          this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
+        this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
+        this.setupForm()
+      })
+    }
+  }
+
+  private setupForm() {
+    if (this.workspaceService.unitMetadataStore) {
+      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        WorkspaceService.unitKeyUniquenessValidator(unitData.id, this.workspaceService.unitList.units())]);
+        WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList.units())]);
       this.unitForm.setValue({
-        key: unitData.key,
-        name: unitData.name,
-        description: unitData.description
-      }, { emitEvent: false });
-      if (this.editorDiv) this.editorDiv.innerText = unitData.editor ? unitData.editor : '';
-      if (this.playerDiv) this.playerDiv.innerText = unitData.player ? unitData.player : '';
-      this.workspaceService.unitMetadata = unitData;
-      this.workspaceService.setChangedUnitMetadata();
+        key: unitMetadata.key,
+        name: unitMetadata.name,
+        description: unitMetadata.description
+      }, {emitEvent: false});
+      if (this.editorSelector) {
+        this.editorSelector.selectedModuleId = unitMetadata.editor ? unitMetadata.editor : '';
+        this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
+          this.workspaceService.unitMetadataStore?.setEditor(selectedValue)
+        })
+      }
+      if (this.playerSelector) {
+        this.playerSelector.selectedModuleId = unitMetadata.player ? unitMetadata.player : '';
+        this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
+          this.workspaceService.unitMetadataStore?.setPlayer(selectedValue)
+        })
+      }
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
-        const newUnitData: UnitMetadataDto = {id: this.unitId};
-        const newKey = this.unitForm.get('key')?.value;
-        if (newKey !== this.workspaceService.unitMetadata.key) newUnitData.key = newKey;
-        const newName = this.unitForm.get('name')?.value;
-        if (newName !== this.workspaceService.unitMetadata.name) newUnitData.name = newName;
-        const newDescription = this.unitForm.get('description')?.value;
-        if (newDescription !== this.workspaceService.unitMetadata.description) newUnitData.description = newDescription;
-        this.workspaceService.setChangedUnitMetadata(newUnitData);
-      });
-    });
+        this.workspaceService.unitMetadataStore?.setBasicData(
+          this.unitForm.get('key')?.value,
+          this.unitForm.get('name')?.value,
+          this.unitForm.get('description')?.value
+        );
+      })
+    }
   }
 
   ngOnDestroy(): void {
-    if (this.routingSubscription) this.routingSubscription.unsubscribe();
+    if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
+    if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
+    if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
   }
 }

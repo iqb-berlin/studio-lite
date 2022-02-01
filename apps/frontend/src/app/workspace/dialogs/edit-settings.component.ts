@@ -16,8 +16,8 @@ export class EditSettingsComponent {
     public ds: WorkspaceService
   ) {
     this.settingsForm = this.fb.group({
-      editorSelector: this.fb.control(this.ds.defaultEditor),
-      playerSelector: this.fb.control(this.ds.defaultPlayer)
+      editorSelector: this.fb.control(''),
+      playerSelector: this.fb.control('')
     });
   }
 }

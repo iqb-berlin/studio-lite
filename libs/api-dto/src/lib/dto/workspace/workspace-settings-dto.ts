@@ -8,5 +8,5 @@ export class WorkspaceSettingsDto {
   defaultPlayer = '';
 
   @ApiProperty()
-  unitGroups: string[] = [];
+  unitGroups?: string[];
 }
