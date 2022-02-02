@@ -1,12 +1,16 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards} from '@nestjs/common';
 import {UnitService} from "../database/services/unit.service";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {CreateUnitDto, UnitInListDto, UnitMetadataDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
+import {
+  CreateUnitDto,
+  UnitDefinitionDto,
+  UnitInListDto,
+  UnitMetadataDto
+} from "@studio-lite-lib/api-dto";
 import {WorkspaceGuard} from "./workspace.guard";
 import {WorkspaceId} from "./workspace.decorator";
 import {ApiImplicitParam} from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
-import {IsAdminGuard} from "../admin/is-admin.guard";
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -34,8 +38,20 @@ export class UnitsController {
     type: UnitMetadataDto
   })
   @ApiTags('workspace unit')
-  async findOnesMetadata(@WorkspaceId() workspaceId: number, @Param('id') unitId: number): Promise<UnitMetadataDto> {
+  async findOnesMetadata(@WorkspaceId() workspaceId: number, @Param('id', ParseIntPipe) unitId: number): Promise<UnitMetadataDto> {
     return this.unitService.findOnesMetadata(workspaceId, unitId);
+  }
+
+  @Get(':id/definition')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: UnitDefinitionDto
+  })
+  @ApiTags('workspace unit')
+  async findOnesDefinition(@WorkspaceId() workspaceId: number, @Param('id', ParseIntPipe) unitId: number): Promise<UnitDefinitionDto> {
+    return this.unitService.findOnesDefinition(workspaceId, unitId);
   }
 
   @Patch(':id/metadata')
@@ -44,9 +60,20 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchMetadata(@WorkspaceId() workspaceId: number,
-                      @Param('id') unitId: number,
+                      @Param('id', ParseIntPipe) unitId: number,
                       @Body() unitMetadataDto: UnitMetadataDto) {
     return this.unitService.patchMetadata(workspaceId, unitId, unitMetadataDto);
+  }
+
+  @Patch(':id/definition')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchDefinition(@WorkspaceId() workspaceId: number,
+                      @Param('id', ParseIntPipe) unitId: number,
+                      @Body() unitDefinitionDto: UnitDefinitionDto) {
+    return this.unitService.patchDefinition(workspaceId, unitId, unitDefinitionDto);
   }
 
   @Post('units')

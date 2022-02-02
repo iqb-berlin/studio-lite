@@ -7,6 +7,8 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { BackendService } from './backend.service';
 import {UnitInListDto} from "@studio-lite-lib/api-dto";
 import {ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore} from "./workspace.classes";
+import {AppService} from "../app.service";
+import {fakeAsync} from "@angular/core/testing";
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,8 @@ export class WorkspaceService {
   unitList = new UnitCollection([]);
 
   constructor(
-    private bs: BackendService
+    private backendService: BackendService,
+    private appService: AppService
   ) {}
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
@@ -52,19 +55,20 @@ export class WorkspaceService {
   }
 
   async getModuleHtml(key: string): Promise<string> {
-    console.log(key);
     if (Object.keys(this.moduleHtmlStore).indexOf(key) >= 0) return this.moduleHtmlStore[key]
-    const fileData = await lastValueFrom(this.bs.getModuleHtml(key));
+    this.appService.dataLoading = true;
+    const fileData = await lastValueFrom(this.backendService.getModuleHtml(key));
     this.moduleHtmlStore[key] = fileData.file;
-    console.log(Object.keys(this.moduleHtmlStore));
+    this.appService.dataLoading = false;
     return this.moduleHtmlStore[key]
   }
 
   async saveUnitData(): Promise<boolean> {
     let reloadUnitList = false;
     let saveOk = true;
+    this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
-      saveOk = await lastValueFrom(this.bs.setUnitMetadata(
+      saveOk = await lastValueFrom(this.backendService.setUnitMetadata(
         this.selectedWorkspace, this.unitMetadataStore.getChangedData()));
       if (saveOk) {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameChanged();
@@ -72,20 +76,22 @@ export class WorkspaceService {
       }
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
-      saveOk = await lastValueFrom(this.bs.setUnitDefinition(
+      saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
         this.selectedWorkspace, this.unitDefinitionStore.getChangedData()));
       if (saveOk) this.unitDefinitionStore.applyChanges();
     }
     if (reloadUnitList) {
-      saveOk = await lastValueFrom(this.bs.getUnitList(this.selectedWorkspace)
+      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspace)
           .pipe(
             map(uResponse => {
               this.unitList = new UnitCollection(uResponse);
+              this.appService.dataLoading = false;
               return true;
             })
           )
       )
     }
+    this.appService.dataLoading = false;
     return saveOk;
   }
 }

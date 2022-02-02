@@ -14,6 +14,7 @@ import Setting from "./entities/setting.entity";
 import {SettingService} from "./services/setting.service";
 import Unit from "./entities/unit.entity";
 import {UnitService} from "./services/unit.service";
+import UnitDefinition from "./entities/unit-definition.entity";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import {UnitService} from "./services/unit.service";
     WorkspaceGroup,
     WorkspaceUser,
     VeronaModule,
+    UnitDefinition,
     Setting,
     TypeOrmModule.forRootAsync({
         useFactory: () => ({
@@ -32,12 +34,14 @@ import {UnitService} from "./services/unit.service";
             "username": "superdb",
             "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",
             "database": "studio-lite",
-            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting, Unit],
+            "entities": [User, Workspace, WorkspaceGroup, WorkspaceUser,
+              UnitDefinition, VeronaModule, Setting, Unit],
             "synchronize": false
           })
       }
     ),
-    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser, VeronaModule, Setting, Unit])
+    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser,
+      UnitDefinition, VeronaModule, Setting, Unit])
   ],
   providers: [
     UsersService,
@@ -51,6 +55,7 @@ import {UnitService} from "./services/unit.service";
   exports: [
     User,
     Unit,
+    UnitDefinition,
     Workspace,
     WorkspaceUser,
     WorkspaceGroup,
