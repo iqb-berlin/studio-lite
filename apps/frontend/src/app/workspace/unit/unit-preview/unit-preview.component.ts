@@ -159,7 +159,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
-                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(ued)
+                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId,ued)
                 this.postUnitDef(this.workspaceService.unitDefinitionStore);
               },
               err => {

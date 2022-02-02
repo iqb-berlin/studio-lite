@@ -182,10 +182,12 @@ export class UnitMetadataStore {
 export class UnitDefinitionStore {
   private originalData: UnitDefinitionDto;
   private changedData: UnitDefinitionDto;
+  private unitId: number;
 
-  constructor(originalData: UnitDefinitionDto) {
+  constructor(unitId: number, originalData: UnitDefinitionDto) {
+    this.unitId = unitId;
     this.originalData = originalData;
-    this.changedData = <UnitDefinitionDto>{id: originalData.id}
+    this.changedData = <UnitDefinitionDto>{}
   }
 
   setData(newVariables: string, newDefinition: string) {
@@ -215,10 +217,10 @@ export class UnitDefinitionStore {
 
   applyChanges() {
     this.originalData = this.getData();
-    this.changedData = <UnitMetadataDto>{id: this.originalData.id}
+    this.changedData = <UnitDefinitionDto>{}
   }
 
   restore() {
-    this.changedData = <UnitMetadataDto>{id: this.originalData.id}
+    this.changedData = <UnitDefinitionDto>{}
   }
 }

@@ -77,7 +77,7 @@ export class WorkspaceService {
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
-        this.selectedWorkspace, this.unitDefinitionStore.getChangedData()));
+        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()));
       if (saveOk) this.unitDefinitionStore.applyChanges();
     }
     if (reloadUnitList) {

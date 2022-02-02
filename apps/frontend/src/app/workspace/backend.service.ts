@@ -137,9 +137,9 @@ export class BackendService {
       );
   }
 
-  setUnitDefinition(workspaceId: number, unitData: UnitDefinitionDto): Observable<boolean> {
+  setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitData.id}/definition`, unitData)
+      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`, unitData)
       .pipe(
         map(() => true),
         catchError(() => of(false))
