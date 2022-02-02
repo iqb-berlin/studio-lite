@@ -1,5 +1,5 @@
 import {
-  Component, HostListener, Input, OnChanges, OnDestroy, OnInit, ViewChild
+  Component, HostListener, OnDestroy, OnInit
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -10,7 +10,6 @@ import {
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import {UnitDefinitionDto} from "@studio-lite-lib/api-dto";
 import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
 
 @Component({
@@ -18,7 +17,7 @@ import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
   styleUrls: ['./unit-preview.component.css']
 })
 export class UnitPreviewComponent implements OnInit, OnDestroy {
-  @ViewChild('iFrameHostPlayer') iFrameHostElement: HTMLDivElement | undefined;
+  iFrameHostElement: HTMLDivElement | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
   private postMessageSubscription: Subscription  | undefined;
   private unitIdChangedSubscription: Subscription | undefined;
@@ -38,6 +37,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
       id: 'focus', label: 'F', color: 'DarkGray', description: 'Status: Player hat Fenster-Fokus'
     }
   ];
+  message = '';
 
   showPageNav = false;
   pageList: PageData[] = [];
@@ -54,9 +54,10 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
       if ((msgType !== undefined) && (msgType !== null)) {
         switch (msgType) {
           case 'vopReadyNotification':
+          case 'player':
           case 'vo.FromPlayer.ReadyNotification':
-            if (msgType === 'vopReadyNotification') {
-              const majorVersion = msgData.apiVersion.match(/\d+/);
+            if (msgType === 'vopReadyNotification' || msgType === 'player') {
+              const majorVersion = msgData.apiVersion ? msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
               if (majorVersion.length > 0) {
                 const majorVersionNumber = Number(majorVersion[0]);
                 this.playerApiVersion = majorVersionNumber > 2 ? 3 : 2;
@@ -130,7 +131,9 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     setTimeout(() => {
+      this.iFrameHostElement = <HTMLIFrameElement>document.querySelector('#iFrameHostPlayer');
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+        this.message = '';
         if (this.workspaceService.unitMetadataStore) {
           this.sendUnitDataToPlayer();
         } else {
@@ -171,8 +174,12 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           this.buildPlayer(playerId);
           // player gets unit data via ReadyNotification
         }
+      } else {
+        this.message = 'Kein gültiger Player zugewiesen. Bitte gehen Sie zu "Eigenschaften".';
+        this.buildPlayer();
       }
     } else {
+      this.message = 'Aufgabe nicht gefunden oder Daten fehlerhaft.';
       this.buildPlayer();
     }
   }
@@ -228,12 +235,11 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             this.setupPlayerIFrame(playerData);
             this.lastPlayerId = playerId;
           } else {
-            // todo: error message?
+            this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
             this.lastPlayerId = '';
           }
         })
       } else {
-        // todo: error message?
         this.lastPlayerId = '';
       }
     }

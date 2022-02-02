@@ -10,9 +10,12 @@ import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
 import {SelectModuleComponent} from "../unit-metadata/select-module.component";
 
 @Component({
-  template: `<div id="iFrameHostEditor"><iframe id="hosting-iframe" class="unitHost"
-                     sandbox="allow-forms allow-scripts allow-same-origin"
-  ></iframe></div>`,
+  template: `
+    <div *ngIf="message" style="margin: 30px">{{message}}</div>
+    <div id="iFrameHostEditor">
+      <iframe id="hosting-iframe" class="unitHost"
+              sandbox="allow-forms allow-scripts allow-same-origin"></iframe>
+    </div>`,
   styles: ['#iFrameHostEditor {height: calc(100% - 49px);}']
 })
 export class UnitEditorComponent implements OnInit, OnDestroy {
@@ -23,6 +26,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   private sessionId = '';
   private lastEditorId = '';
   editorApiVersion = 1;
+  message = '';
 
   constructor(
     private backendService: BackendService,
@@ -94,6 +98,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+        this.message = '';
         if (this.workspaceService.unitMetadataStore) {
           this.sendUnitDataToEditor();
         } else {
@@ -119,6 +124,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
+                console.log(ued);
                 this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued)
                 this.postUnitDef(this.workspaceService.unitDefinitionStore);
               },
@@ -132,10 +138,12 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           // editor gets unit data via ReadyNotification
         }
       } else {
-        this.buildEditor(); // creates error message
+        this.message = 'Kein gültiger Editor zugewiesen. Bitte gehen Sie zu "Eigenschaften".';
+        this.buildEditor();
       }
     } else {
-      this.buildEditor('');
+      this.message = 'Aufgabe nicht gefunden oder Daten fehlerhaft.';
+      this.buildEditor();
     }
   }
 
@@ -171,12 +179,11 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
             this.setupEditorIFrame(editorData);
             this.lastEditorId = editorId;
           } else {
-            // todo: error message?
+            this.message = `Der Editor "${editorId}" konnte nicht geladen werden.`;
             this.lastEditorId = '';
           }
         });
       } else {
-        // todo: error message?
         this.lastEditorId = '';
       }
     }
