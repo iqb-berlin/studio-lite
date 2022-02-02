@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 
 const pool = new Pool({
   user: 'superdb',
@@ -8,10 +9,11 @@ const pool = new Pool({
   port: 5432,
 })
 
-const sql = `
-  CREATE EXTENSION IF NOT EXISTS pgcrypto;
-  INSERT INTO public.user (name, password, is_admin)
-      VALUES ('tobias', encode(digest('wedding', 'sha1'), 'hex'), 'True');`;
+const name = 'rondo';
+const password = 'veniziano';
+const passwordEncrypted = bcrypt.hashSync(password, 11);
+const valuesString = "'" + name + "', '" + passwordEncrypted + "', 'True'";
+const sql = 'INSERT INTO public.user (name, password, is_admin) VALUES (' + valuesString + ');';
 
 pool.query(sql, function(err, result){
   console.log(err, result);
