@@ -44,7 +44,6 @@ export class WorkspaceService {
   resetUnitData(): void {
     this.unitMetadataStore = undefined;
     this.unitDefinitionStore = undefined;
-    this.moduleHtmlStore = {};
   }
 
   isChanged(): boolean {
@@ -53,9 +52,11 @@ export class WorkspaceService {
   }
 
   async getModuleHtml(key: string): Promise<string> {
-    if (this.moduleHtmlStore[key]) return this.moduleHtmlStore[key]
+    console.log(key);
+    if (Object.keys(this.moduleHtmlStore).indexOf(key) >= 0) return this.moduleHtmlStore[key]
     const fileData = await lastValueFrom(this.bs.getModuleHtml(key));
     this.moduleHtmlStore[key] = fileData.file;
+    console.log(Object.keys(this.moduleHtmlStore));
     return this.moduleHtmlStore[key]
   }
 

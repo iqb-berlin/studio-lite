@@ -1,4 +1,4 @@
-<div class="authoring-body" fxLayout="row">
+<div class="authoring-body" fxLayout="row" fxLayoutAlign="space-between stretch">
   <div class="navibar" fxLayout="column" fxFlex="200px">
     <div fxLayout="row" style="margin: 2px">
       <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
@@ -69,7 +69,7 @@
     <button mat-raised-button color="primary" *ngIf="fileUploadQueue.files.length <= 0" class="upload-message-ok-button"
             (click)="clearUploadMessages()">OK</button>
   </div>
-  <div fxFlex class="unitdatacontainer">
+  <div fxFlex class="unitdatacontainer" fxFlexLayout="column">
     <nav mat-tab-nav-bar>
       <a mat-tab-link
          *ngFor="let link of navLinks"

@@ -10,14 +10,15 @@ import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
 import {SelectModuleComponent} from "../unit-metadata/select-module.component";
 
 @Component({
-  template: `<div id="iFrameHostEditor"></div>`,
-  styles: ['#iFrameHostEditor {height: 99%; width: 100%;}']
+  template: `<div id="iFrameHostEditor"><iframe id="hosting-iframe" class="unitHost"
+                     sandbox="allow-forms allow-scripts allow-same-origin"
+  ></iframe></div>`,
+  styles: ['#iFrameHostEditor {height: calc(100% - 49px);}']
 })
 export class UnitEditorComponent implements OnInit, OnDestroy {
-  private iFrameHostElement: HTMLDivElement | undefined;
   private readonly postMessageSubscription: Subscription;
   private unitIdChangedSubscription: Subscription | undefined;
-  private iFrameElement: HTMLElement | undefined;
+  private iFrameElement: HTMLIFrameElement | undefined;
   private postMessageTarget: Window | undefined;
   private sessionId = '';
   private lastEditorId = '';
@@ -91,7 +92,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.iFrameHostElement = <HTMLDivElement>document.querySelector('#iFrameHostEditor');
+      this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
         if (this.workspaceService.unitMetadataStore) {
           this.sendUnitDataToEditor();
@@ -161,12 +162,9 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   }
 
   private buildEditor(editorId?: string) {
-    this.iFrameElement = undefined;
     this.postMessageTarget = undefined;
-    if (this.iFrameHostElement) {
-      while (this.iFrameHostElement.lastChild) {
-        this.iFrameHostElement.removeChild(this.iFrameHostElement.lastChild);
-      }
+    if (this.iFrameElement) {
+      this.iFrameElement.srcdoc = '';
       if (editorId) {
         this.workspaceService.getModuleHtml(editorId).then(editorData => {
           if (editorData) {
@@ -185,23 +183,18 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   }
 
   private setupEditorIFrame(editorHtml: string): void {
-    if (this.iFrameHostElement) {
-      console.log(this.iFrameHostElement);
-      this.iFrameElement = <HTMLIFrameElement>document.createElement('iframe');
-      this.iFrameElement.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin');
-      this.iFrameElement.setAttribute('class', 'unitHost');
-      this.iFrameElement.setAttribute('height', String(this.iFrameHostElement.clientHeight - 5));
-      this.iFrameHostElement.appendChild(this.iFrameElement);
-      this.iFrameElement.setAttribute('srcdoc', editorHtml);
+    if (this.iFrameElement && this.iFrameElement.parentElement) {
+      const divHeight = this.iFrameElement.parentElement.clientHeight;
+      this.iFrameElement.height = `${ String(divHeight - 5)}px`;
+      this.iFrameElement.srcdoc = editorHtml;
     }
   }
 
   @HostListener('window:resize')
   onResize(): void {
-    if (this.iFrameElement && this.iFrameHostElement) {
-      const divHeight = this.iFrameHostElement.clientHeight;
-      this.iFrameElement.setAttribute('height', String(divHeight - 5));
-      // TODO: Why minus 5px?
+    if (this.iFrameElement && this.iFrameElement.parentElement) {
+      const divHeight = this.iFrameElement.parentElement.clientHeight;
+      this.iFrameElement.height = `${ String(divHeight - 5)}px`;
     }
   }
 
