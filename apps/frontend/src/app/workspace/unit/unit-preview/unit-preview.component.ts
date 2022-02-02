@@ -1,5 +1,5 @@
 import {
-  Component, HostListener, Input, OnChanges, OnDestroy, OnInit
+  Component, HostListener, Input, OnChanges, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -11,22 +11,17 @@ import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
 import {UnitDefinitionDto} from "@studio-lite-lib/api-dto";
-import {UnitDefinitionStore} from "../../workspace.classes";
-
-declare let srcDoc: any;
+import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'app-unit-preview',
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.css']
 })
-export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() unitId!: number | null;
-  @Input() playerId = '';
-  private iFrameHostElement: HTMLElement | undefined;
+export class UnitPreviewComponent implements OnInit, OnDestroy {
+  @ViewChild('iFrameHostPlayer') iFrameHostElement: HTMLDivElement | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
-  private readonly postMessageSubscription: Subscription  | undefined;
+  private postMessageSubscription: Subscription  | undefined;
+  private unitIdChangedSubscription: Subscription | undefined;
   private sessionId = '';
   postMessageTarget: Window  | undefined;
   private lastPlayerId = '';
@@ -48,12 +43,12 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
   pageList: PageData[] = [];
 
   constructor(
-    private mds: AppService,
+    private appService: AppService,
     private snackBar: MatSnackBar,
-    private bs: BackendService,
-    private ds: WorkspaceService
+    private backendService: BackendService,
+    private workspaceService: WorkspaceService
   ) {
-    this.postMessageSubscription = this.mds.postMessage$.subscribe((m: MessageEvent) => {
+    this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;
       const msgType = msgData.type;
       if ((msgType !== undefined) && (msgType !== null)) {
@@ -133,24 +128,39 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+        if (this.workspaceService.unitMetadataStore) {
+          this.sendUnitDataToPlayer();
+        } else {
+          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+            this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
+            this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
+            this.sendUnitDataToPlayer();
+          })
+        }
+      })
+    })
+  }
+
   sendUnitDataToPlayer(): void {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
-    if (this.unitId && this.unitId > 0) {
-      const playerValidation = this.ds.playerList.isValid(this.playerId);
-      if (playerValidation === false) {
-        this.buildPlayer(this.playerId); // creates error message
-      } else {
-        if (playerValidation !== true) this.playerId = playerValidation;
-        if ((this.playerId === this.lastPlayerId) && this.postMessageTarget) {
-          if (this.ds.unitDefinitionStore) {
-            this.postUnitDef(this.ds.unitDefinitionStore);
+    const unitId = this.workspaceService.selectedUnit$.getValue();
+    if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
+      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      const playerId = unitMetadata.player ? this.workspaceService.playerList.getBestMatch(unitMetadata.player) : '';
+      if (playerId) {
+        if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
+          if (this.workspaceService.unitDefinitionStore) {
+            this.postUnitDef(this.workspaceService.unitDefinitionStore);
           } else {
-            this.bs.getUnitDefinition(this.ds.selectedWorkspace, this.unitId).subscribe(
+            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
-                this.ds.unitDefinitionStore = new UnitDefinitionStore(ued)
-                this.postUnitDef(this.ds.unitDefinitionStore);
+                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(ued)
+                this.postUnitDef(this.workspaceService.unitDefinitionStore);
               },
               err => {
                 this.snackBar.open(`Konnte Aufgabendefinition nicht laden (${err.code})`, 'Fehler', { duration: 3000 });
@@ -158,12 +168,12 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
             );
           }
         } else {
-          this.buildPlayer(this.playerId);
+          this.buildPlayer(playerId);
           // player gets unit data via ReadyNotification
         }
       }
     } else {
-      this.buildPlayer('');
+      this.buildPlayer();
     }
   }
 
@@ -204,45 +214,27 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private buildPlayer(playerId: string) {
+  private buildPlayer(playerId?: string) {
     this.iFrameElement = undefined;
     this.postMessageTarget = undefined;
     if (this.iFrameHostElement) {
       while (this.iFrameHostElement.lastChild) {
         this.iFrameHostElement.removeChild(this.iFrameHostElement.lastChild);
       }
-      if (playerId && this.ds.playerList && this.ds.playerList.isInList(playerId)) {
-        const playerData = this.ds.playerList.getFile(playerId);
-        this.playerName = playerData.label;
-        if (playerData.html) {
-          this.setupPlayerIFrame(playerData.html);
-          this.lastPlayerId = playerId;
-        } else {
-          this.bs.getModuleHtml(playerId).subscribe(
-            playerResponse => {
-              playerData.html = playerResponse;
-              this.setupPlayerIFrame(playerResponse);
-              this.lastPlayerId = playerId;
-            },
-            () => {
-              if (this.iFrameHostElement) {
-                // this.iFrameHostElement.appendChild(
-                  // UnitComponent.getMessageElement(`Für Player "${playerData.label}" konnte kein Modul geladen werden.`)
-                  // todo reactivate?
-                // );
-              }
-              this.lastPlayerId = '';
-            }
-          );
-        }
+      if (playerId) {
+        this.workspaceService.getModuleHtml(playerId).then(playerData => {
+          this.playerName = playerId;
+          if (playerData) {
+            this.setupPlayerIFrame(playerData);
+            this.lastPlayerId = playerId;
+          } else {
+            // todo: error message?
+            this.lastPlayerId = '';
+          }
+        })
       } else {
-        // this.iFrameHostElement.appendChild(
-        //  UnitComponent.getMessageElement(
-        //    playerId ? `Player-Modul "${playerId}" nicht in Datenbank` : 'Kein Player festgelegt.'
-        // todo reactivate?
-        //  )
-        // );
-        // this.lastPlayerId = '';
+        // todo: error message?
+        this.lastPlayerId = '';
       }
     }
   }
@@ -254,19 +246,8 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
       this.iFrameElement.setAttribute('class', 'unitHost');
       this.iFrameElement.setAttribute('height', String(this.iFrameHostElement.clientHeight - 5));
       this.iFrameHostElement.appendChild(this.iFrameElement);
-      srcDoc.set(this.iFrameElement, playerHtml);
+      this.iFrameElement.setAttribute('srcdoc', playerHtml);
     }
-  }
-
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.iFrameHostElement = <HTMLElement>document.querySelector('#iFrameHost');
-      if (this.unitId && this.unitId > 0) this.sendUnitDataToPlayer();
-    })
-  }
-
-  ngOnChanges(): void {
-    if (this.iFrameHostElement) this.sendUnitDataToPlayer();
   }
 
   @HostListener('window:resize')
@@ -279,7 +260,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   // ++++++++++++ page nav ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  setPageList(validPages: string[], currentPage: string): void {
+  setPageList(validPages?: string[], currentPage?: string): void {
     if ((validPages instanceof Array)) {
       const newPageList: PageData[] = [];
       if (validPages.length > 1) {
@@ -428,5 +409,6 @@ export class UnitPreviewComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnDestroy(): void {
     if (this.postMessageSubscription) this.postMessageSubscription.unsubscribe();
+    if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
   }
 }

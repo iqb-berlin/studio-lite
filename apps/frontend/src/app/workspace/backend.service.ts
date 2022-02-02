@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@angular/core';
 import {
   CreateUnitDto, UnitDefinitionDto,
   UnitInListDto,
-  UnitMetadataDto,
+  UnitMetadataDto, VeronaModuleFileDto,
   VeronaModuleInListDto,
   WorkspaceFullDto
 } from "@studio-lite-lib/api-dto";
@@ -146,12 +146,11 @@ export class BackendService {
       );
   }
 
-  getModuleHtml(moduleId: string): Observable<string> {
+  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto> {
     return this.http
-      .post<string>(`${this.serverUrl}getModuleHtml.php`,
-      { m: moduleId })
+      .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of (<VeronaModuleFileDto>{}))
       );
   }
 

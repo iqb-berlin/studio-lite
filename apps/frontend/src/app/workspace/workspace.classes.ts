@@ -51,11 +51,11 @@ export class ModuleCollection {
     return !!this.moduleData[key]
   }
 
-  isValid(key: string): boolean | string {
-    if (this.moduleData[key]) return true;
+  getBestMatch(key: string): string {
+    if (this.isInList(key)) return key;
     const regexPattern = /^([A-Za-z0-9_-]+)@(\d+)\.(\d+)/;
     const matches1 = regexPattern.exec(key);
-    if (!matches1 || matches1.length !== 4) return false;
+    if (!matches1 || matches1.length !== 4) return '';
     let bestMatchId = '';
     let bestMatchMinor = +matches1[3];
     Object.keys(this.moduleData).forEach(k => {
@@ -71,7 +71,13 @@ export class ModuleCollection {
       }
     });
     if (bestMatchId) return bestMatchId;
-    return false;
+    return '';
+  }
+
+  isValid(key: string): boolean | string {
+    if (this.moduleData[key]) return true;
+    const bestMatch = this.getBestMatch(key);
+    return bestMatch ? bestMatch : false
   }
 
   getName(key: string): string {
@@ -99,10 +105,6 @@ export class ModuleCollection {
     });
     const newKeys = Object.keys(newList).sort();
     return newKeys.map(key => newList[key]);
-  }
-
-  getFile(key: string): any {
-    return this.moduleData[key].metadata
   }
 }
 

@@ -16,6 +16,7 @@ export class WorkspaceService {
   selectedUnit$ = new BehaviorSubject<number>(0);
   editorList = new ModuleCollection([]);
   playerList = new ModuleCollection([]);
+  moduleHtmlStore: {[key: string]: string} = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;
   unitList = new UnitCollection([]);
@@ -43,11 +44,19 @@ export class WorkspaceService {
   resetUnitData(): void {
     this.unitMetadataStore = undefined;
     this.unitDefinitionStore = undefined;
+    this.moduleHtmlStore = {};
   }
 
   isChanged(): boolean {
     return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
       (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()))
+  }
+
+  async getModuleHtml(key: string): Promise<string> {
+    if (this.moduleHtmlStore[key]) return this.moduleHtmlStore[key]
+    const fileData = await lastValueFrom(this.bs.getModuleHtml(key));
+    this.moduleHtmlStore[key] = fileData.file;
+    return this.moduleHtmlStore[key]
   }
 
   async saveUnitData(): Promise<boolean> {

@@ -1,26 +1,22 @@
 import {
-  Component, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit
+  Component, HostListener, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import {UnitDefinitionStore} from "../../workspace.classes";
-
-declare let srcDoc: any;
+import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
+import {SelectModuleComponent} from "../unit-metadata/select-module.component";
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'app-unit-editor',
-  templateUrl: './unit-editor.component.html',
-  styleUrls: ['./unit-editor.component.css']
+  template: `<div id="iFrameHostEditor"></div>`,
+  styles: ['#iFrameHostEditor {height: 99%; width: 100%;}']
 })
-export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() unitId!: number | null;
-  @Input() editorId = '';
+export class UnitEditorComponent implements OnInit, OnDestroy {
+  private iFrameHostElement: HTMLDivElement | undefined;
   private readonly postMessageSubscription: Subscription;
-  private iFrameHostElement: HTMLElement | undefined;
+  private unitIdChangedSubscription: Subscription | undefined;
   private iFrameElement: HTMLElement | undefined;
   private postMessageTarget: Window | undefined;
   private sessionId = '';
@@ -28,13 +24,12 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
   editorApiVersion = 1;
 
   constructor(
-    @Inject('SERVER_URL') private serverUrl: string,
-    private bs: BackendService,
-    private ds: WorkspaceService,
+    private backendService: BackendService,
+    private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
-    private mds: AppService
+    private appService: AppService
   ) {
-    this.postMessageSubscription = this.mds.postMessage$.subscribe((m: MessageEvent) => {
+    this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;
       const msgType = msgData.type;
 
@@ -64,7 +59,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
             if (msgData.sessionId === this.sessionId) {
               if (this.editorApiVersion > 1) {
                 if (msgData.unitDefinition) {
-                  this.ds.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
+                  this.workspaceService.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
                 } else {
                   this.postMessageTarget.postMessage({
                     type: 'voeGetDefinitionRequest',
@@ -82,7 +77,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
 
           case 'vo.FromAuthoringModule.DataTransfer':
             if (msgData.sessionId === this.sessionId) {
-              this.ds.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
+              this.workspaceService.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
             }
             break;
 
@@ -94,21 +89,37 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.iFrameHostElement = <HTMLDivElement>document.querySelector('#iFrameHostEditor');
+      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+        if (this.workspaceService.unitMetadataStore) {
+          this.sendUnitDataToEditor();
+        } else {
+          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+            this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
+            this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
+            this.sendUnitDataToEditor();
+          })
+        }
+      })
+    })
+  }
+
   sendUnitDataToEditor(): void {
-    if (this.unitId && this.unitId > 0) {
-      const editorValidation = this.ds.editorList.isValid(this.editorId);
-      if (editorValidation === false) {
-        this.buildEditor(this.editorId); // creates error message
-      } else {
-        if (editorValidation !== true) this.editorId = editorValidation;
-        if ((this.editorId === this.lastEditorId) && this.postMessageTarget) {
-          if (this.ds.unitDefinitionStore) {
-            this.postUnitDef(this.ds.unitDefinitionStore);
+    const unitId = this.workspaceService.selectedUnit$.getValue();
+    if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
+      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      const editorId = unitMetadata.editor ? this.workspaceService.editorList.getBestMatch(unitMetadata.editor) : '';
+      if (editorId) {
+        if ((editorId === this.lastEditorId) && this.postMessageTarget) {
+          if (this.workspaceService.unitDefinitionStore) {
+            this.postUnitDef(this.workspaceService.unitDefinitionStore);
           } else {
-            this.bs.getUnitDefinition(this.ds.selectedWorkspace, this.unitId).subscribe(
+            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
-                this.ds.unitDefinitionStore = new UnitDefinitionStore(ued)
-                this.postUnitDef(this.ds.unitDefinitionStore);
+                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(ued)
+                this.postUnitDef(this.workspaceService.unitDefinitionStore);
               },
               err => {
                 this.snackBar.open(`Konnte Aufgabendefinition nicht laden (${err.code})`, 'Fehler', { duration: 3000 });
@@ -116,9 +127,11 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
             );
           }
         } else {
-          this.buildEditor(this.editorId);
+          this.buildEditor(editorId);
           // editor gets unit data via ReadyNotification
         }
+      } else {
+        this.buildEditor(); // creates error message
       }
     } else {
       this.buildEditor('');
@@ -147,67 +160,40 @@ export class UnitEditorComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private buildEditor(editorId: string) {
+  private buildEditor(editorId?: string) {
     this.iFrameElement = undefined;
     this.postMessageTarget = undefined;
     if (this.iFrameHostElement) {
       while (this.iFrameHostElement.lastChild) {
         this.iFrameHostElement.removeChild(this.iFrameHostElement.lastChild);
       }
-      if (editorId && this.ds.editorList && this.ds.editorList.isInList(editorId)) {
-        const editorData = this.ds.editorList.getFile(editorId);
-        if (editorData.html) {
-          this.setupEditorIFrame(editorData.html);
-          this.lastEditorId = editorId;
-        } else {
-          this.bs.getModuleHtml(editorId).subscribe(
-            editorResponse => {
-              editorData.html = editorResponse;
-              this.setupEditorIFrame(editorResponse);
-              this.lastEditorId = editorId;
-            },
-            () => {
-              // if (this.iFrameHostElement) {
-              // todo reactivate?
-               //   UnitComponent.getMessageElement(`Für Editor "${editorData.label}" konnte kein Modul geladen werden.`)
-               // );
-             // }
-              // this.lastEditorId = '';
-            }
-          );
-        }
+      if (editorId) {
+        this.workspaceService.getModuleHtml(editorId).then(editorData => {
+          if (editorData) {
+            this.setupEditorIFrame(editorData);
+            this.lastEditorId = editorId;
+          } else {
+            // todo: error message?
+            this.lastEditorId = '';
+          }
+        });
       } else {
-//        this.iFrameHostElement.appendChild(
- //         UnitComponent.getMessageElement(
-   //         editorId ? `Editor-Modul "${editorId}" nicht in Datenbank` : 'Kein Editor festgelegt.'
-     //     )
-       // );
-        // todo reactivate?
-        // this.lastEditorId = '';
+        // todo: error message?
+        this.lastEditorId = '';
       }
     }
   }
 
   private setupEditorIFrame(editorHtml: string): void {
     if (this.iFrameHostElement) {
+      console.log(this.iFrameHostElement);
       this.iFrameElement = <HTMLIFrameElement>document.createElement('iframe');
       this.iFrameElement.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin');
       this.iFrameElement.setAttribute('class', 'unitHost');
       this.iFrameElement.setAttribute('height', String(this.iFrameHostElement.clientHeight - 5));
       this.iFrameHostElement.appendChild(this.iFrameElement);
-      srcDoc.set(this.iFrameElement, editorHtml);
+      this.iFrameElement.setAttribute('srcdoc', editorHtml);
     }
-  }
-
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.iFrameHostElement = <HTMLElement>document.querySelector('#iFrameHostEditor');
-      if (this.unitId && this.unitId > 0) this.sendUnitDataToEditor();
-    })
-  }
-
-  ngOnChanges(): void {
-    if (this.iFrameHostElement) this.sendUnitDataToEditor();
   }
 
   @HostListener('window:resize')

@@ -1,3 +1,4 @@
+export {VeronaModuleFileDto} from "./lib/dto/verona-module/verona-module-file-dto";
 export {UnitDefinitionDto} from "./lib/dto/unit/unit-definition-dto";
 export {UnitMetadataDto} from "./lib/dto/unit/unit-metadata-dto";
 export {WorkspaceSettingsDto} from "./lib/dto/workspace/workspace-settings-dto";

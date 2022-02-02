@@ -2,7 +2,7 @@ import {Injectable, NotAcceptableException} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import { getConnection, Repository} from "typeorm";
 import VeronaModule from "../entities/verona-module.entity";
-import {VeronaModuleInListDto, VeronaModuleMetadataDto} from "@studio-lite-lib/api-dto";
+import {VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto} from "@studio-lite-lib/api-dto";
 import * as cheerio from "cheerio";
 
 @Injectable()
@@ -11,6 +11,18 @@ export class VeronaModulesService {
     @InjectRepository(VeronaModule)
     private veronaModulesRepository: Repository<VeronaModule>)
   {}
+
+  async findFileById(key: string): Promise<VeronaModuleFileDto> {
+    const file = await this.veronaModulesRepository.findOne({
+      where: {key: key},
+      select: ['file', 'key', 'metadata']
+    });
+    return <VeronaModuleFileDto>{
+      key: file.key,
+      name: file.metadata.name,
+      file: file.file.toString()
+    }
+  }
 
   async findAll(type?: string): Promise<VeronaModuleInListDto[]> {
     const veronaModules = await this.veronaModulesRepository.query(

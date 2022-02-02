@@ -5,8 +5,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {Subscription} from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
 import {BackendService} from '../../backend.service';
-import {ActivatedRoute, Router} from "@angular/router";
-import {UnitMetadataDto} from "@studio-lite-lib/api-dto";
 import {SelectModuleComponent} from "./select-module.component";
 import {UnitMetadataStore} from "../../workspace.classes";
 
@@ -28,10 +26,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private bs: BackendService,
-    public workspaceService: WorkspaceService,
-    private router: Router,
-    private route: ActivatedRoute
+    private backendService: BackendService,
+    public workspaceService: WorkspaceService
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
@@ -56,7 +52,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.workspaceService.unitMetadataStore) {
       this.setupForm()
     } else {
-      this.bs.getUnitMetadata(this.workspaceService.selectedWorkspace,
+      this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
           this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
         this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
         this.setupForm()

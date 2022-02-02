@@ -10,18 +10,18 @@ import {
 } from '@nestjs/common';
 import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
+import {VeronaModuleFileDto, VeronaModuleInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
 import {VeronaModulesService} from "../../database/services/verona-modules.service";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {IsAdminGuard} from "../is-admin.guard";
 
-@Controller('admin/verona-modules')
+@Controller('admin')
 export class VeronaModulesController {
   constructor(
     private veronaModuleService: VeronaModulesService
   ) {}
 
-  @Get()
+  @Get('verona-modules')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
@@ -32,18 +32,29 @@ export class VeronaModulesController {
     return this.veronaModuleService.findAll();
   }
 
-  @Get(':type')
+  @Get('verona-modules/:type')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [VeronaModuleInListDto],
   })
   @ApiTags('admin verona-modules')
-  async findAllByType(@Request() req, @Param('type') type: string): Promise<VeronaModuleInListDto[]> {
+  async findAllByType(@Param('type') type: string): Promise<VeronaModuleInListDto[]> {
     return this.veronaModuleService.findAll(type);
   }
 
-  @Post()
+  @Get('verona-module/:key')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: VeronaModuleFileDto,
+  })
+  @ApiTags('admin verona-modules')
+  async findFileById(@Param('key') key: string): Promise<VeronaModuleFileDto> {
+    return this.veronaModuleService.findFileById(key);
+  }
+
+  @Post('verona-modules')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
@@ -52,7 +63,7 @@ export class VeronaModulesController {
     return this.veronaModuleService.upload(file.buffer);
   }
 
-  @Delete(':keys')
+  @Delete('verona-modules/:keys')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin verona-modules')
