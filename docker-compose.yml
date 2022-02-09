@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  studio-lite:
+    container_name: teststudio-lite
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    links:
+      - db
+    ports:
+      - 4200:4200
+    volumes:
+      - .:/usr/src/app
+
+  db:
+    container_name: studio-lite-db
+    restart: always
+    image: postgres
+    hostname: postgres
+    ports:
+      - 5432:5432
+    env_file:
+      - database/docker.env
+    volumes:
+      - /data/postgres:/data/postgres
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql

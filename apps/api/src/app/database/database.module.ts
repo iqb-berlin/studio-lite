@@ -29,7 +29,7 @@ import UnitDefinition from "./entities/unit-definition.entity";
     TypeOrmModule.forRootAsync({
         useFactory: () => ({
             "type": "postgres",
-            "host": "localhost",
+            "host": "192.168.99",
             "port": 5432,
             "username": "superdb",
             "password": "jfsdssfdfmsdp9fsumdpfu3094umt394u3",

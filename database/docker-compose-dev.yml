@@ -3,6 +3,7 @@ version: "3"
 services:
   studio-lite-db:
     container_name: studio-lite-db
+    restart: always
     image: postgres
     ports:
       - "5432:5432"
@@ -10,3 +11,4 @@ services:
       - docker.env
     volumes:
       - /data/postgres:/data/postgres
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql

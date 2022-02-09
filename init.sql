@@ -57,7 +57,7 @@ create table public.unit
   variables               jsonb,
   definition_id           integer
     constraint unit_definition_id_fk
-      references unit_definition
+      references public.unit
       on delete cascade,
   last_changed_definition timestamp with time zone default now(),
   scheme                  jsonb,

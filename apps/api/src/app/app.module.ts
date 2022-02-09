@@ -17,6 +17,6 @@ import {WorkspaceModule} from "./workspace/workspace.module";
     MulterModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}
