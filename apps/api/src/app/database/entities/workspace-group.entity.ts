@@ -1,4 +1,9 @@
-import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 
 @Entity()
 class WorkspaceGroup {
@@ -12,7 +17,7 @@ class WorkspaceGroup {
     type: 'jsonb',
     array: false,
     default: () => "'{}'",
-    nullable: false,
+    nullable: false
   })
   public settings = {};
 }

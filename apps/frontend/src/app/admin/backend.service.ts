@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, of, throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {
   ConfigFullDto,
   CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
@@ -10,8 +10,8 @@ import {
   WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   WorkspaceInListDto,
   WorkspaceGroupDto, VeronaModuleInListDto
-} from "@studio-lite-lib/api-dto";
-import {AppHttpError} from "../app.classes";
+} from '@studio-lite-lib/api-dto';
+import { AppHttpError } from '../app.classes';
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +40,7 @@ export class BackendService {
 
   changeUserData(newData: UserFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users`,newData)
+      .patch(`${this.serverUrl}admin/users`, newData)
       .pipe(
         map(() => true)
       );
@@ -156,7 +156,7 @@ export class BackendService {
   deleteWorkspaceGroup(id: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/workspace-groups/${id}`)
-      .pipe(map(()=>false))
+      .pipe(map(() => false));
   }
 
   renameWorkspaceGroup(id: number, newName: string): Observable<boolean> {
@@ -182,6 +182,6 @@ export class BackendService {
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)
       .pipe(
         map(() => true)
-      )
+      );
   }
 }

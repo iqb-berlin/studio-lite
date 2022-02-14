@@ -6,8 +6,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
-import {SelectModuleComponent} from "../unit-metadata/select-module.component";
+import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
+import { SelectModuleComponent } from '../unit-metadata/select-module.component';
 
 @Component({
   template: `
@@ -106,10 +106,10 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
             this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
             this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
             this.sendUnitDataToEditor();
-          })
+          });
         }
-      })
-    })
+      });
+    });
   }
 
   sendUnitDataToEditor(): void {
@@ -125,7 +125,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
                 console.log(ued);
-                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued)
+                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
                 this.postUnitDef(this.workspaceService.unitDefinitionStore);
               },
               err => {
@@ -192,7 +192,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   private setupEditorIFrame(editorHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
       const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${ String(divHeight - 5)}px`;
+      this.iFrameElement.height = `${String(divHeight - 5)}px`;
       this.iFrameElement.srcdoc = editorHtml;
     }
   }
@@ -201,7 +201,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   onResize(): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
       const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${ String(divHeight - 5)}px`;
+      this.iFrameElement.height = `${String(divHeight - 5)}px`;
     }
   }
 

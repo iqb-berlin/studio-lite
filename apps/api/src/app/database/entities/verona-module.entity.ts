@@ -1,5 +1,10 @@
-import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
-import {VeronaModuleMetadataDto} from "@studio-lite-lib/api-dto";
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  PrimaryGeneratedColumn
+} from 'typeorm';
+import { VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 
 @Entity('verona_module')
 class VeronaModule {
@@ -26,7 +31,6 @@ class VeronaModule {
     name: 'file_datetime'
   })
   public fileDateTime: Date;
-
 }
 
 export default VeronaModule;

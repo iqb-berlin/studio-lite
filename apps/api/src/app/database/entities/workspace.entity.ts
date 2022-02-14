@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import {WorkspaceSettingsDto} from "@studio-lite-lib/api-dto";
+import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 
 @Entity()
 class Workspace {
@@ -18,7 +18,7 @@ class Workspace {
     type: 'jsonb',
     array: false,
     default: () => "'{}'",
-    nullable: false,
+    nullable: false
   })
   public settings: WorkspaceSettingsDto;
 }

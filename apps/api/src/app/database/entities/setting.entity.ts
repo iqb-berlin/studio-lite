@@ -1,5 +1,5 @@
-import {Column, Entity, PrimaryColumn} from 'typeorm';
-import {ConfigFullDto} from "@studio-lite-lib/api-dto";
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { ConfigFullDto } from '@studio-lite-lib/api-dto';
 
 @Entity()
 class Setting {

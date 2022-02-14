@@ -3,10 +3,10 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { ModulData } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
-import {ModuleCollection} from "../../workspace.classes";
+import { ModuleCollection } from '../../workspace.classes';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector

@@ -1,8 +1,8 @@
-import { Subject} from 'rxjs';
+import { Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
-import {AuthDataDto} from "@studio-lite-lib/api-dto";
-import {Title} from "@angular/platform-browser";
-import {AppConfig} from "./app.classes";
+import { AuthDataDto } from '@studio-lite-lib/api-dto';
+import { Title } from '@angular/platform-browser';
+import { AppConfig } from './app.classes';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +14,7 @@ export class AppService {
     isAdmin: false,
     workspaces: []
   }
+
   authData = AppService.defaultAuthData;
   appConfig: AppConfig;
   errorMessage = '';
@@ -24,7 +25,7 @@ export class AppService {
   constructor(
     private titleService: Title
   ) {
-    this.appConfig = new AppConfig(this.titleService)
+    this.appConfig = new AppConfig(this.titleService);
   }
 
   processMessagePost(postData: MessageEvent): void {

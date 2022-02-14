@@ -1,6 +1,11 @@
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
-
+import {
+  CreateUserDto,
+  UserFullDto,
+  UserInListDto,
+  WorkspaceInListDto
+} from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -12,14 +17,14 @@ import {
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite-lib/iqb-components";
+} from '@studio-lite-lib/iqb-components';
 import {
-  BackendService,
+  BackendService
 } from '../backend.service';
 import { AppService } from '../../app.service';
-import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
-import {EditUserComponent} from "./edituser.component";
-import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
+
+import { EditUserComponent } from './edituser.component';
+import { WorkspaceGroupToCheckCollection } from '../workspaces/workspaceChecked';
 
 @Component({
   templateUrl: './users.component.html',
@@ -105,9 +110,8 @@ export class UsersComponent implements OnInit {
           );
         }
       }
-    })
+    });
   }
-
 
   changeData(): void {
     let selectedRows = this.tableselectionRow.selected;
@@ -163,7 +167,7 @@ export class UsersComponent implements OnInit {
             );
           }
         }
-      })
+      });
     }
   }
 
@@ -227,7 +231,7 @@ export class UsersComponent implements OnInit {
   // ***********************************************************************************
   updateWorkspaceList(): void {
     if (this.userWorkspaces.hasChanged) {
-      this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
+      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
@@ -284,15 +288,15 @@ export class UsersComponent implements OnInit {
         this.tableselectionRow.clear();
         this.appService.dataLoading = false;
       }
-    )
+    );
   }
 
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceGroupToCheckCollection([]);
     this.backendService.getWorkspacesGroupwise().subscribe(worksGroups => {
       this.userWorkspaces = new WorkspaceGroupToCheckCollection(worksGroups);
-      this.updateUserList()
-    })
+      this.updateUserList();
+    });
   }
 
   isAllSelected(): boolean {

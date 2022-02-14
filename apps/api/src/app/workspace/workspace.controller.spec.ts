@@ -6,7 +6,7 @@ describe('WorkspaceController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [WorkspaceController],
+      controllers: [WorkspaceController]
     }).compile();
 
     controller = module.get<WorkspaceController>(WorkspaceController);

@@ -1,26 +1,30 @@
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
-
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort } from '@angular/material/sort';
-import { FormGroup } from '@angular/forms';
-import { SelectionModel } from '@angular/cdk/collections';
-import {BackendService} from '../backend.service';
-import { EditworkspaceComponent } from './editworkspace.component';
-import { AppService } from '../../app.service';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite-lib/iqb-components";
-import {WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
-import {UserToCheckCollection} from "../users/usersChecked";
-import {WorkspaceGroupsComponent} from "./workspace-groups.component";
-import {WorkspaceDataFlat} from "../../app.classes";
-import {WorkspaceGroupData} from "./workspaceChecked";
+} from '@studio-lite-lib/iqb-components';
+import {
+  WorkspaceGroupDto,
+  CreateWorkspaceDto,
+  UserInListDto,
+  WorkspaceFullDto
+} from '@studio-lite-lib/api-dto';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSort } from '@angular/material/sort';
+import { FormGroup } from '@angular/forms';
+import { SelectionModel } from '@angular/cdk/collections';
+import { BackendService } from '../backend.service';
+import { EditworkspaceComponent } from './editworkspace.component';
+import { AppService } from '../../app.service';
+import { UserToCheckCollection } from '../users/usersChecked';
+import { WorkspaceGroupsComponent } from './workspace-groups.component';
+import { WorkspaceDataFlat } from '../../app.classes';
+import { WorkspaceGroupData } from './workspaceChecked';
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -152,12 +156,12 @@ export class WorkspacesComponent implements OnInit {
           if (result !== false) {
             this.appService.dataLoading = true;
             const workspaceData = <WorkspaceFullDto>{
-              id: selectedRows[0].id,
+              id: selectedRows[0].id
             };
-            const newName = (<FormGroup>result).get('name')?.value
-            const newWorkspaceGroup = (<FormGroup>result).get('groupSelector')?.value
+            const newName = (<FormGroup>result).get('name')?.value;
+            const newWorkspaceGroup = (<FormGroup>result).get('groupSelector')?.value;
             if (newName !== selectedRows[0].name) workspaceData.name = newName;
-            if (newWorkspaceGroup !== selectedRows[0].groupId) workspaceData.groupId = parseInt(newWorkspaceGroup);
+            if (newWorkspaceGroup !== selectedRows[0].groupId) workspaceData.groupId = parseInt(newWorkspaceGroup, 10);
             this.backendService.changeWorkspace(workspaceData).subscribe(
               respOk => {
                 if (respOk) {
@@ -239,7 +243,7 @@ export class WorkspacesComponent implements OnInit {
   // ***********************************************************************************
   updateUserList(): void {
     if (this.workspaceUsers.hasChanged) {
-      this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
+      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
     if (this.selectedWorkspaceId > 0) {
       this.appService.dataLoading = true;
@@ -303,8 +307,8 @@ export class WorkspacesComponent implements OnInit {
               name: workspace.name,
               groupId: workspaceGroup.id,
               selected: false
-            })
-          })
+            });
+          });
         });
         this.objectsDatasource = new MatTableDataSource(workspaces);
         this.objectsDatasource.sort = this.sort;
@@ -323,8 +327,8 @@ export class WorkspacesComponent implements OnInit {
     this.workspaceUsers = new UserToCheckCollection([]);
     this.backendService.getUsers().subscribe(users => {
       this.workspaceUsers = new UserToCheckCollection(users);
-      this.updateWorkspaceList()
-    })
+      this.updateWorkspaceList();
+    });
   }
 
   isAllSelected(): boolean {

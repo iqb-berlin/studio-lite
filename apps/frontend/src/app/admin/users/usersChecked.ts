@@ -1,11 +1,12 @@
-import {UserInListDto} from "@studio-lite-lib/api-dto";
+/* eslint-disable max-classes-per-file */
+import { UserInListDto } from '@studio-lite-lib/api-dto';
 
 export class UserChecked {
   public id: number;
   public name: string;
   public description: string | undefined;
   public isChecked: boolean;
-  constructor(userDto: UserInListDto ) {
+  constructor(userDto: UserInListDto) {
     this.id = userDto.id;
     this.name = userDto.name;
     this.description = userDto.description;
@@ -18,11 +19,11 @@ export class UserToCheckCollection {
   private workspacesUsersIds: number[] = [];
   public hasChanged = false;
 
-  constructor(users: UserInListDto[] ) {
+  constructor(users: UserInListDto[]) {
     this.entries = [];
     users.forEach(user => {
-      this.entries.push(new UserChecked(user))
-    })
+      this.entries.push(new UserChecked(user));
+    });
   }
 
   setChecks(workspaceUsers?: UserInListDto[]): void {
@@ -48,7 +49,6 @@ export class UserToCheckCollection {
       if ((user.isChecked && this.workspacesUsersIds.indexOf(user.id) < 0) ||
         (!user.isChecked && this.workspacesUsersIds.indexOf(user.id) > -1)) {
         this.hasChanged = true;
-        return
       }
     });
   }

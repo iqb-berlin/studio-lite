@@ -1,11 +1,11 @@
-import {Injectable} from '@nestjs/common';
-import {getConnection, Repository} from "typeorm";
-import {InjectRepository} from "@nestjs/typeorm";
-import User from "../entities/user.entity";
+import { Injectable } from '@nestjs/common';
+import { getConnection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import {CreateUserDto, UserFullDto, UserInListDto} from "@studio-lite-lib/api-dto";
-import {passwordHash} from "../../auth/auth.constants";
-import WorkspaceUser from "../entities/workspace-user.entity";
+import { CreateUserDto, UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
+import User from '../entities/user.entity';
+import { passwordHash } from '../../auth/auth.constants';
+import WorkspaceUser from '../entities/workspace-user.entity';
 
 @Injectable()
 export class UsersService {
@@ -19,10 +19,12 @@ export class UsersService {
   async findAll(workspaceId?: number): Promise<UserInListDto[]> {
     const validUsers: number[] = [];
     if (workspaceId) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find({ where: {workspaceId: workspaceId}});
-      workspaceUsers.forEach(wsU => validUsers.push(wsU.userId))
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find(
+        { where: { workspaceId: workspaceId } }
+      );
+      workspaceUsers.forEach(wsU => validUsers.push(wsU.userId));
     }
-    const users: User[] = await this.usersRepository.find({order: {name: 'ASC'}});
+    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
     const returnUsers: UserInListDto[] = [];
     users.forEach(user => {
       if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
@@ -31,7 +33,7 @@ export class UsersService {
           name: user.name,
           isAdmin: user.isAdmin,
           description: user.description
-        })
+        });
       }
     });
     return returnUsers;
@@ -44,7 +46,7 @@ export class UsersService {
       name: user.name,
       isAdmin: user.isAdmin,
       description: user.description
-    }
+    };
   }
 
   async create(user: CreateUserDto): Promise<number> {
@@ -57,45 +59,45 @@ export class UsersService {
   async getUserByNameAndPassword(name: string, password: string): Promise<number | null> {
     const user = await getConnection()
       .getRepository(User)
-      .createQueryBuilder("user")
-      .where("user.name = :name",
-        {name: name})
+      .createQueryBuilder('user')
+      .where('user.name = :name',
+        { name: name })
       .getOne();
     if (user && bcrypt.compareSync(password, user.password)) {
-      return user.id
+      return user.id;
     }
-    return null
+    return null;
   }
 
   async getUserIsAdmin(userId: number): Promise<boolean | null> {
     const user = await getConnection()
       .getRepository(User)
-      .createQueryBuilder("user")
-      .where("user.id = :id",
-        {id: userId})
+      .createQueryBuilder('user')
+      .where('user.id = :id',
+        { id: userId })
       .getOne();
     if (user) {
-      return user.isAdmin
+      return user.isAdmin;
     }
-    return null
+    return null;
   }
 
   async getUserName(userId: number): Promise<string> {
     const user = await getConnection()
       .getRepository(User)
-      .createQueryBuilder("user")
-      .where("user.id = :id",
-        {id: userId})
+      .createQueryBuilder('user')
+      .where('user.id = :id',
+        { id: userId })
       .getOne();
-    return user.name
+    return user.name;
   }
 
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
     const userRepository = await getConnection().getRepository(User);
     const userForName = await userRepository
-      .createQueryBuilder("user")
-      .where("user.id = :id",
-        {id: userId})
+      .createQueryBuilder('user')
+      .where('user.id = :id',
+        { id: userId })
       .getOne();
     if (userForName) {
       const userForId = await this.getUserByNameAndPassword(userForName.name, oldPassword);
@@ -103,16 +105,16 @@ export class UsersService {
         const userToUpdate = await userRepository.findOne(userForId);
         userToUpdate.password = UsersService.getPasswordHash(newPassword);
         await userRepository.save(userToUpdate);
-        return true
+        return true;
       }
     }
-    return false
+    return false;
   }
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
-    const wsUser = await this.workspaceUsersRepository.createQueryBuilder("ws_user")
-      .where("ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id",
-        {user_id: userId, ws_id: workspaceId})
+    const wsUser = await this.workspaceUsersRepository.createQueryBuilder('ws_user')
+      .where('ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id',
+        { user_id: userId, ws_id: workspaceId })
       .getOne();
     return !!wsUser;
   }
@@ -135,7 +137,7 @@ export class UsersService {
     await getConnection().createQueryBuilder()
       .delete()
       .from(WorkspaceUser)
-      .where("workspace_id = :id", { id: workspaceId })
+      .where('workspace_id = :id', { id: workspaceId })
       .execute();
     for (const userId of users) {
       const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{

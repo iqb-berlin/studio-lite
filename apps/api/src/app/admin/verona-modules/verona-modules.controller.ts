@@ -8,12 +8,12 @@ import {
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
-import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {VeronaModuleFileDto, VeronaModuleInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
-import {VeronaModulesService} from "../../database/services/verona-modules.service";
-import {FileInterceptor} from "@nestjs/platform-express";
-import {IsAdminGuard} from "../is-admin.guard";
+import { FileInterceptor } from '@nestjs/platform-express';
+import { VeronaModuleFileDto, VeronaModuleInListDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { VeronaModulesService } from '../../database/services/verona-modules.service';
+import { IsAdminGuard } from '../is-admin.guard';
 
 @Controller('admin')
 export class VeronaModulesController {
@@ -25,7 +25,7 @@ export class VeronaModulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [VeronaModuleInListDto],
+    type: [VeronaModuleInListDto]
   })
   @ApiTags('admin verona-modules')
   async findAll(): Promise<VeronaModuleInListDto[]> {
@@ -36,7 +36,7 @@ export class VeronaModulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [VeronaModuleInListDto],
+    type: [VeronaModuleInListDto]
   })
   @ApiTags('admin verona-modules')
   async findAllByType(@Param('type') type: string): Promise<VeronaModuleInListDto[]> {
@@ -47,7 +47,7 @@ export class VeronaModulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: VeronaModuleFileDto,
+    type: VeronaModuleFileDto
   })
   @ApiTags('admin verona-modules')
   async findFileById(@Param('key') key: string): Promise<VeronaModuleFileDto> {

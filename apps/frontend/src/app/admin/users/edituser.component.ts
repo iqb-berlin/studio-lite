@@ -58,6 +58,6 @@ export class EditUserComponent {
         data.newUser ?
           [Validators.pattern(/^\S{3,}$/), Validators.required] :
           [Validators.pattern(/^\S{3,}$/)])
-    })
+    });
   }
 }

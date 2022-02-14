@@ -20,7 +20,7 @@ import { AppService } from '../app.service';
   styles: ['div.intro-main {margin: 40px; max-width: 600px;}']
 })
 
-  export class AboutComponent implements OnInit {
+export class AboutComponent implements OnInit {
   constructor(
     @Inject('APP_NAME') public appName: string,
     @Inject('APP_PUBLISHER') public appPublisher: string,

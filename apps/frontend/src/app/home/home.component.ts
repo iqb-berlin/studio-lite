@@ -1,5 +1,12 @@
-import {ActivatedRoute, Router} from '@angular/router';
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  Component,
+  Inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
+import { WorkspaceDto } from '@studio-lite-lib/api-dto';
+import { Subscription } from 'rxjs';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
@@ -7,8 +14,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
 import { ChangePasswordComponent } from './change-password.component';
-import {WorkspaceDto} from "@studio-lite-lib/api-dto";
-import {Subscription} from "rxjs";
 
 @Component({
   templateUrl: './home.component.html',
@@ -48,8 +53,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       const token = localStorage.getItem('id_token');
       if (token) {
         this.backendService.getAuthData().subscribe(authData => {
-          this.appService.authData = authData
-        })
+          this.appService.authData = authData;
+        });
       }
     });
   }
@@ -60,12 +65,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.appService.dataLoading = true;
     if (this.loginForm && this.loginForm.valid) {
       this.backendService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(() => {
-          this.appService.dataLoading = false;
-          console.log(this.redirectTo);
-          if (this.redirectTo) {
-            this.router.navigate([this.redirectTo]);
-          }
-        },
+        this.appService.dataLoading = false;
+        console.log(this.redirectTo);
+        if (this.redirectTo) {
+          this.router.navigate([this.redirectTo]);
+        }
+      },
       err => {
         this.isError = true;
         this.appService.dataLoading = false;

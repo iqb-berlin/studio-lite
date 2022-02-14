@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { AppService } from './app.service';
-import { BackendService} from './backend.service';
-import {AppConfig} from "./app.classes";
+import { BackendService } from './backend.service';
+import { AppConfig } from './app.classes';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -33,8 +33,8 @@ export class AppComponent implements OnInit {
       const token = localStorage.getItem('id_token');
       if (token) {
         this.backendService.getAuthData().subscribe(authData => {
-          this.appService.authData = authData
-        })
+          this.appService.authData = authData;
+        });
       }
 
       window.addEventListener('message', event => {

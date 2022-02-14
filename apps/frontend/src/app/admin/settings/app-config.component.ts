@@ -2,9 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import {ConfigFullDto} from "@studio-lite-lib/api-dto";
-import {BackendService} from "../backend.service";
-import {AppConfig} from "../../app.classes";
+import { ConfigFullDto } from '@studio-lite-lib/api-dto';
+import { BackendService } from '../backend.service';
+import { AppConfig } from '../../app.classes';
 
 const defaultAppConfig = <ConfigFullDto>{
   appTitle: 'IQB-Teststudio',
@@ -109,17 +109,19 @@ export class AppConfigComponent implements OnInit, OnDestroy {
           }, { emitEvent: false });
         }
       }
-      this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay, this.appConfig.globalWarningExpiredHour);
+      this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay,
+        this.appConfig.globalWarningExpiredHour);
       if (this.configForm) {
         this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
           if (this.configForm && this.appConfig) {
             this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
             this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
-            this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay, this.appConfig.globalWarningExpiredHour);
+            this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay,
+              this.appConfig.globalWarningExpiredHour);
             this.dataChanged = true;
           }
-        })
-      };
+        });
+      }
     },
     () => {
       this.appConfig = defaultAppConfig;
@@ -130,8 +132,8 @@ export class AppConfigComponent implements OnInit, OnDestroy {
           imprintHtml: '',
           globalWarningText: '',
           globalWarningExpiredDay: ''
-        }, { emitEvent: false })
-      };
+        }, { emitEvent: false });
+      }
       this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht laden', 'Fehler', { duration: 3000 });
     });
   }
@@ -146,18 +148,18 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
       this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
-          if (isOk) {
-            this.snackBar.open(
-              'Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!', 'Info', { duration: 3000 }
-            );
-            this.dataChanged = false;
-          } else {
-            this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht speichern', 'Fehler', { duration: 3000 });
-          }
-        },
-        () => {
+        if (isOk) {
+          this.snackBar.open(
+            'Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!', 'Info', { duration: 3000 }
+          );
+          this.dataChanged = false;
+        } else {
           this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht speichern', 'Fehler', { duration: 3000 });
-        });
+        }
+      },
+      () => {
+        this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht speichern', 'Fehler', { duration: 3000 });
+      });
     }
   }
 

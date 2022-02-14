@@ -2,11 +2,11 @@ import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {Subscription} from 'rxjs';
+import { Subscription } from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
-import {BackendService} from '../../backend.service';
-import {SelectModuleComponent} from "./select-module.component";
-import {UnitMetadataStore} from "../../workspace.classes";
+import { BackendService } from '../../backend.service';
+import { SelectModuleComponent } from './select-module.component';
+import { UnitMetadataStore } from '../../workspace.classes';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -41,8 +41,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
         this.readData();
-      })
-    })
+      });
+    });
   }
 
   private readData(): void {
@@ -50,13 +50,13 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.workspaceService.unitMetadataStore) {
-      this.setupForm()
+      this.setupForm();
     } else {
       this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
-          this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
+        this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
         this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
-        this.setupForm()
-      })
+        this.setupForm();
+      });
     }
   }
 
@@ -70,18 +70,18 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         key: unitMetadata.key,
         name: unitMetadata.name,
         description: unitMetadata.description
-      }, {emitEvent: false});
+      }, { emitEvent: false });
       if (this.editorSelector) {
         this.editorSelector.setModule(unitMetadata.editor ? unitMetadata.editor : '');
         this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.unitMetadataStore?.setEditor(selectedValue)
-        })
+          this.workspaceService.unitMetadataStore?.setEditor(selectedValue);
+        });
       }
       if (this.playerSelector) {
         this.playerSelector.setModule(unitMetadata.player ? unitMetadata.player : '');
         this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.unitMetadataStore?.setPlayer(selectedValue)
-        })
+          this.workspaceService.unitMetadataStore?.setPlayer(selectedValue);
+        });
       }
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         this.workspaceService.unitMetadataStore?.setBasicData(
@@ -89,7 +89,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           this.unitForm.get('name')?.value,
           this.unitForm.get('description')?.value
         );
-      })
+      });
     }
   }
 

@@ -10,15 +10,15 @@ import {
   UnauthorizedException,
   UseGuards
 } from '@nestjs/common';
-import {AuthService} from "../../auth/service/auth.service";
-import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {WorkspaceGroupService} from "../../database/services/workspace-group.service";
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
-} from "@studio-lite-lib/api-dto";
+} from '@studio-lite-lib/api-dto';
+import { AuthService } from '../../auth/service/auth.service';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
@@ -31,7 +31,7 @@ export class WorkspaceGroupsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupInListDto],
+    type: [WorkspaceGroupInListDto]
   })
   @ApiTags('admin workspaces')
   async findAll(@Request() req): Promise<WorkspaceGroupInListDto[]> {
@@ -46,7 +46,7 @@ export class WorkspaceGroupsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupFullDto],
+    type: [WorkspaceGroupFullDto]
   })
   @ApiTags('admin workspaces')
   async findOne(@Request() req, @Param('id') id: number): Promise<WorkspaceGroupFullDto> {
@@ -78,7 +78,7 @@ export class WorkspaceGroupsController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspaceGroupService.patch(workspaceGroupFullDto)
+    return this.workspaceGroupService.patch(workspaceGroupFullDto);
   }
 
   @Post()
@@ -86,7 +86,7 @@ export class WorkspaceGroupsController {
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new workspace group in database',
-    type: Number,
+    type: Number
   })
   @ApiTags('admin workspaces')
   async create(@Request() req, @Body() createWorkspaceDto: CreateWorkspaceGroupDto) {
@@ -94,6 +94,6 @@ export class WorkspaceGroupsController {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    return this.workspaceGroupService.create(createWorkspaceDto)
+    return this.workspaceGroupService.create(createWorkspaceDto);
   }
 }

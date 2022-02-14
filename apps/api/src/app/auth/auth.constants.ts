@@ -1,6 +1,6 @@
 export const jwtConstants = {
-  secret: 'schnullerfatz',
+  secret: 'schnullerfatz'
 };
 export const passwordHash = {
-  salt: 11,
+  salt: 11
 };

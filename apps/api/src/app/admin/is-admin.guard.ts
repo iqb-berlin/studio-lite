@@ -1,5 +1,10 @@
-import {CanActivate, ExecutionContext, Injectable, UnauthorizedException} from '@nestjs/common';
-import {AuthService} from "../auth/service/auth.service";
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException
+} from '@nestjs/common';
+import { AuthService } from '../auth/service/auth.service';
 
 @Injectable()
 export class IsAdminGuard implements CanActivate {
@@ -8,7 +13,7 @@ export class IsAdminGuard implements CanActivate {
   ) {}
 
   async canActivate(
-    context: ExecutionContext,
+    context: ExecutionContext
   ) {
     const req = context.switchToHttp().getRequest();
     const userId = req.user.id;

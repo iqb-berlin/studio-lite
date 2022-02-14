@@ -10,7 +10,7 @@ import {
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
+import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -19,10 +19,10 @@ import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
 export class UnitPreviewComponent implements OnInit, OnDestroy {
   iFrameHostElement: HTMLDivElement | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
-  private postMessageSubscription: Subscription  | undefined;
+  private postMessageSubscription: Subscription | undefined;
   private unitIdChangedSubscription: Subscription | undefined;
   private sessionId = '';
-  postMessageTarget: Window  | undefined;
+  postMessageTarget: Window | undefined;
   private lastPlayerId = '';
   playerName = '';
   playerApiVersion = 3;
@@ -37,6 +37,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
       id: 'focus', label: 'F', color: 'DarkGray', description: 'Status: Player hat Fenster-Fokus'
     }
   ];
+
   message = '';
 
   showPageNav = false;
@@ -141,10 +142,10 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
             this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
             this.sendUnitDataToPlayer();
-          })
+          });
         }
-      })
-    })
+      });
+    });
   }
 
   sendUnitDataToPlayer(): void {
@@ -162,7 +163,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
-                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId,ued)
+                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
                 this.postUnitDef(this.workspaceService.unitDefinitionStore);
               },
               err => {
@@ -238,7 +239,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
             this.lastPlayerId = '';
           }
-        })
+        });
       } else {
         this.lastPlayerId = '';
       }

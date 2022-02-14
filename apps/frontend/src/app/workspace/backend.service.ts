@@ -8,8 +8,8 @@ import {
   UnitMetadataDto, VeronaModuleFileDto,
   VeronaModuleInListDto,
   WorkspaceFullDto
-} from "@studio-lite-lib/api-dto";
-import {AppHttpError} from "../app.classes";
+} from '@studio-lite-lib/api-dto';
+import { AppHttpError } from '../app.classes';
 
 @Injectable({
   providedIn: 'root'
@@ -150,7 +150,7 @@ export class BackendService {
     return this.http
       .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
       .pipe(
-        catchError(() => of (<VeronaModuleFileDto>{}))
+        catchError(() => of(<VeronaModuleFileDto>{}))
       );
   }
 

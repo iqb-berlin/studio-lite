@@ -23,79 +23,13 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nrwl/nx/typescript", "plugin:@typescript-eslint/recommended"],
-      "rules": {
-        "@typescript-eslint/comma-dangle": ["error", "never"],
-        "import/prefer-default-export": "off",
-        "@typescript-eslint/lines-between-class-members": [
-          "error", "always",
-          {
-            "exceptAfterSingleLine": true
-          }
-        ],
-        "operator-linebreak": [2, "after"],
-        "@typescript-eslint/indent": [
-          "error", 2,
-          {
-            "SwitchCase": 1,
-            "FunctionExpression": {
-              "parameters": "first"
-            }
-          }
-        ],
-        "arrow-parens": ["error", "as-needed"],
-        "max-len": ["warn", 120],
-        "@typescript-eslint/no-inferrable-types": "off",
-        "no-underscore-dangle": ["error", {"allowAfterThis": true}],
-        "prefer-destructuring": ["off"],
-        "@typescript-eslint/no-unused-expressions": [2, {"allowTernary": true}],
-        "no-plusplus": ["error", {"allowForLoopAfterthoughts": true}],
-        "no-param-reassign": ["error", {"props": false}],
-        "@typescript-eslint/explicit-member-accessibility": [
-          "error",
-          {
-            "accessibility": "no-public",
-            "overrides": {
-              "accessors": "no-public",
-              "constructors": "no-public",
-              "methods": "no-public",
-              "properties": "no-public",
-              "parameterProperties": "no-public"
-            }
-          }
-        ],
-        "no-use-before-define": ["off"],
-        "@typescript-eslint/no-use-before-define": ["off"],
-        "object-shorthand": ["off"]
-      }
+      "extends": ["@iqb/eslint-config"],
+      "rules": {}
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nrwl/nx/javascript"],
-      "rules": {
-        "comma-dangle": ["error", "never"],
-    "arrow-parens": ["error", "as-needed"],
-    "max-len": ["warn", 120],
-    "indent": [
-      "error", 2,
-      {
-        "SwitchCase": 1,
-        "FunctionExpression": {
-          "parameters": "first"
-        }
-      }
-    ],
-    "prefer-destructuring": ["error", {
-      "VariableDeclarator": {
-        "array": false,
-        "object": false
-      },
-      "AssignmentExpression": {
-        "array": false,
-        "object": false
-      }
-    }]
-      }
+      "extends": ["@iqb/eslint-config/javascript"],
+      "rules": {}
     }
   ]
 }

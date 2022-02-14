@@ -4,10 +4,10 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-dto";
-import {WorkspaceGroupData} from "./workspaceChecked";
+import { WorkspaceGroupData } from './workspaceChecked';
 
 @Component({
   template: `
@@ -66,7 +66,8 @@ export class WorkspaceGroupsComponent implements OnInit {
             workspaceCount: workspaceGroup.workspaces.length
           });
         });
-    });
+      }
+    );
   }
 
   changeName(wsg: WorkspaceGroupData): void {
@@ -84,7 +85,7 @@ export class WorkspaceGroupsComponent implements OnInit {
             wsg.id,
             (<FormGroup>result).get('name')?.value
           ).subscribe(
-            (respOk) => {
+            respOk => {
               this.updateList();
             },
             err => {
