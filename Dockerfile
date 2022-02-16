@@ -7,4 +7,4 @@ COPY . .
 RUN chown -R node /usr/src/
 USER node
 EXPOSE 4200
-CMD nx run-many --target=serve --projects=api, frontend --parallel
+CMD nx run-many --target=serve --projects=api,frontend --parallel
