@@ -38,6 +38,14 @@ create table workspace_user
   primary key (workspace_id, user_id)
 );
 
+create table public.unit_definition
+(
+  id   serial
+    constraint unit_definition_pk
+      primary key,
+  data text not null
+);
+
 create table public.unit
 (
   id                      serial
@@ -45,31 +53,32 @@ create table public.unit
   workspace_id            integer                                not null
     references workspace
       on delete cascade,
-  group_name              varchar(50),
-  description             text,
+  last_changed_scheme     timestamp with time zone default now() not null,
   key                     varchar(20)                            not null,
   name                    varchar(100),
+  metadata                jsonb,
+  variables               jsonb,
+  scheme                  jsonb,
   editor                  varchar(50),
   player                  varchar(50),
   schemer                 varchar(50),
-  metadata                jsonb,
-  last_changed_metadata   timestamp with time zone default now(),
-  variables               jsonb,
   definition_id           integer
     constraint unit_definition_id_fk
       references unit_definition
       on delete cascade,
   last_changed_definition timestamp with time zone default now(),
-  scheme                  jsonb,
-  last_changed_scheme     timestamp with time zone default now() not null
+  group_name              varchar(50),
+  description             text,
+  last_changed_metadata   timestamp with time zone default now()
 );
 
 
-CREATE TABLE public.app_config
+create table public.setting
 (
-  key character varying(50) NOT NULL,
-  content jsonb,
-  PRIMARY KEY (key)
+  key     varchar(50) not null
+    constraint app_config_pkey
+      primary key,
+  content text        not null
 );
 
 create table public.verona_module
