@@ -9,4 +9,4 @@ services:
     env_file:
       - docker.env
     volumes:
-      - /data/postgres:/data/postgres
+      - /data/postgres-studio-lite:/data/postgres
