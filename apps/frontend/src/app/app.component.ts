@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import { AppService } from './app.service';
+import {AppService, standardLogo} from './app.service';
 import { BackendService} from './backend.service';
 import {AppConfig} from "./app.classes";
 
@@ -29,6 +29,11 @@ export class AppComponent implements OnInit {
           this.appService.dataLoading = false;
           this.appService.globalWarning = this.appService.appConfig.globalWarningText();
         }
+      });
+      this.backendService.getAppLogo().subscribe(newLogo => {
+        this.appService.appLogo = newLogo ? newLogo : standardLogo;
+        if (this.appService.appLogo.bodyBackground) document.documentElement.style.setProperty('--st-body-background', this.appService.appLogo.bodyBackground);
+        if (this.appService.appLogo.boxBackground) document.documentElement.style.setProperty('--st-box-background', this.appService.appLogo.boxBackground);
       });
       const token = localStorage.getItem('id_token');
       if (token) {

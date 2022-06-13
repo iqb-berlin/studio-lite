@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, of, throwError} from 'rxjs';
+import {Observable, throwError} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {
-  ConfigFullDto,
+  ConfigDto, AppLogoDto,
   CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
   UserFullDto,
   UserInListDto,
@@ -170,17 +170,17 @@ export class BackendService {
       );
   }
 
-  getConfig(): Observable<ConfigFullDto | null> {
-    return this.http
-      .get<ConfigFullDto | null>(`${this.serverUrl}admin/settings/config`, {})
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
-
-  setAppConfig(appConfig: ConfigFullDto): Observable<boolean> {
+  setAppConfig(appConfig: ConfigDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)
+      .pipe(
+        map(() => true)
+      )
+  }
+
+  setAppLogo(appLogo: AppLogoDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/app-logo`, appLogo)
       .pipe(
         map(() => true)
       )

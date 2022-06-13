@@ -3,8 +3,9 @@ import { Injectable, Inject } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {AuthDataDto, ChangePasswordDto, ConfigFullDto} from "@studio-lite-lib/api-dto";
+import {AuthDataDto, ChangePasswordDto, ConfigDto} from "@studio-lite-lib/api-dto";
 import {AppService} from "./app.service";
+import {AppLogoDto} from "@studio-lite-lib/api-dto";
 
 @Injectable({
   providedIn: 'root'
@@ -44,9 +45,17 @@ export class BackendService {
     this.appService.authData = AppService.defaultAuthData;
   }
 
-  getConfig(): Observable<ConfigFullDto | null> {
+  getConfig(): Observable<ConfigDto | null> {
     return this.http
-      .get<ConfigFullDto | null>(`${this.serverUrl}admin/settings/config`, {})
+      .get<ConfigDto | null>(`${this.serverUrl}admin/settings/config`, {})
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  getAppLogo(): Observable<AppLogoDto | null> {
+    return this.http
+      .get<AppLogoDto | null>(`${this.serverUrl}admin/settings/app-logo`, {})
       .pipe(
         catchError(() => of(null))
       );

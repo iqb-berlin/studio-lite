@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ConfigFullDto {
+export class ConfigDto {
   @ApiProperty()
   appTitle!: string;
 

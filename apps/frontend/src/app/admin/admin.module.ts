@@ -38,6 +38,7 @@ import { AppConfigComponent } from './settings/app-config.component';
 import {HTTP_INTERCEPTORS} from "@angular/common/http";
 import {AuthInterceptor} from "./auth.interceptor";
 import {EditUserComponent} from "./users/edituser.component";
+import {AppLogoComponent} from "./settings/app-logo.component";
 
 @NgModule({
     imports: [
@@ -81,7 +82,8 @@ import {EditUserComponent} from "./users/edituser.component";
     SettingsComponent,
     WorkspaceGroupsComponent,
     EditWorkspaceGroupComponent,
-    AppConfigComponent
+    AppConfigComponent,
+    AppLogoComponent
   ],
   providers: [
     BackendService,

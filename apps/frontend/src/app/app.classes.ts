@@ -1,5 +1,5 @@
 import {DomSanitizer, SafeUrl, Title} from "@angular/platform-browser";
-import {ConfigFullDto} from "@studio-lite-lib/api-dto";
+import {ConfigDto} from "@studio-lite-lib/api-dto";
 import {HttpErrorResponse} from "@angular/common/http";
 
 export interface WorkspaceDataFlat {
@@ -42,7 +42,7 @@ export class AppConfig {
   private readonly _globalWarningExpiredHour: number | undefined;
   private readonly titleService: Title;
 
-  constructor(titleService: Title, appConfig?: ConfigFullDto, sanitizer?: DomSanitizer) {
+  constructor(titleService: Title, appConfig?: ConfigDto, sanitizer?: DomSanitizer) {
     this.appTitle = appConfig ? appConfig.appTitle : 'IQB-Studio-Lite';
     this.pageTitle = '';
     if (appConfig && appConfig.introHtml && sanitizer) this.introHtml = sanitizer.bypassSecurityTrustHtml(appConfig.introHtml);

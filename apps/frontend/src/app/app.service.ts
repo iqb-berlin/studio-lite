@@ -1,8 +1,15 @@
 import { Subject} from 'rxjs';
 import { Injectable } from '@angular/core';
-import {AuthDataDto} from "@studio-lite-lib/api-dto";
+import {AuthDataDto, AppLogoDto} from "@studio-lite-lib/api-dto";
 import {Title} from "@angular/platform-browser";
 import {AppConfig} from "./app.classes";
+
+export const standardLogo: AppLogoDto = {
+  data: 'assets/IQB-LogoA.png',
+  alt: 'Zur Startseite',
+  bodyBackground: 'linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%, rgba(1,201,241,1) 92%, rgba(237,178,255,1) 100%)',
+  boxBackground: 'lightgray'
+};
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +23,7 @@ export class AppService {
   }
   authData = AppService.defaultAuthData;
   appConfig: AppConfig;
+  appLogo: AppLogoDto | null = null;
   errorMessage = '';
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();

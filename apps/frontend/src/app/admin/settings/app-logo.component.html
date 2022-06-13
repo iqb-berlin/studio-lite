@@ -1,0 +1,31 @@
+<form [formGroup]="configForm" fxFlex fxLayout="column" fxLayoutAlign="start stretch">
+  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+    <img class="logo-img" [src]="logoImageBase64" alt="Klick rechts auf den Schalter zum Hochladen" />
+    <input #hiddenimgfileinput type="file" (change)="imgFileChange($event)" [hidden]="true"/>
+    <button mat-raised-button (click)="hiddenimgfileinput.click()" matTooltip="Logo hochladen/aktualisieren" matTooltipPosition="above">
+      <mat-icon>cloud_upload</mat-icon>
+    </button>
+    <button mat-raised-button (click)="removeLogoImg()" matTooltip="Logo auf Standard setzen" matTooltipPosition="above">
+      <mat-icon>delete</mat-icon>
+    </button>
+    <p class="warning-warning" *ngIf="imageError">{{imageError}}</p>
+  </div>
+  <mat-form-field fxLayout="column">
+    <mat-label>Alternativtext des Logos</mat-label>
+    <input matInput formControlName="alt" placeholder="Alternativ">
+  </mat-form-field>
+  <mat-form-field fxLayout="column">
+    <mat-label>Hintergrundfarbe Anwendung</mat-label>
+    <input matInput formControlName="bodyBackground" placeholder="Farbe">
+  </mat-form-field>
+  <mat-form-field fxLayout="column">
+    <mat-label>Hintergrundfarbe sekundäre Boxen</mat-label>
+    <input matInput formControlName="boxBackground" placeholder="Farbe">
+  </mat-form-field>
+  <div fxLayout="row" fxLayoutGap="30px" fxLayoutAlign="start start">
+    <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()">
+      Speichern
+    </button>
+    <div *ngIf="dataChanged" fxFlex>Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!</div>
+  </div>
+</form>
