@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {getConnection, Repository} from "typeorm";
 import WorkspaceGroup from "../entities/workspace-group.entity";
@@ -7,6 +7,7 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
 } from "@studio-lite-lib/api-dto";
+import {ArgumentOutOfRangeError} from "rxjs";
 
 @Injectable()
 export class WorkspaceGroupService {
@@ -41,11 +42,15 @@ export class WorkspaceGroupService {
   }
 
   async patch(workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
-    const workspaceGroupRepository = await getConnection().getRepository(WorkspaceGroup);
-    const workspaceGroupToUpdate = await workspaceGroupRepository.findOne(workspaceGroupData.id);
-    if (workspaceGroupData.name) workspaceGroupToUpdate.name = workspaceGroupData.name;
-    if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
-    await workspaceGroupRepository.save(workspaceGroupToUpdate);
+    if (workspaceGroupData.id) {
+      const workspaceGroupRepository = await getConnection().getRepository(WorkspaceGroup);
+      const workspaceGroupToUpdate = await workspaceGroupRepository.findOne(workspaceGroupData.id);
+      if (workspaceGroupData.name) workspaceGroupToUpdate.name = workspaceGroupData.name;
+      if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
+      await workspaceGroupRepository.save(workspaceGroupToUpdate);
+    } else {
+      throw new ArgumentOutOfRangeError();
+    }
   }
 
   async remove(id: number): Promise<void> {

@@ -146,7 +146,8 @@ export class BackendService {
   addWorkspaceGroup(name: string): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.serverUrl}admin/workspace-groups`, <CreateWorkspaceGroupDto>{
-        name: name
+        name: name,
+        settings: {}
       })
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
