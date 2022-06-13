@@ -1,4 +1,4 @@
-create table public."user"
+create table public.user
 (
   id          serial
     primary key,
