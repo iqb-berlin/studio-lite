@@ -32,30 +32,38 @@
       <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
           <mat-icon>delete</mat-icon>
       </button>
-      <button mat-button [matMenuTriggerFor]="menu" disabled="disabled" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
+      <button mat-button [matMenuTriggerFor]="menu" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
         <mat-icon>menu</mat-icon>
       </button>
 
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="settings()">
+        <button mat-menu-item (click)="settings()" disabled="disabled">
           <mat-icon>settings</mat-icon>Einstellungen
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="copyUnit()">
+        <button mat-menu-item (click)="copyUnit()" disabled="disabled">
           <mat-icon>content_copy</mat-icon>Kopieren
         </button>
-        <button mat-menu-item (click)="moveUnit()">
+        <button mat-menu-item (click)="moveUnit()" disabled="disabled">
           <mat-icon>swap_horiz</mat-icon>Verschieben
         </button>
         <button mat-menu-item (click)="hiddenFileInput.click()">
           <mat-icon>input</mat-icon>Import
         </button>
-        <button mat-menu-item (click)="exportUnit()">
+        <button mat-menu-item (click)="exportUnit()" disabled="disabled">
           <mat-icon>get_app</mat-icon>Export
         </button>
       </mat-menu>
     </div>
-    <input #hiddenFileInput type="file" name="unit-file" accept=".xml,.voud,.zip" multiple [iqbFilesUploadInputFor]="fileUploadQueue" hidden="true"/>
+    <div fxLayout="row" *ngIf="uploadProgress">
+      <mat-progress-bar mode="determinate" fxFlex [value]="uploadProgress">
+      </mat-progress-bar>
+      <button mat-mini-fab color="primary" (click)="cancelUpload()">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+    </div>
+    <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
+           multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
   </div>
   <div [hidden]="fileUploadQueue.files.length<=0 && uploadMessages.length <= 0" class="import-units-log" fxFlex="40">
     <div *ngFor="let msg of uploadMessages" class="upload-message">{{msg}}</div>
@@ -69,7 +77,7 @@
     <button mat-raised-button color="primary" *ngIf="fileUploadQueue.files.length <= 0" class="upload-message-ok-button"
             (click)="clearUploadMessages()">OK</button>
   </div>
-  <div fxFlex class="unitdatacontainer" fxFlexLayout="column">
+  <div fxLayout="column" fxFlex class="unitdatacontainer">
     <nav mat-tab-nav-bar>
       <a mat-tab-link
          *ngFor="let link of navLinks"

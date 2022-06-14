@@ -1,5 +1,5 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpHeaders, HttpClient } from '@angular/common/http';
+import {HttpHeaders, HttpClient, HttpEvent} from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
 import {
@@ -135,6 +135,21 @@ export class BackendService {
       .pipe(
         catchError(err => throwError(new AppHttpError(err)))
       );
+  }
+
+  uploadUnits(workspaceId: number, files: FileList | null): Observable<boolean | HttpEvent<any>> {
+    if (files) {
+      const formData = new FormData();
+      for (var i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+      return this.http.post(`${this.serverUrl}workspace/${workspaceId}/upload`, formData, {
+        reportProgress: true,
+        observe: 'events'
+      })
+    } else {
+      return of(false)
+    }
   }
 
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {

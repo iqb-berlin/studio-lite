@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Component, Inject, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
-import {Subscription, map, lastValueFrom} from 'rxjs';
+import {Subscription, map, lastValueFrom, finalize} from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../app.service';
 import { BackendService, WorkspaceSettings } from './backend.service';
@@ -20,6 +20,7 @@ import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import {CreateUnitDto, UnitInListDto, WorkspaceSettingsDto} from "@studio-lite-lib/api-dto";
 import {ModuleCollection, UnitCollection} from "./workspace.classes";
 import {MatTabNav} from "@angular/material/tabs";
+import {HttpEvent, HttpEventType} from "@angular/common/http";
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -28,6 +29,8 @@ import {MatTabNav} from "@angular/material/tabs";
 export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
+  private uploadSubscription: Subscription | null = null;
+  uploadProgress: number | null = null;
   uploadProcessId = '';
   uploadUrl = '';
   uploadMessages: string[] = [];
@@ -380,7 +383,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             defaultPlayer: result.controls.playerSelector.value
           }
         ).subscribe(isOK => {
-          if (isOK === false) {
+          if (!isOK) {
             this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
           } else {
             this.snackBar.open('Einstellungen gespeichert', '', { duration: 1000 });
@@ -459,9 +462,42 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  cancelUpload() {
+    if (this.uploadSubscription !== null) {
+      this.uploadSubscription.unsubscribe();
+      this.resetUpload();
+    }
+  }
+
+  resetUpload() {
+    this.uploadProgress = null;
+    this.uploadSubscription = null;
+  }
+
+  onFileSelected(targetElement: EventTarget | null) {
+    if (targetElement) {
+      const inputElement = targetElement as HTMLInputElement;
+      if (inputElement.files && inputElement.files.length > 0) {
+        this.uploadSubscription = this.backendService.uploadUnits(
+          this.workspaceService.selectedWorkspace, inputElement.files)
+          .pipe(
+            finalize(() => this.resetUpload())
+          ).subscribe(event => {
+            const httpEvent = event as HttpEvent<any>;
+            if (httpEvent.type == HttpEventType.UploadProgress) {
+              this.uploadProgress = Math.round(100 * (httpEvent.loaded / (httpEvent.total ? httpEvent.total : 1)))
+            }
+          });
+      }
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.routingSubscription !== null) {
       this.routingSubscription.unsubscribe();
+    }
+    if (this.uploadSubscription !== null) {
+      this.uploadSubscription.unsubscribe();
     }
   }
 }

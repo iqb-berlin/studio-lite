@@ -10,6 +10,8 @@ import {
 } from "@studio-lite-lib/api-dto";
 import WorkspaceUser from "../entities/workspace-user.entity";
 import WorkspaceGroup from "../entities/workspace-group.entity";
+import {FileIo} from "../../interfaces/file-io.interface";
+import * as cheerio from "cheerio";
 
 @Injectable()
 export class WorkspaceService {
@@ -106,5 +108,25 @@ export class WorkspaceService {
 
   async remove(id: number | number[]): Promise<void> {
     await this.workspacesRepository.delete(id);
+  }
+
+  uploadUnits(id: number, files: FileIo[]) {
+    files.forEach(f => {
+      console.log(f.originalname);
+      if (f.mimetype === 'text/xml') {
+        const xmlDocument = cheerio.load(f.buffer.toString());
+        const metadataElement = xmlDocument('Metadata').first();
+        if (metadataElement) {
+          const unitIdElement = metadataElement.find('Id').first();
+          if (unitIdElement) {
+            console.log(`--> ${unitIdElement.text()}`);
+          } else {
+            console.log('nix unitIdElement');
+          }
+        } else {
+          console.log('nix metadataElement');
+        }
+      }
+    });
   }
 }
