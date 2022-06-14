@@ -13,7 +13,7 @@
 }
 
 .box-right {
-  background-color: lightgrey;
+  background-color: var(--st-box-background);
 }
 
 .box-left {
