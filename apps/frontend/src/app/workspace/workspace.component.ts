@@ -34,7 +34,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   navLinks = [
     { path: 'metadata', label: 'Eigenschaften' },
     { path: 'editor', label: 'Editor' },
-    { path: 'preview', label: 'Vorschau' }
+    { path: 'preview', label: 'Vorschau' },
+    { path: 'schemer', label: 'Schemer' }
   ];
   workspacesSettings: WorkspaceSettingsDto;
 

@@ -49,7 +49,7 @@ class Unit {
     default: () => "'{}'",
     nullable: false,
   })
-  public variables = {};
+  public variables = [];
 
   @Column({
     type: 'timestamp with time zone',

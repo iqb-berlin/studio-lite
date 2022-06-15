@@ -123,7 +123,6 @@ export class UnitMetadataStore {
     } else {
       this.changedData.player = newPlayer;
     }
-    console.log(this.changedData);
   }
 
   setEditor(newEditor: string) {
@@ -190,7 +189,7 @@ export class UnitDefinitionStore {
     this.changedData = <UnitDefinitionDto>{}
   }
 
-  setData(newVariables: string, newDefinition: string) {
+  setData(newVariables: never[], newDefinition: string) {
     if (newVariables === this.originalData.variables) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
