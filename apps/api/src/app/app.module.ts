@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 
+import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AdminModule } from './admin/admin.module';
-import {AuthModule} from "./auth/auth.module";
+import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
-import {MulterModule} from "@nestjs/platform-express";
-import {WorkspaceModule} from "./workspace/workspace.module";
+import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [
@@ -17,6 +17,6 @@ import {WorkspaceModule} from "./workspace/workspace.module";
     MulterModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}
