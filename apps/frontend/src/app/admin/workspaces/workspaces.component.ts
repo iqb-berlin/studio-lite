@@ -6,21 +6,23 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { FormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import {BackendService} from '../backend.service';
-import { EditworkspaceComponent } from './editworkspace.component';
-import { AppService } from '../../app.service';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite-lib/iqb-components";
-import {WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto} from "@studio-lite-lib/api-dto";
-import {UserToCheckCollection} from "../users/usersChecked";
-import {WorkspaceGroupsComponent} from "./workspace-groups.component";
-import {WorkspaceDataFlat} from "../../app.classes";
-import {WorkspaceGroupData} from "./workspaceChecked";
+} from '@studio-lite-lib/iqb-components';
+import {
+  WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto
+} from '@studio-lite-lib/api-dto';
+import { BackendService } from '../backend.service';
+import { EditworkspaceComponent } from './editworkspace.component';
+import { AppService } from '../../app.service';
+import { UserToCheckCollection } from '../users/usersChecked';
+import { WorkspaceGroupsComponent } from './workspace-groups.component';
+import { WorkspaceDataFlat } from '../../app.classes';
+import { WorkspaceGroupData } from './workspaceChecked';
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -32,8 +34,8 @@ import {WorkspaceGroupData} from "./workspaceChecked";
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceDataFlat>();
   displayedColumns = ['selectCheckbox', 'group', 'name'];
-  tableselectionCheckbox = new SelectionModel <WorkspaceDataFlat>(true, []);
-  tableselectionRow = new SelectionModel <WorkspaceDataFlat>(false, []);
+  tableSelectionCheckbox = new SelectionModel <WorkspaceDataFlat>(true, []);
+  tableSelectionRow = new SelectionModel <WorkspaceDataFlat>(false, []);
   selectedWorkspaceId = 0;
   workspaceGroups: WorkspaceGroupData[] = [];
 
@@ -44,13 +46,13 @@ export class WorkspacesComponent implements OnInit {
   constructor(
     private appService: AppService,
     private backendService: BackendService,
-    private editworkspaceDialog: MatDialog,
+    private editWorkspaceDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private workspaceGroupsDialog: MatDialog,
     private messsageDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
-    this.tableselectionRow.changed.subscribe(
+    this.tableSelectionRow.changed.subscribe(
       r => {
         if (r.added.length > 0) {
           this.selectedWorkspaceId = r.added[0].id;
@@ -81,7 +83,7 @@ export class WorkspacesComponent implements OnInit {
         }
       });
     } else {
-      const dialogRef = this.editworkspaceDialog.open(EditworkspaceComponent, {
+      const dialogRef = this.editWorkspaceDialog.open(EditworkspaceComponent, {
         width: '600px',
         data: {
           name: '',
@@ -108,11 +110,6 @@ export class WorkspacesComponent implements OnInit {
                   this.snackBar.open('Konnte Arbeitsbereich nicht hinzufügen', 'Fehler', { duration: 3000 });
                 }
                 this.appService.dataLoading = false;
-              },
-              err => {
-                this.snackBar.open(`Konnte Arbeitsbereich nicht hinzufügen (
-                ${err.code})`, 'Fehler', { duration: 3000 });
-                this.appService.dataLoading = false;
               }
             );
           }
@@ -122,9 +119,9 @@ export class WorkspacesComponent implements OnInit {
   }
 
   changeObject(): void {
-    let selectedRows = this.tableselectionRow.selected;
+    let selectedRows = this.tableSelectionRow.selected;
     if (selectedRows.length === 0) {
-      selectedRows = this.tableselectionCheckbox.selected;
+      selectedRows = this.tableSelectionCheckbox.selected;
     }
     if (selectedRows.length === 0) {
       this.messsageDialog.open(MessageDialogComponent, {
@@ -136,7 +133,7 @@ export class WorkspacesComponent implements OnInit {
         }
       });
     } else {
-      const dialogRef = this.editworkspaceDialog.open(EditworkspaceComponent, {
+      const dialogRef = this.editWorkspaceDialog.open(EditworkspaceComponent, {
         width: '600px',
         data: {
           name: selectedRows[0].name,
@@ -152,12 +149,12 @@ export class WorkspacesComponent implements OnInit {
           if (result !== false) {
             this.appService.dataLoading = true;
             const workspaceData = <WorkspaceFullDto>{
-              id: selectedRows[0].id,
+              id: selectedRows[0].id
             };
-            const newName = (<FormGroup>result).get('name')?.value
-            const newWorkspaceGroup = (<FormGroup>result).get('groupSelector')?.value
+            const newName = (<FormGroup>result).get('name')?.value;
+            const newWorkspaceGroup = (<FormGroup>result).get('groupSelector')?.value;
             if (newName !== selectedRows[0].name) workspaceData.name = newName;
-            if (newWorkspaceGroup !== selectedRows[0].groupId) workspaceData.groupId = parseInt(newWorkspaceGroup);
+            if (newWorkspaceGroup !== selectedRows[0].groupId) workspaceData.groupId = parseInt(newWorkspaceGroup, 10);
             this.backendService.changeWorkspace(workspaceData).subscribe(
               respOk => {
                 if (respOk) {
@@ -166,10 +163,6 @@ export class WorkspacesComponent implements OnInit {
                 } else {
                   this.snackBar.open('Konnte Arbeitsbereich nicht ändern', 'Fehler', { duration: 3000 });
                 }
-                this.appService.dataLoading = false;
-              },
-              err => {
-                this.snackBar.open(`Konnte Arbeitsbereich nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
                 this.appService.dataLoading = false;
               }
             );
@@ -180,9 +173,9 @@ export class WorkspacesComponent implements OnInit {
   }
 
   deleteObject(): void {
-    let selectedRows = this.tableselectionCheckbox.selected;
+    let selectedRows = this.tableSelectionCheckbox.selected;
     if (selectedRows.length === 0) {
-      selectedRows = this.tableselectionRow.selected;
+      selectedRows = this.tableSelectionRow.selected;
     }
     if (selectedRows.length === 0) {
       this.messsageDialog.open(MessageDialogComponent, {
@@ -225,10 +218,6 @@ export class WorkspacesComponent implements OnInit {
                 this.snackBar.open('Konnte Arbeitsbereich/e nicht löschen', 'Fehler', { duration: 1000 });
                 this.appService.dataLoading = false;
               }
-            },
-            err => {
-              this.snackBar.open(`Konnte Arbeitsbereich/e nicht löschen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.appService.dataLoading = false;
             }
           );
         }
@@ -239,16 +228,13 @@ export class WorkspacesComponent implements OnInit {
   // ***********************************************************************************
   updateUserList(): void {
     if (this.workspaceUsers.hasChanged) {
-      this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
+      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
     if (this.selectedWorkspaceId > 0) {
       this.appService.dataLoading = true;
       this.backendService.getUsersByWorkspace(this.selectedWorkspaceId).subscribe(
-        (dataresponse: UserInListDto[]) => {
-          this.workspaceUsers.setChecks(dataresponse);
-          this.appService.dataLoading = false;
-        }, () => {
-          // this.ass.updateAdminStatus('', '', [], err.label);
+        (dataResponse: UserInListDto[]) => {
+          this.workspaceUsers.setChecks(dataResponse);
           this.appService.dataLoading = false;
         }
       );
@@ -269,10 +255,6 @@ export class WorkspacesComponent implements OnInit {
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
-            this.appService.dataLoading = false;
-          },
-          err => {
-            this.snackBar.open(`Konnte Zugriffsrechte nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
             this.appService.dataLoading = false;
           }
         );
@@ -303,17 +285,13 @@ export class WorkspacesComponent implements OnInit {
               name: workspace.name,
               groupId: workspaceGroup.id,
               selected: false
-            })
-          })
+            });
+          });
         });
         this.objectsDatasource = new MatTableDataSource(workspaces);
         this.objectsDatasource.sort = this.sort;
-        this.tableselectionCheckbox.clear();
-        this.tableselectionRow.clear();
-        this.appService.dataLoading = false;
-      }, () => {
-        this.tableselectionCheckbox.clear();
-        this.tableselectionRow.clear();
+        this.tableSelectionCheckbox.clear();
+        this.tableSelectionRow.clear();
         this.appService.dataLoading = false;
       }
     );
@@ -323,24 +301,24 @@ export class WorkspacesComponent implements OnInit {
     this.workspaceUsers = new UserToCheckCollection([]);
     this.backendService.getUsers().subscribe(users => {
       this.workspaceUsers = new UserToCheckCollection(users);
-      this.updateWorkspaceList()
-    })
+      this.updateWorkspaceList();
+    });
   }
 
   isAllSelected(): boolean {
-    const numSelected = this.tableselectionCheckbox.selected.length;
+    const numSelected = this.tableSelectionCheckbox.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
     return numSelected === numRows;
   }
 
   masterToggle(): void {
     this.isAllSelected() || !this.objectsDatasource ?
-      this.tableselectionCheckbox.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableselectionCheckbox.select(row));
+      this.tableSelectionCheckbox.clear() :
+      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
   selectRow(row: WorkspaceDataFlat): void {
-    this.tableselectionRow.select(row);
+    this.tableSelectionRow.select(row);
   }
 
   editWorkspaceGroups() {
@@ -349,7 +327,7 @@ export class WorkspacesComponent implements OnInit {
       minHeight: '400px'
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(() => {
       this.updateWorkspaceList();
     });
   }

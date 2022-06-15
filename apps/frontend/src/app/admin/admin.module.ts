@@ -19,10 +19,11 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatBadgeModule } from '@angular/material/badge';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AdminRoutingModule } from './admin-routing.module';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { UsersComponent } from './users/users.component';
@@ -35,39 +36,38 @@ import { SettingsComponent } from './settings/settings.component';
 import { WorkspaceGroupsComponent } from './workspaces/workspace-groups.component';
 import { EditWorkspaceGroupComponent } from './workspaces/edit-workspace-group.component';
 import { AppConfigComponent } from './settings/app-config.component';
-import {HTTP_INTERCEPTORS} from "@angular/common/http";
-import {AuthInterceptor} from "./auth.interceptor";
-import {EditUserComponent} from "./users/edituser.component";
-import {AppLogoComponent} from "./settings/app-logo.component";
+import { AuthInterceptor } from './auth.interceptor';
+import { EditUserComponent } from './users/edituser.component';
+import { AppLogoComponent } from './settings/app-logo.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        AdminRoutingModule,
-        IqbComponentsModule,
-        MatTableModule,
-        MatTabsModule,
-        MatIconModule,
-        MatSelectModule,
-        MatCheckboxModule,
-        MatSortModule,
-        ReactiveFormsModule,
-        MatProgressSpinnerModule,
-        MatDialogModule,
-        MatButtonModule,
-        MatCardModule,
-        MatTooltipModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatToolbarModule,
-        MatSnackBarModule,
-        MatNativeDateModule,
-        MatDatepickerModule,
-        MatBadgeModule,
-        FlexLayoutModule,
-        MatChipsModule,
-        FormsModule
-    ],
+  imports: [
+    CommonModule,
+    AdminRoutingModule,
+    IqbComponentsModule,
+    MatTableModule,
+    MatTabsModule,
+    MatIconModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatSortModule,
+    ReactiveFormsModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatCardModule,
+    MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatToolbarModule,
+    MatSnackBarModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
+    MatBadgeModule,
+    FlexLayoutModule,
+    MatChipsModule,
+    FormsModule
+  ],
   exports: [
     AdminComponent
   ],

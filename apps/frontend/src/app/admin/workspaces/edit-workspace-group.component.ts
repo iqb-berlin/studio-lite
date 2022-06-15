@@ -2,6 +2,10 @@ import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
+export type EditWorkspaceGroupComponentData = {
+  name: string
+};
+
 @Component({
   template: `
     <form [formGroup]="editWorkspaceGroupForm">
@@ -28,7 +32,7 @@ export class EditWorkspaceGroupComponent {
   editWorkspaceGroupForm: FormGroup;
 
   constructor(private fb: FormBuilder,
-              @Inject(MAT_DIALOG_DATA) public data: any) {
+              @Inject(MAT_DIALOG_DATA) public data: EditWorkspaceGroupComponentData) {
     this.editWorkspaceGroupForm = this.fb.group({
       name: this.fb.control(this.data.name, [Validators.required, Validators.minLength(3)])
     });

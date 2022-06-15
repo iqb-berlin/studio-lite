@@ -5,11 +5,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import {BackendService} from '../backend.service';
-import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
+import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import { BackendService } from '../backend.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-verona-modules-table',
   templateUrl: './verona-modules-table.component.html'
 })
@@ -26,21 +25,21 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
 
   constructor(
     @Inject('SERVER_URL') public serverUrl: string,
-    private bs: BackendService) {
+    private bs: BackendService
+  ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 
   ngOnInit(): void {
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {
-      this.selectionChanged.emit({
-        type: this.type, selectedModules: this.tableSelectionCheckboxes.selected});
+      this.selectionChanged.emit({ type: this.type, selectedModules: this.tableSelectionCheckboxes.selected });
     });
     setTimeout(() => {
       this.updateList();
-    })
+    });
   }
 
-  public updateList() {
+  updateList() {
     this.bs.getVeronaModuleList(this.type).subscribe(
       (fileData: VeronaModuleInListDto[]) => {
         if (fileData) {
@@ -49,7 +48,8 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
         } else {
           this.objectsDatasource = new MatTableDataSource();
         }
-      });
+      }
+    );
   }
 
   ngOnChanges(): void {

@@ -1,20 +1,20 @@
 import {
-  Component, OnInit, Inject, ViewChild, ViewChildren, QueryList
+  Component, OnInit, Inject, ViewChildren, QueryList
 } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BackendService } from '../backend.service';
-import { AppService } from '../../app.service';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite-lib/iqb-components";
-import {VeronaModulesTableComponent} from "./verona-modules-table.component";
-import {VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
+} from '@studio-lite-lib/iqb-components';
+import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import { BackendService } from '../backend.service';
+import { AppService } from '../../app.service';
+import { VeronaModulesTableComponent } from './verona-modules-table.component';
 
 @Component({
   templateUrl: './verona-modules.component.html',
@@ -46,18 +46,18 @@ export class VeronaModulesComponent implements OnInit {
     setTimeout(() => {
       this.appService.appConfig.setPageTitle('Admin: Verona-Module');
       const t = localStorage.getItem('t');
-      this.token = t ? t : '';
+      this.token = t || '';
     });
   }
 
   updateTables() {
     this.moduleTables.forEach(tab => {
-      tab.updateList()
+      tab.updateList();
     });
     this.appService.dataLoading = false;
   }
 
-  changeSelectedModules(selection: {type: string; selectedModules: VeronaModuleInListDto[]}) {
+  changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleInListDto[] }) {
     const newSelection: VeronaModuleInListDto[] = [];
     this.selectedModules.forEach(m => {
       if (m.metadata.type !== selection.type) {
@@ -65,7 +65,7 @@ export class VeronaModulesComponent implements OnInit {
       }
     });
     selection.selectedModules.forEach(m => {
-      newSelection.push(m)
+      newSelection.push(m);
     });
     this.selectedModules = newSelection;
   }
@@ -95,13 +95,14 @@ export class VeronaModulesComponent implements OnInit {
           this.backendService.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
             (deleteFilesOk: boolean) => {
               if (deleteFilesOk) {
-                this.snackBar.open('Verona-Modul(e) hochgeladen', '', {duration: 1000});
+                this.snackBar.open('Verona-Modul(e) hochgeladen', '', { duration: 1000 });
                 this.updateTables();
               } else {
-                this.snackBar.open('Konnte Verona-Modul(e) nicht hochladen', '', {duration: 3000});
+                this.snackBar.open('Konnte Verona-Modul(e) nicht hochladen', '', { duration: 3000 });
                 this.appService.dataLoading = false;
               }
-            });
+            }
+          );
           // =========================================================
         }
       });

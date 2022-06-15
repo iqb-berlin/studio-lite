@@ -4,10 +4,10 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
-import {WorkspaceGroupDto} from "@studio-lite-lib/api-dto";
-import {WorkspaceGroupData} from "./workspaceChecked";
+import { WorkspaceGroupData } from './workspaceChecked';
 
 @Component({
   template: `
@@ -58,15 +58,16 @@ export class WorkspaceGroupsComponent implements OnInit {
   updateList(): void {
     this.workspaceGroups = [];
     this.bs.getWorkspacesGroupwise().subscribe(
-      (dataresponse: WorkspaceGroupDto[]) => {
-        dataresponse.forEach(workspaceGroup => {
+      (dataResponse: WorkspaceGroupDto[]) => {
+        dataResponse.forEach(workspaceGroup => {
           this.workspaceGroups.push(<WorkspaceGroupData>{
             id: workspaceGroup.id,
             name: workspaceGroup.name,
             workspaceCount: workspaceGroup.workspaces.length
           });
         });
-    });
+      }
+    );
   }
 
   changeName(wsg: WorkspaceGroupData): void {
@@ -84,11 +85,11 @@ export class WorkspaceGroupsComponent implements OnInit {
             wsg.id,
             (<FormGroup>result).get('name')?.value
           ).subscribe(
-            (respOk) => {
+            ok => {
+              if (!ok) {
+                this.snackBar.open('Konnte Gruppe nicht ändern', 'Fehler', { duration: 3000 });
+              }
               this.updateList();
-            },
-            err => {
-              this.snackBar.open(`Konnte Gruppe nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
             }
           );
         }
@@ -101,13 +102,13 @@ export class WorkspaceGroupsComponent implements OnInit {
   }
 
   add(event: MatChipInputEvent): void {
-    const input = event.input;
-    const value = event.value;
-
-    if ((value || '').trim()) {
-      this.bs.addWorkspaceGroup(value.trim()).subscribe(() => this.updateList());
+    if (event.chipInput) {
+      const input = event.chipInput.inputElement;
+      const value = event.value;
+      if ((value || '').trim()) {
+        this.bs.addWorkspaceGroup(value.trim()).subscribe(() => this.updateList());
+      }
+      if (input) input.value = '';
     }
-
-    if (input) input.value = '';
   }
 }
