@@ -31,7 +31,7 @@ import { Component } from '@angular/core';
       padding: 10px 50px;
     }
     .active-link {
-      font-weight: bold;
+      color: black;
     }
   `]
 })

@@ -18,20 +18,26 @@ export class BackendService {
     private http: HttpClient
   ) { }
 
-  login(name: string, password: string) {
+  login(name: string, password: string): Observable<boolean> {
     const queryParams = new HttpParams()
       .set('username', name)
       .set('password', password);
     return this.http.post<string>(`${this.serverUrl}login?${queryParams.toString()}`, 'jojo')
       .pipe(
+        catchError(() => of(false)),
         switchMap(loginToken => {
-          localStorage.setItem('id_token', loginToken);
-          return this.getAuthData()
-            .pipe(
-              map(authData => {
-                this.appService.authData = authData;
-              })
-            );
+          if (typeof loginToken === 'string') {
+            localStorage.setItem('id_token', loginToken);
+            return this.getAuthData()
+              .pipe(
+                map(authData => {
+                  this.appService.authData = authData;
+                  return true;
+                }),
+                catchError(() => of(false))
+              );
+          }
+          return of(loginToken);
         })
       );
   }

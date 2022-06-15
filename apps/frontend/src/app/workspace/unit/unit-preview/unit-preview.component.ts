@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import {
   PageData,
   StatusVisual
@@ -10,7 +11,7 @@ import {
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
+import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -19,10 +20,10 @@ import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
 export class UnitPreviewComponent implements OnInit, OnDestroy {
   iFrameHostElement: HTMLDivElement | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
-  private postMessageSubscription: Subscription  | undefined;
+  private readonly postMessageSubscription: Subscription | undefined;
   private unitIdChangedSubscription: Subscription | undefined;
   private sessionId = '';
-  postMessageTarget: Window  | undefined;
+  postMessageTarget: Window | undefined;
   private lastPlayerId = '';
   playerName = '';
   playerApiVersion = 3;
@@ -37,6 +38,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
       id: 'focus', label: 'F', color: 'DarkGray', description: 'Status: Player hat Fenster-Fokus'
     }
   ];
+
   message = '';
 
   showPageNav = false;
@@ -57,7 +59,8 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           case 'player':
           case 'vo.FromPlayer.ReadyNotification':
             if (msgType === 'vopReadyNotification' || msgType === 'player') {
-              const majorVersion = msgData.apiVersion ? msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+              const majorVersion = msgData.apiVersion ?
+                msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
               if (majorVersion.length > 0) {
                 const majorVersionNumber = Number(majorVersion[0]);
                 this.playerApiVersion = majorVersionNumber > 2 ? 3 : 2;
@@ -122,6 +125,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             break;
 
           default:
+            // eslint-disable-next-line no-console
             console.warn(`processMessagePost ignored message: ${msgType}`);
             break;
         }
@@ -137,14 +141,17 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
         if (this.workspaceService.unitMetadataStore) {
           this.sendUnitDataToPlayer();
         } else {
+          const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
           this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
-            this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
-            this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
+            selectedUnitId).subscribe(unitData => {
+            this.workspaceService.unitMetadataStore = new UnitMetadataStore(
+              unitData || <UnitMetadataDto>{ id: selectedUnitId }
+            );
             this.sendUnitDataToPlayer();
-          })
+          });
         }
-      })
-    })
+      });
+    });
   }
 
   sendUnitDataToPlayer(): void {
@@ -162,11 +169,14 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
-                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId,ued)
-                this.postUnitDef(this.workspaceService.unitDefinitionStore);
-              },
-              err => {
-                this.snackBar.open(`Konnte Aufgabendefinition nicht laden (${err.code})`, 'Fehler', { duration: 3000 });
+                if (ued) {
+                  this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
+                  this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                } else {
+                  this.snackBar.open(
+                    'Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 }
+                  );
+                }
               }
             );
           }
@@ -238,7 +248,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
             this.lastPlayerId = '';
           }
-        })
+        });
       } else {
         this.lastPlayerId = '';
       }

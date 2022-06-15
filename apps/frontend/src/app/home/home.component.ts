@@ -1,14 +1,16 @@
-import {ActivatedRoute, Router} from '@angular/router';
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  Component, Inject, OnDestroy, OnInit
+} from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { WorkspaceDto } from '@studio-lite-lib/api-dto';
+import { Subscription } from 'rxjs';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
 import { ChangePasswordComponent } from './change-password.component';
-import {WorkspaceDto} from "@studio-lite-lib/api-dto";
-import {Subscription} from "rxjs";
 
 @Component({
   templateUrl: './home.component.html',
@@ -39,7 +41,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
-      console.log(queryParams);
       this.redirectTo = queryParams['redirectTo'];
     });
     setTimeout(() => {
@@ -48,8 +49,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       const token = localStorage.getItem('id_token');
       if (token) {
         this.backendService.getAuthData().subscribe(authData => {
-          this.appService.authData = authData
-        })
+          this.appService.authData = authData;
+        });
       }
     });
   }
@@ -59,17 +60,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.appService.dataLoading = true;
     if (this.loginForm && this.loginForm.valid) {
-      this.backendService.login(this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value).subscribe(() => {
-          this.appService.dataLoading = false;
-          console.log(this.redirectTo);
+      this.backendService.login(
+        this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value
+      ).subscribe(ok => {
+        this.appService.dataLoading = false;
+        if (ok) {
           if (this.redirectTo) {
             this.router.navigate([this.redirectTo]);
           }
-        },
-      err => {
-        this.isError = true;
-        this.appService.dataLoading = false;
-        // this.errorMessage = `${err.msg()}`;
+        } else {
+          this.snackBar.open('Login nicht erfolgreich', 'Fehler', { duration: 3000 });
+        }
       });
     }
   }
@@ -113,11 +114,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   buttonGotoWorkspace(selectedWorkspace: WorkspaceDto): void {
     this.router.navigate([`/a/${selectedWorkspace.id}`]);
-  }
-
-  scrollTo(targetElementId: string): void {
-    const targetElement = document.getElementById(targetElementId);
-    if (targetElement) targetElement.scrollIntoView();
   }
 
   ngOnDestroy(): void {

@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import {AppService, standardLogo} from './app.service';
-import { BackendService} from './backend.service';
-import {AppConfig} from "./app.classes";
+import { AppService, standardLogo } from './app.service';
+import { BackendService } from './backend.service';
+import { AppConfig } from './app.classes';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -31,15 +30,19 @@ export class AppComponent implements OnInit {
         }
       });
       this.backendService.getAppLogo().subscribe(newLogo => {
-        this.appService.appLogo = newLogo ? newLogo : standardLogo;
-        if (this.appService.appLogo.bodyBackground) document.documentElement.style.setProperty('--st-body-background', this.appService.appLogo.bodyBackground);
-        if (this.appService.appLogo.boxBackground) document.documentElement.style.setProperty('--st-box-background', this.appService.appLogo.boxBackground);
+        this.appService.appLogo = newLogo || standardLogo;
+        if (this.appService.appLogo.bodyBackground) {
+          document.documentElement.style.setProperty('--st-body-background', this.appService.appLogo.bodyBackground);
+        }
+        if (this.appService.appLogo.boxBackground) {
+          document.documentElement.style.setProperty('--st-box-background', this.appService.appLogo.boxBackground);
+        }
       });
       const token = localStorage.getItem('id_token');
       if (token) {
         this.backendService.getAuthData().subscribe(authData => {
-          this.appService.authData = authData
-        })
+          this.appService.authData = authData;
+        });
       }
 
       window.addEventListener('message', event => {

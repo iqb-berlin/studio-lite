@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogData, SaveOrDiscardComponent } from '../dialogs/save-or-discard.component';
 import { WorkspaceService } from '../workspace.service';
-import {WorkspaceComponent} from "../workspace.component";
+import { WorkspaceComponent } from '../workspace.component';
 
 @Injectable()
 export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceComponent> {
@@ -46,7 +46,7 @@ export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceCom
               }
               this.snackBar.open('Problem: Konnte Aufgabendaten nicht speichern', '', { duration: 1000 });
               return false;
-            })
+            });
         })
       );
     }
