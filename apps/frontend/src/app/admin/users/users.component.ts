@@ -187,8 +187,8 @@ export class UsersComponent implements OnInit {
         data: <ConfirmDialogData>{
           title: 'Löschen von Nutzer:innen',
           content: `${prompt}gelöscht werden?`,
-          confirmbuttonlabel: 'Löschen',
-          showcancel: true
+          confirmButtonLabel: 'Löschen',
+          showCancel: true
         }
       });
 

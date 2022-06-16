@@ -9,7 +9,6 @@ import { UploadStatus } from '../iqb-files-classes';
  * A material design file upload queue component.
  */
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'iqb-files-upload-queue',
   templateUrl: 'iqbFilesUploadQueue.component.html',
   exportAs: 'iqbFilesUploadQueue'
@@ -18,8 +17,6 @@ export class IqbFilesUploadQueueComponent implements OnDestroy {
   @ViewChildren(IqbFilesUploadComponent) fileUploads: QueryList<IqbFilesUploadComponent> | undefined;
 
   @Output() files: Array<any> = [];
-  private numberOfErrors = 0;
-  private numberOfUploads = 0;
   disableClearButton = true;
 
   /* Http request input bindings */
@@ -101,7 +98,7 @@ export class IqbFilesUploadQueueComponent implements OnDestroy {
         } else if (fileUpload.status === UploadStatus.ready) {
           someoneisready = true;
         }
-      })
+      });
     }
     if (someoneiscomplete && !someoneisbusy) {
       this.uploadCompleteEvent.emit();

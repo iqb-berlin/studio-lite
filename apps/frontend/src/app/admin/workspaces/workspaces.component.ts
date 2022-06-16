@@ -198,8 +198,8 @@ export class WorkspacesComponent implements OnInit {
         data: <ConfirmDialogData>{
           title: 'Löschen von Arbeitsbereichen',
           content: `${prompt}gelöscht werden?`,
-          confirmbuttonlabel: 'Arbeitsbereich/e löschen',
-          showcancel: true
+          confirmButtonLabel: 'Arbeitsbereich/e löschen',
+          showCancel: true
         }
       });
 

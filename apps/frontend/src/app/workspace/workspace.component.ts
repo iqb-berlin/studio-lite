@@ -442,8 +442,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       data: <ConfirmDialogData>{
         title: 'Verwerfen der Änderungen',
         content: 'Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?',
-        confirmbuttonlabel: 'Verwerfen',
-        showcancel: true
+        confirmButtonLabel: 'Verwerfen',
+        showCancel: true
       }
     });
 

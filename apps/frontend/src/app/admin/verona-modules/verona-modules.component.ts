@@ -83,8 +83,8 @@ export class VeronaModulesComponent implements OnInit {
         data: <ConfirmDialogData>{
           title: 'Löschen von Dateien',
           content: `${prompt} diese gelöscht werden?`,
-          confirmbuttonlabel: 'Löschen',
-          showcancel: true
+          confirmButtonLabel: 'Löschen',
+          showCancel: true
         }
       });
 

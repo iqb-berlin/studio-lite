@@ -82,8 +82,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       data: <ConfirmDialogData>{
         title: 'Abmelden',
         content: 'Möchten Sie sich abmelden?',
-        confirmbuttonlabel: 'Abmelden',
-        showcancel: true
+        confirmButtonLabel: 'Abmelden',
+        showCancel: true
       }
     });
     dialogRef.afterClosed().subscribe(result => {
