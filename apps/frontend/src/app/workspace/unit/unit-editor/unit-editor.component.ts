@@ -13,8 +13,7 @@ import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes'
   template: `
     <div *ngIf="message" style="margin: 30px">{{message}}</div>
     <div id="iFrameHostEditor">
-      <iframe id="hosting-iframe" class="unitHost"
-              sandbox="allow-forms allow-scripts allow-same-origin"></iframe>
+      <iframe id="hosting-iframe" class="unitHost"></iframe>
     </div>`,
   styles: ['#iFrameHostEditor {height: calc(100% - 49px);}']
 })
