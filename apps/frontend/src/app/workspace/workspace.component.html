@@ -69,12 +69,13 @@
     <button mat-raised-button color="primary" *ngIf="fileUploadQueue.files.length <= 0" class="upload-message-ok-button"
             (click)="clearUploadMessages()">OK</button>
   </div>
-  <div fxFlex class="unitdatacontainer" fxFlexLayout="column">
+  <div fxFlex class="unitdatacontainer">
     <nav mat-tab-nav-bar>
       <a mat-tab-link
          *ngFor="let link of navLinks"
          [routerLink]="link.path"
-         routerLinkActive #rla="routerLinkActive"
+         routerLinkActive="active-link"
+         #rla="routerLinkActive"
          [active]="rla.isActive">
         {{link.label}}
       </a>

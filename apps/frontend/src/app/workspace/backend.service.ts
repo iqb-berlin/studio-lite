@@ -1,6 +1,6 @@
 import { catchError, map } from 'rxjs/operators';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
 import {
   CreateUnitDto, UnitDefinitionDto,
@@ -8,8 +8,7 @@ import {
   UnitMetadataDto, VeronaModuleFileDto,
   VeronaModuleInListDto,
   WorkspaceFullDto
-} from "@studio-lite-lib/api-dto";
-import {AppHttpError} from "../app.classes";
+} from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -24,38 +23,38 @@ export class BackendService {
     return this.http
       .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => [])
       );
   }
 
-  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto> {
+  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
     return this.http
       .get<WorkspaceFullDto>(
       `${this.serverUrl}workspace/${workspaceId}`
     )
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of(null))
       );
   }
 
-  addUnit(workspaceId: number, newUnit: CreateUnitDto): Observable<number> {
+  addUnit(workspaceId: number, newUnit: CreateUnitDto): Observable<number | null> {
     return this.http
       .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`, newUnit)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err))),
+        catchError(() => of(null)),
         map(returnId => Number(returnId))
       );
   }
 
   copyUnit(workspaceId: number,
-           fromUnit: number, key: string, label: string): Observable<number> {
+           fromUnit: number, key: string, label: string): Observable<number | null> {
     return this.http
       .put<string>(`${this.serverUrl}addUnit.php`,
       {
         t: localStorage.getItem('t'), ws: workspaceId, u: fromUnit, k: key, l: label
       })
       .pipe(
-        catchError(err => throwError(new AppHttpError(err))),
+        catchError(() => of(null)),
         map(returnId => Number(returnId))
       );
   }
@@ -69,6 +68,7 @@ export class BackendService {
       );
   }
 
+  /*
   moveUnits(workspaceId: number,
             units: number[], targetWorkspace: number): Observable<boolean | number> {
     const authToken = localStorage.getItem('t');
@@ -88,8 +88,9 @@ export class BackendService {
         })
       );
   }
+   */
 
-  downloadUnits(workspaceId: number, unitData: ExportUnitSelectionData): Observable<Blob> {
+  downloadUnits(workspaceId: number, unitData: ExportUnitSelectionData): Observable<Blob | null> {
     const httpOptions = {
       responseType: 'blob' as 'json',
       headers: new HttpHeaders({
@@ -97,22 +98,25 @@ export class BackendService {
         options: JSON.stringify({ t: localStorage.getItem('t'), ws: workspaceId, u: unitData })
       })
     };
-    return this.http.get<Blob>(`${this.serverUrl}downloadUnits.php`, httpOptions);
-  }
-
-  getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto> {
-    return this.http
-      .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)
+    return this.http.get<Blob>(`${this.serverUrl}downloadUnits.php`, httpOptions)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of(null))
       );
   }
 
-  getUnitDefinition(workspaceId: number, unitId: number): Observable<UnitDefinitionDto> {
+  getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
+    return this.http
+      .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  getUnitDefinition(workspaceId: number, unitId: number): Observable<UnitDefinitionDto | null> {
     return this.http
       .get<UnitDefinitionDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of(null))
       );
   }
 
@@ -125,6 +129,7 @@ export class BackendService {
       );
   }
 
+  /*
   startUnitUploadProcessing(workspaceId: number, processId: string): Observable<ImportUnitSelectionData[]> {
     return this.http
       .post<ImportUnitSelectionData[]>(`${this.serverUrl}startUnitUploadProcessing.php`, {
@@ -136,6 +141,7 @@ export class BackendService {
         catchError(err => throwError(new AppHttpError(err)))
       );
   }
+   */
 
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {
     return this.http
@@ -146,11 +152,11 @@ export class BackendService {
       );
   }
 
-  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto> {
+  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
     return this.http
       .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
       .pipe(
-        catchError(() => of (<VeronaModuleFileDto>{}))
+        catchError(() => of(null))
       );
   }
 
@@ -162,6 +168,7 @@ export class BackendService {
       );
   }
 
+  /*
   setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettings): Observable<boolean> {
     return this.http
       .put<boolean>(`${this.serverUrl}setWorkspaceSettings.php`, {
@@ -173,6 +180,7 @@ export class BackendService {
         catchError(() => of(false))
       );
   }
+   */
 }
 
 export interface UnitMetadata {

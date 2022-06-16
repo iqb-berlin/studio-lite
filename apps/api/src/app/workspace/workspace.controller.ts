@@ -1,11 +1,11 @@
-import {Controller, Get, UseGuards} from '@nestjs/common';
-import {WorkspaceService} from "../database/services/workspace.service";
-import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {WorkspaceGuard} from "./workspace.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {WorkspaceFullDto} from "@studio-lite-lib/api-dto";
-import {WorkspaceId} from "./workspace.decorator";
-import {ApiImplicitParam} from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
+import { WorkspaceService } from '../database/services/workspace.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WorkspaceGuard } from './workspace.guard';
+import { WorkspaceId } from './workspace.decorator';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -18,7 +18,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
-    type: WorkspaceFullDto,
+    type: WorkspaceFullDto
   })
   @ApiTags('workspace')
   async find(@WorkspaceId() workspaceId: number): Promise<WorkspaceFullDto> {

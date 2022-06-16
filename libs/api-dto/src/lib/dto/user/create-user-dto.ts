@@ -1,15 +1,15 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserDto {
-  @ApiProperty({example: 'hugo'})
+  @ApiProperty({ example: 'hugo' })
   name!: string;
 
-  @ApiProperty({example: 'duhastaberaucheintalent'})
+  @ApiProperty({ example: 'duhastaberaucheintalent' })
   password!: string;
 
-  @ApiPropertyOptional({type: Boolean, example: false})
+  @ApiPropertyOptional({ type: Boolean, example: false })
   isAdmin = false;
 
-  @ApiPropertyOptional({type: String, example: 'hugo@iqb.hu-berlin.de; Student'})
+  @ApiPropertyOptional({ type: String, example: 'hugo@iqb.hu-berlin.de; Student' })
   description = '';
 }

@@ -71,3 +71,7 @@ mat-button-toggle {
 .upload-message-ok-button {
   margin: 10px;
 }
+
+.active-link {
+  color: black;
+}

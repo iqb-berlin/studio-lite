@@ -4,7 +4,7 @@ export class WorkspaceGroupFullDto {
   @ApiProperty()
   id!: number;
 
-  @ApiProperty({example: 'VERA2002'})
+  @ApiProperty({ example: 'VERA2002' })
   name?: string;
 
   @ApiProperty()

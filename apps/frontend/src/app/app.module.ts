@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgModule, ApplicationModule } from '@angular/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -21,6 +21,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { RouterModule } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -28,8 +29,7 @@ import { BackendService } from './backend.service';
 import { AboutComponent } from './home/about.component';
 import { HomeComponent } from './home/home.component';
 import { ChangePasswordComponent } from './home/change-password.component';
-import { IqbComponentsModule } from "@studio-lite-lib/iqb-components";
-import {AuthInterceptor} from "./auth.interceptor";
+import { AuthInterceptor } from './auth.interceptor';
 
 @NgModule({
   declarations: [

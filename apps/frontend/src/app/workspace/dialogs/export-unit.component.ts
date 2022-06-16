@@ -134,12 +134,10 @@ export class ExportUnitComponent implements OnInit {
             this.appService.dataLoading = false;
           });
       }
-    } else {
-      if (this.objectsDatasource) {
-        this.objectsDatasource.data.forEach(ud => {
-          ud.disabled = false;
-        });
-      }
+    } else if (this.objectsDatasource) {
+      this.objectsDatasource.data.forEach(ud => {
+        ud.disabled = false;
+      });
     }
   }
 

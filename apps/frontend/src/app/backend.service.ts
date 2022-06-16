@@ -1,11 +1,12 @@
 // eslint-disable-next-line max-classes-per-file
 import { Injectable, Inject } from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import {catchError, map, switchMap} from 'rxjs/operators';
-import {AuthDataDto, ChangePasswordDto, ConfigDto} from "@studio-lite-lib/api-dto";
-import {AppService} from "./app.service";
-import {AppLogoDto} from "@studio-lite-lib/api-dto";
+import { catchError, map, switchMap } from 'rxjs/operators';
+import {
+  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto
+} from '@studio-lite-lib/api-dto';
+import { AppService, defaultAppConfig } from './app.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,31 +18,36 @@ export class BackendService {
     private http: HttpClient
   ) { }
 
-  login(name: string, password: string) {
+  login(name: string, password: string): Observable<boolean> {
     const queryParams = new HttpParams()
       .set('username', name)
       .set('password', password);
     return this.http.post<string>(`${this.serverUrl}login?${queryParams.toString()}`, 'jojo')
       .pipe(
+        catchError(() => of(false)),
         switchMap(loginToken => {
-          localStorage.setItem("id_token", loginToken);
-          return this.getAuthData()
-            .pipe(
-              map(authData => {
-                this.appService.authData = authData;
-                return
-              })
-            );
+          if (typeof loginToken === 'string') {
+            localStorage.setItem('id_token', loginToken);
+            return this.getAuthData()
+              .pipe(
+                map(authData => {
+                  this.appService.authData = authData;
+                  return true;
+                }),
+                catchError(() => of(false))
+              );
+          }
+          return of(loginToken);
         })
-      )
+      );
   }
 
   getAuthData(): Observable<AuthDataDto> {
-    return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`)
+    return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
   }
 
   logout(): void {
-    localStorage.removeItem("id_token");
+    localStorage.removeItem('id_token');
     this.appService.authData = AppService.defaultAuthData;
   }
 
@@ -49,7 +55,7 @@ export class BackendService {
     return this.http
       .get<ConfigDto | null>(`${this.serverUrl}admin/settings/config`, {})
       .pipe(
-        catchError(() => of(null))
+        catchError(() => of(defaultAppConfig))
       );
   }
 
@@ -63,8 +69,10 @@ export class BackendService {
 
   setUserPassword(oldPassword: string, newPassword: string): Observable<boolean> {
     return this.http
-      .patch<boolean>(`${this.serverUrl}password`, <ChangePasswordDto>{
-        oldPassword: oldPassword, newPassword: newPassword})
+      .patch<boolean>(
+      `${this.serverUrl}password`,
+        <ChangePasswordDto>{ oldPassword: oldPassword, newPassword: newPassword }
+    )
       .pipe(
         catchError(() => of(false))
       );

@@ -1,33 +1,29 @@
-import { Component, Directive, ElementRef, EventEmitter, HostListener,
-    Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Directive, ElementRef, HostListener, Input
+} from '@angular/core';
 
-
-  @Directive({
-    // eslint-disable-next-line @angular-eslint/directive-selector
-    selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]',
-  })
-  export class IqbFilesUploadInputForDirective  {
-
-
+@Directive({
+  selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]'
+})
+export class IqbFilesUploadInputForDirective {
     private _queue: any = null;
     private _element: HTMLElement;
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     constructor(private element: ElementRef) {
-        this._element = this.element.nativeElement;
+      this._element = this.element.nativeElement;
     }
-
 
     @Input()
     set iqbFilesUploadInputFor(value: any) {
-        if (value) {
-            this._queue = value;
-        }
+      if (value) {
+        this._queue = value;
+      }
     }
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     @HostListener('change')
-    public onChange(): any {
+    onChange(): any {
       const files = this.element.nativeElement.files;
       // this.onFileSelected.emit(files);
 
@@ -38,8 +34,8 @@ import { Component, Directive, ElementRef, EventEmitter, HostListener,
     }
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    @HostListener('drop', [ '$event' ])
-    public onDrop(event: any): any {
+    @HostListener('drop', ['$event'])
+    onDrop(event: any): any {
       const files = event.dataTransfer.files;
       // this.onFileSelected.emit(files);
 
@@ -52,9 +48,8 @@ import { Component, Directive, ElementRef, EventEmitter, HostListener,
     }
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    @HostListener('dragover', [ '$event' ])
-    public onDropOver(event: any): any {
+    @HostListener('dragover', ['$event'])
+    onDropOver(event: any): any {
       event.preventDefault();
     }
-
-  }
+}

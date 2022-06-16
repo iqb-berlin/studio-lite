@@ -8,15 +8,15 @@ import {
   Post,
   UseGuards
 } from '@nestjs/common';
-import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {WorkspaceGroupService} from "../../database/services/workspace-group.service";
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
-} from "@studio-lite-lib/api-dto";
-import {IsAdminGuard} from "../is-admin.guard";
+} from '@studio-lite-lib/api-dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
+import { IsAdminGuard } from '../is-admin.guard';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
@@ -28,7 +28,7 @@ export class WorkspaceGroupsController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupInListDto],
+    type: [WorkspaceGroupInListDto]
   })
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceGroupInListDto[]> {
@@ -39,7 +39,7 @@ export class WorkspaceGroupsController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupFullDto],
+    type: [WorkspaceGroupFullDto]
   })
   @ApiTags('admin workspaces')
   async findOne(@Param('id') id: number): Promise<WorkspaceGroupFullDto> {
@@ -59,7 +59,7 @@ export class WorkspaceGroupsController {
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
-    return this.workspaceGroupService.patch(workspaceGroupFullDto)
+    return this.workspaceGroupService.patch(workspaceGroupFullDto);
   }
 
   @Post()
@@ -67,10 +67,10 @@ export class WorkspaceGroupsController {
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new workspace group in database',
-    type: Number,
+    type: Number
   })
   @ApiTags('admin workspaces')
   async create(@Body() createWorkspaceGroupDto: CreateWorkspaceGroupDto) {
-    return this.workspaceGroupService.create(createWorkspaceGroupDto)
+    return this.workspaceGroupService.create(createWorkspaceGroupDto);
   }
 }

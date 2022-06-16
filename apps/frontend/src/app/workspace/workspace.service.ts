@@ -1,14 +1,15 @@
 import {
-  BehaviorSubject, forkJoin, lastValueFrom, Observable, of
+  BehaviorSubject, lastValueFrom
 } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
-import {UnitInListDto} from "@studio-lite-lib/api-dto";
-import {ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore} from "./workspace.classes";
-import {AppService} from "../app.service";
-import {fakeAsync} from "@angular/core/testing";
+import {
+  ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore
+} from './workspace.classes';
+import { AppService } from '../app.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class WorkspaceService {
   selectedUnit$ = new BehaviorSubject<number>(0);
   editorList = new ModuleCollection([]);
   playerList = new ModuleCollection([]);
-  moduleHtmlStore: {[key: string]: string} = {};
+  moduleHtmlStore: { [key: string]: string } = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;
   unitList = new UnitCollection([]);
@@ -51,16 +52,19 @@ export class WorkspaceService {
 
   isChanged(): boolean {
     return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
-      (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()))
+      (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()));
   }
 
-  async getModuleHtml(key: string): Promise<string> {
-    if (Object.keys(this.moduleHtmlStore).indexOf(key) >= 0) return this.moduleHtmlStore[key]
+  async getModuleHtml(key: string): Promise<string | null> {
+    if (Object.keys(this.moduleHtmlStore).indexOf(key) >= 0) return this.moduleHtmlStore[key];
     this.appService.dataLoading = true;
     const fileData = await lastValueFrom(this.backendService.getModuleHtml(key));
-    this.moduleHtmlStore[key] = fileData.file;
     this.appService.dataLoading = false;
-    return this.moduleHtmlStore[key]
+    if (fileData) {
+      this.moduleHtmlStore[key] = fileData.file;
+      return this.moduleHtmlStore[key];
+    }
+    return null;
   }
 
   async saveUnitData(): Promise<boolean> {
@@ -69,27 +73,28 @@ export class WorkspaceService {
     this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitMetadata(
-        this.selectedWorkspace, this.unitMetadataStore.getChangedData()));
+        this.selectedWorkspace, this.unitMetadataStore.getChangedData()
+      ));
       if (saveOk) {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameChanged();
-        this.unitMetadataStore.applyChanges()
+        this.unitMetadataStore.applyChanges();
       }
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
-        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()));
+        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
+      ));
       if (saveOk) this.unitDefinitionStore.applyChanges();
     }
     if (reloadUnitList) {
       saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspace)
-          .pipe(
-            map(uResponse => {
-              this.unitList = new UnitCollection(uResponse);
-              this.appService.dataLoading = false;
-              return true;
-            })
-          )
-      )
+        .pipe(
+          map(uResponse => {
+            this.unitList = new UnitCollection(uResponse);
+            this.appService.dataLoading = false;
+            return true;
+          })
+        ));
     }
     this.appService.dataLoading = false;
     return saveOk;

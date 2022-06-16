@@ -22,10 +22,10 @@ const routes: Routes = [
     RouterModule.forRoot(
       routes,
       {
-        onSameUrlNavigation: 'reload',
+        onSameUrlNavigation: 'reload'
         // relativeLinkResolution: 'legacy'
       }
-      )
+    )
   ],
   exports: [RouterModule]
 })

@@ -1,4 +1,7 @@
-import {UnitDefinitionDto, UnitInListDto, UnitMetadataDto, VeronaModuleInListDto} from "@studio-lite-lib/api-dto";
+// eslint-disable-next-line max-classes-per-file
+import {
+  UnitDefinitionDto, UnitInListDto, UnitMetadataDto, VeronaModuleInListDto
+} from '@studio-lite-lib/api-dto';
 
 export interface UnitGroup {
   name: string;
@@ -15,45 +18,45 @@ export class UnitCollection {
       this.groups.forEach(g => {
         if (g.name === groupName) {
           g.units.push(u);
-          groupFound = true
+          groupFound = true;
         }
       });
       if (!groupFound) {
         this.groups.push({
           name: groupName,
           units: [u]
-        })
+        });
       }
-    })
+    });
   }
 
   units(): UnitInListDto[] {
     const myUnits: UnitInListDto[] = [];
     this.groups.forEach(g => {
       g.units.forEach(u => {
-        myUnits.push(u)
-      })
-    })
+        myUnits.push(u);
+      });
+    });
     return myUnits;
   }
 }
 
 export class ModuleCollection {
-  moduleData: {[key: string]: VeronaModuleInListDto};
+  moduleData: { [key: string]: VeronaModuleInListDto };
   constructor(modules: VeronaModuleInListDto[]) {
     this.moduleData = {};
     modules.forEach(m => {
       this.moduleData[m.key] = m;
-    })
+    });
   }
 
   isInList(key: string): boolean {
-    return !!this.moduleData[key]
+    return !!this.moduleData[key];
   }
 
   getBestMatch(key: string): string {
     if (this.isInList(key)) return key;
-    const regexPattern = /^([A-Za-z0-9_-]+)@(\d+)\.(\d+)/;
+    const regexPattern = /^([A-Za-z\d_-]+)@(\d+)\.(\d+)/;
     const matches1 = regexPattern.exec(key);
     if (!matches1 || matches1.length !== 4) return '';
     let bestMatchId = '';
@@ -77,15 +80,15 @@ export class ModuleCollection {
   isValid(key: string): boolean | string {
     if (this.moduleData[key]) return true;
     const bestMatch = this.getBestMatch(key);
-    return bestMatch ? bestMatch : false
+    return bestMatch || false;
   }
 
   getName(key: string): string {
     const dataEntry = this.moduleData[key];
     if (dataEntry) {
-      return dataEntry.metadata.name
+      return dataEntry.metadata.name;
     }
-    return '?'
+    return '?';
   }
 
   hasEntries(): boolean {
@@ -93,8 +96,8 @@ export class ModuleCollection {
   }
 
   getEntries(): VeronaModuleInListDto[] {
-    const regexPattern = /^([A-Za-z0-9_-]+)@(\d+)\.(\d+)/;
-    const newList: {[key: string]: VeronaModuleInListDto} = {};
+    const regexPattern = /^([A-Za-z\d_-]+)@(\d+)\.(\d+)/;
+    const newList: { [key: string]: VeronaModuleInListDto } = {};
     Object.keys(this.moduleData).forEach(key => {
       const matches1 = regexPattern.exec(key);
       if (matches1 && matches1.length === 4) {
@@ -114,7 +117,7 @@ export class UnitMetadataStore {
 
   constructor(originalData: UnitMetadataDto) {
     this.originalData = originalData;
-    this.changedData = <UnitMetadataDto>{id: originalData.id}
+    this.changedData = <UnitMetadataDto>{ id: originalData.id };
   }
 
   setPlayer(newPlayer: string) {
@@ -152,29 +155,29 @@ export class UnitMetadataStore {
   }
 
   isChanged(): boolean {
-    return Object.keys(this.changedData).length > 1
+    return Object.keys(this.changedData).length > 1;
   }
 
   isKeyOrNameChanged(): boolean {
     const dataKeys = Object.keys(this.changedData);
-    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0)
+    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0);
   }
 
   getChangedData(): UnitMetadataDto {
-    return this.changedData
+    return this.changedData;
   }
 
   getData(): UnitMetadataDto {
-    return {...this.originalData, ...this.changedData}
+    return { ...this.originalData, ...this.changedData };
   }
 
   applyChanges() {
     this.originalData = this.getData();
-    this.changedData = <UnitMetadataDto>{id: this.originalData.id}
+    this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
   }
 
   restore() {
-    this.changedData = <UnitMetadataDto>{id: this.originalData.id}
+    this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
   }
 }
 
@@ -186,7 +189,7 @@ export class UnitDefinitionStore {
   constructor(unitId: number, originalData: UnitDefinitionDto) {
     this.unitId = unitId;
     this.originalData = originalData;
-    this.changedData = <UnitDefinitionDto>{}
+    this.changedData = <UnitDefinitionDto>{};
   }
 
   setData(newVariables: never[], newDefinition: string) {
@@ -203,23 +206,23 @@ export class UnitDefinitionStore {
   }
 
   isChanged(): boolean {
-    return Object.keys(this.changedData).length > 1
+    return Object.keys(this.changedData).length > 1;
   }
 
   getChangedData(): UnitDefinitionDto {
-    return this.changedData
+    return this.changedData;
   }
 
   getData(): UnitDefinitionDto {
-    return {...this.originalData, ...this.changedData}
+    return { ...this.originalData, ...this.changedData };
   }
 
   applyChanges() {
     this.originalData = this.getData();
-    this.changedData = <UnitDefinitionDto>{}
+    this.changedData = <UnitDefinitionDto>{};
   }
 
   restore() {
-    this.changedData = <UnitDefinitionDto>{}
+    this.changedData = <UnitDefinitionDto>{};
   }
 }

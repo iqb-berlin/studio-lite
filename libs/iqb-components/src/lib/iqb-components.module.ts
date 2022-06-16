@@ -8,15 +8,15 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { HttpClientModule } from '@angular/common/http';
-import { ConfirmDialogComponent, ConfirmDialogData } from './dialogs/confirm/confirm-dialog.component';
-import { MessageDialogComponent, MessageDialogData, MessageType } from './dialogs/message/message-dialog.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCardModule } from '@angular/material/card';
+import { ConfirmDialogComponent, ConfirmDialogData } from './dialogs/confirm-dialog.component';
+import { MessageDialogComponent, MessageDialogData, MessageType } from './dialogs/message-dialog.component';
 import { BytesPipe } from './pipes/bytes.pipe';
 import { ErrorHandler, IqbComponentsConfig, ServerError } from './iqb-components.classes';
-import {IqbFilesUploadComponent} from "./iqb-files/iqbFilesUpload/iqbFilesUpload.component";
-import {MatProgressBarModule} from "@angular/material/progress-bar";
-import {MatCardModule} from "@angular/material/card";
-import {IqbFilesUploadQueueComponent} from "./iqb-files/iqbFilesUploadQueue/iqbFilesUploadQueue.component";
-import {IqbFilesUploadInputForDirective} from "./iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive";
+import { IqbFilesUploadComponent } from './iqb-files/iqbFilesUpload/iqbFilesUpload.component';
+import { IqbFilesUploadQueueComponent } from './iqb-files/iqbFilesUploadQueue/iqbFilesUploadQueue.component';
+import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive';
 
 @NgModule({
   imports: [
@@ -30,7 +30,7 @@ import {IqbFilesUploadInputForDirective} from "./iqb-files/iqbFilesUploadInputFo
     MatInputModule,
     HttpClientModule,
     MatProgressBarModule,
-    MatCardModule,
+    MatCardModule
   ],
   entryComponents: [
     ConfirmDialogComponent,

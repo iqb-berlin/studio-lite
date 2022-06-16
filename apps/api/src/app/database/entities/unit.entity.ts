@@ -28,7 +28,7 @@ class Unit {
     type: 'jsonb',
     array: false,
     default: () => "'{}'",
-    nullable: false,
+    nullable: false
   })
   public metadata = {};
 
@@ -47,7 +47,7 @@ class Unit {
     type: 'jsonb',
     array: false,
     default: () => "'{}'",
-    nullable: false,
+    nullable: false
   })
   public variables = [];
 
@@ -64,7 +64,7 @@ class Unit {
     type: 'jsonb',
     array: false,
     default: () => "'{}'",
-    nullable: false,
+    nullable: false
   })
   public scheme = {};
 

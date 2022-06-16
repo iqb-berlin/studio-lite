@@ -8,7 +8,6 @@ import {
 import { UploadStatus } from '../iqb-files-classes';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'iqb-files-upload',
   templateUrl: './iqbFilesUpload.component.html',
   exportAs: 'iqbFilesUpload',
@@ -25,7 +24,7 @@ export class IqbFilesUploadComponent implements OnInit {
   // ''''''''''''''''''''''''
   private _status: UploadStatus | undefined;
   get status(): UploadStatus {
-    return <UploadStatus>this._status;
+    return <UploadStatus> this._status;
   }
 
   set status(newstatus: UploadStatus) {
@@ -97,7 +96,7 @@ export class IqbFilesUploadComponent implements OnInit {
   }
 
   get id(): number {
-    return <number>this._id;
+    return <number> this._id;
   }
 
   @Output() removeFileRequestEvent = new EventEmitter<IqbFilesUploadComponent>();
@@ -149,7 +148,8 @@ export class IqbFilesUploadComponent implements OnInit {
             this.status = UploadStatus.busy;
           } else if (event.type === HttpEventType.Response) {
             this.requestResponseText = event.body;
-            if (this.requestResponseText && (this.requestResponseText.length > 5) && (this.requestResponseText.substr(0, 2) === 'e:')) {
+            if (this.requestResponseText && (this.requestResponseText.length > 5) &&
+              (this.requestResponseText.substr(0, 2) === 'e:')) {
               this.requestResponseText = this.requestResponseText.substr(2);
               this.status = UploadStatus.error;
             } else {
@@ -172,7 +172,7 @@ export class IqbFilesUploadComponent implements OnInit {
           } else {
             this.requestResponseText = `Fehler: ${errorObj.message}`;
           }
-        })
+        });
       }
     }
   }

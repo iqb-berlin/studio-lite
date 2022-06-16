@@ -2,6 +2,14 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
+export type EditUserComponentData = {
+  newUser: boolean,
+  name?: string,
+  password?: string,
+  description?: string,
+  isAdmin: boolean
+};
+
 @Component({
   template: `
       <h1 mat-dialog-title>{{title}}</h1>
@@ -18,7 +26,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <mat-label>Notiz</mat-label>
           <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
         </mat-form-field>
-        <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin">System-Administrator:in</mat-checkbox>
+        <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin.toString()">System-Administrator:in</mat-checkbox>
         <p>&nbsp;</p>
         <p>
           Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.
@@ -38,6 +46,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       </mat-dialog-actions>
   `
 })
+
 export class EditUserComponent {
   editUserForm: FormGroup;
   saveButtonLabel: string;
@@ -45,7 +54,7 @@ export class EditUserComponent {
   passwordLabel: string;
 
   constructor(private fb: FormBuilder,
-              @Inject(MAT_DIALOG_DATA) public data: any) {
+              @Inject(MAT_DIALOG_DATA) public data: EditUserComponentData) {
     this.saveButtonLabel = data.newUser ? 'Neu anlegen' : 'Speichern';
     this.title = data.newUser ? 'Nutzer:in neu anlegen' : 'Nutzerdaten ändern';
     this.passwordLabel = data.newUser ? 'Kennwort' : 'Neues Kennwort';
@@ -58,6 +67,6 @@ export class EditUserComponent {
         data.newUser ?
           [Validators.pattern(/^\S{3,}$/), Validators.required] :
           [Validators.pattern(/^\S{3,}$/)])
-    })
+    });
   }
 }
