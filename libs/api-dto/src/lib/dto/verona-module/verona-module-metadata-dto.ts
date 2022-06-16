@@ -52,7 +52,7 @@ export class VeronaModuleMetadataDto {
       returnData = {
         type: jsonMetadata['@type'] as VeronaModuleType,
         id: jsonMetadata['@id'],
-        name: nameList.de || (nameList.en || jsonMetadata['@id']),
+        name: nameList['de'] || (nameList['en'] || jsonMetadata['@id']),
         version: jsonMetadata.version,
         specVersion: jsonMetadata.apiVersion
       };
