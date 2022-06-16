@@ -11,7 +11,8 @@ import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
-import * as cheerio from 'cheerio';
+import { UnitImportData } from '../../workspace/unit-import-data.class';
+import { UnitService } from './unit.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -21,7 +22,8 @@ export class WorkspaceService {
     @InjectRepository(WorkspaceUser)
     private workspaceUsersRepository: Repository<WorkspaceUser>,
     @InjectRepository(WorkspaceGroup)
-    private workspaceGroupRepository: Repository<WorkspaceGroup>
+    private workspaceGroupRepository: Repository<WorkspaceGroup>,
+    private unitService: UnitService
   ) {}
 
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
@@ -110,22 +112,40 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  uploadUnits(id: number, files: FileIo[]) {
+  async uploadUnits(id: number, files: FileIo[]) {
+    const unitData: UnitImportData[] = [];
+    const otherFiles: { [fName: string]: FileIo } = {};
     files.forEach(f => {
-      console.log(f.originalname);
       if (f.mimetype === 'text/xml') {
-        const xmlDocument = cheerio.load(f.buffer.toString());
-        const metadataElement = xmlDocument('Metadata').first();
-        if (metadataElement) {
-          const unitIdElement = metadataElement.find('Id').first();
-          if (unitIdElement) {
-            console.log(`--> ${unitIdElement.text()}`);
-          } else {
-            console.log('nix unitIdElement');
-          }
-        } else {
-          console.log('nix metadataElement');
+        try {
+          unitData.push(new UnitImportData(f));
+        } catch {
+          console.warn(`unit upload: xml parse error in ${f.originalname}`);
         }
+      } else {
+        otherFiles[f.originalname] = f;
+      }
+    });
+    unitData.forEach(u => {
+      if (u.definitionFileName && otherFiles[u.definitionFileName]) {
+        u.definition = otherFiles[u.definitionFileName].buffer.toString();
+      }
+    });
+    unitData.forEach(async u => {
+      const newUnitId = await this.unitService.create(id, {
+        key: u.key,
+        name: u.name
+      });
+      await this.unitService.patchMetadata(id, newUnitId, {
+        id: newUnitId, // todo: check whether id can be removed
+        editor: u.editor,
+        player: u.player,
+        description: u.description
+      });
+      if (u.definition) {
+        await this.unitService.patchDefinition(id, newUnitId, {
+          definition: u.definition
+        });
       }
     });
   }

@@ -5,10 +5,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Component, Inject, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
-import { Subscription, map, lastValueFrom, finalize } from 'rxjs';
+import {
+  Subscription, map, lastValueFrom, finalize
+} from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { CreateUnitDto, UnitInListDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
@@ -17,7 +20,6 @@ import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { ModuleCollection, UnitCollection } from './workspace.classes';
-import { HttpEvent, HttpEventType } from '@angular/common/http';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -477,13 +479,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       const inputElement = targetElement as HTMLInputElement;
       if (inputElement.files && inputElement.files.length > 0) {
         this.uploadSubscription = this.backendService.uploadUnits(
-          this.workspaceService.selectedWorkspace, inputElement.files)
+          this.workspaceService.selectedWorkspace, inputElement.files
+        )
           .pipe(
-            finalize(() => this.resetUpload())
+            finalize(() => {
+              this.resetUpload();
+              this.updateUnitList();
+            })
           ).subscribe(event => {
             const httpEvent = event as HttpEvent<any>;
-            if (httpEvent.type == HttpEventType.UploadProgress) {
-              this.uploadProgress = Math.round(100 * (httpEvent.loaded / (httpEvent.total ? httpEvent.total : 1)))
+            if (httpEvent.type === HttpEventType.UploadProgress) {
+              this.uploadProgress = Math.round(100 * (httpEvent.loaded / (httpEvent.total ? httpEvent.total : 1)));
             }
           });
       }
