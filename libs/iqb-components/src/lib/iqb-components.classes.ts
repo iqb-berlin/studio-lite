@@ -20,7 +20,7 @@ export class IqbComponentsConfig {
 }
 
 export class ErrorHandler {
-  public static handle(errorObj: HttpErrorResponse): Observable<ServerError> {
+  static handle(errorObj: HttpErrorResponse): Observable<ServerError> {
     let myReturn: ServerError;
 
     if (errorObj.error instanceof ErrorEvent) {

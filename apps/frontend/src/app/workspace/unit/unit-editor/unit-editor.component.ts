@@ -1,20 +1,19 @@
 import {
-  Component, HostListener, OnDestroy, OnInit, ViewChild
+  Component, HostListener, OnDestroy, OnInit
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import {UnitDefinitionStore, UnitMetadataStore} from "../../workspace.classes";
-import {SelectModuleComponent} from "../unit-metadata/select-module.component";
+import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
 
 @Component({
   template: `
     <div *ngIf="message" style="margin: 30px">{{message}}</div>
     <div id="iFrameHostEditor">
-      <iframe id="hosting-iframe" class="unitHost"
-              sandbox="allow-forms allow-scripts allow-same-origin"></iframe>
+      <iframe id="hosting-iframe" class="unitHost"></iframe>
     </div>`,
   styles: ['#iFrameHostEditor {height: calc(100% - 49px);}']
 })
@@ -87,7 +86,8 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
             break;
 
           default:
-            console.log(`processMessagePost ignored message: ${msgType}`);
+            // eslint-disable-next-line no-console
+            console.warn(`processMessagePost ignored message: ${msgType}`);
             break;
         }
       }
@@ -102,14 +102,17 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
         if (this.workspaceService.unitMetadataStore) {
           this.sendUnitDataToEditor();
         } else {
+          const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
           this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
-            this.workspaceService.selectedUnit$.getValue()).subscribe(unitData => {
-            this.workspaceService.unitMetadataStore = new UnitMetadataStore(unitData);
+            selectedUnitId).subscribe(unitData => {
+            this.workspaceService.unitMetadataStore = new UnitMetadataStore(
+              unitData || <UnitMetadataDto>{ id: selectedUnitId }
+            );
             this.sendUnitDataToEditor();
-          })
+          });
         }
-      })
-    })
+      });
+    });
   }
 
   sendUnitDataToEditor(): void {
@@ -124,12 +127,12 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
               ued => {
-                console.log(ued);
-                this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued)
-                this.postUnitDef(this.workspaceService.unitDefinitionStore);
-              },
-              err => {
-                this.snackBar.open(`Konnte Aufgabendefinition nicht laden (${err.code})`, 'Fehler', { duration: 3000 });
+                if (ued) {
+                  this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
+                  this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                } else {
+                  this.snackBar.open('Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 });
+                }
               }
             );
           }
@@ -192,7 +195,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   private setupEditorIFrame(editorHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
       const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${ String(divHeight - 5)}px`;
+      this.iFrameElement.height = `${String(divHeight - 5)}px`;
       this.iFrameElement.srcdoc = editorHtml;
     }
   }
@@ -201,7 +204,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   onResize(): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
       const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${ String(divHeight - 5)}px`;
+      this.iFrameElement.height = `${String(divHeight - 5)}px`;
     }
   }
 

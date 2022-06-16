@@ -4,8 +4,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class BytesPipe implements PipeTransform {
   private units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
-  public transform(bytes: number): string {
-    if (isNaN(parseFloat(`${bytes}`)) || !isFinite(bytes)) {
+  transform(bytes: number): string {
+    if (Number.isNaN(parseFloat(`${bytes}`)) || !Number.isFinite(bytes)) {
       return '-';
     }
     if (bytes <= 0) {
@@ -13,6 +13,6 @@ export class BytesPipe implements PipeTransform {
     }
 
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return `${(bytes / Math.pow(1024, Math.floor(i))).toFixed(1)} ${this.units[i]}`;
+    return `${(bytes / (1024 ** Math.floor(i))).toFixed(1)} ${this.units[i]}`;
   }
 }

@@ -8,12 +8,14 @@ import {
   Post,
   UseGuards
 } from '@nestjs/common';
-import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {WorkspaceService} from "../../database/services/workspace.service";
-import {WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
-import {UsersService} from "../../database/services/users.service";
-import {IsAdminGuard} from "../is-admin.guard";
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto
+} from '@studio-lite-lib/api-dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { WorkspaceService } from '../../database/services/workspace.service';
+import { UsersService } from '../../database/services/users.service';
+import { IsAdminGuard } from '../is-admin.guard';
 
 @Controller('admin/workspaces')
 export class WorkspacesController {
@@ -26,7 +28,7 @@ export class WorkspacesController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceInListDto],
+    type: [WorkspaceInListDto]
   })
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceInListDto[]> {
@@ -37,7 +39,7 @@ export class WorkspacesController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupDto],
+    type: [WorkspaceGroupDto]
   })
   @ApiTags('admin workspaces')
   async findAllGroupwise(): Promise<WorkspaceGroupDto[]> {
@@ -48,7 +50,7 @@ export class WorkspacesController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceFullDto],
+    type: [WorkspaceFullDto]
   })
   @ApiTags('admin workspaces')
   async findOne(@Param('id') id: number): Promise<WorkspaceFullDto> {
@@ -61,7 +63,7 @@ export class WorkspacesController {
   @ApiTags('admin workspaces')
   async remove(@Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
     return this.workspaceService.remove(idsAsNumberArray);
   }
 
@@ -70,11 +72,11 @@ export class WorkspacesController {
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new workspace in database',
-    type: Number,
+    type: Number
   })
   @ApiTags('admin workspaces')
   async create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
-    return this.workspaceService.create(createWorkspaceDto)
+    return this.workspaceService.create(createWorkspaceDto);
   }
 
   @Patch()
@@ -82,14 +84,14 @@ export class WorkspacesController {
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceFullDto: WorkspaceFullDto) {
-    return this.workspaceService.patch(workspaceFullDto)
+    return this.workspaceService.patch(workspaceFullDto);
   }
 
   @Get(':id/users')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [UserInListDto],
+    type: [UserInListDto]
   })
   @ApiTags('admin workspaces')
   async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
@@ -101,7 +103,7 @@ export class WorkspacesController {
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
   async patchOnesUsers(@Param('id') id: number,
-                       @Body() users: number[]) {
+    @Body() users: number[]) {
     return this.userService.setUsersByWorkspace(id, users);
   }
 }

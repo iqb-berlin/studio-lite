@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
           <a mat-tab-link
              *ngFor="let link of navLinks"
              [routerLink]="link.path"
-             routerLinkActive #rla="routerLinkActive"
+             routerLinkActive="active-link" #rla="routerLinkActive"
              [active]="rla.isActive">
             {{link.label}}
           </a>
@@ -29,6 +29,9 @@ import { Component } from '@angular/core';
     .communication-error-message {
       color: red;
       padding: 10px 50px;
+    }
+    .active-link {
+      color: black;
     }
   `]
 })

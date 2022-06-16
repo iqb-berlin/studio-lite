@@ -12,14 +12,16 @@ import {
   MessageDialogComponent,
   MessageDialogData,
   MessageType
-} from "@studio-lite-lib/iqb-components";
+} from '@studio-lite-lib/iqb-components';
 import {
-  BackendService,
+  CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto
+} from '@studio-lite-lib/api-dto';
+import {
+  BackendService
 } from '../backend.service';
 import { AppService } from '../../app.service';
-import {CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
-import {EditUserComponent} from "./edituser.component";
-import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
+import { EditUserComponent } from './edituser.component';
+import { WorkspaceGroupToCheckCollection } from '../workspaces/workspaceChecked';
 
 @Component({
   templateUrl: './users.component.html',
@@ -31,8 +33,8 @@ import { WorkspaceGroupToCheckCollection} from "../workspaces/workspaceChecked";
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserInListDto>();
   displayedColumns = ['selectCheckbox', 'name', 'description'];
-  tableselectionCheckbox = new SelectionModel <UserInListDto>(true, []);
-  tableselectionRow = new SelectionModel <UserInListDto>(false, []);
+  tableSelectionCheckbox = new SelectionModel <UserInListDto>(true, []);
+  tableSelectionRow = new SelectionModel <UserInListDto>(false, []);
   selectedUser = 0;
 
   userWorkspaces = new WorkspaceGroupToCheckCollection([]);
@@ -51,7 +53,7 @@ export class UsersComponent implements OnInit {
     private messsageDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
-    this.tableselectionRow.changed.subscribe(
+    this.tableSelectionRow.changed.subscribe(
       r => {
         if (r.added.length > 0) {
           this.selectedUser = r.added[0].id;
@@ -75,7 +77,8 @@ export class UsersComponent implements OnInit {
     const dialogRef = this.editUserDialog.open(EditUserComponent, {
       width: '600px',
       data: {
-        newUser: true
+        newUser: true,
+        isAdmin: false
       }
     });
 
@@ -97,22 +100,17 @@ export class UsersComponent implements OnInit {
               } else {
                 this.snackBar.open('Konnte Nutzer:in nicht anlegen', 'Fehler', { duration: 3000 });
               }
-            },
-            err => {
-              this.snackBar.open(`Konnte Nutzer:in nicht anlegen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.appService.dataLoading = false;
             }
           );
         }
       }
-    })
+    });
   }
 
-
   changeData(): void {
-    let selectedRows = this.tableselectionRow.selected;
+    let selectedRows = this.tableSelectionRow.selected;
     if (selectedRows.length === 0) {
-      selectedRows = this.tableselectionCheckbox.selected;
+      selectedRows = this.tableSelectionCheckbox.selected;
     }
     if (selectedRows.length === 0) {
       this.messsageDialog.open(MessageDialogComponent, {
@@ -155,22 +153,18 @@ export class UsersComponent implements OnInit {
                 } else {
                   this.snackBar.open('Konnte Nutzerdaten nicht ändern', 'Fehler', { duration: 3000 });
                 }
-              },
-              err => {
-                this.snackBar.open(`Konnte Nutzerdaten nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
-                this.appService.dataLoading = false;
               }
             );
           }
         }
-      })
+      });
     }
   }
 
   deleteObject(): void {
-    let selectedRows = this.tableselectionCheckbox.selected;
+    let selectedRows = this.tableSelectionCheckbox.selected;
     if (selectedRows.length === 0) {
-      selectedRows = this.tableselectionRow.selected;
+      selectedRows = this.tableSelectionRow.selected;
     }
     if (selectedRows.length === 0) {
       this.messsageDialog.open(MessageDialogComponent, {
@@ -193,8 +187,8 @@ export class UsersComponent implements OnInit {
         data: <ConfirmDialogData>{
           title: 'Löschen von Nutzer:innen',
           content: `${prompt}gelöscht werden?`,
-          confirmbuttonlabel: 'Löschen',
-          showcancel: true
+          confirmButtonLabel: 'Löschen',
+          showCancel: true
         }
       });
 
@@ -213,10 +207,6 @@ export class UsersComponent implements OnInit {
                 this.snackBar.open('Konnte Nutzer:in nicht löschen', 'Fehler', { duration: 3000 });
                 this.appService.dataLoading = false;
               }
-            },
-            err => {
-              this.snackBar.open(`Konnte Nutzer:in nicht löschen (${err.code})`, 'Fehler', { duration: 3000 });
-              this.appService.dataLoading = false;
             }
           );
         }
@@ -227,15 +217,13 @@ export class UsersComponent implements OnInit {
   // ***********************************************************************************
   updateWorkspaceList(): void {
     if (this.userWorkspaces.hasChanged) {
-      this.snackBar.open(`Zugriffsrechte nicht gespeichert.`, 'Warnung', { duration: 3000 });
+      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
       this.backendService.getWorkspacesByUser(this.selectedUser).subscribe(
         (dataresponse: WorkspaceInListDto[]) => {
           this.userWorkspaces.setChecks(dataresponse);
-          this.appService.dataLoading = false;
-        }, () => {
           this.appService.dataLoading = false;
         }
       );
@@ -273,41 +261,42 @@ export class UsersComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.getUsers().subscribe(
       (dataresponse: UserInListDto[]) => {
-        this.objectsDatasource = new MatTableDataSource(dataresponse);
-        this.objectsDatasource.sort = this.sort;
-        this.tableselectionCheckbox.clear();
-        this.tableselectionRow.clear();
-        this.appService.dataLoading = false;
-      }, () => {
-        // this.ass.updateAdminStatus('', '', [], err.label);
-        this.tableselectionCheckbox.clear();
-        this.tableselectionRow.clear();
-        this.appService.dataLoading = false;
+        if (dataresponse.length > 0) {
+          this.objectsDatasource = new MatTableDataSource(dataresponse);
+          this.objectsDatasource.sort = this.sort;
+          this.tableSelectionCheckbox.clear();
+          this.tableSelectionRow.clear();
+          this.appService.dataLoading = false;
+        } else {
+          this.tableSelectionCheckbox.clear();
+          this.tableSelectionRow.clear();
+          this.appService.dataLoading = false;
+        }
       }
-    )
+    );
   }
 
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceGroupToCheckCollection([]);
     this.backendService.getWorkspacesGroupwise().subscribe(worksGroups => {
       this.userWorkspaces = new WorkspaceGroupToCheckCollection(worksGroups);
-      this.updateUserList()
-    })
+      this.updateUserList();
+    });
   }
 
   isAllSelected(): boolean {
-    const numSelected = this.tableselectionCheckbox.selected.length;
+    const numSelected = this.tableSelectionCheckbox.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
     return numSelected === numRows;
   }
 
   masterToggle(): void {
     this.isAllSelected() || !this.objectsDatasource ?
-      this.tableselectionCheckbox.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableselectionCheckbox.select(row));
+      this.tableSelectionCheckbox.clear() :
+      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
   selectRow(row: UserInListDto): void {
-    this.tableselectionRow.select(row);
+    this.tableSelectionRow.select(row);
   }
 }

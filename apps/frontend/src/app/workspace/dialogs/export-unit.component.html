@@ -25,7 +25,7 @@
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef mat-sort-header="element.key"> Aufgabe </mat-header-cell>
         <mat-cell *matCellDef="let element" [class]="element.disabled ? 'disabled-element' : ''"> {{element.key}}-{{element.label}} </mat-cell>
       </ng-container>
 

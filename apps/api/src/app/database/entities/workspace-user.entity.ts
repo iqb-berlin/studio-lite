@@ -1,4 +1,4 @@
-import {Entity, PrimaryColumn} from 'typeorm';
+import { Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 class WorkspaceUser {
