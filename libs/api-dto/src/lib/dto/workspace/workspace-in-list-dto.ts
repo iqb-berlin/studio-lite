@@ -7,6 +7,6 @@ export class WorkspaceInListDto {
   @ApiProperty()
   name!: string;
 
-  @ApiProperty({example: 463})
+  @ApiProperty({ example: 463 })
   groupId!: number;
 }
