@@ -5,7 +5,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto
+  WorkspaceInListDto, ErrorReportDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -112,23 +112,34 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadUnits(id: number, files: FileIo[]) {
+  async uploadUnits(id: number, files: FileIo[]): Promise<ErrorReportDto> {
+    const functionReturn: ErrorReportDto = {
+      source: 'uploadUnits',
+      errors: {}
+    };
     const unitData: UnitImportData[] = [];
-    const otherFiles: { [fName: string]: FileIo } = {};
+    const notXmlFiles: { [fName: string]: FileIo } = {};
+    const usedFiles: string[] = [];
     files.forEach(f => {
       if (f.mimetype === 'text/xml') {
         try {
           unitData.push(new UnitImportData(f));
+          usedFiles.push(f.originalname);
         } catch {
-          console.warn(`unit upload: xml parse error in ${f.originalname}`);
+          functionReturn.errors[f.originalname] = 'unit-upload.api-warning.xml-parse';
         }
       } else {
-        otherFiles[f.originalname] = f;
+        notXmlFiles[f.originalname] = f;
       }
     });
     unitData.forEach(u => {
-      if (u.definitionFileName && otherFiles[u.definitionFileName]) {
-        u.definition = otherFiles[u.definitionFileName].buffer.toString();
+      if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
+        u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
+        usedFiles.push(u.definitionFileName);
+      } else if (u.definition) {
+        usedFiles.push(u.definitionFileName);
+      } else {
+        functionReturn.errors[u.key] = 'unit-upload.api-error.missing-definition';
       }
     });
     unitData.forEach(async u => {
@@ -137,7 +148,7 @@ export class WorkspaceService {
         name: u.name
       });
       await this.unitService.patchMetadata(id, newUnitId, {
-        id: newUnitId, // todo: check whether id can be removed
+        id: newUnitId,
         editor: u.editor,
         player: u.player,
         description: u.description
@@ -148,5 +159,11 @@ export class WorkspaceService {
         });
       }
     });
+    files.forEach(f => {
+      if (!(f.originalname in usedFiles) && !functionReturn.errors[f.originalname]) {
+        functionReturn.errors[f.originalname] = 'unit-upload.api-warning.ignore-file';
+      }
+    });
+    return functionReturn;
   }
 }

@@ -1,3 +1,4 @@
+export { ErrorReportDto } from './lib/dto/error-report-dto';
 export { AppLogoDto } from './lib/dto/setting/app-logo-dto';
 export { ConfigDto } from './lib/dto/setting/config-dto';
 export { VeronaModuleFileDto } from './lib/dto/verona-module/verona-module-file-dto';

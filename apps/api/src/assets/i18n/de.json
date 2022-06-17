@@ -1,7 +1,7 @@
 {
   "unit-upload": {
     "api-error": {
-      "missing-definition-file": "Korrespondierende Unit-Definition (separate Datei) nicht gefunden.",
+      "missing-definition": "Korrespondierende Unit-Definition (separate Datei?) nicht gefunden.",
       "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
     },
     "api-warning": {
