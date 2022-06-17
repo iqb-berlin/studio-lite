@@ -3,7 +3,8 @@
 </div>
 <div class="page-title" fxLayout="row" fxLayoutAlign="space-between center">
   <a [routerLink]="['/']">
-    <img class="logo" src="assets/IQB-LogoA.png" matTooltip="Startseite"/>
+    <img class="logo" [src]="appService.appLogo?.data" [alt]="appService.appLogo ? appService.appLogo.alt : 'Startseite'"
+         [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'Startseite'"/>
   </a>
   <div>{{ appService.appConfig?.appTitle }}</div>
   <div *ngIf="appService.appConfig?.pageTitle">{{ appService.appConfig?.pageTitle }}</div>

@@ -23,6 +23,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTabsModule } from '@angular/material/tabs';
 
+import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
@@ -36,7 +37,6 @@ import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component
 import { SelectModuleComponent } from './unit/unit-metadata/select-module.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
-import {IqbComponentsModule} from "@studio-lite-lib/iqb-components";
 
 @NgModule({
   imports: [

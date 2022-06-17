@@ -3,10 +3,10 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../workspace.service';
 import { AppService } from '../../app.service';
 import { BackendService } from '../backend.service';
-import {UnitInListDto} from "@studio-lite-lib/api-dto";
 
 @Component({
   templateUrl: './select-unit.component.html'

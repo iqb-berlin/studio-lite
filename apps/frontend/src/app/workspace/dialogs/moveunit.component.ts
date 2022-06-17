@@ -3,10 +3,10 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { AppService } from '../../app.service';
 import { WorkspaceService } from '../workspace.service';
-import {WorkspaceDataFlat} from "../../app.classes";
-import {UnitInListDto} from "@studio-lite-lib/api-dto";
+import { WorkspaceDataFlat } from '../../app.classes';
 
 @Component({
   templateUrl: './moveunit.component.html'
@@ -41,7 +41,7 @@ export class MoveUnitComponent implements OnInit {
               groupName: wsg.name
             });
           }
-        })
+        });
       });
     }
     this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units());

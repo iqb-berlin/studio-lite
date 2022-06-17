@@ -1,38 +1,56 @@
 import { Injectable } from '@nestjs/common';
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import Setting from "../entities/setting.entity";
-import {ConfigFullDto} from "@studio-lite-lib/api-dto";
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ConfigDto, AppLogoDto } from '@studio-lite-lib/api-dto';
+import Setting from '../entities/setting.entity';
 
 @Injectable()
 export class SettingService {
   constructor(
     @InjectRepository(Setting)
-    private settingsRepository: Repository<Setting>,
+    private settingsRepository: Repository<Setting>
   ) {}
 
-  async findConfig(): Promise<ConfigFullDto> {
-    const setting = await this.settingsRepository.findOne({where: {key: 'config'}});
+  async findConfig(): Promise<ConfigDto> {
+    const setting = await this.settingsRepository.findOne({ where: { key: 'config' } });
     if (setting) {
-      return setting.content as ConfigFullDto
-    } else {
-      return <ConfigFullDto> {
-        appTitle: 'IQB-Studio-Lite',
-        introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
-        imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>'
-      }
+      return JSON.parse(setting.content) as ConfigDto;
     }
+    return <ConfigDto> {
+      appTitle: 'IQB-Studio-Lite',
+      introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
+      imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>'
+    };
   }
 
-  async patchConfig(settingContent: ConfigFullDto): Promise<void> {
-    const settingToUpdate = await this.settingsRepository.findOne({ where: {key: 'config'}});
+  async patchConfig(settingContent: ConfigDto): Promise<void> {
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'config' } });
     if (settingToUpdate) {
-      settingToUpdate.content = settingContent;
+      settingToUpdate.content = JSON.stringify(settingContent);
       await this.settingsRepository.save(settingToUpdate);
     } else {
       const newSetting = await this.settingsRepository.create({
         key: 'config',
-        content: settingContent
+        content: JSON.stringify(settingContent)
+      });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findAppLogo(): Promise<AppLogoDto | null> {
+    const appLogo = await this.settingsRepository.findOne({ where: { key: 'app-logo' } });
+    return appLogo ? JSON.parse(appLogo.content) : null;
+  }
+
+  async patchAppLogo(newLogo: AppLogoDto): Promise<void> {
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'app-logo' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = JSON.stringify(newLogo);
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = await this.settingsRepository.create({
+        key: 'app-logo',
+        content: JSON.stringify(newLogo)
       });
       await this.settingsRepository.save(newSetting);
     }

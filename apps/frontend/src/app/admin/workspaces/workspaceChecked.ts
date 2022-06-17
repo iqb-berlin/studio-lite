@@ -1,11 +1,11 @@
-import {WorkspaceDto, WorkspaceGroupDto, WorkspaceInListDto} from "@studio-lite-lib/api-dto";
-import {WorkspaceData} from "../../workspace/backend.service";
+// eslint-disable-next-line max-classes-per-file
+import { WorkspaceDto, WorkspaceGroupDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 
 export class WorkspaceChecked {
   public id: number;
   public name: string;
   public isChecked: boolean;
-  constructor(workspaceDto: WorkspaceDto ) {
+  constructor(workspaceDto: WorkspaceDto) {
     this.id = workspaceDto.id;
     this.name = workspaceDto.name;
     this.isChecked = false;
@@ -16,13 +16,13 @@ export class WorkspaceGroupToCheck {
   public id: number;
   public name: string;
   public workspaces: WorkspaceChecked[];
-  constructor(workspaceGroupDto: WorkspaceGroupDto ) {
+  constructor(workspaceGroupDto: WorkspaceGroupDto) {
     this.id = workspaceGroupDto.id;
     this.name = workspaceGroupDto.name;
     this.workspaces = [];
     workspaceGroupDto.workspaces.forEach(workspace => {
-      this.workspaces.push(new WorkspaceChecked(workspace))
-    })
+      this.workspaces.push(new WorkspaceChecked(workspace));
+    });
   }
 }
 
@@ -31,11 +31,11 @@ export class WorkspaceGroupToCheckCollection {
   private userWorkspacesIds: number[] = [];
   public hasChanged = false;
 
-  constructor(workspaceGroups: WorkspaceGroupDto[] ) {
+  constructor(workspaceGroups: WorkspaceGroupDto[]) {
     this.entries = [];
     workspaceGroups.forEach(workspaceGroup => {
-      if (workspaceGroup.workspaces.length > 0) this.entries.push(new WorkspaceGroupToCheck(workspaceGroup))
-    })
+      if (workspaceGroup.workspaces.length > 0) this.entries.push(new WorkspaceGroupToCheck(workspaceGroup));
+    });
   }
 
   setChecks(userWorkspaces?: WorkspaceInListDto[]): void {
@@ -44,7 +44,7 @@ export class WorkspaceGroupToCheckCollection {
     this.entries.forEach(workspaceGroup => {
       workspaceGroup.workspaces.forEach(workspace => {
         workspace.isChecked = this.userWorkspacesIds.indexOf(workspace.id) > -1;
-      })
+      });
     });
     this.hasChanged = false;
   }
@@ -54,7 +54,7 @@ export class WorkspaceGroupToCheckCollection {
     this.entries.forEach(workspaceGroup => {
       workspaceGroup.workspaces.forEach(workspace => {
         if (workspace.isChecked) checkedWorkspacesIds.push(workspace.id);
-      })
+      });
     });
     return checkedWorkspacesIds;
   }
@@ -66,9 +66,8 @@ export class WorkspaceGroupToCheckCollection {
         if ((workspace.isChecked && this.userWorkspacesIds.indexOf(workspace.id) < 0) ||
           (!workspace.isChecked && this.userWorkspacesIds.indexOf(workspace.id) > -1)) {
           this.hasChanged = true;
-          return
         }
-      })
+      });
     });
   }
 
@@ -77,7 +76,7 @@ export class WorkspaceGroupToCheckCollection {
     this.entries.forEach(workspaceGroup => {
       workspaceGroup.workspaces.forEach(workspace => {
         if (workspace.isChecked) this.userWorkspacesIds.push(workspace.id);
-      })
+      });
     });
     this.hasChanged = false;
   }

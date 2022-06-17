@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { WorkspaceService } from '../workspace.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-edit-settings',
   templateUrl: './edit-settings.component.html',
   styleUrls: ['./edit-settings.component.css']

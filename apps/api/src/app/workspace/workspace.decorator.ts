@@ -5,5 +5,5 @@ export const WorkspaceId = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const params = request.params;
     return params.workspace_id;
-  },
+  }
 );

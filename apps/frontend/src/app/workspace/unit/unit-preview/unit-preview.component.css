@@ -1,9 +1,7 @@
 .preview-body {
-  position: absolute;
   width: 100%;
-  top: 2px;
-  bottom: 45px;
   padding: 0;
+  height: calc(100% - 49px);
 }
 
 .pageNav {

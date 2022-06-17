@@ -1,16 +1,18 @@
-import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards} from '@nestjs/common';
-import {UnitService} from "../database/services/unit.service";
-import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
+import {
+  Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateUnitDto,
   UnitDefinitionDto,
   UnitInListDto,
   UnitMetadataDto
-} from "@studio-lite-lib/api-dto";
-import {WorkspaceGuard} from "./workspace.guard";
-import {WorkspaceId} from "./workspace.decorator";
-import {ApiImplicitParam} from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
+} from '@studio-lite-lib/api-dto';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
+import { UnitService } from '../database/services/unit.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WorkspaceGuard } from './workspace.guard';
+import { WorkspaceId } from './workspace.decorator';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -38,7 +40,10 @@ export class UnitsController {
     type: UnitMetadataDto
   })
   @ApiTags('workspace unit')
-  async findOnesMetadata(@WorkspaceId() workspaceId: number, @Param('id', ParseIntPipe) unitId: number): Promise<UnitMetadataDto> {
+  async findOnesMetadata(
+    @WorkspaceId() workspaceId: number,
+      @Param('id', ParseIntPipe) unitId: number
+  ): Promise<UnitMetadataDto> {
     return this.unitService.findOnesMetadata(workspaceId, unitId);
   }
 
@@ -50,7 +55,10 @@ export class UnitsController {
     type: UnitDefinitionDto
   })
   @ApiTags('workspace unit')
-  async findOnesDefinition(@WorkspaceId() workspaceId: number, @Param('id', ParseIntPipe) unitId: number): Promise<UnitDefinitionDto> {
+  async findOnesDefinition(
+    @WorkspaceId() workspaceId: number,
+      @Param('id', ParseIntPipe) unitId: number
+  ): Promise<UnitDefinitionDto> {
     return this.unitService.findOnesDefinition(workspaceId, unitId);
   }
 
@@ -60,8 +68,8 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchMetadata(@WorkspaceId() workspaceId: number,
-                      @Param('id', ParseIntPipe) unitId: number,
-                      @Body() unitMetadataDto: UnitMetadataDto) {
+    @Param('id', ParseIntPipe) unitId: number,
+    @Body() unitMetadataDto: UnitMetadataDto) {
     return this.unitService.patchMetadata(workspaceId, unitId, unitMetadataDto);
   }
 
@@ -71,8 +79,8 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchDefinition(@WorkspaceId() workspaceId: number,
-                      @Param('id', ParseIntPipe) unitId: number,
-                      @Body() unitDefinitionDto: UnitDefinitionDto) {
+    @Param('id', ParseIntPipe) unitId: number,
+    @Body() unitDefinitionDto: UnitDefinitionDto) {
     return this.unitService.patchDefinition(workspaceId, unitId, unitDefinitionDto);
   }
 
@@ -86,8 +94,8 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async create(@WorkspaceId() workspaceId: number,
-               @Body() createUnitDto: CreateUnitDto) {
-    return this.unitService.create(workspaceId, createUnitDto)
+    @Body() createUnitDto: CreateUnitDto) {
+    return this.unitService.create(workspaceId, createUnitDto);
   }
 
   @Delete(':ids')
@@ -95,9 +103,9 @@ export class UnitsController {
   @ApiBearerAuth()
   @ApiTags('workspace unit')
   async remove(@WorkspaceId() workspaceId: number,
-               @Param('ids') ids: string): Promise<void> {
+    @Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s)));
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
     return this.unitService.remove(idsAsNumberArray);
   }
 }

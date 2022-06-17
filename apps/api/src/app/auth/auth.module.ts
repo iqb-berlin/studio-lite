@@ -1,11 +1,11 @@
-import { AuthService } from './service/auth.service';
-import { LocalStrategy } from './local.strategy';
-import {PassportModule} from "@nestjs/passport";
-import {Module} from "@nestjs/common";
+import { PassportModule } from '@nestjs/passport';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { LocalStrategy } from './local.strategy';
+import { AuthService } from './service/auth.service';
 import { jwtConstants } from './auth.constants';
-import {JwtStrategy} from "./jwt.strategy";
-import {DatabaseModule} from "../database/database.module";
+import { JwtStrategy } from './jwt.strategy';
+import { DatabaseModule } from '../database/database.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import {DatabaseModule} from "../database/database.module";
     DatabaseModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '1d' }
     })
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],

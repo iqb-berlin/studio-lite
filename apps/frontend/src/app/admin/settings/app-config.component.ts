@@ -2,27 +2,19 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import {ConfigFullDto} from "@studio-lite-lib/api-dto";
-import {BackendService} from "../backend.service";
-import {AppConfig} from "../../app.classes";
-
-const defaultAppConfig = <ConfigFullDto>{
-  appTitle: 'IQB-Teststudio',
-  introHtml: '<p>nicht definiert</p>',
-  imprintHtml: '<p>nicht definiert</p>',
-  globalWarningText: '',
-  globalWarningExpiredHour: 0,
-  globalWarningExpiredDay: new Date()
-};
+import { BackendService as WriteBackendService } from '../backend.service';
+import { BackendService as ReadBackendService } from '../../backend.service';
+import { AppConfig } from '../../app.classes';
+import { defaultAppConfig } from '../../app.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-app-config',
   templateUrl: 'app-config.component.html',
   styles: [
     '.example-chip-list {width: 100%;}',
     '.block-ident {margin-left: 40px}',
-    '.warning-warning { color: darkgoldenrod }'
+    '.warning-warning { color: darkgoldenrod }',
+    '.save-button {margin-bottom: 20px}'
   ]
 })
 
@@ -63,7 +55,8 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
-    private backendService: BackendService
+    private writeBackendService: WriteBackendService,
+    private readBackendService: ReadBackendService
   ) {
     this.configForm = this.fb.group({
       appTitle: this.fb.control(''),
@@ -82,7 +75,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   }
 
   updateFormFields(): void {
-    this.backendService.getConfig().subscribe(appConfig => {
+    this.readBackendService.getConfig().subscribe(appConfig => {
       if (this.configDataChangedSubscription !== null) {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
@@ -109,35 +102,27 @@ export class AppConfigComponent implements OnInit, OnDestroy {
           }, { emitEvent: false });
         }
       }
-      this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay, this.appConfig.globalWarningExpiredHour);
+      this.warningIsExpired = AppConfig.isExpired(
+        this.appConfig.globalWarningExpiredDay,
+        this.appConfig.globalWarningExpiredHour
+      );
       if (this.configForm) {
         this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
           if (this.configForm && this.appConfig) {
             this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
             this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
-            this.warningIsExpired = AppConfig.isExpired(this.appConfig.globalWarningExpiredDay, this.appConfig.globalWarningExpiredHour);
+            this.warningIsExpired = AppConfig.isExpired(
+              this.appConfig.globalWarningExpiredDay,
+              this.appConfig.globalWarningExpiredHour
+            );
             this.dataChanged = true;
           }
-        })
-      };
-    },
-    () => {
-      this.appConfig = defaultAppConfig;
-      if (this.configForm) {
-        this.configForm.setValue({
-          appTitle: '',
-          introHtml: '',
-          imprintHtml: '',
-          globalWarningText: '',
-          globalWarningExpiredDay: ''
-        }, { emitEvent: false })
-      };
-      this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht laden', 'Fehler', { duration: 3000 });
+        });
+      }
     });
   }
 
   saveData(): void {
-    this.snackBar.open('tbd', 'coming soon', { duration: 3000 });
     if (this.appConfig && this.configForm) {
       this.appConfig.appTitle = this.configForm.get('appTitle')?.value;
       this.appConfig.introHtml = this.configForm.get('introHtml')?.value;
@@ -145,19 +130,16 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
-      this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
-          if (isOk) {
-            this.snackBar.open(
-              'Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!', 'Info', { duration: 3000 }
-            );
-            this.dataChanged = false;
-          } else {
-            this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht speichern', 'Fehler', { duration: 3000 });
-          }
-        },
-        () => {
+      this.writeBackendService.setAppConfig(this.appConfig).subscribe(isOk => {
+        if (isOk) {
+          this.snackBar.open(
+            'Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!', 'Info', { duration: 3000 }
+          );
+          this.dataChanged = false;
+        } else {
           this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht speichern', 'Fehler', { duration: 3000 });
-        });
+        }
+      });
     }
   }
 

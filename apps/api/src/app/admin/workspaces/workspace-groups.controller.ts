@@ -6,94 +6,71 @@ import {
   Param,
   Patch,
   Post,
-  Request,
-  UnauthorizedException,
   UseGuards
 } from '@nestjs/common';
-import {AuthService} from "../../auth/service/auth.service";
-import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
-import {WorkspaceGroupService} from "../../database/services/workspace-group.service";
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
-} from "@studio-lite-lib/api-dto";
+} from '@studio-lite-lib/api-dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
+import { IsAdminGuard } from '../is-admin.guard';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
   constructor(
-    private workspaceGroupService: WorkspaceGroupService,
-    private authService: AuthService
+    private workspaceGroupService: WorkspaceGroupService
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupInListDto],
+    type: [WorkspaceGroupInListDto]
   })
   @ApiTags('admin workspaces')
-  async findAll(@Request() req): Promise<WorkspaceGroupInListDto[]> {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
+  async findAll(): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    type: [WorkspaceGroupFullDto],
+    type: [WorkspaceGroupFullDto]
   })
   @ApiTags('admin workspaces')
-  async findOne(@Request() req, @Param('id') id: number): Promise<WorkspaceGroupFullDto> {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
+  async findOne(@Param('id') id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
-  async remove(@Request() req, @Param('id') id: number): Promise<void> {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
+  async remove(@Param('id') id: number): Promise<void> {
     return this.workspaceGroupService.remove(id);
   }
 
   @Patch()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
-  async patch(@Request() req, @Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
-    return this.workspaceGroupService.patch(workspaceGroupFullDto)
+  async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
+    return this.workspaceGroupService.patch(workspaceGroupFullDto);
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new workspace group in database',
-    type: Number,
+    type: Number
   })
   @ApiTags('admin workspaces')
-  async create(@Request() req, @Body() createWorkspaceDto: CreateWorkspaceGroupDto) {
-    const isAdmin = await this.authService.isAdminUser(req);
-    if (!isAdmin) {
-      throw new UnauthorizedException();
-    }
-    return this.workspaceGroupService.create(createWorkspaceDto)
+  async create(@Body() createWorkspaceGroupDto: CreateWorkspaceGroupDto) {
+    return this.workspaceGroupService.create(createWorkspaceGroupDto);
   }
 }

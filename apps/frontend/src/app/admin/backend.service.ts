@@ -1,17 +1,16 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, of, throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {
-  ConfigFullDto,
+  ConfigDto, AppLogoDto,
   CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
   UserFullDto,
   UserInListDto,
   WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   WorkspaceInListDto,
   WorkspaceGroupDto, VeronaModuleInListDto
-} from "@studio-lite-lib/api-dto";
-import {AppHttpError} from "../app.classes";
+} from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +25,7 @@ export class BackendService {
     return this.http
       .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of([]))
       );
   }
 
@@ -34,14 +33,16 @@ export class BackendService {
     return this.http
       .post(`${this.serverUrl}admin/users`, newUser)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
 
   changeUserData(newData: UserFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users`,newData)
+      .patch(`${this.serverUrl}admin/users`, newData)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -50,6 +51,7 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}admin/users/${users.join(';')}`)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -58,7 +60,7 @@ export class BackendService {
     return this.http
       .get<WorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of([]))
       );
   }
 
@@ -66,6 +68,7 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/users/${userId}/workspaces`, accessTo)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -74,7 +77,7 @@ export class BackendService {
     return this.http
       .get<WorkspaceGroupDto[]>(`${this.serverUrl}admin/workspaces/groupwise`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of([]))
       );
   }
 
@@ -82,6 +85,7 @@ export class BackendService {
     return this.http
       .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -90,6 +94,7 @@ export class BackendService {
     return this.http
       .patch<boolean>(`${this.serverUrl}admin/workspaces`, workspaceData)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -98,6 +103,7 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -107,7 +113,7 @@ export class BackendService {
     return this.http
       .get<UserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of([]))
       );
   }
 
@@ -115,6 +121,7 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/workspaces/${workspaceId}/users`, accessTo)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -131,6 +138,7 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}admin/verona-modules/${files.join(';')}`)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
       );
   }
@@ -139,24 +147,28 @@ export class BackendService {
     return this.http
       .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/workspace-groups`)
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of([]))
       );
   }
 
   addWorkspaceGroup(name: string): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.serverUrl}admin/workspace-groups`, <CreateWorkspaceGroupDto>{
-        name: name
+        name: name,
+        settings: {}
       })
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of(false))
       );
   }
 
   deleteWorkspaceGroup(id: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/workspace-groups/${id}`)
-      .pipe(map(()=>false))
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
   }
 
   renameWorkspaceGroup(id: number, newName: string): Observable<boolean> {
@@ -165,23 +177,25 @@ export class BackendService {
         id: id, name: newName
       })
       .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
+        catchError(() => of(false))
       );
   }
 
-  getConfig(): Observable<ConfigFullDto | null> {
-    return this.http
-      .get<ConfigFullDto | null>(`${this.serverUrl}admin/settings/config`, {})
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
-
-  setAppConfig(appConfig: ConfigFullDto): Observable<boolean> {
+  setAppConfig(appConfig: ConfigDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)
       .pipe(
+        catchError(() => of(false)),
         map(() => true)
-      )
+      );
+  }
+
+  setAppLogo(appLogo: AppLogoDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/app-logo`, appLogo)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
   }
 }

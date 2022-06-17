@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {WorkspaceSettingsDto} from "./workspace-settings-dto";
+import { WorkspaceSettingsDto } from './workspace-settings-dto';
 
 export class WorkspaceFullDto {
   @ApiProperty()
   id!: number;
 
-  @ApiProperty({example: 'VERA2002'})
+  @ApiProperty({ example: 'VERA2002' })
   name?: string;
 
-  @ApiProperty({example: 463})
+  @ApiProperty({ example: 463 })
   groupId?: number;
 
-  @ApiProperty({example: 'Hörverstehen'})
+  @ApiProperty({ example: 'Hörverstehen' })
   groupName?: string;
 
   @ApiProperty()
