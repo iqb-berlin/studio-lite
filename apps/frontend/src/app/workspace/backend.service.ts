@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@angular/core';
 import {
   CreateUnitDto, UnitDefinitionDto,
   UnitInListDto,
-  UnitMetadataDto, VeronaModuleFileDto,
+  UnitMetadataDto, UnitSchemeDto, VeronaModuleFileDto,
   VeronaModuleInListDto,
   WorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
@@ -120,6 +120,14 @@ export class BackendService {
       );
   }
 
+  getUnitScheme(workspaceId: number, unitId: number): Observable<UnitSchemeDto | null> {
+    return this.http
+      .get<UnitSchemeDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/scheme`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
   setUnitMetadata(workspaceId: number, unitData: UnitMetadataDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspace/${workspaceId}/${unitData.id}/metadata`, unitData)
@@ -146,6 +154,15 @@ export class BackendService {
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`, unitData)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  setUnitScheme(workspaceId: number, unitId: number, unitData: UnitSchemeDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/scheme`, unitData)
       .pipe(
         map(() => true),
         catchError(() => of(false))

@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import {
-  UnitDefinitionDto, UnitInListDto, UnitMetadataDto, VeronaModuleInListDto
+  UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto, VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
 
 export interface UnitGroup {
@@ -136,6 +136,15 @@ export class UnitMetadataStore {
     }
   }
 
+  setSchemer(newSchemer: string) {
+    console.log(newSchemer);
+    if (newSchemer === this.originalData.schemer) {
+      if (this.changedData.schemer) delete this.changedData.schemer;
+    } else {
+      this.changedData.schemer = newSchemer;
+    }
+  }
+
   setBasicData(newKey: string, newName: string, newDescription: string) {
     if (newKey === this.originalData.key) {
       if (this.changedData.key) delete this.changedData.key;
@@ -164,6 +173,7 @@ export class UnitMetadataStore {
   }
 
   getChangedData(): UnitMetadataDto {
+    console.log(this.changedData);
     return this.changedData;
   }
 
@@ -192,7 +202,7 @@ export class UnitDefinitionStore {
     this.changedData = <UnitDefinitionDto>{};
   }
 
-  setData(newVariables: never[], newDefinition: string) {
+  setData(newVariables: unknown[], newDefinition: string) {
     if (newVariables === this.originalData.variables) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
@@ -224,5 +234,45 @@ export class UnitDefinitionStore {
 
   restore() {
     this.changedData = <UnitDefinitionDto>{};
+  }
+}
+
+export class UnitSchemeStore {
+  private originalData: UnitSchemeDto;
+  private changedData: UnitSchemeDto;
+  private unitId: number;
+
+  constructor(unitId: number, originalData: UnitSchemeDto) {
+    this.unitId = unitId;
+    this.originalData = originalData;
+    this.changedData = <UnitSchemeDto>{};
+  }
+
+  setData(newScheme: string, newSchemeType: string) {
+    this.changedData = <UnitSchemeDto>{
+      scheme: newScheme,
+      schemeType: newSchemeType
+    };
+  }
+
+  isChanged(): boolean {
+    return Object.keys(this.changedData).length > 1;
+  }
+
+  getChangedData(): UnitSchemeDto {
+    return this.changedData;
+  }
+
+  getData(): UnitSchemeDto {
+    return { ...this.originalData, ...this.changedData };
+  }
+
+  applyChanges() {
+    this.originalData = this.getData();
+    this.changedData = <UnitSchemeDto>{};
+  }
+
+  restore() {
+    this.changedData = <UnitSchemeDto>{};
   }
 }

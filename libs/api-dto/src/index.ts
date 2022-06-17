@@ -1,3 +1,4 @@
+export { UnitSchemeDto } from './lib/dto/unit/unit-scheme-dto';
 export { AppLogoDto } from './lib/dto/setting/app-logo-dto';
 export { ConfigDto } from './lib/dto/setting/config-dto';
 export { VeronaModuleFileDto } from './lib/dto/verona-module/verona-module-file-dto';

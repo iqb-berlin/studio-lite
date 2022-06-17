@@ -35,6 +35,13 @@
                            moduleType="Player">
         </app-select-module>
       </div>
+      <div fxLayout="row" fxLayoutAlign="space-between start">
+        <div fxFlex="40%">Editor für die Kodierung/das Antwortschema</div>
+        <app-select-module #schemer [moduleList]="workspaceService.schemerList"
+                           fxFlex="55%"
+                           moduleType="Editor für die Kodierung/das Antwortschema">
+        </app-select-module>
+      </div>
     </div>
   </div>
 

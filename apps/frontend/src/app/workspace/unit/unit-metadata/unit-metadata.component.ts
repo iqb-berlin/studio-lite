@@ -18,10 +18,12 @@ import { UnitMetadataStore } from '../../workspace.classes';
 export class UnitMetadataComponent implements OnInit, OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
+  @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
   private unitIdChangedSubscription: Subscription | undefined;
   private unitFormDataChangedSubscription: Subscription | undefined;
   private editorSelectionChangedSubscription: Subscription | undefined;
   private playerSelectionChangedSubscription: Subscription | undefined;
+  private schemerSelectionChangedSubscription: Subscription | undefined;
   unitForm: FormGroup;
   timeZone = 'Europe/Berlin';
 
@@ -50,6 +52,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
+    if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.workspaceService.unitMetadataStore) {
       this.setupForm();
     } else {
@@ -76,15 +79,21 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         description: unitMetadata.description
       }, { emitEvent: false });
       if (this.editorSelector) {
-        this.editorSelector.setModule(unitMetadata.editor ? unitMetadata.editor : '');
+        this.editorSelector.setModule(unitMetadata.editor || '');
         this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setEditor(selectedValue);
         });
       }
       if (this.playerSelector) {
-        this.playerSelector.setModule(unitMetadata.player ? unitMetadata.player : '');
+        this.playerSelector.setModule(unitMetadata.player || '');
         this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setPlayer(selectedValue);
+        });
+      }
+      if (this.schemerSelector) {
+        this.schemerSelector.setModule(unitMetadata.schemer || '');
+        this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
+          this.workspaceService.unitMetadataStore?.setSchemer(selectedValue);
         });
       }
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
@@ -102,5 +111,6 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
+    if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
   }
 }
