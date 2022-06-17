@@ -1,0 +1,14 @@
+{
+  "unit-upload": {
+    "menu-label": {
+      "import": "Import",
+      "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) importieren"
+    }
+  },
+  "home": {
+    "home-page": "Startseite",
+    "select-workspace": "Arbeitsbereich wählen",
+    "goto-admin": "Allgemeine Systemverwaltung",
+    "imprint": "Impressum/Datenschutz"
+  }
+}

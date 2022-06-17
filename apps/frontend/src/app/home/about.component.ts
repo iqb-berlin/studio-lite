@@ -11,7 +11,7 @@ import { AppService } from '../app.service';
             <div [innerHTML]="appService.appConfig?.imprintHtml"></div>
           </mat-card-content>
           <mat-card-actions>
-            <button mat-raised-button [routerLink]="['/']">Startseite</button>
+            <button mat-raised-button [routerLink]="['/']">{{'home.home-page' | translate}}</button>
           </mat-card-actions>
         </mat-card>
       </div>

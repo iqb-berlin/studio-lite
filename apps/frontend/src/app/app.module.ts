@@ -22,6 +22,7 @@ import { RouterModule } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -30,6 +31,7 @@ import { AboutComponent } from './home/about.component';
 import { HomeComponent } from './home/home.component';
 import { ChangePasswordComponent } from './home/change-password.component';
 import { AuthInterceptor } from './auth.interceptor';
+import { AppTranslateLoader } from './app-translate-loader';
 
 @NgModule({
   declarations: [
@@ -62,7 +64,14 @@ import { AuthInterceptor } from './auth.interceptor';
     ReactiveFormsModule,
     HttpClientModule,
     AppRoutingModule,
-    IqbComponentsModule.forRoot()
+    IqbComponentsModule.forRoot(),
+    TranslateModule.forRoot({
+      defaultLanguage: 'de',
+      loader: {
+        provide: TranslateLoader,
+        useClass: AppTranslateLoader
+      }
+    })
   ],
   providers: [
     BackendService,
