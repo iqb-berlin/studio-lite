@@ -46,7 +46,7 @@ class Unit {
   @Column({
     type: 'jsonb',
     array: false,
-    default: () => "'{}'",
+    default: () => "'[]'",
     nullable: false
   })
   public variables = [];
