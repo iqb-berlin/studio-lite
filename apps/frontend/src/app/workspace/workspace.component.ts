@@ -32,7 +32,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     { path: 'metadata', label: 'Eigenschaften' },
     { path: 'editor', label: 'Editor' },
     { path: 'preview', label: 'Vorschau' },
-    { path: 'schemer', label: 'Schemer' }
+    { path: 'schemer', label: 'Kodierung' }
   ];
 
   workspacesSettings: WorkspaceSettingsDto;
