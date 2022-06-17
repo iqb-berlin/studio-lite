@@ -16,7 +16,6 @@ import { UnitMetadataStore, UnitSchemeStore } from '../../workspace.classes';
   styles: ['#iFrameHostSchemer {height: calc(100% - 49px);}']
 })
 export class UnitSchemerComponent implements OnInit {
-  variables!: never[] | undefined;
   private readonly postMessageSubscription: Subscription;
   private unitIdChangedSubscription: Subscription | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -133,7 +132,8 @@ export class UnitSchemerComponent implements OnInit {
           definitionReportPolicy: 'eager'
         },
         codingScheme: unitScheme.scheme || '',
-        codingSchemeType: unitScheme.schemeType || ''
+        codingSchemeType: unitScheme.schemeType || '',
+        variables: this.workspaceService.unitDefinitionStore?.getData().variables || []
       }, '*');
     }
   }
