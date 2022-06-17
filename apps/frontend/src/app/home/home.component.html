@@ -19,9 +19,9 @@
 
     <div fxFlex="0 0 500px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
       <h1 fxLayout="row" fxLayoutAlign="space-between center">
-        Arbeitsbereich wählen
+        {{'home.select-workspace' | translate}}
         <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
-                matTooltip="Nutzer/Arbeitsbereiche">
+                [matTooltip]="'home.goto-admin' | translate">
           <mat-icon>settings</mat-icon>
         </button>
       </h1>
@@ -61,6 +61,6 @@
           <li *ngIf="appService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
         </ul>
       </div>
-      <button mat-raised-button color="primary" [routerLink]="['/about']">Impressum/Datenschutz</button>
+      <button mat-raised-button color="primary" [routerLink]="['/about']">{{'home.imprint' | translate}}</button>
     </div>
   </div>
