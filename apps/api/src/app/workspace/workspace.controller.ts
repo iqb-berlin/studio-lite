@@ -2,7 +2,7 @@ import {
   Controller, Get, Post, UploadedFiles, UseGuards, UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { WorkspaceFullDto, ErrorReportDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceFullDto, RequestReportDto } from '@studio-lite-lib/api-dto';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../database/services/workspace.service';
@@ -34,9 +34,9 @@ export class WorkspaceController {
   @UseInterceptors(FilesInterceptor('files'))
   @ApiTags('workspace')
   @ApiCreatedResponse({
-    type: ErrorReportDto
+    type: RequestReportDto
   })
-  async addModuleFile(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<ErrorReportDto> {
+  async addModuleFile(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<RequestReportDto> {
     return this.workspaceService.uploadUnits(workspaceId, files);
   }
 }

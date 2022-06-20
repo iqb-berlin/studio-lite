@@ -5,7 +5,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto, ErrorReportDto
+  WorkspaceInListDto, RequestReportDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -109,34 +109,38 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadUnits(id: number, files: FileIo[]): Promise<ErrorReportDto> {
-    const functionReturn: ErrorReportDto = {
-      source: 'uploadUnits',
-      messages: {}
+  async uploadUnits(id: number, files: FileIo[]): Promise<RequestReportDto> {
+    const functionReturn: RequestReportDto = {
+      source: 'upload-units',
+      messages: []
     };
     const unitData: UnitImportData[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];
+    console.log(`#1 ${usedFiles.length}`);
     files.forEach(f => {
       if (f.mimetype === 'text/xml') {
         try {
           unitData.push(new UnitImportData(f));
           usedFiles.push(f.originalname);
         } catch {
-          functionReturn.messages[f.originalname] = 'unit-upload.api-warning.xml-parse';
+          functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.xml-parse' });
+          console.log(`${f.originalname}: unit-upload.api-warning.xml-parse`);
         }
       } else {
         notXmlFiles[f.originalname] = f;
       }
     });
+    console.log(`#2 ${usedFiles.length}`);
     unitData.forEach(u => {
       if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
         u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
         usedFiles.push(u.definitionFileName);
       } else if (!u.definition) {
-        functionReturn.messages[u.key] = 'unit-upload.api-error.missing-definition';
+        functionReturn.messages.push({ objectKey: u.key, messageKey: 'unit-upload.api-error.missing-definition' });
       }
     });
+    console.log(`#3 ${usedFiles.length}`);
     await Promise.all(unitData.map(async u => {
       const newUnitId = await this.unitService.create(id, {
         key: u.key,
@@ -155,12 +159,13 @@ export class WorkspaceService {
           });
         }
       } else {
-        functionReturn.messages[u.key] = 'unit-upload.api-error.duplicate-unit-id';
+        functionReturn.messages.push({ objectKey: u.key, messageKey: 'unit-upload.api-error.duplicate-unit-id' });
       }
     }));
+    console.log(`#4 ${usedFiles.length}`);
     files.forEach(f => {
-      if (!(f.originalname in usedFiles || functionReturn.messages[f.originalname])) {
-        functionReturn.messages[f.originalname] = 'unit-upload.api-warning.ignore-file';
+      if (!(f.originalname in usedFiles)) {
+        functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.ignore-file' });
       }
     });
     return functionReturn;

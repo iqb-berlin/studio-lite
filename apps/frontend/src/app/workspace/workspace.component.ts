@@ -9,7 +9,9 @@ import {
   Subscription, map, lastValueFrom, finalize
 } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { CreateUnitDto, UnitInListDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  CreateUnitDto, UnitInListDto, WorkspaceSettingsDto
+} from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { AppService } from '../app.service';
@@ -485,12 +487,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           .pipe(
             finalize(() => {
               this.resetUpload();
-              this.updateUnitList();
             })
           ).subscribe(event => {
             const httpEvent = event as HttpEvent<any>;
             if (httpEvent.type === HttpEventType.UploadProgress) {
               this.uploadProgress = Math.round(100 * (httpEvent.loaded / (httpEvent.total ? httpEvent.total : 1)));
+            } else if (httpEvent.type === HttpEventType.Sent) {
+              console.log(httpEvent);
+              this.updateUnitList();
             }
           });
       }

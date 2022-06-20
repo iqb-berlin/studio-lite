@@ -10,5 +10,11 @@
     "select-workspace": "Arbeitsbereich wählen",
     "goto-admin": "Allgemeine Systemverwaltung",
     "imprint": "Impressum/Datenschutz"
+  },
+  "dialogs": {
+    "close": "Schließen",
+    "request-report-source": {
+      "upload-units": "Import Aufgaben - Ergebnis"
+    }
   }
 }

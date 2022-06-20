@@ -3,7 +3,7 @@ import { HttpHeaders, HttpClient, HttpEvent } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Injectable, Inject } from '@angular/core';
 import {
-  CreateUnitDto, UnitDefinitionDto,
+  CreateUnitDto, RequestReportDto, UnitDefinitionDto,
   UnitInListDto,
   UnitMetadataDto, VeronaModuleFileDto,
   VeronaModuleInListDto,
@@ -143,19 +143,18 @@ export class BackendService {
   }
    */
 
-  uploadUnits(workspaceId: number, files: FileList | null): Observable<boolean | HttpEvent<any>> {
+  uploadUnits(workspaceId: number, files: FileList | null): Observable<HttpEvent<RequestReportDto> | null> {
     if (files) {
       const formData = new FormData();
-      for (var i = 0; i < files.length; i++) {
-        formData.append("files", files[i]);
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
       }
-      return this.http.post(`${this.serverUrl}workspace/${workspaceId}/upload`, formData, {
+      return this.http.post<RequestReportDto>(`${this.serverUrl}workspace/${workspaceId}/upload`, formData, {
         reportProgress: true,
         observe: 'events'
-      })
-    } else {
-      return of(false)
+      });
     }
+    return of(null);
   }
 
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {
