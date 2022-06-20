@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
@@ -47,17 +47,14 @@ export class WorkspaceService {
   }
 
   async setWorkspacesByUser(userId: number, workspaces: number[]) {
-    await getConnection().createQueryBuilder()
-      .delete()
-      .from(WorkspaceUser)
-      .where('user_id = :id', { id: userId })
-      .execute();
-    workspaces.forEach(async workspaceId => {
-      const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
-        userId: userId,
-        workspaceId: workspaceId
-      });
-      await this.workspaceUsersRepository.save(newWorkspaceUser);
+    return this.workspaceUsersRepository.delete({ userId: userId }).then(async () => {
+      await Promise.all(workspaces.map(async workspaceId => {
+        const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+          userId: userId,
+          workspaceId: workspaceId
+        });
+        await this.workspaceUsersRepository.save(newWorkspaceUser);
+      }));
     });
   }
 
@@ -115,7 +112,7 @@ export class WorkspaceService {
   async uploadUnits(id: number, files: FileIo[]): Promise<ErrorReportDto> {
     const functionReturn: ErrorReportDto = {
       source: 'uploadUnits',
-      errors: {}
+      messages: {}
     };
     const unitData: UnitImportData[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
@@ -126,7 +123,7 @@ export class WorkspaceService {
           unitData.push(new UnitImportData(f));
           usedFiles.push(f.originalname);
         } catch {
-          functionReturn.errors[f.originalname] = 'unit-upload.api-warning.xml-parse';
+          functionReturn.messages[f.originalname] = 'unit-upload.api-warning.xml-parse';
         }
       } else {
         notXmlFiles[f.originalname] = f;
@@ -136,32 +133,34 @@ export class WorkspaceService {
       if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
         u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
         usedFiles.push(u.definitionFileName);
-      } else if (u.definition) {
-        usedFiles.push(u.definitionFileName);
-      } else {
-        functionReturn.errors[u.key] = 'unit-upload.api-error.missing-definition';
+      } else if (!u.definition) {
+        functionReturn.messages[u.key] = 'unit-upload.api-error.missing-definition';
       }
     });
-    unitData.forEach(async u => {
+    await Promise.all(unitData.map(async u => {
       const newUnitId = await this.unitService.create(id, {
         key: u.key,
         name: u.name
       });
-      await this.unitService.patchMetadata(id, newUnitId, {
-        id: newUnitId,
-        editor: u.editor,
-        player: u.player,
-        description: u.description
-      });
-      if (u.definition) {
-        await this.unitService.patchDefinition(id, newUnitId, {
-          definition: u.definition
+      if (newUnitId > 0) {
+        await this.unitService.patchMetadata(id, newUnitId, {
+          id: newUnitId,
+          editor: u.editor,
+          player: u.player,
+          description: u.description
         });
+        if (u.definition) {
+          await this.unitService.patchDefinition(id, newUnitId, {
+            definition: u.definition
+          });
+        }
+      } else {
+        functionReturn.messages[u.key] = 'unit-upload.api-error.duplicate-unit-id';
       }
-    });
+    }));
     files.forEach(f => {
-      if (!(f.originalname in usedFiles) && !functionReturn.errors[f.originalname]) {
-        functionReturn.errors[f.originalname] = 'unit-upload.api-warning.ignore-file';
+      if (!(f.originalname in usedFiles || functionReturn.messages[f.originalname])) {
+        functionReturn.messages[f.originalname] = 'unit-upload.api-warning.ignore-file';
       }
     });
     return functionReturn;

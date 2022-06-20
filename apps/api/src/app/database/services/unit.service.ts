@@ -25,6 +25,11 @@ export class UnitService {
   }
 
   async create(workspaceId: number, unit: CreateUnitDto): Promise<number> {
+    const existingUnitId = await this.unitsRepository.findOne({
+      where: { workspaceId: workspaceId, key: unit.key },
+      select: ['id']
+    });
+    if (existingUnitId) return 0;
     const newUnit = await this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     await this.unitsRepository.save(newUnit);
@@ -90,5 +95,3 @@ export class UnitService {
     }
   }
 }
-
-

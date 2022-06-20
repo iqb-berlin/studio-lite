@@ -5,5 +5,5 @@ export class ErrorReportDto {
   source!: string;
 
   @ApiProperty()
-  errors: { [key: string]: string } = {}
+  messages: { [key: string]: string } = {}
 }
