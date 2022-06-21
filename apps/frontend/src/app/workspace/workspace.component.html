@@ -65,18 +65,6 @@
     <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
            multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
   </div>
-  <div [hidden]="fileUploadQueue.files.length<=0 && uploadMessages.length <= 0" class="import-units-log" fxFlex="40">
-    <div *ngFor="let msg of uploadMessages" class="upload-message">{{msg}}</div>
-    <iqb-files-upload-queue #fileUploadQueue
-                            [httpUrl]="uploadUrl"
-                            [fileAlias]="'unit-file'"
-                            [folderName]="'p'"
-                            [folder]="uploadProcessId"
-                            (uploadCompleteEvent)="finishUnitUpload()">
-    </iqb-files-upload-queue>
-    <button mat-raised-button color="primary" *ngIf="fileUploadQueue.files.length <= 0" class="upload-message-ok-button"
-            (click)="clearUploadMessages()">OK</button>
-  </div>
   <div fxFlex class="unitdatacontainer">
     <nav mat-tab-nav-bar>
       <a mat-tab-link

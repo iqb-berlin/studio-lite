@@ -404,47 +404,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  finishUnitUpload(): void {
-    /*
-      this.uploadMessages = [];
-      this.appService.dataLoading = true;
-      this.backendService.startUnitUploadProcessing(
-      this.workspaceService.selectedWorkspace, this.uploadProcessId).subscribe(
-        okdata => {
-          let okCount = 0;
-          okdata.forEach(uploadInfo => {
-            if (uploadInfo.success) {
-              okCount += 1;
-            } else {
-              this.uploadMessages.push(`${uploadInfo.filename}: ${uploadInfo.message}`);
-            }
-            if (this.uploadMessages.length > 0) {
-              this.snackBar.open('Problem: Konnte Aufgabendateien nicht hochladen', '', { duration: 3000 });
-            } else {
-              this.snackBar.open(`${okCount} Aufgabe(n) wurden importiert`, '', { duration: 3000 });
-            }
-            if (okCount > 0) {
-              this.updateUnitList();
-              // this.selectedUnits = [];
-            }
-          });
-          this.appService.dataLoading = false;
-        },
-        err => {
-          this.uploadMessages.push(`${err.code}: ${err.info}`);
-          this.snackBar.open(`Problem: Konnte Aufgabendateien nicht hochladen: ${err.msg()}`, '', { duration: 3000 });
-          this.appService.dataLoading = false;
-        }
-      );
-      this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
-      this.snackBar.open('Dateien wurden an den Server gesendet - bitte warten', '', { duration: 10000 });
-    */
-  }
-
-  clearUploadMessages(): void {
-    this.uploadMessages = [];
-  }
-
   discardChanges(): void {
     const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
       width: '400px',
