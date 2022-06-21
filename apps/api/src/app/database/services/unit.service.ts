@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto
+  CreateUnitDto,
+  UnitDefinitionDto,
+  UnitInListDto,
+  UnitMetadataDto,
+  UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -61,6 +65,7 @@ export class UnitService {
     if (dataKeys.indexOf('description') >= 0) unitToUpdate.description = newData.description;
     if (dataKeys.indexOf('editor') >= 0) unitToUpdate.editor = newData.editor;
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
+    if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     await this.unitsRepository.save(unitToUpdate);
   }
 
@@ -83,6 +88,18 @@ export class UnitService {
     return returnUnit;
   }
 
+  async findOnesScheme(workspaceId: number, unitId: number): Promise<UnitSchemeDto> {
+    const unit = await this.unitsRepository.findOne({
+      where: { workspaceId: workspaceId, id: unitId },
+      select: ['scheme', 'schemeType', 'variables']
+    });
+    return {
+      variables: unit.variables,
+      scheme: unit.scheme,
+      schemeType: unit.schemeType
+    };
+  }
+
   async patchDefinition(workspaceId: number, unitId: number, unitDefinitionDto: UnitDefinitionDto) {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, id: unitId }
@@ -102,5 +119,14 @@ export class UnitService {
       if (newUnitDefinitionId >= 0) unitToUpdate.definitionId = newUnitDefinitionId;
       await this.unitsRepository.save(unitToUpdate);
     }
+  }
+
+  async patchScheme(workspaceId: number, unitId: number, unitSchemeDto: UnitSchemeDto) {
+    const unitToUpdate = await this.unitsRepository.findOne({
+      where: { workspaceId: workspaceId, id: unitId }
+    });
+    unitToUpdate.scheme = unitSchemeDto.scheme;
+    unitToUpdate.schemeType = unitSchemeDto.schemeType;
+    await this.unitsRepository.save(unitToUpdate);
   }
 }

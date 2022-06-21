@@ -64,6 +64,11 @@ class Unit {
   public scheme: string;
 
   @Column({
+    name: 'scheme_type'
+  })
+  public schemeType: string;
+
+  @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_scheme'
   })

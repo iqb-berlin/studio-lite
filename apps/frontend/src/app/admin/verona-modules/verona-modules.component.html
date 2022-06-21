@@ -33,6 +33,12 @@
                                   [downloadPath]="serverUrl"
                                   type="player"></app-verona-modules-table>
       </div>
+      <div fxLayout="column">
+        <h1>Editoren für Kodierung/Antwortschema</h1>
+        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
+                                  [downloadPath]="serverUrl"
+                                  type="schemer"></app-verona-modules-table>
+      </div>
     </div>
   </div>
 </div>

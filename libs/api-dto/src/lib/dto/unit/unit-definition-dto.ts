@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitDefinitionDto {
   @ApiProperty()
-  variables? = [];
+  variables?: unknown[] = [];
 
   @ApiProperty()
   definition?: string;

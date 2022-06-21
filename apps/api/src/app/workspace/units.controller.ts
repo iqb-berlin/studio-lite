@@ -6,7 +6,7 @@ import {
   CreateUnitDto,
   UnitDefinitionDto,
   UnitInListDto,
-  UnitMetadataDto
+  UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { UnitService } from '../database/services/unit.service';
@@ -74,6 +74,21 @@ export class UnitsController {
     return this.unitService.findOnesDefinition(workspaceId, unitId);
   }
 
+  @Get(':id/scheme')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: UnitSchemeDto
+  })
+  @ApiTags('workspace unit')
+  async findOnesScheme(
+    @WorkspaceId() workspaceId: number,
+      @Param('id', ParseIntPipe) unitId: number
+  ): Promise<UnitSchemeDto> {
+    return this.unitService.findOnesScheme(workspaceId, unitId);
+  }
+
   @Patch(':id/metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
@@ -94,6 +109,17 @@ export class UnitsController {
     @Param('id', ParseIntPipe) unitId: number,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
     return this.unitService.patchDefinition(workspaceId, unitId, unitDefinitionDto);
+  }
+
+  @Patch(':id/scheme')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchScheme(@WorkspaceId() workspaceId: number,
+    @Param('id', ParseIntPipe) unitId: number,
+    @Body() unitSchemeDto: UnitSchemeDto) {
+    return this.unitService.patchDefinition(workspaceId, unitId, unitSchemeDto);
   }
 
   @Post('units')

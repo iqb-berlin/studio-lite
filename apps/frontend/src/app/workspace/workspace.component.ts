@@ -103,6 +103,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.backendService.getModuleList('player').subscribe(moduleList => {
         this.workspaceService.playerList = new ModuleCollection(moduleList);
       });
+      this.backendService.getModuleList('schemer').subscribe(moduleList => {
+        this.workspaceService.schemerList = new ModuleCollection(moduleList);
+        console.log(this.workspaceService.schemerList);
+      });
     });
   }
 

@@ -18,7 +18,6 @@ import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes'
   styleUrls: ['./unit-preview.component.css']
 })
 export class UnitPreviewComponent implements OnInit, OnDestroy {
-  iFrameHostElement: HTMLDivElement | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
   private readonly postMessageSubscription: Subscription | undefined;
   private unitIdChangedSubscription: Subscription | undefined;
@@ -135,7 +134,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.iFrameHostElement = <HTMLIFrameElement>document.querySelector('#iFrameHostPlayer');
+      this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
         this.message = '';
         if (this.workspaceService.unitMetadataStore) {
@@ -232,12 +231,9 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
   }
 
   private buildPlayer(playerId?: string) {
-    this.iFrameElement = undefined;
     this.postMessageTarget = undefined;
-    if (this.iFrameHostElement) {
-      while (this.iFrameHostElement.lastChild) {
-        this.iFrameHostElement.removeChild(this.iFrameHostElement.lastChild);
-      }
+    if (this.iFrameElement) {
+      this.iFrameElement.srcdoc = '';
       if (playerId) {
         this.workspaceService.getModuleHtml(playerId).then(playerData => {
           this.playerName = playerId;
@@ -256,22 +252,18 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
   }
 
   private setupPlayerIFrame(playerHtml: string): void {
-    if (this.iFrameHostElement) {
-      this.iFrameElement = <HTMLIFrameElement>document.createElement('iframe');
-      this.iFrameElement.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin');
-      this.iFrameElement.setAttribute('class', 'unitHost');
-      this.iFrameElement.setAttribute('height', String(this.iFrameHostElement.clientHeight - 5));
-      this.iFrameHostElement.appendChild(this.iFrameElement);
-      this.iFrameElement.setAttribute('srcdoc', playerHtml);
+    if (this.iFrameElement && this.iFrameElement.parentElement) {
+      const divHeight = this.iFrameElement.parentElement.clientHeight;
+      this.iFrameElement.height = `${String(divHeight - 5)}px`;
+      this.iFrameElement.srcdoc = playerHtml;
     }
   }
 
   @HostListener('window:resize')
   onResize(): void {
-    if (this.iFrameElement && this.iFrameHostElement) {
-      const divHeight = this.iFrameHostElement.clientHeight;
-      this.iFrameElement.setAttribute('height', String(divHeight - 5));
-      // TODO: Why minus 5px?
+    if (this.iFrameElement && this.iFrameElement.parentElement) {
+      const divHeight = this.iFrameElement.parentElement.clientHeight;
+      this.iFrameElement.height = `${String(divHeight - 5)}px`;
     }
   }
 

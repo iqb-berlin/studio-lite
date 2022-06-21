@@ -2,12 +2,12 @@ import {
   BehaviorSubject, lastValueFrom
 } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import {
-  ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore
+  ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
 } from './workspace.classes';
 import { AppService } from '../app.service';
 
@@ -19,9 +19,11 @@ export class WorkspaceService {
   selectedUnit$ = new BehaviorSubject<number>(0);
   editorList = new ModuleCollection([]);
   playerList = new ModuleCollection([]);
+  schemerList = new ModuleCollection([]);
   moduleHtmlStore: { [key: string]: string } = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;
+  unitSchemeStore: UnitSchemeStore | undefined;
   unitList = new UnitCollection([]);
 
   constructor(
@@ -30,7 +32,7 @@ export class WorkspaceService {
   ) {}
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const newKeyNormalised = control.value.toUpperCase().trim();
       let isUnique = true;
       unitList.forEach(u => {
@@ -48,11 +50,14 @@ export class WorkspaceService {
   resetUnitData(): void {
     this.unitMetadataStore = undefined;
     this.unitDefinitionStore = undefined;
+    this.unitSchemeStore = undefined;
   }
 
   isChanged(): boolean {
     return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
-      (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()));
+      (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||
+      (this.unitSchemeStore && this.unitSchemeStore.isChanged())
+    );
   }
 
   async getModuleHtml(key: string): Promise<string | null> {
@@ -85,6 +90,12 @@ export class WorkspaceService {
         this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
       ));
       if (saveOk) this.unitDefinitionStore.applyChanges();
+    }
+    if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
+      saveOk = await lastValueFrom(this.backendService.setUnitScheme(
+        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
+      ));
+      if (saveOk) this.unitSchemeStore.applyChanges();
     }
     if (reloadUnitList) {
       saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspace)
