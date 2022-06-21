@@ -39,7 +39,16 @@ export class UnitService {
   async findOnesMetadata(workspaceId: number, unitId: number): Promise<UnitMetadataDto> {
     return this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, id: unitId },
-      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer',
+      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata',
+        'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
+    });
+  }
+
+  async findAllWithMetadata(workspaceId: number): Promise<UnitMetadataDto[]> {
+    return this.unitsRepository.find({
+      where: { workspaceId: workspaceId },
+      order: { groupName: 'ASC', key: 'ASC' },
+      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata',
         'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
     });
   }

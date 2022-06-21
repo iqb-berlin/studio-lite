@@ -32,6 +32,18 @@ export class UnitsController {
     return this.unitService.findAll(workspaceId);
   }
 
+  @Get('units/metadata')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: [UnitMetadataDto]
+  })
+  @ApiTags('workspace')
+  async findAllWithMetadata(@WorkspaceId() workspaceId: number): Promise<UnitMetadataDto[]> {
+    return this.unitService.findAllWithMetadata(workspaceId);
+  }
+
   @Get(':id/metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()

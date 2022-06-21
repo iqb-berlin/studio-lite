@@ -60,13 +60,8 @@ class Unit {
   @Column()
   public schemer: string;
 
-  @Column({
-    type: 'jsonb',
-    array: false,
-    default: () => "'{}'",
-    nullable: false
-  })
-  public scheme = {};
+  @Column()
+  public scheme: string;
 
   @Column({
     type: 'timestamp with time zone',

@@ -334,7 +334,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   exportUnit(): void {
-    /*
     const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
       width: '400px',
       height: '700px',
@@ -364,7 +363,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         );
       }
     });
-    */
   }
 
   settings(): void {

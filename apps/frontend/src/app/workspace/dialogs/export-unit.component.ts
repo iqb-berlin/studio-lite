@@ -40,7 +40,7 @@ export class ExportUnitComponent implements OnInit {
     private appService: AppService,
     public ds: WorkspaceService,
     private backendService: BackendService,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: unknown
   ) { }
 
   static getCodeList(codeLen: number, codeCount: number): string[] {
