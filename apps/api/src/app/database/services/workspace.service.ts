@@ -24,7 +24,8 @@ export class WorkspaceService {
     @InjectRepository(WorkspaceGroup)
     private workspaceGroupRepository: Repository<WorkspaceGroup>,
     private unitService: UnitService
-  ) {}
+  ) {
+  }
 
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
     const validWorkspaces: number[] = [];
@@ -117,54 +118,51 @@ export class WorkspaceService {
     const unitData: UnitImportData[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];
-    console.log(`#1 ${usedFiles.length}`);
     files.forEach(f => {
       if (f.mimetype === 'text/xml') {
         try {
           unitData.push(new UnitImportData(f));
-          usedFiles.push(f.originalname);
         } catch {
           functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.xml-parse' });
-          console.log(`${f.originalname}: unit-upload.api-warning.xml-parse`);
+          usedFiles.push(f.originalname);
         }
       } else {
         notXmlFiles[f.originalname] = f;
       }
     });
-    console.log(`#2 ${usedFiles.length}`);
-    unitData.forEach(u => {
-      if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
-        u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
-        usedFiles.push(u.definitionFileName);
-      } else if (!u.definition) {
-        functionReturn.messages.push({ objectKey: u.key, messageKey: 'unit-upload.api-error.missing-definition' });
-      }
-    });
-    console.log(`#3 ${usedFiles.length}`);
     await Promise.all(unitData.map(async u => {
+      usedFiles.push(u.fileName);
       const newUnitId = await this.unitService.create(id, {
         key: u.key,
         name: u.name
       });
       if (newUnitId > 0) {
+        if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
+          u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
+          usedFiles.push(u.definitionFileName);
+        }
         await this.unitService.patchMetadata(id, newUnitId, {
           id: newUnitId,
           editor: u.editor,
           player: u.player,
           description: u.description
         });
-        if (u.definition) {
-          await this.unitService.patchDefinition(id, newUnitId, {
-            definition: u.definition
-          });
+        await this.unitService.patchDefinition(id, newUnitId, {
+          definition: u.definition
+        });
+        if (!u.definition) {
+          functionReturn.messages.push(
+            { objectKey: u.fileName, messageKey: 'unit-upload.api-warning.missing-definition' }
+          );
         }
       } else {
-        functionReturn.messages.push({ objectKey: u.key, messageKey: 'unit-upload.api-error.duplicate-unit-id' });
+        functionReturn.messages.push({
+          objectKey: u.fileName, messageKey: 'unit-upload.api-error.duplicate-unit-id'
+        });
       }
     }));
-    console.log(`#4 ${usedFiles.length}`);
     files.forEach(f => {
-      if (!(f.originalname in usedFiles)) {
+      if (usedFiles.indexOf(f.originalname) < 0) {
         functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.ignore-file' });
       }
     });

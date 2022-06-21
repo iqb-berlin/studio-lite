@@ -6,14 +6,13 @@ import {
   Component, Inject, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
-  Subscription, map, lastValueFrom, finalize
+  Subscription, map, lastValueFrom
 } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import {
   CreateUnitDto, UnitInListDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
-import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
@@ -22,6 +21,7 @@ import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { ModuleCollection, UnitCollection } from './workspace.classes';
+import { RequestMessageDialogComponent } from '../../components/request-message-dialog.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -31,7 +31,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
   private uploadSubscription: Subscription | null = null;
-  uploadProgress: number | null = null;
+  uploadProgress: number = 0;
   uploadProcessId = '';
   uploadUrl = '';
   uploadMessages: string[] = [];
@@ -55,6 +55,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private messsageDialog: MatDialog,
     private editSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
+    private uploadReportDialog: MatDialog,
     private snackBar: MatSnackBar,
     private router: Router,
     private route: ActivatedRoute
@@ -465,16 +466,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelUpload() {
+  resetUpload() {
     if (this.uploadSubscription !== null) {
       this.uploadSubscription.unsubscribe();
-      this.resetUpload();
+      this.uploadSubscription = null;
     }
-  }
-
-  resetUpload() {
-    this.uploadProgress = null;
-    this.uploadSubscription = null;
+    this.uploadProgress = 0;
   }
 
   onFileSelected(targetElement: EventTarget | null) {
@@ -482,21 +479,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       const inputElement = targetElement as HTMLInputElement;
       if (inputElement.files && inputElement.files.length > 0) {
         this.uploadSubscription = this.backendService.uploadUnits(
-          this.workspaceService.selectedWorkspace, inputElement.files
-        )
-          .pipe(
-            finalize(() => {
-              this.resetUpload();
-            })
-          ).subscribe(event => {
-            const httpEvent = event as HttpEvent<any>;
-            if (httpEvent.type === HttpEventType.UploadProgress) {
-              this.uploadProgress = Math.round(100 * (httpEvent.loaded / (httpEvent.total ? httpEvent.total : 1)));
-            } else if (httpEvent.type === HttpEventType.Sent) {
-              console.log(httpEvent);
-              this.updateUnitList();
+          this.workspaceService.selectedWorkspace,
+          inputElement.files
+        ).subscribe(uploadStatus => {
+          if (typeof uploadStatus === 'number') {
+            if (uploadStatus < 0) {
+              console.error(uploadStatus);
+            } else {
+              this.uploadProgress = uploadStatus;
             }
-          });
+          } else {
+            const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+              width: '400px',
+              height: '300px',
+              data: uploadStatus
+            });
+            dialogRef.afterClosed().subscribe(() => {
+              this.resetUpload();
+              this.updateUnitList();
+            });
+          }
+        });
       }
     }
   }

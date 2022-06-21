@@ -55,10 +55,10 @@
         </button>
       </mat-menu>
     </div>
-    <div fxLayout="row" *ngIf="uploadProgress">
+    <div fxLayout="row" *ngIf="uploadProgress > 0">
       <mat-progress-bar mode="determinate" fxFlex [value]="uploadProgress">
       </mat-progress-bar>
-      <button mat-mini-fab color="primary" (click)="cancelUpload()">
+      <button mat-mini-fab color="primary" (click)="resetUpload()">
         <mat-icon>delete_forever</mat-icon>
       </button>
     </div>

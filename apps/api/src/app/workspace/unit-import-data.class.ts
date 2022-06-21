@@ -4,6 +4,7 @@ import { FileIo } from '../interfaces/file-io.interface';
 export class UnitImportData {
   key: string;
   name: string;
+  fileName: string;
   description: string;
   definition: string;
   definitionFileName: string;
@@ -11,6 +12,7 @@ export class UnitImportData {
   editor: string;
 
   constructor(fileIo: FileIo) {
+    this.fileName = fileIo.originalname;
     const xmlDocument = cheerio.load(fileIo.buffer.toString());
     const metadataElement = xmlDocument('Metadata').first();
     if (metadataElement.length === 0) throw new Error('metadata element missing');

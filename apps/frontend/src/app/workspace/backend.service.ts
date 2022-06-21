@@ -1,11 +1,14 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpHeaders, HttpClient, HttpEvent } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { Injectable, Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import {
-  CreateUnitDto, RequestReportDto, UnitDefinitionDto,
+  CreateUnitDto,
+  RequestReportDto,
+  UnitDefinitionDto,
   UnitInListDto,
-  UnitMetadataDto, VeronaModuleFileDto,
+  UnitMetadataDto,
+  VeronaModuleFileDto,
   VeronaModuleInListDto,
   WorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
@@ -143,7 +146,7 @@ export class BackendService {
   }
    */
 
-  uploadUnits(workspaceId: number, files: FileList | null): Observable<HttpEvent<RequestReportDto> | null> {
+  uploadUnits(workspaceId: number, files: FileList | null): Observable<RequestReportDto | number> {
     if (files) {
       const formData = new FormData();
       for (let i = 0; i < files.length; i++) {
@@ -152,9 +155,25 @@ export class BackendService {
       return this.http.post<RequestReportDto>(`${this.serverUrl}workspace/${workspaceId}/upload`, formData, {
         reportProgress: true,
         observe: 'events'
-      });
+      }).pipe(
+        map(event => {
+          if (event) {
+            if (event.type === HttpEventType.UploadProgress) {
+              return Math.round(100 * (event.loaded / (event.total ? event.total : 1)));
+            }
+            if (event.type === HttpEventType.Response) {
+              return event.body || {
+                source: 'upload-units',
+                messages: [{ objectKey: '', messageKey: 'upload-units.request-error' }]
+              };
+            }
+            return 0;
+          }
+          return -1;
+        })
+      );
     }
-    return of(null);
+    return of(-1);
   }
 
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {

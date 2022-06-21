@@ -3,7 +3,8 @@
     "menu-label": {
       "import": "Import",
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) importieren"
-    }
+    },
+    "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },
   "home": {
     "home-page": "Startseite",
