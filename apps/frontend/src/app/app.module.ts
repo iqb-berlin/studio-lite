@@ -32,7 +32,7 @@ import { HomeComponent } from './home/home.component';
 import { ChangePasswordComponent } from './home/change-password.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { AppTranslateLoader } from './app-translate-loader';
-import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
+import { RequestMessageDialogComponent } from './components/request-message-dialog.component';
 
 @NgModule({
   declarations: [

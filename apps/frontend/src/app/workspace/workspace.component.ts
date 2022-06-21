@@ -21,7 +21,7 @@ import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { ModuleCollection, UnitCollection } from './workspace.classes';
-import { RequestMessageDialogComponent } from '../../components/request-message-dialog.component';
+import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -478,6 +478,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (targetElement) {
       const inputElement = targetElement as HTMLInputElement;
       if (inputElement.files && inputElement.files.length > 0) {
+        this.appService.dataLoading = true;
         this.uploadSubscription = this.backendService.uploadUnits(
           this.workspaceService.selectedWorkspace,
           inputElement.files
@@ -489,15 +490,21 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               this.uploadProgress = uploadStatus;
             }
           } else {
-            const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
-              width: '400px',
-              height: '300px',
-              data: uploadStatus
-            });
-            dialogRef.afterClosed().subscribe(() => {
+            this.appService.dataLoading = false;
+            if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+              const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                width: '500px',
+                height: '600px',
+                data: uploadStatus
+              });
+              dialogRef.afterClosed().subscribe(() => {
+                this.resetUpload();
+                this.updateUnitList();
+              });
+            } else {
               this.resetUpload();
               this.updateUnitList();
-            });
+            }
           }
         });
       }
