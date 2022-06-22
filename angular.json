@@ -294,6 +294,29 @@
         }
       },
       "tags": []
+    },
+    "shared-code": {
+      "root": "libs/shared-code",
+      "sourceRoot": "libs/shared-code/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared-code/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared-code"],
+          "options": {
+            "jestConfig": "libs/shared-code/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
     }
   }
 }

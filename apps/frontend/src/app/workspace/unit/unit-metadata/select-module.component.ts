@@ -3,14 +3,14 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ModuleCollection } from '../../workspace.classes';
+import { VeronaModuleCollection } from '../../verona-module-collection.class';
 
 @Component({
   selector: 'app-select-module',
   templateUrl: './select-module.component.html'
 })
 export class SelectModuleComponent implements OnDestroy {
-  @Input() moduleList = new ModuleCollection([]);
+  @Input() moduleList = new VeronaModuleCollection([]);
   selectedModuleId!: string;
   @Input() moduleType = '?';
   @Output() selectionChanged = new EventEmitter();
@@ -49,7 +49,7 @@ export class SelectModuleComponent implements OnDestroy {
       } else if (checkModuleId === true) {
         newModuleSelectorValue = this.selectedModuleId;
       } else if (this.moduleList) {
-        this.moduleSubstitute = this.moduleList.getName(checkModuleId);
+        this.moduleSubstitute = `${checkModuleId} - ${this.moduleList.getName(checkModuleId)}`;
       }
     }
     this.moduleFormDataChangedSubscription = this.moduleForm.valueChanges.subscribe(() => {

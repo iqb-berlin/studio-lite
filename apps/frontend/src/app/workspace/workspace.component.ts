@@ -28,9 +28,10 @@ import { WorkspaceService } from './workspace.service';
 import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
-import { ModuleCollection, UnitCollection } from './workspace.classes';
+import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
+import { VeronaModuleCollection } from './verona-module-collection.class';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -108,13 +109,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       );
       this.backendService.getModuleList('editor').subscribe(moduleList => {
-        this.workspaceService.editorList = new ModuleCollection(moduleList);
+        this.workspaceService.editorList = new VeronaModuleCollection(moduleList);
       });
       this.backendService.getModuleList('player').subscribe(moduleList => {
-        this.workspaceService.playerList = new ModuleCollection(moduleList);
+        this.workspaceService.playerList = new VeronaModuleCollection(moduleList);
       });
       this.backendService.getModuleList('schemer').subscribe(moduleList => {
-        this.workspaceService.schemerList = new ModuleCollection(moduleList);
+        this.workspaceService.schemerList = new VeronaModuleCollection(moduleList);
         console.log(this.workspaceService.schemerList);
       });
     });

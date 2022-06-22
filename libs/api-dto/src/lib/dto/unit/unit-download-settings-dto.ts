@@ -5,7 +5,7 @@ export class UnitDownloadSettingsDto {
   unitIdList!: number[];
 
   @ApiProperty()
-  addBookletAndPlayers = false;
+  addPlayers = false;
 
   @ApiProperty()
   addTestTakersReview = 0;

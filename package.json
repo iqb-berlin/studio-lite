@@ -53,6 +53,7 @@
     "swagger-ui-express": "^4.3.0",
     "tslib": "^2.0.0",
     "typeorm": "^0.2.41",
+    "xmlbuilder2": "^3.0.2",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
@@ -86,6 +87,8 @@
     "@typescript-eslint/eslint-plugin": "~5.3.0",
     "@typescript-eslint/parser": "~5.3.0",
     "cypress": "^9.1.0",
+    "eslint": "8.2.0",
+    "eslint-config-prettier": "8.1.0",
     "eslint-plugin-cypress": "^2.10.3",
     "jest": "27.2.3",
     "jest-preset-angular": "11.0.0",

@@ -28,30 +28,30 @@
       </mat-table>
     </mat-dialog-content>
     <div fxFlex="300px">
-      <mat-checkbox (change)="updateUnitList()" [(ngModel)]="unitExportSettings.addBookletAndPlayers">
-        Als Paket für Testcenter
+      <mat-checkbox (change)="updateUnitList()" [(ngModel)]="unitExportSettings.addPlayers">
+        Player hinzufügen
       </mat-checkbox>
-      <div fxLayout="column" *ngIf="unitExportSettings.addBookletAndPlayers">
+      <div fxLayout="column" *ngIf="unitExportSettings.addPlayers">
         <div *ngIf="unitsWithPlayer.length === 0" class="tcMessage">Keine Aufgabe hat einen gültigen Player gesetzt.</div>
         <div *ngIf="unitsWithPlayer.length !== ds.unitList.units().length && unitsWithPlayer.length > 0" class="tcMessage">
           Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
         </div>
         <div fxLayout="row">
-          <label fxFlex="50%">Anzahl der Logins</label>
+          <label fxFlex="50%">Logins hinzufügen</label>
           <div fxLayout="column">
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Review-Logins">
+              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
             </mat-form-field>
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Monitor-Logins">
+              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
             </mat-form-field>
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Testperson-Logins">
+              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
             </mat-form-field>
           </div>
         </div>
         <mat-checkbox [(ngModel)]="unitExportSettings.passwordLess">
-          <div>Kein Kennwort setzen, nur Login-Namen</div>
+          <div>Ohne Kennwort (nur Login-Name)</div>
         </mat-checkbox>
       </div>
     </div>

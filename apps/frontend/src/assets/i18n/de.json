@@ -28,5 +28,10 @@
     "request-report-source": {
       "upload-units": "Import Aufgaben - Ergebnis"
     }
+  },
+  "modules": {
+    "editor-name": "Editor",
+    "player-name": "Vorschau (Player)",
+    "schemer-name": "Kodierung (Schemer)"
   }
 }

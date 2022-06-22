@@ -22,19 +22,19 @@
                               (uploadCompleteEvent)="updateTables()">
       </iqb-files-upload-queue>
       <div fxLayout="column">
-        <h1>Editoren</h1>
+        <h1>{{'modules.editor-name' | translate}}</h1>
         <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   [downloadPath]="serverUrl"
                                   type="editor"></app-verona-modules-table>
       </div>
       <div fxLayout="column">
-        <h1>Player</h1>
+        <h1>{{'modules.player-name' | translate}}</h1>
         <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   [downloadPath]="serverUrl"
                                   type="player"></app-verona-modules-table>
       </div>
       <div fxLayout="column">
-        <h1>Editoren für Kodierung/Antwortschema</h1>
+        <h1>{{'modules.schemer-name' | translate}}</h1>
         <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   [downloadPath]="serverUrl"
                                   type="schemer"></app-verona-modules-table>

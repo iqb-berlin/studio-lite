@@ -39,35 +39,37 @@ import { AppConfigComponent } from './settings/app-config.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './settings/app-logo.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    AdminRoutingModule,
-    IqbComponentsModule,
-    MatTableModule,
-    MatTabsModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatSortModule,
-    ReactiveFormsModule,
-    MatProgressSpinnerModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatCardModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatToolbarModule,
-    MatSnackBarModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatBadgeModule,
-    FlexLayoutModule,
-    MatChipsModule,
-    FormsModule
-  ],
+    imports: [
+        CommonModule,
+        AdminRoutingModule,
+        IqbComponentsModule,
+        MatTableModule,
+        MatTabsModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatSortModule,
+        ReactiveFormsModule,
+        MatProgressSpinnerModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatCardModule,
+        MatTooltipModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatToolbarModule,
+        MatSnackBarModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        MatBadgeModule,
+        FlexLayoutModule,
+        MatChipsModule,
+        FormsModule,
+        TranslateModule
+    ],
   exports: [
     AdminComponent
   ],

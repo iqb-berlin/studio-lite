@@ -39,7 +39,7 @@ export class AdminComponent {
   navLinks = [
     { path: 'users', label: 'Nutzer:innen' },
     { path: 'workspaces', label: 'Arbeitsbereiche' },
-    { path: 'v-modules', label: 'Editoren/Player' },
+    { path: 'v-modules', label: 'Module' },
     { path: 'settings', label: 'Einstellungen' }
   ];
 }

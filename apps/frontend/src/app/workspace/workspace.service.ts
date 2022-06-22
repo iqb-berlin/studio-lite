@@ -7,9 +7,10 @@ import { map } from 'rxjs/operators';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import {
-  ModuleCollection, UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
+  UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
 } from './workspace.classes';
 import { AppService } from '../app.service';
+import { VeronaModuleCollection } from './verona-module-collection.class';
 
 @Injectable({
   providedIn: 'root'
@@ -17,9 +18,9 @@ import { AppService } from '../app.service';
 export class WorkspaceService {
   selectedWorkspace = 0;
   selectedUnit$ = new BehaviorSubject<number>(0);
-  editorList = new ModuleCollection([]);
-  playerList = new ModuleCollection([]);
-  schemerList = new ModuleCollection([]);
+  editorList = new VeronaModuleCollection([]);
+  playerList = new VeronaModuleCollection([]);
+  schemerList = new VeronaModuleCollection([]);
   moduleHtmlStore: { [key: string]: string } = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;

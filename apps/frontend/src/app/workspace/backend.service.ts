@@ -144,20 +144,6 @@ export class BackendService {
       );
   }
 
-  /*
-  startUnitUploadProcessing(workspaceId: number, processId: string): Observable<ImportUnitSelectionData[]> {
-    return this.http
-      .post<ImportUnitSelectionData[]>(`${this.serverUrl}startUnitUploadProcessing.php`, {
-      t: localStorage.getItem('t'),
-      ws: workspaceId,
-      p: processId
-    })
-      .pipe(
-        catchError(err => throwError(new AppHttpError(err)))
-      );
-  }
-   */
-
   uploadUnits(workspaceId: number, files: FileList | null): Observable<RequestReportDto | number> {
     if (files) {
       const formData = new FormData();

@@ -10,11 +10,15 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
 import { UnitDownloadClass } from './unit-download.class';
+import { UnitService } from '../database/services/unit.service';
+import { VeronaModulesService } from '../database/services/verona-modules.service';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
   constructor(
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private unitService: UnitService,
+    private veronaModuleService: VeronaModulesService
   ) {}
 
   @Get()
@@ -55,7 +59,13 @@ export class WorkspaceController {
       @Param('settings') unitDownloadSettingsString: string
   ): Promise<StreamableFile> {
     const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
-    const file = await UnitDownloadClass.get(this.workspaceService, unitDownloadSettings);
+    const file = await UnitDownloadClass.get(
+      this.workspaceService,
+      this.unitService,
+      this.veronaModuleService,
+      workspaceId,
+      unitDownloadSettings
+    );
     return new StreamableFile(file);
   }
 }

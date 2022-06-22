@@ -25,7 +25,7 @@ export class ExportUnitComponent implements OnInit {
   tableSelectionCheckbox = new SelectionModel <UnitExtendedData>(true, []);
   unitExportSettings = <UnitDownloadSettingsDto>{
     unitIdList: [],
-    addBookletAndPlayers: false,
+    addPlayers: false,
     addTestTakersReview: 0,
     addTestTakersMonitor: 0,
     addTestTakersHot: 0,
@@ -40,28 +40,6 @@ export class ExportUnitComponent implements OnInit {
     public ds: WorkspaceService,
     private backendService: BackendService
   ) {}
-  /*
-  static getCodeList(codeLen: number, codeCount: number): string[] {
-    const codeCharacters = 'abcdefghprqstuvxyz';
-    const codeNumbers = '2345679';
-    const codeList: string[] = [];
-    for (let i = 0; i < codeCount; i++) {
-      let newCode = '';
-      do {
-        newCode = '';
-        let isNumber = false;
-        do {
-          newCode += isNumber ?
-            codeNumbers.substr(Math.floor(codeNumbers.length * Math.random()), 1) :
-            codeCharacters.substr(Math.floor(codeCharacters.length * Math.random()), 1);
-          isNumber = !isNumber;
-        } while (newCode.length < codeLen);
-      } while (codeList.indexOf(newCode) >= 0);
-      codeList.push(newCode);
-    }
-    return codeList;
-  }
-  */
 
   ngOnInit(): void {
     this.tableSelectionCheckbox.clear();
@@ -100,7 +78,7 @@ export class ExportUnitComponent implements OnInit {
   }
 
   updateUnitList(): void {
-    if (this.unitExportSettings.addBookletAndPlayers) {
+    if (this.unitExportSettings.addPlayers) {
       if (this.unitsWithPlayer.length > 0) {
         if (this.objectsDatasource) {
           this.objectsDatasource.data.forEach(ud => {
