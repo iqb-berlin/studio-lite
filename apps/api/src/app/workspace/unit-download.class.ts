@@ -66,6 +66,38 @@ export class UnitDownloadClass {
         }
       }))
     }
+    if ((unitDownloadSettings.addTestTakersHot
+      + unitDownloadSettings.addTestTakersMonitor
+      + unitDownloadSettings.addTestTakersReview) > 0) {
+      const doc = XmlBuilder.create({ version: '1.0' }, {
+        Booklet: {
+          '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+          '@xsi:noNamespaceSchemaLocation': bookletXsdUrl,
+          '@att': 'val',
+          Metadata: {
+            Id: 'booklet1',
+            Label: 'Testheft 1'
+          },
+          BookletConfig: {
+            Config: {
+              '@key': 'unit_navibuttons',
+              '#': 'FULL'
+            }
+          }
+        }
+      });
+      let unitCount = 1;
+      const unitsElement = doc.root().ele('Units');
+      unitKeys.forEach(u => {
+        unitsElement.ele('Unit', {
+          id: u,
+          label: `Aufgabe ${unitCount}`,
+          labelshort: `${unitCount}`
+        });
+        unitCount += 1;
+      });
+      zip.addFile('booklet1.xml', Buffer.from(doc.toString({ prettyPrint: true })));
+    }
     return zip.toBuffer();
   }
 
