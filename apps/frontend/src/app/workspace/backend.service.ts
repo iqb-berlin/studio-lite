@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@angular/core';
 import {
   CreateUnitDto,
   RequestReportDto,
-  UnitDefinitionDto,
+  UnitDefinitionDto, UnitExportSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
   UnitSchemeDto,
@@ -26,6 +26,14 @@ export class BackendService {
   getUnitList(workspaceId: number): Observable <UnitInListDto[]> {
     return this.http
       .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`)
+      .pipe(
+        catchError(() => [])
+      );
+  }
+
+  getUnitListWithMetadata(workspaceId: number): Observable <UnitMetadataDto[]> {
+    return this.http
+      .get<UnitMetadataDto[]>(`${this.serverUrl}workspace/${workspaceId}/units/metadata`)
       .pipe(
         catchError(() => [])
       );
@@ -94,8 +102,10 @@ export class BackendService {
   }
    */
 
-  downloadUnits(workspaceId: number, unitData: ExportUnitSelectionData): Observable<Blob | null> {
-    const httpOptions = {
+  downloadUnits(workspaceId: number, settings: UnitExportSettingsDto): Observable<Blob | null> {
+    console.log(workspaceId);
+    console.log(settings);
+    /*    const httpOptions = {
       responseType: 'blob' as 'json',
       headers: new HttpHeaders({
         'Content-Type': 'application/json; charset=utf-8',
@@ -106,6 +116,8 @@ export class BackendService {
       .pipe(
         catchError(() => of(null))
       );
+      */
+    return of(null);
   }
 
   getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
@@ -232,51 +244,6 @@ export class BackendService {
       );
   }
    */
-}
-
-export interface UnitMetadata {
-  id: number;
-  key: string;
-  label: string;
-  description: string;
-  lastchanged: number;
-  editorid: string;
-  playerid: string;
-}
-
-export interface ModulData {
-  label: string;
-  html: string;
-}
-
-export interface WorkspaceData {
-  id: number;
-  label: string;
-  group: string;
-  settings: WorkspaceSettings;
-  players: {
-    [key: string]: ModulData;
-  };
-  editors: {
-    [key: string]: ModulData;
-  };
-}
-
-export interface ModuleDataForExport {
-  id : string;
-  content : string
-}
-
-export interface ExportUnitSelectionData {
-  selected_units: number[];
-  add_players: string[];
-  add_xml: ModuleDataForExport[];
-}
-
-export interface ImportUnitSelectionData {
-  filename: string;
-  success: boolean;
-  message: string;
 }
 
 export interface WorkspaceSettings {

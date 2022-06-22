@@ -6,6 +6,16 @@
     },
     "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },
+  "unit-download": {
+    "menu-label": {
+      "import": "Export",
+      "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
+    },
+    "dialog": {
+      "title": "Aufgabe(n) als Datei speichern",
+      "ok-button-label": "Download"
+    }
+  },
   "home": {
     "home-page": "Startseite",
     "select-workspace": "Arbeitsbereich wählen",
@@ -14,6 +24,7 @@
   },
   "dialogs": {
     "close": "Schließen",
+    "cancel": "Abbrechen",
     "request-report-source": {
       "upload-units": "Import Aufgaben - Ergebnis"
     }

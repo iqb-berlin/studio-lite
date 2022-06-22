@@ -51,7 +51,7 @@ export class UnitService {
   async findAllWithMetadata(workspaceId: number): Promise<UnitMetadataDto[]> {
     return this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      order: { groupName: 'ASC', key: 'ASC' },
+      order: { key: 'ASC' },
       select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata',
         'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
     });

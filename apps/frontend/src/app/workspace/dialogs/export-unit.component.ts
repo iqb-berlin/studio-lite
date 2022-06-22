@@ -1,16 +1,8 @@
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
-import {
-  BackendService,
-  UnitMetadata,
-  ExportUnitSelectionData,
-  ModuleDataForExport
-} from '../backend.service';
-import { AppService } from '../../app.service';
+import { Component, OnInit } from '@angular/core';
+import { UnitExportSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 
 export interface UnitExtendedData {
@@ -23,26 +15,32 @@ export interface UnitExtendedData {
 @Component({
   templateUrl: './export-unit.component.html',
   styles: [
-    '.disabled-element {color: gray}',
-    '.tcMessage {font-style: italic; font-size: smaller}'
+    '.tcMessage {font-style: italic; font-size: smaller; margin-bottom: 10px}',
+    '.disabled-element {color: gray}'
   ]
 })
 export class ExportUnitComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UnitExtendedData>();
   displayedColumns = ['selectCheckbox', 'name'];
   tableSelectionCheckbox = new SelectionModel <UnitExtendedData>(true, []);
-  addTestcenterFiles = false;
+  unitExportSettings = <UnitExportSettingsDto>{
+    unitIdList: [],
+    addBookletAndPlayers: false,
+    addTestTakersReview: 0,
+    addTestTakersMonitor: 0,
+    addTestTakersHot: 0,
+    passwordLess: false
+  };
+
   unitsWithPlayer: number[] = [];
   usedPlayers: string[] = [];
+  allUnitsWithMetadata: UnitMetadataDto[] = [];
 
   constructor(
-    private fb: FormBuilder,
-    private appService: AppService,
     public ds: WorkspaceService,
-    private backendService: BackendService,
-    @Inject(MAT_DIALOG_DATA) public data: unknown
-  ) { }
-
+    private backendService: BackendService
+  ) {}
+  /*
   static getCodeList(codeLen: number, codeCount: number): string[] {
     const codeCharacters = 'abcdefghprqstuvxyz';
     const codeNumbers = '2345679';
@@ -63,17 +61,23 @@ export class ExportUnitComponent implements OnInit {
     }
     return codeList;
   }
+  */
 
   ngOnInit(): void {
     this.tableSelectionCheckbox.clear();
-    this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units().map(
-      ud => <UnitExtendedData>{
-        id: ud.id,
-        key: ud.key,
-        label: ud.name,
-        disabled: false
-      }
-    ));
+    setTimeout(() => {
+      this.backendService.getUnitListWithMetadata(this.ds.selectedWorkspace).subscribe(md => {
+        this.allUnitsWithMetadata = md;
+        this.objectsDatasource = new MatTableDataSource(this.allUnitsWithMetadata.map(
+          ud => <UnitExtendedData>{
+            id: ud.id,
+            key: ud.key,
+            label: ud.name,
+            disabled: false
+          }
+        ));
+      });
+    });
   }
 
   isAllSelected(): boolean {
@@ -96,7 +100,7 @@ export class ExportUnitComponent implements OnInit {
   }
 
   updateUnitList(): void {
-    if (this.addTestcenterFiles) {
+    if (this.unitExportSettings.addBookletAndPlayers) {
       if (this.unitsWithPlayer.length > 0) {
         if (this.objectsDatasource) {
           this.objectsDatasource.data.forEach(ud => {
@@ -104,35 +108,24 @@ export class ExportUnitComponent implements OnInit {
           });
         }
       } else {
-        this.appService.dataLoading = true;
-        const getMetadataSubscriptions: Observable<UnitMetadata>[] = [];
-        this.ds.unitList.units().forEach(
-          ud => {
-            // getMetadataSubscriptions.push(this.backendService.getUnitMetadata(this.ds.selectedWorkspace, ud.id));
-            // todo reactivate?
-          }
-        );
-        forkJoin(getMetadataSubscriptions)
-          .subscribe((allMetadata: UnitMetadata[]) => {
-            this.unitsWithPlayer = [];
-            this.usedPlayers = [];
-            allMetadata.forEach(umd => {
-              if (umd.playerid) {
-                const validPlayerId = this.ds.playerList.isValid(umd.playerid);
-                if (validPlayerId !== false) {
-                  this.unitsWithPlayer.push(umd.id);
-                  const playerIdToAdd = validPlayerId === true ? umd.playerid : validPlayerId;
-                  if (this.usedPlayers.indexOf(playerIdToAdd) < 0) this.usedPlayers.push(playerIdToAdd);
-                }
-              }
-            });
-            if (this.objectsDatasource) {
-              this.objectsDatasource.data.forEach(ud => {
-                ud.disabled = this.unitsWithPlayer.indexOf(ud.id) < 0;
-              });
+        this.unitsWithPlayer = [];
+        this.usedPlayers = [];
+        this.allUnitsWithMetadata.forEach(umd => {
+          if (umd.player) {
+            const validPlayerId = this.ds.playerList.isValid(umd.player);
+            if (validPlayerId !== false) {
+              this.unitsWithPlayer.push(umd.id);
+              const playerIdToAdd = validPlayerId === true ? umd.player : validPlayerId;
+              if (this.usedPlayers.indexOf(playerIdToAdd) < 0) this.usedPlayers.push(playerIdToAdd);
             }
-            this.appService.dataLoading = false;
+          }
+        });
+        if (this.objectsDatasource) {
+          this.objectsDatasource.data.forEach(ud => {
+            ud.disabled = this.unitsWithPlayer.indexOf(ud.id) < 0;
+            if (ud.disabled) this.tableSelectionCheckbox.deselect(ud);
           });
+        }
       }
     } else if (this.objectsDatasource) {
       this.objectsDatasource.data.forEach(ud => {
@@ -141,12 +134,11 @@ export class ExportUnitComponent implements OnInit {
     }
   }
 
-  getResultData(): ExportUnitSelectionData {
-    const returnData = <ExportUnitSelectionData>{
-      selected_units: (this.tableSelectionCheckbox.selected).map(ud => ud.id),
-      add_players: [],
-      add_xml: []
-    };
+  getResultData(): UnitExportSettingsDto {
+    this.unitExportSettings.unitIdList = (this.tableSelectionCheckbox.selected).map(ud => ud.id);
+    return this.unitExportSettings;
+  }
+  /*
     if (this.addTestcenterFiles) {
       returnData.add_players = this.usedPlayers;
       const nowDate = new Date();
@@ -203,4 +195,5 @@ export class ExportUnitComponent implements OnInit {
     }
     return returnData;
   }
+   */
 }

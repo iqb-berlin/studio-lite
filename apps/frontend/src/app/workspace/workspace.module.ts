@@ -25,6 +25,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTabsModule } from '@angular/material/tabs';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
+import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
@@ -41,35 +42,36 @@ import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        MatIconModule,
-        MatTooltipModule,
-        FlexLayoutModule,
-        WorkspaceRoutingModule,
-        ReactiveFormsModule,
-        MatSelectModule,
-        MatListModule,
-        MatSlideToggleModule,
-        MatButtonToggleModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatSortModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        HttpClientModule,
-        MatProgressSpinnerModule,
-        MatInputModule,
-        MatCardModule,
-        MatSnackBarModule,
-        MatTableModule,
-        MatCheckboxModule,
-        FormsModule,
-        MatTabsModule,
-        IqbComponentsModule,
-        MatProgressBarModule
-    ],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule,
+    FlexLayoutModule,
+    WorkspaceRoutingModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatListModule,
+    MatSlideToggleModule,
+    MatButtonToggleModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatSortModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    HttpClientModule,
+    MatProgressSpinnerModule,
+    MatInputModule,
+    MatCardModule,
+    MatSnackBarModule,
+    MatTableModule,
+    MatCheckboxModule,
+    FormsModule,
+    MatTabsModule,
+    IqbComponentsModule,
+    MatProgressBarModule,
+    TranslateModule
+  ],
   declarations: [
     WorkspaceComponent,
     NewUnitComponent,

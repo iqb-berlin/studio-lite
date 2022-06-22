@@ -16,6 +16,15 @@ import { UnitService } from './unit.service';
 
 @Injectable()
 export class WorkspaceService {
+  private unitXsdUrl =
+    'https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/master/definitions/vo_Unit.xsd';
+
+  private bookletXsdUrl =
+    'https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/master/definitions/vo_Booklet.xsd';
+
+  private testTakersXsdUrl =
+    'https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/master/definitions/vo_Testtakers.xsd';
+
   constructor(
     @InjectRepository(Workspace)
     private workspacesRepository: Repository<Workspace>,

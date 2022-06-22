@@ -1,3 +1,4 @@
+export { UnitExportSettingsDto } from './lib/dto/unit/unit-export-settings-dto';
 export { RequestReportDto } from './lib/dto/request-report-dto';
 export { UnitSchemeDto } from './lib/dto/unit/unit-scheme-dto';
 export { AppLogoDto } from './lib/dto/setting/app-logo-dto';

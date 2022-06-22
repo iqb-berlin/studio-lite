@@ -8,11 +8,17 @@ import {
 import {
   Subscription, map, lastValueFrom
 } from 'rxjs';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import {
-  CreateUnitDto, UnitInListDto, WorkspaceSettingsDto
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+  MessageDialogComponent,
+  MessageDialogData, MessageType
+} from '@studio-lite-lib/iqb-components';
+import {
+  CreateUnitDto, UnitExportSettingsDto, UnitInListDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
+import { TranslateService } from '@ngx-translate/core';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
@@ -22,6 +28,7 @@ import { SelectUnitComponent } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { ModuleCollection, UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
+import { ExportUnitComponent } from './dialogs/export-unit.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -58,7 +65,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private uploadReportDialog: MatDialog,
     private snackBar: MatSnackBar,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    public translate: TranslateService
   ) {
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
     this.workspacesSettings = {
@@ -338,35 +346,43 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   exportUnit(): void {
-    const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-      width: '400px',
-      height: '700px',
-      data: {
-        title: 'Aufgabe(n) als Datei speichern',
-        buttonLabel: 'Download'
-      }
-    });
+    if (this.workspaceService.unitList.units().length > 0) {
+      const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
+        width: '800px'
+      });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
-        this.backendService.downloadUnits(
-          this.workspaceService.selectedWorkspace,
-          result
-        ).subscribe(
-          (binaryData: Blob) => {
-            // todo db-error?
-            // const file = new File(binaryData, 'unitDefs.voud.zip', {type: 'application/zip'});
-            const nowDate = new Date();
-            let fileName = `${nowDate.getFullYear().toString()}-`;
-            fileName += `${(nowDate.getMonth() < 9 ? '0' : '')}${nowDate.getMonth() + 1}-`;
-            fileName += `${(nowDate.getDate() < 10 ? '0' : '')}${nowDate.getDate()}`;
-            // saveAs(binaryData, `${fileName} UnitDefs.voud.zip`);
-            // todo save units
-            this.snackBar.open('Aufgabe(n) gespeichert', '', { duration: 1000 });
-          }
-        );
-      }
-    });
+      dialogRef.afterClosed().subscribe((result: UnitExportSettingsDto | boolean) => {
+        if (result !== false) {
+          this.backendService.downloadUnits(
+            this.workspaceService.selectedWorkspace,
+            result as UnitExportSettingsDto
+          ).subscribe();
+          /*
+            (binaryData: Blob) => {
+              // todo db-error?
+              // const file = new File(binaryData, 'unitDefs.voud.zip', {type: 'application/zip'});
+              const nowDate = new Date();
+              let fileName = `${nowDate.getFullYear().toString()}-`;
+              fileName += `${(nowDate.getMonth() < 9 ? '0' : '')}${nowDate.getMonth() + 1}-`;
+              fileName += `${(nowDate.getDate() < 10 ? '0' : '')}${nowDate.getDate()}`;
+              // saveAs(binaryData, `${fileName} UnitDefs.voud.zip`);
+              // todo save units
+              this.snackBar.open('Aufgabe(n) gespeichert', '', { duration: 1000 });
+            }
+          );
+             */
+        }
+      });
+    } else {
+      this.messsageDialog.open(MessageDialogComponent, {
+        width: '400px',
+        data: <MessageDialogData>{
+          title: this.translate.instant('unit-download.dialog.title'),
+          content: 'Dieser Arbeitsbereich enthält keine Units!',
+          type: MessageType.error
+        }
+      });
+    }
   }
 
   settings(): void {
