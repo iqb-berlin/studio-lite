@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@angular/core';
 import {
   CreateUnitDto,
   RequestReportDto,
-  UnitDefinitionDto, UnitExportSettingsDto,
+  UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
   UnitSchemeDto,
@@ -102,22 +102,13 @@ export class BackendService {
   }
    */
 
-  downloadUnits(workspaceId: number, settings: UnitExportSettingsDto): Observable<Blob | null> {
-    console.log(workspaceId);
-    console.log(settings);
-    /*    const httpOptions = {
-      responseType: 'blob' as 'json',
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json; charset=utf-8',
-        options: JSON.stringify({ t: localStorage.getItem('t'), ws: workspaceId, u: unitData })
-      })
-    };
-    return this.http.get<Blob>(`${this.serverUrl}downloadUnits.php`, httpOptions)
-      .pipe(
-        catchError(() => of(null))
-      );
-      */
-    return of(null);
+  downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob> {
+    return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download/${JSON.stringify(settings)}`, {
+      headers: {
+        Accept: 'application/zip'
+      },
+      responseType: 'blob'
+    });
   }
 
   getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {

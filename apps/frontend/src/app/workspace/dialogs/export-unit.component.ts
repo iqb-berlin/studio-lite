@@ -1,7 +1,7 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { Component, OnInit } from '@angular/core';
-import { UnitExportSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 
@@ -23,7 +23,7 @@ export class ExportUnitComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UnitExtendedData>();
   displayedColumns = ['selectCheckbox', 'name'];
   tableSelectionCheckbox = new SelectionModel <UnitExtendedData>(true, []);
-  unitExportSettings = <UnitExportSettingsDto>{
+  unitExportSettings = <UnitDownloadSettingsDto>{
     unitIdList: [],
     addBookletAndPlayers: false,
     addTestTakersReview: 0,
@@ -134,7 +134,7 @@ export class ExportUnitComponent implements OnInit {
     }
   }
 
-  getResultData(): UnitExportSettingsDto {
+  getResultData(): UnitDownloadSettingsDto {
     this.unitExportSettings.unitIdList = (this.tableSelectionCheckbox.selected).map(ud => ud.id);
     return this.unitExportSettings;
   }

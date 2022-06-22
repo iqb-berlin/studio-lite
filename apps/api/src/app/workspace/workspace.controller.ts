@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, UploadedFiles, UseGuards, UseInterceptors
+  Controller, Get, Header, Param, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { WorkspaceFullDto, RequestReportDto } from '@studio-lite-lib/api-dto';
@@ -9,6 +9,7 @@ import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
+import { UnitDownloadClass } from './unit-download.class';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -31,6 +32,7 @@ export class WorkspaceController {
   @Post('upload')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @UseInterceptors(FilesInterceptor('files'))
   @ApiTags('workspace')
   @ApiCreatedResponse({
@@ -38,5 +40,22 @@ export class WorkspaceController {
   })
   async addModuleFile(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<RequestReportDto> {
     return this.workspaceService.uploadUnits(workspaceId, files);
+  }
+
+  @Get('download/:settings')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @Header('Content-Disposition', 'attachment; filename="studio-export-units.zip"')
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/zip')
+  @ApiTags('workspace')
+  async downloadUnitsZip(
+    @WorkspaceId() workspaceId: number,
+      @Param('settings') unitDownloadSettingsString: string
+  ): Promise<StreamableFile> {
+    const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
+    const file = await UnitDownloadClass.get(this.workspaceService, unitDownloadSettings);
+    return new StreamableFile(file);
   }
 }

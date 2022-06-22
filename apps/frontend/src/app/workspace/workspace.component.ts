@@ -15,10 +15,12 @@ import {
   MessageDialogData, MessageType
 } from '@studio-lite-lib/iqb-components';
 import {
-  CreateUnitDto, UnitExportSettingsDto, UnitInListDto, WorkspaceSettingsDto
+  CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
+import * as _moment from 'moment';
+import { saveAs } from 'file-saver';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
@@ -351,12 +353,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         width: '800px'
       });
 
-      dialogRef.afterClosed().subscribe((result: UnitExportSettingsDto | boolean) => {
+      dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
         if (result !== false) {
           this.backendService.downloadUnits(
             this.workspaceService.selectedWorkspace,
-            result as UnitExportSettingsDto
-          ).subscribe();
+            result as UnitDownloadSettingsDto
+          ).subscribe(b => {
+            const thisMoment = _moment().format('YYYY-MM-DD');
+            saveAs(b, `${thisMoment} studio unit download.zip`);
+          });
           /*
             (binaryData: Blob) => {
               // todo db-error?

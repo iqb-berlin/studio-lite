@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UnitExportSettingsDto {
+export class UnitDownloadSettingsDto {
   @ApiProperty()
   unitIdList!: number[];
 
