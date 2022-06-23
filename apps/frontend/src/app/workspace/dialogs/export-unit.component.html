@@ -28,31 +28,40 @@
       </mat-table>
     </mat-dialog-content>
     <div fxFlex="300px">
-      <mat-checkbox (change)="updateUnitList()" [(ngModel)]="unitExportSettings.addPlayers">
+      <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
+      <mat-checkbox (change)="updateUnitList()" [disabled]="unitsWithPlayer.length === 0"
+                    [(ngModel)]="unitExportSettings.addPlayers" class="margin-bottom">
         Player hinzufügen
       </mat-checkbox>
-      <div fxLayout="column" *ngIf="unitExportSettings.addPlayers">
-        <div *ngIf="unitsWithPlayer.length === 0" class="tcMessage">Keine Aufgabe hat einen gültigen Player gesetzt.</div>
-        <div *ngIf="unitsWithPlayer.length !== ds.unitList.units().length && unitsWithPlayer.length > 0" class="tcMessage">
-          Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
+      <div fxLayout="column">
+        <div *ngIf="unitsWithPlayer.length === 0" class="tcMessage margin-bottom">
+          Keine Aufgabe hat einen gültigen Player gesetzt.
         </div>
         <div fxLayout="row">
           <label fxFlex="50%">Logins hinzufügen</label>
           <div fxLayout="column">
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
+              <input matInput type="number" min="0"
+                     [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
             </mat-form-field>
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
+              <input matInput type="number" min="0"
+                     [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
             </mat-form-field>
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
+              <input matInput type="number" min="0"
+                     [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
             </mat-form-field>
           </div>
         </div>
-        <mat-checkbox [(ngModel)]="unitExportSettings.passwordLess">
+        <mat-checkbox [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
+                      [(ngModel)]="unitExportSettings.passwordLess" class="margin-bottom">
           <div>Ohne Kennwort (nur Login-Name)</div>
         </mat-checkbox>
+        <div *ngIf="unitExportSettings.addPlayers && unitsWithPlayer.length !== ds.unitList.units().length && unitsWithPlayer.length > 0"
+             class="tcMessage">
+          Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
+        </div>
       </div>
     </div>
   </div>

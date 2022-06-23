@@ -25,14 +25,14 @@ import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
 
-import {NewUnitComponent, NewUnitData} from './dialogs/new-unit.component';
-import {SelectUnitComponent, SelectUnitData} from './dialogs/select-unit.component';
+import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
+import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from './verona-module-collection.class';
-import {MoveUnitComponent, MoveUnitData} from './dialogs/move-unit.component';
+import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -227,6 +227,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         data: <SelectUnitData>{
           title: 'Aufgabe(n) löschen',
           buttonLabel: 'Löschen',
+          fromOtherWorkspacesToo: false,
           multiple: true
         }
       });
@@ -245,25 +246,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   addUnitFromExisting(): void {
-    this.addUnitFromExistingDialog().then((unitSource: number[] | boolean) => {
+    this.addUnitFromExistingDialog().then((unitSource: UnitInListDto[] | boolean) => {
       if (typeof unitSource !== 'boolean') {
-        let unitSourceKey = unitSource[0].toString();
-        let unitSourceName = '';
-        this.workspaceService.unitList.units().forEach(u => {
-          if (u.id === unitSource[0]) {
-            unitSourceKey = u.key;
-            unitSourceName = u.name || '';
-          }
-        });
         this.addUnitDialog({
           title: 'Neue Aufgabe aus vorhandener',
-          subTitle: `Kopie von ${unitSourceKey}${unitSourceName ? ' - ' + unitSourceName : ''}`,
-          key: unitSourceKey,
-          label: unitSourceName
+          subTitle: `Kopie von ${unitSource[0].key}${unitSource[0].name ? ' - ' + unitSource[0].name : ''}`,
+          key: unitSource[0].key,
+          label: unitSource[0].name || ''
         }).then((createUnitDto: CreateUnitDto | boolean) => {
           if (typeof createUnitDto !== 'boolean') {
             this.appService.dataLoading = true;
-            createUnitDto.createFrom = unitSource[0];
+            createUnitDto.createFrom = unitSource[0].id;
             this.backendService.addUnit(
               this.workspaceService.selectedWorkspace, createUnitDto
             ).subscribe(
@@ -283,7 +276,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async addUnitFromExistingDialog(): Promise<number[] | boolean> {
+  async addUnitFromExistingDialog(): Promise<UnitInListDto[] | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
@@ -292,6 +285,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         data: <SelectUnitData>{
           title: 'Neue Aufgabe (Kopie)',
           buttonLabel: 'Weiter',
+          fromOtherWorkspacesToo: true,
           multiple: false
         }
       });
@@ -299,7 +293,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         map(dialogResult => {
           if (typeof dialogResult !== 'undefined') {
             if (dialogResult !== false) {
-              return (dialogResult as UnitInListDto[]).map(ud => ud.id);
+              return dialogResult as UnitInListDto[];
             }
           }
           return false;
@@ -354,69 +348,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       }
     });
-  }
-
-  copyUnit(): void {
-    const myUnitId = this.workspaceService.selectedUnit$.getValue();
-    /*
-    if (myUnitId > 0) {
-      this.backendService.getUnitMetadata(
-        this.ds.selectedWorkspace,
-        myUnitId
-      ).subscribe(
-        newUnit => {
-          if (newUnit.id === myUnitId) {
-            const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
-              width: '600px',
-              data: {
-                title: `Aufgabe ${newUnit.key} in neue Aufgabe kopieren`,
-                key: newUnit.key,
-                label: newUnit.label
-              }
-            });
-
-            dialogRef.afterClosed().subscribe(result => {
-              if (typeof result !== 'undefined') {
-                if (result !== false) {
-                  this.appService.dataLoading = true;
-                  this.backendService.copyUnit(
-                    this.ds.selectedWorkspace,
-                    myUnitId,
-                    (<FormGroup>result).get('key')?.value,
-                    (<FormGroup>result).get('label')?.value
-                  ).subscribe(
-                    respOk => {
-                      // todo db-error?
-                      if (respOk) {
-                        this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
-                        this.updateUnitList(respOk);
-                      } else {
-                        this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
-                      }
-                      this.appService.dataLoading = false;
-                    },
-                    err => {
-                      this.snackBar.open(`Konnte Aufgabe nicht hinzufügen (${err.msg()})`,
-                        'Fehler', { duration: 3000 });
-                      this.appService.dataLoading = false;
-                    }
-                  );
-                }
-              }
-            });
-          }
-        },
-        err => {
-          this.snackBar.open(`Fehler beim Laden der Aufgabeneigenschaften (${err.msg()})`,
-            'Fehler', { duration: 3000 });
-          this.appService.dataLoading = false;
-        }
-      );
-    } else {
-      this.snackBar.open('Bitte erst Aufgabe auswählen', 'Hinweis', { duration: 3000 });
-    }
-
-     */
   }
 
   exportUnit(): void {
