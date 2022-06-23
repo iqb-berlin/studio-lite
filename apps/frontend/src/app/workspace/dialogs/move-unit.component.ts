@@ -8,8 +8,14 @@ import { AppService } from '../../app.service';
 import { WorkspaceService } from '../workspace.service';
 import { WorkspaceDataFlat } from '../../app.classes';
 
+export interface MoveUnitData {
+  title: string,
+  buttonLabel: string,
+  currentWorkspaceId: number
+}
+
 @Component({
-  templateUrl: './moveunit.component.html'
+  templateUrl: './move-unit.component.html'
 })
 export class MoveUnitComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
@@ -22,7 +28,7 @@ export class MoveUnitComponent implements OnInit {
     private fb: FormBuilder,
     private appService: AppService,
     private ds: WorkspaceService,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: MoveUnitData
   ) {
     this.selectForm = this.fb.group({
       wsSelector: this.fb.control(0, [Validators.required, Validators.min(1)])

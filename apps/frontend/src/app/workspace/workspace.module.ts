@@ -30,7 +30,7 @@ import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
-import { MoveUnitComponent } from './dialogs/moveunit.component';
+import { MoveUnitComponent } from './dialogs/move-unit.component';
 import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';

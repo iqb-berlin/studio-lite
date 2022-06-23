@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateUnitDto,
+  CreateUnitDto, RequestReportDto,
   UnitDefinitionDto,
   UnitInListDto,
   UnitMetadataDto,
@@ -83,6 +83,42 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     await this.unitsRepository.save(unitToUpdate);
+  }
+
+  async patchWorkspace(workspaceId: number, unitIds: number[], newWorkspace: number): Promise<RequestReportDto> {
+    const reports = await Promise.all(unitIds.map(async unitId => {
+      const unitToUpdate = await this.unitsRepository.findOne({
+        where: { workspaceId: workspaceId, id: unitId },
+        select: ['id', 'key', 'workspaceId']
+      });
+      const existingUnit = await this.unitsRepository.findOne({
+        where: { workspaceId: newWorkspace, key: unitToUpdate.key },
+        select: ['id']
+      });
+      if (existingUnit) return <RequestReportDto>{
+        source: 'unit-patch-workspace',
+        messages: [
+          {
+            objectKey: unitToUpdate.key,
+            messageKey: 'unit-patch.duplicate-unit-id'
+          }
+        ]
+      };
+      unitToUpdate.workspaceId = newWorkspace;
+      await this.unitsRepository.save(unitToUpdate);
+      return <RequestReportDto>{
+        source: 'unit-patch-workspace',
+        messages: []
+      };
+    }));
+    const report = <RequestReportDto>{
+      source: 'unit-patch-workspace',
+      messages: []
+    };
+    reports.forEach(r => {
+      if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages]
+    });
+    return report;
   }
 
   async remove(id: number | number[]): Promise<void> {

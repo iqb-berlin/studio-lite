@@ -26,7 +26,8 @@
     "close": "Schließen",
     "cancel": "Abbrechen",
     "request-report-source": {
-      "upload-units": "Import Aufgaben - Ergebnis"
+      "upload-units": "Import Aufgaben - Ergebnis",
+      "unit-patch-workspace": "Aufgaben verschieben - unvollständig"
     }
   },
   "modules": {

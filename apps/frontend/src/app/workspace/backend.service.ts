@@ -58,19 +58,6 @@ export class BackendService {
       );
   }
 
-  copyUnit(workspaceId: number,
-           fromUnit: number, key: string, label: string): Observable<number | null> {
-    return this.http
-      .put<string>(`${this.serverUrl}addUnit.php`,
-      {
-        t: localStorage.getItem('t'), ws: workspaceId, u: fromUnit, k: key, l: label
-      })
-      .pipe(
-        catchError(() => of(null)),
-        map(returnId => Number(returnId))
-      );
-  }
-
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspace/${workspaceId}/${units.join(';')}`)
@@ -80,27 +67,16 @@ export class BackendService {
       );
   }
 
-  /*
   moveUnits(workspaceId: number,
-            units: number[], targetWorkspace: number): Observable<boolean | number> {
-    const authToken = localStorage.getItem('t');
-    if (!authToken) {
-      return of(401);
-    }
+            units: number[], targetWorkspace: number): Observable<boolean | RequestReportDto> {
     return this.http
-      .put<UnitInListDto[]>(`${this.serverUrl}moveUnits.php`,
-      {
-        t: authToken, ws: workspaceId, u: units, tws: targetWorkspace
-      })
+      .patch<RequestReportDto>(
+        `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/moveto/${targetWorkspace}`, {}
+      )
       .pipe(
-        catchError(err => throwError(new AppHttpError(err))),
-        map((unMovableUnits: UnitInListDto[]) => {
-          if (unMovableUnits.length === 0) return true;
-          return unMovableUnits.length;
-        })
+        catchError(() => of(false))
       );
   }
-   */
 
   downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob | number | null> {
     return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download/${JSON.stringify(settings)}`, {

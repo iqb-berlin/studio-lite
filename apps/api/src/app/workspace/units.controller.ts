@@ -100,6 +100,19 @@ export class UnitsController {
     return this.unitService.patchMetadata(workspaceId, unitId, unitMetadataDto);
   }
 
+  @Patch(':ids/moveto/:target')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchWorkspace(@WorkspaceId() workspaceId: number,
+                      @Param('ids') ids: string,
+                       @Param('target', ParseIntPipe) targetWorkspaceId: number) {
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
+    return this.unitService.patchWorkspace(workspaceId, idsAsNumberArray, targetWorkspaceId);
+  }
+
   @Patch(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()

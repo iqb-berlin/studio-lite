@@ -32,6 +32,7 @@ import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from './verona-module-collection.class';
+import {MoveUnitComponent, MoveUnitData} from './dialogs/move-unit.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -309,11 +310,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   moveUnit(): void {
-    /*
     const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
       width: '600px',
       height: '700px',
-      data: {
+      data: <MoveUnitData>{
         title: 'Aufgabe(n) verschieben',
         buttonLabel: 'Verschieben',
         currentWorkspaceId: this.workspaceService.selectedWorkspace
@@ -330,25 +330,29 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               this.workspaceService.selectedWorkspace,
               (dialogComponent.tableSelectionCheckbox.selected as UnitInListDto[]).map(ud => ud.id),
               wsSelected.value
-            ).subscribe(
-              moveResponse => {
-                if (typeof moveResponse === 'number') {
-                  this.snackBar.open(`Es konnte(n) ${moveResponse} Aufgabe(n) nicht verschoben werden.`,
-                    'Fehler', { duration: 3000 });
+            ).subscribe(uploadStatus => {
+              if (typeof uploadStatus === 'boolean') {
+                this.snackBar.open(`Konnte Aufgabe(n) nicht verschieben.`, 'Fehler', {duration: 3000});
+              } else {
+                if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+                  const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                    width: '500px',
+                    height: '600px',
+                    data: uploadStatus
+                  });
+                  dialogRef.afterClosed().subscribe(() => {
+                    this.updateUnitList();
+                  });
                 } else {
-                  this.snackBar.open('Aufgabe(n) verschoben', '', { duration: 1000 });
+                  this.snackBar.open('Aufgabe(n) verschoben', '', {duration: 1000});
+                  this.updateUnitList();
                 }
-                this.updateUnitList();
-              },
-              err => {
-                this.snackBar.open(`Konnte Aufgabe nicht verschieben (${err.code})`, 'Fehler', { duration: 3000 });
               }
-            );
+            });
           }
         }
       }
     });
- */
   }
 
   copyUnit(): void {

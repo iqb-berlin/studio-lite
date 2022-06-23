@@ -184,7 +184,7 @@ export class WorkspaceService {
         }
       } else {
         functionReturn.messages.push({
-          objectKey: u.fileName, messageKey: 'unit-upload.api-error.duplicate-unit-id'
+          objectKey: u.fileName, messageKey: 'unit-patch.duplicate-unit-id'
         });
       }
     }));
