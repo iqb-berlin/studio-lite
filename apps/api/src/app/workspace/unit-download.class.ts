@@ -28,11 +28,10 @@ export class UnitDownloadClass {
     const usedPlayers: string[] = [];
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
       const unitMetadata = await unitService.findOnesMetadata(workspaceId, unitId);
-      const doc = XmlBuilder.create({ version: '1.0' }, {
+      const unitXml = XmlBuilder.create({ version: '1.0' }, {
         Unit: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitXsdUrl,
-          '@att': 'val',
           Metadata: {
             Id: unitMetadata.key,
             Label: unitMetadata.name,
@@ -45,7 +44,7 @@ export class UnitDownloadClass {
           }
         }
       });
-      zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(doc.toString({ prettyPrint: true })));
+      zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
       const definition = await unitService.findOnesDefinition(workspaceId, unitId);
       zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(definition.definition));
       unitKeys.push(unitMetadata.key);
@@ -66,14 +65,14 @@ export class UnitDownloadClass {
         }
       }))
     }
-    if ((unitDownloadSettings.addTestTakersHot
+    const loginCount = unitDownloadSettings.addTestTakersHot
       + unitDownloadSettings.addTestTakersMonitor
-      + unitDownloadSettings.addTestTakersReview) > 0) {
-      const doc = XmlBuilder.create({ version: '1.0' }, {
+      + unitDownloadSettings.addTestTakersReview;
+    if (loginCount > 0) {
+      const bookletXml = XmlBuilder.create({ version: '1.0' }, {
         Booklet: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': bookletXsdUrl,
-          '@att': 'val',
           Metadata: {
             Id: 'booklet1',
             Label: 'Testheft 1'
@@ -87,16 +86,83 @@ export class UnitDownloadClass {
         }
       });
       let unitCount = 1;
-      const unitsElement = doc.root().ele('Units');
+      const unitsElement = bookletXml.root().ele('Units');
       unitKeys.forEach(u => {
-        unitsElement.ele('Unit', {
-          id: u,
-          label: `Aufgabe ${unitCount}`,
-          labelshort: `${unitCount}`
+        unitsElement.ele({
+          Unit: {
+            '@id': u,
+            '@label': `Aufgabe ${unitCount}`,
+            '@labelshort': `${unitCount}`
+          }
         });
         unitCount += 1;
       });
-      zip.addFile('booklet1.xml', Buffer.from(doc.toString({ prettyPrint: true })));
+      zip.addFile('booklet1.xml', Buffer.from(bookletXml.toString({ prettyPrint: true })));
+      const testTakerXml = XmlBuilder.create({ version: '1.0' }, {
+        Testtakers: {
+          '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+          '@xsi:noNamespaceSchemaLocation': testTakersXsdUrl,
+          Metadata: {},
+          CustomTexts: {
+            CustomText: {
+              '@key': 'login_testEndButtonText',
+              '#': 'Test beenden'
+            }
+          }
+        }
+      });
+      const loginNames = UnitDownloadClass.generateCodeList(5, loginCount + 1);
+      const loginPasswords = UnitDownloadClass.generateCodeList(4, loginCount);
+      let loginIndex = 0;
+      const groupElement = testTakerXml.root().ele({
+        Group: {
+          '@id': `TestTakerGroup_${loginNames[loginIndex]}`,
+          '@label': 'Login-Gruppe A'
+        }
+      });
+      for (let i = 0; i < unitDownloadSettings.addTestTakersHot; i++) {
+        loginIndex += 1;
+        const prefix = (unitDownloadSettings.addTestTakersMonitor > 0) ? `T${(i + 1).toString().padStart(2, '0')}_` : '';
+        const loginElement = groupElement.ele({
+          Login: {
+            '@mode': 'run-hot-return',
+            '@name': `${prefix}${loginNames[loginIndex]}`
+          }
+        });
+        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex-1]);
+        loginElement.ele({
+          Booklet: {
+            '#': 'booklet1'
+          }
+        });
+      }
+      for (let i = 0; i < unitDownloadSettings.addTestTakersReview; i++) {
+        loginIndex += 1;
+        const loginElement = groupElement.ele({
+          Login: {
+            '@mode': 'run-review',
+            '@name': loginNames[loginIndex]
+          }
+        });
+        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex-1]);
+        loginElement.ele({
+          Booklet: {
+            '#': 'booklet1'
+          }
+        });
+      }
+      for (let i = 0; i < unitDownloadSettings.addTestTakersMonitor; i++) {
+        loginIndex += 1;
+        const prefix = (unitDownloadSettings.addTestTakersMonitor > 1) ? `TL${(i + 1).toString().padStart(2, '0')}_` : 'TL_';
+        const loginElement = groupElement.ele({
+          Login: {
+            '@mode': 'monitor-group',
+            '@name': `${prefix}${loginNames[loginIndex]}`
+          }
+        });
+        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex-1]);
+      }
+      zip.addFile('testtaker1.xml', Buffer.from(testTakerXml.toString({ prettyPrint: true })));
     }
     return zip.toBuffer();
   }
