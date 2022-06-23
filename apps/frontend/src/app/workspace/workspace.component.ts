@@ -25,8 +25,8 @@ import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
 
-import { NewUnitComponent } from './dialogs/new-unit.component';
-import { SelectUnitComponent } from './dialogs/select-unit.component';
+import {NewUnitComponent, NewUnitData} from './dialogs/new-unit.component';
+import {SelectUnitComponent, SelectUnitData} from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
@@ -146,7 +146,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   addUnit() {
-    this.addUnitDialog().then((createUnitDto: CreateUnitDto | boolean) => {
+    this.addUnitDialog({
+      title: 'Neue Aufgabe',
+      subTitle: '',
+      key: '',
+      label: ''
+    }).then((createUnitDto: CreateUnitDto | boolean) => {
       if (typeof createUnitDto !== 'boolean') {
         this.appService.dataLoading = true;
         this.backendService.addUnit(
@@ -166,16 +171,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async addUnitDialog(): Promise<CreateUnitDto | boolean> {
+  async addUnitDialog(newUnitData: NewUnitData): Promise<CreateUnitDto | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
         width: '600px',
-        data: {
-          title: 'Neue Aufgabe',
-          key: '',
-          label: ''
-        }
+        data: newUnitData,
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
@@ -222,9 +223,58 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
         width: '400px',
         height: '700px',
-        data: {
+        data: <SelectUnitData>{
           title: 'Aufgabe(n) löschen',
-          buttonLabel: 'Löschen'
+          buttonLabel: 'Löschen',
+          multiple: true
+        }
+      });
+      return lastValueFrom(dialogRef.afterClosed().pipe(
+        map(dialogResult => {
+          if (typeof dialogResult !== 'undefined') {
+            if (dialogResult !== false) {
+              return (dialogResult as UnitInListDto[]).map(ud => ud.id);
+            }
+          }
+          return false;
+        })
+      ));
+    }
+    return false;
+  }
+
+  addUnitFromExisting(): void {
+    this.addUnitFromExistingDialog().then((unitsToDelete: number[] | boolean) => {
+      if (typeof unitsToDelete !== 'boolean') {
+        this.backendService.deleteUnits(
+          this.workspaceService.selectedWorkspace,
+          unitsToDelete
+        ).subscribe(
+          ok => {
+            // todo db-error?
+            if (ok) {
+              this.updateUnitList();
+              this.snackBar.open('Aufgabe(n) gelöscht', '', { duration: 1000 });
+            } else {
+              this.snackBar.open('Konnte Aufgabe(n) nicht löschen.', 'Fehler', { duration: 3000 });
+              this.appService.dataLoading = false;
+            }
+          }
+        );
+      }
+    });
+  }
+
+  async addUnitFromExistingDialog(): Promise<number[] | boolean> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+        width: '400px',
+        height: '700px',
+        data: <SelectUnitData>{
+          title: 'Neue Aufgabe (Kopie)',
+          buttonLabel: 'Weiter',
+          multiple: false
         }
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(

@@ -3,11 +3,18 @@ import { Component, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { WorkspaceService } from '../workspace.service';
 
+export interface NewUnitData {
+  title: string,
+  subTitle: string,
+  key: string,
+  label: string
+}
+
 @Component({
   template: `
     <div fxLayout="column" style="height: 100%">
       <h1 mat-dialog-title>{{data.title}}</h1>
-
+      <h2 *ngIf="data.subTitle">{{data.subTitle}}</h2>
       <mat-dialog-content>
         <form [formGroup]="newUnitForm" fxLayout="column">
           <mat-form-field>
@@ -35,7 +42,7 @@ export class NewUnitComponent {
 
   constructor(private fb: FormBuilder,
               public ds: WorkspaceService,
-              @Inject(MAT_DIALOG_DATA) public data: any) {
+              @Inject(MAT_DIALOG_DATA) public data: NewUnitData) {
     this.newUnitForm = this.fb.group({
       key: this.fb.control('', [Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),

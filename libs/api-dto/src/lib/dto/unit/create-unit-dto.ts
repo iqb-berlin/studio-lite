@@ -9,4 +9,7 @@ export class CreateUnitDto {
 
   @ApiPropertyOptional()
   groupName?: string;
+
+  @ApiProperty()
+  createFrom?: number;
 }

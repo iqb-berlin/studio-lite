@@ -26,17 +26,29 @@
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
-      <button mat-raised-button (click)="addUnit()" matTooltip="Aufgabe hinzufügen" matTooltipPosition="above" fxFlex="33">
+      <button mat-raised-button [matMenuTriggerFor]="menuNew" matTooltip="Aufgabe(n) hinzufügen" matTooltipPosition="above" fxFlex="33">
         <mat-icon>add</mat-icon>
       </button>
       <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
           <mat-icon>delete</mat-icon>
       </button>
-      <button mat-button [matMenuTriggerFor]="menu" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
+      <button mat-button [matMenuTriggerFor]="menuOther" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
         <mat-icon>menu</mat-icon>
       </button>
 
-      <mat-menu #menu="matMenu">
+      <mat-menu #menuNew="matMenu">
+        <button mat-menu-item (click)="hiddenFileInput.click()">
+          <mat-icon>input</mat-icon>Import von Datei(en)
+        </button>
+        <button mat-menu-item (click)="addUnitFromExisting()">
+          Neu von vorhandener Aufgabe (Kopie)
+        </button>
+        <button mat-menu-item (click)="addUnit()">
+          Neu (leer)
+        </button>
+      </mat-menu>
+
+      <mat-menu #menuOther="matMenu">
         <button mat-menu-item (click)="settings()" disabled="disabled">
           <mat-icon>settings</mat-icon>Einstellungen
         </button>
@@ -46,9 +58,6 @@
         </button>
         <button mat-menu-item (click)="moveUnit()" disabled="disabled">
           <mat-icon>swap_horiz</mat-icon>Verschieben
-        </button>
-        <button mat-menu-item (click)="hiddenFileInput.click()">
-          <mat-icon>input</mat-icon>Import
         </button>
         <button mat-menu-item (click)="exportUnit()">
           <mat-icon>get_app</mat-icon>Export

@@ -9,7 +9,8 @@
     <mat-table [dataSource]="objectsDatasource" matSort>
       <ng-container matColumnDef="selectCheckbox">
         <mat-header-cell *matHeaderCellDef fxFlex="70px">
-          <mat-checkbox (change)="$event ? masterToggle() : null"
+          <mat-checkbox *ngIf="data.multiple"
+                        (change)="$event ? masterToggle() : null"
                         [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
                         [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
           </mat-checkbox>
@@ -23,7 +24,7 @@
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef> Aufgabe </mat-header-cell>
         <mat-cell *matCellDef="let element"> {{element.key}}{{element.name ? ' - ' + element.name : ''}} </mat-cell>
       </ng-container>
 

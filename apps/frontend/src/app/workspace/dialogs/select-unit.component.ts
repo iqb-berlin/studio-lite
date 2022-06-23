@@ -8,21 +8,29 @@ import { WorkspaceService } from '../workspace.service';
 import { AppService } from '../../app.service';
 import { BackendService } from '../backend.service';
 
+export interface SelectUnitData {
+  title: string,
+  buttonLabel: string,
+  multiple: boolean
+}
+
 @Component({
   templateUrl: './select-unit.component.html'
 })
 export class SelectUnitComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
-  tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
+  tableSelectionCheckbox: SelectionModel <UnitInListDto>;
 
   constructor(
     private fb: FormBuilder,
     private bs: BackendService,
     private mds: AppService,
     private ds: WorkspaceService,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) { }
+    @Inject(MAT_DIALOG_DATA) public data: SelectUnitData
+  ) {
+    this.tableSelectionCheckbox = new SelectionModel <UnitInListDto>(data.multiple, []);
+  }
 
   ngOnInit(): void {
     this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units());
