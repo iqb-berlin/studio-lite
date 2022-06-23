@@ -37,6 +37,22 @@ export class UnitService {
     const newUnit = await this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     await this.unitsRepository.save(newUnit);
+    if (unit.createFrom) {
+      const unitSourceMetadata = await this.findOnesMetadata(workspaceId, unit.createFrom);
+      if (unitSourceMetadata) {
+        newUnit.description = unitSourceMetadata.description;
+        // todo: newUnit.metadata = unitSource.metadata;
+        newUnit.player = unitSourceMetadata.player;
+        newUnit.editor = unitSourceMetadata.editor;
+        newUnit.schemer = unitSourceMetadata.schemer;
+        newUnit.groupName = unitSourceMetadata.groupName;
+        await this.unitsRepository.save(newUnit);
+        const unitSourceDefinition = await this.findOnesDefinition(workspaceId, unit.createFrom);
+        if (unitSourceDefinition) {
+          await this.patchDefinition(workspaceId, newUnit.id, unitSourceDefinition);
+        }
+      }
+    }
     return newUnit.id;
   }
 

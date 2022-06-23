@@ -244,23 +244,40 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   addUnitFromExisting(): void {
-    this.addUnitFromExistingDialog().then((unitsToDelete: number[] | boolean) => {
-      if (typeof unitsToDelete !== 'boolean') {
-        this.backendService.deleteUnits(
-          this.workspaceService.selectedWorkspace,
-          unitsToDelete
-        ).subscribe(
-          ok => {
-            // todo db-error?
-            if (ok) {
-              this.updateUnitList();
-              this.snackBar.open('Aufgabe(n) gelöscht', '', { duration: 1000 });
-            } else {
-              this.snackBar.open('Konnte Aufgabe(n) nicht löschen.', 'Fehler', { duration: 3000 });
-              this.appService.dataLoading = false;
-            }
+    this.addUnitFromExistingDialog().then((unitSource: number[] | boolean) => {
+      if (typeof unitSource !== 'boolean') {
+        let unitSourceKey = unitSource[0].toString();
+        let unitSourceName = '';
+        this.workspaceService.unitList.units().forEach(u => {
+          if (u.id === unitSource[0]) {
+            unitSourceKey = u.key;
+            unitSourceName = u.name || '';
           }
-        );
+        });
+        this.addUnitDialog({
+          title: 'Neue Aufgabe aus vorhandener',
+          subTitle: `Kopie von ${unitSourceKey}${unitSourceName ? ' - ' + unitSourceName : ''}`,
+          key: unitSourceKey,
+          label: unitSourceName
+        }).then((createUnitDto: CreateUnitDto | boolean) => {
+          if (typeof createUnitDto !== 'boolean') {
+            this.appService.dataLoading = true;
+            createUnitDto.createFrom = unitSource[0];
+            this.backendService.addUnit(
+              this.workspaceService.selectedWorkspace, createUnitDto
+            ).subscribe(
+              respOk => {
+                if (respOk) {
+                  this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+                  this.updateUnitList(respOk);
+                } else {
+                  this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
+                }
+                this.appService.dataLoading = false;
+              }
+            );
+          }
+        });
       }
     });
   }
