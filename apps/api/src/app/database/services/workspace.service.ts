@@ -168,13 +168,13 @@ export class WorkspaceService {
           u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
           usedFiles.push(u.definitionFileName);
         }
-        await this.unitService.patchMetadata(id, newUnitId, {
+        await this.unitService.patchMetadata(newUnitId, {
           id: newUnitId,
           editor: u.editor,
           player: u.player,
           description: u.description
         });
-        await this.unitService.patchDefinition(id, newUnitId, {
+        await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition
         });
         if (!u.definition) {

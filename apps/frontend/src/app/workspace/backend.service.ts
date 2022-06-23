@@ -67,11 +67,11 @@ export class BackendService {
       );
   }
 
-  moveUnits(workspaceId: number,
-            units: number[], targetWorkspace: number): Observable<boolean | RequestReportDto> {
+  moveOrCopyUnits(workspaceId: number, units: number[],
+                  targetWorkspace: number, moveOnly: boolean): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-        `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/moveto/${targetWorkspace}`, {}
+        `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${moveOnly ? 'moveto' : 'copyto'}/${targetWorkspace}`, {}
       )
       .pipe(
         catchError(() => of(false))

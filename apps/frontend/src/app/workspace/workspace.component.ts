@@ -309,13 +309,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  moveUnit(): void {
+  moveOrCopyUnit(moveOnly: boolean): void {
     const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
       width: '600px',
       height: '700px',
       data: <MoveUnitData>{
-        title: 'Aufgabe(n) verschieben',
-        buttonLabel: 'Verschieben',
+        title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',
+        buttonLabel: moveOnly ? 'Verschieben' : 'Kopieren',
         currentWorkspaceId: this.workspaceService.selectedWorkspace
       }
     });
@@ -326,13 +326,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           const dialogComponent = dialogRef.componentInstance;
           const wsSelected = dialogComponent.selectForm ? dialogComponent.selectForm.get('wsSelector') : false;
           if (wsSelected) {
-            this.backendService.moveUnits(
+            this.backendService.moveOrCopyUnits(
               this.workspaceService.selectedWorkspace,
               (dialogComponent.tableSelectionCheckbox.selected as UnitInListDto[]).map(ud => ud.id),
-              wsSelected.value
+              wsSelected.value, moveOnly
             ).subscribe(uploadStatus => {
               if (typeof uploadStatus === 'boolean') {
-                this.snackBar.open(`Konnte Aufgabe(n) nicht verschieben.`, 'Fehler', {duration: 3000});
+                this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,
+                  'Fehler', {duration: 3000});
               } else {
                 if (uploadStatus.messages && uploadStatus.messages.length > 0) {
                   const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
@@ -344,7 +345,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                     this.updateUnitList();
                   });
                 } else {
-                  this.snackBar.open('Aufgabe(n) verschoben', '', {duration: 1000});
+                  this.snackBar.open(`Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', {duration: 1000});
                   this.updateUnitList();
                 }
               }

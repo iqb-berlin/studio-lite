@@ -2,11 +2,11 @@
   <div class="navibar" fxLayout="column" fxFlex="200px">
     <div fxLayout="row" style="margin: 2px">
       <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
-              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
+              [disabled]="!workspaceService.isChanged()" matTooltipPosition="below">
         <mat-icon>close</mat-icon>
       </button>
       <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
-              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
+              [disabled]="!workspaceService.isChanged()" matTooltipPosition="below">
         Speichern <mat-icon>save</mat-icon>
       </button>
     </div>
@@ -53,11 +53,20 @@
           <mat-icon>settings</mat-icon>Einstellungen
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="moveUnit()" matTooltip="Aufgaben in anderen Arbeitsbereich verschieben">
+        <button mat-menu-item (click)="exportUnit()"
+                matTooltip="Aufgaben als Datei herunterladen"
+                matTooltipPosition="right">
+          <mat-icon>get_app</mat-icon>Export
+        </button>
+        <button mat-menu-item (click)="moveOrCopyUnit(true)"
+                matTooltip="Aufgaben in anderen Arbeitsbereich verschieben"
+                matTooltipPosition="right">
           <mat-icon>swap_horiz</mat-icon>Verschieben
         </button>
-        <button mat-menu-item (click)="exportUnit()">
-          <mat-icon>get_app</mat-icon>Export
+        <button mat-menu-item (click)="moveOrCopyUnit(false)"
+                matTooltip="Aufgaben in anderen Arbeitsbereich kopieren"
+                matTooltipPosition="right">
+          <mat-icon>content_copy</mat-icon>Kopieren
         </button>
       </mat-menu>
     </div>
