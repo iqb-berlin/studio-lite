@@ -55,13 +55,6 @@
         </button>
       </mat-menu>
     </div>
-    <div fxLayout="row" *ngIf="uploadProgress > 0">
-      <mat-progress-bar mode="determinate" fxFlex [value]="uploadProgress">
-      </mat-progress-bar>
-      <button mat-mini-fab color="primary" (click)="resetUpload()">
-        <mat-icon>delete_forever</mat-icon>
-      </button>
-    </div>
     <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
            multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
   </div>

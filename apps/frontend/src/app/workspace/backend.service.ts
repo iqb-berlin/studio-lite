@@ -102,13 +102,28 @@ export class BackendService {
   }
    */
 
-  downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob> {
+  downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob | number | null> {
     return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download/${JSON.stringify(settings)}`, {
       headers: {
         Accept: 'application/zip'
       },
-      responseType: 'blob'
-    });
+      responseType: 'blob',
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      map(event => {
+        if (event) {
+          if (event.type === HttpEventType.DownloadProgress) {
+            return event.total ? Math.round(100 * (event.loaded / event.total)) : event.loaded;
+          }
+          if (event.type === HttpEventType.Response) {
+            return event.body;
+          }
+          return 0;
+        }
+        return -1;
+      })
+    );
   }
 
   getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
@@ -157,7 +172,7 @@ export class BackendService {
         map(event => {
           if (event) {
             if (event.type === HttpEventType.UploadProgress) {
-              return Math.round(100 * (event.loaded / (event.total ? event.total : 1)));
+              return event.total ? Math.round(100 * (event.loaded / event.total)) : event.loaded;
             }
             if (event.type === HttpEventType.Response) {
               return event.body || {

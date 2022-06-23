@@ -36,7 +36,7 @@ export class AppService {
   errorMessage = '';
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();
-  dataLoading = false;
+  dataLoading: boolean | number = false;
 
   constructor(
     private titleService: Title

@@ -41,7 +41,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
   private uploadSubscription: Subscription | null = null;
-  uploadProgress: number = 0;
   uploadProcessId = '';
   uploadUrl = '';
   uploadMessages: string[] = [];
@@ -356,27 +355,21 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
         if (result !== false) {
+          this.appService.dataLoading = true;
           this.backendService.downloadUnits(
             this.workspaceService.selectedWorkspace,
             result as UnitDownloadSettingsDto
           ).subscribe(b => {
-            const thisMoment = _moment().format('YYYY-MM-DD');
-            saveAs(b, `${thisMoment} studio unit download.zip`);
-          });
-          /*
-            (binaryData: Blob) => {
-              // todo db-error?
-              // const file = new File(binaryData, 'unitDefs.voud.zip', {type: 'application/zip'});
-              const nowDate = new Date();
-              let fileName = `${nowDate.getFullYear().toString()}-`;
-              fileName += `${(nowDate.getMonth() < 9 ? '0' : '')}${nowDate.getMonth() + 1}-`;
-              fileName += `${(nowDate.getDate() < 10 ? '0' : '')}${nowDate.getDate()}`;
-              // saveAs(binaryData, `${fileName} UnitDefs.voud.zip`);
-              // todo save units
-              this.snackBar.open('Aufgabe(n) gespeichert', '', { duration: 1000 });
+            if (b) {
+              if (typeof b === 'number') {
+                this.appService.dataLoading = b;
+              } else {
+                const thisMoment = _moment().format('YYYY-MM-DD');
+                saveAs(b, `${thisMoment} studio unit download.zip`);
+                this.appService.dataLoading = false;
+              }
             }
-          );
-             */
+          });
         }
       });
     } else {
@@ -454,7 +447,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.uploadSubscription.unsubscribe();
       this.uploadSubscription = null;
     }
-    this.uploadProgress = 0;
   }
 
   onFileSelected(targetElement: EventTarget | null) {
@@ -468,9 +460,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         ).subscribe(uploadStatus => {
           if (typeof uploadStatus === 'number') {
             if (uploadStatus < 0) {
+              this.appService.dataLoading = false;
               console.error(uploadStatus);
             } else {
-              this.uploadProgress = uploadStatus;
+              this.appService.dataLoading = uploadStatus;
             }
           } else {
             this.appService.dataLoading = false;

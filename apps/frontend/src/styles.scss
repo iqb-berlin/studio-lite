@@ -44,6 +44,11 @@ body {
   z-index: 999;
 }
 
+.spinner-container .mat-progress-spinner {
+  height: 100px;
+  width: 100px;
+}
+
 .mat-progress-spinner circle, .mat-spinner circle {
   stroke: blueviolet!important;
 }

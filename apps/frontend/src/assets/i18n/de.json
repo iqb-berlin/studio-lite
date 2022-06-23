@@ -33,5 +33,8 @@
     "editor-name": "Editor",
     "player-name": "Vorschau (Player)",
     "schemer-name": "Kodierung (Schemer)"
+  },
+  "application": {
+    "wait-message": "Bitte warten"
   }
 }
