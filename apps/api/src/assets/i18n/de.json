@@ -1,7 +1,8 @@
 {
   "unit-upload": {
     "api-error": {
-      "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
+      "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden",
+      "zip": "Zip-Datei konnte nicht extrahiert werden"
     },
     "api-warning": {
       "missing-definition": "Korrespondierende Unit-Definition (separate Datei?) nicht gefunden.",

@@ -13,6 +13,7 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
+import * as AdmZip from 'adm-zip';
 
 @Injectable()
 export class WorkspaceService {
@@ -110,11 +111,37 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadUnits(id: number, files: FileIo[]): Promise<RequestReportDto> {
+  async uploadUnits(id: number, originalFiles: FileIo[]): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
     };
+    const files: FileIo[] = [];
+    originalFiles.forEach(f => {
+      if (f.mimetype === 'application/zip') {
+        try {
+          const zip = new AdmZip(f.buffer);
+          const zipEntries = zip.getEntries();
+          zipEntries.forEach(function (zipEntry) {
+            const isXmlFile = /\.xml$/i.test(zipEntry.entryName);
+            const fileContent = zipEntry.getData();
+            files.push({
+              originalname: `${f.originalname}/${zipEntry.entryName}`,
+              mimetype: isXmlFile ? 'text/xml' : 'application/octet-stream',
+              fieldname: f.fieldname,
+              encoding: f.encoding,
+              buffer: fileContent,
+              size: fileContent.length
+            });
+          });
+        } catch {
+          functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-error.zip' });
+        }
+      } else {
+        files.push(f);
+      }
+    });
+
     const unitData: UnitImportData[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];

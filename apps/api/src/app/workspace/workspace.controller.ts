@@ -42,7 +42,7 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: RequestReportDto
   })
-  async addModuleFile(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<RequestReportDto> {
+  async addUnitFiles(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<RequestReportDto> {
     return this.workspaceService.uploadUnits(workspaceId, files);
   }
 

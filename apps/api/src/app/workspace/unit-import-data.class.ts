@@ -30,7 +30,7 @@ export class UnitImportData {
     if (definitionRefElement.length > 0) {
       this.player = definitionRefElement.attr('player');
       this.editor = definitionRefElement.attr('editor');
-      this.definitionFileName = definitionRefElement.text();
+      this.definitionFileName = this.getFolder() + definitionRefElement.text();
     } else {
       const definitionElement = xmlDocument('Definition').first();
       if (definitionElement.length > 0) {
@@ -40,5 +40,12 @@ export class UnitImportData {
       }
     }
     if (!this.definition && !this.definitionFileName) throw new Error('definition and definition file empty');
+  }
+
+  private getFolder(): string {
+    const regexPattern = /^(.+)\/.+$/;
+    const folderMatch = regexPattern.exec(this.fileName);
+    if (folderMatch && folderMatch.length === 2) return `${folderMatch[1]}/`;
+    return '';
   }
 }
