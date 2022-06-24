@@ -23,6 +23,7 @@ import {SelectionModel} from "@angular/cdk/collections";
           </mat-header-cell>
           <mat-cell *matCellDef="let row" fxFlex="70px">
             <mat-checkbox (click)="$event.stopPropagation()"
+                          [disabled]="disabledUnits.indexOf(row.id) >= 0"
                           (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
                           [checked]="tableSelectionCheckbox.isSelected(row)">
             </mat-checkbox>
@@ -31,7 +32,10 @@ import {SelectionModel} from "@angular/cdk/collections";
 
         <ng-container matColumnDef="name">
           <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{element.key}}-{{element.name}} </mat-cell>
+          <mat-cell *matCellDef="let element"
+                    [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
+            {{element.key}}{{element.name ? ' - ' + element.name : ''}}
+          </mat-cell>
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
@@ -41,13 +45,15 @@ import {SelectionModel} from "@angular/cdk/collections";
   `,
   styles: [
     '.unit-list-wrapper {height: 100%}',
-    '.unit-list {overflow-x: auto}'
+    '.unit-list {overflow-x: auto}',
+    '.disabled-element {color: gray}'
   ]
 })
 export class SelectUnitListComponent {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
   tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
+  disabledUnits: number[] = [];
   @Input('workspace')
   set workspaceId(value: number) {
     this.tableSelectionCheckbox.clear();
@@ -60,6 +66,14 @@ export class SelectUnitListComponent {
   set multiple(value: boolean) {
     this.multipleSelection = value;
     this.tableSelectionCheckbox = new SelectionModel <UnitInListDto>(value, []);
+  }
+  @Input('disabled')
+  set disabled(value: number[]) {
+    console.log(value);
+    this.disabledUnits = value;
+    this.objectsDatasource.data.forEach(ud => {
+      if (this.disabledUnits.indexOf(ud.id) >= 0) this.tableSelectionCheckbox.deselect(ud);
+    });
   }
   get selectionCount(): number {
     return this.tableSelectionCheckbox.selected.length
