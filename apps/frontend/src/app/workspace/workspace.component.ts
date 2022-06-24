@@ -240,7 +240,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '400px',
+        width: '500px',
         height: '700px',
         data: <SelectUnitData>{
           title: 'Aufgabe(n) löschen',
@@ -252,11 +252,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
           if (typeof dialogResult !== 'undefined') {
-            if (dialogResult !== false) {
-              return (dialogResult as UnitInListDto[]).map(ud => ud.id);
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+              return dialogComponent.selectedUnitIds;
             }
           }
-          return false;
+          return false
         })
       ));
     }
@@ -264,18 +265,18 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   addUnitFromExisting(): void {
-    this.addUnitFromExistingDialog().then((unitSource: UnitInListDto[] | boolean) => {
+    this.addUnitFromExistingDialog().then((unitSource: UnitInListDto | boolean) => {
       if (typeof unitSource !== 'boolean') {
         this.addUnitDialog({
           title: 'Neue Aufgabe aus vorhandener',
-          subTitle: `Kopie von ${unitSource[0].key}${unitSource[0].name ? ' - ' + unitSource[0].name : ''}`,
-          key: unitSource[0].key,
-          label: unitSource[0].name || '',
+          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ' - ' + unitSource.name : ''}`,
+          key: unitSource.key,
+          label: unitSource.name || '',
           groups: this.workspacesSettings.unitGroups || []
         }).then((createUnitDto: CreateUnitDto | boolean) => {
           if (typeof createUnitDto !== 'boolean') {
             this.appService.dataLoading = true;
-            createUnitDto.createFrom = unitSource[0].id;
+            createUnitDto.createFrom = unitSource.id;
             this.backendService.addUnit(
               this.workspaceService.selectedWorkspace, createUnitDto
             ).subscribe(
@@ -296,11 +297,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async addUnitFromExistingDialog(): Promise<UnitInListDto[] | boolean> {
+  private async addUnitFromExistingDialog(): Promise<UnitInListDto | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '400px',
+        width: '500px',
         height: '700px',
         data: <SelectUnitData>{
           title: 'Neue Aufgabe (Kopie)',
@@ -312,8 +313,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
           if (typeof dialogResult !== 'undefined') {
-            if (dialogResult !== false) {
-              return dialogResult as UnitInListDto[];
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length === 1) {
+              return <UnitInListDto>{
+                id: dialogComponent.selectedUnitIds[0],
+                key: dialogComponent.selectedUnitKey,
+                name: dialogComponent.selectedUnitName
+              };
             }
           }
           return false;
@@ -325,7 +331,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   moveOrCopyUnit(moveOnly: boolean): void {
     const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
-      width: '600px',
+      width: '500px',
       height: '700px',
       data: <MoveUnitData>{
         title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',

@@ -1,5 +1,5 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AppService } from '../../app.service';
 import { WorkspaceDataFlat } from '../../app.classes';
@@ -15,11 +15,6 @@ export interface MoveUnitData {
   template: `
     <div fxLayout="column" style="height: 100%">
       <h1 mat-dialog-title>{{ data.title }}</h1>
-
-      <p *ngIf="unitSelectionTable.selectionCount === 0">Bitte Aufgaben auswählen!</p>
-      <p *ngIf="unitSelectionTable.selectionCount === 1">Eine Aufgabe ausgewählt.</p>
-      <p *ngIf="unitSelectionTable.selectionCount > 1">{{unitSelectionTable.selectionCount}} Aufgaben ausgewählt.</p>
-
       <form [formGroup]="selectForm" fxLayout="column">
         <mat-form-field>
           <mat-select placeholder="Ziel-Arbeitsbereich" formControlName="wsSelector">
@@ -46,7 +41,7 @@ export class MoveUnitComponent implements OnInit {
   workspaceList: WorkspaceDataFlat[] = [];
   selectForm: FormGroup;
   get selectedUnits(): number[] {
-    return this.unitSelectionTable ? this.unitSelectionTable.selectedUnits : []
+    return this.unitSelectionTable ? this.unitSelectionTable.selectedUnitIds : []
   }
   get targetWorkspace(): number {
     const selectorControl = this.selectForm.get('wsSelector');

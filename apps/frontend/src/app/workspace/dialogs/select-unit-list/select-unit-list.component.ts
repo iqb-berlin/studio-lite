@@ -7,31 +7,42 @@ import {SelectionModel} from "@angular/cdk/collections";
 @Component({
   selector: 'select-unit-list',
   template: `
-    <mat-table [dataSource]="objectsDatasource" matSort>
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-header-cell *matHeaderCellDef fxFlex="70px">
-          <mat-checkbox (change)="$event ? masterToggle() : null"
-                        [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
-                        [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
-          </mat-checkbox>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let row" fxFlex="70px">
-          <mat-checkbox (click)="$event.stopPropagation()"
-                        (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
-                        [checked]="tableSelectionCheckbox.isSelected(row)">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
+    <div fxLayout="column" class="unit-list-wrapper">
+      <div *ngIf="multipleSelection">
+        <p *ngIf="selectionCount === 0">Bitte Aufgaben auswählen!</p>
+        <p *ngIf="selectionCount === 1">Eine Aufgabe ausgewählt.</p>
+        <p *ngIf="selectionCount > 1">{{selectionCount}} Aufgaben ausgewählt.</p>
+      </div>
+      <mat-table [dataSource]="objectsDatasource" matSort class="unit-list">
+        <ng-container matColumnDef="selectCheckbox">
+          <mat-header-cell *matHeaderCellDef fxFlex="70px">
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+                          [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                          [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
+            </mat-checkbox>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" fxFlex="70px">
+            <mat-checkbox (click)="$event.stopPropagation()"
+                          (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
+                          [checked]="tableSelectionCheckbox.isSelected(row)">
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
 
-      <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.key}}-{{element.name}} </mat-cell>
-      </ng-container>
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{element.key}}-{{element.name}} </mat-cell>
+        </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
-  `
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </div>
+  `,
+  styles: [
+    '.unit-list-wrapper {height: 100%}',
+    '.unit-list {overflow-x: auto}'
+  ]
 })
 export class SelectUnitListComponent {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
@@ -44,11 +55,27 @@ export class SelectUnitListComponent {
       this.objectsDatasource = new MatTableDataSource(unitData);
     });
   }
+  multipleSelection = true;
+  @Input('multiple')
+  set multiple(value: boolean) {
+    this.multipleSelection = value;
+    this.tableSelectionCheckbox = new SelectionModel <UnitInListDto>(value, []);
+  }
   get selectionCount(): number {
     return this.tableSelectionCheckbox.selected.length
   }
-  get selectedUnits(): number[] {
+  get selectedUnitIds(): number[] {
     return this.tableSelectionCheckbox.selected.map(ud => ud.id)
+  }
+  get selectedUnitKey(): string {
+    const selectedUnits = this.tableSelectionCheckbox.selected;
+    if (selectedUnits.length > 0) return selectedUnits[0].key;
+    return ''
+  }
+  get selectedUnitName(): string {
+    const selectedUnits = this.tableSelectionCheckbox.selected;
+    if (selectedUnits.length > 0 && selectedUnits[0].name) return selectedUnits[0].name;
+    return ''
   }
 
   constructor(
