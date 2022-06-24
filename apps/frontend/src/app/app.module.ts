@@ -33,6 +33,7 @@ import { ChangePasswordComponent } from './home/change-password.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { AppTranslateLoader } from './app-translate-loader';
 import { RequestMessageDialogComponent } from './components/request-message-dialog.component';
+import { InputTextComponent } from './components/input-text.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { RequestMessageDialogComponent } from './components/request-message-dial
     HomeComponent,
     AboutComponent,
     ChangePasswordComponent,
-    RequestMessageDialogComponent
+    RequestMessageDialogComponent,
+    InputTextComponent
   ],
   imports: [
     ApplicationModule,
@@ -90,7 +92,8 @@ import { RequestMessageDialogComponent } from './components/request-message-dial
   ],
   entryComponents: [
     ChangePasswordComponent,
-    RequestMessageDialogComponent
+    RequestMessageDialogComponent,
+    InputTextComponent
   ],
   bootstrap: [AppComponent]
 })

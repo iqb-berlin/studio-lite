@@ -86,6 +86,7 @@ export class UnitService {
     if (dataKeys.indexOf('editor') >= 0) unitToUpdate.editor = newData.editor;
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
+    if (dataKeys.indexOf('groupName') >= 0) unitToUpdate.groupName = newData.groupName;
     await this.unitsRepository.save(unitToUpdate);
   }
 

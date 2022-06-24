@@ -8,6 +8,9 @@ import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { SelectModuleComponent } from './select-module.component';
 import { UnitMetadataStore } from '../../workspace.classes';
+import { MatDialog } from '@angular/material/dialog';
+import { InputTextComponent, InputTextData } from '../../../components/input-text.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -30,7 +33,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private backendService: BackendService,
-    public workspaceService: WorkspaceService
+    public workspaceService: WorkspaceService,
+    private inputTextDialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
@@ -115,5 +120,37 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
+  }
+
+  newGroup() {
+    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
+      width: '500px',
+      data: <InputTextData>{
+        title: 'Neue Gruppe',
+        default: '',
+        okButtonLabel: 'Speichern',
+        prompt: 'Namen der Gruppe'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (typeof result === 'string') {
+        if (!this.workspaceService.workspaceSettings.unitGroups) this.workspaceService.workspaceSettings.unitGroups = [];
+        if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
+          this.workspaceService.workspaceSettings.unitGroups.push(result);
+          this.backendService.setWorkspaceSettings(
+            this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+          ).subscribe(isOK => {
+            if (!isOK) {
+              this.snackBar.open('Neue Gruppe konnte nicht gespeichert werden.', '', { duration: 3000 });
+            } else {
+              this.snackBar.open('Neue Gruppe gespeichert', '', { duration: 1000 });
+              const groupControl = this.unitForm.get('group');
+              if (groupControl) groupControl.setValue(result);
+            }
+          });
+        }
+      }
+    })
   }
 }
