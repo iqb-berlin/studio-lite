@@ -117,7 +117,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       });
       this.backendService.getModuleList('schemer').subscribe(moduleList => {
         this.workspaceService.schemerList = new VeronaModuleCollection(moduleList);
-        console.log(this.workspaceService.schemerList);
       });
     });
   }
@@ -152,7 +151,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       title: 'Neue Aufgabe',
       subTitle: '',
       key: '',
-      label: ''
+      label: '',
+      groups: this.workspacesSettings.unitGroups || []
     }).then((createUnitDto: CreateUnitDto | boolean) => {
       if (typeof createUnitDto !== 'boolean') {
         this.appService.dataLoading = true;
@@ -164,6 +164,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           respOk => {
             if (respOk) {
               this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+              this.addUnitGroup(createUnitDto.groupName);
               this.updateUnitList(respOk);
             } else {
               this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
@@ -175,7 +176,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async addUnitDialog(newUnitData: NewUnitData): Promise<CreateUnitDto | boolean> {
+  private addUnitGroup(newGroup: string | undefined) {
+    if (newGroup && this.workspacesSettings.unitGroups &&
+      this.workspacesSettings.unitGroups.indexOf(newGroup) < 0) {
+      this.workspacesSettings.unitGroups.push(newGroup);
+      this.backendService.setWorkspaceSettings(
+        this.workspaceService.selectedWorkspace,this.workspacesSettings).subscribe(isOK => {
+        this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
+          isOK ? '' : 'Fehler', { duration: 3000 });
+      });
+    }
+  }
+
+  private async addUnitDialog(newUnitData: NewUnitData): Promise<CreateUnitDto | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
@@ -188,7 +201,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             if (dialogResult !== false) {
               return <CreateUnitDto>{
                 key: (<FormGroup>dialogResult).get('key')?.value.trim(),
-                name: (<FormGroup>dialogResult).get('label')?.value
+                name: (<FormGroup>dialogResult).get('label')?.value,
+                groupName: (<FormGroup>dialogResult).get('groupSelect')?.value ||
+                  (<FormGroup>dialogResult).get('groupDirect')?.value || ''
               };
             }
           }
@@ -221,7 +236,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async deleteUnitDialog(): Promise<number[] | boolean> {
+  private async deleteUnitDialog(): Promise<number[] | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
@@ -255,7 +270,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           title: 'Neue Aufgabe aus vorhandener',
           subTitle: `Kopie von ${unitSource[0].key}${unitSource[0].name ? ' - ' + unitSource[0].name : ''}`,
           key: unitSource[0].key,
-          label: unitSource[0].name || ''
+          label: unitSource[0].name || '',
+          groups: this.workspacesSettings.unitGroups || []
         }).then((createUnitDto: CreateUnitDto | boolean) => {
           if (typeof createUnitDto !== 'boolean') {
             this.appService.dataLoading = true;
@@ -266,6 +282,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               respOk => {
                 if (respOk) {
                   this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+                  this.addUnitGroup(createUnitDto.groupName);
                   this.updateUnitList(respOk);
                 } else {
                   this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
@@ -279,7 +296,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async addUnitFromExistingDialog(): Promise<UnitInListDto[] | boolean> {
+  private async addUnitFromExistingDialog(): Promise<UnitInListDto[] | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {

@@ -15,11 +15,12 @@
       <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList.groups">
         <div class="unit-group-header">{{unitGroup.name}}</div>
         <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-                *ngFor="let unit of unitGroup.units"
-                class="unit-list-entry"
-                [matTooltip]="unit.name ? unit.name : unit.id.toString()"
-                (click)="selectUnit(unit.id)"
-                [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
+           *ngFor="let unit of unitGroup.units"
+           class="unit-list-entry"
+           [matTooltip]="unit.name ? unit.name : unit.id.toString()"
+           matTooltipPosition="right"
+           (click)="selectUnit(unit.id)"
+           [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
           {{ unit.key }}{{ unit.name ? ' - ' + unit.name : ''}}
         </a>
       </mat-nav-list>
