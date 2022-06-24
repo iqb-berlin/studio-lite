@@ -11,10 +11,10 @@ export class VeronaModuleCollection extends VeronaModuleKeyCollection {
     });
   }
 
-  getName(key: string): string {
+  getNameAndVersion(key: string): string {
     const dataEntry = this.moduleData[key];
     if (dataEntry) {
-      return dataEntry.metadata.name;
+      return `${dataEntry.metadata.name} ${dataEntry.metadata.version}`;
     }
     return '?';
   }

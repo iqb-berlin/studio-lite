@@ -1,5 +1,5 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
@@ -11,7 +11,7 @@ import {
   UnitSchemeDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto,
-  WorkspaceFullDto
+  WorkspaceFullDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -46,6 +46,15 @@ export class BackendService {
     )
       .pipe(
         catchError(() => of(null))
+      );
+  }
+
+  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -198,23 +207,4 @@ export class BackendService {
         catchError(() => of([]))
       );
   }
-
-  /*
-  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettings): Observable<boolean> {
-    return this.http
-      .put<boolean>(`${this.serverUrl}setWorkspaceSettings.php`, {
-      t: localStorage.getItem('t'),
-      ws: workspaceId,
-      s: settings
-    })
-      .pipe(
-        catchError(() => of(false))
-      );
-  }
-   */
-}
-
-export interface WorkspaceSettings {
-  defaultPlayer: string;
-  defaultEditor: string
 }

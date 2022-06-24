@@ -5,7 +5,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto, RequestReportDto
+  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -104,6 +104,12 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne(workspaceData.id);
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
     if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
+    await this.workspacesRepository.save(workspaceToUpdate);
+  }
+
+  async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne(id);
+    workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 

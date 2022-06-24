@@ -94,6 +94,7 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
     SelectUnitComponent,
     MoveUnitComponent,
     SaveOrDiscardComponent,
+    EditSettingsComponent,
     ExportUnitComponent
   ],
   providers: [

@@ -12,4 +12,13 @@ export class CreateUnitDto {
 
   @ApiProperty()
   createFrom?: number;
+
+  @ApiProperty()
+  player?: string;
+
+  @ApiProperty()
+  editor?: string;
+
+  @ApiProperty()
+  schemer?: string;
 }

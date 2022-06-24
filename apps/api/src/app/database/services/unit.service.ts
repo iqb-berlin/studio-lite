@@ -52,6 +52,11 @@ export class UnitService {
           await this.patchDefinition(newUnit.id, unitSourceDefinition);
         }
       }
+    } else {
+      if (unit.player) newUnit.player = unit.player;
+      if (unit.editor) newUnit.editor = unit.editor;
+      if (unit.schemer) newUnit.editor = unit.schemer;
+      await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
   }

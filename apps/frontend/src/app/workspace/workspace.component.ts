@@ -33,6 +33,7 @@ import { RequestMessageDialogComponent } from '../components/request-message-dia
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from './verona-module-collection.class';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
+import {EditSettingsComponent} from "./dialogs/edit-settings.component";
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -155,6 +156,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }).then((createUnitDto: CreateUnitDto | boolean) => {
       if (typeof createUnitDto !== 'boolean') {
         this.appService.dataLoading = true;
+        createUnitDto.player = this.workspacesSettings.defaultPlayer;
+        createUnitDto.editor = this.workspacesSettings.defaultEditor;
         this.backendService.addUnit(
           this.workspaceService.selectedWorkspace, createUnitDto
         ).subscribe(
@@ -388,19 +391,20 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   settings(): void {
-    /*
     const dialogRef = this.editSettingsDialog.open(EditSettingsComponent, {
-      width: '400px',
-      height: '300px'
+      width: '600px',
+      height: '300px',
+      data: this.workspacesSettings
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
         this.backendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspace,
-          <WorkspaceSettings>{
+          <WorkspaceSettingsDto>{
             defaultEditor: result.controls.editorSelector.value,
-            defaultPlayer: result.controls.playerSelector.value
+            defaultPlayer: result.controls.playerSelector.value,
+            unitGroups: []
           }
         ).subscribe(isOK => {
           if (!isOK) {
@@ -411,7 +415,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         });
       }
     });
-     */
   }
 
   saveUnitData(): void {
