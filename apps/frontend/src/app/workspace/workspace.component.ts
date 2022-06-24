@@ -33,7 +33,7 @@ import { RequestMessageDialogComponent } from '../components/request-message-dia
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from './verona-module-collection.class';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
-import {EditSettingsComponent} from "./dialogs/edit-settings.component";
+import { EditSettingsComponent } from './dialogs/edit-settings.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -338,12 +338,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (typeof result !== 'undefined') {
         if (result !== false) {
           const dialogComponent = dialogRef.componentInstance;
-          const wsSelected = dialogComponent.selectForm ? dialogComponent.selectForm.get('wsSelector') : false;
-          if (wsSelected) {
+          if (dialogComponent.targetWorkspace > 0) {
             this.backendService.moveOrCopyUnits(
               this.workspaceService.selectedWorkspace,
-              (dialogComponent.tableSelectionCheckbox.selected as UnitInListDto[]).map(ud => ud.id),
-              wsSelected.value, moveOnly
+              dialogComponent.selectedUnits,
+              dialogComponent.targetWorkspace, moveOnly
             ).subscribe(uploadStatus => {
               if (typeof uploadStatus === 'boolean') {
                 this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,

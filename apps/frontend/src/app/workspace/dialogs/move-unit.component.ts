@@ -1,12 +1,9 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
-import { Component, Inject, OnInit } from '@angular/core';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { AppService } from '../../app.service';
-import { WorkspaceService } from '../workspace.service';
 import { WorkspaceDataFlat } from '../../app.classes';
+import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
 
 export interface MoveUnitData {
   title: string,
@@ -15,19 +12,50 @@ export interface MoveUnitData {
 }
 
 @Component({
-  templateUrl: './move-unit.component.html'
+  template: `
+    <div fxLayout="column" style="height: 100%">
+      <h1 mat-dialog-title>{{ data.title }}</h1>
+
+      <p *ngIf="unitSelectionTable.selectionCount === 0">Bitte Aufgaben auswählen!</p>
+      <p *ngIf="unitSelectionTable.selectionCount === 1">Eine Aufgabe ausgewählt.</p>
+      <p *ngIf="unitSelectionTable.selectionCount > 1">{{unitSelectionTable.selectionCount}} Aufgaben ausgewählt.</p>
+
+      <form [formGroup]="selectForm" fxLayout="column">
+        <mat-form-field>
+          <mat-select placeholder="Ziel-Arbeitsbereich" formControlName="wsSelector">
+            <mat-option *ngFor="let ws of workspaceList" [value]="ws.id">
+              {{ws.groupName}}: {{ws.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+      <mat-dialog-content fxFlex>
+        <select-unit-list #unitSelectionTable [workspace]="data.currentWorkspaceId"></select-unit-list>
+      </mat-dialog-content>
+
+      <mat-dialog-actions>
+        <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="true" [disabled]="unitSelectionTable.selectionCount === 0 || selectForm.invalid">
+          {{data.buttonLabel}}</button>
+        <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+      </mat-dialog-actions>
+    </div>
+  `
 })
 export class MoveUnitComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<UnitInListDto>();
-  displayedColumns = ['selectCheckbox', 'name'];
-  tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
+  @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
   workspaceList: WorkspaceDataFlat[] = [];
   selectForm: FormGroup;
+  get selectedUnits(): number[] {
+    return this.unitSelectionTable ? this.unitSelectionTable.selectedUnits : []
+  }
+  get targetWorkspace(): number {
+    const selectorControl = this.selectForm.get('wsSelector');
+    return selectorControl ? selectorControl.value : 0
+  }
 
   constructor(
     private fb: FormBuilder,
     private appService: AppService,
-    private ds: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: MoveUnitData
   ) {
     this.selectForm = this.fb.group({
@@ -50,19 +78,5 @@ export class MoveUnitComponent implements OnInit {
         });
       });
     }
-    this.objectsDatasource = new MatTableDataSource(this.ds.unitList.units());
-    this.tableSelectionCheckbox.clear();
-  }
-
-  isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckbox.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
-  }
-
-  masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckbox.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 }
