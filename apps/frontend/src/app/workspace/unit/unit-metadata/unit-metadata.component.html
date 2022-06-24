@@ -13,6 +13,15 @@
         <input matInput formControlName="name" placeholder="Name">
       </mat-form-field>
       <mat-form-field>
+        <mat-label>Gruppe</mat-label>
+        <mat-select placeholder="Gruppe" formControlName="group">
+          <mat-option [value]=""></mat-option>
+          <mat-option *ngFor="let g of workspaceService.workspaceSettings.unitGroups" [value]="g">
+            {{g}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
         <mat-label>Beschreibung/Notizen</mat-label>
         <textarea matInput formControlName="description"
                   cdkTextareaAutosize

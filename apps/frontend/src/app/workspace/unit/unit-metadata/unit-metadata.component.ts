@@ -36,7 +36,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
       name: this.fb.control(''),
-      description: this.fb.control('')
+      description: this.fb.control(''),
+      group: this.fb.control('')
     });
   }
 
@@ -76,7 +77,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       this.unitForm.setValue({
         key: unitMetadata.key,
         name: unitMetadata.name,
-        description: unitMetadata.description
+        description: unitMetadata.description,
+        group: unitMetadata.groupName
       }, { emitEvent: false });
       if (this.editorSelector) {
         this.editorSelector.setModule(unitMetadata.editor || '');
@@ -100,7 +102,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         this.workspaceService.unitMetadataStore?.setBasicData(
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,
-          this.unitForm.get('description')?.value
+          this.unitForm.get('description')?.value,
+          this.unitForm.get('group')?.value
         );
       });
     }

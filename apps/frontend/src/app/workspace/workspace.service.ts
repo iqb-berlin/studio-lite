@@ -4,7 +4,7 @@ import {
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
-import { UnitInListDto } from '@studio-lite-lib/api-dto';
+import {UnitInListDto, WorkspaceSettingsDto} from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import {
   UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
@@ -18,6 +18,7 @@ import { VeronaModuleCollection } from './verona-module-collection.class';
 export class WorkspaceService {
   selectedWorkspace = 0;
   selectedUnit$ = new BehaviorSubject<number>(0);
+  workspaceSettings: WorkspaceSettingsDto;
   editorList = new VeronaModuleCollection([]);
   playerList = new VeronaModuleCollection([]);
   schemerList = new VeronaModuleCollection([]);
@@ -30,7 +31,13 @@ export class WorkspaceService {
   constructor(
     private backendService: BackendService,
     private appService: AppService
-  ) {}
+  ) {
+    this.workspaceSettings = {
+      defaultEditor: '',
+      defaultPlayer: '',
+      unitGroups: []
+    }
+  }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -82,7 +89,7 @@ export class WorkspaceService {
         this.selectedWorkspace, this.unitMetadataStore.getChangedData()
       ));
       if (saveOk) {
-        reloadUnitList = this.unitMetadataStore.isKeyOrNameChanged();
+        reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupChanged();
         this.unitMetadataStore.applyChanges();
       }
     }

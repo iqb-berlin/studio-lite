@@ -15,7 +15,7 @@ import {
   MessageDialogData, MessageType
 } from '@studio-lite-lib/iqb-components';
 import {
-  CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto, WorkspaceSettingsDto
+  CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
@@ -53,8 +53,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     { path: 'schemer', label: 'Kodierung' }
   ];
 
-  workspacesSettings: WorkspaceSettingsDto;
-
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
     private appService: AppService,
@@ -73,7 +71,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     public translate: TranslateService
   ) {
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
-    this.workspacesSettings = {
+    this.workspaceService.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
       unitGroups: []
@@ -99,7 +97,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           if (wResponse) {
             this.appService.appConfig.setPageTitle(`${wResponse.groupName}: ${wResponse.name}`);
             if (wResponse.settings) {
-              this.workspacesSettings = wResponse.settings;
+              this.workspaceService.workspaceSettings = wResponse.settings;
             }
             this.updateUnitList();
           } else {
@@ -125,6 +123,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.backendService.getUnitList(this.workspaceService.selectedWorkspace).subscribe(
       uResponse => {
         this.workspaceService.unitList = new UnitCollection(uResponse);
+        const newUnitGroups: string[] = [];
+        if (this.workspaceService.workspaceSettings.unitGroups) {
+          this.workspaceService.workspaceSettings.unitGroups.forEach(g => {
+            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g)
+          })
+        }
+        this.workspaceService.unitList.groups.forEach(g => {
+          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name)
+        });
+        newUnitGroups.sort();
+        this.workspaceService.workspaceSettings.unitGroups = newUnitGroups;
         if (unitToSelect) this.selectUnit(unitToSelect);
         if (uResponse.length === 0) {
           this.workspaceService.selectedUnit$.next(0);
@@ -152,12 +161,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       subTitle: '',
       key: '',
       label: '',
-      groups: this.workspacesSettings.unitGroups || []
+      groups: this.workspaceService.workspaceSettings.unitGroups || []
     }).then((createUnitDto: CreateUnitDto | boolean) => {
       if (typeof createUnitDto !== 'boolean') {
         this.appService.dataLoading = true;
-        createUnitDto.player = this.workspacesSettings.defaultPlayer;
-        createUnitDto.editor = this.workspacesSettings.defaultEditor;
+        createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
+        createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
         this.backendService.addUnit(
           this.workspaceService.selectedWorkspace, createUnitDto
         ).subscribe(
@@ -177,11 +186,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private addUnitGroup(newGroup: string | undefined) {
-    if (newGroup && this.workspacesSettings.unitGroups &&
-      this.workspacesSettings.unitGroups.indexOf(newGroup) < 0) {
-      this.workspacesSettings.unitGroups.push(newGroup);
+    if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
+      this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
+      this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
       this.backendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspace,this.workspacesSettings).subscribe(isOK => {
+        this.workspaceService.selectedWorkspace,this.workspaceService.workspaceSettings).subscribe(isOK => {
         this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
           isOK ? '' : 'Fehler', { duration: 3000 });
       });
@@ -192,7 +201,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
-        width: '600px',
+        width: '500px',
         data: newUnitData,
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(
@@ -272,7 +281,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ' - ' + unitSource.name : ''}`,
           key: unitSource.key,
           label: unitSource.name || '',
-          groups: this.workspacesSettings.unitGroups || []
+          groups: this.workspaceService.workspaceSettings.unitGroups || []
         }).then((createUnitDto: CreateUnitDto | boolean) => {
           if (typeof createUnitDto !== 'boolean') {
             this.appService.dataLoading = true;
@@ -414,20 +423,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   settings(): void {
     const dialogRef = this.editSettingsDialog.open(EditSettingsComponent, {
-      width: '600px',
-      height: '300px',
-      data: this.workspacesSettings
+      width: '500px',
+      data: this.workspaceService.workspaceSettings
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
+        this.workspaceService.workspaceSettings.defaultEditor = result.controls.editorSelector.value;
+        this.workspaceService.workspaceSettings.defaultPlayer = result.controls.playerSelector.value;
         this.backendService.setWorkspaceSettings(
-          this.workspaceService.selectedWorkspace,
-          <WorkspaceSettingsDto>{
-            defaultEditor: result.controls.editorSelector.value,
-            defaultPlayer: result.controls.playerSelector.value,
-            unitGroups: []
-          }
+          this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {
           if (!isOK) {
             this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });

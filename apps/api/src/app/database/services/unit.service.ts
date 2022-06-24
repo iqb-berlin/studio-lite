@@ -45,7 +45,6 @@ export class UnitService {
         newUnit.player = unitSourceMetadata.player;
         newUnit.editor = unitSourceMetadata.editor;
         newUnit.schemer = unitSourceMetadata.schemer;
-        newUnit.groupName = unitSourceMetadata.groupName;
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
