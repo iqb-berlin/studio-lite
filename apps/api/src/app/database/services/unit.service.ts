@@ -23,8 +23,13 @@ export class UnitService {
   async findAll(workspaceId: number): Promise<UnitInListDto[]> {
     return this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      order: { groupName: 'ASC', key: 'ASC' },
-      select: ['id', 'key', 'name', 'groupName']
+      order: { key: 'ASC' },
+      select: {
+        id: true,
+        key: true,
+        name: true,
+        groupName: true
+      }
     });
   }
 
@@ -169,7 +174,9 @@ export class UnitService {
       variables: unit.variables, definition: ''
     };
     if (unit.definitionId) {
-      const unitDefinition = await this.unitDefinitionsRepository.findOne(unit.definitionId);
+      const unitDefinition = await this.unitDefinitionsRepository.findOne({
+        where: {id: unit.definitionId}
+      });
       if (unitDefinition) returnUnit.definition = unitDefinition.data;
     }
     return returnUnit;
@@ -193,7 +200,9 @@ export class UnitService {
     });
     let newUnitDefinitionId = -1;
     if (unitToUpdate.definitionId) {
-      const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne(unitToUpdate.definitionId);
+      const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
+        where: {id: unitToUpdate.definitionId}
+      });
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
     } else {

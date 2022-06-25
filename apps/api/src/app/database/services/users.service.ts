@@ -39,7 +39,9 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<UserFullDto> {
-    const user = await this.usersRepository.findOne(id);
+    const user = await this.usersRepository.findOne({
+      where: {id: id}
+    });
     return <UserFullDto>{
       id: user.id,
       name: user.name,
@@ -56,11 +58,10 @@ export class UsersService {
   }
 
   async getUserByNameAndPassword(name: string, password: string): Promise<number | null> {
-    const user = await this.usersRepository
-      .createQueryBuilder('user')
-      .where('user.name = :name',
-        { name: name })
-      .getOne();
+    const user = await this.usersRepository.findOne({
+      where: {name: name},
+      select: {id: true, password: true}
+    });
     if (user && bcrypt.compareSync(password, user.password)) {
       return user.id;
     }
@@ -79,27 +80,17 @@ export class UsersService {
     return null;
   }
 
-  /*
-  async getUserName(userId: number): Promise<string> {
-    const user = await this.usersRepository
-      .createQueryBuilder('user')
-      .where('user.id = :id',
-        { id: userId })
-      .getOne();
-    return user.name;
-  }
-   */
-
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
-    const userForName = await this.usersRepository
-      .createQueryBuilder('user')
-      .where('user.id = :id',
-        { id: userId })
-      .getOne();
+    const userForName = await this.usersRepository.findOne({
+      where: {id: userId},
+      select: {name: true}
+    });
     if (userForName) {
       const userForId = await this.getUserByNameAndPassword(userForName.name, oldPassword);
       if (userForId) {
-        const userToUpdate = await this.usersRepository.findOne(userForId);
+        const userToUpdate = await this.usersRepository.findOne({
+          where: {id: userForId}
+        });
         userToUpdate.password = UsersService.getPasswordHash(newPassword);
         await this.usersRepository.save(userToUpdate);
         return true;
@@ -121,7 +112,10 @@ export class UsersService {
   }
 
   async patch(userData: UserFullDto): Promise<void> {
-    const userToUpdate = await this.usersRepository.findOne(userData.id);
+    const userToUpdate = await this.usersRepository.findOne({
+      where: {id: userData.id},
+      select: {name: true, isAdmin: true, description: true, password: true, id: true}
+    });
     if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
     if (userData.name) userToUpdate.name = userData.name;
     if (userData.description) userToUpdate.description = userData.description;

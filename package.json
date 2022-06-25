@@ -32,7 +32,7 @@
     "@nestjs/passport": "^8.1.0",
     "@nestjs/platform-express": "^8.2.6",
     "@nestjs/swagger": "^5.1.5",
-    "@nestjs/typeorm": "^8.0.2",
+    "@nestjs/typeorm": "^8.1.4",
     "@ngx-translate/core": "^14.0.0",
     "@nrwl/angular": "13.4.5",
     "@types/adm-zip": "^0.5.0",
@@ -52,7 +52,7 @@
     "rxjs": "~7.4.0",
     "swagger-ui-express": "^4.3.0",
     "tslib": "^2.0.0",
-    "typeorm": "^0.2.41",
+    "typeorm": "^0.3.6",
     "xmlbuilder2": "^3.0.2",
     "zone.js": "~0.11.4"
   },

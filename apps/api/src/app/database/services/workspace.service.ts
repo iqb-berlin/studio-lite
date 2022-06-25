@@ -83,8 +83,12 @@ export class WorkspaceService {
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
-    const workspace = await this.workspacesRepository.findOne(id);
-    const workspaceGroup = await this.workspaceGroupRepository.findOne(workspace.groupId);
+    const workspace = await this.workspacesRepository.findOne({
+      where: {id: id}
+    });
+    const workspaceGroup = await this.workspaceGroupRepository.findOne({
+      where: {id: workspace.groupId}
+    });
     return <WorkspaceFullDto>{
       id: workspace.id,
       name: workspace.name,
@@ -101,14 +105,18 @@ export class WorkspaceService {
   }
 
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
-    const workspaceToUpdate = await this.workspacesRepository.findOne(workspaceData.id);
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: {id: workspaceData.id}
+    });
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
     if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
   async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
-    const workspaceToUpdate = await this.workspacesRepository.findOne(id);
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: {id: id}
+    });
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
