@@ -27,7 +27,7 @@ export class UnitDownloadClass {
     const unitKeys: string[] = [];
     const usedPlayers: string[] = [];
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
-      const unitMetadata = await unitService.findOnesMetadata(workspaceId, unitId);
+      const unitMetadata = await unitService.findOnesMetadata(unitId);
       const unitXml = XmlBuilder.create({ version: '1.0' }, {
         Unit: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -45,7 +45,7 @@ export class UnitDownloadClass {
         }
       });
       zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
-      const definition = await unitService.findOnesDefinition(workspaceId, unitId);
+      const definition = await unitService.findOnesDefinition(unitId);
       zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(definition.definition));
       unitKeys.push(unitMetadata.key);
       if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);

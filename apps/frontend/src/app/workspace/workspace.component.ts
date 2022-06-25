@@ -15,7 +15,7 @@ import {
   MessageDialogData, MessageType
 } from '@studio-lite-lib/iqb-components';
 import {
-  CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto, WorkspaceSettingsDto
+  CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
@@ -25,13 +25,15 @@ import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from './workspace.service';
 
-import { NewUnitComponent } from './dialogs/new-unit.component';
-import { SelectUnitComponent } from './dialogs/select-unit.component';
+import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
+import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
 import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from './verona-module-collection.class';
+import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
+import { EditSettingsComponent } from './dialogs/edit-settings.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -51,8 +53,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     { path: 'schemer', label: 'Kodierung' }
   ];
 
-  workspacesSettings: WorkspaceSettingsDto;
-
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
     private appService: AppService,
@@ -71,7 +71,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     public translate: TranslateService
   ) {
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
-    this.workspacesSettings = {
+    this.workspaceService.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
       unitGroups: []
@@ -97,7 +97,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           if (wResponse) {
             this.appService.appConfig.setPageTitle(`${wResponse.groupName}: ${wResponse.name}`);
             if (wResponse.settings) {
-              this.workspacesSettings = wResponse.settings;
+              this.workspaceService.workspaceSettings = wResponse.settings;
             }
             this.updateUnitList();
           } else {
@@ -115,7 +115,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       });
       this.backendService.getModuleList('schemer').subscribe(moduleList => {
         this.workspaceService.schemerList = new VeronaModuleCollection(moduleList);
-        console.log(this.workspaceService.schemerList);
       });
     });
   }
@@ -124,6 +123,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.backendService.getUnitList(this.workspaceService.selectedWorkspace).subscribe(
       uResponse => {
         this.workspaceService.unitList = new UnitCollection(uResponse);
+        const newUnitGroups: string[] = [];
+        if (this.workspaceService.workspaceSettings.unitGroups) {
+          this.workspaceService.workspaceSettings.unitGroups.forEach(g => {
+            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g)
+          })
+        }
+        this.workspaceService.unitList.groups.forEach(g => {
+          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name)
+        });
+        newUnitGroups.sort();
+        this.workspaceService.workspaceSettings.unitGroups = newUnitGroups;
         if (unitToSelect) this.selectUnit(unitToSelect);
         if (uResponse.length === 0) {
           this.workspaceService.selectedUnit$.next(0);
@@ -146,15 +156,24 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   addUnit() {
-    this.addUnitDialog().then((createUnitDto: CreateUnitDto | boolean) => {
+    this.addUnitDialog({
+      title: 'Neue Aufgabe',
+      subTitle: '',
+      key: '',
+      label: '',
+      groups: this.workspaceService.workspaceSettings.unitGroups || []
+    }).then((createUnitDto: CreateUnitDto | boolean) => {
       if (typeof createUnitDto !== 'boolean') {
         this.appService.dataLoading = true;
+        createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
+        createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
         this.backendService.addUnit(
           this.workspaceService.selectedWorkspace, createUnitDto
         ).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+              this.addUnitGroup(createUnitDto.groupName);
               this.updateUnitList(respOk);
             } else {
               this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
@@ -166,16 +185,24 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async addUnitDialog(): Promise<CreateUnitDto | boolean> {
+  private addUnitGroup(newGroup: string | undefined) {
+    if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
+      this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
+      this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
+      this.backendService.setWorkspaceSettings(
+        this.workspaceService.selectedWorkspace,this.workspaceService.workspaceSettings).subscribe(isOK => {
+        this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
+          isOK ? '' : 'Fehler', { duration: 3000 });
+      });
+    }
+  }
+
+  private async addUnitDialog(newUnitData: NewUnitData): Promise<CreateUnitDto | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
-        width: '600px',
-        data: {
-          title: 'Neue Aufgabe',
-          key: '',
-          label: ''
-        }
+        width: '500px',
+        data: newUnitData,
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
@@ -183,7 +210,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             if (dialogResult !== false) {
               return <CreateUnitDto>{
                 key: (<FormGroup>dialogResult).get('key')?.value.trim(),
-                name: (<FormGroup>dialogResult).get('label')?.value
+                name: (<FormGroup>dialogResult).get('label')?.value,
+                groupName: (<FormGroup>dialogResult).get('groupSelect')?.value ||
+                  (<FormGroup>dialogResult).get('groupDirect')?.value || ''
               };
             }
           }
@@ -216,22 +245,90 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  async deleteUnitDialog(): Promise<number[] | boolean> {
+  private async deleteUnitDialog(): Promise<number[] | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '400px',
+        width: '500px',
         height: '700px',
-        data: {
+        data: <SelectUnitData>{
           title: 'Aufgabe(n) löschen',
-          buttonLabel: 'Löschen'
+          buttonLabel: 'Löschen',
+          fromOtherWorkspacesToo: false,
+          multiple: true
         }
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
           if (typeof dialogResult !== 'undefined') {
-            if (dialogResult !== false) {
-              return (dialogResult as UnitInListDto[]).map(ud => ud.id);
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+              return dialogComponent.selectedUnitIds;
+            }
+          }
+          return false
+        })
+      ));
+    }
+    return false;
+  }
+
+  addUnitFromExisting(): void {
+    this.addUnitFromExistingDialog().then((unitSource: UnitInListDto | boolean) => {
+      if (typeof unitSource !== 'boolean') {
+        this.addUnitDialog({
+          title: 'Neue Aufgabe aus vorhandener',
+          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ' - ' + unitSource.name : ''}`,
+          key: unitSource.key,
+          label: unitSource.name || '',
+          groups: this.workspaceService.workspaceSettings.unitGroups || []
+        }).then((createUnitDto: CreateUnitDto | boolean) => {
+          if (typeof createUnitDto !== 'boolean') {
+            this.appService.dataLoading = true;
+            createUnitDto.createFrom = unitSource.id;
+            this.backendService.addUnit(
+              this.workspaceService.selectedWorkspace, createUnitDto
+            ).subscribe(
+              respOk => {
+                if (respOk) {
+                  this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+                  this.addUnitGroup(createUnitDto.groupName);
+                  this.updateUnitList(respOk);
+                } else {
+                  this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
+                }
+                this.appService.dataLoading = false;
+              }
+            );
+          }
+        });
+      }
+    });
+  }
+
+  private async addUnitFromExistingDialog(): Promise<UnitInListDto | boolean> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+        width: '500px',
+        height: '700px',
+        data: <SelectUnitData>{
+          title: 'Neue Aufgabe (Kopie)',
+          buttonLabel: 'Weiter',
+          fromOtherWorkspacesToo: true,
+          multiple: false
+        }
+      });
+      return lastValueFrom(dialogRef.afterClosed().pipe(
+        map(dialogResult => {
+          if (typeof dialogResult !== 'undefined') {
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length === 1) {
+              return <UnitInListDto>{
+                id: dialogComponent.selectedUnitIds[0],
+                key: dialogComponent.selectedUnitKey,
+                name: dialogComponent.selectedUnitName
+              };
             }
           }
           return false;
@@ -241,14 +338,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  moveUnit(): void {
-    /*
+  moveOrCopyUnit(moveOnly: boolean): void {
     const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
-      width: '600px',
+      width: '500px',
       height: '700px',
-      data: {
-        title: 'Aufgabe(n) verschieben',
-        buttonLabel: 'Verschieben',
+      data: <MoveUnitData>{
+        title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',
+        buttonLabel: moveOnly ? 'Verschieben' : 'Kopieren',
         currentWorkspaceId: this.workspaceService.selectedWorkspace
       }
     });
@@ -257,100 +353,41 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (typeof result !== 'undefined') {
         if (result !== false) {
           const dialogComponent = dialogRef.componentInstance;
-          const wsSelected = dialogComponent.selectForm ? dialogComponent.selectForm.get('wsSelector') : false;
-          if (wsSelected) {
-            this.backendService.moveUnits(
+          if (dialogComponent.targetWorkspace > 0) {
+            this.backendService.moveOrCopyUnits(
               this.workspaceService.selectedWorkspace,
-              (dialogComponent.tableSelectionCheckbox.selected as UnitInListDto[]).map(ud => ud.id),
-              wsSelected.value
-            ).subscribe(
-              moveResponse => {
-                if (typeof moveResponse === 'number') {
-                  this.snackBar.open(`Es konnte(n) ${moveResponse} Aufgabe(n) nicht verschoben werden.`,
-                    'Fehler', { duration: 3000 });
+              dialogComponent.selectedUnits,
+              dialogComponent.targetWorkspace, moveOnly
+            ).subscribe(uploadStatus => {
+              if (typeof uploadStatus === 'boolean') {
+                this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,
+                  'Fehler', {duration: 3000});
+              } else {
+                if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+                  const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                    width: '500px',
+                    height: '600px',
+                    data: uploadStatus
+                  });
+                  dialogRef.afterClosed().subscribe(() => {
+                    this.updateUnitList();
+                  });
                 } else {
-                  this.snackBar.open('Aufgabe(n) verschoben', '', { duration: 1000 });
+                  this.snackBar.open(`Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', {duration: 1000});
+                  this.updateUnitList();
                 }
-                this.updateUnitList();
-              },
-              err => {
-                this.snackBar.open(`Konnte Aufgabe nicht verschieben (${err.code})`, 'Fehler', { duration: 3000 });
               }
-            );
+            });
           }
         }
       }
     });
- */
-  }
-
-  copyUnit(): void {
-    const myUnitId = this.workspaceService.selectedUnit$.getValue();
-    /*
-    if (myUnitId > 0) {
-      this.backendService.getUnitMetadata(
-        this.ds.selectedWorkspace,
-        myUnitId
-      ).subscribe(
-        newUnit => {
-          if (newUnit.id === myUnitId) {
-            const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
-              width: '600px',
-              data: {
-                title: `Aufgabe ${newUnit.key} in neue Aufgabe kopieren`,
-                key: newUnit.key,
-                label: newUnit.label
-              }
-            });
-
-            dialogRef.afterClosed().subscribe(result => {
-              if (typeof result !== 'undefined') {
-                if (result !== false) {
-                  this.appService.dataLoading = true;
-                  this.backendService.copyUnit(
-                    this.ds.selectedWorkspace,
-                    myUnitId,
-                    (<FormGroup>result).get('key')?.value,
-                    (<FormGroup>result).get('label')?.value
-                  ).subscribe(
-                    respOk => {
-                      // todo db-error?
-                      if (respOk) {
-                        this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
-                        this.updateUnitList(respOk);
-                      } else {
-                        this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
-                      }
-                      this.appService.dataLoading = false;
-                    },
-                    err => {
-                      this.snackBar.open(`Konnte Aufgabe nicht hinzufügen (${err.msg()})`,
-                        'Fehler', { duration: 3000 });
-                      this.appService.dataLoading = false;
-                    }
-                  );
-                }
-              }
-            });
-          }
-        },
-        err => {
-          this.snackBar.open(`Fehler beim Laden der Aufgabeneigenschaften (${err.msg()})`,
-            'Fehler', { duration: 3000 });
-          this.appService.dataLoading = false;
-        }
-      );
-    } else {
-      this.snackBar.open('Bitte erst Aufgabe auswählen', 'Hinweis', { duration: 3000 });
-    }
-
-     */
   }
 
   exportUnit(): void {
     if (this.workspaceService.unitList.units().length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '800px'
+        width: '900px'
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
@@ -385,20 +422,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   settings(): void {
-    /*
     const dialogRef = this.editSettingsDialog.open(EditSettingsComponent, {
-      width: '400px',
-      height: '300px'
+      width: '500px',
+      data: this.workspaceService.workspaceSettings
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
+        this.workspaceService.workspaceSettings.defaultEditor = result.controls.editorSelector.value;
+        this.workspaceService.workspaceSettings.defaultPlayer = result.controls.playerSelector.value;
         this.backendService.setWorkspaceSettings(
-          this.workspaceService.selectedWorkspace,
-          <WorkspaceSettings>{
-            defaultEditor: result.controls.editorSelector.value,
-            defaultPlayer: result.controls.playerSelector.value
-          }
+          this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {
           if (!isOK) {
             this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
@@ -408,7 +442,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         });
       }
     });
-     */
   }
 
   saveUnitData(): void {

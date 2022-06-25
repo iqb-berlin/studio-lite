@@ -49,7 +49,7 @@ export class SelectModuleComponent implements OnDestroy {
       } else if (checkModuleId === true) {
         newModuleSelectorValue = this.selectedModuleId;
       } else if (this.moduleList) {
-        this.moduleSubstitute = `${checkModuleId} - ${this.moduleList.getName(checkModuleId)}`;
+        this.moduleSubstitute = this.moduleList.getNameAndVersion(checkModuleId);
       }
     }
     this.moduleFormDataChangedSubscription = this.moduleForm.valueChanges.subscribe(() => {

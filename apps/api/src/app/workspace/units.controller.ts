@@ -53,10 +53,9 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesMetadata(
-    @WorkspaceId() workspaceId: number,
       @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitMetadataDto> {
-    return this.unitService.findOnesMetadata(workspaceId, unitId);
+    return this.unitService.findOnesMetadata(unitId);
   }
 
   @Get(':id/definition')
@@ -68,10 +67,9 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesDefinition(
-    @WorkspaceId() workspaceId: number,
-      @Param('id', ParseIntPipe) unitId: number
+    @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitDefinitionDto> {
-    return this.unitService.findOnesDefinition(workspaceId, unitId);
+    return this.unitService.findOnesDefinition(unitId);
   }
 
   @Get(':id/scheme')
@@ -83,10 +81,9 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesScheme(
-    @WorkspaceId() workspaceId: number,
       @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitSchemeDto> {
-    return this.unitService.findOnesScheme(workspaceId, unitId);
+    return this.unitService.findOnesScheme(unitId);
   }
 
   @Patch(':id/metadata')
@@ -94,10 +91,33 @@ export class UnitsController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchMetadata(@WorkspaceId() workspaceId: number,
-    @Param('id', ParseIntPipe) unitId: number,
+  async patchMetadata(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitMetadataDto: UnitMetadataDto) {
-    return this.unitService.patchMetadata(workspaceId, unitId, unitMetadataDto);
+    return this.unitService.patchMetadata(unitId, unitMetadataDto);
+  }
+
+  @Patch(':ids/moveto/:target')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchWorkspace(@Param('ids') ids: string,
+                       @Param('target', ParseIntPipe) targetWorkspaceId: number) {
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
+    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId);
+  }
+
+  @Patch(':ids/copyto/:target')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async copy(@Param('ids') ids: string,
+             @Param('target', ParseIntPipe) targetWorkspaceId: number) {
+    const idsAsNumberArray: number[] = [];
+    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
+    return this.unitService.copy(idsAsNumberArray, targetWorkspaceId);
   }
 
   @Patch(':id/definition')
@@ -105,10 +125,9 @@ export class UnitsController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchDefinition(@WorkspaceId() workspaceId: number,
-    @Param('id', ParseIntPipe) unitId: number,
+  async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
-    return this.unitService.patchDefinition(workspaceId, unitId, unitDefinitionDto);
+    return this.unitService.patchDefinition(unitId, unitDefinitionDto);
   }
 
   @Patch(':id/scheme')
@@ -116,10 +135,9 @@ export class UnitsController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchScheme(@WorkspaceId() workspaceId: number,
-    @Param('id', ParseIntPipe) unitId: number,
+  async patchScheme(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitSchemeDto: UnitSchemeDto) {
-    return this.unitService.patchDefinition(workspaceId, unitId, unitSchemeDto);
+    return this.unitService.patchDefinition(unitId, unitSchemeDto);
   }
 
   @Post('units')

@@ -5,7 +5,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto, RequestReportDto
+  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -83,8 +83,12 @@ export class WorkspaceService {
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
-    const workspace = await this.workspacesRepository.findOne(id);
-    const workspaceGroup = await this.workspaceGroupRepository.findOne(workspace.groupId);
+    const workspace = await this.workspacesRepository.findOne({
+      where: {id: id}
+    });
+    const workspaceGroup = await this.workspaceGroupRepository.findOne({
+      where: {id: workspace.groupId}
+    });
     return <WorkspaceFullDto>{
       id: workspace.id,
       name: workspace.name,
@@ -101,9 +105,19 @@ export class WorkspaceService {
   }
 
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
-    const workspaceToUpdate = await this.workspacesRepository.findOne(workspaceData.id);
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: {id: workspaceData.id}
+    });
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
     if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
+    await this.workspacesRepository.save(workspaceToUpdate);
+  }
+
+  async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: {id: id}
+    });
+    workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
@@ -168,13 +182,13 @@ export class WorkspaceService {
           u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
           usedFiles.push(u.definitionFileName);
         }
-        await this.unitService.patchMetadata(id, newUnitId, {
+        await this.unitService.patchMetadata(newUnitId, {
           id: newUnitId,
           editor: u.editor,
           player: u.player,
           description: u.description
         });
-        await this.unitService.patchDefinition(id, newUnitId, {
+        await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition
         });
         if (!u.definition) {
@@ -184,7 +198,7 @@ export class WorkspaceService {
         }
       } else {
         functionReturn.messages.push({
-          objectKey: u.fileName, messageKey: 'unit-upload.api-error.duplicate-unit-id'
+          objectKey: u.fileName, messageKey: 'unit-patch.duplicate-unit-id'
         });
       }
     }));

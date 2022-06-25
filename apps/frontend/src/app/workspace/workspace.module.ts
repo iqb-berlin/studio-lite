@@ -30,7 +30,7 @@ import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
 import { SelectUnitComponent } from './dialogs/select-unit.component';
-import { MoveUnitComponent } from './dialogs/moveunit.component';
+import { MoveUnitComponent } from './dialogs/move-unit.component';
 import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
@@ -40,6 +40,7 @@ import { SelectModuleComponent } from './unit/unit-metadata/select-module.compon
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
+import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-list.component';
 
 @NgModule({
   imports: [
@@ -84,7 +85,8 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
     SelectModuleComponent,
     ExportUnitComponent,
     EditSettingsComponent,
-    UnitSchemerComponent
+    UnitSchemerComponent,
+    SelectUnitListComponent
   ],
   exports: [
     WorkspaceComponent
@@ -94,6 +96,7 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
     SelectUnitComponent,
     MoveUnitComponent,
     SaveOrDiscardComponent,
+    EditSettingsComponent,
     ExportUnitComponent
   ],
   providers: [

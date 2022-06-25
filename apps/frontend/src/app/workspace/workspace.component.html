@@ -2,11 +2,11 @@
   <div class="navibar" fxLayout="column" fxFlex="200px">
     <div fxLayout="row" style="margin: 2px">
       <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
-              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
+              [disabled]="!workspaceService.isChanged()" matTooltipPosition="below">
         <mat-icon>close</mat-icon>
       </button>
       <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
-              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
+              [disabled]="!workspaceService.isChanged()" matTooltipPosition="below">
         Speichern <mat-icon>save</mat-icon>
       </button>
     </div>
@@ -15,43 +15,59 @@
       <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList.groups">
         <div class="unit-group-header">{{unitGroup.name}}</div>
         <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-                *ngFor="let unit of unitGroup.units"
-                class="unit-list-entry"
-                [matTooltip]="unit.name ? unit.name : unit.id.toString()"
-                (click)="selectUnit(unit.id)"
-                [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
+           *ngFor="let unit of unitGroup.units"
+           class="unit-list-entry"
+           [matTooltip]="unit.name ? unit.name : unit.id.toString()"
+           matTooltipPosition="right"
+           (click)="selectUnit(unit.id)"
+           [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
           {{ unit.key }}{{ unit.name ? ' - ' + unit.name : ''}}
         </a>
       </mat-nav-list>
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
-      <button mat-raised-button (click)="addUnit()" matTooltip="Aufgabe hinzufügen" matTooltipPosition="above" fxFlex="33">
+      <button mat-raised-button [matMenuTriggerFor]="menuNew" matTooltip="Aufgabe(n) hinzufügen" matTooltipPosition="above" fxFlex="33">
         <mat-icon>add</mat-icon>
       </button>
       <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
           <mat-icon>delete</mat-icon>
       </button>
-      <button mat-button [matMenuTriggerFor]="menu" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
+      <button mat-button [matMenuTriggerFor]="menuOther" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
         <mat-icon>menu</mat-icon>
       </button>
 
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="settings()" disabled="disabled">
+      <mat-menu #menuNew="matMenu">
+        <button mat-menu-item (click)="hiddenFileInput.click()">
+          <mat-icon>input</mat-icon>Import von Datei(en)
+        </button>
+        <button mat-menu-item (click)="addUnitFromExisting()">
+          <mat-icon>content_copy</mat-icon>Neu von vorhandener Aufgabe
+        </button>
+        <button mat-menu-item (click)="addUnit()">
+          <mat-icon>add</mat-icon>Neu (leer)
+        </button>
+      </mat-menu>
+
+      <mat-menu #menuOther="matMenu">
+        <button mat-menu-item (click)="settings()">
           <mat-icon>settings</mat-icon>Einstellungen
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="copyUnit()" disabled="disabled">
-          <mat-icon>content_copy</mat-icon>Kopieren
+        <button mat-menu-item (click)="exportUnit()"
+                matTooltip="Aufgaben als Datei herunterladen"
+                matTooltipPosition="right">
+          <mat-icon>get_app</mat-icon>Export
         </button>
-        <button mat-menu-item (click)="moveUnit()" disabled="disabled">
+        <button mat-menu-item (click)="moveOrCopyUnit(true)"
+                matTooltip="Aufgaben in anderen Arbeitsbereich verschieben"
+                matTooltipPosition="right">
           <mat-icon>swap_horiz</mat-icon>Verschieben
         </button>
-        <button mat-menu-item (click)="hiddenFileInput.click()">
-          <mat-icon>input</mat-icon>Import
-        </button>
-        <button mat-menu-item (click)="exportUnit()">
-          <mat-icon>get_app</mat-icon>Export
+        <button mat-menu-item (click)="moveOrCopyUnit(false)"
+                matTooltip="Aufgaben in anderen Arbeitsbereich kopieren"
+                matTooltipPosition="right">
+          <mat-icon>content_copy</mat-icon>Kopieren
         </button>
       </mat-menu>
     </div>

@@ -27,7 +27,10 @@ export class WorkspaceGroupService {
   }
 
   async findOne(id: number): Promise<WorkspaceGroupFullDto> {
-    const workspace = await this.workspaceGroupsRepository.findOne(id);
+    const workspace = await this.workspaceGroupsRepository.findOne({
+      where: {id: id},
+      select: {id: true, name: true, settings: true}
+    });
     return <WorkspaceGroupFullDto>{
       id: workspace.id,
       name: workspace.name,
@@ -43,7 +46,10 @@ export class WorkspaceGroupService {
 
   async patch(workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
     if (workspaceGroupData.id) {
-      const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne(workspaceGroupData.id);
+      const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
+        where: {id: workspaceGroupData.id},
+        select: {settings: true, name: true}
+      });
       if (workspaceGroupData.name) workspaceGroupToUpdate.name = workspaceGroupData.name;
       if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);

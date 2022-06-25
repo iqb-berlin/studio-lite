@@ -75,7 +75,7 @@ export class UnitMetadataStore {
     }
   }
 
-  setBasicData(newKey: string, newName: string, newDescription: string) {
+  setBasicData(newKey: string, newName: string, newDescription: string, newGroup: string) {
     if (newKey === this.originalData.key) {
       if (this.changedData.key) delete this.changedData.key;
     } else {
@@ -91,15 +91,20 @@ export class UnitMetadataStore {
     } else {
       this.changedData.description = newDescription;
     }
+    if (newGroup === this.originalData.groupName) {
+      if (this.changedData.groupName) delete this.changedData.groupName;
+    } else {
+      this.changedData.groupName = newGroup;
+    }
   }
 
   isChanged(): boolean {
     return Object.keys(this.changedData).length > 1;
   }
 
-  isKeyOrNameChanged(): boolean {
+  isKeyOrNameOrGroupChanged(): boolean {
     const dataKeys = Object.keys(this.changedData);
-    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0);
+    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0 || dataKeys.indexOf('groupName') >= 0);
   }
 
   getChangedData(): UnitMetadataDto {

@@ -1,5 +1,5 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
@@ -11,7 +11,7 @@ import {
   UnitSchemeDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto,
-  WorkspaceFullDto
+  WorkspaceFullDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -49,22 +49,18 @@ export class BackendService {
       );
   }
 
-  addUnit(workspaceId: number, newUnit: CreateUnitDto): Observable<number | null> {
+  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
     return this.http
-      .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`, newUnit)
+      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
       .pipe(
-        catchError(() => of(null)),
-        map(returnId => Number(returnId))
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
-  copyUnit(workspaceId: number,
-           fromUnit: number, key: string, label: string): Observable<number | null> {
+  addUnit(workspaceId: number, newUnit: CreateUnitDto): Observable<number | null> {
     return this.http
-      .put<string>(`${this.serverUrl}addUnit.php`,
-      {
-        t: localStorage.getItem('t'), ws: workspaceId, u: fromUnit, k: key, l: label
-      })
+      .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`, newUnit)
       .pipe(
         catchError(() => of(null)),
         map(returnId => Number(returnId))
@@ -80,27 +76,16 @@ export class BackendService {
       );
   }
 
-  /*
-  moveUnits(workspaceId: number,
-            units: number[], targetWorkspace: number): Observable<boolean | number> {
-    const authToken = localStorage.getItem('t');
-    if (!authToken) {
-      return of(401);
-    }
+  moveOrCopyUnits(workspaceId: number, units: number[],
+                  targetWorkspace: number, moveOnly: boolean): Observable<boolean | RequestReportDto> {
     return this.http
-      .put<UnitInListDto[]>(`${this.serverUrl}moveUnits.php`,
-      {
-        t: authToken, ws: workspaceId, u: units, tws: targetWorkspace
-      })
+      .patch<RequestReportDto>(
+        `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${moveOnly ? 'moveto' : 'copyto'}/${targetWorkspace}`, {}
+      )
       .pipe(
-        catchError(err => throwError(new AppHttpError(err))),
-        map((unMovableUnits: UnitInListDto[]) => {
-          if (unMovableUnits.length === 0) return true;
-          return unMovableUnits.length;
-        })
+        catchError(() => of(false))
       );
   }
-   */
 
   downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob | number | null> {
     return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download/${JSON.stringify(settings)}`, {
@@ -222,23 +207,4 @@ export class BackendService {
         catchError(() => of([]))
       );
   }
-
-  /*
-  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettings): Observable<boolean> {
-    return this.http
-      .put<boolean>(`${this.serverUrl}setWorkspaceSettings.php`, {
-      t: localStorage.getItem('t'),
-      ws: workspaceId,
-      s: settings
-    })
-      .pipe(
-        catchError(() => of(false))
-      );
-  }
-   */
-}
-
-export interface WorkspaceSettings {
-  defaultPlayer: string;
-  defaultEditor: string
 }

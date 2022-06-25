@@ -8,7 +8,7 @@
         <mat-select placeholder="Editor" formControlName="editorSelector">
           <mat-option [value]=""></mat-option>
           <mat-option *ngFor="let m of ds.editorList.getEntries()" [value]="m.key">
-            {{m.metadata.name}}
+            {{m.metadata?.name}} {{m.metadata?.version}}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -17,7 +17,7 @@
         <mat-select placeholder="Player" formControlName="playerSelector">
           <mat-option [value]=""></mat-option>
           <mat-option *ngFor="let m of ds.playerList.getEntries()" [value]="m.key">
-            {{m.metadata.name}}
+            {{m.metadata?.name}} {{m.metadata?.version}}
           </mat-option>
         </mat-select>
       </mat-form-field>

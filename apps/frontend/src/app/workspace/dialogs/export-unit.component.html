@@ -2,66 +2,49 @@
   <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
   <div fxLayout="row" fxLayoutGap="20px">
     <mat-dialog-content fxFlex>
-      <mat-table [dataSource]="objectsDatasource" matSort>
-        <ng-container matColumnDef="selectCheckbox">
-          <mat-header-cell *matHeaderCellDef fxFlex="70px">
-            <mat-checkbox (change)="$event ? masterToggle() : null"
-                          [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
-                          [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
-            </mat-checkbox>
-          </mat-header-cell>
-          <mat-cell *matCellDef="let row" fxFlex="70px">
-            <mat-checkbox (click)="$event.stopPropagation()" [disabled]="row.disabled"
-                          (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
-                          [checked]="tableSelectionCheckbox.isSelected(row)">
-            </mat-checkbox>
-          </mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef mat-sort-header="element.key"> Aufgabe </mat-header-cell>
-          <mat-cell *matCellDef="let element" [class]="element.disabled ? 'disabled-element' : ''"> {{element.key}}-{{element.label}} </mat-cell>
-        </ng-container>
-
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-      </mat-table>
+      <select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspace"></select-unit-list>
     </mat-dialog-content>
     <div fxFlex="300px">
-      <mat-checkbox (change)="updateUnitList()" [(ngModel)]="unitExportSettings.addPlayers">
+      <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
+      <mat-checkbox (change)="updateDisabled()" [disabled]="!enablePlayerOption"
+                    [(ngModel)]="unitExportSettings.addPlayers" class="margin-bottom">
         Player hinzufügen
       </mat-checkbox>
-      <div fxLayout="column" *ngIf="unitExportSettings.addPlayers">
-        <div *ngIf="unitsWithPlayer.length === 0" class="tcMessage">Keine Aufgabe hat einen gültigen Player gesetzt.</div>
-        <div *ngIf="unitsWithPlayer.length !== ds.unitList.units().length && unitsWithPlayer.length > 0" class="tcMessage">
-          Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
+      <div fxLayout="column">
+        <div *ngIf="!enablePlayerOption" class="tcMessage margin-bottom">
+          Keine Aufgabe hat einen gültigen Player gesetzt.
         </div>
         <div fxLayout="row">
           <label fxFlex="50%">Logins hinzufügen</label>
           <div fxLayout="column">
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
+              <input matInput type="number" min="0"
+                     [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
             </mat-form-field>
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
+              <input matInput type="number" min="0"
+                     [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
             </mat-form-field>
             <mat-form-field>
-              <input matInput type="number" [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
+              <input matInput type="number" min="0"
+                     [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
             </mat-form-field>
           </div>
         </div>
-        <mat-checkbox [(ngModel)]="unitExportSettings.passwordLess">
+        <mat-checkbox [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
+                      [(ngModel)]="unitExportSettings.passwordLess" class="margin-bottom">
           <div>Ohne Kennwort (nur Login-Name)</div>
         </mat-checkbox>
+        <div *ngIf="unitExportSettings.addPlayers && unitsWithOutPlayer.length > 0"
+             class="tcMessage">
+          Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
+        </div>
       </div>
     </div>
   </div>
   <mat-dialog-actions fxLayout="column">
-    <p *ngIf="!tableSelectionCheckbox.hasValue()">Bitte Aufgaben auswählen!</p>
-    <p *ngIf="tableSelectionCheckbox.selected.length === 1">Eine Aufgabe ausgewählt.</p>
-    <p *ngIf="tableSelectionCheckbox.selected.length > 1">{{tableSelectionCheckbox.selected.length}} Aufgaben ausgewählt.</p>
     <div fxLayout="row">
-      <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="getResultData()" [disabled]="!tableSelectionCheckbox.hasValue()">
+      <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="getResultData()" [disabled]="unitSelectionTable.selectionCount === 0">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}

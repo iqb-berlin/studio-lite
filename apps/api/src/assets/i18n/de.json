@@ -1,7 +1,6 @@
 {
   "unit-upload": {
     "api-error": {
-      "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden",
       "zip": "Zip-Datei konnte nicht extrahiert werden"
     },
     "api-warning": {
@@ -9,5 +8,8 @@
       "xml-parse": "Nicht als Unit-Xml erkannt",
       "ignore-file": "Datei wurde ignoriert"
     }
+  },
+  "unit-patch": {
+    "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
   }
 }
