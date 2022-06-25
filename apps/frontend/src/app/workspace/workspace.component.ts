@@ -387,7 +387,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   exportUnit(): void {
     if (this.workspaceService.unitList.units().length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '800px'
+        width: '900px'
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {

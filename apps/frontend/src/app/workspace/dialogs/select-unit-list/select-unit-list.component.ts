@@ -1,8 +1,9 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ViewChild} from '@angular/core';
 import {BackendService} from "../../backend.service";
 import {MatTableDataSource} from "@angular/material/table";
 import {UnitInListDto} from "@studio-lite-lib/api-dto";
 import {SelectionModel} from "@angular/cdk/collections";
+import {MatSort} from "@angular/material/sort";
 
 @Component({
   selector: 'select-unit-list',
@@ -30,11 +31,19 @@ import {SelectionModel} from "@angular/cdk/collections";
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef mat-sort-header> Aufgabe </mat-header-cell>
+        <ng-container matColumnDef="key">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="key"> Aufgabe</mat-header-cell>
           <mat-cell *matCellDef="let element"
                     [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
             {{element.key}}{{element.name ? ' - ' + element.name : ''}}
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="groupName">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="groupName"> Gruppe</mat-header-cell>
+          <mat-cell *matCellDef="let element"
+                    [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
+            {{element.groupName}}
           </mat-cell>
         </ng-container>
 
@@ -51,7 +60,7 @@ import {SelectionModel} from "@angular/cdk/collections";
 })
 export class SelectUnitListComponent {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
-  displayedColumns = ['selectCheckbox', 'name'];
+  displayedColumns = ['selectCheckbox', 'key', 'groupName'];
   tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
   disabledUnits: number[] = [];
   @Input('workspace')
@@ -59,6 +68,7 @@ export class SelectUnitListComponent {
     this.tableSelectionCheckbox.clear();
     this.backendService.getUnitList(value).subscribe(unitData => {
       this.objectsDatasource = new MatTableDataSource(unitData);
+      this.objectsDatasource.sort = this.sort;
     });
   }
   multipleSelection = true;
@@ -91,6 +101,7 @@ export class SelectUnitListComponent {
     if (selectedUnits.length > 0 && selectedUnits[0].name) return selectedUnits[0].name;
     return ''
   }
+  @ViewChild(MatSort) sort = new MatSort();
 
   constructor(
     private backendService: BackendService,
