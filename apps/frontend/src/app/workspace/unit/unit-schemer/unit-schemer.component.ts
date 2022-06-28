@@ -47,11 +47,11 @@ export class UnitSchemerComponent implements OnInit {
             if (msgData.sessionId === this.sessionId) {
               if (msgData.codingScheme) {
                 this.workspaceService.unitSchemeStore?.setData(msgData.codingScheme, msgData.codingSchemeType);
-              } else {
-                this.postMessageTarget.postMessage({
-                  type: 'vosGetSchemeRequest',
-                  sessionId: this.sessionId
-                }, '*');
+              // } else { TODO: find solution for vosGetSchemeRequest
+              //   this.postMessageTarget.postMessage({
+              //     type: 'vosGetSchemeRequest',
+              //     sessionId: this.sessionId
+              //   }, '*');
               }
             }
             break;

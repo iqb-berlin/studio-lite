@@ -64,11 +64,11 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
               if (this.editorApiVersion > 1) {
                 if (msgData.unitDefinition) {
                   this.workspaceService.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
-                } else {
-                  this.postMessageTarget.postMessage({
-                    type: 'voeGetDefinitionRequest',
-                    sessionId: this.sessionId
-                  }, '*');
+                // } else { TODO: find solution for voeGetDefinitionRequest
+                //   this.postMessageTarget.postMessage({
+                //     type: 'voeGetDefinitionRequest',
+                //     sessionId: this.sessionId
+                //   }, '*');
                 }
               } else {
                 this.postMessageTarget.postMessage({
