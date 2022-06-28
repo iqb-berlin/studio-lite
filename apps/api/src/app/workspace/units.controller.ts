@@ -137,7 +137,7 @@ export class UnitsController {
   @ApiTags('workspace unit')
   async patchScheme(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitSchemeDto: UnitSchemeDto) {
-    return this.unitService.patchDefinition(unitId, unitSchemeDto);
+    return this.unitService.patchScheme(unitId, unitSchemeDto);
   }
 
   @Post('units')
