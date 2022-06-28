@@ -124,6 +124,7 @@ export class UnitSchemerComponent implements OnInit {
 
   private postUnitScheme(unitSchemeStore: UnitSchemeStore): void {
     const unitScheme = unitSchemeStore.getData();
+    const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitScheme.variables;
     if (this.postMessageTarget) {
       this.postMessageTarget.postMessage({
         type: 'vosStartCommand',
@@ -133,7 +134,7 @@ export class UnitSchemerComponent implements OnInit {
         },
         codingScheme: unitScheme.scheme || '',
         codingSchemeType: unitScheme.schemeType || '',
-        variables: this.workspaceService.unitDefinitionStore?.getData().variables || []
+        variables: variables || []
       }, '*');
     }
   }
