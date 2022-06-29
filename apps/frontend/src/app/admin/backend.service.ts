@@ -9,7 +9,7 @@ import {
   UserInListDto,
   WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   WorkspaceInListDto,
-  WorkspaceGroupDto, VeronaModuleInListDto
+  WorkspaceGroupDto, VeronaModuleInListDto, UnitExportConfigDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -193,6 +193,20 @@ export class BackendService {
   setAppLogo(appLogo: AppLogoDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/app-logo`, appLogo)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  getUnitExportConfig(): Observable<UnitExportConfigDto> {
+    return this.http
+      .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`)
+  }
+
+  setUnitExportConfig(unitExportConfig: UnitExportConfigDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/unit-export-config`, unitExportConfig)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
