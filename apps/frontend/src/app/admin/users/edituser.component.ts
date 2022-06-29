@@ -1,6 +1,6 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 
 export type EditUserComponentData = {
   newUser: boolean,
@@ -48,12 +48,12 @@ export type EditUserComponentData = {
 })
 
 export class EditUserComponent {
-  editUserForm: FormGroup;
+  editUserForm: UntypedFormGroup;
   saveButtonLabel: string;
   title: string;
   passwordLabel: string;
 
-  constructor(private fb: FormBuilder,
+  constructor(private fb: UntypedFormBuilder,
               @Inject(MAT_DIALOG_DATA) public data: EditUserComponentData) {
     this.saveButtonLabel = data.newUser ? 'Neu anlegen' : 'Speichern';
     this.title = data.newUser ? 'Nutzer:in neu anlegen' : 'Nutzerdaten ändern';

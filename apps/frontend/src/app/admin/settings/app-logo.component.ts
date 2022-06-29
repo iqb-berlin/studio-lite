@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { BackendService as WriteBackendService } from '../backend.service';
 import { BackendService as ReadBackendService } from '../../backend.service';
@@ -18,14 +18,14 @@ import { standardLogo } from '../../app.service';
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {
-  configForm: FormGroup;
+  configForm: UntypedFormGroup;
   dataChanged = false;
   private configDataChangedSubscription: Subscription | null = null;
   imageError: string | null = '';
   logoImageBase64 = '';
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private snackBar: MatSnackBar,
     private writeBackendService: WriteBackendService,
     private readBackendService: ReadBackendService

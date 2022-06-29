@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
@@ -83,7 +83,7 @@ export class WorkspaceGroupsComponent implements OnInit {
         if (result !== false) {
           this.bs.renameWorkspaceGroup(
             wsg.id,
-            (<FormGroup>result).get('name')?.value
+            (<UntypedFormGroup>result).get('name')?.value
           ).subscribe(
             ok => {
               if (!ok) {

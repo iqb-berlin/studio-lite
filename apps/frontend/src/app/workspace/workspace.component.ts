@@ -1,5 +1,5 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -209,10 +209,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           if (typeof dialogResult !== 'undefined') {
             if (dialogResult !== false) {
               return <CreateUnitDto>{
-                key: (<FormGroup>dialogResult).get('key')?.value.trim(),
-                name: (<FormGroup>dialogResult).get('label')?.value,
-                groupName: (<FormGroup>dialogResult).get('groupSelect')?.value ||
-                  (<FormGroup>dialogResult).get('groupDirect')?.value || ''
+                key: (<UntypedFormGroup>dialogResult).get('key')?.value.trim(),
+                name: (<UntypedFormGroup>dialogResult).get('label')?.value,
+                groupName: (<UntypedFormGroup>dialogResult).get('groupSelect')?.value ||
+                  (<UntypedFormGroup>dialogResult).get('groupDirect')?.value || ''
               };
             }
           }

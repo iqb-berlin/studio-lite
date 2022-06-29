@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 @Component({
   template: `
@@ -38,9 +38,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   `
 })
 export class ChangePasswordComponent {
-  changePasswordForm: FormGroup;
+  changePasswordForm: UntypedFormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: UntypedFormBuilder) {
     this.changePasswordForm = this.fb.group({
       pw_old: this.fb.control('', [Validators.required, Validators.minLength(3), Validators.pattern(/^\S+$/)]),
       pw_new1: this.fb.control('', [Validators.required, Validators.minLength(3), Validators.pattern(/^\S+$/)]),

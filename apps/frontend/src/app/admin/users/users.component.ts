@@ -4,7 +4,7 @@ import { ViewChild, Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   ConfirmDialogComponent,
@@ -87,10 +87,10 @@ export class UsersComponent implements OnInit {
         if (result !== false) {
           this.appService.dataLoading = true;
           const userData: CreateUserDto = {
-            name: (<FormGroup>result).get('name')?.value,
-            password: (<FormGroup>result).get('password')?.value,
-            isAdmin: (<FormGroup>result).get('isAdmin')?.value,
-            description: (<FormGroup>result).get('description')?.value
+            name: (<UntypedFormGroup>result).get('name')?.value,
+            password: (<UntypedFormGroup>result).get('password')?.value,
+            isAdmin: (<UntypedFormGroup>result).get('isAdmin')?.value,
+            description: (<UntypedFormGroup>result).get('description')?.value
           };
           this.backendService.addUser(userData).subscribe(
             respOk => {
@@ -136,10 +136,10 @@ export class UsersComponent implements OnInit {
         if (typeof result !== 'undefined') {
           if (result !== false) {
             this.appService.dataLoading = true;
-            const newPassword: string = (<FormGroup>result).get('password')?.value;
-            const newName: string = (<FormGroup>result).get('name')?.value;
-            const newDescription: string = (<FormGroup>result).get('description')?.value;
-            const newIsAdmin: boolean = (<FormGroup>result).get('isAdmin')?.value;
+            const newPassword: string = (<UntypedFormGroup>result).get('password')?.value;
+            const newName: string = (<UntypedFormGroup>result).get('name')?.value;
+            const newDescription: string = (<UntypedFormGroup>result).get('description')?.value;
+            const newIsAdmin: boolean = (<UntypedFormGroup>result).get('isAdmin')?.value;
             const changedData: UserFullDto = { id: selectedRows[0].id };
             if (newName !== selectedRows[0].name) changedData.name = newName;
             if (newDescription !== selectedRows[0].description) changedData.description = newDescription;
