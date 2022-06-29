@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
@@ -12,11 +13,11 @@ import { BackendService } from '../backend.service';
   selector: 'app-verona-modules-table',
   templateUrl: './verona-modules-table.component.html'
 })
-export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy {
+export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
   @Input() type!: 'player' | 'editor' | 'schemer';
   @Input() downloadPath = '';
   @Output() selectionChanged = new EventEmitter();
-  @ViewChild(MatSort) sort: MatSort | null = null;
+  @ViewChild(MatSort) sort = new MatSort();
   objectsDatasource = new MatTableDataSource<VeronaModuleInListDto>();
   tableSelectionCheckboxes = new SelectionModel <VeronaModuleInListDto>(true, []);
   timeZone = 'Europe/Berlin';
@@ -34,6 +35,9 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {
       this.selectionChanged.emit({ type: this.type, selectedModules: this.tableSelectionCheckboxes.selected });
     });
+  }
+
+  ngAfterViewInit(): void {
     setTimeout(() => {
       this.updateList();
     });
