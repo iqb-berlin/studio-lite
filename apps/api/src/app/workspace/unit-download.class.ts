@@ -36,17 +36,28 @@ export class UnitDownloadClass {
             Id: unitMetadata.key,
             Label: unitMetadata.name,
             Description: unitMetadata.description
-          },
-          DefinitionRef: {
-            '@player': unitMetadata.player,
-            '@editor': unitMetadata.editor,
-            '#': `${unitMetadata.key}.voud`
           }
         }
       });
+      const definitionData = await unitService.findOnesDefinition(unitId);
+      if (definitionData && definitionData.definition && definitionData.definition.length > 0) {
+        unitXml.root().ele({
+          DefinitionRef: {
+            '@player': unitMetadata.player || '',
+            '@editor': unitMetadata.editor || '',
+            '#': `${unitMetadata.key}.voud`
+          }
+        });
+        zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(definitionData.definition));
+      } else {
+        unitXml.root().ele({
+          Definition: {
+            '@player': unitMetadata.player || '',
+            '@editor': unitMetadata.editor || ''
+          }
+        });
+      }
       zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
-      const definition = await unitService.findOnesDefinition(unitId);
-      zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(definition.definition));
       unitKeys.push(unitMetadata.key);
       if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
     }));
