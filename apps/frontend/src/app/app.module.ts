@@ -36,65 +36,60 @@ import { RequestMessageDialogComponent } from './components/request-message-dial
 import { InputTextComponent } from './components/input-text.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    AboutComponent,
-    ChangePasswordComponent,
-    RequestMessageDialogComponent,
-    InputTextComponent
-  ],
-  imports: [
-    ApplicationModule,
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatMenuModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatInputModule,
-    MatTooltipModule,
-    MatDialogModule,
-    MatCardModule,
-    MatIconModule,
-    MatTabsModule,
-    MatTableModule,
-    ReactiveFormsModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    FlexLayoutModule,
-    RouterModule,
-    ReactiveFormsModule,
-    HttpClientModule,
-    AppRoutingModule,
-    IqbComponentsModule.forRoot(),
-    TranslateModule.forRoot({
-      defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useClass: AppTranslateLoader
-      }
-    })
-  ],
-  providers: [
-    BackendService,
-    MatDialog,
-    {
-      provide: LocationStrategy,
-      useClass: HashLocationStrategy
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
-  ],
-  entryComponents: [
-    ChangePasswordComponent,
-    RequestMessageDialogComponent,
-    InputTextComponent
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        HomeComponent,
+        AboutComponent,
+        ChangePasswordComponent,
+        RequestMessageDialogComponent,
+        InputTextComponent
+    ],
+    imports: [
+        ApplicationModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatMenuModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatInputModule,
+        MatTooltipModule,
+        MatDialogModule,
+        MatCardModule,
+        MatIconModule,
+        MatTabsModule,
+        MatTableModule,
+        ReactiveFormsModule,
+        MatProgressSpinnerModule,
+        MatSnackBarModule,
+        FlexLayoutModule,
+        RouterModule,
+        ReactiveFormsModule,
+        HttpClientModule,
+        AppRoutingModule,
+        IqbComponentsModule.forRoot(),
+        TranslateModule.forRoot({
+            defaultLanguage: 'de',
+            loader: {
+                provide: TranslateLoader,
+                useClass: AppTranslateLoader
+            }
+        })
+    ],
+    providers: [
+        BackendService,
+        MatDialog,
+        {
+            provide: LocationStrategy,
+            useClass: HashLocationStrategy
+        },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptor,
+            multi: true
+        }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

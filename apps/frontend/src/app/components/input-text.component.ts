@@ -1,6 +1,6 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 
 export interface InputTextData {
   title: string,
@@ -30,9 +30,9 @@ export interface InputTextData {
   `
 })
 export class InputTextComponent {
-  textInputForm: FormGroup;
+  textInputForm: UntypedFormGroup;
 
-  constructor(private fb: FormBuilder,
+  constructor(private fb: UntypedFormBuilder,
               @Inject(MAT_DIALOG_DATA) public data: InputTextData) {
     this.textInputForm = this.fb.group({
       text: this.fb.control(data.default, [Validators.required]),

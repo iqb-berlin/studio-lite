@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { WorkspaceService } from '../workspace.service';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
@@ -9,10 +9,10 @@ import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
   templateUrl: './edit-settings.component.html'
 })
 export class EditSettingsComponent {
-  settingsForm: FormGroup;
+  settingsForm: UntypedFormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public ds: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: unknown
   ) {

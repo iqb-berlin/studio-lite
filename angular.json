@@ -2,12 +2,13 @@
   "version": 1,
   "projects": {
     "api": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "apps/api",
       "sourceRoot": "apps/api/src",
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@nrwl/node:build",
+          "builder": "@nrwl/node:webpack",
           "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/apps/api",
@@ -30,7 +31,7 @@
           }
         },
         "serve": {
-          "builder": "@nrwl/node:execute",
+          "builder": "@nrwl/node:node",
           "options": {
             "buildTarget": "api:build"
           }
@@ -46,7 +47,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/api"],
           "options": {
-            "jestConfig": "apps/api/jest.config.js",
+            "jestConfig": "apps/api/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -66,6 +67,7 @@
       "tags": []
     },
     "api-admin": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "libs/api-admin",
       "sourceRoot": "libs/api-admin/src",
       "projectType": "library",
@@ -89,6 +91,7 @@
       "tags": []
     },
     "api-auth": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "libs/api-auth",
       "sourceRoot": "libs/api-auth/src",
       "projectType": "library",
@@ -112,6 +115,7 @@
       "tags": []
     },
     "api-authoring": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "libs/api-authoring",
       "sourceRoot": "libs/api-authoring/src",
       "projectType": "library",
@@ -135,6 +139,7 @@
       "tags": []
     },
     "frontend": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "projectType": "application",
       "root": "apps/frontend",
       "sourceRoot": "apps/frontend/src",
@@ -222,7 +227,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/frontend"],
           "options": {
-            "jestConfig": "apps/frontend/jest.config.js",
+            "jestConfig": "apps/frontend/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -242,6 +247,7 @@
       "tags": []
     },
     "frontend-e2e": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "apps/frontend-e2e",
       "sourceRoot": "apps/frontend-e2e/src",
       "projectType": "application",
@@ -270,6 +276,7 @@
       "implicitDependencies": ["frontend"]
     },
     "iqb-components": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "projectType": "library",
       "root": "libs/iqb-components",
       "sourceRoot": "libs/iqb-components/src",
@@ -279,7 +286,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/iqb-components"],
           "options": {
-            "jestConfig": "libs/iqb-components/jest.config.js",
+            "jestConfig": "libs/iqb-components/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -296,6 +303,7 @@
       "tags": []
     },
     "shared-code": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "libs/shared-code",
       "sourceRoot": "libs/shared-code/src",
       "projectType": "library",
@@ -311,7 +319,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared-code"],
           "options": {
-            "jestConfig": "libs/shared-code/jest.config.js",
+            "jestConfig": "libs/shared-code/jest.config.ts",
             "passWithNoTests": true
           }
         }

@@ -1,6 +1,6 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { WorkspaceService } from '../workspace.service';
 
 export interface NewUnitData {
@@ -60,11 +60,11 @@ export interface NewUnitData {
   `
 })
 export class NewUnitComponent {
-  newUnitForm: FormGroup;
+  newUnitForm: UntypedFormGroup;
   groupDirectMode = false;
   @ViewChild('newGroupInput') newGroupInput: ElementRef | undefined;
 
-  constructor(private fb: FormBuilder,
+  constructor(private fb: UntypedFormBuilder,
               public ds: WorkspaceService,
               @Inject(MAT_DIALOG_DATA) public data: NewUnitData) {
     this.newUnitForm = this.fb.group({

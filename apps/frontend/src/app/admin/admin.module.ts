@@ -70,38 +70,33 @@ import { TranslateModule } from '@ngx-translate/core';
         FormsModule,
         TranslateModule
     ],
-  exports: [
-    AdminComponent
-  ],
-  declarations: [
-    WorkspacesComponent,
-    UsersComponent,
-    AdminComponent,
-    EditworkspaceComponent,
-    EditUserComponent,
-    VeronaModulesComponent,
-    VeronaModulesTableComponent,
-    SettingsComponent,
-    WorkspaceGroupsComponent,
-    EditWorkspaceGroupComponent,
-    AppConfigComponent,
-    AppLogoComponent
-  ],
-  providers: [
-    BackendService,
-    [
-      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-      {
-        provide: HTTP_INTERCEPTORS,
-        useClass: AuthInterceptor,
-        multi: true
-      }
+    exports: [
+        AdminComponent
+    ],
+    declarations: [
+        WorkspacesComponent,
+        UsersComponent,
+        AdminComponent,
+        EditworkspaceComponent,
+        EditUserComponent,
+        VeronaModulesComponent,
+        VeronaModulesTableComponent,
+        SettingsComponent,
+        WorkspaceGroupsComponent,
+        EditWorkspaceGroupComponent,
+        AppConfigComponent,
+        AppLogoComponent
+    ],
+    providers: [
+        BackendService,
+        [
+            { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+            {
+                provide: HTTP_INTERCEPTORS,
+                useClass: AuthInterceptor,
+                multi: true
+            }
+        ]
     ]
-  ],
-  entryComponents: [
-    EditUserComponent,
-    EditworkspaceComponent,
-    EditWorkspaceGroupComponent
-  ]
 })
 export class AdminModule { }

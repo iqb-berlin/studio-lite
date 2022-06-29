@@ -1,7 +1,7 @@
 import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../workspace.service';
@@ -27,11 +27,11 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   private editorSelectionChangedSubscription: Subscription | undefined;
   private playerSelectionChangedSubscription: Subscription | undefined;
   private schemerSelectionChangedSubscription: Subscription | undefined;
-  unitForm: FormGroup;
+  unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private backendService: BackendService,
     public workspaceService: WorkspaceService,
     private inputTextDialog: MatDialog,

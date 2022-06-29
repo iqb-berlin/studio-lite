@@ -4,7 +4,7 @@ import { ViewChild, Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   ConfirmDialogComponent,
@@ -99,8 +99,8 @@ export class WorkspacesComponent implements OnInit {
           if (result !== false) {
             this.appService.dataLoading = true;
             this.backendService.addWorkspace(<CreateWorkspaceDto>{
-              name: (<FormGroup>result).get('name')?.value,
-              groupId: (<FormGroup>result).get('groupSelector')?.value
+              name: (<UntypedFormGroup>result).get('name')?.value,
+              groupId: (<UntypedFormGroup>result).get('groupSelector')?.value
             }).subscribe(
               respOk => {
                 if (respOk) {
@@ -151,8 +151,8 @@ export class WorkspacesComponent implements OnInit {
             const workspaceData = <WorkspaceFullDto>{
               id: selectedRows[0].id
             };
-            const newName = (<FormGroup>result).get('name')?.value;
-            const newWorkspaceGroup = (<FormGroup>result).get('groupSelector')?.value;
+            const newName = (<UntypedFormGroup>result).get('name')?.value;
+            const newWorkspaceGroup = (<UntypedFormGroup>result).get('groupSelector')?.value;
             if (newName !== selectedRows[0].name) workspaceData.name = newName;
             if (newWorkspaceGroup !== selectedRows[0].groupId) workspaceData.groupId = parseInt(newWorkspaceGroup, 10);
             this.backendService.changeWorkspace(workspaceData).subscribe(

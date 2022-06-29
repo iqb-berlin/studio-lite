@@ -43,64 +43,56 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
 import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-list.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatTooltipModule,
-    FlexLayoutModule,
-    WorkspaceRoutingModule,
-    ReactiveFormsModule,
-    MatSelectModule,
-    MatListModule,
-    MatSlideToggleModule,
-    MatButtonToggleModule,
-    MatChipsModule,
-    MatMenuModule,
-    MatSortModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    HttpClientModule,
-    MatProgressSpinnerModule,
-    MatInputModule,
-    MatCardModule,
-    MatSnackBarModule,
-    MatTableModule,
-    MatCheckboxModule,
-    FormsModule,
-    MatTabsModule,
-    IqbComponentsModule,
-    MatProgressBarModule,
-    TranslateModule
-  ],
-  declarations: [
-    WorkspaceComponent,
-    NewUnitComponent,
-    SelectUnitComponent,
-    MoveUnitComponent,
-    UnitMetadataComponent,
-    UnitEditorComponent,
-    SaveOrDiscardComponent,
-    UnitPreviewComponent,
-    SelectModuleComponent,
-    ExportUnitComponent,
-    EditSettingsComponent,
-    UnitSchemerComponent,
-    SelectUnitListComponent
-  ],
-  exports: [
-    WorkspaceComponent
-  ],
-  entryComponents: [
-    NewUnitComponent,
-    SelectUnitComponent,
-    MoveUnitComponent,
-    SaveOrDiscardComponent,
-    EditSettingsComponent,
-    ExportUnitComponent
-  ],
-  providers: [
-    UnitRoutingCanDeactivateGuard
-  ]
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatTooltipModule,
+        FlexLayoutModule,
+        WorkspaceRoutingModule,
+        ReactiveFormsModule,
+        MatSelectModule,
+        MatListModule,
+        MatSlideToggleModule,
+        MatButtonToggleModule,
+        MatChipsModule,
+        MatMenuModule,
+        MatSortModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        HttpClientModule,
+        MatProgressSpinnerModule,
+        MatInputModule,
+        MatCardModule,
+        MatSnackBarModule,
+        MatTableModule,
+        MatCheckboxModule,
+        FormsModule,
+        MatTabsModule,
+        IqbComponentsModule,
+        MatProgressBarModule,
+        TranslateModule
+    ],
+    declarations: [
+        WorkspaceComponent,
+        NewUnitComponent,
+        SelectUnitComponent,
+        MoveUnitComponent,
+        UnitMetadataComponent,
+        UnitEditorComponent,
+        SaveOrDiscardComponent,
+        UnitPreviewComponent,
+        SelectModuleComponent,
+        ExportUnitComponent,
+        EditSettingsComponent,
+        UnitSchemerComponent,
+        SelectUnitListComponent
+    ],
+    exports: [
+        WorkspaceComponent
+    ],
+    providers: [
+        UnitRoutingCanDeactivateGuard
+    ]
 })
 export class WorkspaceModule { }

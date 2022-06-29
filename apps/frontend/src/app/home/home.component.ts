@@ -2,7 +2,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   Component, Inject, OnDestroy, OnInit
 } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,13 +17,13 @@ import { ChangePasswordComponent } from './change-password.component';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  loginForm: FormGroup;
+  loginForm: UntypedFormGroup;
   isError = false;
   errorMessage = '';
   private routingSubscription: Subscription | null = null;
   redirectTo = '';
 
-  constructor(private fb: FormBuilder,
+  constructor(private fb: UntypedFormBuilder,
               @Inject('APP_VERSION') readonly appVersion: string,
               @Inject('APP_NAME') readonly appName: string,
               public appService: AppService,

@@ -1,6 +1,6 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, OnInit, Inject, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { WorkspaceService } from '../workspace.service';
 import { AppService } from '../../app.service';
 import { BackendService } from '../backend.service';
@@ -45,7 +45,7 @@ export interface SelectUnitData {
 export class SelectUnitComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
   workspaceList: WorkspaceDataFlat[] = [];
-  selectForm: FormGroup | null = null;
+  selectForm: UntypedFormGroup | null = null;
   get selectedUnitIds(): number[] {
     return this.unitSelectionTable ? this.unitSelectionTable.selectedUnitIds : []
   }
@@ -57,7 +57,7 @@ export class SelectUnitComponent implements OnInit {
   }
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private backendService: BackendService,
     private appService: AppService,
     public ds: WorkspaceService,

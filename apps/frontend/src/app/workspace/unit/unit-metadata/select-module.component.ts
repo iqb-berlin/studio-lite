@@ -1,7 +1,7 @@
 import {
   Component, EventEmitter, Input, OnDestroy, Output
 } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { VeronaModuleCollection } from '../../verona-module-collection.class';
 
@@ -15,14 +15,14 @@ export class SelectModuleComponent implements OnDestroy {
   @Input() moduleType = '?';
   @Output() selectionChanged = new EventEmitter();
   hasListEntries = false;
-  moduleForm: FormGroup;
+  moduleForm: UntypedFormGroup;
   isValid = false;
   isEmpty = false;
   moduleSubstitute = '';
   private moduleFormDataChangedSubscription: Subscription | undefined;
 
   constructor(
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) {
     this.moduleForm = this.fb.group({
       moduleSelector: this.fb.control('')
