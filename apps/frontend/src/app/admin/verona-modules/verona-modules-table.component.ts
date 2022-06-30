@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import {VeronaModuleInListDto, VeronaModuleMetadataDto} from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 
 @Component({
@@ -21,7 +21,7 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
   objectsDatasource = new MatTableDataSource<VeronaModuleInListDto>();
   tableSelectionCheckboxes = new SelectionModel <VeronaModuleInListDto>(true, []);
   timeZone = 'Europe/Berlin';
-  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'verona-version', 'filedatetime', 'filesize'];
+  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(
@@ -48,6 +48,11 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
       (fileData: VeronaModuleInListDto[]) => {
         if (fileData) {
           this.objectsDatasource = new MatTableDataSource(fileData);
+          this.objectsDatasource.sortingDataAccessor = (item, property) =>
+            (property.includes('.')) ?
+              property.split('.')
+                .reduce((metaData: unknown ,i: string)=> (metaData as VeronaModuleMetadataDto)[i] , item) :
+              (item)[property];
           this.objectsDatasource.sort = this.sort;
         } else {
           this.objectsDatasource = new MatTableDataSource();
