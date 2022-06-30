@@ -18,7 +18,7 @@
       </button>
     </div>
 
-    <mat-table [dataSource]="objectsDatasource" matSort class="scroll-area">
+    <mat-table [dataSource]="objectsDatasource" matSort matSortDisableClear class="scroll-area">
       <ng-container matColumnDef="selectCheckbox">
         <mat-header-cell *matHeaderCellDef fxFlex="70px">
           <mat-checkbox (change)="$event ? masterToggle() : null"
