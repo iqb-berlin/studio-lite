@@ -1,7 +1,8 @@
 <p *ngIf="!hasObjects()">
   Keine Module gespeichert.
 </p>
-<mat-table [dataSource]="objectsDatasource" *ngIf="hasObjects()" matSort class="admin-tab-content">
+
+<mat-table [dataSource]="objectsDatasource" *ngIf="hasObjects()" matSort matSortDisableClear class="admin-tab-content">
   <ng-container matColumnDef="selectCheckbox">
     <mat-header-cell *matHeaderCellDef fxFlex="60px">
       <mat-checkbox (change)="$event ? masterToggleSelection() : null"
@@ -18,35 +19,35 @@
   </ng-container>
 
   <ng-container matColumnDef="name">
-    <mat-header-cell *matHeaderCellDef mat-sort-header="element.metadata.name" class="namecell" fxFlex> Name </mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="metadata.name" class="namecell" fxFlex> Name </mat-header-cell>
     <mat-cell *matCellDef="let element" class="namecell" fxFlex>
       <a target="_blank" [href]="downloadPath + element.filelink" [matTooltip]="element.metadata.description">{{element.metadata.name}}</a>
     </mat-cell>
   </ng-container>
 
   <ng-container matColumnDef="id">
-    <mat-header-cell *matHeaderCellDef mat-sort-header="element.key" class="namecell" fxFlex> ID </mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="key" class="namecell" fxFlex> ID </mat-header-cell>
     <mat-cell *matCellDef="let element" class="namecell" fxFlex>{{element.key}}</mat-cell>
   </ng-container>
 
   <ng-container matColumnDef="version">
-    <mat-header-cell *matHeaderCellDef mat-sort-header="element.metadata.version" class="namecell" fxFlex="80px"> Version </mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="metadata.version" class="namecell" fxFlex="80px"> Version </mat-header-cell>
     <mat-cell *matCellDef="let element" class="namecell" fxFlex="80px">{{element.metadata.version}}</mat-cell>
   </ng-container>
 
-  <ng-container matColumnDef="filedatetime">
-    <mat-header-cell *matHeaderCellDef mat-sort-header="element.fileDateTime" class="datecell" fxFlex="160px"> Datum/Zeit </mat-header-cell>
+  <ng-container matColumnDef="fileDateTime">
+    <mat-header-cell *matHeaderCellDef mat-sort-header="fileDateTime" class="datecell" fxFlex="160px"> Datum/Zeit </mat-header-cell>
     <mat-cell *matCellDef="let element" class="datecell" fxFlex="160px">
       {{element.fileDateTime | date : 'dd.MM.yyyy HH:mm' : timeZone}}
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="filesize">
-    <mat-header-cell *matHeaderCellDef mat-sort-header="element.fileSize" fxFlex="80px"> Größe </mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="fileSize" fxFlex="80px"> Größe </mat-header-cell>
     <mat-cell *matCellDef="let element" fxFlex="80px"> {{element.fileSize | bytes}} </mat-cell>
   </ng-container>
 
-  <ng-container matColumnDef="verona-version">
-    <mat-header-cell *matHeaderCellDef mat-sort-header="element.metadata.specVersion" fxFlex="100px"> API-Version </mat-header-cell>
+  <ng-container matColumnDef="veronaVersion">
+    <mat-header-cell *matHeaderCellDef mat-sort-header="metadata.specVersion" fxFlex="100px"> API-Version </mat-header-cell>
     <mat-cell *matCellDef="let element" fxFlex="100px"> {{element.metadata.specVersion}} </mat-cell>
   </ng-container>
 

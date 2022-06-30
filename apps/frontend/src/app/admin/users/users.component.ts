@@ -39,7 +39,7 @@ export class UsersComponent implements OnInit {
 
   userWorkspaces = new WorkspaceGroupToCheckCollection([]);
 
-  @ViewChild(MatSort, { static: true }) sort = new MatSort();
+  @ViewChild(MatSort) sort = new MatSort();
 
   constructor(
     private appService: AppService,

@@ -41,7 +41,7 @@ export class WorkspacesComponent implements OnInit {
 
   workspaceUsers = new UserToCheckCollection([]);
 
-  @ViewChild(MatSort, { static: true }) sort: MatSort | null = null;
+  @ViewChild(MatSort) sort = new MatSort();
 
   constructor(
     private appService: AppService,

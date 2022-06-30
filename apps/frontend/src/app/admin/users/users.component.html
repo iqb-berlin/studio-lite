@@ -14,7 +14,7 @@
         </button>
     </div>
 
-    <mat-table [dataSource]="objectsDatasource" matSort class="scroll-area">
+    <mat-table [dataSource]="objectsDatasource" matSortDisableClear matSort class="scroll-area">
       <ng-container matColumnDef="selectCheckbox">
         <mat-header-cell *matHeaderCellDef fxFlex="70px">
           <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -31,12 +31,12 @@
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef mat-sort-header="element.name"> Name </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef mat-sort-header="name"> Name </mat-header-cell>
         <mat-cell *matCellDef="let element"> {{element.name}} {{element.isAdmin ? '*' : ''}}</mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="description">
-        <mat-header-cell *matHeaderCellDef mat-sort-header="row.description" fxFlex="65%"> Notiz </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef mat-sort-header="description" fxFlex="65%"> Notiz </mat-header-cell>
         <mat-cell *matCellDef="let row" style="color: gray" fxFlex="65%"> {{row.description}} </mat-cell>
       </ng-container>
 
