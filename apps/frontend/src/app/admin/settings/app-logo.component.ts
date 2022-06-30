@@ -13,7 +13,8 @@ import { standardLogo } from '../../app.service';
     '.example-chip-list {width: 100%;}',
     '.block-ident {margin-left: 40px}',
     '.warning-warning { color: darkgoldenrod }',
-    '.logo-img {width: 100px; margin: 20px}'
+    '.logo-img {width: 100px; margin: 20px}',
+    '.save-button {margin-bottom: 20px}'
   ]
 })
 

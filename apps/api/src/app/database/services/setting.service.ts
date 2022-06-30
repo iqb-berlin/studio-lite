@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigDto, AppLogoDto } from '@studio-lite-lib/api-dto';
 import Setting from '../entities/setting.entity';
+import { UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 
 @Injectable()
 export class SettingService {
@@ -51,6 +52,25 @@ export class SettingService {
       const newSetting = await this.settingsRepository.create({
         key: 'app-logo',
         content: JSON.stringify(newLogo)
+      });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findUnitExportConfig(): Promise<UnitExportConfigDto | null> {
+    const unitExportConfig = await this.settingsRepository.findOne({ where: { key: 'unit-export-config' } });
+    return unitExportConfig ? JSON.parse(unitExportConfig.content) : new UnitExportConfigDto();
+  }
+
+  async patchUnitExportConfig(newUnitExportConfig: UnitExportConfigDto): Promise<void> {
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'unit-export-config' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = JSON.stringify(newUnitExportConfig);
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = await this.settingsRepository.create({
+        key: 'unit-export-config',
+        content: JSON.stringify(newUnitExportConfig)
       });
       await this.settingsRepository.save(newSetting);
     }

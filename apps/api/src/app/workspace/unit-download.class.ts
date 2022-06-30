@@ -3,35 +3,36 @@ import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
-import {VeronaModulesService} from "../database/services/verona-modules.service";
-import {VeronaModuleKeyCollection} from "@studio-lite/shared-code";
-
-const unitXsdUrl =
-  'https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/master/definitions/vo_Unit.xsd';
-
-const bookletXsdUrl =
-  'https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/master/definitions/vo_Booklet.xsd';
-
-const testTakersXsdUrl =
-  'https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/master/definitions/vo_Testtakers.xsd';
+import { VeronaModulesService } from '../database/services/verona-modules.service';
+import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { SettingService } from '../database/services/setting.service';
+import { UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 
 export class UnitDownloadClass {
   static async get(
     workspaceService: WorkspaceService,
     unitService: UnitService,
     veronaModuleService: VeronaModulesService,
+    settingService: SettingService,
     workspaceId: number,
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
     const zip = new AdmZip();
     const unitKeys: string[] = [];
     const usedPlayers: string[] = [];
+    const unitExportConfig = new UnitExportConfigDto();
+    const unitExportConfigFromDB = await settingService.findUnitExportConfig();
+    if (unitExportConfigFromDB) {
+      if (unitExportConfigFromDB.unitXsdUrl) unitExportConfig.unitXsdUrl = unitExportConfigFromDB.unitXsdUrl;
+      if (unitExportConfigFromDB.bookletXsdUrl) unitExportConfig.bookletXsdUrl = unitExportConfigFromDB.bookletXsdUrl;
+      if (unitExportConfigFromDB.testTakersXsdUrl) unitExportConfig.testTakersXsdUrl = unitExportConfigFromDB.testTakersXsdUrl;
+    }
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
       const unitMetadata = await unitService.findOnesMetadata(unitId);
       const unitXml = XmlBuilder.create({ version: '1.0' }, {
         Unit: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-          '@xsi:noNamespaceSchemaLocation': unitXsdUrl,
+          '@xsi:noNamespaceSchemaLocation': unitExportConfig.unitXsdUrl,
           Metadata: {
             Id: unitMetadata.key,
             Label: unitMetadata.name,
@@ -83,7 +84,7 @@ export class UnitDownloadClass {
       const bookletXml = XmlBuilder.create({ version: '1.0' }, {
         Booklet: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-          '@xsi:noNamespaceSchemaLocation': bookletXsdUrl,
+          '@xsi:noNamespaceSchemaLocation': unitExportConfig.bookletXsdUrl,
           Metadata: {
             Id: 'booklet1',
             Label: 'Testheft 1'
@@ -112,7 +113,7 @@ export class UnitDownloadClass {
       const testTakerXml = XmlBuilder.create({ version: '1.0' }, {
         Testtakers: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-          '@xsi:noNamespaceSchemaLocation': testTakersXsdUrl,
+          '@xsi:noNamespaceSchemaLocation': unitExportConfig.testTakersXsdUrl,
           Metadata: {},
           CustomTexts: {
             CustomText: {

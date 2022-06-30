@@ -22,7 +22,7 @@
     <mat-label>Hintergrundfarbe sekundäre Boxen</mat-label>
     <input matInput formControlName="boxBackground" placeholder="Farbe">
   </mat-form-field>
-  <div fxLayout="row" fxLayoutGap="30px" fxLayoutAlign="start start">
+  <div fxLayout="row" fxLayoutGap="30px" fxLayoutAlign="start start" class="save-button">
     <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()">
       Speichern
     </button>

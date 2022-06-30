@@ -19,6 +19,14 @@ import { Component } from '@angular/core';
           <app-app-logo></app-app-logo>
         </div>
       </div>
+      <div fxLayout="row" class="div-row">
+        <div fxFlex="30">
+          <mat-label>Parameter für den Unit-Export</mat-label>
+        </div>
+        <div fxFlex="70">
+          <app-unit-export-config></app-unit-export-config>
+        </div>
+      </div>
     </div>
   `,
   styles: ['.div-row {border-color: gray; border-width: 0 0 1px 0; border-style: solid; margin-top: 10px}']

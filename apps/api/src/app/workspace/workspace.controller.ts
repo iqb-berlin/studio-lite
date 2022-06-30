@@ -13,13 +13,15 @@ import { WorkspaceId } from './workspace.decorator';
 import { UnitDownloadClass } from './unit-download.class';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
+import {SettingService} from "../database/services/setting.service";
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
-    private veronaModuleService: VeronaModulesService
+    private veronaModuleService: VeronaModulesService,
+    private settingService: SettingService
   ) {}
 
   @Get()
@@ -63,6 +65,7 @@ export class WorkspaceController {
       this.workspaceService,
       this.unitService,
       this.veronaModuleService,
+      this.settingService,
       workspaceId,
       unitDownloadSettings
     );
