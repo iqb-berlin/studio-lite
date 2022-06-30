@@ -35,7 +35,7 @@
     <mat-cell *matCellDef="let element" class="namecell" fxFlex="80px">{{element.metadata.version}}</mat-cell>
   </ng-container>
 
-  <ng-container matColumnDef="filedatetime">
+  <ng-container matColumnDef="fileDateTime">
     <mat-header-cell *matHeaderCellDef mat-sort-header="fileDateTime" class="datecell" fxFlex="160px"> Datum/Zeit </mat-header-cell>
     <mat-cell *matCellDef="let element" class="datecell" fxFlex="160px">
       {{element.fileDateTime | date : 'dd.MM.yyyy HH:mm' : timeZone}}
@@ -46,7 +46,7 @@
     <mat-cell *matCellDef="let element" fxFlex="80px"> {{element.fileSize | bytes}} </mat-cell>
   </ng-container>
 
-  <ng-container matColumnDef="verona-version">
+  <ng-container matColumnDef="veronaVersion">
     <mat-header-cell *matHeaderCellDef mat-sort-header="metadata.specVersion" fxFlex="100px"> API-Version </mat-header-cell>
     <mat-cell *matCellDef="let element" fxFlex="100px"> {{element.metadata.specVersion}} </mat-cell>
   </ng-container>

@@ -21,7 +21,7 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
   objectsDatasource = new MatTableDataSource<VeronaModuleInListDto>();
   tableSelectionCheckboxes = new SelectionModel <VeronaModuleInListDto>(true, []);
   timeZone = 'Europe/Berlin';
-  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'verona-version', 'filedatetime', 'filesize'];
+  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(
