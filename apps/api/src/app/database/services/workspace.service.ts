@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -17,6 +17,8 @@ import { UnitService } from './unit.service';
 
 @Injectable()
 export class WorkspaceService {
+  private readonly logger = new Logger(WorkspaceService.name);
+
   constructor(
     @InjectRepository(Workspace)
     private workspacesRepository: Repository<Workspace>,
@@ -29,6 +31,7 @@ export class WorkspaceService {
   }
 
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
+    this.logger.log(`Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`);
     const validWorkspaces: number[] = [];
     if (userId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
@@ -62,6 +65,7 @@ export class WorkspaceService {
   }
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
+    this.logger.log(`Returning groupwise ordered workspaces${userId ? ` for userId: ${userId}` : '.'}`);
     const workspaceGroups = await this.workspaceGroupRepository.find({ order: { name: 'ASC' } });
     const workspaces = await this.findAll(userId);
     const myReturn: WorkspaceGroupDto[] = [];
@@ -84,6 +88,7 @@ export class WorkspaceService {
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
+    this.logger.log(`Returning workspace with id: ${id}`);
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id }
     });
@@ -105,12 +110,14 @@ export class WorkspaceService {
   }
 
   async create(workspace: CreateWorkspaceDto): Promise<number> {
+    this.logger.log(`Creating workspace with name: ${workspace.name}`);
     const newWorkspace = await this.workspacesRepository.create(workspace);
     await this.workspacesRepository.save(newWorkspace);
     return newWorkspace.id;
   }
 
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
+    this.logger.log(`Updating workspace with id: ${workspaceData.id}`);
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });
@@ -132,6 +139,7 @@ export class WorkspaceService {
 
   async remove(id: number | number[]): Promise<void> {
     // TODO: sollte Fehler liefern wenn eine nicht gültige id verwendet wird
+    this.logger.log(`Deleting workspace with id: ${id}`);
     await this.workspacesRepository.delete(id);
   }
 

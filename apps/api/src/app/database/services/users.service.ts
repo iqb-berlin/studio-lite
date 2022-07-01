@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { getConnection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -9,6 +9,8 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -18,6 +20,7 @@ export class UsersService {
 
   async findAll(workspaceId?: number): Promise<UserInListDto[]> {
     // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
+    this.logger.log(`Returning users${workspaceId ? ` for workspaceId: ${workspaceId}` : '.'}`);
     const validUsers: number[] = [];
     if (workspaceId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
@@ -127,6 +130,7 @@ export class UsersService {
   }
 
   async setUsersByWorkspace(workspaceId: number, users: number[]) {
+    this.logger.log(`Creating ${users.length} users for workspaceId: ${workspaceId}`);
     await getConnection().createQueryBuilder()
       .delete()
       .from(WorkspaceUser)
