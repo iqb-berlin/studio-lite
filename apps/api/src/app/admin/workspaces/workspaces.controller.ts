@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
@@ -11,8 +11,10 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { UsersService } from '../../database/services/users.service';
 import { IsAdminGuard } from '../is-admin.guard';
+import { HttpExceptionFilter } from '../../exceptions/http-exception.filter';
 
 @Controller('admin/workspaces')
+@UseFilters(HttpExceptionFilter)
 export class WorkspacesController {
   constructor(
     private workspaceService: WorkspaceService,
