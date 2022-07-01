@@ -1,14 +1,9 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+} from '@nestjs/swagger';
 import {
   WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
@@ -27,20 +22,17 @@ export class WorkspacesController {
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceInListDto]
-  })
+  @ApiOkResponse({ description: 'Workspaces retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAll();
   }
 
+  // TODO: sollte vermutlich besser über einen Query Parameter gelöst werden (evtl. auch gar keine Aufgabe des BE)?
   @Get('groupwise')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceGroupDto]
-  })
+  @ApiOkResponse({ description: 'Groupwise ordered workspaces retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findAllGroupwise(): Promise<WorkspaceGroupDto[]> {
     return this.workspaceService.findAllGroupwise();
@@ -49,17 +41,19 @@ export class WorkspacesController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceFullDto]
-  })
+  @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Workspace not found.' })
   @ApiTags('admin workspaces')
   async findOne(@Param('id') id: number): Promise<WorkspaceFullDto> {
     return this.workspaceService.findOne(id);
   }
 
+  // TODO: Sollen hier mehrere Workspaces gelöscht werden? Sollte über Query gelöst werden.
   @Delete(':ids')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Workspace deleted successfully.' })
+  @ApiNotFoundResponse({ description: 'Workspace not found.' }) // TODO: not implemented in workspaceService.remove
   @ApiTags('admin workspaces')
   async remove(@Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];
@@ -82,6 +76,8 @@ export class WorkspacesController {
   @Patch()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Workspace updated successfully.' })
+  @ApiNotFoundResponse({ description: 'Workspace not found.' })
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceFullDto: WorkspaceFullDto) {
     return this.workspaceService.patch(workspaceFullDto);
@@ -90,14 +86,14 @@ export class WorkspacesController {
   @Get(':id/users')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [UserInListDto]
-  })
+  @ApiOkResponse({ description: 'Workspace users retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Workspace not found.' }) // TODO: not implemented in userService.findAll
   @ApiTags('admin workspaces')
   async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
     return this.userService.findAll(id);
   }
 
+  // TODO: Werden hier neue User angelegt? Sind es dann nicht eher multiple Posts?
   @Patch(':id/users')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

@@ -17,6 +17,7 @@ export class UsersService {
   ) {}
 
   async findAll(workspaceId?: number): Promise<UserInListDto[]> {
+    // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
     const validUsers: number[] = [];
     if (workspaceId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
@@ -40,7 +41,7 @@ export class UsersService {
 
   async findOne(id: number): Promise<UserFullDto> {
     const user = await this.usersRepository.findOne({
-      where: {id: id}
+      where: { id: id }
     });
     return <UserFullDto>{
       id: user.id,
@@ -59,8 +60,8 @@ export class UsersService {
 
   async getUserByNameAndPassword(name: string, password: string): Promise<number | null> {
     const user = await this.usersRepository.findOne({
-      where: {name: name},
-      select: {id: true, password: true}
+      where: { name: name },
+      select: { id: true, password: true }
     });
     if (user && bcrypt.compareSync(password, user.password)) {
       return user.id;
@@ -82,14 +83,14 @@ export class UsersService {
 
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
     const userForName = await this.usersRepository.findOne({
-      where: {id: userId},
-      select: {name: true}
+      where: { id: userId },
+      select: { name: true }
     });
     if (userForName) {
       const userForId = await this.getUserByNameAndPassword(userForName.name, oldPassword);
       if (userForId) {
         const userToUpdate = await this.usersRepository.findOne({
-          where: {id: userForId}
+          where: { id: userForId }
         });
         userToUpdate.password = UsersService.getPasswordHash(newPassword);
         await this.usersRepository.save(userToUpdate);
@@ -113,8 +114,10 @@ export class UsersService {
 
   async patch(userData: UserFullDto): Promise<void> {
     const userToUpdate = await this.usersRepository.findOne({
-      where: {id: userData.id},
-      select: {name: true, isAdmin: true, description: true, password: true, id: true}
+      where: { id: userData.id },
+      select: {
+        name: true, isAdmin: true, description: true, password: true, id: true
+      }
     });
     if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
     if (userData.name) userToUpdate.name = userData.name;

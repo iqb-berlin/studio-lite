@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -7,13 +7,13 @@ import {
   WorkspaceFullDto,
   WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
+import * as AdmZip from 'adm-zip';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
-import * as AdmZip from 'adm-zip';
 
 @Injectable()
 export class WorkspaceService {
@@ -31,7 +31,8 @@ export class WorkspaceService {
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
     const validWorkspaces: number[] = [];
     if (userId) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find({ where: { userId: userId } });
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
+        .find({ where: { userId: userId } });
       workspaceUsers.forEach(wsU => validWorkspaces.push(wsU.workspaceId));
     }
     const workspaces: Workspace[] = await this.workspacesRepository.find({ order: { name: 'ASC' } });
@@ -84,11 +85,16 @@ export class WorkspaceService {
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
     const workspace = await this.workspacesRepository.findOne({
-      where: {id: id}
+      where: { id: id }
     });
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found.');
+    }
+    // TODO: ist das richtig, hier eine zweite Anfrage zu starten?
     const workspaceGroup = await this.workspaceGroupRepository.findOne({
-      where: {id: workspace.groupId}
+      where: { id: workspace.groupId }
     });
+
     return <WorkspaceFullDto>{
       id: workspace.id,
       name: workspace.name,
@@ -106,8 +112,11 @@ export class WorkspaceService {
 
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: {id: workspaceData.id}
+      where: { id: workspaceData.id }
     });
+    if (!workspaceToUpdate) {
+      throw new NotFoundException('Workspace not found.');
+    }
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
     if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
     await this.workspacesRepository.save(workspaceToUpdate);
@@ -115,13 +124,14 @@ export class WorkspaceService {
 
   async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: {id: id}
+      where: { id: id }
     });
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
   async remove(id: number | number[]): Promise<void> {
+    // TODO: sollte Fehler liefern wenn eine nicht gültige id verwendet wird
     await this.workspacesRepository.delete(id);
   }
 
@@ -136,7 +146,7 @@ export class WorkspaceService {
         try {
           const zip = new AdmZip(f.buffer);
           const zipEntries = zip.getEntries();
-          zipEntries.forEach(function (zipEntry) {
+          zipEntries.forEach(zipEntry => {
             const isXmlFile = /\.xml$/i.test(zipEntry.entryName);
             const fileContent = zipEntry.getData();
             files.push({
