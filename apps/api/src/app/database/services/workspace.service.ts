@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -14,6 +14,7 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
+import { AdminWorkspaceNotFoundException } from '../../exceptions/admin-workspace-not-found.exception';
 
 @Injectable()
 export class WorkspaceService {
@@ -92,21 +93,20 @@ export class WorkspaceService {
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    if (!workspace) {
-      throw new NotFoundException('Workspace not found.');
+    if (workspace) {
+      // TODO: ist das richtig, hier eine zweite Anfrage zu starten?
+      const workspaceGroup = await this.workspaceGroupRepository.findOne({
+        where: { id: workspace.groupId }
+      });
+      return <WorkspaceFullDto>{
+        id: workspace.id,
+        name: workspace.name,
+        groupId: workspace.groupId,
+        groupName: workspaceGroup.name,
+        settings: workspace.settings
+      };
     }
-    // TODO: ist das richtig, hier eine zweite Anfrage zu starten?
-    const workspaceGroup = await this.workspaceGroupRepository.findOne({
-      where: { id: workspace.groupId }
-    });
-
-    return <WorkspaceFullDto>{
-      id: workspace.id,
-      name: workspace.name,
-      groupId: workspace.groupId,
-      groupName: workspaceGroup.name,
-      settings: workspace.settings
-    };
+    throw new AdminWorkspaceNotFoundException(id);
   }
 
   async create(workspace: CreateWorkspaceDto): Promise<number> {
@@ -121,12 +121,13 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });
-    if (!workspaceToUpdate) {
-      throw new NotFoundException('Workspace not found.');
+    if (workspaceToUpdate) {
+      if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
+      if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
+      await this.workspacesRepository.save(workspaceToUpdate);
+    } else {
+      throw new AdminWorkspaceNotFoundException(workspaceData.id);
     }
-    if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-    if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
-    await this.workspacesRepository.save(workspaceToUpdate);
   }
 
   async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {

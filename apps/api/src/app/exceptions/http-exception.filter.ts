@@ -13,6 +13,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const statusCode = exception.getStatus();
     const message = exception.message || null;
+    const custom = exception.getResponse();
 
     this.logger.warn(`${statusCode} ${message}`);
 
@@ -21,6 +22,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       .json({
         statusCode,
         message,
+        custom,
         timestamp: new Date().toISOString(),
         endpoint: request.url
       });
