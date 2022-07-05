@@ -1,14 +1,9 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+} from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
@@ -27,9 +22,7 @@ export class WorkspaceGroupsController {
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceGroupInListDto]
-  })
+  @ApiOkResponse({ description: 'Admin workspace-groups retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll();
@@ -38,9 +31,8 @@ export class WorkspaceGroupsController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceGroupFullDto]
-  })
+  @ApiOkResponse({ description: 'Admin workspace-group retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace-group not found.' })
   @ApiTags('admin workspaces')
   async findOne(@Param('id') id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
@@ -49,6 +41,8 @@ export class WorkspaceGroupsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin workspace-group deleted successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace group not found.' }) // TODO: not implemented
   @ApiTags('admin workspaces')
   async remove(@Param('id') id: number): Promise<void> {
     return this.workspaceGroupService.remove(id);
