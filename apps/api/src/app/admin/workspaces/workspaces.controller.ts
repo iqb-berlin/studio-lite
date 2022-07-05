@@ -24,7 +24,7 @@ export class WorkspacesController {
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspaces retrieved successfully.' })
+  @ApiOkResponse({ description: 'Admin workspaces retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAll();
@@ -34,7 +34,7 @@ export class WorkspacesController {
   @Get('groupwise')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Groupwise ordered workspaces retrieved successfully.' })
+  @ApiOkResponse({ description: 'Groupwise ordered admin workspaces retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findAllGroupwise(): Promise<WorkspaceGroupDto[]> {
     return this.workspaceService.findAllGroupwise();
@@ -43,8 +43,8 @@ export class WorkspacesController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Workspace not found.' })
+  @ApiOkResponse({ description: 'Admin workspace retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin Workspace not found.' })
   @ApiTags('admin workspaces')
   async findOne(@Param('id') id: number): Promise<WorkspaceFullDto> {
     return this.workspaceService.findOne(id);
@@ -54,8 +54,8 @@ export class WorkspacesController {
   @Delete(':ids')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace deleted successfully.' })
-  @ApiNotFoundResponse({ description: 'Workspace not found.' }) // TODO: not implemented in workspaceService.remove
+  @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in workspaceService.remove
   @ApiTags('admin workspaces')
   async remove(@Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];
@@ -67,7 +67,7 @@ export class WorkspacesController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    description: 'Sends back the id of the new workspace in database',
+    description: 'Sends back the id of the new admin workspace in database',
     type: Number
   })
   @ApiTags('admin workspaces')
@@ -78,8 +78,8 @@ export class WorkspacesController {
   @Patch()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace updated successfully.' })
-  @ApiNotFoundResponse({ description: 'Workspace not found.' })
+  @ApiOkResponse({ description: 'Admin workspace updated successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceFullDto: WorkspaceFullDto) {
     return this.workspaceService.patch(workspaceFullDto);
@@ -88,8 +88,8 @@ export class WorkspacesController {
   @Get(':id/users')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace users retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Workspace not found.' }) // TODO: not implemented in userService.findAll
+  @ApiOkResponse({ description: 'Admin workspace users retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
   @ApiTags('admin workspaces')
   async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
     return this.userService.findAll(id);
