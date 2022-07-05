@@ -34,6 +34,7 @@ export class WorkspaceService {
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
     this.logger.log(`Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`);
     const validWorkspaces: number[] = [];
+    // TODO: hier fehlt echte User Abfrage!
     if (userId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
         .find({ where: { userId: userId } });
@@ -53,6 +54,7 @@ export class WorkspaceService {
     return returnWorkspaces;
   }
 
+  // TODO: setWorkspacesForUser? //was ändert sich hier?
   async setWorkspacesByUser(userId: number, workspaces: number[]) {
     return this.workspaceUsersRepository.delete({ userId: userId }).then(async () => {
       await Promise.all(workspaces.map(async workspaceId => {
@@ -116,6 +118,7 @@ export class WorkspaceService {
     return newWorkspace.id;
   }
 
+  // TODO: id als Parameter
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
     this.logger.log(`Updating workspace with id: ${workspaceData.id}`);
     const workspaceToUpdate = await this.workspacesRepository.findOne({
