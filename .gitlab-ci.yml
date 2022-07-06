@@ -1,0 +1,409 @@
+image: node:16.15-bullseye-slim
+
+variables:
+  REGISTRY: $CI_REGISTRY
+  REGISTRY_USER: $CI_REGISTRY_USER
+  REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD
+  REGISTRY_PROJECT: "/${CI_PROJECT_PATH}/"
+  DOCKER_TLS_CERTDIR: ""
+  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+
+stages:
+  - setup
+  - build
+  - unit-test
+  - e2e-test
+  - lint
+  - audit
+  - build-images
+  - scan-images
+
+.default_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH != "main"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.default_rules_db:
+  rules:
+    - if: $CI_COMMIT_BRANCH != "main"
+      changes:
+        - database/*
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.default_rules_manual:
+  rules:
+    - if: $CI_COMMIT_BRANCH != "main"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+install-dependencies:
+  stage: setup
+  interruptible: true
+  rules:
+    - !reference [.default_rules, rules]
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules
+      - .npm/
+      - cache/Cypress
+  script:
+    - npm ci --cache .npm --prefer-offline --no-fund
+  artifacts:
+    paths:
+      - node_modules
+      - cache/Cypress
+
+.distributed:
+  interruptible: true
+  rules:
+    - !reference [.default_rules, rules]
+  needs:
+    - install-dependencies
+  artifacts:
+    paths:
+      - node_modules/.cache/nx
+      - cache/Cypress
+
+build-app:
+  stage: build
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=build --parallel=3
+  artifacts:
+    paths:
+      - dist
+
+test-app:
+  stage: unit-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=test --parallel=2
+
+test-app-e2e:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-chrome:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-chrome-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-firefox:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-firefox-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-edge:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-edge-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - pkill npx
+
+lint-app:
+  stage: lint
+  extends: .distributed
+  allow_failure: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=lint --parallel=2
+
+audit-app:
+  stage: audit
+  allow_failure: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  script:
+    - npm audit --audit-level critical
+
+build-docker-db:
+  stage: build-images
+  rules:
+    - !reference [ .default_rules_db, rules ]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Dockerfile --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
+    - docker push -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+  after_script:
+    - docker logout $REGISTRY
+
+scan-docker-db:
+  stage: scan-images
+  allow_failure: true
+  rules:
+   - !reference [.default_rules_db, rules]
+  needs:
+    - build-docker-db
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  script:
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+build-docker-app:
+  stage: build-images
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+  needs:
+    - install-dependencies
+    - build-app
+    - test-app
+#    - test-app-e2e
+#    - test-app-e2e-ui-chrome
+#    - test-app-e2e-ui-chrome-mobile
+#    - test-app-e2e-ui-firefox
+#    - test-app-e2e-ui-firefox-mobile
+#    - test-app-e2e-ui-edge
+#    - test-app-e2e-ui-edge-mobile
+    - audit-app
+    - lint-app
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+    - echo "$REGISTRY_PASSWORD"
+    - echo $REGISTRY_USER
+    - echo $REGISTRY
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
+  after_script:
+    - docker logout $REGISTRY
+
+scan-docker-app:
+  stage: scan-images
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+  needs:
+    - install-dependencies
+    - build-docker-app
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
