@@ -56,7 +56,7 @@ export class UsersService {
         description: user.description
       };
     }
-    throw new AdminUserNotFoundException(id);
+    throw new AdminUserNotFoundException(id, 'GET');
   }
 
   async create(user: CreateUserDto): Promise<number> {
@@ -138,7 +138,7 @@ export class UsersService {
       if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
       await this.usersRepository.save(userToUpdate);
     } else {
-      throw new AdminUserNotFoundException(userData.id);
+      throw new AdminUserNotFoundException(userData.id, 'PATCH');
     }
   }
 

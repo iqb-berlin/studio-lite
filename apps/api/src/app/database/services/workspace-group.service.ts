@@ -42,7 +42,7 @@ export class WorkspaceGroupService {
         settings: workspaceGroup.settings
       };
     }
-    throw new AdminWorkspaceGroupNotFoundException(id);
+    throw new AdminWorkspaceGroupNotFoundException(id, 'GET');
   }
 
   async create(workspaceGroup: CreateWorkspaceGroupDto): Promise<number> {
@@ -64,7 +64,7 @@ export class WorkspaceGroupService {
       if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);
     } else {
-      throw new ArgumentOutOfRangeError(); // TODO ?
+      throw new ArgumentOutOfRangeError(); // TODO: Warum ist das hier anders als bei den anderen patches ?
     }
   }
 

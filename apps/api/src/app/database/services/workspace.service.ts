@@ -108,7 +108,7 @@ export class WorkspaceService {
         settings: workspace.settings
       };
     }
-    throw new AdminWorkspaceNotFoundException(id);
+    throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
 
   async create(workspace: CreateWorkspaceDto): Promise<number> {
@@ -129,7 +129,7 @@ export class WorkspaceService {
       if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
       await this.workspacesRepository.save(workspaceToUpdate);
     } else {
-      throw new AdminWorkspaceNotFoundException(workspaceData.id);
+      throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
     }
   }
 
