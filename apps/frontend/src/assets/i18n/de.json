@@ -14,6 +14,20 @@
     "dialog": {
       "title": "Aufgabe(n) als Datei speichern",
       "ok-button-label": "Download"
+    },
+    "booklet-config": {
+      "paging-mode": {
+        "label": "Modus Seitenwechsel",
+        "separate": "Seiten extra blättern",
+        "concat-scroll": "Seiten untereinander stapeln",
+        "concat-scroll-snap": "Seiten untereinander - schnappen/magnetisch"
+      },
+      "unit_navibuttons": {
+        "label": "Buttons für Unit-Navigation",
+        "FULL": "Pfeil-Buttons und dazwischen Unit-Buttons",
+        "ARROWS_ONLY": "Nur Pfeil-Buttons",
+        "OFF": "Keine Buttons für Unit-Navigation"
+      }
     }
   },
   "home": {

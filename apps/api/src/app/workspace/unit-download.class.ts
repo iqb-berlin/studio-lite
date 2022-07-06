@@ -1,12 +1,13 @@
-import {UnitDownloadSettingsDto, VeronaModuleFileDto, VeronaModuleInListDto} from '@studio-lite-lib/api-dto';
+import {
+  UnitDownloadSettingsDto, UnitExportConfigDto, VeronaModuleFileDto, VeronaModuleInListDto
+} from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
+import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { SettingService } from '../database/services/setting.service';
-import { UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 
 export class UnitDownloadClass {
   static async get(
@@ -25,7 +26,9 @@ export class UnitDownloadClass {
     if (unitExportConfigFromDB) {
       if (unitExportConfigFromDB.unitXsdUrl) unitExportConfig.unitXsdUrl = unitExportConfigFromDB.unitXsdUrl;
       if (unitExportConfigFromDB.bookletXsdUrl) unitExportConfig.bookletXsdUrl = unitExportConfigFromDB.bookletXsdUrl;
-      if (unitExportConfigFromDB.testTakersXsdUrl) unitExportConfig.testTakersXsdUrl = unitExportConfigFromDB.testTakersXsdUrl;
+      if (unitExportConfigFromDB.testTakersXsdUrl) {
+        unitExportConfig.testTakersXsdUrl = unitExportConfigFromDB.testTakersXsdUrl;
+      }
     }
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
       const unitMetadata = await unitService.findOnesMetadata(unitId);
@@ -75,11 +78,11 @@ export class UnitDownloadClass {
             addedPlayers.push(bestMatch);
           }
         }
-      }))
+      }));
     }
-    const loginCount = unitDownloadSettings.addTestTakersHot
-      + unitDownloadSettings.addTestTakersMonitor
-      + unitDownloadSettings.addTestTakersReview;
+    const loginCount = unitDownloadSettings.addTestTakersHot +
+      unitDownloadSettings.addTestTakersMonitor +
+      unitDownloadSettings.addTestTakersReview;
     if (loginCount > 0) {
       const bookletXml = XmlBuilder.create({ version: '1.0' }, {
         Booklet: {
@@ -88,14 +91,17 @@ export class UnitDownloadClass {
           Metadata: {
             Id: 'booklet1',
             Label: 'Testheft 1'
-          },
-          BookletConfig: {
-            Config: {
-              '@key': 'unit_navibuttons',
-              '#': 'FULL'
-            }
           }
         }
+      });
+      const configElement = bookletXml.root().ele('BookletConfig');
+      unitDownloadSettings.bookletSettings.forEach(bc => {
+        configElement.ele({
+          Config: {
+            '@key': bc.key,
+            '#': bc.value
+          }
+        });
       });
       let unitCount = 1;
       const unitsElement = bookletXml.root().ele('Units');
@@ -123,8 +129,11 @@ export class UnitDownloadClass {
           }
         }
       });
-      const loginNames = UnitDownloadClass.generateCodeList(5, loginCount + 1);
-      const loginPasswords = UnitDownloadClass.generateCodeList(4, loginCount);
+      let codeLen = loginCount > 1000 ? 8 : 5;
+      if (unitDownloadSettings.passwordLess) codeLen += 2;
+      const loginNames = UnitDownloadClass.generateCodeList(codeLen, loginCount + 1);
+      const loginPasswords = unitDownloadSettings.passwordLess ? <string[]>[] :
+        UnitDownloadClass.generateCodeList(loginCount > 1000 ? 5 : 4, loginCount);
       let loginIndex = 0;
       const groupElement = testTakerXml.root().ele({
         Group: {
@@ -134,14 +143,15 @@ export class UnitDownloadClass {
       });
       for (let i = 0; i < unitDownloadSettings.addTestTakersHot; i++) {
         loginIndex += 1;
-        const prefix = (unitDownloadSettings.addTestTakersMonitor > 0) ? `T${(i + 1).toString().padStart(2, '0')}_` : '';
+        const prefix = (unitDownloadSettings.addTestTakersMonitor > 0) ?
+          `T${(i + 1).toString().padStart(2, '0')}_` : '';
         const loginElement = groupElement.ele({
           Login: {
             '@mode': 'run-hot-return',
             '@name': `${prefix}${loginNames[loginIndex]}`
           }
         });
-        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex-1]);
+        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
         loginElement.ele({
           Booklet: {
             '#': 'booklet1'
@@ -156,7 +166,7 @@ export class UnitDownloadClass {
             '@name': loginNames[loginIndex]
           }
         });
-        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex-1]);
+        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
         loginElement.ele({
           Booklet: {
             '#': 'booklet1'
@@ -165,14 +175,15 @@ export class UnitDownloadClass {
       }
       for (let i = 0; i < unitDownloadSettings.addTestTakersMonitor; i++) {
         loginIndex += 1;
-        const prefix = (unitDownloadSettings.addTestTakersMonitor > 1) ? `TL${(i + 1).toString().padStart(2, '0')}_` : 'TL_';
+        const prefix = (unitDownloadSettings.addTestTakersMonitor > 1) ?
+          `TL${(i + 1).toString().padStart(2, '0')}_` : 'TL_';
         const loginElement = groupElement.ele({
           Login: {
             '@mode': 'monitor-group',
             '@name': `${prefix}${loginNames[loginIndex]}`
           }
         });
-        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex-1]);
+        if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
       }
       zip.addFile('testtaker1.xml', Buffer.from(testTakerXml.toString({ prettyPrint: true })));
     }

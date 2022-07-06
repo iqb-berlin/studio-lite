@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitDownloadSettingsDto {
@@ -18,4 +19,15 @@ export class UnitDownloadSettingsDto {
 
   @ApiProperty()
   passwordLess = false;
+
+  @ApiProperty()
+  bookletSettings: UnitDownloadBookletSettingsDto[] = []
+}
+
+export class UnitDownloadBookletSettingsDto {
+  @ApiProperty()
+  key!: string;
+
+  @ApiProperty()
+  value!: string;
 }

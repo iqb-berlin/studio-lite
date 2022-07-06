@@ -35,6 +35,37 @@
                       [(ngModel)]="unitExportSettings.passwordLess" class="margin-bottom">
           <div>Ohne Kennwort (nur Login-Name)</div>
         </mat-checkbox>
+        <mat-form-field>
+          <mat-select [placeholder]="'unit-download.booklet-config.paging-mode.label' | translate"
+                      [(ngModel)]="unitExportSettings.bookletSettings[0].value"
+                      [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0">
+            <mat-option [value]="'separate'">
+              {{'unit-download.booklet-config.paging-mode.separate' | translate}}
+            </mat-option>
+            <mat-option [value]="'concat-scroll'">
+              {{'unit-download.booklet-config.paging-mode.concat-scroll' | translate}}
+            </mat-option>
+            <mat-option [value]="'concat-scroll-snap'">
+              {{'unit-download.booklet-config.paging-mode.concat-scroll-snap' | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-select [placeholder]="'unit-download.booklet-config.unit_navibuttons.label' | translate"
+                      [(ngModel)]="unitExportSettings.bookletSettings[1].value"
+                      [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0">
+            <mat-option [value]="'FULL'">
+              {{'unit-download.booklet-config.unit_navibuttons.FULL' | translate}}
+            </mat-option>
+            <mat-option [value]="'ARROWS_ONLY'">
+              {{'unit-download.booklet-config.unit_navibuttons.ARROWS_ONLY' | translate}}
+            </mat-option>
+            <mat-option [value]="'OFF'">
+              {{'unit-download.booklet-config.unit_navibuttons.OFF' | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <div *ngIf="unitExportSettings.addPlayers && unitsWithOutPlayer.length > 0"
              class="tcMessage">
           Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.

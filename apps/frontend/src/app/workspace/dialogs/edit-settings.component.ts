@@ -1,8 +1,8 @@
-import {Component, Inject} from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { WorkspaceService } from '../workspace.service';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceService } from '../workspace.service';
 
 @Component({
   selector: 'app-edit-settings',

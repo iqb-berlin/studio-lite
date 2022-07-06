@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
@@ -19,7 +19,11 @@ export class ExportUnitComponent implements OnInit {
     addTestTakersReview: 0,
     addTestTakersMonitor: 0,
     addTestTakersHot: 0,
-    passwordLess: false
+    passwordLess: false,
+    bookletSettings: [
+      { key: 'pagingMode', value: 'separate' },
+      { key: 'unit_navibuttons', value: 'FULL' }
+    ]
   };
 
   unitsWithOutPlayer: number[] = [];
