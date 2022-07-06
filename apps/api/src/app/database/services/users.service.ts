@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
@@ -8,6 +8,7 @@ import {
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
 import WorkspaceUser from '../entities/workspace-user.entity';
+import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,9 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(WorkspaceUser)
-    private workspaceUsersRepository: Repository<WorkspaceUser>
+    private workspaceUsersRepository: Repository<WorkspaceUser>,
+    @InjectRepository(WorkspaceGroupAdmin)
+    private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>
   ) {}
 
   async findAll(workspaceId?: number): Promise<UserInListDto[]> {
@@ -140,6 +143,14 @@ export class UsersService {
     return !!wsUser;
   }
 
+  async isWorkspaceGroupAdmin(userId: number, workspaceGroupId: number): Promise<boolean> {
+    const wsgAdmin = await this.workspaceGroupAdminRepository.createQueryBuilder('wsg_admin')
+      .where('wsg_admin.user_id = :user_id and wsg_admin.workspace_group_id = :wsg_id',
+        { user_id: userId, wsg_id: workspaceGroupId })
+      .getOne();
+    return !!wsgAdmin;
+  }
+
   async remove(id: number | number[]): Promise<void> {
     await this.usersRepository.delete(id);
   }
@@ -191,17 +202,26 @@ export class UsersService {
   }
 
   async setUsersByWorkspace(workspaceId: number, users: number[]) {
-    await getConnection().createQueryBuilder()
-      .delete()
-      .from(WorkspaceUser)
-      .where('workspace_id = :id', { id: workspaceId })
-      .execute();
-    await users.forEach(async userId => {
-      const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
-        userId: userId,
-        workspaceId: workspaceId
-      });
-      await this.workspaceUsersRepository.save(newWorkspaceUser);
+    return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
+      await Promise.all(users.map(async userId => {
+        const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+          userId: userId,
+          workspaceId: workspaceId
+        });
+        await this.workspaceUsersRepository.save(newWorkspaceUser);
+      }));
+    });
+  }
+
+  async setWorkspaceGroupAdminsByWorkspaceGroup(workspaceGroupId: number, users: number[]) {
+    return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
+      await Promise.all(users.map(async userId => {
+        const newWorkspaceGroupAdmin = await this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
+          userId: userId,
+          workspaceGroupId: workspaceGroupId
+        });
+        await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
+      }));
     });
   }
 

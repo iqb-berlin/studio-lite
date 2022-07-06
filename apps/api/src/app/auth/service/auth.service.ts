@@ -27,6 +27,13 @@ export class AuthService {
     return isAdmin || false;
   }
 
+  async isWorkspaceGroupAdmin(userId: number, workspaceGroupId: number): Promise<boolean> {
+    const isAdmin = await this.usersService.getUserIsAdmin(userId);
+    if (isAdmin === true) return true;
+    const isWorkspaceGroupAdmin = await this.usersService.isWorkspaceGroupAdmin(userId, workspaceGroupId);
+    return isWorkspaceGroupAdmin || false;
+  }
+
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     return this.usersService.canAccessWorkSpace(userId, workspaceId);
   }

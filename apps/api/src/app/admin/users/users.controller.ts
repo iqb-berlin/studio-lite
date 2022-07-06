@@ -10,18 +10,20 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto
+  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../../database/services/users.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { IsAdminGuard } from '../is-admin.guard';
+import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 
 @Controller('admin/users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private workspaceGroupService: WorkspaceGroupService
   ) {}
 
   @Get()
@@ -68,6 +70,17 @@ export class UsersController {
     return this.workspaceService.findAll(id);
   }
 
+  @Get(':id/workspace-groups')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: [WorkspaceGroupInListDto]
+  })
+  @ApiTags('admin users')
+  async findOnesWorkspaceGroups(@Param('id') id: number): Promise<WorkspaceGroupInListDto[]> {
+    return this.workspaceGroupService.findAll(id);
+  }
+
   @Patch(':id/workspaces')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
@@ -75,6 +88,15 @@ export class UsersController {
   async patchOnesWorkspaces(@Param('id') id: number,
     @Body() workspaces: number[]) {
     return this.workspaceService.setWorkspacesByUser(id, workspaces);
+  }
+
+  @Patch(':id/workspace-groups')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin users')
+  async patchOnesWorkspaceGroups(@Param('id') id: number,
+    @Body() workspaceGroups: number[]) {
+    return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, workspaceGroups);
   }
 
   @Delete(':ids')
