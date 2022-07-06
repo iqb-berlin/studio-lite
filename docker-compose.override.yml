@@ -1,0 +1,12 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: database/Dockerfile
+      target: base
+    image: iqbberlin/studio-lite-db:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/updates:/studio-lite-db/updates
