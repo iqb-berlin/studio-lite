@@ -1,0 +1,56 @@
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
+
+export type EditMyDataComponentData = {
+  description?: string,
+  firstName?: string,
+  lastName?: string,
+  email?: string
+};
+
+@Component({
+  template: `
+      <h1 mat-dialog-title>Meine Daten ändern</h1>
+
+      <mat-dialog-content fxLayout="column">
+        <form [formGroup]="editUserForm" fxLayout="column">
+          <mat-form-field>
+            <input matInput formControlName="lastName" type="text" placeholder="Nachname" [value]="data.lastName"/>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput formControlName="firstName" type="text" placeholder="Vorname" [value]="data.firstName"/>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput formControlName="email" type="text" placeholder="E-Mail" [value]="data.email"/>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Notiz</mat-label>
+            <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
+          </mat-form-field>
+        </form>
+      </mat-dialog-content>
+
+      <mat-dialog-actions>
+        <button mat-raised-button color="primary"
+                type="submit" [mat-dialog-close]="editUserForm"
+                [disabled]="editUserForm.invalid">Speichern
+        </button>
+        <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+      </mat-dialog-actions>
+  `
+})
+
+export class EditMyDataComponent {
+  editUserForm: UntypedFormGroup;
+
+  constructor(private fb: UntypedFormBuilder,
+              @Inject(MAT_DIALOG_DATA) public data: EditMyDataComponentData) {
+    this.editUserForm = this.fb.group({
+      lastName: this.fb.control(this.data.lastName),
+      firstName: this.fb.control(this.data.firstName),
+      email: this.fb.control(this.data.email),
+      description: this.fb.control(this.data.description)
+    });
+  }
+}

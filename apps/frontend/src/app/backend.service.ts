@@ -4,7 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
-  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto
+  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto, MyDataDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -44,6 +44,18 @@ export class BackendService {
 
   getAuthData(): Observable<AuthDataDto> {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
+  }
+
+  getMyData(): Observable<MyDataDto> {
+    return this.http.get<MyDataDto>(`${this.serverUrl}my-data`);
+  }
+
+  setMyData(newMyData: MyDataDto): Observable<boolean> {
+    return this.http
+      .patch<boolean>(`${this.serverUrl}my-data`, newMyData)
+      .pipe(
+        catchError(() => of(false))
+      );
   }
 
   logout(): void {

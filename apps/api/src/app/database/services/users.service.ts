@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { getConnection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
+import {
+  CreateUserDto, MyDataDto, UserFullDto, UserInListDto
+} from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -161,6 +163,24 @@ export class UsersService {
     if (userData.firstName) userToUpdate.firstName = userData.firstName;
     if (userData.email) userToUpdate.email = userData.email;
     if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
+    await this.usersRepository.save(userToUpdate);
+  }
+
+  async patchMyData(userData: MyDataDto): Promise<void> {
+    const userToUpdate = await this.usersRepository.findOne({
+      where: { id: userData.id },
+      select: {
+        description: true,
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
+    });
+    if (userData.description) userToUpdate.description = userData.description;
+    if (userData.lastName) userToUpdate.lastName = userData.lastName;
+    if (userData.firstName) userToUpdate.firstName = userData.firstName;
+    if (userData.email) userToUpdate.email = userData.email;
     await this.usersRepository.save(userToUpdate);
   }
 

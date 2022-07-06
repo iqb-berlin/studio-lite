@@ -1,11 +1,11 @@
 import {
-  Controller, Request, Get, Post, UseGuards, Patch, Body
+  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException
 } from '@nestjs/common';
 
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
-import { AuthDataDto, ChangePasswordDto } from '@studio-lite-lib/api-dto';
+import { AuthDataDto, ChangePasswordDto, MyDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/service/auth.service';
@@ -25,7 +25,7 @@ export class AppController {
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  @ApiTags('auth')
+  @ApiTags('home')
   @ApiCreatedResponse({
     type: String
   })
@@ -42,7 +42,7 @@ export class AppController {
   @ApiCreatedResponse({
     type: AuthDataDto
   })
-  @ApiTags('auth')
+  @ApiTags('home')
   async findCanDos(@UserId() userId: number, @UserName() userName: string): Promise<AuthDataDto> {
     return <AuthDataDto>{
       userId: userId,
@@ -55,8 +55,35 @@ export class AppController {
   @Patch('password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiTags('auth')
+  @ApiTags('home')
   async setPassword(@Request() req, @Body() passwords: ChangePasswordDto): Promise<boolean> {
     return this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
+  }
+
+  @Get('my-data')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: MyDataDto
+  })
+  @ApiTags('home')
+  async findMydata(@UserId() userId: number): Promise<MyDataDto> {
+    return this.userService.findOne(userId).then(userData => <MyDataDto>{
+      id: userData.id,
+      lastName: userData.lastName,
+      firstName: userData.firstName,
+      email: userData.email,
+      description: userData.description
+    });
+  }
+
+  @Patch('my-data')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('home')
+  async setMyData(@Request() req, @Body() myNewData: MyDataDto): Promise<boolean> {
+    if (req.user.id !== myNewData.id) throw new UnauthorizedException();
+    await this.userService.patchMyData(myNewData);
+    return true;
   }
 }

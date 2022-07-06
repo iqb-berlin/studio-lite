@@ -6,11 +6,12 @@ import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { WorkspaceDto } from '@studio-lite-lib/api-dto';
+import { MyDataDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
 import { Subscription } from 'rxjs';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
 import { ChangePasswordComponent } from './change-password.component';
+import { EditMyDataComponent } from './edit-my-data.component';
 
 @Component({
   templateUrl: './home.component.html',
@@ -30,6 +31,7 @@ export class HomeComponent implements OnInit, OnDestroy {
               private backendService: BackendService,
               public confirmDialog: MatDialog,
               private changePasswordDialog: MatDialog,
+              private editMyDataDialog: MatDialog,
               private snackBar: MatSnackBar,
               private route: ActivatedRoute,
               private router: Router) {
@@ -120,5 +122,47 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.routingSubscription !== null) {
       this.routingSubscription.unsubscribe();
     }
+  }
+
+  changeUserData() {
+    this.backendService.getMyData().subscribe(myData => {
+      const dialogRef = this.editMyDataDialog.open(EditMyDataComponent, {
+        width: '600px',
+        data: {
+          description: myData.description,
+          firstName: myData.firstName,
+          lastName: myData.lastName,
+          email: myData.email
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (typeof result !== 'undefined') {
+          if (result !== false) {
+            this.appService.dataLoading = true;
+            const newFirstName: string = (<UntypedFormGroup>result).get('firstName')?.value;
+            const newLastName: string = (<UntypedFormGroup>result).get('lastName')?.value;
+            const newEmail: string = (<UntypedFormGroup>result).get('email')?.value;
+            const newDescription: string = (<UntypedFormGroup>result).get('description')?.value;
+            const changedData: MyDataDto = { id: this.appService.authData.userId };
+            if (newDescription !== myData.description) changedData.description = newDescription;
+            if (newFirstName !== myData.firstName) changedData.firstName = newFirstName;
+            if (newLastName !== myData.lastName) changedData.lastName = newLastName;
+            if (newEmail !== myData.email) changedData.email = newEmail;
+            this.appService.dataLoading = true;
+            this.backendService.setMyData(changedData).subscribe(
+              respOk => {
+                this.appService.dataLoading = false;
+                if (respOk) {
+                  this.snackBar.open('Nutzerdaten geändert', '', { duration: 1000 });
+                } else {
+                  this.snackBar.open('Konnte Nutzerdaten nicht ändern', 'Fehler', { duration: 3000 });
+                }
+              }
+            );
+          }
+        }
+      });
+    });
   }
 }
