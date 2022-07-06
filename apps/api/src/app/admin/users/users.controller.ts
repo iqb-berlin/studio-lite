@@ -2,7 +2,7 @@ import {
   Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiMethodNotAllowedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto
@@ -83,6 +83,7 @@ export class UsersController {
     required: false
   })
   @ApiOkResponse({ description: 'Admin users deleted successfully.' })
+  @ApiMethodNotAllowedResponse({ description: 'Active admin user must not be deleted.' })
   async removeIds(ids: number[]): Promise<void> {
     return this.usersService.removeIds(ids);
   }

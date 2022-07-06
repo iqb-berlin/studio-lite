@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
 import { getConnection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -163,6 +163,11 @@ export class UsersService {
   }
 
   removeIds(ids: number[]) {
-    ids.forEach(id => this.remove(id));
+    // TODO: Sich selbst bzw. alle löschen verhindern?
+    if (ids && ids.length) {
+      ids.forEach(id => this.remove(id));
+    }
+    // TODO: Eigene Exception mit Custom-Parametern
+    throw new MethodNotAllowedException();
   }
 }
