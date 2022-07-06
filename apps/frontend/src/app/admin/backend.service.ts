@@ -29,6 +29,14 @@ export class BackendService {
       );
   }
 
+  getUsersFull(): Observable<UserFullDto[]> {
+    return this.http
+      .get<UserFullDto[]>(`${this.serverUrl}admin/users/full`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
   addUser(newUser: CreateUserDto): Observable<boolean> {
     return this.http
       .post(`${this.serverUrl}admin/users`, newUser)
@@ -201,7 +209,7 @@ export class BackendService {
 
   getUnitExportConfig(): Observable<UnitExportConfigDto> {
     return this.http
-      .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`)
+      .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`);
   }
 
   setUnitExportConfig(unitExportConfig: UnitExportConfigDto): Observable<boolean> {

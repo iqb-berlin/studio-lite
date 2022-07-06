@@ -12,4 +12,7 @@ export class UserInListDto {
 
   @ApiProperty()
   description?: string;
+
+  @ApiProperty()
+  displayName?: string;
 }

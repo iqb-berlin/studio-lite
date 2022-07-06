@@ -62,9 +62,9 @@
 
     <div class="scroll-area" fxLayout="column">
       <div fxLayout="row" fxLayoutAlign="start start" *ngFor="let u of workspaceUsers.entries">
-        <mat-checkbox (change)="workspaceUsers?.updateHasChanged()" fxFlex="30%"
+        <mat-checkbox (change)="workspaceUsers?.updateHasChanged()" fxFlex
                       [(ngModel)]="u.isChecked" [disabled]="selectedWorkspaceId === 0" style="margin-left: 20px;">
-          {{u.name}}</mat-checkbox>
+          {{u.displayName}} ({{u.name}})</mat-checkbox>
           <div style="color: gray; margin: 3px" fxFlex>{{u.description}}</div>
       </div>
     </div>

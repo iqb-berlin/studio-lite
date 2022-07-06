@@ -7,6 +7,9 @@ export type EditUserComponentData = {
   name?: string,
   password?: string,
   description?: string,
+  firstName?: string,
+  lastName?: string,
+  email?: string,
   isAdmin: boolean
 };
 
@@ -20,7 +23,16 @@ export type EditUserComponentData = {
             Der Name muss mindestens drei Zeichen lang sein. Es sind nur Kleinbuchstaben und Ziffern erlaubt.
           </p>
         <mat-form-field>
-          <input matInput formControlName="name" type="text" placeholder="Name" [value]="data.name"/>
+          <input matInput formControlName="name" type="text" placeholder="Login-Name" [value]="data.name"/>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput formControlName="lastName" type="text" placeholder="Nachname" [value]="data.lastName"/>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput formControlName="firstName" type="text" placeholder="Vorname" [value]="data.firstName"/>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput formControlName="email" type="text" placeholder="E-Mail" [value]="data.email"/>
         </mat-form-field>
         <mat-form-field>
           <mat-label>Notiz</mat-label>
@@ -61,6 +73,9 @@ export class EditUserComponent {
     this.editUserForm = this.fb.group({
       name: this.fb.control(this.data.name,
         [Validators.required, Validators.pattern(/^[a-zäöüß]{3,}$/)]),
+      lastName: this.fb.control(this.data.lastName),
+      firstName: this.fb.control(this.data.firstName),
+      email: this.fb.control(this.data.email),
       description: this.fb.control(this.data.description),
       isAdmin: this.fb.control(this.data.isAdmin),
       password: this.fb.control(this.data.password,

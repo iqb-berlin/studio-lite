@@ -35,6 +35,17 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('full')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: [UserFullDto]
+  })
+  @ApiTags('admin users')
+  async findAllFull(): Promise<UserFullDto[]> {
+    return this.usersService.findAllFull();
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

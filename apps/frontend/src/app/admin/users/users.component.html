@@ -31,13 +31,23 @@
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef mat-sort-header="name"> Name </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef mat-sort-header="name"> Login-Name </mat-header-cell>
         <mat-cell *matCellDef="let element"> {{element.name}} {{element.isAdmin ? '*' : ''}}</mat-cell>
       </ng-container>
 
+      <ng-container matColumnDef="displayName">
+        <mat-header-cell *matHeaderCellDef mat-sort-header="displayName" fxFlex> Name </mat-header-cell>
+        <mat-cell *matCellDef="let row" style="color: gray" fxFlex> {{row.lastName ? row.lastName : row.name}}{{row.firstName ? (', ' + row.firstName) : ''}} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef mat-sort-header="email" fxFlex> E-Mail </mat-header-cell>
+        <mat-cell *matCellDef="let row" style="color: gray" fxFlex> {{row.email ? row.email : 'keine'}} </mat-cell>
+      </ng-container>
+
       <ng-container matColumnDef="description">
-        <mat-header-cell *matHeaderCellDef mat-sort-header="description" fxFlex="65%"> Notiz </mat-header-cell>
-        <mat-cell *matCellDef="let row" style="color: gray" fxFlex="65%"> {{row.description}} </mat-cell>
+        <mat-header-cell *matHeaderCellDef mat-sort-header="description" fxFlex="45%"> Notiz </mat-header-cell>
+        <mat-cell *matCellDef="let row" style="color: gray" fxFlex="45%"> {{row.description}} </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

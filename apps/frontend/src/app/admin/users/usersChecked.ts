@@ -4,11 +4,13 @@ import { UserInListDto } from '@studio-lite-lib/api-dto';
 export class UserChecked {
   public id: number;
   public name: string;
+  public displayName: string | undefined;
   public description: string | undefined;
   public isChecked: boolean;
   constructor(userDto: UserInListDto) {
     this.id = userDto.id;
     this.name = userDto.name;
+    this.displayName = userDto.displayName;
     this.description = userDto.description;
     this.isChecked = false;
   }

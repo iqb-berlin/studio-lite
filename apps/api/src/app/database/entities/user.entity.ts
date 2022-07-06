@@ -18,6 +18,19 @@ class User {
     name: 'is_admin'
   })
   public isAdmin: boolean;
+
+  @Column({
+    name: 'last_name'
+  })
+  public lastName: string | null;
+
+  @Column({
+    name: 'first_name'
+  })
+  public firstName: string | null;
+
+  @Column()
+  public email: string | null;
 }
 
 export default User;
