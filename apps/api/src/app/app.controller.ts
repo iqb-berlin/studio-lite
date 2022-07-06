@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { AuthDataDto, ChangePasswordDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
@@ -26,9 +26,7 @@ export class AppController {
   @Post('login')
   @UseGuards(LocalAuthGuard)
   @ApiTags('auth')
-  @ApiCreatedResponse({
-    type: String
-  })
+  @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiQuery({ type: String, name: 'password', required: true })
   @ApiQuery({ type: String, name: 'username', required: true })
   async login(@Request() req) {
@@ -39,9 +37,7 @@ export class AppController {
   @Get('auth-data')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: AuthDataDto
-  })
+  @ApiOkResponse({ description: 'User data successfully retrieved.' }) // TODO: Add Exception
   @ApiTags('auth')
   async findCanDos(@UserId() userId: number, @UserName() userName: string): Promise<AuthDataDto> {
     return <AuthDataDto>{
@@ -55,6 +51,7 @@ export class AppController {
   @Patch('password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Password successfully updated.' }) // TODO: Exception & Return Value entfernen
   @ApiTags('auth')
   async setPassword(@Request() req, @Body() passwords: ChangePasswordDto): Promise<boolean> {
     return this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);

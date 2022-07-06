@@ -90,7 +90,9 @@ export class UsersService {
     return null;
   }
 
+  // TODO: Kein Return Value, stattdessen Exception
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
+    this.logger.log(`Setting password for user with id: ${userId}.`);
     const userForName = await this.usersRepository.findOne({
       where: { id: userId },
       select: { name: true }
