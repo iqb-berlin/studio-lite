@@ -132,7 +132,8 @@ export class HomeComponent implements OnInit, OnDestroy {
           description: myData.description,
           firstName: myData.firstName,
           lastName: myData.lastName,
-          email: myData.email
+          email: myData.email,
+          emailPublishApproved: myData.emailPublishApproved
         }
       });
 
@@ -143,12 +144,14 @@ export class HomeComponent implements OnInit, OnDestroy {
             const newFirstName: string = (<UntypedFormGroup>result).get('firstName')?.value;
             const newLastName: string = (<UntypedFormGroup>result).get('lastName')?.value;
             const newEmail: string = (<UntypedFormGroup>result).get('email')?.value;
+            const newEmailApproval: boolean = (<UntypedFormGroup>result).get('emailPublishApproval')?.value;
             const newDescription: string = (<UntypedFormGroup>result).get('description')?.value;
             const changedData: MyDataDto = { id: this.appService.authData.userId };
             if (newDescription !== myData.description) changedData.description = newDescription;
             if (newFirstName !== myData.firstName) changedData.firstName = newFirstName;
             if (newLastName !== myData.lastName) changedData.lastName = newLastName;
             if (newEmail !== myData.email) changedData.email = newEmail;
+            if (newEmailApproval !== myData.emailPublishApproved) changedData.emailPublishApproved = newEmailApproval;
             this.appService.dataLoading = true;
             this.backendService.setMyData(changedData).subscribe(
               respOk => {

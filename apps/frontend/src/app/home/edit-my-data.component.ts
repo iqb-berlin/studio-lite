@@ -6,7 +6,8 @@ export type EditMyDataComponentData = {
   description?: string,
   firstName?: string,
   lastName?: string,
-  email?: string
+  email?: string,
+  emailPublishApproved?: boolean
 };
 
 @Component({
@@ -24,6 +25,12 @@ export type EditMyDataComponentData = {
           <mat-form-field>
             <input matInput formControlName="email" type="text" placeholder="E-Mail" [value]="data.email"/>
           </mat-form-field>
+          <div fxLayout="row" fxLayoutGap="10px">
+            <mat-checkbox formControlName="emailPublishApproval"
+                          [value]="data.emailPublishApproved ? data.emailPublishApproved.toString() : 'false'">
+            </mat-checkbox>
+            <div>Ich stimme zu, dass die E-Mail-Adresse für andere in meinen Arbeitsbereichen sichtbar ist.</div>
+          </div>
           <mat-form-field>
             <mat-label>Notiz</mat-label>
             <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
@@ -50,6 +57,7 @@ export class EditMyDataComponent {
       lastName: this.fb.control(this.data.lastName),
       firstName: this.fb.control(this.data.firstName),
       email: this.fb.control(this.data.email),
+      emailPublishApproval: this.fb.control(this.data.emailPublishApproved),
       description: this.fb.control(this.data.description)
     });
   }

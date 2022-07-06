@@ -23,6 +23,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -77,7 +78,8 @@ import { EditMyDataComponent } from './home/edit-my-data.component';
         provide: TranslateLoader,
         useClass: AppTranslateLoader
       }
-    })
+    }),
+    MatCheckboxModule
   ],
   providers: [
     BackendService,

@@ -15,4 +15,7 @@ export class MyDataDto {
 
   @ApiProperty()
   firstName?: string;
+
+  @ApiProperty()
+  emailPublishApproved?: boolean;
 }

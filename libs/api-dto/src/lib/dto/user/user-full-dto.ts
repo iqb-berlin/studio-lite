@@ -24,4 +24,7 @@ export class UserFullDto {
 
   @ApiProperty()
   firstName?: string;
+
+  @ApiProperty()
+  emailPublishApproved?: boolean;
 }

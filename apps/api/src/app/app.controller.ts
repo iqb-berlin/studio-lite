@@ -73,6 +73,7 @@ export class AppController {
       lastName: userData.lastName,
       firstName: userData.firstName,
       email: userData.email,
+      emailPublishApproved: userData.emailPublishApproved,
       description: userData.description
     });
   }

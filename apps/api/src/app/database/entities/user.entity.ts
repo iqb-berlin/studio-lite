@@ -31,6 +31,11 @@ class User {
 
   @Column()
   public email: string | null;
+
+  @Column({
+    name: 'email_publish_approved'
+  })
+  public emailPublishApproved: boolean;
 }
 
 export default User;

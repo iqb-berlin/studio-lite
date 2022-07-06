@@ -60,7 +60,8 @@ export class UsersService {
           description: user.description,
           lastName: user.lastName,
           firstName: user.firstName,
-          email: user.email
+          email: user.email,
+          emailPublishApproved: user.emailPublishApproved
         });
       }
     });
@@ -78,7 +79,8 @@ export class UsersService {
       description: user.description,
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email
+      email: user.email,
+      emailPublishApproved: user.emailPublishApproved
     };
   }
 
@@ -174,13 +176,17 @@ export class UsersService {
         id: true,
         firstName: true,
         lastName: true,
-        email: true
+        email: true,
+        emailPublishApproved: true
       }
     });
     if (userData.description) userToUpdate.description = userData.description;
     if (userData.lastName) userToUpdate.lastName = userData.lastName;
     if (userData.firstName) userToUpdate.firstName = userData.firstName;
     if (userData.email) userToUpdate.email = userData.email;
+    if (typeof userData.emailPublishApproved === 'boolean') {
+      userToUpdate.emailPublishApproved = userData.emailPublishApproved;
+    }
     await this.usersRepository.save(userToUpdate);
   }
 
