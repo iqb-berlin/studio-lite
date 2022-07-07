@@ -8,8 +8,8 @@
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2020 browser module main",
     "build-backend": "nx build api",
     "start-backend": "nx serve api",
-    "build": "nx build",
-    "start": "nx serve",
+    "build-frontend": "nx build frontend",
+    "start-frontend": "nx serve frontend",
     "test": "nx test"
   },
   "private": true,

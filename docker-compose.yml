@@ -33,8 +33,21 @@ services:
     networks:
       - backend-network
 
+  frontend:
+    container_name: studio-lite-frontend
+    depends_on:
+      - db
+      - backend
+    restart: always
+    environment:
+      <<: *env-api
+    networks:
+      - backend-network
+      - frontend-network
+
 volumes:
   db_vol:
 
 networks:
   backend-network:
+  frontend-network:

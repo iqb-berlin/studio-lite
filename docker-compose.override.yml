@@ -26,3 +26,22 @@ services:
       - "api"
     volumes:
       - ./apps/api/src:/studio-lite/apps/api/src
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: dev
+      args:
+        project: frontend
+        apihost: ${API_HOST}
+        apiport: ${API_PORT}
+    image: iqbberlin/studio-lite-frontend:latest
+    ports:
+      - "4200:4200"
+    command:
+      - "serve"
+      - "frontend"
+      - "--host=${WEB_HOST}"
+    volumes:
+      - ./apps/frontend/src:/studio-lite/apps/frontend/src
