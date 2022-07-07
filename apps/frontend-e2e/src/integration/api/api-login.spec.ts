@@ -1,6 +1,6 @@
-import { getGreeting } from '../support/app.po';
+import { getGreeting } from '../../support/app.po';
 
-describe('frontend', () => {
+describe('api-login', () => {
   beforeEach(() => cy.visit('/'));
 
   it('should display welcome message', () => {
