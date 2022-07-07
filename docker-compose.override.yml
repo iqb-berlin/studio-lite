@@ -10,3 +10,19 @@ services:
     volumes:
       - ./database/init:/docker-entrypoint-initdb.d
       - ./database/updates:/studio-lite-db/updates
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: dev
+      args:
+        project: api
+    image: iqbberlin/studio-lite-backend:latest
+    ports:
+      - "3333:3333"
+    command:
+      - "serve"
+      - "api"
+    volumes:
+      - ./apps/api/src:/studio-lite/apps/api/src
