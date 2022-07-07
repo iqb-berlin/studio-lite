@@ -24,6 +24,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
 import { AdminRoutingModule } from './admin-routing.module';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { UsersComponent } from './users/users.component';
@@ -39,66 +40,65 @@ import { AppConfigComponent } from './settings/app-config.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './settings/app-logo.component';
-import { TranslateModule } from '@ngx-translate/core';
 import { UnitExportConfigComponent } from './settings/unit-export-config.component';
 
 @NgModule({
-    imports: [
-      CommonModule,
-      AdminRoutingModule,
-      IqbComponentsModule,
-      MatTableModule,
-      MatTabsModule,
-      MatIconModule,
-      MatSelectModule,
-      MatCheckboxModule,
-      MatSortModule,
-      ReactiveFormsModule,
-      MatProgressSpinnerModule,
-      MatDialogModule,
-      MatButtonModule,
-      MatCardModule,
-      MatTooltipModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatToolbarModule,
-      MatSnackBarModule,
-      MatNativeDateModule,
-      MatDatepickerModule,
-      MatBadgeModule,
-      FlexLayoutModule,
-      MatChipsModule,
-      FormsModule,
-      TranslateModule
-    ],
-    exports: [
-      AdminComponent
-    ],
-    declarations: [
-      WorkspacesComponent,
-      UsersComponent,
-      AdminComponent,
-      EditworkspaceComponent,
-      EditUserComponent,
-      VeronaModulesComponent,
-      VeronaModulesTableComponent,
-      SettingsComponent,
-      WorkspaceGroupsComponent,
-      EditWorkspaceGroupComponent,
-      AppConfigComponent,
-      AppLogoComponent,
-      UnitExportConfigComponent
-    ],
-    providers: [
-        BackendService,
-        [
-            { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-            {
-                provide: HTTP_INTERCEPTORS,
-                useClass: AuthInterceptor,
-                multi: true
-            }
-        ]
+  imports: [
+    CommonModule,
+    AdminRoutingModule,
+    IqbComponentsModule,
+    MatTableModule,
+    MatTabsModule,
+    MatIconModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatSortModule,
+    ReactiveFormsModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatCardModule,
+    MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatToolbarModule,
+    MatSnackBarModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
+    MatBadgeModule,
+    FlexLayoutModule,
+    MatChipsModule,
+    FormsModule,
+    TranslateModule
+  ],
+  exports: [
+    AdminComponent
+  ],
+  declarations: [
+    WorkspacesComponent,
+    UsersComponent,
+    AdminComponent,
+    EditworkspaceComponent,
+    EditUserComponent,
+    VeronaModulesComponent,
+    VeronaModulesTableComponent,
+    SettingsComponent,
+    WorkspaceGroupsComponent,
+    EditWorkspaceGroupComponent,
+    AppConfigComponent,
+    AppLogoComponent,
+    UnitExportConfigComponent
+  ],
+  providers: [
+    BackendService,
+    [
+      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+      {
+        provide: HTTP_INTERCEPTORS,
+        useClass: AuthInterceptor,
+        multi: true
+      }
     ]
+  ]
 })
 export class AdminModule { }

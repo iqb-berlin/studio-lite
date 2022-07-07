@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   UseGuards
@@ -12,16 +11,20 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
-  WorkspaceGroupInListDto
+  WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 import { IsAdminGuard } from '../is-admin.guard';
+import { WorkspaceService } from '../../database/services/workspace.service';
+import { WorkspaceGroupId } from '../workspace-group.decorator';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
   constructor(
-    private workspaceGroupService: WorkspaceGroupService
+    private workspaceGroupService: WorkspaceGroupService,
+    private workspaceService: WorkspaceService
   ) {}
 
   @Get()
@@ -35,22 +38,36 @@ export class WorkspaceGroupsController {
     return this.workspaceGroupService.findAll();
   }
 
-  @Get(':id')
+  @Get(':workspace_group_id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @ApiCreatedResponse({
-    type: [WorkspaceGroupFullDto]
+    type: WorkspaceGroupFullDto
   })
   @ApiTags('admin workspaces')
-  async findOne(@Param('id') id: number): Promise<WorkspaceGroupFullDto> {
+  async findOne(@WorkspaceGroupId() id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
   }
 
-  @Delete(':id')
+  @Get(':workspace_group_id/workspaces')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiCreatedResponse({
+    type: [WorkspaceInListDto]
+  })
+  @ApiTags('wsg-admin workspaces')
+  async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
+    return this.workspaceService.findAllByGroup(id);
+  }
+
+  @Delete(':workspace_group_id')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('admin workspaces')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@WorkspaceGroupId() id: number): Promise<void> {
     return this.workspaceGroupService.remove(id);
   }
 

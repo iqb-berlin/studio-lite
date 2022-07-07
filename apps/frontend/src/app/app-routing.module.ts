@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'a/:ws',
     loadChildren: () => import('./workspace/workspace.module').then(module => module.WorkspaceModule)
+  },
+  {
+    path: 'wsg-admin/:wsg',
+    loadChildren: () => import('./wsg-admin/wsg-admin.module').then(module => module.WsgAdminModule)
   }
 ];
 

@@ -47,7 +47,13 @@
       </div>
       <div fxFlex *ngIf="appService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
         <div *ngFor="let wsg of appService.authData.workspaces" fxLayout="column">
-          <h2 [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</h2>
+          <div fxLayout="row" fxLayoutAlign="space-between center">
+            <h2 [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</h2>
+            <button mat-button [routerLink]="['/wsg-admin/' + wsg.id]"
+                    [matTooltip]="'home.goto-wsg-admin' | translate">
+              <mat-icon>settings</mat-icon>
+            </button>
+          </div>
           <div fxLayout="column" fxLayoutAlign="start start">
             <button mat-button (click)="buttonGotoWorkspace(ws)"
                     *ngFor="let ws of wsg.workspaces">

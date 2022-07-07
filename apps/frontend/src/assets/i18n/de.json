@@ -34,6 +34,7 @@
     "home-page": "Startseite",
     "select-workspace": "Arbeitsbereich wählen",
     "goto-admin": "Allgemeine Systemverwaltung",
+    "goto-wsg-admin": "Verwaltung der Bereichsgruppe",
     "imprint": "Impressum/Datenschutz"
   },
   "dialogs": {

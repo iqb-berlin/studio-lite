@@ -3,7 +3,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  Component, Inject, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
   Subscription, map, lastValueFrom
@@ -54,7 +54,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    @Inject('SERVER_URL') private serverUrl: string,
     private appService: AppService,
     public workspaceService: WorkspaceService,
     private backendService: BackendService,
@@ -126,11 +125,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         const newUnitGroups: string[] = [];
         if (this.workspaceService.workspaceSettings.unitGroups) {
           this.workspaceService.workspaceSettings.unitGroups.forEach(g => {
-            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g)
-          })
+            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g);
+          });
         }
         this.workspaceService.unitList.groups.forEach(g => {
-          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name)
+          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name);
         });
         newUnitGroups.sort();
         this.workspaceService.workspaceSettings.unitGroups = newUnitGroups;
@@ -190,7 +189,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
       this.backendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspace,this.workspaceService.workspaceSettings).subscribe(isOK => {
+        this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+      ).subscribe(isOK => {
         this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
           isOK ? '' : 'Fehler', { duration: 3000 });
       });
@@ -202,7 +202,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
         width: '500px',
-        data: newUnitData,
+        data: newUnitData
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
@@ -266,7 +266,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               return dialogComponent.selectedUnitIds;
             }
           }
-          return false
+          return false;
         })
       ));
     }
@@ -278,7 +278,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (typeof unitSource !== 'boolean') {
         this.addUnitDialog({
           title: 'Neue Aufgabe aus vorhandener',
-          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ' - ' + unitSource.name : ''}`,
+          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
           key: unitSource.key,
           label: unitSource.name || '',
           groups: this.workspaceService.workspaceSettings.unitGroups || []
@@ -361,21 +361,21 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             ).subscribe(uploadStatus => {
               if (typeof uploadStatus === 'boolean') {
                 this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,
-                  'Fehler', {duration: 3000});
-              } else {
-                if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-                  const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
-                    width: '500px',
-                    height: '600px',
-                    data: uploadStatus
-                  });
-                  dialogRef.afterClosed().subscribe(() => {
-                    this.updateUnitList();
-                  });
-                } else {
-                  this.snackBar.open(`Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', {duration: 1000});
+                  'Fehler', { duration: 3000 });
+              } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+                const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                  width: '500px',
+                  height: '600px',
+                  data: uploadStatus
+                });
+                dialogRef2.afterClosed().subscribe(() => {
                   this.updateUnitList();
-                }
+                });
+              } else {
+                this.snackBar.open(
+                  `Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', { duration: 1000 }
+                );
+                this.updateUnitList();
               }
             });
           }

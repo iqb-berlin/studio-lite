@@ -7,13 +7,13 @@ import {
   WorkspaceFullDto,
   WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
+import * as AdmZip from 'adm-zip';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
-import * as AdmZip from 'adm-zip';
 
 @Injectable()
 export class WorkspaceService {
@@ -82,12 +82,28 @@ export class WorkspaceService {
     return myReturn;
   }
 
+  async findAllByGroup(workspaceGroupId: number): Promise<WorkspaceInListDto[]> {
+    const workspaces: Workspace[] = await this.workspacesRepository.find({
+      order: { name: 'ASC' },
+      where: { groupId: workspaceGroupId }
+    });
+    const workspacesReturn: WorkspaceInListDto[] = [];
+    workspaces.forEach(workspace => {
+      workspacesReturn.push(<WorkspaceInListDto>{
+        id: workspace.id,
+        name: workspace.name,
+        groupId: workspaceGroupId
+      });
+    });
+    return workspacesReturn;
+  }
+
   async findOne(id: number): Promise<WorkspaceFullDto> {
     const workspace = await this.workspacesRepository.findOne({
-      where: {id: id}
+      where: { id: id }
     });
     const workspaceGroup = await this.workspaceGroupRepository.findOne({
-      where: {id: workspace.groupId}
+      where: { id: workspace.groupId }
     });
     return <WorkspaceFullDto>{
       id: workspace.id,
@@ -106,7 +122,7 @@ export class WorkspaceService {
 
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: {id: workspaceData.id}
+      where: { id: workspaceData.id }
     });
     if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
     if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
@@ -115,7 +131,7 @@ export class WorkspaceService {
 
   async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: {id: id}
+      where: { id: id }
     });
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
@@ -136,7 +152,7 @@ export class WorkspaceService {
         try {
           const zip = new AdmZip(f.buffer);
           const zipEntries = zip.getEntries();
-          zipEntries.forEach(function (zipEntry) {
+          zipEntries.forEach(zipEntry => {
             const isXmlFile = /\.xml$/i.test(zipEntry.entryName);
             const fileContent = zipEntry.getData();
             files.push({
