@@ -41,58 +41,58 @@ import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-list.component';
+import {
+  PagingModeSelectionComponent
+} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        MatIconModule,
-        MatTooltipModule,
-        FlexLayoutModule,
-        WorkspaceRoutingModule,
-        ReactiveFormsModule,
-        MatSelectModule,
-        MatListModule,
-        MatSlideToggleModule,
-        MatButtonToggleModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatSortModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        HttpClientModule,
-        MatProgressSpinnerModule,
-        MatInputModule,
-        MatCardModule,
-        MatSnackBarModule,
-        MatTableModule,
-        MatCheckboxModule,
-        FormsModule,
-        MatTabsModule,
-        IqbComponentsModule,
-        MatProgressBarModule,
-        TranslateModule
-    ],
-    declarations: [
-        WorkspaceComponent,
-        NewUnitComponent,
-        SelectUnitComponent,
-        MoveUnitComponent,
-        UnitMetadataComponent,
-        UnitEditorComponent,
-        SaveOrDiscardComponent,
-        UnitPreviewComponent,
-        SelectModuleComponent,
-        ExportUnitComponent,
-        EditSettingsComponent,
-        UnitSchemerComponent,
-        SelectUnitListComponent
-    ],
-    exports: [
-        WorkspaceComponent
-    ],
-    providers: [
-        UnitRoutingCanDeactivateGuard
-    ]
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule,
+    FlexLayoutModule,
+    WorkspaceRoutingModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatListModule,
+    MatSlideToggleModule,
+    MatButtonToggleModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatSortModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    HttpClientModule,
+    MatProgressSpinnerModule,
+    MatInputModule,
+    MatCardModule,
+    MatSnackBarModule,
+    MatTableModule,
+    MatCheckboxModule,
+    FormsModule,
+    MatTabsModule,
+    IqbComponentsModule,
+    MatProgressBarModule,
+    TranslateModule
+  ],
+  declarations: [
+    WorkspaceComponent,
+    NewUnitComponent,
+    SelectUnitComponent,
+    MoveUnitComponent,
+    UnitMetadataComponent,
+    UnitEditorComponent,
+    SaveOrDiscardComponent,
+    UnitPreviewComponent,
+    SelectModuleComponent,
+    ExportUnitComponent,
+    EditSettingsComponent,
+    UnitSchemerComponent,
+    SelectUnitListComponent,
+    PagingModeSelectionComponent
+  ],
+  exports: [WorkspaceComponent],
+  providers: [UnitRoutingCanDeactivateGuard]
 })
-export class WorkspaceModule { }
+export class WorkspaceModule {}

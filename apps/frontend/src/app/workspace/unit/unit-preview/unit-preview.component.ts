@@ -1,26 +1,25 @@
 import {
   Component, HostListener, OnDestroy, OnInit
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
-import {
-  PageData,
-  StatusVisual
-} from './unit-preview.classes';
+import { PageData, StatusVisual } from './unit-preview.classes';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
 import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
+import { PreviewService } from './preview.service';
 
 @Component({
   templateUrl: './unit-preview.component.html',
-  styleUrls: ['./unit-preview.component.css']
+  styleUrls: ['./unit-preview.component.css'],
+  host: { class: 'unit-preview' }
 })
 export class UnitPreviewComponent implements OnInit, OnDestroy {
   private iFrameElement: HTMLIFrameElement | undefined;
-  private readonly postMessageSubscription: Subscription | undefined;
-  private unitIdChangedSubscription: Subscription | undefined;
+  private ngUnsubscribe = new Subject<void>();
+
   private sessionId = '';
   postMessageTarget: Window | undefined;
   private lastPlayerId = '';
@@ -28,13 +27,22 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
   playerApiVersion = 3;
   statusVisual: StatusVisual[] = [
     {
-      id: 'presentation', label: 'P', color: 'DarkGray', description: 'Status: Vollständigkeit der Präsentation'
+      id: 'presentation',
+      label: 'P',
+      color: 'DarkGray',
+      description: 'Status: Vollständigkeit der Präsentation'
     },
     {
-      id: 'responses', label: 'R', color: 'DarkGray', description: 'Status: Vollständigkeit der Antworten'
+      id: 'responses',
+      label: 'R',
+      color: 'DarkGray',
+      description: 'Status: Vollständigkeit der Antworten'
     },
     {
-      id: 'focus', label: 'F', color: 'DarkGray', description: 'Status: Player hat Fenster-Fokus'
+      id: 'focus',
+      label: 'F',
+      color: 'DarkGray',
+      description: 'Status: Player hat Fenster-Fokus'
     }
   ];
 
@@ -47,109 +55,123 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     private appService: AppService,
     private snackBar: MatSnackBar,
     private backendService: BackendService,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    public previewService: PreviewService
   ) {
-    this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
-      const msgData = m.data;
-      const msgType = msgData.type;
-      if ((msgType !== undefined) && (msgType !== null)) {
-        switch (msgType) {
-          case 'vopReadyNotification':
-          case 'player':
-          case 'vo.FromPlayer.ReadyNotification':
-            if (msgType === 'vopReadyNotification' || msgType === 'player') {
-              const majorVersion = msgData.apiVersion ?
-                msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
-              if (majorVersion.length > 0) {
-                const majorVersionNumber = Number(majorVersion[0]);
-                this.playerApiVersion = majorVersionNumber > 2 ? 3 : 2;
+    this.appService.postMessage$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((m: MessageEvent) => {
+        const msgData = m.data;
+        const msgType = msgData.type;
+        if ((msgType !== undefined) && (msgType !== null)) {
+          switch (msgType) {
+            case 'vopReadyNotification':
+            case 'player':
+            case 'vo.FromPlayer.ReadyNotification':
+              if (msgType === 'vopReadyNotification' || msgType === 'player') {
+                const majorVersion = msgData.apiVersion ?
+                  msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+                if (majorVersion.length > 0) {
+                  const majorVersionNumber = Number(majorVersion[0]);
+                  this.playerApiVersion = majorVersionNumber > 2 ? 3 : 2;
+                } else {
+                  this.playerApiVersion = 2;
+                }
               } else {
-                this.playerApiVersion = 2;
+                this.playerApiVersion = 1;
               }
-            } else {
-              this.playerApiVersion = 1;
-            }
-            this.sessionId = Math.floor(Math.random() * 20000000 + 10000000).toString();
-            this.postMessageTarget = m.source as Window;
-            this.sendUnitDataToPlayer();
-            break;
+              this.sessionId = Math.floor(Math.random() * 20000000 + 10000000)
+                .toString();
+              this.postMessageTarget = m.source as Window;
+              this.sendUnitDataToPlayer();
+              break;
 
-          case 'vo.FromPlayer.StartedNotification':
-            this.setPageList(msgData.validPages, msgData.currentPage);
-            this.setPresentationStatus(msgData.presentationComplete);
-            this.setResponsesStatus(msgData.responsesGiven);
-            break;
+            case 'vo.FromPlayer.StartedNotification':
+              this.setPageList(msgData.validPages, msgData.currentPage);
+              this.setPresentationStatus(msgData.presentationComplete);
+              this.setResponsesStatus(msgData.responsesGiven);
+              break;
 
-          case 'vopStateChangedNotification':
-            if (msgData.playerState) {
-              const pages = msgData.playerState.validPages;
-              this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
-            }
-            if (msgData.unitState) {
-              this.setPresentationStatus(msgData.unitState.presentationProgress);
-              this.setResponsesStatus(msgData.unitState.responseProgress);
-            }
-            break;
+            case 'vopStateChangedNotification':
+              if (msgData.playerState) {
+                const pages = msgData.playerState.validPages;
+                this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
+              }
+              if (msgData.unitState) {
+                this.setPresentationStatus(msgData.unitState.presentationProgress);
+                this.setResponsesStatus(msgData.unitState.responseProgress);
+              }
+              break;
 
-          case 'vo.FromPlayer.ChangedDataTransfer':
-            this.setPageList(msgData.validPages, msgData.currentPage);
-            this.setPresentationStatus(msgData.presentationComplete);
-            this.setResponsesStatus(msgData.responsesGiven);
-            break;
+            case 'vo.FromPlayer.ChangedDataTransfer':
+              this.setPageList(msgData.validPages, msgData.currentPage);
+              this.setPresentationStatus(msgData.presentationComplete);
+              this.setResponsesStatus(msgData.responsesGiven);
+              break;
 
-          case 'vo.FromPlayer.PageNavigationRequest':
-            this.snackBar.open(`Player sendet PageNavigationRequest: "${
-              msgData.newPage}"`, '', { duration: 3000 });
-            this.gotoPage(msgData.newPage);
-            break;
+            case 'vo.FromPlayer.PageNavigationRequest':
+              this.snackBar.open(`Player sendet PageNavigationRequest: "${
+                msgData.newPage}"`, '', { duration: 3000 });
+              this.gotoPage(msgData.newPage);
+              break;
 
-          case 'vopPageNavigationCommand':
-            this.snackBar.open(`Player sendet PageNavigationRequest: "${
-              msgData.target}"`, '', { duration: 3000 });
-            this.gotoPage(msgData.target);
-            break;
+            case 'vopPageNavigationCommand':
+              this.snackBar.open(`Player sendet PageNavigationRequest: "${
+                msgData.target}"`, '', { duration: 3000 });
+              this.gotoPage(msgData.target);
+              break;
 
-          case 'vo.FromPlayer.UnitNavigationRequest':
-            this.snackBar.open(`Player sendet UnitNavigationRequest: "${
-              msgData.navigationTarget}"`, '', { duration: 3000 });
-            break;
+            case 'vo.FromPlayer.UnitNavigationRequest':
+              this.snackBar.open(`Player sendet UnitNavigationRequest: "${
+                msgData.navigationTarget}"`, '', { duration: 3000 });
+              break;
 
-          case 'vopUnitNavigationRequestedNotification':
-            this.snackBar.open(`Player sendet UnitNavigationRequest: "${
-              msgData.target}"`, '', { duration: 3000 });
-            break;
+            case 'vopUnitNavigationRequestedNotification':
+              this.snackBar.open(`Player sendet UnitNavigationRequest: "${
+                msgData.target}"`, '', { duration: 3000 });
+              break;
 
-          case 'vopWindowFocusChangedNotification':
-            this.setFocusStatus(msgData.hasFocus);
-            break;
+            case 'vopWindowFocusChangedNotification':
+              this.setFocusStatus(msgData.hasFocus);
+              break;
 
-          default:
-            // eslint-disable-next-line no-console
-            console.warn(`processMessagePost ignored message: ${msgType}`);
-            break;
+            default:
+              // eslint-disable-next-line no-console
+              console.warn(`processMessagePost ignored message: ${msgType}`);
+              break;
+          }
         }
-      }
-    });
+      });
+    this.previewService.pagingMode
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.initPlayer());
   }
 
   ngOnInit(): void {
+    this.initPlayer();
+  }
+
+  private initPlayer(): void {
     setTimeout(() => {
       this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
-      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
-        this.message = '';
-        if (this.workspaceService.unitMetadataStore) {
-          this.sendUnitDataToPlayer();
-        } else {
-          const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
-            selectedUnitId).subscribe(unitData => {
-            this.workspaceService.unitMetadataStore = new UnitMetadataStore(
-              unitData || <UnitMetadataDto>{ id: selectedUnitId }
-            );
+      this.workspaceService.selectedUnit$
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          this.message = '';
+          if (this.workspaceService.unitMetadataStore) {
             this.sendUnitDataToPlayer();
-          });
-        }
-      });
+          } else {
+            const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
+            this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+              selectedUnitId)
+              .subscribe(unitData => {
+                this.workspaceService.unitMetadataStore = new UnitMetadataStore(
+                  unitData || <UnitMetadataDto>{ id: selectedUnitId }
+                );
+                this.sendUnitDataToPlayer();
+              });
+          }
+        });
     });
   }
 
@@ -163,23 +185,26 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
       const playerId = unitMetadata.player ? this.workspaceService.playerList.getBestMatch(unitMetadata.player) : '';
       if (playerId) {
         if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
+          // TODO: Ist das nicht EditorCode, der hier entfernt werden kann?
           if (this.workspaceService.unitDefinitionStore) {
             this.postUnitDef(this.workspaceService.unitDefinitionStore);
           } else {
-            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
-              ued => {
-                if (ued) {
-                  this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
-                  this.postUnitDef(this.workspaceService.unitDefinitionStore);
-                } else {
-                  this.snackBar.open(
-                    'Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 }
-                  );
+            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId)
+              .subscribe(
+                ued => {
+                  if (ued) {
+                    this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
+                    this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                  } else {
+                    this.snackBar.open(
+                      'Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 }
+                    );
+                  }
                 }
-              }
-            );
+              );
           }
         } else {
+          this.message = '';
           this.buildPlayer(playerId);
           // player gets unit data via ReadyNotification
         }
@@ -212,7 +237,8 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             responseProgress: 'none'
           },
           playerConfig: {
-            stateReportPolicy: 'eager'
+            stateReportPolicy: 'eager',
+            pagingMode: this.previewService.pagingMode.value
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
@@ -235,16 +261,17 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (playerId) {
-        this.workspaceService.getModuleHtml(playerId).then(playerData => {
-          this.playerName = playerId;
-          if (playerData) {
-            this.setupPlayerIFrame(playerData);
-            this.lastPlayerId = playerId;
-          } else {
-            this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
-            this.lastPlayerId = '';
-          }
-        });
+        this.workspaceService.getModuleHtml(playerId)
+          .then(playerData => {
+            this.playerName = playerId;
+            if (playerData) {
+              this.setupPlayerIFrame(playerData);
+              this.lastPlayerId = playerId;
+            } else {
+              this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
+              this.lastPlayerId = '';
+            }
+          });
       } else {
         this.lastPlayerId = '';
       }
@@ -416,7 +443,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.postMessageSubscription) this.postMessageSubscription.unsubscribe();
-    if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

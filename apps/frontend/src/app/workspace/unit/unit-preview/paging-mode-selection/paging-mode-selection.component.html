@@ -1,0 +1,7 @@
+<label class="selection-label">Paging Mode</label>
+<select [ngModel]="previewService.pagingMode.value"
+            (ngModelChange)="previewService.setPagingMode($event)">
+  <option *ngFor="let mode of pagingModes" [value]="mode">
+    {{mode}}
+  </option>
+</select>
