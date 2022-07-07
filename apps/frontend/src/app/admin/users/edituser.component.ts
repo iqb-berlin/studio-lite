@@ -10,7 +10,8 @@ export type EditUserComponentData = {
   firstName?: string,
   lastName?: string,
   email?: string,
-  isAdmin: boolean
+  isAdmin: boolean,
+  emailApproved: boolean
 };
 
 @Component({
@@ -22,30 +23,40 @@ export type EditUserComponentData = {
           <p>
             Der Name muss mindestens drei Zeichen lang sein. Es sind nur Kleinbuchstaben und Ziffern erlaubt.
           </p>
-        <mat-form-field>
-          <input matInput formControlName="name" type="text" placeholder="Login-Name" [value]="data.name"/>
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput formControlName="lastName" type="text" placeholder="Nachname" [value]="data.lastName"/>
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput formControlName="firstName" type="text" placeholder="Vorname" [value]="data.firstName"/>
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput formControlName="email" type="text" placeholder="E-Mail" [value]="data.email"/>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Notiz</mat-label>
-          <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
-        </mat-form-field>
-        <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin.toString()">System-Administrator:in</mat-checkbox>
-        <p>&nbsp;</p>
-        <p>
-          Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.
-        </p>
-        <mat-form-field>
-          <input matInput formControlName="password" type="password" [placeholder]="passwordLabel"/>
-        </mat-form-field>
+          <mat-form-field>
+            <input matInput formControlName="name" type="text" placeholder="Login-Name" [value]="data.name"/>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput formControlName="lastName" type="text" placeholder="Nachname" [value]="data.lastName"/>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput formControlName="firstName" type="text" placeholder="Vorname" [value]="data.firstName"/>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput formControlName="email" type="text" placeholder="E-Mail" [value]="data.email"/>
+          </mat-form-field>
+          <div *ngIf="data.emailApproved" class="email-consent"
+               fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon>check_circle_outline</mat-icon>
+            Zustimmung zur Anzeige der E-Mail-Adresse wurde erteilt.</div>
+          <div *ngIf="!data.emailApproved" class="email-consent"
+               fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon>highlight_off</mat-icon>
+            Zustimmung zur Anzeige der E-Mail-Adresse wurde nicht erteilt.</div>
+          <mat-form-field>
+            <mat-label>Notiz</mat-label>
+            <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
+          </mat-form-field>
+          <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin.toString()">
+            System-Administrator:in
+          </mat-checkbox>
+          <p>&nbsp;</p>
+          <p>
+            Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.
+          </p>
+          <mat-form-field>
+            <input matInput formControlName="password" type="password" [placeholder]="passwordLabel"/>
+          </mat-form-field>
         </form>
       </mat-dialog-content>
 
@@ -56,7 +67,11 @@ export type EditUserComponentData = {
         </button>
         <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
       </mat-dialog-actions>
-  `
+  `,
+  styles: [
+    '.email-consent {margin-bottom: 10px}',
+    '.email-consent mat-icon {margin-right: 10px}'
+  ]
 })
 
 export class EditUserComponent {

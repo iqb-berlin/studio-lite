@@ -36,7 +36,7 @@
       </ng-container>
 
       <ng-container matColumnDef="displayName">
-        <mat-header-cell *matHeaderCellDef mat-sort-header="displayName" fxFlex> Name </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef mat-sort-header="lastName" fxFlex> Name </mat-header-cell>
         <mat-cell *matCellDef="let row" style="color: gray" fxFlex> {{row.lastName ? row.lastName : row.name}}{{row.firstName ? (', ' + row.firstName) : ''}} </mat-cell>
       </ng-container>
 

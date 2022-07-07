@@ -134,7 +134,8 @@ export class UsersComponent implements OnInit {
           isAdmin: selectedRows[0].isAdmin,
           firstName: selectedRows[0].firstName,
           lastName: selectedRows[0].lastName,
-          email: selectedRows[0].email
+          email: selectedRows[0].email,
+          emailApproved: selectedRows[0].emailPublishApproved
         }
       });
 
