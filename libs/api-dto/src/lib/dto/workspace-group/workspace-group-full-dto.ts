@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { WorkspaceGroupSettingsDto } from './workspace-group-settings-dto';
 
 export class WorkspaceGroupFullDto {
   @ApiProperty()
@@ -8,5 +9,5 @@ export class WorkspaceGroupFullDto {
   name?: string;
 
   @ApiProperty()
-  settings? = {};
+  settings?: WorkspaceGroupSettingsDto;
 }

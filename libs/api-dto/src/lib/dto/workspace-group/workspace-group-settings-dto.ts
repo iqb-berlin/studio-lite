@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class WorkspaceSettingsDto {
+export class WorkspaceGroupSettingsDto {
   @ApiProperty()
   defaultEditor = '';
 
@@ -9,10 +9,4 @@ export class WorkspaceSettingsDto {
 
   @ApiProperty()
   defaultSchemer = '';
-
-  @ApiProperty()
-  unitGroups?: string[];
-
-  @ApiProperty()
-  stableModulesOnly?: boolean = true;
 }

@@ -73,7 +73,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
-      unitGroups: []
+      defaultSchemer: '',
+      unitGroups: [],
+      stableModulesOnly: true
     };
   }
 
@@ -166,6 +168,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.appService.dataLoading = true;
         createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
         createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
+        createUnitDto.schemer = this.workspaceService.workspaceSettings.defaultSchemer;
         this.backendService.addUnit(
           this.workspaceService.selectedWorkspace, createUnitDto
         ).subscribe(
@@ -431,6 +434,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (result !== false) {
         this.workspaceService.workspaceSettings.defaultEditor = result.controls.editorSelector.value;
         this.workspaceService.workspaceSettings.defaultPlayer = result.controls.playerSelector.value;
+        this.workspaceService.workspaceSettings.defaultSchemer = result.controls.schemerSelector.value;
+        this.workspaceService.workspaceSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
         this.backendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {

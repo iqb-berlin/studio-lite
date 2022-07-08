@@ -4,7 +4,7 @@ import {
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
-import {UnitInListDto, WorkspaceSettingsDto} from '@studio-lite-lib/api-dto';
+import { UnitInListDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import {
   UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
@@ -35,8 +35,10 @@ export class WorkspaceService {
     this.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
-      unitGroups: []
-    }
+      defaultSchemer: '',
+      unitGroups: [],
+      stableModulesOnly: true
+    };
   }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
