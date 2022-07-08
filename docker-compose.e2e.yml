@@ -1,0 +1,125 @@
+services:
+  test-e2e:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=chrome"
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-api:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=chrome"
+      - "--spec=\"./apps/frontend-e2e/src/integration/api/*\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-ui-chrome:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=chrome"
+      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-ui-chrome-mobile:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=chrome"
+      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--config=\"viewportWidth=375,viewportHeight=667\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-ui-firefox:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=firefox"
+      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-ui-firefox-mobile:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=firefox"
+      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--config=\"viewportWidth=375,viewportHeight=667\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-ui-edge:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=edge"
+      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+  test-e2e-ui-edge-mobile:
+    container_name: studio-lite-frontend-e2e
+    build:
+      context: .
+      dockerfile: apps/frontend-e2e/Dockerfile
+    image: iqbberlin/studio-lite-frontend-e2e:latest
+    command:
+      - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
+      - "--browser=edge"
+      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--config=\"viewportWidth=375,viewportHeight=667\""
+    volumes:
+      - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
