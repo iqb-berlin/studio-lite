@@ -1,7 +1,7 @@
-<label class="selection-label">Paging Mode</label>
+<label class="selection-label">{{'unit-preview.paging-selection-mode.label' | translate}}</label>
 <select [ngModel]="previewService.pagingMode.value"
             (ngModelChange)="previewService.setPagingMode($event)">
   <option *ngFor="let mode of pagingModes" [value]="mode">
-    {{mode}}
+    {{'unit-preview.paging-selection-mode.' + mode | translate}}
   </option>
 </select>
