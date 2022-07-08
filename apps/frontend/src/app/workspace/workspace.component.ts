@@ -46,13 +46,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
   uploadUrl = '';
   uploadMessages: string[] = [];
-  navLinks = [
-    { path: 'metadata', label: 'Eigenschaften' },
-    { path: 'editor', label: 'Editor' },
-    { path: 'preview', label: 'Vorschau' },
-    { path: 'schemer', label: 'Kodierung' },
-    { path: 'comments', label: 'Kommentare' }
-  ];
+  navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
 
   constructor(
     @Inject('SERVER_URL') private serverUrl: string,
@@ -147,7 +141,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   async selectUnit(unitId?: number): Promise<boolean> {
     if (unitId && unitId > 0) {
       const selectedTab = this.nav ? this.nav.selectedIndex : -1;
-      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab].path}` : '';
+      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
       return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
     }
     return this.router.navigate(

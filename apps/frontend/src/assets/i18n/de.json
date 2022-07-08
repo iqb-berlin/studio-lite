@@ -38,5 +38,14 @@
   },
   "application": {
     "wait-message": "Bitte warten"
+  },
+  "workspace": {
+    "routes": {
+      "metadata": "Eigenschaften",
+      "editor": "Editor",
+      "preview": "Vorschau",
+      "schemer": "Kodierung",
+      "comments": "Kommentare"
+    }
   }
 }

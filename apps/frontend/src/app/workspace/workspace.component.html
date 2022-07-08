@@ -78,11 +78,11 @@
     <nav mat-tab-nav-bar>
       <a mat-tab-link
          *ngFor="let link of navLinks"
-         [routerLink]="link.path"
+         [routerLink]="link"
          routerLinkActive="active-link"
          #rla="routerLinkActive"
          [active]="rla.isActive">
-        {{link.label}}
+        {{'workspace.routes.' + link | translate}}
       </a>
     </nav>
     <router-outlet></router-outlet>
