@@ -28,7 +28,6 @@ import { WorkspaceService } from './workspace.service';
 
 import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
 import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
-import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
@@ -59,7 +58,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     public workspaceService: WorkspaceService,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
-    private bsSuper: SuperAdminBackendService,
     private newUnitDialog: MatDialog,
     private selectUnitDialog: MatDialog,
     private messsageDialog: MatDialog,
@@ -95,7 +93,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.backendService.getWorkspaceData(this.workspaceService.selectedWorkspace).subscribe(
+      this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspace).subscribe(
         wResponse => {
           if (wResponse) {
             this.appService.appConfig.setPageTitle(`${wResponse.groupName}: ${wResponse.name}`);
@@ -193,7 +191,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
       this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
-      this.backendService.setWorkspaceSettings(
+      this.appBackendService.setWorkspaceSettings(
         this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
       ).subscribe(isOK => {
         this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
@@ -438,7 +436,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.workspaceService.workspaceSettings.defaultPlayer = result.controls.playerSelector.value;
         this.workspaceService.workspaceSettings.defaultSchemer = result.controls.schemerSelector.value;
         this.workspaceService.workspaceSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
-        this.backendService.setWorkspaceSettings(
+        this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {
           if (!isOK) {

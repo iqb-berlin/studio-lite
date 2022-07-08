@@ -78,6 +78,15 @@ export class BackendService {
       );
   }
 
+  renameWorkspace(workspaceId: number, newName: string): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/rename/${newName}`, {})
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
   deleteWorkspaces(workspaces: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`)

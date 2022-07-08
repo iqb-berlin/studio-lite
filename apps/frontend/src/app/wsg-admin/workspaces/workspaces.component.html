@@ -1,17 +1,21 @@
 <div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
   <div class="object-list" fxLayout="column" fxFlex="50">
     <div fxLayout="row">
-        <button mat-raised-button (click)="addObject()" matTooltip="Arbeitsbereich hinzufügen" matTooltipPosition="above">
-            <mat-icon>add</mat-icon>
-          </button>
-        <button mat-raised-button (click)="deleteObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length === 0"
-                matTooltip="Markierte/n Arbeitsbereich/e löschen" matTooltipPosition="above">
-          <mat-icon>delete</mat-icon>
+      <button mat-raised-button (click)="addObject()" matTooltip="Arbeitsbereich hinzufügen" matTooltipPosition="above">
+          <mat-icon>add</mat-icon>
         </button>
-        <button mat-raised-button (click)="changeObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length !== 1"
-                matTooltip="Eigenschaften des Arbeitsbereiches ändern" matTooltipPosition="above">
-          <mat-icon>edit</mat-icon>
-        </button>
+      <button mat-raised-button (click)="deleteObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length === 0"
+              matTooltip="Markierte/n Arbeitsbereich/e löschen" matTooltipPosition="above">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-raised-button (click)="renameObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length !== 1"
+              matTooltip="Arbeitsbereich umbenennen" matTooltipPosition="above">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-raised-button (click)="changeObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length !== 1"
+              matTooltip="Einstellungen des Arbeitsbereiches ändern" matTooltipPosition="above">
+        <mat-icon>settings</mat-icon>
+      </button>
     </div>
 
     <mat-table [dataSource]="objectsDatasource" matSort matSortDisableClear class="scroll-area">

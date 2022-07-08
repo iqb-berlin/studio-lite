@@ -9,8 +9,7 @@ import {
   UnitInListDto,
   UnitMetadataDto,
   UnitSchemeDto,
-  VeronaModuleFileDto,
-  WorkspaceFullDto, WorkspaceSettingsDto
+  VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -35,25 +34,6 @@ export class BackendService {
       .get<UnitMetadataDto[]>(`${this.serverUrl}workspace/${workspaceId}/units/metadata`)
       .pipe(
         catchError(() => [])
-      );
-  }
-
-  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
-    return this.http
-      .get<WorkspaceFullDto>(
-      `${this.serverUrl}workspace/${workspaceId}`
-    )
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
-
-  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
-    return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
       );
   }
 

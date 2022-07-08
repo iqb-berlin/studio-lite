@@ -8,9 +8,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
+import { BackendService as AppBackendService } from '../../../backend.service';
 import { SelectModuleComponent } from './select-module.component';
 import { UnitMetadataStore } from '../../workspace.classes';
-import { InputTextComponent, InputTextData } from '../../../components/input-text.component';
+import { InputTextComponent } from '../../../components/input-text.component';
 import { AppService } from '../../../app.service';
 
 @Component({
@@ -34,6 +35,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   constructor(
     private fb: UntypedFormBuilder,
     private backendService: BackendService,
+    private appBackendService: AppBackendService,
     public workspaceService: WorkspaceService,
     public appService: AppService,
     private inputTextDialog: MatDialog,
@@ -127,7 +129,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   newGroup() {
     const dialogRef = this.inputTextDialog.open(InputTextComponent, {
       width: '500px',
-      data: <InputTextData>{
+      data: {
         title: 'Neue Gruppe',
         default: '',
         okButtonLabel: 'Speichern',
@@ -142,7 +144,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         }
         if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
           this.workspaceService.workspaceSettings.unitGroups.push(result);
-          this.backendService.setWorkspaceSettings(
+          this.appBackendService.setWorkspaceSettings(
             this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
           ).subscribe(isOK => {
             if (!isOK) {

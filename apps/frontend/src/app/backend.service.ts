@@ -3,7 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
-  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto, MyDataDto, VeronaModuleInListDto
+  AuthDataDto,
+  ChangePasswordDto,
+  ConfigDto,
+  AppLogoDto,
+  MyDataDto,
+  VeronaModuleInListDto,
+  WorkspaceFullDto,
+  WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -94,6 +101,25 @@ export class BackendService {
       .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
       .pipe(
         catchError(() => of([]))
+      );
+  }
+
+  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
+    return this.http
+      .get<WorkspaceFullDto>(
+      `${this.serverUrl}workspace/${workspaceId}`
+    )
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 }

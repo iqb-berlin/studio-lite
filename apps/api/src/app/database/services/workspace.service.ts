@@ -129,6 +129,14 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
+  async patchName(id: number, newName: string): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    workspaceToUpdate.name = newName;
+    await this.workspacesRepository.save(workspaceToUpdate);
+  }
+
   async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }

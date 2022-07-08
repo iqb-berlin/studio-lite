@@ -13,7 +13,7 @@ import { WorkspaceId } from './workspace.decorator';
 import { UnitDownloadClass } from './unit-download.class';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
-import {SettingService} from "../database/services/setting.service";
+import { SettingService } from '../database/services/setting.service';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -58,8 +58,7 @@ export class WorkspaceController {
   @Header('Content-Type', 'application/zip')
   @ApiTags('workspace')
   async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-                         @Param('settings') unitDownloadSettingsString: string
-  ): Promise<StreamableFile> {
+    @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
     const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
     const file = await UnitDownloadClass.get(
       this.workspaceService,
@@ -78,7 +77,16 @@ export class WorkspaceController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
-                      @Body() workspaceSetting: WorkspaceSettingsDto) {
+    @Body() workspaceSetting: WorkspaceSettingsDto) {
     return this.workspaceService.patchSettings(workspaceId, workspaceSetting);
+  }
+
+  @Patch('rename/:name')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async patchName(@WorkspaceId() workspaceId: number, @Param('name') newName: string) {
+    return this.workspaceService.patchName(workspaceId, newName);
   }
 }

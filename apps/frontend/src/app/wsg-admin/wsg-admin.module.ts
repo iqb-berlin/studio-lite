@@ -20,7 +20,6 @@ import { UsersComponent } from './users/users.component';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { BackendService } from './backend.service';
-import { EditWorkspaceComponent } from './workspaces/edit-workspace.component';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
 
 @NgModule({
@@ -28,7 +27,6 @@ import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
     WorkspacesComponent,
     UsersComponent,
     SettingsComponent,
-    EditWorkspaceComponent,
     WsgAdminComponent
   ],
   imports: [
