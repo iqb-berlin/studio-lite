@@ -13,4 +13,5 @@ COPY . .
 
 RUN npm install -g --silent nx
 
-ENTRYPOINT ["nx", "e2e", "frontend-e2e"]
+ENTRYPOINT ["nx"]
+CMD ["e2e", "frontend-e2e"]
