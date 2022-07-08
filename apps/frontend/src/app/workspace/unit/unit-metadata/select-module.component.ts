@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { VeronaModuleCollection } from '../../verona-module-collection.class';
+import { VeronaModuleCollection } from '../../../classes/verona-module-collection.class';
 
 @Component({
   selector: 'app-select-module',

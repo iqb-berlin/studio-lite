@@ -2,11 +2,10 @@ import {
   Body, Controller, Get, Patch, UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { ConfigDto, AppLogoDto } from '@studio-lite-lib/api-dto';
+import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 import { SettingService } from '../../database/services/setting.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { IsAdminGuard } from '../is-admin.guard';
-import { UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 
 @Controller('admin/settings')
 export class SettingController {

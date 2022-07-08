@@ -3,6 +3,7 @@ import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
+import { AppService } from '../../app.service';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -30,16 +31,19 @@ export class ExportUnitComponent implements OnInit {
   enablePlayerOption = true;
 
   constructor(
-    public ds: WorkspaceService,
+    public workspaceService: WorkspaceService,
+    public appService: AppService,
     private backendService: BackendService
   ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.backendService.getUnitListWithMetadata(this.ds.selectedWorkspace).subscribe(unitsWithMetadata => {
+      this.backendService.getUnitListWithMetadata(
+        this.workspaceService.selectedWorkspace
+      ).subscribe(unitsWithMetadata => {
         unitsWithMetadata.forEach(umd => {
           if (umd.player) {
-            const validPlayerId = this.ds.playerList.isValid(umd.player);
+            const validPlayerId = this.appService.playerList.isValid(umd.player);
             if (validPlayerId === false) this.unitsWithOutPlayer.push(umd.id);
           } else {
             this.unitsWithOutPlayer.push(umd.id);

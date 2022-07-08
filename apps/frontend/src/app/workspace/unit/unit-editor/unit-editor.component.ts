@@ -119,7 +119,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
-      const editorId = unitMetadata.editor ? this.workspaceService.editorList.getBestMatch(unitMetadata.editor) : '';
+      const editorId = unitMetadata.editor ? this.appService.editorList.getBestMatch(unitMetadata.editor) : '';
       if (editorId) {
         if ((editorId === this.lastEditorId) && this.postMessageTarget) {
           if (this.workspaceService.unitDefinitionStore) {

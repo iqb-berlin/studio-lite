@@ -2,10 +2,9 @@ import { Component, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { WorkspaceService } from '../workspace.service';
+import { AppService } from '../app.service';
 
 @Component({
-  selector: 'app-edit-settings',
   template: `
     <div fxLayout="column" style="height: 100%">
       <h1 mat-dialog-title>Einstellungen für den Arbeitsbereich</h1>
@@ -15,7 +14,7 @@ import { WorkspaceService } from '../workspace.service';
             <mat-label>Voreingestellter Editor</mat-label>
             <mat-select placeholder="Editor" formControlName="editorSelector">
               <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of ds.editorList.getEntries()" [value]="m.key">
+              <mat-option *ngFor="let m of appService.editorList.getEntries()" [value]="m.key">
                 {{m.metadata?.name}} {{m.metadata?.version}}
               </mat-option>
             </mat-select>
@@ -24,7 +23,7 @@ import { WorkspaceService } from '../workspace.service';
             <mat-label>Voreingestellter Player</mat-label>
             <mat-select placeholder="Player" formControlName="playerSelector">
               <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of ds.playerList.getEntries()" [value]="m.key">
+              <mat-option *ngFor="let m of appService.playerList.getEntries()" [value]="m.key">
                 {{m.metadata?.name}} {{m.metadata?.version}}
               </mat-option>
             </mat-select>
@@ -33,7 +32,7 @@ import { WorkspaceService } from '../workspace.service';
             <mat-label>Voreingestellter Schemer</mat-label>
             <mat-select placeholder="Kodierung" formControlName="schemerSelector">
               <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of ds.schemerList.getEntries()" [value]="m.key">
+              <mat-option *ngFor="let m of appService.schemerList.getEntries()" [value]="m.key">
                 {{m.metadata?.name}} {{m.metadata?.version}}
               </mat-option>
             </mat-select>
@@ -46,7 +45,8 @@ import { WorkspaceService } from '../workspace.service';
       </mat-dialog-content>
       <mat-dialog-actions>
         <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="settingsForm">
-          Speichern</button>
+          Speichern
+        </button>
         <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
       </mat-dialog-actions>
     </div>
@@ -55,12 +55,12 @@ import { WorkspaceService } from '../workspace.service';
     '.margin-bottom {margin-bottom: 10px}'
   ]
 })
-export class EditSettingsComponent {
+export class EditWorkspaceSettingsComponent {
   settingsForm: UntypedFormGroup;
 
   constructor(
     private fb: UntypedFormBuilder,
-    public ds: WorkspaceService,
+    public appService: AppService,
     @Inject(MAT_DIALOG_DATA) public data: unknown
   ) {
     this.settingsForm = this.fb.group({

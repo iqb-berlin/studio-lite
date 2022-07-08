@@ -10,7 +10,6 @@ import {
   UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
 } from './workspace.classes';
 import { AppService } from '../app.service';
-import { VeronaModuleCollection } from './verona-module-collection.class';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +18,6 @@ export class WorkspaceService {
   selectedWorkspace = 0;
   selectedUnit$ = new BehaviorSubject<number>(0);
   workspaceSettings: WorkspaceSettingsDto;
-  editorList = new VeronaModuleCollection([]);
-  playerList = new VeronaModuleCollection([]);
-  schemerList = new VeronaModuleCollection([]);
   moduleHtmlStore: { [key: string]: string } = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;

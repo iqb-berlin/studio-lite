@@ -24,6 +24,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -36,6 +37,7 @@ import { AppTranslateLoader } from './app-translate-loader';
 import { RequestMessageDialogComponent } from './components/request-message-dialog.component';
 import { InputTextComponent } from './components/input-text.component';
 import { EditMyDataComponent } from './home/edit-my-data.component';
+import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +47,8 @@ import { EditMyDataComponent } from './home/edit-my-data.component';
     ChangePasswordComponent,
     RequestMessageDialogComponent,
     InputTextComponent,
-    EditMyDataComponent
+    EditMyDataComponent,
+    EditWorkspaceSettingsComponent
   ],
   imports: [
     ApplicationModule,
@@ -79,7 +82,8 @@ import { EditMyDataComponent } from './home/edit-my-data.component';
         useClass: AppTranslateLoader
       }
     }),
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatSelectModule
   ],
   providers: [
     BackendService,

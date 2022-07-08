@@ -23,6 +23,7 @@ import * as _moment from 'moment';
 import { saveAs } from 'file-saver';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
+import { BackendService as AppBackendService } from '../backend.service';
 import { WorkspaceService } from './workspace.service';
 
 import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
@@ -31,9 +32,9 @@ import { BackendService as SuperAdminBackendService } from '../admin/backend.ser
 import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
-import { VeronaModuleCollection } from './verona-module-collection.class';
+import { VeronaModuleCollection } from '../classes/verona-module-collection.class';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
-import { EditSettingsComponent } from './dialogs/edit-settings.component';
+import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -57,6 +58,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private appService: AppService,
     public workspaceService: WorkspaceService,
     private backendService: BackendService,
+    private appBackendService: AppBackendService,
     private bsSuper: SuperAdminBackendService,
     private newUnitDialog: MatDialog,
     private selectUnitDialog: MatDialog,
@@ -108,14 +110,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         }
       );
-      this.backendService.getModuleList('editor').subscribe(moduleList => {
-        this.workspaceService.editorList = new VeronaModuleCollection(moduleList);
+      this.appBackendService.getModuleList('editor').subscribe(moduleList => {
+        this.appService.editorList = new VeronaModuleCollection(moduleList);
       });
-      this.backendService.getModuleList('player').subscribe(moduleList => {
-        this.workspaceService.playerList = new VeronaModuleCollection(moduleList);
+      this.appBackendService.getModuleList('player').subscribe(moduleList => {
+        this.appService.playerList = new VeronaModuleCollection(moduleList);
       });
-      this.backendService.getModuleList('schemer').subscribe(moduleList => {
-        this.workspaceService.schemerList = new VeronaModuleCollection(moduleList);
+      this.appBackendService.getModuleList('schemer').subscribe(moduleList => {
+        this.appService.schemerList = new VeronaModuleCollection(moduleList);
       });
     });
   }
@@ -425,7 +427,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   settings(): void {
-    const dialogRef = this.editSettingsDialog.open(EditSettingsComponent, {
+    const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
       width: '500px',
       data: this.workspaceService.workspaceSettings
     });

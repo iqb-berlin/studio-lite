@@ -10,7 +10,6 @@ import {
   UnitMetadataDto,
   UnitSchemeDto,
   VeronaModuleFileDto,
-  VeronaModuleInListDto,
   WorkspaceFullDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 
@@ -78,10 +77,12 @@ export class BackendService {
 
   moveOrCopyUnits(workspaceId: number, units: number[],
                   targetWorkspace: number, moveOnly: boolean): Observable<boolean | RequestReportDto> {
+    const newUnitMode = moveOnly ? 'moveto' : 'copyto';
     return this.http
       .patch<RequestReportDto>(
-        `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${moveOnly ? 'moveto' : 'copyto'}/${targetWorkspace}`, {}
-      )
+      `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${newUnitMode}/${targetWorkspace}`,
+      {}
+    )
       .pipe(
         catchError(() => of(false))
       );
@@ -197,14 +198,6 @@ export class BackendService {
       .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
       .pipe(
         catchError(() => of(null))
-      );
-  }
-
-  getModuleList(type: string): Observable<VeronaModuleInListDto[]> {
-    return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
-      .pipe(
-        catchError(() => of([]))
       );
   }
 }

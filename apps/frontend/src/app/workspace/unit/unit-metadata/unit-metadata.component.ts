@@ -4,13 +4,14 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { SelectModuleComponent } from './select-module.component';
 import { UnitMetadataStore } from '../../workspace.classes';
-import { MatDialog } from '@angular/material/dialog';
 import { InputTextComponent, InputTextData } from '../../../components/input-text.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { AppService } from '../../../app.service';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -34,6 +35,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     private fb: UntypedFormBuilder,
     private backendService: BackendService,
     public workspaceService: WorkspaceService,
+    public appService: AppService,
     private inputTextDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
@@ -135,7 +137,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result === 'string') {
-        if (!this.workspaceService.workspaceSettings.unitGroups) this.workspaceService.workspaceSettings.unitGroups = [];
+        if (!this.workspaceService.workspaceSettings.unitGroups) {
+          this.workspaceService.workspaceSettings.unitGroups = [];
+        }
         if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
           this.workspaceService.workspaceSettings.unitGroups.push(result);
           this.backendService.setWorkspaceSettings(
@@ -151,6 +155,6 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           });
         }
       }
-    })
+    });
   }
 }

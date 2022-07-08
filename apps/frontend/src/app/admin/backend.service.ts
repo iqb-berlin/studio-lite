@@ -9,7 +9,7 @@ import {
   UserInListDto,
   WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   WorkspaceInListDto,
-  WorkspaceGroupDto, VeronaModuleInListDto, UnitExportConfigDto
+  WorkspaceGroupDto, UnitExportConfigDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -131,14 +131,6 @@ export class BackendService {
       .pipe(
         catchError(() => of(false)),
         map(() => true)
-      );
-  }
-
-  getVeronaModuleList(type: string): Observable<VeronaModuleInListDto[]> {
-    return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
-      .pipe(
-        catchError(() => [])
       );
   }
 

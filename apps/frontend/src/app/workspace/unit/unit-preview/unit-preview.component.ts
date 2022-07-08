@@ -160,7 +160,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
-      const playerId = unitMetadata.player ? this.workspaceService.playerList.getBestMatch(unitMetadata.player) : '';
+      const playerId = unitMetadata.player ? this.appService.playerList.getBestMatch(unitMetadata.player) : '';
       if (playerId) {
         if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
           if (this.workspaceService.unitDefinitionStore) {

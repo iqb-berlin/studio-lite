@@ -1,10 +1,9 @@
-// eslint-disable-next-line max-classes-per-file
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
-  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto, MyDataDto
+  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto, MyDataDto, VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -87,6 +86,14 @@ export class BackendService {
     )
       .pipe(
         catchError(() => of(false))
+      );
+  }
+
+  getModuleList(type: string): Observable<VeronaModuleInListDto[]> {
+    return this.http
+      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
+      .pipe(
+        catchError(() => of([]))
       );
   }
 }

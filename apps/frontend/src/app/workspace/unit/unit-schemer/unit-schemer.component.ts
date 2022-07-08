@@ -91,7 +91,7 @@ export class UnitSchemerComponent implements OnInit {
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       const schemerId = unitMetadata.schemer ?
-        this.workspaceService.schemerList.getBestMatch(unitMetadata.schemer) : '';
+        this.appService.schemerList.getBestMatch(unitMetadata.schemer) : '';
       if (schemerId) {
         if ((schemerId === this.lastSchemerId) && this.postMessageTarget) {
           if (this.workspaceService.unitSchemeStore) {
