@@ -14,11 +14,11 @@
       <p>&nbsp;{{ playerName }}</p>
     </div>
 
-    <studio-lite-paging-mode-selection
+    <studio-lite-paging-mode-selection *ngIf="showPageNav"
       class="paging-mode-selection-container">
     </studio-lite-paging-mode-selection>
 
-    <div fxLayout="row" fxLayoutAlign="space-between center"
+    <div fxLayout="row" fxLayoutAlign="space-between center" *ngIf="showPageNav"
          class="pageNav">
       <div id="pageNavPrompt">
         Wähle hier andere Seiten dieser Aufgabe:
