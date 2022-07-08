@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { IsAdminGuard } from '../is-admin.guard';
 import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
+import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
 
 @Controller('admin/users')
 export class UsersController {
@@ -27,7 +28,7 @@ export class UsersController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [UserInListDto]
@@ -38,7 +39,7 @@ export class UsersController {
   }
 
   @Get('full')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [UserFullDto]
@@ -60,7 +61,7 @@ export class UsersController {
   }
 
   @Get(':id/workspaces')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [WorkspaceInListDto]
@@ -82,7 +83,7 @@ export class UsersController {
   }
 
   @Patch(':id/workspaces')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin users')
   async patchOnesWorkspaces(@Param('id') id: number,

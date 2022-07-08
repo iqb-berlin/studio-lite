@@ -14,6 +14,8 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
+import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -24,6 +26,9 @@ export class WorkspaceService {
     private workspaceUsersRepository: Repository<WorkspaceUser>,
     @InjectRepository(WorkspaceGroup)
     private workspaceGroupRepository: Repository<WorkspaceGroup>,
+    @InjectRepository(WorkspaceGroupAdmin)
+    private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
+    private usersService: UsersService,
     private unitService: UnitService
   ) {
   }
@@ -61,6 +66,18 @@ export class WorkspaceService {
   }
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
+    let workspaceGroupsToAdminList: number[] = [];
+    let isSuperAdmin = false;
+    if (userId) {
+      isSuperAdmin = await this.usersService.getUserIsAdmin(userId);
+      if (!isSuperAdmin) {
+        const workspaceGroupsToAdmin = await this.workspaceGroupAdminRepository.find({
+          where: { userId: userId },
+          select: { workspaceGroupId: true }
+        });
+        workspaceGroupsToAdminList = workspaceGroupsToAdmin.map(workspaceGroup => workspaceGroup.workspaceGroupId);
+      }
+    }
     const workspaceGroups = await this.workspaceGroupRepository.find({ order: { name: 'ASC' } });
     const workspaces = await this.findAll(userId);
     const myReturn: WorkspaceGroupDto[] = [];
@@ -68,6 +85,7 @@ export class WorkspaceService {
       const localWorkspaceGroup = <WorkspaceGroupDto>{
         id: workspaceGroup.id,
         name: workspaceGroup.name,
+        isAdmin: isSuperAdmin || workspaceGroupsToAdminList.indexOf(workspaceGroup.id) >= 0,
         workspaces: []
       };
       workspaces.forEach(workspace => {
@@ -75,7 +93,7 @@ export class WorkspaceService {
           localWorkspaceGroup.workspaces.push(workspace);
         }
       });
-      if (!userId || localWorkspaceGroup.workspaces.length > 0) {
+      if (!userId || localWorkspaceGroup.isAdmin || localWorkspaceGroup.workspaces.length > 0) {
         myReturn.push(localWorkspaceGroup);
       }
     });

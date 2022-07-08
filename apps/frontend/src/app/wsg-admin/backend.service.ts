@@ -6,7 +6,6 @@ import {
   CreateWorkspaceDto,
   UserFullDto,
   UserInListDto,
-  WorkspaceFullDto,
   WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 
@@ -63,15 +62,6 @@ export class BackendService {
   addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
-  changeWorkspace(workspaceData: WorkspaceFullDto): Observable<boolean> {
-    return this.http
-      .patch<boolean>(`${this.serverUrl}admin/workspaces`, workspaceData)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

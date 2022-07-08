@@ -19,6 +19,7 @@ import { WorkspaceGroupService } from '../../database/services/workspace-group.s
 import { IsAdminGuard } from '../is-admin.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { WorkspaceGroupId } from '../workspace-group.decorator';
+import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
@@ -39,7 +40,7 @@ export class WorkspaceGroupsController {
   }
 
   @Get(':workspace_group_id')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @ApiCreatedResponse({
@@ -51,7 +52,7 @@ export class WorkspaceGroupsController {
   }
 
   @Get(':workspace_group_id/workspaces')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @ApiCreatedResponse({
@@ -72,7 +73,7 @@ export class WorkspaceGroupsController {
   }
 
   @Patch()
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {

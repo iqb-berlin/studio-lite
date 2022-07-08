@@ -105,15 +105,13 @@ export class UsersService {
     return null;
   }
 
-  async getUserIsAdmin(userId: number): Promise<boolean | null> {
+  async getUserIsAdmin(userId: number): Promise<boolean> {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
       select: { isAdmin: true }
     });
-    if (user) {
-      return user.isAdmin;
-    }
-    return null;
+    if (user) return user.isAdmin;
+    return false;
   }
 
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
@@ -143,11 +141,16 @@ export class UsersService {
     return !!wsUser;
   }
 
-  async isWorkspaceGroupAdmin(userId: number, workspaceGroupId: number): Promise<boolean> {
-    const wsgAdmin = await this.workspaceGroupAdminRepository.createQueryBuilder('wsg_admin')
-      .where('wsg_admin.user_id = :user_id and wsg_admin.workspace_group_id = :wsg_id',
-        { user_id: userId, wsg_id: workspaceGroupId })
-      .getOne();
+  async isWorkspaceGroupAdmin(userId: number, workspaceGroupId?: number): Promise<boolean> {
+    if (workspaceGroupId) {
+      const wsgAdmin = await this.workspaceGroupAdminRepository.findOne({
+        where: { workspaceGroupId: workspaceGroupId, userId: userId }
+      });
+      return !!wsgAdmin;
+    }
+    const wsgAdmin = await this.workspaceGroupAdminRepository.findOne({
+      where: { userId: userId }
+    });
     return !!wsgAdmin;
   }
 
