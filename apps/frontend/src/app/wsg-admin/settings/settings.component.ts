@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AppService } from '../../app.service';
+import { WsgAdminService } from '../wsg-admin.service';
 
 @Component({
   template: `
@@ -34,12 +35,15 @@ import { AppService } from '../../app.service';
 })
 export class SettingsComponent implements OnInit {
   constructor(
-    private appService: AppService
+    private appService: AppService,
+    private wsgAdminService: WsgAdminService
   ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.appService.appConfig.setPageTitle('Verwaltung Bereichsgruppe: Einstellungen');
+      this.appService.appConfig.setPageTitle(
+        `Verwaltung "${this.wsgAdminService.selectedWorkspaceGroupName}": Einstellungen`
+      );
     });
   }
 }

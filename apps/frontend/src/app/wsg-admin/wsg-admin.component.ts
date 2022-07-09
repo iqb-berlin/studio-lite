@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WsgAdminService } from './wsg-admin.service';
+import { BackendService } from './backend.service';
 
 @Component({
   template: `
@@ -46,13 +47,31 @@ export class WsgAdminComponent {
 
   constructor(
     private wsgAdminService: WsgAdminService,
+    private backendService: BackendService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.wsgAdminService.selectedWorkspaceGroup = Number(this.route.snapshot.params['wsg']);
+      this.wsgAdminService.selectedWorkspaceGroupId = Number(this.route.snapshot.params['wsg']);
+      this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(wsgData => {
+        if (wsgData) {
+          this.wsgAdminService.selectedWorkspaceGroupName = wsgData.name || 'unbekannt';
+          this.wsgAdminService.selectedWorkspaceGroupSettings = wsgData.settings || {
+            defaultSchemer: '',
+            defaultPlayer: '',
+            defaultEditor: ''
+          };
+        } else {
+          this.wsgAdminService.selectedWorkspaceGroupName = '*Fehler*';
+          this.wsgAdminService.selectedWorkspaceGroupSettings = {
+            defaultSchemer: '',
+            defaultPlayer: '',
+            defaultEditor: ''
+          };
+        }
+      });
     });
   }
 }

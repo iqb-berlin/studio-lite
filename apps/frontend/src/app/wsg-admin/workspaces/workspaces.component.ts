@@ -67,7 +67,9 @@ export class WorkspacesComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createUserList();
-      this.appService.appConfig.setPageTitle('Verwaltung Bereichsgruppe: Arbeitsbereiche');
+      this.appService.appConfig.setPageTitle(
+        `Verwaltung "${this.wsgAdminService.selectedWorkspaceGroupName}": Arbeitsbereiche`
+      );
     });
   }
 
@@ -89,7 +91,7 @@ export class WorkspacesComponent implements OnInit {
           this.appService.dataLoading = true;
           this.backendService.addWorkspace(<CreateWorkspaceDto>{
             name: result,
-            groupId: this.wsgAdminService.selectedWorkspaceGroup
+            groupId: this.wsgAdminService.selectedWorkspaceGroupId
           }).subscribe(
             respOk => {
               if (respOk) {
@@ -200,7 +202,7 @@ export class WorkspacesComponent implements OnInit {
           const workspacesToDelete: number[] = [];
           selectedRows.forEach((r: WorkspaceInListDto) => workspacesToDelete.push(r.id));
           this.backendService.deleteWorkspaces(
-            this.wsgAdminService.selectedWorkspaceGroup, workspacesToDelete
+            this.wsgAdminService.selectedWorkspaceGroupId, workspacesToDelete
           ).subscribe(
             respOk => {
               if (respOk) {
@@ -260,7 +262,7 @@ export class WorkspacesComponent implements OnInit {
     this.updateUserList();
 
     this.appService.dataLoading = true;
-    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroup).subscribe(
+    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(
       (dataResponse: WorkspaceInListDto[]) => {
         this.objectsDatasource = new MatTableDataSource(dataResponse);
         this.objectsDatasource.sort = this.sort;

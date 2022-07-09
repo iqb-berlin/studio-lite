@@ -5,7 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import {
   CreateWorkspaceDto,
   UserFullDto,
-  UserInListDto,
+  UserInListDto, WorkspaceGroupFullDto,
   WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 
@@ -101,6 +101,16 @@ export class BackendService {
       .pipe(
         catchError(() => of(false)),
         map(() => true)
+      );
+  }
+
+  getWorkspaceGroupData(workspaceGroupId: number): Observable<WorkspaceGroupFullDto | null> {
+    return this.http
+      .get<WorkspaceGroupFullDto>(
+      `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`
+    )
+      .pipe(
+        catchError(() => of(null))
       );
   }
 }

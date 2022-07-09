@@ -61,7 +61,9 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createWorkspaceList();
-      this.appService.appConfig.setPageTitle('Verwaltung Bereichsgruppe: Nutzer:innen');
+      this.appService.appConfig.setPageTitle(
+        `Verwaltung "${this.wsgAdminService.selectedWorkspaceGroupName}": Nutzer:innen`
+      );
     });
   }
 
@@ -87,7 +89,7 @@ export class UsersComponent implements OnInit {
       if (this.userWorkspaces.hasChanged) {
         this.appService.dataLoading = true;
         this.backendService.setWorkspacesByUser(
-          this.selectedUser, this.userWorkspaces.getChecks(), this.wsgAdminService.selectedWorkspaceGroup
+          this.selectedUser, this.userWorkspaces.getChecks(), this.wsgAdminService.selectedWorkspaceGroupId
         ).subscribe(
           respOk => {
             if (respOk) {
@@ -125,7 +127,7 @@ export class UsersComponent implements OnInit {
 
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceToCheckCollection([]);
-    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroup).subscribe(workspaces => {
+    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(workspaces => {
       this.userWorkspaces = new WorkspaceToCheckCollection(workspaces);
       this.updateUserList();
     });
