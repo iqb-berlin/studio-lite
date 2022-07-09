@@ -54,7 +54,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private appService: AppService,
+    public appService: AppService,
     public workspaceService: WorkspaceService,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
@@ -100,6 +100,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             if (wResponse.settings) {
               this.workspaceService.workspaceSettings = wResponse.settings;
             }
+            this.workspaceService.isWorkspaceGroupAdmin =
+              this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspace);
             this.updateUnitList();
           } else {
             this.snackBar.open(

@@ -50,7 +50,7 @@
       </mat-menu>
 
       <mat-menu #menuOther="matMenu">
-        <button mat-menu-item (click)="settings()">
+        <button mat-menu-item (click)="settings()" [disabled]="!workspaceService.isWorkspaceGroupAdmin">
           <mat-icon>settings</mat-icon>Einstellungen
         </button>
         <mat-divider></mat-divider>

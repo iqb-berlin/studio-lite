@@ -56,4 +56,14 @@ export class AppService {
       this.postMessage$.next(postData);
     }
   }
+
+  isWorkspaceGroupAdmin(workspaceId: number): boolean {
+    let myReturn = false;
+    this.authData.workspaces.forEach(wsGroup => {
+      wsGroup.workspaces.forEach(ws => {
+        if (ws.id === workspaceId) myReturn = wsGroup.isAdmin;
+      });
+    });
+    return myReturn;
+  }
 }

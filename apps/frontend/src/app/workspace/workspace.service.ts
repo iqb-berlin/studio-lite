@@ -23,6 +23,7 @@ export class WorkspaceService {
   unitDefinitionStore: UnitDefinitionStore | undefined;
   unitSchemeStore: UnitSchemeStore | undefined;
   unitList = new UnitCollection([]);
+  isWorkspaceGroupAdmin = false;
 
   constructor(
     private backendService: BackendService,

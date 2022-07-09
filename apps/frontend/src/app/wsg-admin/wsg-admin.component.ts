@@ -40,8 +40,8 @@ import { WsgAdminService } from './wsg-admin.service';
 export class WsgAdminComponent {
   navLinks = [
     { path: 'users', label: 'Nutzer:innen' },
-    { path: 'workspaces', label: 'Arbeitsbereiche' },
-    { path: 'settings', label: 'Einstellungen' }
+    { path: 'workspaces', label: 'Arbeitsbereiche' }
+    // { path: 'settings', label: 'Einstellungen' }
   ];
 
   constructor(
