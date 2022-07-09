@@ -86,7 +86,9 @@ export class UsersComponent implements OnInit {
     if (this.selectedUser > 0) {
       if (this.userWorkspaces.hasChanged) {
         this.appService.dataLoading = true;
-        this.backendService.setWorkspacesByUser(this.selectedUser, this.userWorkspaces.getChecks()).subscribe(
+        this.backendService.setWorkspacesByUser(
+          this.selectedUser, this.userWorkspaces.getChecks(), this.wsgAdminService.selectedWorkspaceGroup
+        ).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });

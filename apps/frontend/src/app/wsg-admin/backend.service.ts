@@ -42,9 +42,9 @@ export class BackendService {
       );
   }
 
-  setWorkspacesByUser(userId: number, accessTo: number[]): Observable<boolean> {
+  setWorkspacesByUser(userId: number, accessTo: number[], workspaceGroupId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspaces`, accessTo)
+      .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

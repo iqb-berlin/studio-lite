@@ -16,6 +16,7 @@ import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
+import { WorkspaceUserService } from './workspace-user.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -28,6 +29,7 @@ export class WorkspaceService {
     private workspaceGroupRepository: Repository<WorkspaceGroup>,
     @InjectRepository(WorkspaceGroupAdmin)
     private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
+    private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
     private unitService: UnitService
   ) {
@@ -53,8 +55,8 @@ export class WorkspaceService {
     return returnWorkspaces;
   }
 
-  async setWorkspacesByUser(userId: number, workspaces: number[]) {
-    return this.workspaceUsersRepository.delete({ userId: userId }).then(async () => {
+  async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: number[]) {
+    return this.workspaceUserService.deleteAllByWorkspaceGroup(workspaceGroupId, userId).then(async () => {
       await Promise.all(workspaces.map(async workspaceId => {
         const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
           userId: userId,

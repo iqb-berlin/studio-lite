@@ -12,12 +12,14 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { UsersService } from '../../database/services/users.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { IsAdminGuard } from '../is-admin.guard';
 import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
+import { WorkspaceGroupId } from '../workspace-group.decorator';
 
 @Controller('admin/users')
 export class UsersController {
@@ -82,13 +84,15 @@ export class UsersController {
     return this.workspaceGroupService.findAll(id);
   }
 
-  @Patch(':id/workspaces')
+  @Patch(':id/workspaces/:workspace_group_id')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin users')
   async patchOnesWorkspaces(@Param('id') id: number,
+    @WorkspaceGroupId() workspaceGroupId: number,
     @Body() workspaces: number[]) {
-    return this.workspaceService.setWorkspacesByUser(id, workspaces);
+    return this.workspaceService.setWorkspacesByUser(id, workspaceGroupId, workspaces);
   }
 
   @Patch(':id/workspace-groups')
