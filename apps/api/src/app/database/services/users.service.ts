@@ -9,6 +9,7 @@ import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
+import Workspace from '../entities/workspace.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,9 @@ export class UsersService {
     @InjectRepository(WorkspaceUser)
     private workspaceUsersRepository: Repository<WorkspaceUser>,
     @InjectRepository(WorkspaceGroupAdmin)
-    private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>
+    private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>
   ) {}
 
   async findAll(workspaceId?: number): Promise<UserInListDto[]> {
@@ -134,11 +137,15 @@ export class UsersService {
   }
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
-    const wsUser = await this.workspaceUsersRepository.createQueryBuilder('ws_user')
-      .where('ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id',
-        { user_id: userId, ws_id: workspaceId })
-      .getOne();
-    return !!wsUser;
+    const wsUser = await this.workspaceUsersRepository.findOne({
+      where: { userId: userId, workspaceId: workspaceId }
+    });
+    if (wsUser) return true;
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+      select: { groupId: true }
+    });
+    return this.isWorkspaceGroupAdmin(userId, workspace.groupId);
   }
 
   async isWorkspaceGroupAdmin(userId: number, workspaceGroupId?: number): Promise<boolean> {

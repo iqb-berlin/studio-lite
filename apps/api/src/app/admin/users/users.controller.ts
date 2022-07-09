@@ -63,7 +63,7 @@ export class UsersController {
   }
 
   @Get(':id/workspaces')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [WorkspaceInListDto]
@@ -74,7 +74,7 @@ export class UsersController {
   }
 
   @Get(':id/workspace-groups')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [WorkspaceGroupInListDto]

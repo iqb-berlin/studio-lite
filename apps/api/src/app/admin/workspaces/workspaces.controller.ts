@@ -12,11 +12,13 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
   WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { UsersService } from '../../database/services/users.service';
 import { IsAdminGuard } from '../is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
+import { WorkspaceGroupId } from '../workspace-group.decorator';
 
 @Controller('admin/workspaces')
 export class WorkspacesController {
@@ -48,7 +50,7 @@ export class WorkspacesController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [WorkspaceFullDto]
@@ -58,25 +60,33 @@ export class WorkspacesController {
     return this.workspaceService.findOne(id);
   }
 
-  @Delete(':ids')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @Delete(':ids/:workspace_group_id')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
-  async remove(@Param('ids') ids: string): Promise<void> {
+  async remove(@WorkspaceGroupId() workspaceGroupId: number, @Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
+    const validWorkspaces = await this.workspaceService.findAllByGroup(workspaceGroupId);
+    const validWorkspaceIds = validWorkspaces.map(ws => ws.id);
+    ids.split(';').forEach(s => {
+      const idAsNumber = parseInt(s, 10);
+      if (validWorkspaceIds.indexOf(idAsNumber) >= 0) idsAsNumberArray.push(idAsNumber);
+    });
     return this.workspaceService.remove(idsAsNumberArray);
   }
 
-  @Post()
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @Post(':workspace_group_id')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new workspace in database',
     type: Number
   })
   @ApiTags('admin workspaces')
-  async create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
+  async create(@WorkspaceGroupId() id: number, @Body() createWorkspaceDto: CreateWorkspaceDto) {
+    createWorkspaceDto.groupId = id;
     return this.workspaceService.create(createWorkspaceDto);
   }
 

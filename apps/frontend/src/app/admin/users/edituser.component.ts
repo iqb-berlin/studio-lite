@@ -47,13 +47,12 @@ export type EditUserComponentData = {
             <mat-label>Notiz</mat-label>
             <input matInput formControlName="description" type="text" placeholder="Notiz" [value]="data.description"/>
           </mat-form-field>
-          <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin.toString()">
+          <mat-checkbox formControlName="isAdmin" [value]="data.isAdmin.toString()" class="email-consent">
             System-Administrator:in
           </mat-checkbox>
-          <p>&nbsp;</p>
-          <p>
+          <div>
             Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.
-          </p>
+          </div>
           <mat-form-field>
             <input matInput formControlName="password" type="password" [placeholder]="passwordLabel"/>
           </mat-form-field>

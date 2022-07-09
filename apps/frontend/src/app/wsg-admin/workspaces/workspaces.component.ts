@@ -124,30 +124,34 @@ export class WorkspacesComponent implements OnInit {
       this.appBackendService.getWorkspaceData(selectedRows[0].id).subscribe(
         wResponse => {
           if (wResponse) {
-            if (wResponse.settings) {
-              const wsSettings = wResponse.settings;
-              const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
-                width: '600px',
-                data: wsSettings
-              });
-              dialogRef.afterClosed().subscribe(result => {
-                if (result !== false) {
-                  this.appService.dataLoading = true;
-                  wsSettings.defaultEditor = result.controls.editorSelector.value;
-                  wsSettings.defaultPlayer = result.controls.playerSelector.value;
-                  wsSettings.defaultSchemer = result.controls.schemerSelector.value;
-                  wsSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
-                  this.appBackendService.setWorkspaceSettings(selectedRows[0].id, wsSettings).subscribe(isOK => {
-                    this.appService.dataLoading = false;
-                    if (!isOK) {
-                      this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
-                    } else {
-                      this.snackBar.open('Einstellungen gespeichert', '', { duration: 1000 });
-                    }
-                  });
-                }
-              });
-            }
+            const wsSettings = wResponse.settings || {
+              defaultEditor: '',
+              defaultPlayer: '',
+              defaultSchemer: '',
+              unitGroups: [],
+              stableModulesOnly: true
+            };
+            const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
+              width: '600px',
+              data: wsSettings
+            });
+            dialogRef.afterClosed().subscribe(result => {
+              if (result !== false) {
+                this.appService.dataLoading = true;
+                wsSettings.defaultEditor = result.controls.editorSelector.value;
+                wsSettings.defaultPlayer = result.controls.playerSelector.value;
+                wsSettings.defaultSchemer = result.controls.schemerSelector.value;
+                wsSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
+                this.appBackendService.setWorkspaceSettings(selectedRows[0].id, wsSettings).subscribe(isOK => {
+                  this.appService.dataLoading = false;
+                  if (!isOK) {
+                    this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
+                  } else {
+                    this.snackBar.open('Einstellungen gespeichert', '', { duration: 1000 });
+                  }
+                });
+              }
+            });
           } else {
             this.snackBar.open(
               'Konnte Daten für Arbeitsbereich nicht laden', 'Fehler', { duration: 3000 }
@@ -195,7 +199,9 @@ export class WorkspacesComponent implements OnInit {
           this.appService.dataLoading = true;
           const workspacesToDelete: number[] = [];
           selectedRows.forEach((r: WorkspaceInListDto) => workspacesToDelete.push(r.id));
-          this.backendService.deleteWorkspaces(workspacesToDelete).subscribe(
+          this.backendService.deleteWorkspaces(
+            this.wsgAdminService.selectedWorkspaceGroup, workspacesToDelete
+          ).subscribe(
             respOk => {
               if (respOk) {
                 this.snackBar.open('Arbeitsbereich/e gelöscht', '', { duration: 1000 });

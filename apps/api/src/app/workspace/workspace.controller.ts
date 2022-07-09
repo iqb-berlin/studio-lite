@@ -14,6 +14,7 @@ import { UnitDownloadClass } from './unit-download.class';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
 import { SettingService } from '../database/services/setting.service';
+import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -72,7 +73,7 @@ export class WorkspaceController {
   }
 
   @Patch('settings')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')

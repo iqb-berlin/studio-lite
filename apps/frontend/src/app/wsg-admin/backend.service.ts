@@ -61,7 +61,7 @@ export class BackendService {
 
   addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
+      .post<boolean>(`${this.serverUrl}admin/workspaces/${createWorkspaceDto.groupId}`, createWorkspaceDto)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -77,9 +77,9 @@ export class BackendService {
       );
   }
 
-  deleteWorkspaces(workspaces: number[]): Observable<boolean> {
+  deleteWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`)
+      .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
