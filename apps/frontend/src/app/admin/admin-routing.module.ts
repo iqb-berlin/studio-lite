@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { WorkspacesComponent } from './workspaces/workspaces.component';
+import { WorkspacesComponent } from './workspace-groups/workspaces.component';
 import { UsersComponent } from './users/users.component';
 import { AdminComponent } from './admin.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';

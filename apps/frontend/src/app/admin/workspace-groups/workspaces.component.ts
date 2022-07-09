@@ -14,15 +14,12 @@ import {
   MessageType
 } from '@studio-lite-lib/iqb-components';
 import {
-  WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto
+  UserInListDto, CreateWorkspaceGroupDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
-import { EditworkspaceComponent } from './editworkspace.component';
 import { AppService } from '../../app.service';
 import { UserToCheckCollection } from '../users/usersChecked';
-import { WorkspaceGroupsComponent } from './workspace-groups.component';
-import { WorkspaceDataFlat } from '../../app.classes';
-import { WorkspaceGroupData } from './workspaceChecked';
+import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -32,13 +29,11 @@ import { WorkspaceGroupData } from './workspaceChecked';
   ]
 })
 export class WorkspacesComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<WorkspaceDataFlat>();
-  displayedColumns = ['selectCheckbox', 'group', 'name'];
-  tableSelectionCheckbox = new SelectionModel <WorkspaceDataFlat>(true, []);
-  tableSelectionRow = new SelectionModel <WorkspaceDataFlat>(false, []);
-  selectedWorkspaceId = 0;
-  workspaceGroups: WorkspaceGroupData[] = [];
-
+  objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
+  displayedColumns = ['selectCheckbox', 'name'];
+  tableSelectionCheckbox = new SelectionModel <WorkspaceGroupInListDto>(true, []);
+  tableSelectionRow = new SelectionModel <WorkspaceGroupInListDto>(false, []);
+  selectedWorkspaceGroupId = 0;
   workspaceUsers = new UserToCheckCollection([]);
 
   @ViewChild(MatSort) sort = new MatSort();
@@ -55,9 +50,9 @@ export class WorkspacesComponent implements OnInit {
     this.tableSelectionRow.changed.subscribe(
       r => {
         if (r.added.length > 0) {
-          this.selectedWorkspaceId = r.added[0].id;
+          this.selectedWorkspaceGroupId = r.added[0].id;
         } else {
-          this.selectedWorkspaceId = 0;
+          this.selectedWorkspaceGroupId = 0;
         }
         this.updateUserList();
       }
@@ -73,49 +68,36 @@ export class WorkspacesComponent implements OnInit {
 
   // ***********************************************************************************
   addObject(): void {
-    if (this.workspaceGroups.length === 0) {
-      this.messsageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: 'Arbeitsbereich hinzufügen',
-          content: 'Bitte legen Sie erst eine Gruppe für Arbeitsbereiche an! Gehen Sie hierzu auf "Einstellungen"!',
-          type: MessageType.error
-        }
-      });
-    } else {
-      const dialogRef = this.editWorkspaceDialog.open(EditworkspaceComponent, {
-        width: '600px',
-        data: {
-          name: '',
-          title: 'Neuer Arbeitsbereich',
-          saveButtonLabel: 'Anlegen',
-          groups: this.workspaceGroups,
-          group: this.workspaceGroups.length === 1 ? this.workspaceGroups[0].id : null
-        }
-      });
+    const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
+      width: '600px',
+      data: {
+        name: '',
+        title: 'Neue Gruppe für Arbeitsbereiche',
+        saveButtonLabel: 'Anlegen'
+      }
+    });
 
-      dialogRef.afterClosed().subscribe(result => {
-        if (typeof result !== 'undefined') {
-          if (result !== false) {
-            this.appService.dataLoading = true;
-            this.backendService.addWorkspace(<CreateWorkspaceDto>{
-              name: (<UntypedFormGroup>result).get('name')?.value,
-              groupId: (<UntypedFormGroup>result).get('groupSelector')?.value
-            }).subscribe(
-              respOk => {
-                if (respOk) {
-                  this.snackBar.open('Arbeitsbereich hinzugefügt', '', { duration: 1000 });
-                  this.updateWorkspaceList();
-                } else {
-                  this.snackBar.open('Konnte Arbeitsbereich nicht hinzufügen', 'Fehler', { duration: 3000 });
-                }
-                this.appService.dataLoading = false;
+    dialogRef.afterClosed().subscribe(result => {
+      if (typeof result !== 'undefined') {
+        if (result !== false) {
+          this.appService.dataLoading = true;
+          this.backendService.addWorkspaceGroup(<CreateWorkspaceGroupDto>{
+            name: (<UntypedFormGroup>result).get('name')?.value,
+            settings: {}
+          }).subscribe(
+            respOk => {
+              if (respOk) {
+                this.snackBar.open('Arbeitsbereichsgruppe hinzugefügt', '', { duration: 1000 });
+                this.updateWorkspaceList();
+              } else {
+                this.snackBar.open('Konnte Arbeitsbereichsgruppe nicht hinzufügen', 'Fehler', { duration: 3000 });
               }
-            );
-          }
+              this.appService.dataLoading = false;
+            }
+          );
         }
-      });
-    }
+      }
+    });
   }
 
   changeObject(): void {
@@ -133,14 +115,12 @@ export class WorkspacesComponent implements OnInit {
         }
       });
     } else {
-      const dialogRef = this.editWorkspaceDialog.open(EditworkspaceComponent, {
+      const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
         width: '600px',
         data: {
           name: selectedRows[0].name,
-          title: 'Arbeitsbereich ändern',
-          saveButtonLabel: 'Speichern',
-          groups: this.workspaceGroups,
-          group: selectedRows[0].groupId
+          title: 'Arbeitsbereichsgruppe ändern',
+          saveButtonLabel: 'Speichern'
         }
       });
 
@@ -148,20 +128,21 @@ export class WorkspacesComponent implements OnInit {
         if (typeof result !== 'undefined') {
           if (result !== false) {
             this.appService.dataLoading = true;
-            const workspaceData = <WorkspaceFullDto>{
-              id: selectedRows[0].id
-            };
-            const newName = (<UntypedFormGroup>result).get('name')?.value;
-            const newWorkspaceGroup = (<UntypedFormGroup>result).get('groupSelector')?.value;
-            if (newName !== selectedRows[0].name) workspaceData.name = newName;
-            if (newWorkspaceGroup !== selectedRows[0].groupId) workspaceData.groupId = parseInt(newWorkspaceGroup, 10);
-            this.backendService.changeWorkspace(workspaceData).subscribe(
+            this.backendService.changeWorkspaceGroup({
+              id: selectedRows[0].id,
+              name: (<UntypedFormGroup>result).get('name')?.value,
+              settings: {
+                defaultSchemer: '',
+                defaultPlayer: '',
+                defaultEditor: ''
+              }
+            }).subscribe(
               respOk => {
                 if (respOk) {
-                  this.snackBar.open('Arbeitsbereich geändert', '', { duration: 1000 });
+                  this.snackBar.open('Arbeitsbereichsgruppe geändert', '', { duration: 1000 });
                   this.updateWorkspaceList();
                 } else {
-                  this.snackBar.open('Konnte Arbeitsbereich nicht ändern', 'Fehler', { duration: 3000 });
+                  this.snackBar.open('Konnte Arbeitsbereichsgruppe nicht ändern', 'Fehler', { duration: 3000 });
                 }
                 this.appService.dataLoading = false;
               }
@@ -181,24 +162,24 @@ export class WorkspacesComponent implements OnInit {
       this.messsageDialog.open(MessageDialogComponent, {
         width: '400px',
         data: <MessageDialogData>{
-          title: 'Löschen von Arbeitsbereichen',
-          content: 'Bitte markieren Sie erst Arbeitsbereich/e!',
+          title: 'Löschen von Arbeitsbereichsgruppe(n)',
+          content: 'Bitte markieren Sie erst Arbeitsbereichsgruppen!',
           type: MessageType.error
         }
       });
     } else {
       let prompt = 'Soll';
       if (selectedRows.length > 1) {
-        prompt = `${prompt}en ${selectedRows.length} Arbeitsbereiche `;
+        prompt = `${prompt}en ${selectedRows.length} Arbeitsbereichsgruppen `;
       } else {
-        prompt = `${prompt} Arbeitsbereich "${selectedRows[0].name}" `;
+        prompt = `${prompt} Arbeitsbereichsgruppe "${selectedRows[0].name}" `;
       }
       const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: <ConfirmDialogData>{
-          title: 'Löschen von Arbeitsbereichen',
+          title: 'Löschen von Arbeitsbereichsgruppen',
           content: `${prompt}gelöscht werden?`,
-          confirmButtonLabel: 'Arbeitsbereich/e löschen',
+          confirmButtonLabel: 'Arbeitsbereichsgruppe/n löschen',
           showCancel: true
         }
       });
@@ -207,9 +188,9 @@ export class WorkspacesComponent implements OnInit {
         if (result === true) {
           // =========================================================
           this.appService.dataLoading = true;
-          const workspacesToDelete: number[] = [];
-          selectedRows.forEach((r: WorkspaceDataFlat) => workspacesToDelete.push(r.id));
-          this.backendService.deleteWorkspaces(workspacesToDelete).subscribe(
+          const workspaceGroupsToDelete: number[] = [];
+          selectedRows.forEach(r => workspaceGroupsToDelete.push(r.id));
+          this.backendService.deleteWorkspaceGroups(workspaceGroupsToDelete).subscribe(
             respOk => {
               if (respOk) {
                 this.snackBar.open('Arbeitsbereich/e gelöscht', '', { duration: 1000 });
@@ -230,9 +211,9 @@ export class WorkspacesComponent implements OnInit {
     if (this.workspaceUsers.hasChanged) {
       this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
-    if (this.selectedWorkspaceId > 0) {
+    if (this.selectedWorkspaceGroupId > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getUsersByWorkspace(this.selectedWorkspaceId).subscribe(
+      this.backendService.getWorkspaceGroupAdmins(this.selectedWorkspaceGroupId).subscribe(
         (dataResponse: UserInListDto[]) => {
           this.workspaceUsers.setChecks(dataResponse);
           this.appService.dataLoading = false;
@@ -244,10 +225,12 @@ export class WorkspacesComponent implements OnInit {
   }
 
   saveUsers(): void {
-    if (this.selectedWorkspaceId > 0) {
+    if (this.selectedWorkspaceGroupId > 0) {
       if (this.workspaceUsers.hasChanged) {
         this.appService.dataLoading = true;
-        this.backendService.setUsersByWorkspace(this.selectedWorkspaceId, this.workspaceUsers.getChecks()).subscribe(
+        this.backendService.setWorkspaceGroupAdmins(
+          this.selectedWorkspaceGroupId, this.workspaceUsers.getChecks()
+        ).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
@@ -264,37 +247,17 @@ export class WorkspacesComponent implements OnInit {
 
   // ***********************************************************************************
   updateWorkspaceList(): void {
-    this.selectedWorkspaceId = 0;
+    this.selectedWorkspaceGroupId = 0;
     this.updateUserList();
 
     this.appService.dataLoading = true;
-    this.backendService.getWorkspacesGroupwise().subscribe(
-      (dataresponse: WorkspaceGroupDto[]) => {
-        const workspaces: WorkspaceDataFlat[] = [];
-        this.workspaceGroups = [];
-        dataresponse.forEach(workspaceGroup => {
-          this.workspaceGroups.push(<WorkspaceGroupData>{
-            id: workspaceGroup.id,
-            name: workspaceGroup.name,
-            workspaceCount: workspaceGroup.workspaces.length
-          });
-          workspaceGroup.workspaces.forEach(workspace => {
-            workspaces.push(<WorkspaceDataFlat>{
-              id: workspace.id,
-              groupName: workspaceGroup.name,
-              name: workspace.name,
-              groupId: workspaceGroup.id,
-              selected: false
-            });
-          });
-        });
-        this.objectsDatasource = new MatTableDataSource(workspaces);
-        this.objectsDatasource.sort = this.sort;
-        this.tableSelectionCheckbox.clear();
-        this.tableSelectionRow.clear();
-        this.appService.dataLoading = false;
-      }
-    );
+    this.backendService.getWorkspaceGroupList().subscribe(dataresponse => {
+      this.objectsDatasource = new MatTableDataSource(dataresponse);
+      this.objectsDatasource.sort = this.sort;
+      this.tableSelectionCheckbox.clear();
+      this.tableSelectionRow.clear();
+      this.appService.dataLoading = false;
+    });
   }
 
   createUserList(): void {
@@ -317,18 +280,7 @@ export class WorkspacesComponent implements OnInit {
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
-  selectRow(row: WorkspaceDataFlat): void {
+  selectRow(row: WorkspaceGroupInListDto): void {
     this.tableSelectionRow.select(row);
-  }
-
-  editWorkspaceGroups() {
-    const dialogRef = this.workspaceGroupsDialog.open(WorkspaceGroupsComponent, {
-      width: '600px',
-      minHeight: '400px'
-    });
-
-    dialogRef.afterClosed().subscribe(() => {
-      this.updateWorkspaceList();
-    });
   }
 }

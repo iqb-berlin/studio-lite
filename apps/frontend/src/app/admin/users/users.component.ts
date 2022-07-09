@@ -14,14 +14,14 @@ import {
   MessageType
 } from '@studio-lite-lib/iqb-components';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto
+  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import {
   BackendService
 } from '../backend.service';
 import { AppService } from '../../app.service';
 import { EditUserComponent } from './edituser.component';
-import { WorkspaceGroupToCheckCollection } from '../workspaces/workspaceChecked';
+import { WorkspaceGroupToCheckCollection } from '../workspace-groups/workspaceChecked';
 
 @Component({
   templateUrl: './users.component.html',
@@ -36,8 +36,7 @@ export class UsersComponent implements OnInit {
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
-
-  userWorkspaces = new WorkspaceGroupToCheckCollection([]);
+  userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -60,7 +59,7 @@ export class UsersComponent implements OnInit {
         } else {
           this.selectedUser = 0;
         }
-        this.updateWorkspaceList();
+        this.updateWorkspaceGroupList();
       }
     );
   }
@@ -228,39 +227,37 @@ export class UsersComponent implements OnInit {
   }
 
   // ***********************************************************************************
-  updateWorkspaceList(): void {
-    if (this.userWorkspaces.hasChanged) {
+  updateWorkspaceGroupList(): void {
+    if (this.userWorkspaceGroups.hasChanged) {
       this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspacesByUser(this.selectedUser).subscribe(
-        (dataresponse: WorkspaceInListDto[]) => {
-          this.userWorkspaces.setChecks(dataresponse);
+      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).subscribe(
+        (dataresponse: WorkspaceGroupInListDto[]) => {
+          this.userWorkspaceGroups.setChecks(dataresponse);
           this.appService.dataLoading = false;
         }
       );
     } else {
-      this.userWorkspaces.setChecks();
+      this.userWorkspaceGroups.setChecks();
     }
   }
 
   saveWorkspaces(): void {
     if (this.selectedUser > 0) {
-      if (this.userWorkspaces.hasChanged) {
+      if (this.userWorkspaceGroups.hasChanged) {
         this.appService.dataLoading = true;
-        this.backendService.setWorkspacesByUser(this.selectedUser, this.userWorkspaces.getChecks()).subscribe(
+        this.backendService.setWorkspaceGroupsByAdmin(
+          this.selectedUser, this.userWorkspaceGroups.getChecks()
+        ).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
-              this.userWorkspaces.setHasChangedFalse();
+              this.userWorkspaceGroups.setHasChangedFalse();
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
-            this.appService.dataLoading = false;
-          },
-          err => {
-            this.snackBar.open(`Konnte Zugriffsrechte nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
             this.appService.dataLoading = false;
           }
         );
@@ -290,9 +287,9 @@ export class UsersComponent implements OnInit {
   }
 
   createWorkspaceList(): void {
-    this.userWorkspaces = new WorkspaceGroupToCheckCollection([]);
-    this.backendService.getWorkspacesGroupwise().subscribe(worksGroups => {
-      this.userWorkspaces = new WorkspaceGroupToCheckCollection(worksGroups);
+    this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
+    this.backendService.getWorkspaceGroupList().subscribe(worksGroups => {
+      this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection(worksGroups);
       this.updateUserList();
     });
   }

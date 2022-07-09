@@ -24,7 +24,7 @@ export class UsersService {
     private workspaceRepository: Repository<Workspace>
   ) {}
 
-  async findAll(workspaceId?: number): Promise<UserInListDto[]> {
+  async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
     const validUsers: number[] = [];
     if (workspaceId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
@@ -35,6 +35,29 @@ export class UsersService {
     const returnUsers: UserInListDto[] = [];
     users.forEach(user => {
       if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
+        const displayName = user.lastName ? user.lastName : user.name;
+        returnUsers.push(<UserInListDto>{
+          id: user.id,
+          name: user.name,
+          isAdmin: user.isAdmin,
+          description: user.description,
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName
+        });
+      }
+    });
+    return returnUsers;
+  }
+
+  async findAllWorkspaceGroupAdmins(workspaceGroupId: number): Promise<UserInListDto[]> {
+    const workspaceGroupAdmins = await this.workspaceGroupAdminRepository.find({
+      where: { workspaceGroupId: workspaceGroupId },
+      select: { userId: true }
+    });
+    const workspaceGroupAdminsIds = workspaceGroupAdmins.map(wsgA => wsgA.userId);
+    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
+    const returnUsers: UserInListDto[] = [];
+    users.forEach(user => {
+      if (workspaceGroupAdminsIds.indexOf(user.id) > -1) {
         const displayName = user.lastName ? user.lastName : user.name;
         returnUsers.push(<UserInListDto>{
           id: user.id,
@@ -219,6 +242,18 @@ export class UsersService {
           workspaceId: workspaceId
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
+      }));
+    });
+  }
+
+  async setWorkspaceGroupAdmins(workspaceGroupId: number, users: number[]) {
+    return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
+      await Promise.all(users.map(async userId => {
+        const newWorkspaceGroupAdmin = await this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
+          userId: userId,
+          workspaceGroupId: workspaceGroupId
+        });
+        await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
       }));
     });
   }

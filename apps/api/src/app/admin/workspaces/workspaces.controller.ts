@@ -106,7 +106,7 @@ export class WorkspacesController {
   })
   @ApiTags('admin workspaces')
   async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
-    return this.userService.findAll(id);
+    return this.userService.findAllUsers(id);
   }
 
   @Patch(':id/users')

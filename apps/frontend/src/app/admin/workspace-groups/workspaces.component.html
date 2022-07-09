@@ -1,20 +1,16 @@
 <div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
   <div class="object-list" fxLayout="column" fxFlex="50">
     <div fxLayout="row">
-        <button mat-raised-button (click)="addObject()" matTooltip="Arbeitsbereich hinzufügen" matTooltipPosition="above">
-            <mat-icon>add</mat-icon>
-          </button>
-        <button mat-raised-button (click)="deleteObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length === 0"
-                matTooltip="Markierte/n Arbeitsbereich/e löschen" matTooltipPosition="above">
-          <mat-icon>delete</mat-icon>
+      <button mat-raised-button (click)="addObject()" matTooltip="Gruppe hinzufügen" matTooltipPosition="above">
+          <mat-icon>add</mat-icon>
         </button>
-        <button mat-raised-button (click)="changeObject()" [disabled]="selectedWorkspaceId === 0 && this.tableSelectionCheckbox.selected.length !== 1"
-                matTooltip="Arbeitsbereich umbenennen" matTooltipPosition="above">
-          <mat-icon>edit</mat-icon>
-        </button>
-      <button mat-raised-button (click)="editWorkspaceGroups()"
-              matTooltip="Gruppen für Arbeitsbereiche ändern" matTooltipPosition="above">
-        Gruppen
+      <button mat-raised-button (click)="deleteObject()" [disabled]="selectedWorkspaceGroupId === 0 && this.tableSelectionCheckbox.selected.length === 0"
+              matTooltip="Markierte Gruppe/n löschen" matTooltipPosition="above">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-raised-button (click)="changeObject()" [disabled]="selectedWorkspaceGroupId === 0 && this.tableSelectionCheckbox.selected.length !== 1"
+              matTooltip="Gruppe ändern" matTooltipPosition="above">
+        <mat-icon>edit</mat-icon>
       </button>
     </div>
 
@@ -39,11 +35,6 @@
         <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="group">
-        <mat-header-cell *matHeaderCellDef mat-sort-header="groupName"> Gruppe </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.groupName}} </mat-cell>
-      </ng-container>
-
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectRow(row)"
         [style.background]="tableSelectionRow.isSelected(row) ? 'lightblue' : ''"></mat-row>
@@ -52,8 +43,8 @@
 
   <div class="object-list" fxLayout="column" fxFlex="40">
     <div fxLayout="row" fxLayoutAlign="space-between center">
-      <div *ngIf="selectedWorkspaceId === 0">Zugriffsrechte: Bitte links Arbeitsbereich wählen</div>
-      <div *ngIf="selectedWorkspaceId > 0" >Zugriffsrechte für {{ tableSelectionRow.selected[0]?.name }}:</div>
+      <div *ngIf="selectedWorkspaceGroupId === 0">Zugriffsrechte: Bitte links Gruppe wählen</div>
+      <div *ngIf="selectedWorkspaceGroupId > 0" >Zugriffsrechte für {{ tableSelectionRow.selected[0]?.name }}:</div>
       <button mat-raised-button (click)="saveUsers()" matTooltip="Speichern"
               matTooltipPosition="above" [disabled]="!workspaceUsers?.hasChanged">
         <mat-icon>save</mat-icon>
@@ -63,7 +54,7 @@
     <div class="scroll-area" fxLayout="column">
       <div fxLayout="row" fxLayoutAlign="start start" *ngFor="let u of workspaceUsers.entries">
         <mat-checkbox (change)="workspaceUsers?.updateHasChanged()" fxFlex
-                      [(ngModel)]="u.isChecked" [disabled]="selectedWorkspaceId === 0" style="margin-left: 20px;">
+                      [(ngModel)]="u.isChecked" [disabled]="selectedWorkspaceGroupId === 0" style="margin-left: 20px;">
           {{u.displayName}} ({{u.name}})</mat-checkbox>
           <div style="color: gray; margin: 3px" fxFlex>{{u.description}}</div>
       </div>

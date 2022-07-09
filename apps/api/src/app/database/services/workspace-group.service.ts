@@ -68,8 +68,7 @@ export class WorkspaceGroupService {
   async patch(workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
     if (workspaceGroupData.id) {
       const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
-        where: { id: workspaceGroupData.id },
-        select: { settings: true, name: true }
+        where: { id: workspaceGroupData.id }
       });
       if (workspaceGroupData.name) workspaceGroupToUpdate.name = workspaceGroupData.name;
       if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
@@ -79,7 +78,7 @@ export class WorkspaceGroupService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number[]): Promise<void> {
     await this.workspaceGroupsRepository.delete(id);
   }
 

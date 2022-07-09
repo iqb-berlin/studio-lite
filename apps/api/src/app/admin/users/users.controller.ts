@@ -37,7 +37,7 @@ export class UsersController {
   })
   @ApiTags('admin users')
   async findAll(): Promise<UserInListDto[]> {
-    return this.usersService.findAll();
+    return this.usersService.findAllUsers();
   }
 
   @Get('full')

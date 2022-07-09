@@ -2,14 +2,14 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, Param,
   Patch,
   Post,
   UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
-  CreateWorkspaceGroupDto,
+  CreateWorkspaceGroupDto, UserInListDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
@@ -20,12 +20,14 @@ import { IsAdminGuard } from '../is-admin.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { WorkspaceGroupId } from '../workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
+import { UsersService } from '../../database/services/users.service';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
   constructor(
     private workspaceGroupService: WorkspaceGroupService,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private userService: UsersService
   ) {}
 
   @Get()
@@ -63,17 +65,17 @@ export class WorkspaceGroupsController {
     return this.workspaceService.findAllByGroup(id);
   }
 
-  @Delete(':workspace_group_id')
+  @Delete(':ids')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('admin workspaces')
-  async remove(@WorkspaceGroupId() id: number): Promise<void> {
-    return this.workspaceGroupService.remove(id);
+  async remove(@Param('ids') ids: string): Promise<void> {
+    const idsAsNumberArray: number[] = ids.split(';').map(idString => parseInt(idString, 10));
+    return this.workspaceGroupService.remove(idsAsNumberArray);
   }
 
   @Patch()
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
@@ -90,5 +92,27 @@ export class WorkspaceGroupsController {
   @ApiTags('admin workspaces')
   async create(@Body() createWorkspaceGroupDto: CreateWorkspaceGroupDto) {
     return this.workspaceGroupService.create(createWorkspaceGroupDto);
+  }
+
+  @Get(':workspace_group_id/admins')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: [UserInListDto]
+  })
+  @ApiTags('admin workspaces')
+  async findOnesAdmins(@WorkspaceGroupId() id: number): Promise<UserInListDto[]> {
+    return this.userService.findAllWorkspaceGroupAdmins(id);
+  }
+
+  @Patch(':workspace_group_id/admins')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin workspaces')
+  async patchOnesAdmins(@WorkspaceGroupId() id: number,
+    @Body() users: number[]) {
+    return this.userService.setWorkspaceGroupAdmins(id, users);
   }
 }

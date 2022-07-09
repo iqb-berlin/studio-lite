@@ -26,16 +26,14 @@ import { MatChipsModule } from '@angular/material/chips';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { AdminRoutingModule } from './admin-routing.module';
-import { WorkspacesComponent } from './workspaces/workspaces.component';
+import { WorkspacesComponent } from './workspace-groups/workspaces.component';
 import { UsersComponent } from './users/users.component';
 import { AdminComponent } from './admin.component';
 import { BackendService } from './backend.service';
-import { EditworkspaceComponent } from './workspaces/editworkspace.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { VeronaModulesTableComponent } from './verona-modules/verona-modules-table.component';
 import { SettingsComponent } from './settings/settings.component';
-import { WorkspaceGroupsComponent } from './workspaces/workspace-groups.component';
-import { EditWorkspaceGroupComponent } from './workspaces/edit-workspace-group.component';
+import { EditWorkspaceGroupComponent } from './workspace-groups/edit-workspace-group.component';
 import { AppConfigComponent } from './settings/app-config.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
@@ -78,12 +76,11 @@ import { UnitExportConfigComponent } from './settings/unit-export-config.compone
     WorkspacesComponent,
     UsersComponent,
     AdminComponent,
-    EditworkspaceComponent,
+    EditWorkspaceGroupComponent,
     EditUserComponent,
     VeronaModulesComponent,
     VeronaModulesTableComponent,
     SettingsComponent,
-    WorkspaceGroupsComponent,
     EditWorkspaceGroupComponent,
     AppConfigComponent,
     AppLogoComponent,
