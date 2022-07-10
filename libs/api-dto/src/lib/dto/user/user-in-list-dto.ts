@@ -15,4 +15,7 @@ export class UserInListDto {
 
   @ApiProperty()
   displayName?: string;
+
+  @ApiProperty()
+  email?: string;
 }

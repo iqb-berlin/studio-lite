@@ -67,9 +67,6 @@ export class WorkspacesComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createUserList();
-      this.appService.appConfig.setPageTitle(
-        `Verwaltung "${this.wsgAdminService.selectedWorkspaceGroupName}": Arbeitsbereiche`
-      );
     });
   }
 

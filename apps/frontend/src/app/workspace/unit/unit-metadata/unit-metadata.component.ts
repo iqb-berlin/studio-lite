@@ -67,7 +67,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       this.setupForm();
     } else {
       const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-      this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+      this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
         selectedUnitId).subscribe(unitData => {
         this.workspaceService.unitMetadataStore = new UnitMetadataStore(
           unitData || <UnitMetadataDto>{ id: selectedUnitId }
@@ -145,7 +145,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
           this.workspaceService.workspaceSettings.unitGroups.push(result);
           this.appBackendService.setWorkspaceSettings(
-            this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+            this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
           ).subscribe(isOK => {
             if (!isOK) {
               this.snackBar.open('Neue Gruppe konnte nicht gespeichert werden.', '', { duration: 3000 });

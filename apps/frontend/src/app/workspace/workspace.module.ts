@@ -39,7 +39,9 @@ import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component
 import { SelectModuleComponent } from './unit/unit-metadata/select-module.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
-import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-list.component';
+import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
+import { UserListComponent } from './dialogs/components/user-list.component';
+import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 
 @NgModule({
   imports: [
@@ -84,7 +86,9 @@ import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-
     SelectModuleComponent,
     ExportUnitComponent,
     UnitSchemerComponent,
-    SelectUnitListComponent
+    SelectUnitListComponent,
+    UserListComponent,
+    WorkspaceUserListComponent
   ],
   exports: [
     WorkspaceComponent

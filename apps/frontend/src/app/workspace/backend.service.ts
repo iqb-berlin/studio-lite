@@ -8,7 +8,7 @@ import {
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
-  UnitSchemeDto,
+  UnitSchemeDto, UsersInWorkspaceDto,
   VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 
@@ -26,6 +26,14 @@ export class BackendService {
       .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`)
       .pipe(
         catchError(() => [])
+      );
+  }
+
+  getUsersList(workspaceId: number): Observable <UsersInWorkspaceDto | boolean> {
+    return this.http
+      .get<UsersInWorkspaceDto>(`${this.serverUrl}workspace/${workspaceId}/users`)
+      .pipe(
+        catchError(() => of(false))
       );
   }
 

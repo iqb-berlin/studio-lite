@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
-import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
+import { SelectUnitListComponent } from './components/select-unit-list.component';
 import { AppService } from '../../app.service';
 
 @Component({
@@ -39,7 +39,7 @@ export class ExportUnitComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.backendService.getUnitListWithMetadata(
-        this.workspaceService.selectedWorkspace
+        this.workspaceService.selectedWorkspaceId
       ).subscribe(unitsWithMetadata => {
         unitsWithMetadata.forEach(umd => {
           if (umd.player) {

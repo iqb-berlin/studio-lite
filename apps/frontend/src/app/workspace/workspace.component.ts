@@ -34,6 +34,7 @@ import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from '../classes/verona-module-collection.class';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
 import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
+import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -62,6 +63,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private selectUnitDialog: MatDialog,
     private messsageDialog: MatDialog,
     private editSettingsDialog: MatDialog,
+    private showUsersDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private uploadReportDialog: MatDialog,
     private snackBar: MatSnackBar,
@@ -82,7 +84,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     setTimeout(() => {
       this.workspaceService.unitList = new UnitCollection([]);
-      this.workspaceService.selectedWorkspace = Number(this.route.snapshot.params['ws']);
+      this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params['ws']);
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
         const unitParam = params['u'];
@@ -93,15 +95,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspace).subscribe(
+      this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspaceId).subscribe(
         wResponse => {
           if (wResponse) {
-            this.appService.appConfig.setPageTitle(`${wResponse.groupName}: ${wResponse.name}`);
+            this.workspaceService.selectedWorkspaceName = `${wResponse.groupName}: ${wResponse.name}`;
+            this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
             if (wResponse.settings) {
               this.workspaceService.workspaceSettings = wResponse.settings;
             }
             this.workspaceService.isWorkspaceGroupAdmin =
-              this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspace);
+              this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
             this.updateUnitList();
           } else {
             this.snackBar.open(
@@ -123,7 +126,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   updateUnitList(unitToSelect?: number): void {
-    this.backendService.getUnitList(this.workspaceService.selectedWorkspace).subscribe(
+    this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId).subscribe(
       uResponse => {
         this.workspaceService.unitList = new UnitCollection(uResponse);
         const newUnitGroups: string[] = [];
@@ -140,7 +143,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         if (unitToSelect) this.selectUnit(unitToSelect);
         if (uResponse.length === 0) {
           this.workspaceService.selectedUnit$.next(0);
-          this.router.navigate([`/a/${this.workspaceService.selectedWorkspace}`]);
+          this.router.navigate([`/a/${this.workspaceService.selectedWorkspaceId}`]);
         }
       }
     );
@@ -153,7 +156,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
     }
     return this.router.navigate(
-      [`a/${this.workspaceService.selectedWorkspace}`],
+      [`a/${this.workspaceService.selectedWorkspaceId}`],
       { relativeTo: this.route.root }
     );
   }
@@ -172,7 +175,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
         createUnitDto.schemer = this.workspaceService.workspaceSettings.defaultSchemer;
         this.backendService.addUnit(
-          this.workspaceService.selectedWorkspace, createUnitDto
+          this.workspaceService.selectedWorkspaceId, createUnitDto
         ).subscribe(
           respOk => {
             if (respOk) {
@@ -194,7 +197,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
       this.appBackendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+        this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
       ).subscribe(isOK => {
         this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
           isOK ? '' : 'Fehler', { duration: 3000 });
@@ -232,7 +235,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.deleteUnitDialog().then((unitsToDelete: number[] | boolean) => {
       if (typeof unitsToDelete !== 'boolean') {
         this.backendService.deleteUnits(
-          this.workspaceService.selectedWorkspace,
+          this.workspaceService.selectedWorkspaceId,
           unitsToDelete
         ).subscribe(
           ok => {
@@ -292,7 +295,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.appService.dataLoading = true;
             createUnitDto.createFrom = unitSource.id;
             this.backendService.addUnit(
-              this.workspaceService.selectedWorkspace, createUnitDto
+              this.workspaceService.selectedWorkspaceId, createUnitDto
             ).subscribe(
               respOk => {
                 if (respOk) {
@@ -350,7 +353,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       data: <MoveUnitData>{
         title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',
         buttonLabel: moveOnly ? 'Verschieben' : 'Kopieren',
-        currentWorkspaceId: this.workspaceService.selectedWorkspace
+        currentWorkspaceId: this.workspaceService.selectedWorkspaceId
       }
     });
 
@@ -360,7 +363,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           const dialogComponent = dialogRef.componentInstance;
           if (dialogComponent.targetWorkspace > 0) {
             this.backendService.moveOrCopyUnits(
-              this.workspaceService.selectedWorkspace,
+              this.workspaceService.selectedWorkspaceId,
               dialogComponent.selectedUnits,
               dialogComponent.targetWorkspace, moveOnly
             ).subscribe(uploadStatus => {
@@ -399,7 +402,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         if (result !== false) {
           this.appService.dataLoading = true;
           this.backendService.downloadUnits(
-            this.workspaceService.selectedWorkspace,
+            this.workspaceService.selectedWorkspaceId,
             result as UnitDownloadSettingsDto
           ).subscribe(b => {
             if (b) {
@@ -439,12 +442,26 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.workspaceService.workspaceSettings.defaultSchemer = result.controls.schemerSelector.value;
         this.workspaceService.workspaceSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
         this.appBackendService.setWorkspaceSettings(
-          this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+          this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {
           if (!isOK) {
             this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
           } else {
             this.snackBar.open('Einstellungen gespeichert', '', { duration: 1000 });
+          }
+        });
+      }
+    });
+  }
+
+  userList(): void {
+    this.backendService.getUsersList(this.workspaceService.selectedWorkspaceId).subscribe(dataResponse => {
+      if (dataResponse !== false) {
+        this.showUsersDialog.open(WorkspaceUserListComponent, {
+          width: '800px',
+          data: {
+            title: `Liste der Nutzer:innen für "${this.workspaceService.selectedWorkspaceName}"`,
+            users: dataResponse
           }
         });
       }
@@ -495,7 +512,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (inputElement.files && inputElement.files.length > 0) {
         this.appService.dataLoading = true;
         this.uploadSubscription = this.backendService.uploadUnits(
-          this.workspaceService.selectedWorkspace,
+          this.workspaceService.selectedWorkspaceId,
           inputElement.files
         ).subscribe(uploadStatus => {
           if (typeof uploadStatus === 'number') {

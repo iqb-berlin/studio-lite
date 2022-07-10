@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
-  CreateUserDto, MyDataDto, UserFullDto, UserInListDto
+  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
@@ -41,7 +41,8 @@ export class UsersService {
           name: user.name,
           isAdmin: user.isAdmin,
           description: user.description,
-          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
+          email: `${user.email}${user.emailPublishApproved ? '' : ' (verborgen)'}`
         });
       }
     });
@@ -64,9 +65,72 @@ export class UsersService {
           name: user.name,
           isAdmin: user.isAdmin,
           description: user.description,
-          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
+          email: user.emailPublishApproved ? user.email : ''
         });
       }
+    });
+    return returnUsers;
+  }
+
+  async findAllWorkspaceUsers(workspaceId: number): Promise<UsersInWorkspaceDto> {
+    const returnUsers: UsersInWorkspaceDto = {
+      users: [],
+      workspaceGroupAdmins: [],
+      admins: []
+    };
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+      select: { groupId: true }
+    });
+    const workspaceGroupAdmins: number[] = [];
+    await this.workspaceGroupAdminRepository.find({
+      where: { workspaceGroupId: workspace.groupId },
+      select: { userId: true }
+    }).then(adminsData => {
+      adminsData.forEach(adminData => {
+        workspaceGroupAdmins.push(adminData.userId);
+      });
+    });
+    const users: number[] = [];
+    await this.workspaceUsersRepository.find({
+      where: { workspaceId: workspaceId },
+      select: { userId: true }
+    }).then(usersData => {
+      usersData.forEach(userData => {
+        users.push(userData.userId);
+      });
+    });
+    await this.usersRepository.find({
+      select: {
+        id: true,
+        email: true,
+        emailPublishApproved: true,
+        firstName: true,
+        lastName: true,
+        name: true,
+        isAdmin: true,
+        description: true
+      }
+    }).then(allUsers => {
+      allUsers.forEach(user => {
+        const displayName = user.lastName ? user.lastName : user.name;
+        const newUser: UserInListDto = {
+          id: user.id,
+          name: user.name,
+          isAdmin: user.isAdmin,
+          description: user.description,
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
+          email: user.emailPublishApproved ? user.email : ''
+        };
+        if (user.isAdmin) {
+          returnUsers.admins.push(newUser);
+        } else if (workspaceGroupAdmins.indexOf(user.id) >= 0) {
+          returnUsers.workspaceGroupAdmins.push(newUser);
+        } else if (users.indexOf(user.id) >= 0) {
+          returnUsers.users.push(newUser);
+        }
+      });
     });
     return returnUsers;
   }

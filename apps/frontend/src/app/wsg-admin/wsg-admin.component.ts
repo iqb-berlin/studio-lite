@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WsgAdminService } from './wsg-admin.service';
 import { BackendService } from './backend.service';
+import { AppService } from '../app.service';
 
 @Component({
   template: `
@@ -48,6 +49,7 @@ export class WsgAdminComponent {
   constructor(
     private wsgAdminService: WsgAdminService,
     private backendService: BackendService,
+    private appService: AppService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -58,6 +60,9 @@ export class WsgAdminComponent {
       this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(wsgData => {
         if (wsgData) {
           this.wsgAdminService.selectedWorkspaceGroupName = wsgData.name || 'unbekannt';
+          this.appService.appConfig.setPageTitle(
+            `Verwaltung "${this.wsgAdminService.selectedWorkspaceGroupName}"`
+          );
           this.wsgAdminService.selectedWorkspaceGroupSettings = wsgData.settings || {
             defaultSchemer: '',
             defaultPlayer: '',

@@ -15,7 +15,8 @@ import { AppService } from '../app.service';
   providedIn: 'root'
 })
 export class WorkspaceService {
-  selectedWorkspace = 0;
+  selectedWorkspaceId = 0;
+  selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
   workspaceSettings: WorkspaceSettingsDto;
   moduleHtmlStore: { [key: string]: string } = {};
@@ -85,7 +86,7 @@ export class WorkspaceService {
     this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitMetadata(
-        this.selectedWorkspace, this.unitMetadataStore.getChangedData()
+        this.selectedWorkspaceId, this.unitMetadataStore.getChangedData()
       ));
       if (saveOk) {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupChanged();
@@ -94,18 +95,18 @@ export class WorkspaceService {
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
-        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
+        this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
       ));
       if (saveOk) this.unitDefinitionStore.applyChanges();
     }
     if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitScheme(
-        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
+        this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
       ));
       if (saveOk) this.unitSchemeStore.applyChanges();
     }
     if (reloadUnitList) {
-      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspace)
+      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId)
         .pipe(
           map(uResponse => {
             this.unitList = new UnitCollection(uResponse);

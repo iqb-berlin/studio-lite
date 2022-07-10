@@ -2,7 +2,7 @@
   <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
   <div fxLayout="row" fxLayoutGap="20px">
     <mat-dialog-content fxFlex>
-      <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspace"></select-unit-list>
+      <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
     </mat-dialog-content>
     <div fxFlex="300px">
       <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>

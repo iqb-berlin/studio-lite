@@ -41,9 +41,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.appService.appConfig.setPageTitle(
-        `Verwaltung "${this.wsgAdminService.selectedWorkspaceGroupName}": Einstellungen`
-      );
+      console.log('yoyo');
     });
   }
 }

@@ -50,8 +50,11 @@
       </mat-menu>
 
       <mat-menu #menuOther="matMenu">
-        <button mat-menu-item (click)="settings()" [disabled]="!workspaceService.isWorkspaceGroupAdmin">
+        <button mat-menu-item (click)="settings()" *ngIf="workspaceService.isWorkspaceGroupAdmin">
           <mat-icon>settings</mat-icon>Einstellungen
+        </button>
+        <button mat-menu-item (click)="userList()">
+          <mat-icon>people_alt</mat-icon>Nutzer:innen
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="exportUnit()"
