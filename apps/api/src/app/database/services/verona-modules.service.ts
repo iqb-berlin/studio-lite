@@ -63,7 +63,8 @@ export class VeronaModulesService {
       if (veronaModuleMetadata) {
         const moduleKey = VeronaModuleMetadataDto.getKey(veronaModuleMetadata);
         const existingModule = await this.veronaModulesRepository.findOne({
-          where: { key: moduleKey }
+          where: { key: moduleKey },
+          select: { key: true }
         });
         if (existingModule) {
           existingModule.metadata = veronaModuleMetadata;
