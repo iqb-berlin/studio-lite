@@ -1,14 +1,9 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiCreatedResponse, ApiMethodNotAllowedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+} from '@nestjs/swagger';
 import {
   CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
@@ -32,9 +27,7 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [UserInListDto]
-  })
+  @ApiOkResponse({ description: 'Admin users retrieved successfully.' })
   @ApiTags('admin users')
   async findAll(): Promise<UserInListDto[]> {
     return this.usersService.findAllUsers();
@@ -54,9 +47,8 @@ export class UsersController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [UserFullDto]
-  })
+  @ApiOkResponse({ description: 'Admin user retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin user not found.' })
   @ApiTags('admin users')
   async findOne(@Param('id') id: number): Promise<UserFullDto> {
     return this.usersService.findOne(id);
@@ -65,9 +57,8 @@ export class UsersController {
   @Get(':id/workspaces')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceInListDto]
-  })
+  @ApiOkResponse({ description: 'Admin user workspaces retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin user not found.' }) // TODO: Exception implementieren?
   @ApiTags('admin users')
   async findOnesWorkspaces(@Param('id') id: number): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAll(id);
@@ -88,6 +79,8 @@ export class UsersController {
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin user workspaces updated successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin user not found.' }) // TODO: Exception implementieren?
   @ApiTags('admin users')
   async patchOnesWorkspaces(@Param('id') id: number,
     @WorkspaceGroupId() workspaceGroupId: number,
@@ -104,14 +97,33 @@ export class UsersController {
     return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, workspaceGroups);
   }
 
+  // TODO: Delete mit id (statt ids) nur für ein Element (für mehrere s.u.)
   @Delete(':ids')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin users')
+  @ApiOkResponse({ description: 'Admin users deleted successfully.' })
   async remove(@Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
     return this.usersService.remove(idsAsNumberArray);
+  }
+
+  // TODO: Delete mit QueryParam für mehrere Elemente im Frontend implementieren
+  @Delete()
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin users')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: false
+  })
+  @ApiOkResponse({ description: 'Admin users deleted successfully.' })
+  @ApiMethodNotAllowedResponse({ description: 'Active admin user must not be deleted.' })
+  async removeIds(ids: number[]): Promise<void> {
+    return this.usersService.removeIds(ids);
   }
 
   @Post()
@@ -126,6 +138,7 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  // TODO: der Pfad sollte die Id beinhalten
   @Patch()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

@@ -7,7 +7,9 @@ import {
   Post,
   UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+} from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto, UserInListDto,
   WorkspaceGroupFullDto,
@@ -33,9 +35,7 @@ export class WorkspaceGroupsController {
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceGroupInListDto]
-  })
+  @ApiOkResponse({ description: 'Admin workspace-groups retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll();
@@ -44,10 +44,9 @@ export class WorkspaceGroupsController {
   @Get(':workspace_group_id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin workspace-group retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace-group not found.' })
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
-  @ApiCreatedResponse({
-    type: WorkspaceGroupFullDto
-  })
   @ApiTags('admin workspaces')
   async findOne(@WorkspaceGroupId() id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
@@ -57,9 +56,7 @@ export class WorkspaceGroupsController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
-  @ApiCreatedResponse({
-    type: [WorkspaceInListDto]
-  })
+  @ApiOkResponse({ description: 'Admin workspaces by workspace-group retrieved successfully.' })
   @ApiTags('wsg-admin workspaces')
   async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAllByGroup(id);
@@ -68,6 +65,8 @@ export class WorkspaceGroupsController {
   @Delete(':ids')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin workspace-group deleted successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace group not found.' }) // TODO: not implemented
   @ApiTags('admin workspaces')
   async remove(@Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = ids.split(';').map(idString => parseInt(idString, 10));
@@ -98,9 +97,7 @@ export class WorkspaceGroupsController {
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [UserInListDto]
-  })
+  @ApiOkResponse({ description: 'List of admins for workspace-group retrieved successfully.' })
   @ApiTags('admin workspaces')
   async findOnesAdmins(@WorkspaceGroupId() id: number): Promise<UserInListDto[]> {
     return this.userService.findAllWorkspaceGroupAdmins(id);

@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
+import { getConnection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
@@ -8,11 +8,14 @@ import {
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
 import WorkspaceUser from '../entities/workspace-user.entity';
+import { AdminUserNotFoundException } from '../../exceptions/admin-user-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -24,7 +27,9 @@ export class UsersService {
     private workspaceRepository: Repository<Workspace>
   ) {}
 
-  async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
+  async findAll(workspaceId?: number): Promise<UserInListDto[]> {
+    // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
+    this.logger.log(`Returning users${workspaceId ? ` for workspaceId: ${workspaceId}` : '.'}`);
     const validUsers: number[] = [];
     if (workspaceId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
@@ -162,22 +167,27 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<UserFullDto> {
+    this.logger.log(`Returning user with id: ${id}`);
     const user = await this.usersRepository.findOne({
       where: { id: id }
     });
-    return <UserFullDto>{
-      id: user.id,
-      name: user.name,
-      isAdmin: user.isAdmin,
-      description: user.description,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      emailPublishApproved: user.emailPublishApproved
-    };
+    if (user) {
+      return <UserFullDto>{
+        id: user.id,
+        name: user.name,
+        isAdmin: user.isAdmin,
+        description: user.description,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        emailPublishApproved: user.emailPublishApproved
+      };
+    }
+    throw new AdminUserNotFoundException(id, 'GET');
   }
 
   async create(user: CreateUserDto): Promise<number> {
+    this.logger.log(`Creating workspace with name: ${user.name}`);
     user.password = UsersService.getPasswordHash(user.password);
     const newUser = await this.usersRepository.create(user);
     await this.usersRepository.save(newUser);
@@ -204,7 +214,9 @@ export class UsersService {
     return false;
   }
 
+  // TODO: Kein Return Value, stattdessen Exception
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
+    this.logger.log(`Setting password for user with id: ${userId}.`);
     const userForName = await this.usersRepository.findOne({
       where: { id: userId },
       select: { name: true }
@@ -249,10 +261,13 @@ export class UsersService {
   }
 
   async remove(id: number | number[]): Promise<void> {
+    this.logger.log(`Deleting user with id: ${id}`);
     await this.usersRepository.delete(id);
   }
 
+  // TODO: id als Parameter
   async patch(userData: UserFullDto): Promise<void> {
+    this.logger.log(`Updating user with id: ${userData.id}`);
     const userToUpdate = await this.usersRepository.findOne({
       where: { id: userData.id },
       select: {
@@ -266,14 +281,18 @@ export class UsersService {
         email: true
       }
     });
-    if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
-    if (userData.name) userToUpdate.name = userData.name;
-    if (userData.description) userToUpdate.description = userData.description;
-    if (userData.lastName) userToUpdate.lastName = userData.lastName;
-    if (userData.firstName) userToUpdate.firstName = userData.firstName;
-    if (userData.email) userToUpdate.email = userData.email;
-    if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
-    await this.usersRepository.save(userToUpdate);
+    if (userToUpdate) {
+      if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
+      if (userData.name) userToUpdate.name = userData.name;
+      if (userData.description) userToUpdate.description = userData.description;
+      if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
+      if (userData.lastName) userToUpdate.lastName = userData.lastName;
+      if (userData.firstName) userToUpdate.firstName = userData.firstName;
+      if (userData.email) userToUpdate.email = userData.email;
+      await this.usersRepository.save(userToUpdate);
+    } else {
+      throw new AdminUserNotFoundException(userData.id, 'PATCH');
+    }
   }
 
   async patchMyData(userData: MyDataDto): Promise<void> {
@@ -299,6 +318,7 @@ export class UsersService {
   }
 
   async setUsersByWorkspace(workspaceId: number, users: number[]) {
+    this.logger.log(`Creating ${users.length} users for workspaceId: ${workspaceId}`);
     return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
       await Promise.all(users.map(async userId => {
         const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
@@ -336,5 +356,14 @@ export class UsersService {
 
   private static getPasswordHash(stringToHash: string): string {
     return bcrypt.hashSync(stringToHash, passwordHash.salt);
+  }
+
+  removeIds(ids: number[]) {
+    // TODO: Sich selbst bzw. alle löschen verhindern?
+    if (ids && ids.length) {
+      ids.forEach(id => this.remove(id));
+    }
+    // TODO: Eigene Exception mit Custom-Parametern
+    throw new MethodNotAllowedException();
   }
 }

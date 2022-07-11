@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -8,10 +8,13 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
 import WorkspaceGroup from '../entities/workspace-group.entity';
+import { AdminWorkspaceGroupNotFoundException } from '../../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 
 @Injectable()
 export class WorkspaceGroupService {
+  private readonly logger = new Logger(WorkspaceGroupService.name);
+
   constructor(
     @InjectRepository(WorkspaceGroup)
     private workspaceGroupsRepository: Repository<WorkspaceGroup>,
@@ -21,6 +24,8 @@ export class WorkspaceGroupService {
   ) {}
 
   async findAll(userId?: number): Promise<WorkspaceGroupInListDto[]> {
+    // TODO: Warum werden nur id und Name zurückgegeben?
+    this.logger.log('Returning all workspace groups.');
     let usersWorkspaceGroupIds: number[] = [];
     if (userId) {
       const usersWorkspaceGroups = await this.workspaceGroupAdminRepository.find({
@@ -48,24 +53,31 @@ export class WorkspaceGroupService {
   }
 
   async findOne(id: number): Promise<WorkspaceGroupFullDto> {
-    const workspace = await this.workspaceGroupsRepository.findOne({
+    this.logger.log(`Returning workspace group with id: ${id}`);
+    const workspaceGroup = await this.workspaceGroupsRepository.findOne({
       where: { id: id },
       select: { id: true, name: true, settings: true }
     });
-    return <WorkspaceGroupFullDto>{
-      id: workspace.id,
-      name: workspace.name,
-      settings: workspace.settings
-    };
+    if (workspaceGroup) {
+      return <WorkspaceGroupFullDto>{
+        id: workspaceGroup.id,
+        name: workspaceGroup.name,
+        settings: workspaceGroup.settings
+      };
+    }
+    throw new AdminWorkspaceGroupNotFoundException(id, 'GET');
   }
 
   async create(workspaceGroup: CreateWorkspaceGroupDto): Promise<number> {
+    this.logger.log(`Creating workspace group with name: ${workspaceGroup.name}`);
     const newWorkspaceGroup = await this.workspaceGroupsRepository.create(workspaceGroup);
     await this.workspaceGroupsRepository.save(newWorkspaceGroup);
     return newWorkspaceGroup.id;
   }
 
+  // TODO: Pfad mit Id (s. patch bei WorkspaceService und UsersService)
   async patch(workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
+    this.logger.log(`Updating workspace group with id: ${workspaceGroupData.id}`);
     if (workspaceGroupData.id) {
       const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
         where: { id: workspaceGroupData.id }
@@ -74,11 +86,13 @@ export class WorkspaceGroupService {
       if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);
     } else {
-      throw new ArgumentOutOfRangeError();
+      throw new ArgumentOutOfRangeError(); // TODO: Warum ist das hier anders als bei den anderen patches ?
     }
   }
 
   async remove(id: number[]): Promise<void> {
+    // TODO: Exception
+    this.logger.log(`Deleting workspace group with id: ${id.join(', ')}`);
     await this.workspaceGroupsRepository.delete(id);
   }
 

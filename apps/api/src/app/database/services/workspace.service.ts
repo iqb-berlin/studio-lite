@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -14,12 +14,15 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
+import { AdminWorkspaceNotFoundException } from '../../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 
 @Injectable()
 export class WorkspaceService {
+  private readonly logger = new Logger(WorkspaceService.name);
+
   constructor(
     @InjectRepository(Workspace)
     private workspacesRepository: Repository<Workspace>,
@@ -36,9 +39,12 @@ export class WorkspaceService {
   }
 
   async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
+    this.logger.log(`Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`);
     const validWorkspaces: number[] = [];
+    // TODO: hier fehlt echte User Abfrage!
     if (userId) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find({ where: { userId: userId } });
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
+        .find({ where: { userId: userId } });
       workspaceUsers.forEach(wsU => validWorkspaces.push(wsU.workspaceId));
     }
     const workspaces: Workspace[] = await this.workspacesRepository.find({ order: { name: 'ASC' } });
@@ -55,6 +61,7 @@ export class WorkspaceService {
     return returnWorkspaces;
   }
 
+  // TODO: setWorkspacesForUser? //was ändert sich hier?
   async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: number[]) {
     return this.workspaceUserService.deleteAllByWorkspaceGroup(workspaceGroupId, userId).then(async () => {
       await Promise.all(workspaces.map(async workspaceId => {
@@ -68,6 +75,7 @@ export class WorkspaceService {
   }
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
+    this.logger.log(`Returning groupwise ordered workspaces${userId ? ` for userId: ${userId}` : '.'}`);
     let workspaceGroupsToAdminList: number[] = [];
     let isSuperAdmin = false;
     if (userId) {
@@ -119,34 +127,46 @@ export class WorkspaceService {
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
+    this.logger.log(`Returning workspace with id: ${id}`);
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    const workspaceGroup = await this.workspaceGroupRepository.findOne({
-      where: { id: workspace.groupId }
-    });
-    return <WorkspaceFullDto>{
-      id: workspace.id,
-      name: workspace.name,
-      groupId: workspace.groupId,
-      groupName: workspaceGroup.name,
-      settings: workspace.settings
-    };
+    if (workspace) {
+      // TODO: ist das richtig, hier eine zweite Anfrage zu starten?
+      const workspaceGroup = await this.workspaceGroupRepository.findOne({
+        where: { id: workspace.groupId }
+      });
+      return <WorkspaceFullDto>{
+        id: workspace.id,
+        name: workspace.name,
+        groupId: workspace.groupId,
+        groupName: workspaceGroup.name,
+        settings: workspace.settings
+      };
+    }
+    throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
 
   async create(workspace: CreateWorkspaceDto): Promise<number> {
+    this.logger.log(`Creating workspace with name: ${workspace.name}`);
     const newWorkspace = await this.workspacesRepository.create(workspace);
     await this.workspacesRepository.save(newWorkspace);
     return newWorkspace.id;
   }
 
+  // TODO: id als Parameter
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
+    this.logger.log(`Updating workspace with id: ${workspaceData.id}`);
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });
-    if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-    if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
-    await this.workspacesRepository.save(workspaceToUpdate);
+    if (workspaceToUpdate) {
+      if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
+      if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
+      await this.workspacesRepository.save(workspaceToUpdate);
+    } else {
+      throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
+    }
   }
 
   async patchName(id: number, newName: string): Promise<void> {
@@ -166,6 +186,8 @@ export class WorkspaceService {
   }
 
   async remove(id: number | number[]): Promise<void> {
+    // TODO: sollte Fehler liefern wenn eine nicht gültige id verwendet wird
+    this.logger.log(`Deleting workspace with id: ${id}`);
     await this.workspacesRepository.delete(id);
   }
 

@@ -1,7 +1,9 @@
 import {
   Body, Controller, Get, Patch, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiOkResponse, ApiTags
+} from '@nestjs/swagger';
 import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 import { SettingService } from '../../database/services/setting.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -14,16 +16,16 @@ export class SettingController {
   ) {}
 
   @Get('config')
-  @ApiCreatedResponse({
-    type: ConfigDto
-  })
+  @ApiOkResponse({ description: 'Config settings retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findConfig(): Promise<ConfigDto> {
     return this.settingService.findConfig();
   }
 
+  // TODO:  Könnte ein PUT sein?
   @Patch('config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Config settings updated successfully.' }) // TODO Exception?
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchConfig(@Body() settingData: ConfigDto) {
@@ -31,16 +33,16 @@ export class SettingController {
   }
 
   @Get('app-logo')
-  @ApiCreatedResponse({
-    type: AppLogoDto
-  })
+  @ApiOkResponse({ description: 'App logo retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findAppLogo(): Promise<AppLogoDto> {
     return this.settingService.findAppLogo();
   }
 
+  // TODO:  Könnte ein PUT sein?
   @Patch('app-logo')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'App logo updated successfully.' }) // TODO Exception?
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchAppLogo(@Body() newLogo: AppLogoDto) {
@@ -48,14 +50,13 @@ export class SettingController {
   }
 
   @Get('unit-export-config')
-  @ApiCreatedResponse({
-    type: UnitExportConfigDto
-  })
+  @ApiOkResponse({ description: 'Unit export config retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findUnitExportConfig(): Promise<UnitExportConfigDto> {
     return this.settingService.findUnitExportConfig();
   }
 
+  // TODO:  Könnte ein PUT sein?
   @Patch('unit-export-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
