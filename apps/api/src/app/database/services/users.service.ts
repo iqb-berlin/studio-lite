@@ -1,5 +1,5 @@
 import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
@@ -27,7 +27,7 @@ export class UsersService {
     private workspaceRepository: Repository<Workspace>
   ) {}
 
-  async findAll(workspaceId?: number): Promise<UserInListDto[]> {
+  async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
     // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
     this.logger.log(`Returning users${workspaceId ? ` for workspaceId: ${workspaceId}` : '.'}`);
     const validUsers: number[] = [];
