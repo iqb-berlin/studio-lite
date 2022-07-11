@@ -1,0 +1,876 @@
+image: node:16.15-bullseye-slim
+
+variables:
+  REGISTRY: $CI_REGISTRY
+  REGISTRY_USER: $CI_REGISTRY_USER
+  REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD
+  REGISTRY_PROJECT: "/${CI_PROJECT_PATH}/"
+  DOCKER_TLS_CERTDIR: ""
+  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+
+stages:
+#  - .pre
+  - build
+  - unit-test
+  - e2e-test
+  - lint
+  - audit
+  - build-images
+  - scan-images
+  - push-images
+
+.default_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && "${CI_COMMIT_BRANCH}" != "main"
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+      when: never
+
+.default_rules_db:
+  rules:
+    - if: $CI_COMMIT_BRANCH && "${CI_COMMIT_BRANCH}" != "main"
+      changes:
+        - database/*
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+      when: never
+
+.default_rules_manual:
+  rules:
+    - if: $CI_COMMIT_BRANCH && "${CI_COMMIT_BRANCH}" != "main"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+      when: never
+
+.default_release_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && "${CI_COMMIT_BRANCH}" == "main"
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+
+.default_release_rules_manual:
+  rules:
+    - if: $CI_COMMIT_BRANCH && "${CI_COMMIT_BRANCH}" == "main"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+      when: manual
+
+#check-config:
+#  stage: .pre
+#  interruptible: true
+#  allow_failure: true
+#  script:
+#    - echo $CI_PIPELINE_SOURCE
+#    - echo $CI_COMMIT_BRANCH
+#    - echo $CI_COMMIT_TAG
+#    - echo $CI_COMMIT_SHA
+#    - echo $CI_COMMIT_SHORT_SHA
+#    - echo $CI_COMMIT_REF_NAME
+#    - if [ "$CI_PIPELINE_SOURCE" == "external_pull_request_event" ]; then echo "pull request"; else echo "no pull request"; fi
+#    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" == "main" ]; then echo "commit at main branch"; else echo "commit not at main branch"; fi
+#    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" != "main" ]; then echo "commit not at main branch"; else echo "commit at main branch"; fi
+#    - if [ -n "$CI_COMMIT_TAG" ]; then echo "tag created"; else echo "no tag created"; fi
+#    - if [[ ! -n "$CI_COMMIT_TAG" || ( -n "$CI_COMMIT_BRANCH" && "$CI_COMMIT_BRANCH" != "main" ) ]]; then echo "no main, no tag"; else echo "normal push"; fi
+#    - if [ -n "$CI_COMMIT_TAG" ]; then export TAG="$CI_COMMIT_TAG"; else export TAG="latest"; fi
+#    - echo $TAG
+
+
+############################################
+## NON MAIN COMMITS
+############################################
+
+install-dependencies:
+  stage: build
+  interruptible: true
+  rules:
+    - !reference [.default_rules, rules]
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules
+      - .npm/
+      - cache/Cypress
+  script:
+    - npm ci --cache .npm --prefer-offline --no-fund
+  artifacts:
+    paths:
+      - node_modules
+      - cache/Cypress
+
+.distributed:
+  interruptible: true
+  rules:
+    - !reference [.default_rules, rules]
+  needs:
+    - install-dependencies
+  artifacts:
+    paths:
+      - node_modules/.cache/nx
+      - cache/Cypress
+
+build-app:
+  stage: build
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=build --parallel=3
+  artifacts:
+    paths:
+      - dist
+
+test-app:
+  stage: unit-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=test --parallel=2
+
+test-app-e2e:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-chrome:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-chrome-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-firefox:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-firefox-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-edge:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+    - pkill npx
+
+test-app-e2e-ui-edge-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules_manual, rules ]
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    DB_USER: ${POSTGRES_DB_USER}
+    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  services:
+    - postgres:14.4-bullseye
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - pkill npx
+
+lint-app:
+  stage: lint
+  extends: .distributed
+  allow_failure: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=lint --parallel=2
+
+audit-app:
+  stage: audit
+  allow_failure: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  script:
+    - npm audit --audit-level critical
+
+build-docker-db:
+  stage: build-images
+  rules:
+    - !reference [ .default_rules_db, rules ]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Dockerfile --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
+    - docker push -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+  after_script:
+    - docker logout $REGISTRY
+
+scan-docker-db:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_rules_db, rules]
+  needs:
+    - build-docker-db
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  script:
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+build-docker-app:
+  stage: build-images
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+  needs:
+    - install-dependencies
+    - build-app
+    - test-app
+#    - test-app-e2e
+#    - test-app-e2e-ui-chrome
+#    - test-app-e2e-ui-chrome-mobile
+#    - test-app-e2e-ui-firefox
+#    - test-app-e2e-ui-firefox-mobile
+#    - test-app-e2e-ui-edge
+#    - test-app-e2e-ui-edge-mobile
+    - audit-app
+    - lint-app
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+    - echo "$REGISTRY_PASSWORD"
+    - echo $REGISTRY_USER
+    - echo $REGISTRY
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
+  after_script:
+    - docker logout $REGISTRY
+
+scan-docker-app:
+  stage: scan-images
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_rules, rules ]
+  needs:
+    - install-dependencies
+    - build-docker-app
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
+
+
+############################################
+## MAIN COMMITS, TAGS, AND MERGE REQUESTS
+############################################
+
+build-backend-test-image:
+  stage: build
+  rules:
+    - !reference [.default_release_rules, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/api/Dockerfile --build-arg project=api --target=dev -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-frontend-test-image:
+  stage: build
+  rules:
+    - !reference [.default_release_rules, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/frontend/Dockerfile --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333 --target=dev -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-frontend-e2e-test-image:
+  stage: build
+  rules:
+    - !reference [.default_release_rules, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/frontend-e2e/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA} -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest .
+    - docker push -a ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-db-release-image:
+  stage: build
+  rules:
+    - !reference [.default_release_rules, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f database/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-backend-release-image:
+  stage: build
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-backend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-frontend-release-image:
+  stage: build
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-frontend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+test-backend:
+  stage: unit-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-backend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test test api
+
+test-frontend:
+  stage: unit-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-frontend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test test frontend
+
+test-release-e2e:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  needs:
+    - build-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-api
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-api test-e2e-api
+
+test-release-e2e-ui-chrome:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-chrome
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
+
+test-release-e2e-ui-chrome-mobile:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-chrome-mobile
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+
+test-release-e2e-ui-firefox:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+#    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-firefox
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
+
+test-release-e2e-ui-firefox-mobile:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-firefox-mobile
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+
+test-release-e2e-ui-edge:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-edge
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
+
+test-release-e2e-ui-edge-mobile:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules_manual, rules]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+  script:
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-edge-mobile
+    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+
+lint-backend:
+  stage: lint
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-backend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test lint api
+
+lint-frontend:
+  stage: lint
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-frontend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test lint frontend
+
+lint-frontend-e2e:
+  stage: lint
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-frontend-e2e-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA} lint frontend-e2e
+
+audit-backend:
+  stage: audit
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-backend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test audit --audit-level critical
+
+audit-frontend:
+  stage: audit
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-frontend-test-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test audit --audit-level critical
+
+scan-release-db:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-db-release-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+scan-release-backend:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-backend-release-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+
+scan-release-frontend:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-frontend-release-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+
+push-docker-release:
+  stage: push-images
+  rules:
+    - !reference [.default_release_rules, rules]
+  needs:
+    - build-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - test-backend
+    - test-frontend
+    #- test-release-e2e
+    #- test-release-e2e-ui-chrome
+    #- test-release-e2e-ui-chrome-mobile
+    #- test-release-e2e-ui-firefox
+    #- test-release-e2e-ui-firefox-mobile
+    #- test-release-e2e-ui-edge
+    #- test-release-e2e-ui-edge-mobile
+    - lint-backend
+    - lint-frontend
+    - lint-frontend-e2e
+    - audit-backend
+    - audit-frontend
+    - scan-release-db
+    - scan-release-backend
+    - scan-release-frontend
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - if [ -n "$CI_COMMIT_TAG" ]; then export TAG="$CI_COMMIT_TAG"; else export TAG="latest"; fi
+    - echo $TAG
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  script:
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${TAG}
+    - docker push ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${TAG}
+    - docker push ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${TAG}
+    - docker push ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${TAG}
+  after_script:
+    - docker logout $REGISTRY
