@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import User from './entities/user.entity';
 import { UsersService } from './services/users.service';
 import VeronaModule from './entities/verona-module.entity';
@@ -30,20 +32,40 @@ import { WorkspaceGroupAdminService } from './services/workspace-group-admin.ser
     UnitDefinition,
     Setting,
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        username: 'superdb',
-        password: 'jfsdssfdfmsdp9fsumdpfu3094umt394u3',
-        database: 'studio-lite',
-        entities: [User, Workspace, WorkspaceGroup, WorkspaceUser,
-          UnitDefinition, VeronaModule, Setting, Unit, WorkspaceGroupAdmin],
+        host: configService.get('POSTGRES_HOST'),
+        port: +configService.get<number>('POSTGRES_PORT'),
+        username: configService.get('POSTGRES_USER'),
+        password: configService.get('POSTGRES_PASSWORD'),
+        database: configService.get('POSTGRES_DB'),
+        entities: [
+          User,
+          Workspace,
+          WorkspaceGroup,
+          WorkspaceUser,
+          UnitDefinition,
+          VeronaModule,
+          Setting,
+          Unit,
+          WorkspaceGroupAdmin
+        ],
         synchronize: false
-      })
+      }),
+      inject: [ConfigService]
     }),
-    TypeOrmModule.forFeature([User, Workspace, WorkspaceGroup, WorkspaceUser,
-      UnitDefinition, VeronaModule, Setting, Unit, WorkspaceGroupAdmin])
+    TypeOrmModule.forFeature([
+      User,
+      Workspace,
+      WorkspaceGroup,
+      WorkspaceUser,
+      UnitDefinition,
+      VeronaModule,
+      Setting,
+      Unit,
+      WorkspaceGroupAdmin
+    ])
   ],
   providers: [
     UsersService,

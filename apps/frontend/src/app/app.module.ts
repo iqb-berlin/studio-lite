@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule, ApplicationModule } from '@angular/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -23,6 +23,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { AppComponent } from './app.component';
@@ -33,11 +34,14 @@ import { AboutComponent } from './home/about.component';
 import { HomeComponent } from './home/home.component';
 import { ChangePasswordComponent } from './home/change-password.component';
 import { AuthInterceptor } from './auth.interceptor';
-import { AppTranslateLoader } from './app-translate-loader';
 import { RequestMessageDialogComponent } from './components/request-message-dialog.component';
 import { InputTextComponent } from './components/input-text.component';
 import { EditMyDataComponent } from './home/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings.component';
+
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 @NgModule({
   declarations: [
@@ -79,7 +83,8 @@ import { EditWorkspaceSettingsComponent } from './components/edit-workspace-sett
       defaultLanguage: 'de',
       loader: {
         provide: TranslateLoader,
-        useClass: AppTranslateLoader
+        useFactory: (createTranslateLoader),
+        deps: [HttpClient]
       }
     }),
     MatCheckboxModule,

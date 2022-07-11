@@ -1,15 +1,18 @@
-import { Logger } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
 import { json } from 'express';
+
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const host = configService.get('API_HOST') || 'localhost';
+  const port = configService.get('API_PORT') || 3333;
   const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
-  app.use(json({ limit: '50mb' }));
-  const port = process.env.PORT || 3333;
   const config = new DocumentBuilder()
     .setTitle('IQB Studio Lite')
     .setDescription('The IQB Studio Lite API description and try-out')
@@ -18,10 +21,14 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.use(json({ limit: '50mb' }));
+  app.setGlobalPrefix(globalPrefix);
   app.enableCors();
-  await app.listen(port);
+
+  await app.listen(port, host);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: http://${host}:${port}/${globalPrefix}`
   );
 }
 
