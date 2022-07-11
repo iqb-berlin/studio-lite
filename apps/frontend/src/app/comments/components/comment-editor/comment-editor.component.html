@@ -1,0 +1,19 @@
+<form [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      (reset)="onReset()">
+  <div class="textarea-container">
+    <textarea class="textarea"
+              formControlName="comment">
+    </textarea>
+    <button mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid">
+      {{ submitLabel | translate}}
+    </button>
+    <button mat-flat-button
+            type="reset">
+      {{ 'comment-editor.cancel' | translate}}
+    </button>
+  </div>
+</form>

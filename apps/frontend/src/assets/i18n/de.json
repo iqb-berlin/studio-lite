@@ -47,5 +47,25 @@
       "schemer": "Kodierung",
       "comments": "Kommentare"
     }
+  },
+  "comment-editor": {
+    "write": "Verfassen",
+    "edit": "Bearbeiten",
+    "reply": "Antworten",
+    "cancel": "Abbrechen"
+  },
+  "comment": {
+    "edit": "Bearbeiten",
+    "reply": "Antworten",
+    "delete": "Löschen"
+  },
+  "comments": {
+    "comment-delete-title": "Kommentar löschen",
+    "comment-delete-question": "Soll der Kommentar gelöscht werden?",
+    "write-comment": "Neuen Kommentar verfassen:"
+  },
+  "delete-dialog": {
+    "cancel": "Abbrechen",
+    "delete": "Löschen"
   }
 }

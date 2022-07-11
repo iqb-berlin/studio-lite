@@ -42,6 +42,7 @@ import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-list.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
+import { CommentsModule } from '../comments/comments.module';
 
 @NgModule({
   imports: [
@@ -72,7 +73,8 @@ import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.compon
     MatTabsModule,
     IqbComponentsModule,
     MatProgressBarModule,
-    TranslateModule
+    TranslateModule,
+    CommentsModule
   ],
   declarations: [
     WorkspaceComponent,

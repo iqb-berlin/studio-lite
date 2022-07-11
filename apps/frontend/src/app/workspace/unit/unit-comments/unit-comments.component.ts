@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { AppService } from '../../../app.service';
 
 @Component({
-  selector: 'studio-lite-unit-comments',
+  selector: 'studio-lite-unit-comments_ALK',
   templateUrl: './unit-comments.component.html',
   styleUrls: ['./unit-comments.component.scss']
 })
-export class UnitCommentsComponent implements OnInit {
-  constructor() {}
-
-  ngOnInit(): void {}
+export class UnitCommentsComponent {
+  constructor(public appService: AppService) {}
 }
