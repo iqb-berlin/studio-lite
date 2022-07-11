@@ -41,16 +41,25 @@ export class VeronaModuleKeyCollection {
     return this.moduleKeys.length > 0;
   }
 
+  static getSortKey(key: string): string {
+    const regexPattern1 = /^([A-Za-z\d_-]+)@(\d+)\.(\d+)/;
+    const regexPatternSuffix = /(\d+)-([a-z]+)(\d+)$/;
+    const matches1 = regexPattern1.exec(key);
+    if (matches1 && matches1.length === 4) {
+      const sortString = `${matches1[1]}@${matches1[2].padStart(20, '0')}.${matches1[3].padStart(20, '0')}`;
+      const matchesSuffix = regexPatternSuffix.exec(key);
+      if (matchesSuffix && matchesSuffix.length === 4) {
+        return `${sortString}.${matchesSuffix[1].padStart(20, '0')}-${matchesSuffix[2]}${matchesSuffix[3].padStart(20, '0')}`;
+      }
+      return sortString;
+    }
+    return key;
+  }
+
   getSorted(): string[] {
-    const regexPattern = /^([A-Za-z\d_-]+)@(\d+)\.(\d+)/;
     const newList: { [key: string]: string } = {};
     this.moduleKeys.forEach(key => {
-      const matches1 = regexPattern.exec(key);
-      if (matches1 && matches1.length === 4) {
-        const major = matches1[2].padStart(20, '0');
-        const minor = matches1[3].padStart(20, '0');
-        newList[`${matches1[2]}@${major}.${minor}`] = key;
-      }
+      newList[VeronaModuleKeyCollection.getSortKey(key)] = key;
     });
     const newKeys = Object.keys(newList).sort();
     return newKeys.map(key => newList[key]);

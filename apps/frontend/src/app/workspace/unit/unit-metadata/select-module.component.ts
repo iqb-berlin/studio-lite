@@ -13,6 +13,7 @@ export class SelectModuleComponent implements OnDestroy {
   @Input() moduleList = new VeronaModuleCollection([]);
   selectedModuleId!: string;
   @Input() moduleType = '?';
+  @Input() stableOnly = false;
   @Output() selectionChanged = new EventEmitter();
   hasListEntries = false;
   moduleForm: UntypedFormGroup;

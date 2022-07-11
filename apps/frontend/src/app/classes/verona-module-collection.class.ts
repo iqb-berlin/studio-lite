@@ -19,7 +19,7 @@ export class VeronaModuleCollection extends VeronaModuleKeyCollection {
     return '?';
   }
 
-  getEntries(): VeronaModuleInListDto[] {
-    return this.getSorted().map(key => this.moduleData[key]);
+  getEntries(stableOnly: boolean): VeronaModuleInListDto[] {
+    return this.getSorted().map(key => this.moduleData[key]).filter(module => !stableOnly || module.metadata.isStable);
   }
 }

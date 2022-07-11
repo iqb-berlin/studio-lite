@@ -8,6 +8,9 @@ export class VeronaModuleInListDto {
   key!: string;
 
   @ApiProperty()
+  sortKey!: string;
+
+  @ApiProperty()
   metadata!: VeronaModuleMetadataDto;
 
   @ApiProperty()
