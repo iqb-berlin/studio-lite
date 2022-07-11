@@ -1,22 +1,35 @@
-import { Injectable } from '@nestjs/common';
-import { getConnection, Repository } from 'typeorm';
+import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
+import {
+  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
+} from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
 import WorkspaceUser from '../entities/workspace-user.entity';
+import { AdminUserNotFoundException } from '../../exceptions/admin-user-not-found.exception';
+import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
+import Workspace from '../entities/workspace.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(WorkspaceUser)
-    private workspaceUsersRepository: Repository<WorkspaceUser>
+    private workspaceUsersRepository: Repository<WorkspaceUser>,
+    @InjectRepository(WorkspaceGroupAdmin)
+    private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>
   ) {}
 
-  async findAll(workspaceId?: number): Promise<UserInListDto[]> {
+  async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
+    // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
+    this.logger.log(`Returning users${workspaceId ? ` for workspaceId: ${workspaceId}` : '.'}`);
     const validUsers: number[] = [];
     if (workspaceId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
@@ -27,11 +40,126 @@ export class UsersService {
     const returnUsers: UserInListDto[] = [];
     users.forEach(user => {
       if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
+        const displayName = user.lastName ? user.lastName : user.name;
         returnUsers.push(<UserInListDto>{
           id: user.id,
           name: user.name,
           isAdmin: user.isAdmin,
-          description: user.description
+          description: user.description,
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
+          email: `${user.email}${user.emailPublishApproved ? '' : ' (verborgen)'}`
+        });
+      }
+    });
+    return returnUsers;
+  }
+
+  async findAllWorkspaceGroupAdmins(workspaceGroupId: number): Promise<UserInListDto[]> {
+    const workspaceGroupAdmins = await this.workspaceGroupAdminRepository.find({
+      where: { workspaceGroupId: workspaceGroupId },
+      select: { userId: true }
+    });
+    const workspaceGroupAdminsIds = workspaceGroupAdmins.map(wsgA => wsgA.userId);
+    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
+    const returnUsers: UserInListDto[] = [];
+    users.forEach(user => {
+      if (workspaceGroupAdminsIds.indexOf(user.id) > -1) {
+        const displayName = user.lastName ? user.lastName : user.name;
+        returnUsers.push(<UserInListDto>{
+          id: user.id,
+          name: user.name,
+          isAdmin: user.isAdmin,
+          description: user.description,
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
+          email: user.emailPublishApproved ? user.email : ''
+        });
+      }
+    });
+    return returnUsers;
+  }
+
+  async findAllWorkspaceUsers(workspaceId: number): Promise<UsersInWorkspaceDto> {
+    const returnUsers: UsersInWorkspaceDto = {
+      users: [],
+      workspaceGroupAdmins: [],
+      admins: []
+    };
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+      select: { groupId: true }
+    });
+    const workspaceGroupAdmins: number[] = [];
+    await this.workspaceGroupAdminRepository.find({
+      where: { workspaceGroupId: workspace.groupId },
+      select: { userId: true }
+    }).then(adminsData => {
+      adminsData.forEach(adminData => {
+        workspaceGroupAdmins.push(adminData.userId);
+      });
+    });
+    const users: number[] = [];
+    await this.workspaceUsersRepository.find({
+      where: { workspaceId: workspaceId },
+      select: { userId: true }
+    }).then(usersData => {
+      usersData.forEach(userData => {
+        users.push(userData.userId);
+      });
+    });
+    await this.usersRepository.find({
+      select: {
+        id: true,
+        email: true,
+        emailPublishApproved: true,
+        firstName: true,
+        lastName: true,
+        name: true,
+        isAdmin: true,
+        description: true
+      }
+    }).then(allUsers => {
+      allUsers.forEach(user => {
+        const displayName = user.lastName ? user.lastName : user.name;
+        const newUser: UserInListDto = {
+          id: user.id,
+          name: user.name,
+          isAdmin: user.isAdmin,
+          description: user.description,
+          displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
+          email: user.emailPublishApproved ? user.email : ''
+        };
+        if (user.isAdmin) {
+          returnUsers.admins.push(newUser);
+        } else if (workspaceGroupAdmins.indexOf(user.id) >= 0) {
+          returnUsers.workspaceGroupAdmins.push(newUser);
+        } else if (users.indexOf(user.id) >= 0) {
+          returnUsers.users.push(newUser);
+        }
+      });
+    });
+    return returnUsers;
+  }
+
+  async findAllFull(workspaceId?: number): Promise<UserFullDto[]> {
+    const validUsers: number[] = [];
+    if (workspaceId) {
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
+        .find({ where: { workspaceId: workspaceId } });
+      workspaceUsers.forEach(wsU => validUsers.push(wsU.userId));
+    }
+    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
+    const returnUsers: UserFullDto[] = [];
+    users.forEach(user => {
+      if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
+        returnUsers.push(<UserFullDto>{
+          id: user.id,
+          name: user.name,
+          isAdmin: user.isAdmin,
+          description: user.description,
+          lastName: user.lastName,
+          firstName: user.firstName,
+          email: user.email,
+          emailPublishApproved: user.emailPublishApproved
         });
       }
     });
@@ -39,18 +167,27 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<UserFullDto> {
+    this.logger.log(`Returning user with id: ${id}`);
     const user = await this.usersRepository.findOne({
-      where: {id: id}
+      where: { id: id }
     });
-    return <UserFullDto>{
-      id: user.id,
-      name: user.name,
-      isAdmin: user.isAdmin,
-      description: user.description
-    };
+    if (user) {
+      return <UserFullDto>{
+        id: user.id,
+        name: user.name,
+        isAdmin: user.isAdmin,
+        description: user.description,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        emailPublishApproved: user.emailPublishApproved
+      };
+    }
+    throw new AdminUserNotFoundException(id, 'GET');
   }
 
   async create(user: CreateUserDto): Promise<number> {
+    this.logger.log(`Creating workspace with name: ${user.name}`);
     user.password = UsersService.getPasswordHash(user.password);
     const newUser = await this.usersRepository.create(user);
     await this.usersRepository.save(newUser);
@@ -59,8 +196,8 @@ export class UsersService {
 
   async getUserByNameAndPassword(name: string, password: string): Promise<number | null> {
     const user = await this.usersRepository.findOne({
-      where: {name: name},
-      select: {id: true, password: true}
+      where: { name: name },
+      select: { id: true, password: true }
     });
     if (user && bcrypt.compareSync(password, user.password)) {
       return user.id;
@@ -68,28 +205,27 @@ export class UsersService {
     return null;
   }
 
-  async getUserIsAdmin(userId: number): Promise<boolean | null> {
-    const user = await this.usersRepository
-      .createQueryBuilder('user')
-      .where('user.id = :id',
-        { id: userId })
-      .getOne();
-    if (user) {
-      return user.isAdmin;
-    }
-    return null;
+  async getUserIsAdmin(userId: number): Promise<boolean> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: { isAdmin: true }
+    });
+    if (user) return user.isAdmin;
+    return false;
   }
 
+  // TODO: Kein Return Value, stattdessen Exception
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
+    this.logger.log(`Setting password for user with id: ${userId}.`);
     const userForName = await this.usersRepository.findOne({
-      where: {id: userId},
-      select: {name: true}
+      where: { id: userId },
+      select: { name: true }
     });
     if (userForName) {
       const userForId = await this.getUserByNameAndPassword(userForName.name, oldPassword);
       if (userForId) {
         const userToUpdate = await this.usersRepository.findOne({
-          where: {id: userForId}
+          where: { id: userForId }
         });
         userToUpdate.password = UsersService.getPasswordHash(newPassword);
         await this.usersRepository.save(userToUpdate);
@@ -100,45 +236,134 @@ export class UsersService {
   }
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
-    const wsUser = await this.workspaceUsersRepository.createQueryBuilder('ws_user')
-      .where('ws_user.user_id = :user_id and ws_user.workspace_id = :ws_id',
-        { user_id: userId, ws_id: workspaceId })
-      .getOne();
-    return !!wsUser;
+    const wsUser = await this.workspaceUsersRepository.findOne({
+      where: { userId: userId, workspaceId: workspaceId }
+    });
+    if (wsUser) return true;
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+      select: { groupId: true }
+    });
+    return this.isWorkspaceGroupAdmin(userId, workspace.groupId);
+  }
+
+  async isWorkspaceGroupAdmin(userId: number, workspaceGroupId?: number): Promise<boolean> {
+    if (workspaceGroupId) {
+      const wsgAdmin = await this.workspaceGroupAdminRepository.findOne({
+        where: { workspaceGroupId: workspaceGroupId, userId: userId }
+      });
+      return !!wsgAdmin;
+    }
+    const wsgAdmin = await this.workspaceGroupAdminRepository.findOne({
+      where: { userId: userId }
+    });
+    return !!wsgAdmin;
   }
 
   async remove(id: number | number[]): Promise<void> {
+    this.logger.log(`Deleting user with id: ${id}`);
     await this.usersRepository.delete(id);
   }
 
+  // TODO: id als Parameter
   async patch(userData: UserFullDto): Promise<void> {
+    this.logger.log(`Updating user with id: ${userData.id}`);
     const userToUpdate = await this.usersRepository.findOne({
-      where: {id: userData.id},
-      select: {name: true, isAdmin: true, description: true, password: true, id: true}
+      where: { id: userData.id },
+      select: {
+        name: true,
+        isAdmin: true,
+        description: true,
+        password: true,
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
     });
-    if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
-    if (userData.name) userToUpdate.name = userData.name;
+    if (userToUpdate) {
+      if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
+      if (userData.name) userToUpdate.name = userData.name;
+      if (userData.description) userToUpdate.description = userData.description;
+      if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
+      if (userData.lastName) userToUpdate.lastName = userData.lastName;
+      if (userData.firstName) userToUpdate.firstName = userData.firstName;
+      if (userData.email) userToUpdate.email = userData.email;
+      await this.usersRepository.save(userToUpdate);
+    } else {
+      throw new AdminUserNotFoundException(userData.id, 'PATCH');
+    }
+  }
+
+  async patchMyData(userData: MyDataDto): Promise<void> {
+    const userToUpdate = await this.usersRepository.findOne({
+      where: { id: userData.id },
+      select: {
+        description: true,
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        emailPublishApproved: true
+      }
+    });
     if (userData.description) userToUpdate.description = userData.description;
-    if (userData.password) userToUpdate.password = UsersService.getPasswordHash(userData.password);
+    if (userData.lastName) userToUpdate.lastName = userData.lastName;
+    if (userData.firstName) userToUpdate.firstName = userData.firstName;
+    if (userData.email) userToUpdate.email = userData.email;
+    if (typeof userData.emailPublishApproved === 'boolean') {
+      userToUpdate.emailPublishApproved = userData.emailPublishApproved;
+    }
     await this.usersRepository.save(userToUpdate);
   }
 
   async setUsersByWorkspace(workspaceId: number, users: number[]) {
-    await getConnection().createQueryBuilder()
-      .delete()
-      .from(WorkspaceUser)
-      .where('workspace_id = :id', { id: workspaceId })
-      .execute();
-    await users.forEach(async userId => {
-      const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
-        userId: userId,
-        workspaceId: workspaceId
-      });
-      await this.workspaceUsersRepository.save(newWorkspaceUser);
+    this.logger.log(`Creating ${users.length} users for workspaceId: ${workspaceId}`);
+    return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
+      await Promise.all(users.map(async userId => {
+        const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+          userId: userId,
+          workspaceId: workspaceId
+        });
+        await this.workspaceUsersRepository.save(newWorkspaceUser);
+      }));
+    });
+  }
+
+  async setWorkspaceGroupAdmins(workspaceGroupId: number, users: number[]) {
+    return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
+      await Promise.all(users.map(async userId => {
+        const newWorkspaceGroupAdmin = await this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
+          userId: userId,
+          workspaceGroupId: workspaceGroupId
+        });
+        await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
+      }));
+    });
+  }
+
+  async setWorkspaceGroupAdminsByWorkspaceGroup(workspaceGroupId: number, users: number[]) {
+    return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
+      await Promise.all(users.map(async userId => {
+        const newWorkspaceGroupAdmin = await this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
+          userId: userId,
+          workspaceGroupId: workspaceGroupId
+        });
+        await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
+      }));
     });
   }
 
   private static getPasswordHash(stringToHash: string): string {
     return bcrypt.hashSync(stringToHash, passwordHash.salt);
+  }
+
+  removeIds(ids: number[]) {
+    // TODO: Sich selbst bzw. alle löschen verhindern?
+    if (ids && ids.length) {
+      ids.forEach(id => this.remove(id));
+    }
+    // TODO: Eigene Exception mit Custom-Parametern
+    throw new MethodNotAllowedException();
   }
 }

@@ -53,7 +53,7 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesMetadata(
-      @Param('id', ParseIntPipe) unitId: number
+    @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitMetadataDto> {
     return this.unitService.findOnesMetadata(unitId);
   }
@@ -81,7 +81,7 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesScheme(
-      @Param('id', ParseIntPipe) unitId: number
+    @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitSchemeDto> {
     return this.unitService.findOnesScheme(unitId);
   }
@@ -102,7 +102,7 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchWorkspace(@Param('ids') ids: string,
-                       @Param('target', ParseIntPipe) targetWorkspaceId: number) {
+    @Param('target', ParseIntPipe) targetWorkspaceId: number) {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
     return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId);
@@ -114,7 +114,7 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async copy(@Param('ids') ids: string,
-             @Param('target', ParseIntPipe) targetWorkspaceId: number) {
+    @Param('target', ParseIntPipe) targetWorkspaceId: number) {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
     return this.unitService.copy(idsAsNumberArray, targetWorkspaceId);

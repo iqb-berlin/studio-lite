@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
+import { TranslateService } from '@ngx-translate/core';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
-import {TranslateService} from "@ngx-translate/core";
+import { VeronaModuleCollection } from './classes/verona-module-collection.class';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,15 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.appService.dataLoading = true;
+      this.backendService.getModuleList('editor').subscribe(moduleList => {
+        this.appService.editorList = new VeronaModuleCollection(moduleList);
+      });
+      this.backendService.getModuleList('player').subscribe(moduleList => {
+        this.appService.playerList = new VeronaModuleCollection(moduleList);
+      });
+      this.backendService.getModuleList('schemer').subscribe(moduleList => {
+        this.appService.schemerList = new VeronaModuleCollection(moduleList);
+      });
       this.backendService.getConfig().subscribe(newConfig => {
         if (newConfig) {
           this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
@@ -61,8 +71,8 @@ export class AppComponent implements OnInit {
     if (typeof this.appService.dataLoading === 'number') {
       const progressValue = this.appService.dataLoading as number;
       if (progressValue <= 100) return `${progressValue} %`;
-      if (progressValue < 8000) return `${(progressValue/1024).toFixed(1)} kB`;
-      return `${(progressValue/1048576).toFixed(1)} MB`
+      if (progressValue < 8000) return `${(progressValue / 1024).toFixed(1)} kB`;
+      return `${(progressValue / 1048576).toFixed(1)} MB`;
     }
     return this.translateService.instant('application.wait-message');
   }

@@ -4,12 +4,11 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
   ConfigDto, AppLogoDto,
-  CreateUserDto, CreateWorkspaceDto, CreateWorkspaceGroupDto,
+  CreateUserDto, CreateWorkspaceGroupDto,
   UserFullDto,
   UserInListDto,
-  WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceGroupInListDto,
-  WorkspaceInListDto,
-  WorkspaceGroupDto, VeronaModuleInListDto, UnitExportConfigDto
+  WorkspaceGroupFullDto, WorkspaceGroupInListDto,
+  UnitExportConfigDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -24,6 +23,14 @@ export class BackendService {
   getUsers(): Observable<UserInListDto[]> {
     return this.http
       .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  getUsersFull(): Observable<UserFullDto[]> {
+    return this.http
+      .get<UserFullDto[]>(`${this.serverUrl}admin/users/full`)
       .pipe(
         catchError(() => of([]))
       );
@@ -56,81 +63,37 @@ export class BackendService {
       );
   }
 
-  getWorkspacesByUser(userId: number): Observable<WorkspaceInListDto[]> {
+  getWorkspaceGroupsByAdmin(userId: number): Observable<WorkspaceGroupInListDto[]> {
     return this.http
-      .get<WorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
+      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspace-groups`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
-  setWorkspacesByUser(userId: number, accessTo: number[]): Observable<boolean> {
+  setWorkspaceGroupsByAdmin(userId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspaces`, accessTo)
+      .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
       );
   }
 
-  getWorkspacesGroupwise(): Observable<WorkspaceGroupDto[]> {
+  getWorkspaceGroupAdmins(workspaceGroupId: number): Observable<UserInListDto[]> {
     return this.http
-      .get<WorkspaceGroupDto[]>(`${this.serverUrl}admin/workspaces/groupwise`)
+      .get<UserInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
-  addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
+  setWorkspaceGroupAdmins(workspaceGroupId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
+      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
-      );
-  }
-
-  changeWorkspace(workspaceData: WorkspaceFullDto): Observable<boolean> {
-    return this.http
-      .patch<boolean>(`${this.serverUrl}admin/workspaces`, workspaceData)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
-  deleteWorkspaces(workspaces: number[]): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}`)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
-  // *******************************************************************
-  getUsersByWorkspace(workspaceId: number): Observable<UserInListDto[]> {
-    return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
-      .pipe(
-        catchError(() => of([]))
-      );
-  }
-
-  setUsersByWorkspace(workspaceId: number, accessTo: number[]): Observable<boolean> {
-    return this.http
-      .patch(`${this.serverUrl}admin/workspaces/${workspaceId}/users`, accessTo)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
-  getVeronaModuleList(type: string): Observable<VeronaModuleInListDto[]> {
-    return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
-      .pipe(
-        catchError(() => [])
       );
   }
 
@@ -151,33 +114,29 @@ export class BackendService {
       );
   }
 
-  addWorkspaceGroup(name: string): Observable<boolean> {
+  addWorkspaceGroup(workspaceGroupData: CreateWorkspaceGroupDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspace-groups`, <CreateWorkspaceGroupDto>{
-        name: name,
-        settings: {}
-      })
+      .post<boolean>(`${this.serverUrl}admin/workspace-groups`, workspaceGroupData)
       .pipe(
         catchError(() => of(false))
       );
   }
 
-  deleteWorkspaceGroup(id: number): Observable<boolean> {
+  deleteWorkspaceGroups(ids: number[]): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/workspace-groups/${id}`)
+      .delete(`${this.serverUrl}admin/workspace-groups/${ids.join(';')}`)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
       );
   }
 
-  renameWorkspaceGroup(id: number, newName: string): Observable<boolean> {
+  changeWorkspaceGroup(workspaceGroupData: WorkspaceGroupFullDto): Observable<boolean> {
     return this.http
-      .patch<boolean>(`${this.serverUrl}admin/workspace-groups`, <WorkspaceGroupFullDto>{
-        id: id, name: newName
-      })
+      .patch<boolean>(`${this.serverUrl}admin/workspace-groups`, workspaceGroupData)
       .pipe(
-        catchError(() => of(false))
+        catchError(() => of(false)),
+        map(() => true)
       );
   }
 
@@ -201,7 +160,7 @@ export class BackendService {
 
   getUnitExportConfig(): Observable<UnitExportConfigDto> {
     return this.http
-      .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`)
+      .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`);
   }
 
   setUnitExportConfig(unitExportConfig: UnitExportConfigDto): Observable<boolean> {

@@ -3,7 +3,9 @@ import {
   Controller, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
+} from '@studio-lite-lib/api-dto';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../database/services/workspace.service';
@@ -13,7 +15,9 @@ import { WorkspaceId } from './workspace.decorator';
 import { UnitDownloadClass } from './unit-download.class';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
-import {SettingService} from "../database/services/setting.service";
+import { SettingService } from '../database/services/setting.service';
+import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
+import { UsersService } from '../database/services/users.service';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -21,7 +25,8 @@ export class WorkspaceController {
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
     private veronaModuleService: VeronaModulesService,
-    private settingService: SettingService
+    private settingService: SettingService,
+    private usersService: UsersService
   ) {}
 
   @Get()
@@ -34,6 +39,18 @@ export class WorkspaceController {
   @ApiTags('workspace')
   async find(@WorkspaceId() workspaceId: number): Promise<WorkspaceFullDto> {
     return this.workspaceService.findOne(workspaceId);
+  }
+
+  @Get('users')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: WorkspaceFullDto
+  })
+  @ApiTags('workspace')
+  async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
+    return this.usersService.findAllWorkspaceUsers(workspaceId);
   }
 
   @Post('upload')
@@ -58,8 +75,7 @@ export class WorkspaceController {
   @Header('Content-Type', 'application/zip')
   @ApiTags('workspace')
   async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-                         @Param('settings') unitDownloadSettingsString: string
-  ): Promise<StreamableFile> {
+    @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
     const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
     const file = await UnitDownloadClass.get(
       this.workspaceService,
@@ -73,12 +89,21 @@ export class WorkspaceController {
   }
 
   @Patch('settings')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
-                      @Body() workspaceSetting: WorkspaceSettingsDto) {
+    @Body() workspaceSetting: WorkspaceSettingsDto) {
     return this.workspaceService.patchSettings(workspaceId, workspaceSetting);
+  }
+
+  @Patch('rename/:name')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async patchName(@WorkspaceId() workspaceId: number, @Param('name') newName: string) {
+    return this.workspaceService.patchName(workspaceId, newName);
   }
 }

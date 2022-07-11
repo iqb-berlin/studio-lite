@@ -1,3 +1,6 @@
+export { UsersInWorkspaceDto } from './lib/dto/user/users-in-workspace-dto';
+export { WorkspaceGroupSettingsDto } from './lib/dto/workspace-group/workspace-group-settings-dto';
+export { MyDataDto } from './lib/dto/user/my-data-dto';
 export { UnitExportConfigDto } from './lib/dto/setting/unit-export-config-dto';
 export { UnitDownloadSettingsDto } from './lib/dto/unit/unit-download-settings-dto';
 export { RequestReportDto } from './lib/dto/request-report-dto';

@@ -4,29 +4,27 @@ import {
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
-import {UnitInListDto, WorkspaceSettingsDto} from '@studio-lite-lib/api-dto';
+import { UnitInListDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import {
   UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
 } from './workspace.classes';
 import { AppService } from '../app.service';
-import { VeronaModuleCollection } from './verona-module-collection.class';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
-  selectedWorkspace = 0;
+  selectedWorkspaceId = 0;
+  selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
   workspaceSettings: WorkspaceSettingsDto;
-  editorList = new VeronaModuleCollection([]);
-  playerList = new VeronaModuleCollection([]);
-  schemerList = new VeronaModuleCollection([]);
   moduleHtmlStore: { [key: string]: string } = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;
   unitSchemeStore: UnitSchemeStore | undefined;
   unitList = new UnitCollection([]);
+  isWorkspaceGroupAdmin = false;
 
   constructor(
     private backendService: BackendService,
@@ -35,8 +33,10 @@ export class WorkspaceService {
     this.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
-      unitGroups: []
-    }
+      defaultSchemer: '',
+      unitGroups: [],
+      stableModulesOnly: true
+    };
   }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
@@ -86,7 +86,7 @@ export class WorkspaceService {
     this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitMetadata(
-        this.selectedWorkspace, this.unitMetadataStore.getChangedData()
+        this.selectedWorkspaceId, this.unitMetadataStore.getChangedData()
       ));
       if (saveOk) {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupChanged();
@@ -95,18 +95,18 @@ export class WorkspaceService {
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
-        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
+        this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
       ));
       if (saveOk) this.unitDefinitionStore.applyChanges();
     }
     if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitScheme(
-        this.selectedWorkspace, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
+        this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
       ));
       if (saveOk) this.unitSchemeStore.applyChanges();
     }
     if (reloadUnitList) {
-      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspace)
+      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId)
         .pipe(
           map(uResponse => {
             this.unitList = new UnitCollection(uResponse);

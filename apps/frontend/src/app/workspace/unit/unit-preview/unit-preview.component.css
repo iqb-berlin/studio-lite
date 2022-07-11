@@ -1,7 +1,14 @@
+:host.unit-preview {
+  height: 100%;
+}
+
+.paging-mode-selection-container{
+  color: white;
+}
+
 .preview-body {
   width: 100%;
   padding: 0;
-  height: calc(100% - 49px);
 }
 
 .pageNav {
@@ -9,7 +16,6 @@
 }
 
 #pageFooter {
-  position: absolute;
   width: 100%;
   bottom: 0;
   background-color: slategray;

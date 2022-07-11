@@ -103,7 +103,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           this.sendUnitDataToEditor();
         } else {
           const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
             selectedUnitId).subscribe(unitData => {
             this.workspaceService.unitMetadataStore = new UnitMetadataStore(
               unitData || <UnitMetadataDto>{ id: selectedUnitId }
@@ -119,13 +119,13 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
-      const editorId = unitMetadata.editor ? this.workspaceService.editorList.getBestMatch(unitMetadata.editor) : '';
+      const editorId = unitMetadata.editor ? this.appService.editorList.getBestMatch(unitMetadata.editor) : '';
       if (editorId) {
         if ((editorId === this.lastEditorId) && this.postMessageTarget) {
           if (this.workspaceService.unitDefinitionStore) {
             this.postUnitDef(this.workspaceService.unitDefinitionStore);
           } else {
-            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspace, unitId).subscribe(
+            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId).subscribe(
               ued => {
                 if (ued) {
                   this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);

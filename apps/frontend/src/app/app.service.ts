@@ -3,10 +3,12 @@ import { Injectable } from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
 import { AppConfig } from './app.classes';
+import { VeronaModuleCollection } from './classes/verona-module-collection.class';
 
 export const standardLogo: AppLogoDto = {
   data: 'assets/IQB-LogoA.png',
   alt: 'Zur Startseite',
+  // eslint-disable-next-line max-len
   bodyBackground: 'linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%, rgba(1,201,241,1) 92%, rgba(237,178,255,1) 100%)',
   boxBackground: 'lightgray'
 };
@@ -37,6 +39,9 @@ export class AppService {
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();
   dataLoading: boolean | number = false;
+  editorList = new VeronaModuleCollection([]);
+  playerList = new VeronaModuleCollection([]);
+  schemerList = new VeronaModuleCollection([]);
 
   constructor(
     private titleService: Title
@@ -50,5 +55,15 @@ export class AppService {
     if ((typeof msgType !== 'undefined') && (msgType !== null)) {
       this.postMessage$.next(postData);
     }
+  }
+
+  isWorkspaceGroupAdmin(workspaceId: number): boolean {
+    let myReturn = false;
+    this.authData.workspaces.forEach(wsGroup => {
+      wsGroup.workspaces.forEach(ws => {
+        if (ws.id === workspaceId) myReturn = wsGroup.isAdmin;
+      });
+    });
+    return myReturn;
   }
 }

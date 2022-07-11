@@ -4,13 +4,15 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
+import { BackendService as AppBackendService } from '../../../backend.service';
 import { SelectModuleComponent } from './select-module.component';
 import { UnitMetadataStore } from '../../workspace.classes';
-import { MatDialog } from '@angular/material/dialog';
-import { InputTextComponent, InputTextData } from '../../../components/input-text.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { InputTextComponent } from '../../../components/input-text.component';
+import { AppService } from '../../../app.service';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -33,7 +35,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   constructor(
     private fb: UntypedFormBuilder,
     private backendService: BackendService,
+    private appBackendService: AppBackendService,
     public workspaceService: WorkspaceService,
+    public appService: AppService,
     private inputTextDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
@@ -63,7 +67,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       this.setupForm();
     } else {
       const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-      this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+      this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
         selectedUnitId).subscribe(unitData => {
         this.workspaceService.unitMetadataStore = new UnitMetadataStore(
           unitData || <UnitMetadataDto>{ id: selectedUnitId }
@@ -125,7 +129,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   newGroup() {
     const dialogRef = this.inputTextDialog.open(InputTextComponent, {
       width: '500px',
-      data: <InputTextData>{
+      data: {
         title: 'Neue Gruppe',
         default: '',
         okButtonLabel: 'Speichern',
@@ -135,11 +139,13 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result === 'string') {
-        if (!this.workspaceService.workspaceSettings.unitGroups) this.workspaceService.workspaceSettings.unitGroups = [];
+        if (!this.workspaceService.workspaceSettings.unitGroups) {
+          this.workspaceService.workspaceSettings.unitGroups = [];
+        }
         if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
           this.workspaceService.workspaceSettings.unitGroups.push(result);
-          this.backendService.setWorkspaceSettings(
-            this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+          this.appBackendService.setWorkspaceSettings(
+            this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
           ).subscribe(isOK => {
             if (!isOK) {
               this.snackBar.open('Neue Gruppe konnte nicht gespeichert werden.', '', { duration: 3000 });
@@ -151,6 +157,6 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           });
         }
       }
-    })
+    });
   }
 }

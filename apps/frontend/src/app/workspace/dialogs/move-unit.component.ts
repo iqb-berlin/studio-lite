@@ -1,9 +1,11 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+  Component, Inject, OnInit, ViewChild
+} from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { AppService } from '../../app.service';
 import { WorkspaceDataFlat } from '../../app.classes';
-import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
+import { SelectUnitListComponent } from './components/select-unit-list.component';
 
 export interface MoveUnitData {
   title: string,
@@ -29,7 +31,8 @@ export interface MoveUnitData {
       </mat-dialog-content>
 
       <mat-dialog-actions>
-        <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="true" [disabled]="unitSelectionTable.selectionCount === 0 || selectForm.invalid">
+        <button mat-raised-button color="primary" type="submit"
+                [mat-dialog-close]="true" [disabled]="unitSelectionTable.selectionCount === 0 || selectForm.invalid">
           {{data.buttonLabel}}</button>
         <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
       </mat-dialog-actions>
@@ -41,11 +44,12 @@ export class MoveUnitComponent implements OnInit {
   workspaceList: WorkspaceDataFlat[] = [];
   selectForm: UntypedFormGroup;
   get selectedUnits(): number[] {
-    return this.unitSelectionTable ? this.unitSelectionTable.selectedUnitIds : []
+    return this.unitSelectionTable ? this.unitSelectionTable.selectedUnitIds : [];
   }
+
   get targetWorkspace(): number {
     const selectorControl = this.selectForm.get('wsSelector');
-    return selectorControl ? selectorControl.value : 0
+    return selectorControl ? selectorControl.value : 0;
   }
 
   constructor(

@@ -20,10 +20,26 @@
     <div fxFlex="0 0 500px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
       <h1 fxLayout="row" fxLayoutAlign="space-between center">
         {{'home.select-workspace' | translate}}
-        <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
-                [matTooltip]="'home.goto-admin' | translate">
-          <mat-icon>settings</mat-icon>
-        </button>
+        <div>
+          <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
+                  [matTooltip]="'home.goto-admin' | translate">
+            <mat-icon>settings</mat-icon>
+          </button>
+          <button mat-button [matMenuTriggerFor]="menuUser" matTooltip="Meine Daten/Anmelden" matTooltipPosition="above" fxFlex>
+            <mat-icon>account_box</mat-icon>
+          </button>
+        </div>
+        <mat-menu #menuUser="matMenu">
+          <button mat-menu-item (click)="changeUserData()">
+            <mat-icon>edit</mat-icon>Name/E-Mail ändern
+          </button>
+          <button mat-menu-item (click)="changePassword()">
+            <mat-icon>lock</mat-icon>Kennwort ändern
+          </button>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>Abmelden
+          </button>
+        </mat-menu>
       </h1>
       <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
       <div fxFlex *ngIf="appService.authData.workspaces.length === 0">
@@ -31,22 +47,22 @@
       </div>
       <div fxFlex *ngIf="appService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
         <div *ngFor="let wsg of appService.authData.workspaces" fxLayout="column">
-          <h2 [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</h2>
-          <div fxLayout="column" fxLayoutAlign="start start">
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="workspace-group-header"
+               *ngIf="wsg.workspaces.length > 0 || wsg.isAdmin">
+            <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
+            <button mat-button [routerLink]="['/wsg-admin/' + wsg.id]"
+                    *ngIf="wsg.isAdmin"
+                    [matTooltip]="'home.goto-wsg-admin' | translate">
+              <mat-icon>settings</mat-icon>
+            </button>
+          </div>
+          <div fxLayout="column" fxLayoutAlign="start start" *ngIf="wsg.workspaces.length > 0">
             <button mat-button (click)="buttonGotoWorkspace(ws)"
                     *ngFor="let ws of wsg.workspaces">
               {{ws.name}}
             </button>
           </div>
         </div>
-      </div>
-      <div fxLayout="row" fxLayoutAlign="space-between center">
-        <button mat-raised-button color="primary" (click)="changePassword()" matTooltip="Kennwort ändern">
-          <mat-icon>account_box</mat-icon>Kennwort ändern
-        </button>
-        <button mat-raised-button color="primary" (click)="logout()" matTooltip="Abmelden/Neu anmelden">
-          <mat-icon>logout</mat-icon>Abmelden
-        </button>
       </div>
     </div>
 
