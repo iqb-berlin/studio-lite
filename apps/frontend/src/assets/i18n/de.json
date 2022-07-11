@@ -30,6 +30,14 @@
       }
     }
   },
+  "unit-preview": {
+    "paging-selection-mode": {
+      "label": "Seitendarstellung",
+      "separate": "Blättern",
+      "concat-scroll": "Scrollen",
+      "concat-scroll-snap": "Magnetisch Scrollen"
+    }
+  },
   "home": {
     "home-page": "Startseite",
     "select-workspace": "Arbeitsbereich wählen",

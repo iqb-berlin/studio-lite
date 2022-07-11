@@ -42,6 +42,9 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
 import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
 import { UserListComponent } from './dialogs/components/user-list.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
+import {
+  PagingModeSelectionComponent
+} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 
 @NgModule({
   imports: [
@@ -88,7 +91,8 @@ import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.compon
     UnitSchemerComponent,
     SelectUnitListComponent,
     UserListComponent,
-    WorkspaceUserListComponent
+    WorkspaceUserListComponent,
+    PagingModeSelectionComponent
   ],
   exports: [
     WorkspaceComponent
@@ -97,4 +101,4 @@ import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.compon
     UnitRoutingCanDeactivateGuard
   ]
 })
-export class WorkspaceModule { }
+export class WorkspaceModule {}

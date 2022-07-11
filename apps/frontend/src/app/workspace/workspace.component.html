@@ -77,7 +77,7 @@
     <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
            multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
   </div>
-  <div fxFlex class="unitdatacontainer">
+  <div fxFlex class="unitdatacontainer" fxLayout="column">
     <nav mat-tab-nav-bar>
       <a mat-tab-link
          *ngFor="let link of navLinks"
@@ -88,6 +88,8 @@
         {{link.label}}
       </a>
     </nav>
-    <router-outlet></router-outlet>
+    <div fxFlex>
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>
