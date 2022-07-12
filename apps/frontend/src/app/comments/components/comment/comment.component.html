@@ -7,8 +7,8 @@
   </mat-card-header>
 
   <mat-card-content>
-    <div *ngIf="!(activeComment | isEditing: comment)">
-      {{ comment.body }}
+    <div *ngIf="!(activeComment | isEditing: comment)"
+         [innerHTML]="comment.body| safeResourceHTML">
     </div>
 
     <studio-lite-comment-editor

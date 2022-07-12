@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
 import { CommentsService } from '../../services/comments.service';
 import { ActiveCommentInterface } from '../../types/active-comment.interface';
 import { Comment } from '../../types/comment';
@@ -17,6 +18,7 @@ export class CommentsComponent implements OnInit {
 
   comments: Comment[] = [];
   activeComment: ActiveCommentInterface | null = null;
+  latestCommentId: Subject<number> = new Subject();
 
   constructor(
     private translateService: TranslateService,
@@ -90,9 +92,13 @@ export class CommentsComponent implements OnInit {
       });
   }
 
-  private updateComments() {
+  private updateComments(): void {
     this.commentsService.getComments().subscribe(comments => {
-      this.comments = comments;
+      this.comments = comments.sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      const latestComment = this.comments[this.comments.length - 1];
+      this.latestCommentId.next(latestComment.id);
     });
   }
 }

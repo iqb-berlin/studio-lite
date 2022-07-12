@@ -1,19 +1,26 @@
-<div>{{'comments.write-comment' | translate}}</div>
-<studio-lite-comment-editor
-  submitLabel="comment-editor.write"
-  (handleSubmit)="addComment({ text: $event, parentId: null })">
-</studio-lite-comment-editor>
+<div fxLayout="column" fxFlex="100%">
+  <div fxFlex class="comments">
+    <studio-lite-comment
+      *ngFor="let rootComment of comments | rootComments"
+      [comment]="rootComment"
+      [currentUserId]="currentUserId"
+      [replies]="comments | replies: rootComment.id"
+      [activeComment]="activeComment"
+      studioLiteScrollIntoView [id]="rootComment.id"  [scrollTargetId]="latestCommentId"
+      (setActiveComment)="setActiveComment($event)"
+      (addComment)="addComment($event)"
+      (deleteComment)="deleteComment($event)"
+      (updateComment)="updateComment($event)">
+    </studio-lite-comment>
+  </div>
 
-<studio-lite-comment
-  *ngFor="let rootComment of comments | rootComments"
-  [comment]="rootComment"
-  [currentUserId]="currentUserId"
-  [replies]="comments | replies: rootComment.id"
-  [activeComment]="activeComment"
-  (setActiveComment)="setActiveComment($event)"
-  (addComment)="addComment($event)"
-  (deleteComment)="deleteComment($event)"
-  (updateComment)="updateComment($event)">
-</studio-lite-comment>
+  <div>
+    <div class="editor-label">{{'comments.write-comment' | translate}}</div>
+      <studio-lite-comment-editor
+        submitLabel="comment-editor.write"
+        (handleSubmit)="addComment({ text: $event, parentId: null })">
+      </studio-lite-comment-editor>
+  </div>
+</div>
 
 

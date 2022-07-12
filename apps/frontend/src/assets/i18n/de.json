@@ -52,7 +52,15 @@
     "write": "Verfassen",
     "edit": "Bearbeiten",
     "reply": "Antworten",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstrichen",
+    "subscript": "Tiefgestellt",
+    "superscript": "Hochgestellt",
+    "strike": "Durchgestrichen",
+    "text-color": "Textfarbe",
+    "text-background": "Texthintergrund"
   },
   "comment": {
     "edit": "Bearbeiten",

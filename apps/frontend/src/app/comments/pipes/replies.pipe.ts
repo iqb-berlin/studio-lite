@@ -9,9 +9,6 @@ export class RepliesPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(comments: Comment[], commentId: number): Comment[] {
     return comments
-      .filter(comment => comment.parentId === commentId)
-      .sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
+      .filter(comment => comment.parentId === commentId);
   }
 }
