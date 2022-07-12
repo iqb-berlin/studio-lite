@@ -1,30 +1,38 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, Repository } from 'typeorm';
 import { VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import VeronaModule from '../entities/verona-module.entity';
+import { AdminVeronaModulesNotFoundException } from '../../exceptions/admin-verona-modules-not-found.exception';
 
 @Injectable()
 export class VeronaModulesService {
+  private readonly logger = new Logger(VeronaModulesService.name);
+
   constructor(
     @InjectRepository(VeronaModule)
     private veronaModulesRepository: Repository<VeronaModule>
   ) {}
 
   async findFileById(key: string): Promise<VeronaModuleFileDto> {
+    this.logger.log(`Returning verona module with key: ${key}`);
     const file = await this.veronaModulesRepository.findOne({
       where: { key: key },
       select: ['file', 'key', 'metadata']
     });
-    return <VeronaModuleFileDto>{
-      key: file.key,
-      name: file.metadata.name,
-      file: file.file.toString()
-    };
+    if (file) {
+      return <VeronaModuleFileDto>{
+        key: file.key,
+        name: file.metadata.name,
+        file: file.file.toString()
+      };
+    }
+    throw new AdminVeronaModulesNotFoundException(key, 'GET');
   }
 
   async findAll(type?: string): Promise<VeronaModuleInListDto[]> {
+    this.logger.log('Returning verona modules.');
     const veronaModules = await this.veronaModulesRepository.query(
       'SELECT key, metadata, file_size, file_datetime from verona_module'
     );
@@ -43,6 +51,7 @@ export class VeronaModulesService {
   }
 
   async upload(fileData: Buffer) {
+    this.logger.log('Uploading verona module.');
     const fileAsString = fileData.toString('utf8');
     const htmlDocument = cheerio.load(fileAsString);
     const firstScriptElement = htmlDocument('script[type="application/ld+json"]').first();
@@ -84,6 +93,7 @@ export class VeronaModulesService {
   }
 
   async remove(key: string | string[]): Promise<void> {
+    this.logger.log(`Deleting verona module with key: ${key}`);
     await this.veronaModulesRepository.delete(key);
   }
 }

@@ -38,7 +38,7 @@ import { Component } from '@angular/core';
 export class AdminComponent {
   navLinks = [
     { path: 'users', label: 'Nutzer:innen' },
-    { path: 'workspaces', label: 'Arbeitsbereiche' },
+    { path: 'workspaces', label: 'Bereichsgruppen' },
     { path: 'v-modules', label: 'Module' },
     { path: 'settings', label: 'Einstellungen' }
   ];

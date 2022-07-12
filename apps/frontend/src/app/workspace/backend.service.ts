@@ -8,10 +8,8 @@ import {
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
-  UnitSchemeDto,
-  VeronaModuleFileDto,
-  VeronaModuleInListDto,
-  WorkspaceFullDto, WorkspaceSettingsDto
+  UnitSchemeDto, UsersInWorkspaceDto,
+  VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -31,30 +29,19 @@ export class BackendService {
       );
   }
 
+  getUsersList(workspaceId: number): Observable <UsersInWorkspaceDto | boolean> {
+    return this.http
+      .get<UsersInWorkspaceDto>(`${this.serverUrl}workspace/${workspaceId}/users`)
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
   getUnitListWithMetadata(workspaceId: number): Observable <UnitMetadataDto[]> {
     return this.http
       .get<UnitMetadataDto[]>(`${this.serverUrl}workspace/${workspaceId}/units/metadata`)
       .pipe(
         catchError(() => [])
-      );
-  }
-
-  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
-    return this.http
-      .get<WorkspaceFullDto>(
-      `${this.serverUrl}workspace/${workspaceId}`
-    )
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
-
-  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
-    return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
       );
   }
 
@@ -78,10 +65,12 @@ export class BackendService {
 
   moveOrCopyUnits(workspaceId: number, units: number[],
                   targetWorkspace: number, moveOnly: boolean): Observable<boolean | RequestReportDto> {
+    const newUnitMode = moveOnly ? 'moveto' : 'copyto';
     return this.http
       .patch<RequestReportDto>(
-        `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${moveOnly ? 'moveto' : 'copyto'}/${targetWorkspace}`, {}
-      )
+      `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${newUnitMode}/${targetWorkspace}`,
+      {}
+    )
       .pipe(
         catchError(() => of(false))
       );
@@ -197,14 +186,6 @@ export class BackendService {
       .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
       .pipe(
         catchError(() => of(null))
-      );
-  }
-
-  getModuleList(type: string): Observable<VeronaModuleInListDto[]> {
-    return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
-      .pipe(
-        catchError(() => of([]))
       );
   }
 }

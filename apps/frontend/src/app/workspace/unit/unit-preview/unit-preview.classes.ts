@@ -1,3 +1,5 @@
+export type PagingMode = 'separate' | 'concat-scroll' | 'concat-scroll-snap';
+
 export interface KeyValuePairString {
   [K: string]: string;
 }

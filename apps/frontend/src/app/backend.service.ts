@@ -1,10 +1,16 @@
-// eslint-disable-next-line max-classes-per-file
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
-  AuthDataDto, ChangePasswordDto, ConfigDto, AppLogoDto
+  AuthDataDto,
+  ChangePasswordDto,
+  ConfigDto,
+  AppLogoDto,
+  MyDataDto,
+  VeronaModuleInListDto,
+  WorkspaceFullDto,
+  WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -46,6 +52,18 @@ export class BackendService {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
   }
 
+  getMyData(): Observable<MyDataDto> {
+    return this.http.get<MyDataDto>(`${this.serverUrl}my-data`);
+  }
+
+  setMyData(newMyData: MyDataDto): Observable<boolean> {
+    return this.http
+      .patch<boolean>(`${this.serverUrl}my-data`, newMyData)
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
   logout(): void {
     localStorage.removeItem('id_token');
     this.appService.authData = AppService.defaultAuthData;
@@ -74,6 +92,33 @@ export class BackendService {
         <ChangePasswordDto>{ oldPassword: oldPassword, newPassword: newPassword }
     )
       .pipe(
+        catchError(() => of(false))
+      );
+  }
+
+  getModuleList(type: string): Observable<VeronaModuleInListDto[]> {
+    return this.http
+      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
+    return this.http
+      .get<WorkspaceFullDto>(
+      `${this.serverUrl}workspace/${workspaceId}`
+    )
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
+      .pipe(
+        map(() => true),
         catchError(() => of(false))
       );
   }

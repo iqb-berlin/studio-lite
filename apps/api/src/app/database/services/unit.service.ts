@@ -59,7 +59,7 @@ export class UnitService {
     } else {
       if (unit.player) newUnit.player = unit.player;
       if (unit.editor) newUnit.editor = unit.editor;
-      if (unit.schemer) newUnit.editor = unit.schemer;
+      if (unit.schemer) newUnit.schemer = unit.schemer;
       await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
@@ -105,15 +105,17 @@ export class UnitService {
         where: { workspaceId: newWorkspace, key: unitToUpdate.key },
         select: ['id']
       });
-      if (existingUnit) return <RequestReportDto>{
-        source: 'unit-patch-workspace',
-        messages: [
-          {
-            objectKey: unitToUpdate.key,
-            messageKey: 'unit-patch.duplicate-unit-id'
-          }
-        ]
-      };
+      if (existingUnit) {
+        return <RequestReportDto>{
+          source: 'unit-patch-workspace',
+          messages: [
+            {
+              objectKey: unitToUpdate.key,
+              messageKey: 'unit-patch.duplicate-unit-id'
+            }
+          ]
+        };
+      }
       unitToUpdate.workspaceId = newWorkspace;
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
@@ -126,7 +128,7 @@ export class UnitService {
       messages: []
     };
     reports.forEach(r => {
-      if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages]
+      if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages];
     });
     return report;
   }
@@ -134,7 +136,7 @@ export class UnitService {
   async copy(unitIds: number[], newWorkspace: number): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unitToCopy = await this.unitsRepository.findOne({
-        where: {id: unitId},
+        where: { id: unitId },
         select: ['id', 'key', 'name', 'groupName']
       });
       const newUnitId = await this.create(newWorkspace, {
@@ -156,7 +158,7 @@ export class UnitService {
       messages: []
     };
     reports.forEach(r => {
-      if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages]
+      if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages];
     });
     return report;
   }
@@ -175,7 +177,7 @@ export class UnitService {
     };
     if (unit.definitionId) {
       const unitDefinition = await this.unitDefinitionsRepository.findOne({
-        where: {id: unit.definitionId}
+        where: { id: unit.definitionId }
       });
       if (unitDefinition) returnUnit.definition = unitDefinition.data;
     }
@@ -201,7 +203,7 @@ export class UnitService {
     let newUnitDefinitionId = -1;
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
-        where: {id: unitToUpdate.definitionId}
+        where: { id: unitToUpdate.definitionId }
       });
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);

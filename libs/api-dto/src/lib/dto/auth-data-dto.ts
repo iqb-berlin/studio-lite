@@ -23,6 +23,9 @@ export class WorkspaceGroupDto {
   name!: string;
 
   @ApiProperty()
+  isAdmin!: boolean;
+
+  @ApiProperty()
   workspaces!: WorkspaceDto[];
 }
 

@@ -1,8 +1,9 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
-import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
+import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { AppService } from '../../app.service';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -19,23 +20,30 @@ export class ExportUnitComponent implements OnInit {
     addTestTakersReview: 0,
     addTestTakersMonitor: 0,
     addTestTakersHot: 0,
-    passwordLess: false
+    passwordLess: false,
+    bookletSettings: [
+      { key: 'pagingMode', value: 'separate' },
+      { key: 'unit_navibuttons', value: 'FULL' }
+    ]
   };
 
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
 
   constructor(
-    public ds: WorkspaceService,
+    public workspaceService: WorkspaceService,
+    public appService: AppService,
     private backendService: BackendService
   ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.backendService.getUnitListWithMetadata(this.ds.selectedWorkspace).subscribe(unitsWithMetadata => {
+      this.backendService.getUnitListWithMetadata(
+        this.workspaceService.selectedWorkspaceId
+      ).subscribe(unitsWithMetadata => {
         unitsWithMetadata.forEach(umd => {
           if (umd.player) {
-            const validPlayerId = this.ds.playerList.isValid(umd.player);
+            const validPlayerId = this.appService.playerList.isValid(umd.player);
             if (validPlayerId === false) this.unitsWithOutPlayer.push(umd.id);
           } else {
             this.unitsWithOutPlayer.push(umd.id);

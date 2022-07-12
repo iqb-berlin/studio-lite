@@ -6,6 +6,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=chrome"
     volumes:
@@ -20,6 +22,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=chrome"
       - "--spec=\"./apps/frontend-e2e/src/integration/api/*\""
@@ -35,6 +39,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=chrome"
       - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
@@ -50,6 +56,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=chrome"
       - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
@@ -66,6 +74,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=firefox"
       - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
@@ -81,6 +91,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=firefox"
       - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
@@ -97,6 +109,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=edge"
       - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
@@ -112,6 +126,8 @@ services:
       dockerfile: apps/frontend-e2e/Dockerfile
     image: iqbberlin/studio-lite-frontend-e2e:latest
     command:
+      - "e2e"
+      - "frontend-e2e"
       - "--baseUrl=http://${WEB_HOST}:${WEB_PORT}"
       - "--browser=edge"
       - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""

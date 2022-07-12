@@ -6,8 +6,11 @@ import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import {VeronaModuleInListDto, VeronaModuleMetadataDto} from '@studio-lite-lib/api-dto';
+import { VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
+import { BackendService as AppBackendService } from '../../backend.service';
+import { VeronaModuleCollection } from '../../classes/verona-module-collection.class';
+import { AppService } from '../../app.service';
 
 @Component({
   selector: 'app-verona-modules-table',
@@ -26,7 +29,9 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
 
   constructor(
     @Inject('SERVER_URL') public serverUrl: string,
-    private bs: BackendService
+    private backendService: BackendService,
+    private appBackendService: AppBackendService,
+    private appService: AppService
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
@@ -44,15 +49,22 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
   }
 
   updateList() {
-    this.bs.getVeronaModuleList(this.type).subscribe(
+    this.appBackendService.getModuleList(this.type).subscribe(
       (fileData: VeronaModuleInListDto[]) => {
         if (fileData) {
+          const moduleCollection = new VeronaModuleCollection(fileData);
+          if (this.type === 'editor') {
+            this.appService.editorList = moduleCollection;
+          } else if (this.type === 'player') {
+            this.appService.playerList = moduleCollection;
+          } else {
+            this.appService.schemerList = moduleCollection;
+          }
           this.objectsDatasource = new MatTableDataSource(fileData);
-          this.objectsDatasource.sortingDataAccessor = (item, property) =>
-            (property.includes('.')) ?
-              property.split('.')
-                .reduce((metaData: unknown ,i: string)=> (metaData as VeronaModuleMetadataDto)[i] , item) :
-              (item)[property];
+          this.objectsDatasource.sortingDataAccessor = (item, property) => ((property.includes('.')) ?
+            property.split('.')
+              .reduce((metaData: unknown, i: string) => (metaData as VeronaModuleMetadataDto)[i], item) :
+            (item)[property]);
           this.objectsDatasource.sort = this.sort;
         } else {
           this.objectsDatasource = new MatTableDataSource();

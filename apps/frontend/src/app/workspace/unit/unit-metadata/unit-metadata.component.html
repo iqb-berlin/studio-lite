@@ -37,17 +37,17 @@
     <div fxLayout="column" fxFlex="1 0 300px">
       <div fxLayout="row" fxLayoutAlign="space-between start">
         <div fxFlex="40%">{{'modules.editor-name' | translate}}</div>
-        <app-select-module #editor [moduleList]="this.workspaceService.editorList"
+        <app-select-module #editor [moduleList]="this.appService.editorList"
                            fxFlex="55%" moduleType="editor"></app-select-module>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between start">
         <div fxFlex="40%">{{'modules.player-name' | translate}}</div>
-        <app-select-module #player [moduleList]="this.workspaceService.playerList"
+        <app-select-module #player [moduleList]="this.appService.playerList"
                            fxFlex="55%" moduleType="player"></app-select-module>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between start">
         <div fxFlex="40%">{{'modules.schemer-name' | translate}}</div>
-        <app-select-module #schemer [moduleList]="this.workspaceService.schemerList"
+        <app-select-module #schemer [moduleList]="this.appService.schemerList"
                            fxFlex="55%" moduleType="schemer"></app-select-module>
       </div>
     </div>

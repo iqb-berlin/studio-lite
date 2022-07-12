@@ -3,7 +3,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  Component, Inject, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
   Subscription, map, lastValueFrom
@@ -23,17 +23,18 @@ import * as _moment from 'moment';
 import { saveAs } from 'file-saver';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
+import { BackendService as AppBackendService } from '../backend.service';
 import { WorkspaceService } from './workspace.service';
 
 import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
 import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
-import { BackendService as SuperAdminBackendService } from '../admin/backend.service';
 import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
-import { VeronaModuleCollection } from './verona-module-collection.class';
+import { VeronaModuleCollection } from '../classes/verona-module-collection.class';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
-import { EditSettingsComponent } from './dialogs/edit-settings.component';
+import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
+import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -49,15 +50,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
 
   constructor(
-    @Inject('SERVER_URL') private serverUrl: string,
-    private appService: AppService,
+    public appService: AppService,
     public workspaceService: WorkspaceService,
     private backendService: BackendService,
-    private bsSuper: SuperAdminBackendService,
+    private appBackendService: AppBackendService,
     private newUnitDialog: MatDialog,
     private selectUnitDialog: MatDialog,
     private messsageDialog: MatDialog,
     private editSettingsDialog: MatDialog,
+    private showUsersDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private uploadReportDialog: MatDialog,
     private snackBar: MatSnackBar,
@@ -69,14 +70,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
-      unitGroups: []
+      defaultSchemer: '',
+      unitGroups: [],
+      stableModulesOnly: true
     };
   }
 
   ngOnInit(): void {
     setTimeout(() => {
       this.workspaceService.unitList = new UnitCollection([]);
-      this.workspaceService.selectedWorkspace = Number(this.route.snapshot.params['ws']);
+      this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params['ws']);
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
         const unitParam = params['u'];
@@ -87,13 +90,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.backendService.getWorkspaceData(this.workspaceService.selectedWorkspace).subscribe(
+      this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspaceId).subscribe(
         wResponse => {
           if (wResponse) {
-            this.appService.appConfig.setPageTitle(`${wResponse.groupName}: ${wResponse.name}`);
+            this.workspaceService.selectedWorkspaceName = `${wResponse.groupName}: ${wResponse.name}`;
+            this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
             if (wResponse.settings) {
               this.workspaceService.workspaceSettings = wResponse.settings;
             }
+            this.workspaceService.isWorkspaceGroupAdmin =
+              this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
             this.updateUnitList();
           } else {
             this.snackBar.open(
@@ -102,37 +108,37 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         }
       );
-      this.backendService.getModuleList('editor').subscribe(moduleList => {
-        this.workspaceService.editorList = new VeronaModuleCollection(moduleList);
+      this.appBackendService.getModuleList('editor').subscribe(moduleList => {
+        this.appService.editorList = new VeronaModuleCollection(moduleList);
       });
-      this.backendService.getModuleList('player').subscribe(moduleList => {
-        this.workspaceService.playerList = new VeronaModuleCollection(moduleList);
+      this.appBackendService.getModuleList('player').subscribe(moduleList => {
+        this.appService.playerList = new VeronaModuleCollection(moduleList);
       });
-      this.backendService.getModuleList('schemer').subscribe(moduleList => {
-        this.workspaceService.schemerList = new VeronaModuleCollection(moduleList);
+      this.appBackendService.getModuleList('schemer').subscribe(moduleList => {
+        this.appService.schemerList = new VeronaModuleCollection(moduleList);
       });
     });
   }
 
   updateUnitList(unitToSelect?: number): void {
-    this.backendService.getUnitList(this.workspaceService.selectedWorkspace).subscribe(
+    this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId).subscribe(
       uResponse => {
         this.workspaceService.unitList = new UnitCollection(uResponse);
         const newUnitGroups: string[] = [];
         if (this.workspaceService.workspaceSettings.unitGroups) {
           this.workspaceService.workspaceSettings.unitGroups.forEach(g => {
-            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g)
-          })
+            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g);
+          });
         }
         this.workspaceService.unitList.groups.forEach(g => {
-          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name)
+          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name);
         });
         newUnitGroups.sort();
         this.workspaceService.workspaceSettings.unitGroups = newUnitGroups;
         if (unitToSelect) this.selectUnit(unitToSelect);
         if (uResponse.length === 0) {
           this.workspaceService.selectedUnit$.next(0);
-          this.router.navigate([`/a/${this.workspaceService.selectedWorkspace}`]);
+          this.router.navigate([`/a/${this.workspaceService.selectedWorkspaceId}`]);
         }
       }
     );
@@ -145,7 +151,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
     }
     return this.router.navigate(
-      [`a/${this.workspaceService.selectedWorkspace}`],
+      [`a/${this.workspaceService.selectedWorkspaceId}`],
       { relativeTo: this.route.root }
     );
   }
@@ -162,8 +168,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.appService.dataLoading = true;
         createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
         createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
+        createUnitDto.schemer = this.workspaceService.workspaceSettings.defaultSchemer;
         this.backendService.addUnit(
-          this.workspaceService.selectedWorkspace, createUnitDto
+          this.workspaceService.selectedWorkspaceId, createUnitDto
         ).subscribe(
           respOk => {
             if (respOk) {
@@ -184,8 +191,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
       this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
-      this.backendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspace,this.workspaceService.workspaceSettings).subscribe(isOK => {
+      this.appBackendService.setWorkspaceSettings(
+        this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
+      ).subscribe(isOK => {
         this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
           isOK ? '' : 'Fehler', { duration: 3000 });
       });
@@ -197,7 +205,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
         width: '500px',
-        data: newUnitData,
+        data: newUnitData
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(
         map(dialogResult => {
@@ -222,7 +230,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.deleteUnitDialog().then((unitsToDelete: number[] | boolean) => {
       if (typeof unitsToDelete !== 'boolean') {
         this.backendService.deleteUnits(
-          this.workspaceService.selectedWorkspace,
+          this.workspaceService.selectedWorkspaceId,
           unitsToDelete
         ).subscribe(
           ok => {
@@ -261,7 +269,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               return dialogComponent.selectedUnitIds;
             }
           }
-          return false
+          return false;
         })
       ));
     }
@@ -273,7 +281,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (typeof unitSource !== 'boolean') {
         this.addUnitDialog({
           title: 'Neue Aufgabe aus vorhandener',
-          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ' - ' + unitSource.name : ''}`,
+          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
           key: unitSource.key,
           label: unitSource.name || '',
           groups: this.workspaceService.workspaceSettings.unitGroups || []
@@ -282,7 +290,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.appService.dataLoading = true;
             createUnitDto.createFrom = unitSource.id;
             this.backendService.addUnit(
-              this.workspaceService.selectedWorkspace, createUnitDto
+              this.workspaceService.selectedWorkspaceId, createUnitDto
             ).subscribe(
               respOk => {
                 if (respOk) {
@@ -340,7 +348,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       data: <MoveUnitData>{
         title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',
         buttonLabel: moveOnly ? 'Verschieben' : 'Kopieren',
-        currentWorkspaceId: this.workspaceService.selectedWorkspace
+        currentWorkspaceId: this.workspaceService.selectedWorkspaceId
       }
     });
 
@@ -350,27 +358,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           const dialogComponent = dialogRef.componentInstance;
           if (dialogComponent.targetWorkspace > 0) {
             this.backendService.moveOrCopyUnits(
-              this.workspaceService.selectedWorkspace,
+              this.workspaceService.selectedWorkspaceId,
               dialogComponent.selectedUnits,
               dialogComponent.targetWorkspace, moveOnly
             ).subscribe(uploadStatus => {
               if (typeof uploadStatus === 'boolean') {
                 this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,
-                  'Fehler', {duration: 3000});
-              } else {
-                if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-                  const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
-                    width: '500px',
-                    height: '600px',
-                    data: uploadStatus
-                  });
-                  dialogRef.afterClosed().subscribe(() => {
-                    this.updateUnitList();
-                  });
-                } else {
-                  this.snackBar.open(`Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', {duration: 1000});
+                  'Fehler', { duration: 3000 });
+              } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+                const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                  width: '500px',
+                  height: '600px',
+                  data: uploadStatus
+                });
+                dialogRef2.afterClosed().subscribe(() => {
                   this.updateUnitList();
-                }
+                });
+              } else {
+                this.snackBar.open(
+                  `Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', { duration: 1000 }
+                );
+                this.updateUnitList();
               }
             });
           }
@@ -389,7 +397,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         if (result !== false) {
           this.appService.dataLoading = true;
           this.backendService.downloadUnits(
-            this.workspaceService.selectedWorkspace,
+            this.workspaceService.selectedWorkspaceId,
             result as UnitDownloadSettingsDto
           ).subscribe(b => {
             if (b) {
@@ -417,7 +425,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   settings(): void {
-    const dialogRef = this.editSettingsDialog.open(EditSettingsComponent, {
+    const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
       width: '500px',
       data: this.workspaceService.workspaceSettings
     });
@@ -426,13 +434,29 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (result !== false) {
         this.workspaceService.workspaceSettings.defaultEditor = result.controls.editorSelector.value;
         this.workspaceService.workspaceSettings.defaultPlayer = result.controls.playerSelector.value;
-        this.backendService.setWorkspaceSettings(
-          this.workspaceService.selectedWorkspace, this.workspaceService.workspaceSettings
+        this.workspaceService.workspaceSettings.defaultSchemer = result.controls.schemerSelector.value;
+        this.workspaceService.workspaceSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
+        this.appBackendService.setWorkspaceSettings(
+          this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {
           if (!isOK) {
             this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
           } else {
             this.snackBar.open('Einstellungen gespeichert', '', { duration: 1000 });
+          }
+        });
+      }
+    });
+  }
+
+  userList(): void {
+    this.backendService.getUsersList(this.workspaceService.selectedWorkspaceId).subscribe(dataResponse => {
+      if (dataResponse !== false) {
+        this.showUsersDialog.open(WorkspaceUserListComponent, {
+          width: '800px',
+          data: {
+            title: `Liste der Nutzer:innen für "${this.workspaceService.selectedWorkspaceName}"`,
+            users: dataResponse
           }
         });
       }
@@ -483,7 +507,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (inputElement.files && inputElement.files.length > 0) {
         this.appService.dataLoading = true;
         this.uploadSubscription = this.backendService.uploadUnits(
-          this.workspaceService.selectedWorkspace,
+          this.workspaceService.selectedWorkspaceId,
           inputElement.files
         ).subscribe(uploadStatus => {
           if (typeof uploadStatus === 'number') {

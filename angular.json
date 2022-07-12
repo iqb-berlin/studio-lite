@@ -63,6 +63,29 @@
               "exportFormat": "json"
             }
           }
+        },
+        "docker-build": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "docker login {args.registry}",
+                "forwardAllArgs": false
+              },
+              "docker build -f apps/api/Dockerfile --build-arg project=api --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag} .",
+              "docker push {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}"
+            ],
+            "parallel": false
+          }
+        },
+        "docker-scan": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}",
+              "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}"
+            ]
+          }
         }
       },
       "tags": []
@@ -242,6 +265,29 @@
             "json": {
               "exportFormat": "json"
             }
+          }
+        },
+        "docker-build": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "docker login {args.registry}",
+                "forwardAllArgs": false
+              },
+              "docker build -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag} .",
+              "docker push {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}"
+            ],
+            "parallel": false
+          }
+        },
+        "docker-scan": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}",
+              "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}"
+            ]
           }
         }
       },

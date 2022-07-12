@@ -74,7 +74,7 @@ export class UnitSchemerComponent implements OnInit {
           this.sendUnitDataToSchemer();
         } else {
           const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspace,
+          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
             selectedUnitId).subscribe(unitData => {
             this.workspaceService.unitMetadataStore = new UnitMetadataStore(
               unitData || <UnitMetadataDto>{ id: selectedUnitId }
@@ -91,13 +91,13 @@ export class UnitSchemerComponent implements OnInit {
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       const schemerId = unitMetadata.schemer ?
-        this.workspaceService.schemerList.getBestMatch(unitMetadata.schemer) : '';
+        this.appService.schemerList.getBestMatch(unitMetadata.schemer) : '';
       if (schemerId) {
         if ((schemerId === this.lastSchemerId) && this.postMessageTarget) {
           if (this.workspaceService.unitSchemeStore) {
             this.postUnitScheme(this.workspaceService.unitSchemeStore);
           } else {
-            this.backendService.getUnitScheme(this.workspaceService.selectedWorkspace, unitId).subscribe(
+            this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId).subscribe(
               ues => {
                 if (ues) {
                   this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);

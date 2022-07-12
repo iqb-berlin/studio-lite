@@ -10,6 +10,15 @@ export class CreateUserDto {
   @ApiPropertyOptional({ type: Boolean, example: false })
   isAdmin = false;
 
-  @ApiPropertyOptional({ type: String, example: 'hugo@iqb.hu-berlin.de; Student' })
+  @ApiPropertyOptional({ type: String, example: 'Student im HuDel-Projekt' })
   description = '';
+
+  @ApiProperty()
+  email?: string;
+
+  @ApiProperty()
+  lastName?: string;
+
+  @ApiProperty()
+  firstName?: string;
 }

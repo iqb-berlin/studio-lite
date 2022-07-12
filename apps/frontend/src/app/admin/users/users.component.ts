@@ -14,14 +14,14 @@ import {
   MessageType
 } from '@studio-lite-lib/iqb-components';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceInListDto
+  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import {
   BackendService
 } from '../backend.service';
 import { AppService } from '../../app.service';
 import { EditUserComponent } from './edituser.component';
-import { WorkspaceGroupToCheckCollection } from '../workspaces/workspaceChecked';
+import { WorkspaceGroupToCheckCollection } from '../workspace-groups/workspaceChecked';
 
 @Component({
   templateUrl: './users.component.html',
@@ -31,13 +31,12 @@ import { WorkspaceGroupToCheckCollection } from '../workspaces/workspaceChecked'
   ]
 })
 export class UsersComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<UserInListDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'description'];
-  tableSelectionCheckbox = new SelectionModel <UserInListDto>(true, []);
-  tableSelectionRow = new SelectionModel <UserInListDto>(false, []);
+  objectsDatasource = new MatTableDataSource<UserFullDto>();
+  displayedColumns = ['selectCheckbox', 'name', 'displayName', 'email', 'description'];
+  tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
+  tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
-
-  userWorkspaces = new WorkspaceGroupToCheckCollection([]);
+  userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -60,7 +59,7 @@ export class UsersComponent implements OnInit {
         } else {
           this.selectedUser = 0;
         }
-        this.updateWorkspaceList();
+        this.updateWorkspaceGroupList();
       }
     );
   }
@@ -90,7 +89,10 @@ export class UsersComponent implements OnInit {
             name: (<UntypedFormGroup>result).get('name')?.value,
             password: (<UntypedFormGroup>result).get('password')?.value,
             isAdmin: (<UntypedFormGroup>result).get('isAdmin')?.value,
-            description: (<UntypedFormGroup>result).get('description')?.value
+            description: (<UntypedFormGroup>result).get('description')?.value,
+            firstName: (<UntypedFormGroup>result).get('firstName')?.value,
+            lastName: (<UntypedFormGroup>result).get('lastName')?.value,
+            email: (<UntypedFormGroup>result).get('email')?.value
           };
           this.backendService.addUser(userData).subscribe(
             respOk => {
@@ -128,7 +130,11 @@ export class UsersComponent implements OnInit {
           newUser: false,
           name: selectedRows[0].name,
           description: selectedRows[0].description,
-          isAdmin: selectedRows[0].isAdmin
+          isAdmin: selectedRows[0].isAdmin,
+          firstName: selectedRows[0].firstName,
+          lastName: selectedRows[0].lastName,
+          email: selectedRows[0].email,
+          emailApproved: selectedRows[0].emailPublishApproved
         }
       });
 
@@ -138,11 +144,17 @@ export class UsersComponent implements OnInit {
             this.appService.dataLoading = true;
             const newPassword: string = (<UntypedFormGroup>result).get('password')?.value;
             const newName: string = (<UntypedFormGroup>result).get('name')?.value;
+            const newFirstName: string = (<UntypedFormGroup>result).get('firstName')?.value;
+            const newLastName: string = (<UntypedFormGroup>result).get('lastName')?.value;
+            const newEmail: string = (<UntypedFormGroup>result).get('email')?.value;
             const newDescription: string = (<UntypedFormGroup>result).get('description')?.value;
             const newIsAdmin: boolean = (<UntypedFormGroup>result).get('isAdmin')?.value;
             const changedData: UserFullDto = { id: selectedRows[0].id };
             if (newName !== selectedRows[0].name) changedData.name = newName;
             if (newDescription !== selectedRows[0].description) changedData.description = newDescription;
+            if (newFirstName !== selectedRows[0].firstName) changedData.firstName = newFirstName;
+            if (newLastName !== selectedRows[0].lastName) changedData.lastName = newLastName;
+            if (newEmail !== selectedRows[0].email) changedData.email = newEmail;
             if (newPassword) changedData.password = newPassword;
             if (newIsAdmin !== selectedRows[0].isAdmin) changedData.isAdmin = newIsAdmin;
             this.backendService.changeUserData(changedData).subscribe(
@@ -197,7 +209,7 @@ export class UsersComponent implements OnInit {
           // =========================================================
           this.appService.dataLoading = true;
           const usersToDelete: number[] = [];
-          selectedRows.forEach((r: UserInListDto) => usersToDelete.push(r.id));
+          selectedRows.forEach((r: UserFullDto) => usersToDelete.push(r.id));
           this.backendService.deleteUsers(usersToDelete).subscribe(
             respOk => {
               if (respOk) {
@@ -215,39 +227,37 @@ export class UsersComponent implements OnInit {
   }
 
   // ***********************************************************************************
-  updateWorkspaceList(): void {
-    if (this.userWorkspaces.hasChanged) {
+  updateWorkspaceGroupList(): void {
+    if (this.userWorkspaceGroups.hasChanged) {
       this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
     }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspacesByUser(this.selectedUser).subscribe(
-        (dataresponse: WorkspaceInListDto[]) => {
-          this.userWorkspaces.setChecks(dataresponse);
+      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).subscribe(
+        (dataresponse: WorkspaceGroupInListDto[]) => {
+          this.userWorkspaceGroups.setChecks(dataresponse);
           this.appService.dataLoading = false;
         }
       );
     } else {
-      this.userWorkspaces.setChecks();
+      this.userWorkspaceGroups.setChecks();
     }
   }
 
   saveWorkspaces(): void {
     if (this.selectedUser > 0) {
-      if (this.userWorkspaces.hasChanged) {
+      if (this.userWorkspaceGroups.hasChanged) {
         this.appService.dataLoading = true;
-        this.backendService.setWorkspacesByUser(this.selectedUser, this.userWorkspaces.getChecks()).subscribe(
+        this.backendService.setWorkspaceGroupsByAdmin(
+          this.selectedUser, this.userWorkspaceGroups.getChecks()
+        ).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
-              this.userWorkspaces.setHasChangedFalse();
+              this.userWorkspaceGroups.setHasChangedFalse();
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
-            this.appService.dataLoading = false;
-          },
-          err => {
-            this.snackBar.open(`Konnte Zugriffsrechte nicht ändern (${err.code})`, 'Fehler', { duration: 3000 });
             this.appService.dataLoading = false;
           }
         );
@@ -259,8 +269,8 @@ export class UsersComponent implements OnInit {
   updateUserList(): void {
     this.selectedUser = 0;
     this.appService.dataLoading = true;
-    this.backendService.getUsers().subscribe(
-      (dataresponse: UserInListDto[]) => {
+    this.backendService.getUsersFull().subscribe(
+      (dataresponse: UserFullDto[]) => {
         if (dataresponse.length > 0) {
           this.objectsDatasource = new MatTableDataSource(dataresponse);
           this.objectsDatasource.sort = this.sort;
@@ -277,9 +287,9 @@ export class UsersComponent implements OnInit {
   }
 
   createWorkspaceList(): void {
-    this.userWorkspaces = new WorkspaceGroupToCheckCollection([]);
-    this.backendService.getWorkspacesGroupwise().subscribe(worksGroups => {
-      this.userWorkspaces = new WorkspaceGroupToCheckCollection(worksGroups);
+    this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
+    this.backendService.getWorkspaceGroupList().subscribe(worksGroups => {
+      this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection(worksGroups);
       this.updateUserList();
     });
   }

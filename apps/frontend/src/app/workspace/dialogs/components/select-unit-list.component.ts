@@ -1,9 +1,9 @@
-import {Component, Input, ViewChild} from '@angular/core';
-import {BackendService} from "../../backend.service";
-import {MatTableDataSource} from "@angular/material/table";
-import {UnitInListDto} from "@studio-lite-lib/api-dto";
-import {SelectionModel} from "@angular/cdk/collections";
-import {MatSort} from "@angular/material/sort";
+import { Component, Input, ViewChild } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { UnitInListDto } from '@studio-lite-lib/api-dto';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatSort } from '@angular/material/sort';
+import { BackendService } from '../../backend.service';
 
 @Component({
   selector: 'select-unit-list',
@@ -71,40 +71,46 @@ export class SelectUnitListComponent {
       this.objectsDatasource.sort = this.sort;
     });
   }
+
   multipleSelection = true;
   @Input('multiple')
   set multiple(value: boolean) {
     this.multipleSelection = value;
     this.tableSelectionCheckbox = new SelectionModel <UnitInListDto>(value, []);
   }
+
   @Input('disabled')
   set disabled(value: number[]) {
-    console.log(value);
     this.disabledUnits = value;
     this.objectsDatasource.data.forEach(ud => {
       if (this.disabledUnits.indexOf(ud.id) >= 0) this.tableSelectionCheckbox.deselect(ud);
     });
   }
+
   get selectionCount(): number {
-    return this.tableSelectionCheckbox.selected.length
+    return this.tableSelectionCheckbox.selected.length;
   }
+
   get selectedUnitIds(): number[] {
-    return this.tableSelectionCheckbox.selected.map(ud => ud.id)
+    return this.tableSelectionCheckbox.selected.map(ud => ud.id);
   }
+
   get selectedUnitKey(): string {
     const selectedUnits = this.tableSelectionCheckbox.selected;
     if (selectedUnits.length > 0) return selectedUnits[0].key;
-    return ''
+    return '';
   }
+
   get selectedUnitName(): string {
     const selectedUnits = this.tableSelectionCheckbox.selected;
     if (selectedUnits.length > 0 && selectedUnits[0].name) return selectedUnits[0].name;
-    return ''
+    return '';
   }
+
   @ViewChild(MatSort) sort = new MatSort();
 
   constructor(
-    private backendService: BackendService,
+    private backendService: BackendService
   ) { }
 
   isAllSelected(): boolean {

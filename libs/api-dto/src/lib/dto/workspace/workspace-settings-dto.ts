@@ -8,5 +8,11 @@ export class WorkspaceSettingsDto {
   defaultPlayer = '';
 
   @ApiProperty()
+  defaultSchemer = '';
+
+  @ApiProperty()
   unitGroups?: string[];
+
+  @ApiProperty()
+  stableModulesOnly?: boolean = true;
 }

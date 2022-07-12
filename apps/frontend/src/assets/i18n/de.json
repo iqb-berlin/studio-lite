@@ -14,12 +14,35 @@
     "dialog": {
       "title": "Aufgabe(n) als Datei speichern",
       "ok-button-label": "Download"
+    },
+    "booklet-config": {
+      "paging-mode": {
+        "label": "Modus Seitenwechsel",
+        "separate": "Seiten extra blättern",
+        "concat-scroll": "Seiten untereinander stapeln",
+        "concat-scroll-snap": "Seiten untereinander - schnappen/magnetisch"
+      },
+      "unit_navibuttons": {
+        "label": "Buttons für Unit-Navigation",
+        "FULL": "Pfeil-Buttons und dazwischen Unit-Buttons",
+        "ARROWS_ONLY": "Nur Pfeil-Buttons",
+        "OFF": "Keine Buttons für Unit-Navigation"
+      }
+    }
+  },
+  "unit-preview": {
+    "paging-selection-mode": {
+      "label": "Seitendarstellung",
+      "separate": "Blättern",
+      "concat-scroll": "Scrollen",
+      "concat-scroll-snap": "Magnetisch Scrollen"
     }
   },
   "home": {
     "home-page": "Startseite",
     "select-workspace": "Arbeitsbereich wählen",
     "goto-admin": "Allgemeine Systemverwaltung",
+    "goto-wsg-admin": "Verwaltung der Bereichsgruppe",
     "imprint": "Impressum/Datenschutz"
   },
   "dialogs": {

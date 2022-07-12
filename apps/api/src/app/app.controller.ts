@@ -1,11 +1,11 @@
 import {
-  Controller, Request, Get, Post, UseGuards, Patch, Body
+  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException
 } from '@nestjs/common';
 
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
-import { AuthDataDto, ChangePasswordDto } from '@studio-lite-lib/api-dto';
+import { AuthDataDto, ChangePasswordDto, MyDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/service/auth.service';
@@ -26,9 +26,7 @@ export class AppController {
   @Post('login')
   @UseGuards(LocalAuthGuard)
   @ApiTags('auth')
-  @ApiCreatedResponse({
-    type: String
-  })
+  @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiQuery({ type: String, name: 'password', required: true })
   @ApiQuery({ type: String, name: 'username', required: true })
   async login(@Request() req) {
@@ -39,9 +37,7 @@ export class AppController {
   @Get('auth-data')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: AuthDataDto
-  })
+  @ApiOkResponse({ description: 'User auth data successfully retrieved.' }) // TODO: Add Exception
   @ApiTags('auth')
   async findCanDos(@UserId() userId: number, @UserName() userName: string): Promise<AuthDataDto> {
     return <AuthDataDto>{
@@ -55,8 +51,36 @@ export class AppController {
   @Patch('password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Password successfully updated.' }) // TODO: Exception & Return Value entfernen
   @ApiTags('auth')
   async setPassword(@Request() req, @Body() passwords: ChangePasswordDto): Promise<boolean> {
     return this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
+  }
+
+  @Get('my-data')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'User personal data successfully retrieved.' }) // TODO: Exception & Return Value entfernen
+  @ApiTags('home')
+  async findMydata(@UserId() userId: number): Promise<MyDataDto> {
+    return this.userService.findOne(userId).then(userData => <MyDataDto>{
+      id: userData.id,
+      lastName: userData.lastName,
+      firstName: userData.firstName,
+      email: userData.email,
+      emailPublishApproved: userData.emailPublishApproved,
+      description: userData.description
+    });
+  }
+
+  @Patch('my-data')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'User personal data successfully updated.' }) // TODO: Exception & Return Value entfernen
+  @ApiTags('home')
+  async setMyData(@Request() req, @Body() myNewData: MyDataDto): Promise<boolean> {
+    if (req.user.id !== myNewData.id) throw new UnauthorizedException();
+    await this.userService.patchMyData(myNewData);
+    return true;
   }
 }

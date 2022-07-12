@@ -26,6 +26,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
+import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
@@ -38,11 +39,14 @@ import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
 import { SelectModuleComponent } from './unit/unit-metadata/select-module.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
-import { EditSettingsComponent } from './dialogs/edit-settings.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
-import { SelectUnitListComponent } from './dialogs/select-unit-list/select-unit-list.component';
+import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
+import { UserListComponent } from './dialogs/components/user-list.component';
+import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
+import {
+  PagingModeSelectionComponent
+} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
-import { CommentsModule } from '../comments/comments.module';
 
 @NgModule({
   imports: [
@@ -87,12 +91,18 @@ import { CommentsModule } from '../comments/comments.module';
     UnitPreviewComponent,
     SelectModuleComponent,
     ExportUnitComponent,
-    EditSettingsComponent,
     UnitSchemerComponent,
     SelectUnitListComponent,
+    UserListComponent,
+    WorkspaceUserListComponent,
+    PagingModeSelectionComponent,
     UnitCommentsComponent
   ],
-  exports: [WorkspaceComponent],
-  providers: [UnitRoutingCanDeactivateGuard]
+  exports: [
+    WorkspaceComponent
+  ],
+  providers: [
+    UnitRoutingCanDeactivateGuard
+  ]
 })
 export class WorkspaceModule {}

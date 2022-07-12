@@ -17,6 +17,8 @@ import { SettingService } from './services/setting.service';
 import Unit from './entities/unit.entity';
 import { UnitService } from './services/unit.service';
 import UnitDefinition from './entities/unit-definition.entity';
+import WorkspaceGroupAdmin from './entities/workspace-group-admin.entity';
+import { WorkspaceGroupAdminService } from './services/workspace-group-admin.service';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import UnitDefinition from './entities/unit-definition.entity';
     Unit,
     WorkspaceGroup,
     WorkspaceUser,
+    WorkspaceGroupAdmin,
     VeronaModule,
     UnitDefinition,
     Setting,
@@ -45,7 +48,8 @@ import UnitDefinition from './entities/unit-definition.entity';
           UnitDefinition,
           VeronaModule,
           Setting,
-          Unit
+          Unit,
+          WorkspaceGroupAdmin
         ],
         synchronize: false
       }),
@@ -59,7 +63,8 @@ import UnitDefinition from './entities/unit-definition.entity';
       UnitDefinition,
       VeronaModule,
       Setting,
-      Unit
+      Unit,
+      WorkspaceGroupAdmin
     ])
   ],
   providers: [
@@ -67,6 +72,7 @@ import UnitDefinition from './entities/unit-definition.entity';
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceUserService,
+    WorkspaceGroupAdminService,
     UnitService,
     VeronaModulesService,
     SettingService
@@ -78,12 +84,14 @@ import UnitDefinition from './entities/unit-definition.entity';
     Workspace,
     WorkspaceUser,
     WorkspaceGroup,
+    WorkspaceGroupAdmin,
     VeronaModule,
     Setting,
     UsersService,
     UnitService,
     WorkspaceService,
     WorkspaceGroupService,
+    WorkspaceGroupAdminService,
     WorkspaceUserService,
     SettingService,
     VeronaModulesService

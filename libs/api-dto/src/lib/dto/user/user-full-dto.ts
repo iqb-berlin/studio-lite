@@ -15,4 +15,16 @@ export class UserFullDto {
 
   @ApiProperty()
   password?: string;
+
+  @ApiProperty()
+  email?: string;
+
+  @ApiProperty()
+  lastName?: string;
+
+  @ApiProperty()
+  firstName?: string;
+
+  @ApiProperty()
+  emailPublishApproved?: boolean;
 }

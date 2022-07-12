@@ -3,13 +3,15 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 export type EditWorkspaceGroupComponentData = {
-  name: string
+  title: string,
+  name: string,
+  saveButtonLabel: string
 };
 
 @Component({
   template: `
     <form [formGroup]="editWorkspaceGroupForm">
-      <h1 mat-dialog-title>Gruppe für Arbeitsbereiche umbenennen</h1>
+      <h1 mat-dialog-title>{{data.title}}</h1>
 
       <mat-dialog-content fxLayout="column">
         <mat-form-field>
@@ -20,7 +22,7 @@ export type EditWorkspaceGroupComponentData = {
       <mat-dialog-actions>
         <button mat-raised-button color="primary"
                 type="submit" [mat-dialog-close]="editWorkspaceGroupForm"
-                [disabled]="editWorkspaceGroupForm.invalid">Speichern
+                [disabled]="editWorkspaceGroupForm.invalid">{{data.saveButtonLabel}}
         </button>
         <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
       </mat-dialog-actions>
