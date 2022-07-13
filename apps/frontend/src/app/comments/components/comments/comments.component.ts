@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { CommentsService } from '../../services/comments.service';
 import { ActiveCommentInterface } from '../../types/active-comment.interface';
 import { Comment } from '../../types/comment';
@@ -20,6 +20,8 @@ export class CommentsComponent implements OnInit {
   activeComment: ActiveCommentInterface | null = null;
   latestCommentId: Subject<number> = new Subject();
 
+  private ngUnsubscribe = new Subject<void>();
+
   constructor(
     private translateService: TranslateService,
     private commentsService: CommentsService,
@@ -33,6 +35,7 @@ export class CommentsComponent implements OnInit {
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
     this.commentsService
       .updateComment(commentId, text)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.comments = this.comments.map(comment => {
           if (comment.id === commentId) {
@@ -57,7 +60,9 @@ export class CommentsComponent implements OnInit {
           content: this.translateService.instant('comments.comment-delete-question')
         }
       })
-      .afterClosed().subscribe(result => {
+      .afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
         if (result) {
           this.confirmDelete(commentId);
         }
@@ -66,6 +71,7 @@ export class CommentsComponent implements OnInit {
 
   private confirmDelete(commentId: number): void {
     this.commentsService.deleteComment(commentId)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.comments = this.comments.filter(
           comment => comment.id !== commentId
@@ -93,12 +99,19 @@ export class CommentsComponent implements OnInit {
   }
 
   private updateComments(): void {
-    this.commentsService.getComments().subscribe(comments => {
-      this.comments = comments.sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-      const latestComment = this.comments[this.comments.length - 1];
-      this.latestCommentId.next(latestComment.id);
-    });
+    this.commentsService.getComments()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(comments => {
+        this.comments = comments.sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        const latestComment = this.comments[this.comments.length - 1];
+        this.latestCommentId.next(latestComment.id);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
