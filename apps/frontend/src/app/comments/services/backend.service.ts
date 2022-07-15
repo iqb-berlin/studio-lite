@@ -5,7 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { Comment } from '../types/comment';
 
 @Injectable()
-export class CommentsService {
+export class BackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private httpClient: HttpClient

@@ -18,7 +18,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CommentComponent } from './components/comment/comment.component';
 import { CommentEditorComponent } from './components/comment-editor/comment-editor.component';
 import { CommentsComponent } from './components/comments/comments.component';
-import { CommentsService } from './services/comments.service';
+import { BackendService } from './services/backend.service';
 import { IsEditingPipe } from './pipes/is-editing.pipe';
 import { IsReplyingPipe } from './pipes/is-replying.pipe';
 import { DeleteDialogComponent } from './components/delete-dialog/delete-dialog.component';
@@ -26,7 +26,7 @@ import { RootCommentsPipe } from './pipes/root-comments.pipe';
 import { RepliesPipe } from './pipes/replies.pipe';
 import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
 import { ScrollIntoViewDirective } from './directives/scroll-into-view.directive';
-import { AuthInterceptor } from '../wsg-admin/auth.interceptor'; // TODO in lib?
+import { AuthInterceptor } from '../auth.interceptor';
 
 @NgModule({
   imports: [
@@ -60,7 +60,7 @@ import { AuthInterceptor } from '../wsg-admin/auth.interceptor'; // TODO in lib?
   ],
   exports: [CommentsComponent],
   providers: [
-    CommentsService,
+    BackendService,
     [
       { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
       {

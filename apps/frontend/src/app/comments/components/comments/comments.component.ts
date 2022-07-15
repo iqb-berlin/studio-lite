@@ -4,7 +4,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
-import { CommentsService } from '../../services/comments.service';
+import { BackendService } from '../../services/backend.service';
 import { ActiveCommentInterface } from '../../types/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { Comment } from '../../types/comment';
@@ -28,7 +28,7 @@ export class CommentsComponent implements OnChanges {
 
   constructor(
     private translateService: TranslateService,
-    private commentsService: CommentsService,
+    private commentsService: BackendService,
     public dialog: MatDialog
   ) {}
 
