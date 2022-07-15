@@ -6,6 +6,7 @@ import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.compon
 import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
+import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 
 const routes: Routes = [
   {
@@ -22,6 +23,7 @@ const routes: Routes = [
       { path: 'editor', component: UnitEditorComponent },
       { path: 'preview', component: UnitPreviewComponent },
       { path: 'schemer', component: UnitSchemerComponent },
+      { path: 'comments', component: UnitCommentsComponent },
       { path: '**', component: UnitMetadataComponent }
     ]
   }
