@@ -37,7 +37,7 @@ export class CommentsComponent implements OnChanges {
     const workspaceId = 'workspaceId';
     if ((changes[unitId] && changes[unitId].currentValue) ||
     (changes[workspaceId] && changes[workspaceId].currentValue)) {
-      this.updateComments();
+      this.sortComments();
     }
   }
 
@@ -48,7 +48,7 @@ export class CommentsComponent implements OnChanges {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.activeComment = null;
-        this.updateComments();
+        this.sortComments();
       });
   }
 
@@ -78,7 +78,7 @@ export class CommentsComponent implements OnChanges {
     this.commentsService.deleteComment(commentId, this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.updateComments();
+        this.sortComments();
       });
   }
 
@@ -98,11 +98,11 @@ export class CommentsComponent implements OnChanges {
       .createComment(comment, this.workspaceId, this.unitId)
       .subscribe(() => {
         this.activeComment = null;
-        this.updateComments();
+        this.sortComments();
       });
   }
 
-  private updateComments(): void {
+  private sortComments(): void {
     this.commentsService.getComments(this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(comments => {
