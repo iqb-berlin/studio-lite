@@ -110,7 +110,9 @@ export class CommentsComponent implements OnChanges {
           (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
         if (this.comments.length) {
-          const latestComment = this.comments[this.comments.length - 1];
+          const latestComment = this.comments
+            .reduce((previousComment, currentComment) => (
+              previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));
           setTimeout(() => {
             this.latestCommentId.next(latestComment.id);
           });
