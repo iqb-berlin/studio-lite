@@ -5,5 +5,6 @@ export interface Comment {
   userId: number;
   unitId: number;
   parentId: number | null;
-  createdAt: string;
+  createdAt: Date;
+  changedAt: Date;
 }

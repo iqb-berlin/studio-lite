@@ -92,8 +92,7 @@ export class CommentsComponent implements OnChanges {
       userName: this.userName,
       userId: this.userId,
       parentId: parentId,
-      unitId: this.unitId,
-      createdAt: new Date().toISOString()
+      unitId: this.unitId
     };
     this.commentsService
       .createComment(comment, this.workspaceId, this.unitId)
@@ -110,10 +109,12 @@ export class CommentsComponent implements OnChanges {
         this.comments = comments.sort(
           (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
-        const latestComment = this.comments[this.comments.length - 1];
-        setTimeout(() => {
-          this.latestCommentId.next(latestComment.id);
-        });
+        if (this.comments.length) {
+          const latestComment = this.comments[this.comments.length - 1];
+          setTimeout(() => {
+            this.latestCommentId.next(latestComment.id);
+          });
+        }
       });
   }
 

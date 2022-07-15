@@ -208,7 +208,9 @@ export class UnitService {
 
   async createComment(unitComment: CreateUnitCommentDto): Promise<number> {
     this.logger.log(`Creating a comment for unit wit id: ${unitComment.unitId}`);
-    const newComment = await this.unitCommentsRepository.create(unitComment);
+    const timeStamp = new Date();
+    const newComment = this.unitCommentsRepository
+      .create({ ...unitComment, createdAt: timeStamp, changedAt: timeStamp });
     await this.unitCommentsRepository.save(newComment);
     return newComment.id;
   }
@@ -224,6 +226,7 @@ export class UnitService {
     if (commentToUpdate) {
       if (comment.userId === commentToUpdate.userId) {
         commentToUpdate.body = comment.body;
+        commentToUpdate.changedAt = new Date();
         await this.unitCommentsRepository.save(commentToUpdate);
       } else {
         throw new UnauthorizedException(); // TODO: guard?

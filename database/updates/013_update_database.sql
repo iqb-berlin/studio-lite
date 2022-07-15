@@ -10,5 +10,6 @@ create table unit_comment
   unit_id    integer not null
     references unit
       on delete cascade,
-  created_at varchar(50)
+  created_at TIMESTAMP with time zone,
+  changed_at TIMESTAMP with time zone
 );

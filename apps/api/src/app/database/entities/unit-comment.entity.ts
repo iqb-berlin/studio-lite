@@ -33,9 +33,16 @@ class UnitComment {
   })
 
   @Column({
+    type: 'timestamp with time zone',
     name: 'created_at'
   })
-  public createdAt: string;
+  public createdAt: Date;
+
+  @Column({
+    type: 'timestamp with time zone',
+    name: 'changed_at'
+  })
+  public changedAt: Date;
 }
 
 export default UnitComment;

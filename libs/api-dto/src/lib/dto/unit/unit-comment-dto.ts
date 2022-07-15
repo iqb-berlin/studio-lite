@@ -20,5 +20,8 @@ export class UnitCommentDto {
   unitId?: number;
 
   @ApiProperty()
-  createdAt!: string;
+  createdAt?: Date;
+
+  @ApiProperty()
+  changedAt?: Date;
 }
