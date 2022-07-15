@@ -1,79 +1,49 @@
-import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { Inject, Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { catchError, map } from 'rxjs/operators';
 import { Comment } from '../types/comment';
 
 @Injectable()
 export class CommentsService {
-  comments: Comment[] = [
-    {
-      id: 1,
-      body: 'First comment',
-      userName: 'Pauline',
-      userId: 1,
-      parentId: null,
-      createdAt: '2021-08-16T23:00:33.010+02:00'
-    },
-    {
-      id: 2,
-      body: 'Second comment',
-      userName: 'Jenny',
-      userId: 2,
-      parentId: null,
-      createdAt: '2021-08-16T23:00:33.010+02:00'
-    },
-    {
-      id: 3,
-      body: 'Reply',
-      userName: 'Pauline',
-      userId: 1,
-      parentId: 2,
-      createdAt: '2021-08-16T23:00:33.010+02:00'
-    }
-  ];
+  constructor(
+    @Inject('SERVER_URL') private readonly serverUrl: string,
+    private httpClient: HttpClient
+  ) {}
 
-  constructor(private httpClient: HttpClient) {}
-
-  getComments(): Observable<Comment[]> {
-    return of(this.comments).pipe(delay(500));
-    // return this.httpClient.get<CommentInterface[]>(
-    //   url
-    // );
+  getComments(workspaceId: number, unitId: number): Observable<Comment[]> {
+    return this.httpClient
+      .get<Comment[]>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`)
+      .pipe(
+        catchError(() => of([])),
+        map(comments => comments)
+      );
   }
 
-  createComment(comment: Partial<Comment>): Observable<number> {
-    const newComment = {
-      ...comment,
-      id: Math.floor((Math.random() * 1000) + 1),
-      createdAt: new Date().toISOString()
-    } as Comment;
-    this.comments.push(newComment);
-    return of(newComment.id).pipe(delay(500));
-    // return this.httpClient.post<CommentInterface>(
-    //   url , comment
-    // );
+  createComment(comment: Partial<Comment>, workspaceId: number, unitId: number): Observable<number | null> {
+    return this.httpClient
+      .post<number>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`, comment)
+      .pipe(
+        catchError(() => of(null)),
+        map(returnId => Number(returnId))
+      );
   }
 
-  updateComment(id: number, text: string): Observable<null> {
-    const updateComment = this.comments.find(comment => comment.id === id);
-    if (updateComment) {
-      updateComment.body = text;
-    }
-    return of(null).pipe(delay(500));
-    // return this.httpClient.patch<Comment>(
-    //   url,
-    //   {
-    //     body: text
-    //   }
-    // );
+  updateComment(id: number, body: Partial<Comment>, workspaceId: number, unitId: number): Observable<boolean> {
+    return this.httpClient
+      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`, body)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
   }
 
-  deleteComment(id: number): Observable<unknown> {
-    const deleteIndex = this.comments.findIndex(comment => comment.id === id);
-    if (deleteIndex !== -1) {
-      this.comments.splice(deleteIndex, 1);
-    }
-    return of(null).pipe(delay(500));
-    // return this.httpClient.delete(url);
+  deleteComment(id: number, workspaceId: number, unitId: number): Observable<unknown> {
+    return this.httpClient
+      .delete(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
   }
 }

@@ -3,14 +3,17 @@
     <studio-lite-comment
       *ngFor="let rootComment of comments | rootComments"
       [comment]="rootComment"
-      [currentUserId]="currentUserId"
+      [userId]="userId"
       [replies]="comments | replies: rootComment.id"
       [activeComment]="activeComment"
-      studioLiteScrollIntoView [id]="rootComment.id"  [scrollTargetId]="latestCommentId"
+      [latestCommentId]="latestCommentId"
       (setActiveComment)="setActiveComment($event)"
       (addComment)="addComment($event)"
       (deleteComment)="deleteComment($event)"
-      (updateComment)="updateComment($event)">
+      (updateComment)="updateComment($event)"
+      studioLiteScrollIntoView
+      [id]="rootComment.id"
+      [scrollTargetId]="latestCommentId">
     </studio-lite-comment>
   </div>
 

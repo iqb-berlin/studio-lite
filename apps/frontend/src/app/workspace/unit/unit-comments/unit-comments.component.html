@@ -1,7 +1,9 @@
 <div class="comments-container">
   <studio-lite-comments
     [style.height.%]="100"
-    [currentUserName]="appService.authData.userName"
-    [currentUserId]="appService.authData.userId">
+    [userName]="userName"
+    [userId]="userId"
+    [unitId]="unitId"
+    [workspaceId]="workspaceId">
   </studio-lite-comments>
 </div>

@@ -13,6 +13,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxTiptapModule } from 'ngx-tiptap';
 import { MatInputModule } from '@angular/material/input';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CommentComponent } from './components/comment/comment.component';
 import { CommentEditorComponent } from './components/comment-editor/comment-editor.component';
 import { CommentsComponent } from './components/comments/comments.component';
@@ -24,6 +26,7 @@ import { RootCommentsPipe } from './pipes/root-comments.pipe';
 import { RepliesPipe } from './pipes/replies.pipe';
 import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
 import { ScrollIntoViewDirective } from './directives/scroll-into-view.directive';
+import { AuthInterceptor } from '../wsg-admin/auth.interceptor'; // TODO in lib?
 
 @NgModule({
   imports: [
@@ -55,7 +58,18 @@ import { ScrollIntoViewDirective } from './directives/scroll-into-view.directive
     RepliesPipe,
     ScrollIntoViewDirective
   ],
-  providers: [CommentsService],
-  exports: [CommentsComponent]
+  exports: [CommentsComponent],
+  providers: [
+    CommentsService,
+    [
+      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+      {
+        provide: HTTP_INTERCEPTORS,
+        useClass: AuthInterceptor,
+        multi: true
+      }
+    ]
+  ]
+
 })
 export class CommentsModule {}

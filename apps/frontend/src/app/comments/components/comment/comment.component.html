@@ -52,11 +52,15 @@
       [activeComment]="activeComment"
       [parentId]="comment.id"
       [replies]="[]"
-      [currentUserId]="currentUserId"
+      [userId]="userId"
+      [latestCommentId]="latestCommentId"
       (setActiveComment)="setActiveComment.emit($event)"
       (updateComment)="updateComment.emit($event)"
       (deleteComment)="deleteComment.emit($event)"
-      (addComment)="addComment.emit($event)">
+      (addComment)="addComment.emit($event)"
+      studioLiteScrollIntoView
+      [id]="reply.id"
+      [scrollTargetId]="latestCommentId">
     </studio-lite-comment>
   </ng-container>
 </mat-card>

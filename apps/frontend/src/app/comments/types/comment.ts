@@ -3,6 +3,7 @@ export interface Comment {
   body: string;
   userName: string;
   userId: number;
+  unitId: number;
   parentId: number | null;
   createdAt: string;
 }

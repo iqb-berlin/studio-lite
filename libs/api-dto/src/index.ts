@@ -26,3 +26,6 @@ export { CreateWorkspaceDto } from './lib/dto/workspace/create-workspace-dto';
 export { CreateUserDto } from './lib/dto/user/create-user-dto';
 export { UserInListDto } from './lib/dto/user/user-in-list-dto';
 export { UserFullDto } from './lib/dto/user/user-full-dto';
+export { UnitCommentDto } from './lib/dto/unit/unit-comment-dto';
+export { CreateUnitCommentDto } from './lib/dto/unit/create-unit-comment-dto';
+export { UpdateUnitCommentDto } from './lib/dto/unit/update-unit-comment-dto';

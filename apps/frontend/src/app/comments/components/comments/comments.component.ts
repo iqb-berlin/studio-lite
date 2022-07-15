@@ -1,20 +1,24 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  Component, Input, OnChanges, SimpleChanges
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CommentsService } from '../../services/comments.service';
 import { ActiveCommentInterface } from '../../types/active-comment.interface';
-import { Comment } from '../../types/comment';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
+import { Comment } from '../../types/comment';
 
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss']
 })
-export class CommentsComponent implements OnInit {
-  @Input() currentUserId!: number;
-  @Input() currentUserName!: string;
+export class CommentsComponent implements OnChanges {
+  @Input() userId!: number;
+  @Input() userName!: string;
+  @Input() unitId!: number;
+  @Input() workspaceId!: number;
 
   comments: Comment[] = [];
   activeComment: ActiveCommentInterface | null = null;
@@ -28,22 +32,23 @@ export class CommentsComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
-  ngOnInit(): void {
-    this.updateComments();
+  ngOnChanges(changes: SimpleChanges): void {
+    const unitId = 'unitId';
+    const workspaceId = 'workspaceId';
+    if ((changes[unitId] && changes[unitId].currentValue) ||
+    (changes[workspaceId] && changes[workspaceId].currentValue)) {
+      this.updateComments();
+    }
   }
 
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
+    const updateComment = { body: text, userId: this.userId };
     this.commentsService
-      .updateComment(commentId, text)
+      .updateComment(commentId, updateComment, this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.comments = this.comments.map(comment => {
-          if (comment.id === commentId) {
-            return { ...comment, body: text };
-          }
-          return comment;
-        });
         this.activeComment = null;
+        this.updateComments();
       });
   }
 
@@ -70,12 +75,10 @@ export class CommentsComponent implements OnInit {
   }
 
   private confirmDelete(commentId: number): void {
-    this.commentsService.deleteComment(commentId)
+    this.commentsService.deleteComment(commentId, this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.comments = this.comments.filter(
-          comment => comment.id !== commentId
-        );
+        this.updateComments();
       });
   }
 
@@ -84,14 +87,16 @@ export class CommentsComponent implements OnInit {
   }
 
   addComment({ text, parentId }: { text: string; parentId: number | null; }): void {
-    const comment: Partial<Comment> = {
+    const comment = {
       body: text,
-      userName: this.currentUserName,
-      userId: this.currentUserId,
-      parentId: parentId
+      userName: this.userName,
+      userId: this.userId,
+      parentId: parentId,
+      unitId: this.unitId,
+      createdAt: new Date().toISOString()
     };
     this.commentsService
-      .createComment(comment)
+      .createComment(comment, this.workspaceId, this.unitId)
       .subscribe(() => {
         this.activeComment = null;
         this.updateComments();
@@ -99,14 +104,16 @@ export class CommentsComponent implements OnInit {
   }
 
   private updateComments(): void {
-    this.commentsService.getComments()
+    this.commentsService.getComments(this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(comments => {
         this.comments = comments.sort(
           (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
         const latestComment = this.comments[this.comments.length - 1];
-        this.latestCommentId.next(latestComment.id);
+        setTimeout(() => {
+          this.latestCommentId.next(latestComment.id);
+        });
       });
   }
 
