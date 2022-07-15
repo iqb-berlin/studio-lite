@@ -19,6 +19,7 @@ import { UnitService } from './services/unit.service';
 import UnitDefinition from './entities/unit-definition.entity';
 import WorkspaceGroupAdmin from './entities/workspace-group-admin.entity';
 import { WorkspaceGroupAdminService } from './services/workspace-group-admin.service';
+import UnitComment from './entities/unit-comment.entity';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { WorkspaceGroupAdminService } from './services/workspace-group-admin.ser
     WorkspaceGroupAdmin,
     VeronaModule,
     UnitDefinition,
+    UnitComment,
     Setting,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -49,6 +51,7 @@ import { WorkspaceGroupAdminService } from './services/workspace-group-admin.ser
           VeronaModule,
           Setting,
           Unit,
+          UnitComment,
           WorkspaceGroupAdmin
         ],
         synchronize: false
@@ -64,6 +67,7 @@ import { WorkspaceGroupAdminService } from './services/workspace-group-admin.ser
       VeronaModule,
       Setting,
       Unit,
+      UnitComment,
       WorkspaceGroupAdmin
     ])
   ],
@@ -81,6 +85,7 @@ import { WorkspaceGroupAdminService } from './services/workspace-group-admin.ser
     User,
     Unit,
     UnitDefinition,
+    UnitComment,
     Workspace,
     WorkspaceUser,
     WorkspaceGroup,

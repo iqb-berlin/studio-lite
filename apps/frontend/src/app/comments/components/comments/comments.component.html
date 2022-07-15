@@ -1,0 +1,29 @@
+<div fxLayout="column" fxFlex="100%">
+  <div fxFlex class="comments">
+    <studio-lite-comment
+      *ngFor="let rootComment of comments | rootComments"
+      [comment]="rootComment"
+      [userId]="userId"
+      [replies]="comments | replies: rootComment.id"
+      [activeComment]="activeComment"
+      [latestCommentId]="latestCommentId"
+      (setActiveComment)="setActiveComment($event)"
+      (addComment)="addComment($event)"
+      (deleteComment)="deleteComment($event)"
+      (updateComment)="updateComment($event)"
+      studioLiteScrollIntoView
+      [id]="rootComment.id"
+      [scrollTargetId]="latestCommentId">
+    </studio-lite-comment>
+  </div>
+
+  <div>
+    <div class="editor-label">{{'comments.write-comment' | translate}}</div>
+      <studio-lite-comment-editor
+        submitLabel="comment-editor.write"
+        (handleSubmit)="addComment({ text: $event, parentId: null })">
+      </studio-lite-comment-editor>
+  </div>
+</div>
+
+

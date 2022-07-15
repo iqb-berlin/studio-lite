@@ -1,0 +1,66 @@
+<mat-card [style.margin-bottom.px]="10">
+
+  <mat-card-header>
+    <div mat-card-avatar><mat-icon>account_circle</mat-icon></div>
+    <mat-card-title>{{ comment.userName }}</mat-card-title>
+    <mat-card-subtitle>{{ createdAt | date : 'dd.MM.yyyy HH:mm' : timeZone }}</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div *ngIf="!(activeComment | isEditing: comment)"
+         [innerHTML]="comment.body| safeResourceHTML">
+    </div>
+
+    <studio-lite-comment-editor
+      *ngIf="activeComment | isEditing: comment"
+      submitLabel="comment-editor.edit"
+      [initialText]="comment.body"
+      (handleSubmit)="updateComment.emit({ text: $event, commentId: comment.id })"
+      (handleCancel)="setActiveComment.emit(null)">
+    </studio-lite-comment-editor>
+
+    <studio-lite-comment-editor
+      *ngIf="activeComment | isReplying: comment"
+      submitLabel="comment-editor.reply"
+      (handleCancel)="setActiveComment.emit(null)"
+      (handleSubmit)="addComment.emit({ text: $event, parentId: replyId })">
+    </studio-lite-comment-editor>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-button *ngIf="canReply"
+            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
+            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
+      {{'comment.reply' | translate}}
+    </button>
+    <button mat-button *ngIf="canEdit"
+            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
+            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
+      {{'comment.edit' | translate}}
+    </button>
+    <button mat-button color="warn" *ngIf="canDelete"
+            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
+            (click)="deleteComment.emit(comment.id)">
+      {{'comment.delete' | translate}}
+    </button>
+  </mat-card-actions>
+
+  <ng-container *ngIf="replies.length">
+    <studio-lite-comment
+      *ngFor="let reply of replies"
+      [comment]="reply"
+      [activeComment]="activeComment"
+      [parentId]="comment.id"
+      [replies]="[]"
+      [userId]="userId"
+      [latestCommentId]="latestCommentId"
+      (setActiveComment)="setActiveComment.emit($event)"
+      (updateComment)="updateComment.emit($event)"
+      (deleteComment)="deleteComment.emit($event)"
+      (addComment)="addComment.emit($event)"
+      studioLiteScrollIntoView
+      [id]="reply.id"
+      [scrollTargetId]="latestCommentId">
+    </studio-lite-comment>
+  </ng-container>
+</mat-card>

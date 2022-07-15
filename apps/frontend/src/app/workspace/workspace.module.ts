@@ -26,6 +26,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
+import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './dialogs/new-unit.component';
@@ -45,6 +46,7 @@ import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.compon
 import {
   PagingModeSelectionComponent
 } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
+import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 
 @NgModule({
   imports: [
@@ -75,7 +77,8 @@ import {
     MatTabsModule,
     IqbComponentsModule,
     MatProgressBarModule,
-    TranslateModule
+    TranslateModule,
+    CommentsModule
   ],
   declarations: [
     WorkspaceComponent,
@@ -92,7 +95,8 @@ import {
     SelectUnitListComponent,
     UserListComponent,
     WorkspaceUserListComponent,
-    PagingModeSelectionComponent
+    PagingModeSelectionComponent,
+    UnitCommentsComponent
   ],
   exports: [
     WorkspaceComponent
