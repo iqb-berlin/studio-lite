@@ -14,6 +14,8 @@ import { UnitService } from '../database/services/unit.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
+import { CommentWriteGuard } from './comment-write.guard';
+import { CommentDeleteGuard } from './comment-delete.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -113,24 +115,24 @@ export class UnitsController {
   }
 
   @Patch(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
-  @ApiNotFoundResponse({ description: 'Not authorized to update comment.' })
-  @ApiUnauthorizedResponse({ description: 'Comment not found.' }) // TODO: guard?
+  @ApiNotFoundResponse({ description: 'Comment not found.' })
+  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
   @ApiTags('workspace unit')
   async patchCommentBody(@Param('id', ParseIntPipe) id: number, @Body() comment: UpdateUnitCommentDto) {
     return this.unitService.patchCommentBody(id, comment);
   }
 
   @Delete(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentDeleteGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
-  @ApiNotFoundResponse({ description: 'Not authorized to update comment.' }) // TODO
-  @ApiUnauthorizedResponse({ description: 'Comment not found.' }) // TODO: guard?
+  @ApiNotFoundResponse({ description: 'Comment not found.' })
+  @ApiUnauthorizedResponse({ description: 'Not authorized to delete comment.' })
   @ApiTags('workspace unit')
   async removeComment(@Param('id', ParseIntPipe) id: number) {
     return this.unitService.removeComment(id);

@@ -5,7 +5,6 @@ import {
   CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
-import { UnauthorizedException } from '@nestjs/common/exceptions/unauthorized.exception';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import UnitComment from '../entities/unit-comment.entity';
@@ -220,17 +219,22 @@ export class UnitService {
     await this.unitCommentsRepository.delete(id);
   }
 
+  async findOneComment(id: number): Promise<UnitCommentDto> {
+    this.logger.log(`Accessing comment with id: ${id}`);
+    const comment = await this.unitCommentsRepository.findOne({ where: { id: id } });
+    if (comment) {
+      return comment;
+    }
+    throw new UnitCommentNotFoundException(id, 'DELETE');
+  }
+
   async patchCommentBody(id: number, comment: UpdateUnitCommentDto): Promise<void> {
     this.logger.log(`Updating comment with id: ${id}`);
     const commentToUpdate = await this.unitCommentsRepository.findOne({ where: { id: id } });
     if (commentToUpdate) {
-      if (comment.userId === commentToUpdate.userId) {
-        commentToUpdate.body = comment.body;
-        commentToUpdate.changedAt = new Date();
-        await this.unitCommentsRepository.save(commentToUpdate);
-      } else {
-        throw new UnauthorizedException(); // TODO: guard?
-      }
+      commentToUpdate.body = comment.body;
+      commentToUpdate.changedAt = new Date();
+      await this.unitCommentsRepository.save(commentToUpdate);
     } else {
       throw new UnitCommentNotFoundException(id, 'PATCH');
     }
