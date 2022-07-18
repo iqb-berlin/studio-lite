@@ -1,8 +1,9 @@
 # Studio Lite
 
-This project explores frameworks: Nx for a web application in one repo, containing an Angular frontend and a NestJS backend. If successful, this project will replace the [IQB-Teststudio](https://github.com/iqb-berlin/teststudio-lite-setup#readme) written in Angular and php (several separated repos).
+This project replaces the [IQB-Teststudio](https://github.com/iqb-berlin/teststudio-lite-setup#readme). The backend is refactored in nestjs and three separate repositories have been merged into this one. This step increases the efficiency of build and test pipeline and prepares the implementation of websocket based features.
 
-Please see this code as a draft. We check in all secrets, so this application should never go online. Feel free to check out and play around.
+# Do not install
+This project is still in beta state. We do not build images for dockerhub yet, so it's not possible to install it via the docker images way. But you can check out the code and build your own application.
 
 ### Database
 This project relies on a database locally running in a docker container. To start the db use the command 'make dev-db-up'. The first start initializes the db with base data automatically. To stop the db, please use the command 'make dev-db-down'.
