@@ -2,12 +2,16 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 create table public.user
 (
-  id          serial
+  id                     serial
     primary key,
-  name        varchar(50)  not null,
-  password    varchar(100) not null,
-  is_admin    boolean default false,
-  description text
+  name                   varchar(50)  not null,
+  password               varchar(100) not null,
+  is_admin               boolean default false,
+  description            text,
+  last_name              varchar(100),
+  first_name             varchar(100),
+  email                  varchar(100),
+  email_publish_approved boolean default false
 );
 
 create table public.workspace_group
@@ -37,10 +41,6 @@ create table workspace_user
   user_id                integer not null
     references "user"
       on delete cascade,
-  last_name              varchar(100),
-  first_name             varchar(100),
-  email                  varchar(100),
-  email_publish_approved boolean default false,
   primary key (workspace_id, user_id)
 );
 
