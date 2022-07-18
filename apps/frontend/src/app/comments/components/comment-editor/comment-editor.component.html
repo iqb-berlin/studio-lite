@@ -1,0 +1,105 @@
+<form [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      (reset)="onReset()">
+  <div>
+    <div fxLayout="row"
+         class="editor-control-panel"
+         fxLayoutAlign="end">
+      <button type="button" mat-icon-button
+              matTooltip="{{'comment-editor.bold' | translate}}"
+              [matTooltipPosition]="'above'"
+              [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('bold')"
+              (click)="toggleBold()">
+        <mat-icon>format_bold</mat-icon>
+      </button>
+      <button type="button" mat-icon-button
+              matTooltip="{{'comment-editor.italic' | translate}}"
+              [matTooltipPosition]="'above'"
+              [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('italic')"
+              (click)="toggleItalic()">
+        <mat-icon>format_italic</mat-icon>
+      </button>
+      <button type="button" mat-icon-button
+              matTooltip="{{'comment-editor.underline' | translate}}"
+              [matTooltipPosition]="'above'"
+              [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('underline')"
+              (click)="toggleUnderline()" style="text-decoration: underline">
+        <mat-icon>format_underlined</mat-icon>
+      </button>
+      <button type="button" mat-icon-button
+              matTooltip="{{'comment-editor.superscript' | translate}}"
+              [matTooltipPosition]="'above'"
+              [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('superscript')"
+              (click)="toggleSuperscript()">
+        <mat-icon>superscript</mat-icon>
+      </button>
+      <button type="button" mat-icon-button
+              matTooltip="{{'comment-editor.subscript' | translate}}"
+              [matTooltipPosition]="'above'"
+              [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('subscript')"
+              (click)="toggleSubscript()">
+        <mat-icon>subscript</mat-icon>
+      </button>
+      <button type="button" mat-icon-button
+              matTooltip="{{'comment-editor.strike' | translate}}"
+              [matTooltipPosition]="'above'"
+              [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('strike')"
+              (click)="toggleStrike()">
+        <mat-icon>strikethrough_s</mat-icon>
+      </button>
+      <div fxLayout="row"
+           [style.background-color]="selectedFontColor"
+           [style.margin-right.px]="1">
+        <button type="button"
+                mat-icon-button
+                matTooltip="{{'comment-editor.text-color' | translate}}"
+                (click)="applyFontColor()">
+          <mat-icon>format_color_text</mat-icon>
+        </button>
+        <mat-select (click)="textColorInput.click()"></mat-select>
+        <input matInput
+               type="color"
+               #textColorInput hidden
+               (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
+      </div>
+      <div fxLayout="row"
+           [style.background-color]="selectedHighlightColor">
+        <button type="button"
+                mat-icon-button
+                matTooltip="{{'comment-editor.text-background' | translate}}"
+                (click)="applyHighlightColor()">
+          <mat-icon>format_color_fill</mat-icon>
+        </button>
+        <mat-select (click)="textHighlightColorInput.click()"></mat-select>
+        <input matInput
+               type="color"
+               #textHighlightColorInput hidden
+               (input)="selectedHighlightColor = $any($event.target).value; applyHighlightColor()">
+      </div>
+    </div>
+    <tiptap-editor class="tip-tap-editor"
+                   [editor]="editor"
+                   [innerHTML]="initialText"
+                   mat-dialog-content
+                   formControlName="comment"
+                   [style.font-size.px]="18">
+    </tiptap-editor>
+
+    <button mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid">
+      {{ submitLabel | translate}}
+    </button>
+    <button mat-flat-button
+            type="reset">
+      {{'comment-editor.cancel' | translate}}
+    </button>
+  </div>
+</form>

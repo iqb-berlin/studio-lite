@@ -36,6 +36,14 @@ export class BackendService {
       );
   }
 
+  getUserFull(id: number): Observable<UserFullDto | null> {
+    return this.http
+      .get<UserFullDto>(`${this.serverUrl}admin/users/${id}`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
   addUser(newUser: CreateUserDto): Observable<boolean> {
     return this.http
       .post(`${this.serverUrl}admin/users`, newUser)

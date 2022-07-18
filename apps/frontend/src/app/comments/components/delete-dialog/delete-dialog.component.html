@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>
+  {{title}}
+</h1>
+<div mat-dialog-content>
+  <p>{{content}}</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button color='warn'
+          (click)="confirm()">
+    {{'delete-dialog.delete' | translate}}
+  </button>
+  <button mat-button
+          cdkFocusInitial
+          (click)="decline()">
+    {{'delete-dialog.cancel' | translate}}
+  </button>
+</div>
