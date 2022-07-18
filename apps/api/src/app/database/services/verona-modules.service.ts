@@ -1,8 +1,9 @@
 import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
+import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import VeronaModule from '../entities/verona-module.entity';
 import { AdminVeronaModulesNotFoundException } from '../../exceptions/admin-verona-modules-not-found.exception';
 
@@ -41,6 +42,7 @@ export class VeronaModulesService {
       if (!type || veronaModule.metadata.type === type) {
         returnVeronaModules.push(<VeronaModuleInListDto>{
           key: veronaModule.key,
+          sortKey: VeronaModuleKeyCollection.getSortKey(veronaModule.key),
           metadata: veronaModule.metadata,
           fileSize: veronaModule.file_size,
           fileDateTime: veronaModule.file_datetime
@@ -51,7 +53,6 @@ export class VeronaModulesService {
   }
 
   async upload(fileData: Buffer) {
-    this.logger.log('Uploading verona module.');
     const fileAsString = fileData.toString('utf8');
     const htmlDocument = cheerio.load(fileAsString);
     const firstScriptElement = htmlDocument('script[type="application/ld+json"]').first();
@@ -61,22 +62,16 @@ export class VeronaModulesService {
       const veronaModuleMetadata = VeronaModuleMetadataDto.getFromJsonLd(scriptContentAsJson);
       if (veronaModuleMetadata) {
         const moduleKey = VeronaModuleMetadataDto.getKey(veronaModuleMetadata);
-        const existingModule = await this.veronaModulesRepository.find({
+        const existingModule = await this.veronaModulesRepository.findOne({
           where: { key: moduleKey },
-          select: ['key']
+          select: { key: true }
         });
-        if (existingModule && existingModule.length > 0) {
-          await getConnection()
-            .createQueryBuilder()
-            .update(VeronaModule)
-            .set({
-              metadata: veronaModuleMetadata,
-              file: fileData,
-              fileDateTime: new Date().toISOString(),
-              fileSize: fileAsString.length
-            })
-            .where('key = :key', { key: moduleKey })
-            .execute();
+        if (existingModule) {
+          existingModule.metadata = veronaModuleMetadata;
+          existingModule.file = fileData;
+          existingModule.fileDateTime = new Date();
+          existingModule.fileSize = fileAsString.length;
+          await this.veronaModulesRepository.save(existingModule);
         } else {
           const newFile = await this.veronaModulesRepository.create({
             key: moduleKey,

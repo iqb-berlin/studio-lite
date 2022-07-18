@@ -38,16 +38,19 @@
       <div fxLayout="row" fxLayoutAlign="space-between start">
         <div fxFlex="40%">{{'modules.editor-name' | translate}}</div>
         <app-select-module #editor [moduleList]="this.appService.editorList"
+                           [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="editor"></app-select-module>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between start">
         <div fxFlex="40%">{{'modules.player-name' | translate}}</div>
         <app-select-module #player [moduleList]="this.appService.playerList"
+                           [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="player"></app-select-module>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between start">
         <div fxFlex="40%">{{'modules.schemer-name' | translate}}</div>
         <app-select-module #schemer [moduleList]="this.appService.schemerList"
+                           [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="schemer"></app-select-module>
       </div>
     </div>
