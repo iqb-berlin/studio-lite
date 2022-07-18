@@ -31,12 +31,16 @@ create table public.workspace
 
 create table workspace_user
 (
-  workspace_id integer not null
+  workspace_id           integer not null
     references workspace
       on delete cascade,
-  user_id      integer not null
+  user_id                integer not null
     references "user"
       on delete cascade,
+  last_name              varchar(100),
+  first_name             varchar(100),
+  email                  varchar(100),
+  email_publish_approved boolean default false,
   primary key (workspace_id, user_id)
 );
 
@@ -60,7 +64,8 @@ create table public.unit
   name                    varchar(100),
   metadata                jsonb,
   variables               jsonb,
-  scheme                  jsonb,
+  scheme                  text,
+  scheme_type             varchar(50),
   editor                  varchar(50),
   player                  varchar(50),
   schemer                 varchar(50),
@@ -91,4 +96,31 @@ create table public.verona_module
   file          bytea,
   file_size     integer                  default 0,
   file_datetime timestamp with time zone default now()
+);
+
+create table public.workspace_group_admin
+(
+  workspace_group_id integer not null
+    references workspace_group
+      on delete cascade,
+  user_id      integer not null
+    references "user"
+      on delete cascade,
+  primary key (workspace_group_id, user_id)
+);
+
+create table unit_comment
+(
+  id         serial not null
+    constraint unit_comment_pk
+      primary key,
+  body       text,
+  user_name  varchar(100),
+  user_id    integer,
+  parent_id  integer,
+  unit_id    integer not null
+    references unit
+      on delete cascade,
+  created_at timestamp with time zone default now(),
+  changed_at timestamp with time zone default now()
 );
