@@ -14,7 +14,7 @@ import { AppService } from '../app.service';
             <mat-label>Voreingestellter Editor</mat-label>
             <mat-select placeholder="Editor" formControlName="editorSelector">
               <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of appService.editorList.getEntries()" [value]="m.key">
+              <mat-option *ngFor="let m of appService.editorList.getEntries(false)" [value]="m.key">
                 {{m.metadata?.name}} {{m.metadata?.version}}
               </mat-option>
             </mat-select>
@@ -23,7 +23,7 @@ import { AppService } from '../app.service';
             <mat-label>Voreingestellter Player</mat-label>
             <mat-select placeholder="Player" formControlName="playerSelector">
               <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of appService.playerList.getEntries()" [value]="m.key">
+              <mat-option *ngFor="let m of appService.playerList.getEntries(false)" [value]="m.key">
                 {{m.metadata?.name}} {{m.metadata?.version}}
               </mat-option>
             </mat-select>
@@ -32,7 +32,7 @@ import { AppService } from '../app.service';
             <mat-label>Voreingestellter Schemer</mat-label>
             <mat-select placeholder="Kodierung" formControlName="schemerSelector">
               <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of appService.schemerList.getEntries()" [value]="m.key">
+              <mat-option *ngFor="let m of appService.schemerList.getEntries(false)" [value]="m.key">
                 {{m.metadata?.name}} {{m.metadata?.version}}
               </mat-option>
             </mat-select>

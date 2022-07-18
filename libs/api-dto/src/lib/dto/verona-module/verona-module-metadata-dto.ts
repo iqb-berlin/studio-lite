@@ -20,6 +20,9 @@ export class VeronaModuleMetadataDto {
   @ApiProperty()
   specVersion!: string;
 
+  @ApiProperty()
+  isStable!: boolean;
+
   static getFromJsonLd(jsonMetadata: {
     type: VeronaModuleType;
     id: string;
@@ -47,7 +50,8 @@ export class VeronaModuleMetadataDto {
         id: jsonMetadata.id,
         name: nameDe || (nameEn || jsonMetadata.id),
         version: jsonMetadata.version,
-        specVersion: jsonMetadata.specVersion
+        specVersion: jsonMetadata.specVersion,
+        isStable: !VeronaModuleMetadataDto.isPreStableVersion(jsonMetadata.version)
       };
     } else if (jsonMetadata['@type']) {
       const nameList: { [x: string]: string } = jsonMetadata.name as { [x: string]: string };
@@ -56,15 +60,22 @@ export class VeronaModuleMetadataDto {
         id: jsonMetadata['@id'],
         name: nameList['de'] || (nameList['en'] || jsonMetadata['@id']),
         version: jsonMetadata.version,
-        specVersion: jsonMetadata.apiVersion
+        specVersion: jsonMetadata.apiVersion,
+        isStable: !VeronaModuleMetadataDto.isPreStableVersion(jsonMetadata.version)
       };
     }
     return returnData;
   }
 
   static getKey(metadata: VeronaModuleMetadataDto): string {
+    if (VeronaModuleMetadataDto.isPreStableVersion(metadata.version)) return `${metadata.id}@${metadata.version}`;
     const pattern = /^(\d+\.\d+)/g;
     const matches = pattern.exec(metadata.version);
     return matches ? `${metadata.id}@${matches[1]}` : `${metadata.id}@${metadata.version}`;
+  }
+
+  static isPreStableVersion(version: string): boolean {
+    const regexPatternSuffix = /.\d+-[a-z]+\d+$/;
+    return !!regexPatternSuffix.exec(version);
   }
 }
