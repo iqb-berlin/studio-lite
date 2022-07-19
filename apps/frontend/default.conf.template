@@ -3,6 +3,8 @@ server {
     listen  [::]:80;
     server_name  localhost;
 
+    client_max_body_size 50M;
+
     #access_log  /var/log/nginx/host.access.log  main;
 
     location / {
@@ -21,7 +23,6 @@ server {
 
     # pass api calls to studio-lite backend host
     location /api/ {
-        client_max_body_size 50M;
         proxy_pass  http://${API_HOST}:${API_PORT};
     }
 
