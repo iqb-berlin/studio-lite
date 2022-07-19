@@ -19,8 +19,9 @@ server {
         root   /usr/share/nginx/html;
     }
 
-    # pass api calls to PersonalDB backend host
+    # pass api calls to studio-lite backend host
     location /api/ {
+        client_max_body_size 50M;
         proxy_pass  http://${API_HOST}:${API_PORT};
     }
 
