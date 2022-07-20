@@ -1,4 +1,4 @@
-import { json, raw, urlencoded } from 'express';
+import { json } from 'express';
 
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -23,8 +23,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ limit: '50mb', parameterLimit: 100000, extended: true }));
-  app.use(raw({ limit: '50mb' }));
   app.setGlobalPrefix(globalPrefix);
   app.enableCors();
 
