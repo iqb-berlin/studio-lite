@@ -83,7 +83,8 @@
     "superscript": "Hochgestellt",
     "strike": "Durchgestrichen",
     "text-color": "Textfarbe",
-    "text-background": "Texthintergrund"
+    "text-background": "Texthintergrund",
+    "enumeration": "Aufzählung"
   },
   "comment": {
     "edit": "Bearbeiten",
