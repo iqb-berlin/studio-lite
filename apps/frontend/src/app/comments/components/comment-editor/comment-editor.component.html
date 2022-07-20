@@ -82,6 +82,13 @@
                #textHighlightColorInput hidden
                (input)="selectedHighlightColor = $any($event.target).value; applyHighlightColor()">
       </div>
+      <button type="button"
+              mat-icon-button
+              matTooltip="{{'comment-editor.enumeration' | translate}}"
+              [class.active]="editor.isActive('bulletList')"
+              (click)="toggleBulletList()">
+        <mat-icon>format_list_bulleted</mat-icon>
+      </button>
     </div>
     <tiptap-editor class="tip-tap-editor"
                    [editor]="editor"

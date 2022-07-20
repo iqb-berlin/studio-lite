@@ -10,6 +10,7 @@ import { Subscript } from '@tiptap/extension-subscript';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
+import { BulletListExtension } from './extensions/bullet-list';
 
 @Component({
   selector: 'studio-lite-comment-editor',
@@ -28,6 +29,7 @@ export class CommentEditorComponent {
   selectedFontSize: string = '20px';
   selectedFontColor: string = 'lightgrey';
   selectedHighlightColor: string = 'lightgrey';
+  bulletListStyle: string = 'disc';
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
@@ -35,7 +37,7 @@ export class CommentEditorComponent {
     });
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
-        TextStyle, Color,
+        TextStyle, Color, BulletListExtension,
         Highlight.configure({
           multicolor: true
         })]
@@ -76,6 +78,11 @@ export class CommentEditorComponent {
 
   toggleSubscript(): void {
     this.editor.chain().toggleSubscript().focus().run();
+  }
+
+  toggleBulletList(): void {
+    this.editor.chain().toggleBulletList().focus().run();
+    this.editor.commands.setBulletListStyle(this.bulletListStyle);
   }
 
   applyFontColor(): void {
