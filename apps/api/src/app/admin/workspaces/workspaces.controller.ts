@@ -106,7 +106,6 @@ export class WorkspacesController {
     return this.userService.findAllUsers(id);
   }
 
-  // TODO: Werden hier neue User angelegt? Sind es dann nicht eher multiple Posts?
   @Patch(':id/users')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
