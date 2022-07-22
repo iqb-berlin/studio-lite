@@ -1,12 +1,12 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
+  Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Patch, Post, Req, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
-  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
+  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { ApiUnauthorizedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
@@ -19,6 +19,7 @@ import { CommentDeleteGuard } from './comment-delete.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
+  private readonly logger = new Logger(UnitService.name);
   constructor(
     private unitService: UnitService
   ) {}
@@ -95,10 +96,21 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiTags('workspace unit')
-  async findOnesComments(
-    @Param('id', ParseIntPipe) unitId: number
-  ): Promise<UnitCommentDto[]> {
+  async findOnesComments(@Param('id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitService.findOnesComments(unitId);
+  }
+
+  @Patch(':id/comments')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
+  @ApiTags('workspace unit')
+  async patchOnesUnitUserLastSeen(
+    @Param('id', ParseIntPipe) unitId: number,
+      @Body() updateUnitUser: UpdateUnitUserDto
+  ): Promise<void> {
+    return this.unitService.patchUnitUserCommentsLastSeen(unitId, updateUnitUser);
   }
 
   @Post(':id/comments')

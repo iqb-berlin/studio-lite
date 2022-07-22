@@ -96,6 +96,7 @@ export class CommentsComponent implements OnChanges {
     };
     this.commentsService
       .createComment(comment, this.workspaceId, this.unitId)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.activeComment = null;
         this.sortComments();
@@ -113,9 +114,10 @@ export class CommentsComponent implements OnChanges {
           const latestComment = this.comments
             .reduce((previousComment, currentComment) => (
               previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));
-          setTimeout(() => {
-            this.latestCommentId.next(latestComment.id);
-          });
+          const updateUnitUser = { lastSeenCommentChangedAt: latestComment.changedAt, userId: this.userId };
+          this.commentsService.updateComments(updateUnitUser, this.workspaceId, this.unitId)
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(() => this.latestCommentId.next(latestComment.id));
         }
       });
   }
