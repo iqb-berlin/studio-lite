@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
-  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
+  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import UnitComment from '../entities/unit-comment.entity';
 import { UnitCommentNotFoundException } from '../../exceptions/unit-comment-not-found.exception';
+import UnitUser from '../entities/unit-user.entity';
+import WorkspaceUser from '../entities/workspace-user.entity';
 
 @Injectable()
 export class UnitService {
@@ -20,11 +22,15 @@ export class UnitService {
     @InjectRepository(UnitDefinition)
     private unitDefinitionsRepository: Repository<UnitDefinition>,
     @InjectRepository(UnitComment)
-    private unitCommentsRepository: Repository<UnitComment>
+    private unitCommentsRepository: Repository<UnitComment>,
+    @InjectRepository(UnitUser)
+    private unitUserRepository: Repository<UnitUser>,
+    @InjectRepository(WorkspaceUser)
+    private workspaceUserRepository: Repository<WorkspaceUser>
   ) {}
 
   async findAll(workspaceId: number): Promise<UnitInListDto[]> {
-    return this.unitsRepository.find({
+    const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
       select: {
@@ -34,6 +40,23 @@ export class UnitService {
         groupName: true
       }
     });
+    return Promise.all(units.map(async unit => {
+      const comment = await this.findOnesLastChangedComment(unit.id);
+      return {
+        ...unit,
+        lastCommentChangedAt: comment ? comment.changedAt : new Date(2022, 6)
+      };
+    }));
+  }
+
+  async createUnitUser(userId: number, unitId: number): Promise<void> {
+    this.logger.log(`creating UnitUser with userId ${userId} & unitId ${unitId}`);
+    const unitUser = await this.unitUserRepository.create(<UnitUser>{
+      userId: userId,
+      unitId: unitId,
+      lastSeenCommentChangedAt: new Date(2022, 6)
+    });
+    await this.unitUserRepository.save(unitUser);
   }
 
   async create(workspaceId: number, unit: CreateUnitDto): Promise<number> {
@@ -45,6 +68,13 @@ export class UnitService {
     const newUnit = await this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     await this.unitsRepository.save(newUnit);
+
+    const workspaceUsers = await this.workspaceUserRepository
+      .find({ where: { workspaceId: workspaceId } });
+    await Promise.all(workspaceUsers.map(async workspaceUser => {
+      await this.createUnitUser(workspaceUser.userId, newUnit.id);
+    }));
+
     if (unit.createFrom) {
       const unitSourceMetadata = await this.findOnesMetadata(unit.createFrom);
       if (unitSourceMetadata) {
@@ -202,16 +232,44 @@ export class UnitService {
 
   async findOnesComments(unitId: number): Promise<UnitCommentDto[]> {
     this.logger.log(`Returning comments for unit with id: ${unitId}`);
-    return this.unitCommentsRepository.find({ where: { unitId: unitId } });
+    return this.unitCommentsRepository
+      .find({
+        where: { unitId: unitId }
+      });
+  }
+
+  private async findOnesLastChangedComment(unitId: number): Promise<UnitCommentDto | null> {
+    const comments = await this.unitCommentsRepository
+      .find({
+        where: { unitId: unitId },
+        order: { changedAt: 'DESC' }
+      });
+    if (comments && comments.length) {
+      return comments[0];
+    }
+    return null;
   }
 
   async createComment(unitComment: CreateUnitCommentDto): Promise<number> {
-    this.logger.log(`Creating a comment for unit wit id: ${unitComment.unitId}`);
+    this.logger.log(`Creating a comment for unit with id: ${unitComment.unitId}`);
     const timeStamp = new Date();
     const newComment = this.unitCommentsRepository
       .create({ ...unitComment, createdAt: timeStamp, changedAt: timeStamp });
     await this.unitCommentsRepository.save(newComment);
     return newComment.id;
+  }
+
+  async patchUnitUserCommentsLastSeen(
+    unitId: number,
+    updateUnitUser: UpdateUnitUserDto
+  ): Promise<void> {
+    this.logger.log('Update lastCommentChangedAt of UnitUser');
+    const unitUser = await this.unitUserRepository
+      .findOne({ where: { userId: updateUnitUser.userId, unitId: unitId } });
+    if (unitUser) {
+      unitUser.lastSeenCommentChangedAt = updateUnitUser.lastSeenCommentChangedAt;
+      await this.unitUserRepository.save(unitUser);
+    }
   }
 
   async removeComment(id: number): Promise<void> {
