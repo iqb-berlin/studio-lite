@@ -187,7 +187,7 @@ export class UsersService {
   }
 
   async create(user: CreateUserDto): Promise<number> {
-    this.logger.log(`Creating workspace with name: ${user.name}`);
+    this.logger.log(`Creating user with name: ${user.name}`);
     user.password = UsersService.getPasswordHash(user.password);
     const newUser = await this.usersRepository.create(user);
     await this.usersRepository.save(newUser);
@@ -318,7 +318,7 @@ export class UsersService {
   }
 
   async setUsersByWorkspace(workspaceId: number, users: number[]) {
-    this.logger.log(`Creating ${users.length} users for workspaceId: ${workspaceId}`);
+    this.logger.log(`Adding ${users.length} users for workspaceId: ${workspaceId}`);
     return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
       await Promise.all(users.map(async userId => {
         const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
