@@ -29,4 +29,4 @@ export { UserFullDto } from './lib/dto/user/user-full-dto';
 export { UnitCommentDto } from './lib/dto/unit/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dto/unit/create-unit-comment-dto';
 export { UpdateUnitCommentDto } from './lib/dto/unit/update-unit-comment-dto';
-export { UpdateUnitUserDto } from './lib/dto/unit/update-unit-user-dto';
+export { UpdateUnitUserDto } from './lib/dto/unit-user/update-unit-user-dto';
