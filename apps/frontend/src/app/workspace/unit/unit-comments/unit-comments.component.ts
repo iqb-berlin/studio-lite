@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../../admin/backend.service';
+import { BackendService } from '../../../backend.service';
 
 @Component({
   selector: 'studio-lite-unit-comments',
@@ -24,21 +24,19 @@ export class UnitCommentsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.userId = this.appService.authData.userId;
-      this.workspaceService.selectedUnit$
-        .subscribe(unitId => {
-          this.unitId = unitId;
-          this.workspaceId = this.workspaceService.selectedWorkspaceId;
-        });
-      this.backendService.getUserFull(this.appService.authData.userId)
-        .subscribe(user => {
-          if (user) {
-            const displayName = (user.lastName ? user.lastName : user.name) as string;
-            this.userName = user.firstName ? `${displayName}, ${user.firstName}` : displayName;
-          }
-        });
-    });
+    this.workspaceService.selectedUnit$
+      .subscribe(unitId => {
+        this.unitId = unitId;
+        this.workspaceId = this.workspaceService.selectedWorkspaceId;
+      });
+    this.backendService.getMyData()
+      .subscribe(myData => {
+        if (myData) {
+          this.userId = this.appService.authData.userId;
+          const displayName = (myData.lastName ? myData.lastName : this.appService.authData.userName) as string;
+          this.userName = myData.firstName ? `${displayName}, ${myData.firstName}` : displayName;
+        }
+      });
   }
 
   ngOnDestroy(): void {
