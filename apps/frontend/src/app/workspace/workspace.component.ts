@@ -124,7 +124,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   updateUnitList(unitToSelect?: number): void {
     let queryParams = new HttpParams();
-    queryParams = queryParams.append('withLastSeenTimeStamps', true);
+    queryParams = queryParams.append('withLastSeenCommentTimeStamp', true);
     this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams).subscribe(
       uResponse => {
         this.workspaceService.unitList = new UnitCollection(uResponse);

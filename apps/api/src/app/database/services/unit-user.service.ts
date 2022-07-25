@@ -26,7 +26,7 @@ export class UnitUserService {
     await this.unitUserRepository.save(unitUser);
   }
 
-  async findLastSeenTimestamp(userId: number, unitId: number): Promise<Date> {
+  async findLastSeenCommentTimestamp(userId: number, unitId: number): Promise<Date> {
     this.logger.log(`Retrieving last seen comment timestamp for userId ${userId} & unitId ${unitId}`);
     const unitUser = await this.unitUserRepository.findOne({
       where: {
@@ -41,7 +41,7 @@ export class UnitUserService {
     unitId: number,
     updateUnitUser: UpdateUnitUserDto
   ): Promise<void> {
-    this.logger.log('Update lastCommentChangedAt of UnitUser');
+    this.logger.log('Update lastSeenCommentChangedAt of UnitUser');
     const unitUser = await this.unitUserRepository
       .findOne({ where: { userId: updateUnitUser.userId, unitId: unitId } });
     if (unitUser) {

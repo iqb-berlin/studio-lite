@@ -27,7 +27,7 @@ export class UnitService {
 
   async findAll(workspaceId: number,
                 userId:number = null,
-                withLastSeenTimeStamps:boolean = null): Promise<UnitInListDto[]> {
+                withLastSeenCommentTimeStamp:boolean = null): Promise<UnitInListDto[]> {
     this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
@@ -46,7 +46,7 @@ export class UnitService {
         lastCommentChangedAt:
           comment ? comment.changedAt : new Date(2022, 6),
         lastSeenCommentChangedAt:
-          withLastSeenTimeStamps ? await this.unitUserService.findLastSeenTimestamp(userId, unit.id) : null
+          withLastSeenCommentTimeStamp ? await this.unitUserService.findLastSeenCommentTimestamp(userId, unit.id) : null
       };
     }));
   }
