@@ -6,7 +6,7 @@ import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
-  Subscription, map, lastValueFrom
+  Subscription, map, lastValueFrom, takeUntil, Subject
 } from 'rxjs';
 import {
   ConfirmDialogComponent,
@@ -45,6 +45,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
   private uploadSubscription: Subscription | null = null;
+  private ngUnsubscribe = new Subject<void>();
   uploadProcessId = '';
   uploadUrl = '';
   uploadMessages: string[] = [];
@@ -118,7 +119,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.appBackendService.getModuleList('schemer').subscribe(moduleList => {
         this.appService.schemerList = new VeronaModuleCollection(moduleList);
       });
-      this.workspaceService.onCommentsUpdated.subscribe(() => this.updateUnitList());
+      this.workspaceService.onCommentsUpdated
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => this.updateUnitList());
     });
   }
 
@@ -549,5 +552,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (this.uploadSubscription !== null) {
       this.uploadSubscription.unsubscribe();
     }
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
