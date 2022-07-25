@@ -22,6 +22,7 @@ import { WorkspaceGroupAdminService } from './services/workspace-group-admin.ser
 import UnitComment from './entities/unit-comment.entity';
 import UnitUser from './entities/unit-user.entity';
 import { UnitUserService } from './services/unit-user.service';
+import { UnitCommentService } from './services/unit-comment.service';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { UnitUserService } from './services/unit-user.service';
     WorkspaceUserService,
     WorkspaceGroupAdminService,
     UnitService,
+    UnitCommentService,
     UnitUserService,
     VeronaModulesService,
     SettingService
@@ -101,6 +103,7 @@ import { UnitUserService } from './services/unit-user.service';
     Setting,
     UsersService,
     UnitService,
+    UnitCommentService,
     UnitUserService,
     WorkspaceService,
     WorkspaceGroupService,
