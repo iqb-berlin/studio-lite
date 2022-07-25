@@ -1,5 +1,5 @@
 <div class="comments-container">
-  <studio-lite-comments
+  <studio-lite-comments *ngIf="userId && unitId && workspaceId"
     [style.height.%]="100"
     [userName]="userName"
     [userId]="userId"
