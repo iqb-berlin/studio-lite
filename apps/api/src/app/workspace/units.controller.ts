@@ -36,12 +36,15 @@ export class UnitsController {
     type: [UnitInListDto]
   })
   @ApiQuery({
-    name: 'withLastSeenTimeStamps',
+    name: 'withLastSeenCommentTimeStamp',
     type: Boolean
   })
   @ApiTags('workspace')
-  async findAll(@Req() request, @WorkspaceId() workspaceId: number, @Query('withLastSeenTimeStamps' ) withLastSeenTimeStamps): Promise<UnitInListDto[]> {
-    return this.unitService.findAll(workspaceId, request.user.id, withLastSeenTimeStamps);
+  async findAll(
+    @Req() request,
+    @WorkspaceId() workspaceId: number,
+    @Query('withLastSeenCommentTimeStamp' ) withLastSeenCommentTimeStamp): Promise<UnitInListDto[]> {
+    return this.unitService.findAll(workspaceId, request.user.id, withLastSeenCommentTimeStamp);
   }
 
   @Get('units/metadata')
@@ -115,7 +118,7 @@ export class UnitsController {
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
   @ApiTags('workspace unit')
   async findLastSeenTimestamp(@Req() request, @Param('id', ParseIntPipe) unitId: number): Promise<Date> {
-    return this.unitUserService.findLastSeenTimestamp(request.user.id, unitId);
+    return this.unitUserService.findLastSeenCommentTimestamp(request.user.id, unitId);
   }
 
   @Patch(':id/comments')
