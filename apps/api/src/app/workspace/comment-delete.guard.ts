@@ -1,12 +1,12 @@
 import {
   CanActivate, ExecutionContext, Injectable, UnauthorizedException
 } from '@nestjs/common';
-import { UnitService } from '../database/services/unit.service';
+import { UnitCommentService } from '../database/services/unit-comment.service';
 
 @Injectable()
 export class CommentDeleteGuard implements CanActivate {
   constructor(
-    private unitService: UnitService
+    private unitCommentService: UnitCommentService
   ) {}
 
   // eslint-disable-next-line class-methods-use-this
@@ -16,7 +16,7 @@ export class CommentDeleteGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const userId = req.user.id;
     const commentId = req.params.id;
-    const comment = await this.unitService.findOneComment(commentId);
+    const comment = await this.unitCommentService.findOneComment(commentId);
     const canAccess = userId === comment.userId;
     if (!canAccess) {
       throw new UnauthorizedException();

@@ -2,15 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
-  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
+  CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import UnitComment from '../entities/unit-comment.entity';
-import { UnitCommentNotFoundException } from '../../exceptions/unit-comment-not-found.exception';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
+import { UnitCommentService } from './unit-comment.service';
 
 @Injectable()
 export class UnitService {
@@ -25,7 +24,8 @@ export class UnitService {
     private unitCommentsRepository: Repository<UnitComment>,
     @InjectRepository(WorkspaceUser)
     private workspaceUserRepository: Repository<WorkspaceUser>,
-    private unitUserService: UnitUserService
+    private unitUserService: UnitUserService,
+    private unitCommentService: UnitCommentService
   ) {}
 
   async findAll(workspaceId: number): Promise<UnitInListDto[]> {
@@ -40,7 +40,7 @@ export class UnitService {
       }
     });
     return Promise.all(units.map(async unit => {
-      const comment = await this.findOnesLastChangedComment(unit.id);
+      const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id);
       return {
         ...unit,
         lastCommentChangedAt: comment ? comment.changedAt : new Date(2022, 6)
@@ -217,61 +217,6 @@ export class UnitService {
       scheme: unit.scheme,
       schemeType: unit.schemeType
     };
-  }
-
-  async findOnesComments(unitId: number): Promise<UnitCommentDto[]> {
-    this.logger.log(`Returning comments for unit with id: ${unitId}`);
-    return this.unitCommentsRepository
-      .find({
-        where: { unitId: unitId }
-      });
-  }
-
-  private async findOnesLastChangedComment(unitId: number): Promise<UnitCommentDto | null> {
-    const comments = await this.unitCommentsRepository
-      .find({
-        where: { unitId: unitId },
-        order: { changedAt: 'DESC' }
-      });
-    if (comments && comments.length) {
-      return comments[0];
-    }
-    return null;
-  }
-
-  async createComment(unitComment: CreateUnitCommentDto): Promise<number> {
-    this.logger.log(`Creating a comment for unit with id: ${unitComment.unitId}`);
-    const timeStamp = new Date();
-    const newComment = this.unitCommentsRepository
-      .create({ ...unitComment, createdAt: timeStamp, changedAt: timeStamp });
-    await this.unitCommentsRepository.save(newComment);
-    return newComment.id;
-  }
-
-  async removeComment(id: number): Promise<void> {
-    this.logger.log(`Deleting comment with id: ${id}`);
-    await this.unitCommentsRepository.delete(id);
-  }
-
-  async findOneComment(id: number): Promise<UnitCommentDto> {
-    this.logger.log(`Accessing comment with id: ${id}`);
-    const comment = await this.unitCommentsRepository.findOne({ where: { id: id } });
-    if (comment) {
-      return comment;
-    }
-    throw new UnitCommentNotFoundException(id, 'DELETE');
-  }
-
-  async patchCommentBody(id: number, comment: UpdateUnitCommentDto): Promise<void> {
-    this.logger.log(`Updating comment with id: ${id}`);
-    const commentToUpdate = await this.unitCommentsRepository.findOne({ where: { id: id } });
-    if (commentToUpdate) {
-      commentToUpdate.body = comment.body;
-      commentToUpdate.changedAt = new Date();
-      await this.unitCommentsRepository.save(commentToUpdate);
-    } else {
-      throw new UnitCommentNotFoundException(id, 'PATCH');
-    }
   }
 
   async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto) {
