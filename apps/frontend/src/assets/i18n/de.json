@@ -69,7 +69,8 @@
       "preview": "Vorschau",
       "schemer": "Kodierung",
       "comments": "Kommentare"
-    }
+    },
+    "new-comments": "Neue Kommentare"
   },
   "comment-editor": {
     "write": "Verfassen",

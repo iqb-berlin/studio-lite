@@ -4,6 +4,7 @@
     [userName]="userName"
     [userId]="userId"
     [unitId]="unitId"
-    [workspaceId]="workspaceId">
+    [workspaceId]="workspaceId"
+    (onCommentsUpdated)="workspaceService.onCommentsUpdated.emit()">
   </studio-lite-comments>
 </div>

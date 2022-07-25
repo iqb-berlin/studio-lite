@@ -25,7 +25,10 @@ export class UnitService {
     private unitCommentService: UnitCommentService
   ) {}
 
-  async findAll(workspaceId: number): Promise<UnitInListDto[]> {
+  async findAll(workspaceId: number,
+                userId:number = null,
+                withLastSeenTimeStamps:boolean = null): Promise<UnitInListDto[]> {
+    this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
@@ -40,7 +43,10 @@ export class UnitService {
       const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id);
       return {
         ...unit,
-        lastCommentChangedAt: comment ? comment.changedAt : new Date(2022, 6)
+        lastCommentChangedAt:
+          comment ? comment.changedAt : new Date(2022, 6),
+        lastSeenCommentChangedAt:
+          withLastSeenTimeStamps ? await this.unitUserService.findLastSeenTimestamp(userId, unit.id) : null
       };
     }));
   }
