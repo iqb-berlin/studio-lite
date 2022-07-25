@@ -20,7 +20,8 @@ export class UnitCommentService {
     this.logger.log(`Returning comments for unit with id: ${unitId}`);
     return this.unitCommentsRepository
       .find({
-        where: { unitId: unitId }
+        where: { unitId: unitId },
+        order: { createdAt: 'ASC' }
       });
   }
 
