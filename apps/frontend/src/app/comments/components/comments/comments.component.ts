@@ -28,7 +28,7 @@ export class CommentsComponent implements OnChanges {
 
   constructor(
     private translateService: TranslateService,
-    private commentsService: BackendService,
+    private backendService: BackendService,
     public dialog: MatDialog
   ) {}
 
@@ -37,18 +37,18 @@ export class CommentsComponent implements OnChanges {
     const workspaceId = 'workspaceId';
     if ((changes[unitId] && changes[unitId].currentValue) ||
     (changes[workspaceId] && changes[workspaceId].currentValue)) {
-      this.sortComments();
+      this.getUpdatedComments();
     }
   }
 
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
     const updateComment = { body: text, userId: this.userId };
-    this.commentsService
+    this.backendService
       .updateComment(commentId, updateComment, this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.activeComment = null;
-        this.sortComments();
+        this.getUpdatedComments();
       });
   }
 
@@ -75,10 +75,10 @@ export class CommentsComponent implements OnChanges {
   }
 
   private confirmDelete(commentId: number): void {
-    this.commentsService.deleteComment(commentId, this.workspaceId, this.unitId)
+    this.backendService.deleteComment(commentId, this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.sortComments();
+        this.getUpdatedComments();
       });
   }
 
@@ -94,17 +94,17 @@ export class CommentsComponent implements OnChanges {
       parentId: parentId,
       unitId: this.unitId
     };
-    this.commentsService
+    this.backendService
       .createComment(comment, this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.activeComment = null;
-        this.sortComments();
+        this.getUpdatedComments();
       });
   }
 
-  private sortComments(): void {
-    this.commentsService.getComments(this.workspaceId, this.unitId)
+  private getUpdatedComments(): void {
+    this.backendService.getComments(this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(comments => {
         this.comments = comments;
@@ -113,7 +113,7 @@ export class CommentsComponent implements OnChanges {
             .reduce((previousComment, currentComment) => (
               previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));
           const updateUnitUser = { lastSeenCommentChangedAt: latestComment.changedAt, userId: this.userId };
-          this.commentsService.updateComments(updateUnitUser, this.workspaceId, this.unitId)
+          this.backendService.updateComments(updateUnitUser, this.workspaceId, this.unitId)
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(() => this.latestCommentId.next(latestComment.id));
         }
