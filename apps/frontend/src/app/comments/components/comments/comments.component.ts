@@ -107,9 +107,7 @@ export class CommentsComponent implements OnChanges {
     this.commentsService.getComments(this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(comments => {
-        this.comments = comments.sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
+        this.comments = comments;
         if (this.comments.length) {
           const latestComment = this.comments
             .reduce((previousComment, currentComment) => (
