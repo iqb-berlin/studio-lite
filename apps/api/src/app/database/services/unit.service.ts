@@ -6,7 +6,6 @@ import {
 } from '@studio-lite-lib/api-dto';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
-import UnitComment from '../entities/unit-comment.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
@@ -20,8 +19,6 @@ export class UnitService {
     private unitsRepository: Repository<Unit>,
     @InjectRepository(UnitDefinition)
     private unitDefinitionsRepository: Repository<UnitDefinition>,
-    @InjectRepository(UnitComment)
-    private unitCommentsRepository: Repository<UnitComment>,
     @InjectRepository(WorkspaceUser)
     private workspaceUserRepository: Repository<WorkspaceUser>,
     private unitUserService: UnitUserService,
