@@ -16,12 +16,14 @@ import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
 import { CommentWriteGuard } from './comment-write.guard';
 import { CommentDeleteGuard } from './comment-delete.guard';
+import { UnitUserService } from '../database/services/unit-user.service';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
   private readonly logger = new Logger(UnitService.name);
   constructor(
-    private unitService: UnitService
+    private unitService: UnitService,
+    private unitUserService: UnitUserService
   ) {}
 
   @Get('units')
@@ -110,7 +112,7 @@ export class UnitsController {
     @Param('id', ParseIntPipe) unitId: number,
       @Body() updateUnitUser: UpdateUnitUserDto
   ): Promise<void> {
-    return this.unitService.patchUnitUserCommentsLastSeen(unitId, updateUnitUser);
+    return this.unitUserService.patchUnitUserCommentsLastSeen(unitId, updateUnitUser);
   }
 
   @Post(':id/comments')

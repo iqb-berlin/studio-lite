@@ -18,6 +18,7 @@ import { AdminWorkspaceNotFoundException } from '../../exceptions/admin-workspac
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
+import { UnitUserService } from './unit-user.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -34,7 +35,8 @@ export class WorkspaceService {
     private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
     private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
-    private unitService: UnitService
+    private unitService: UnitService,
+    private unitUserService: UnitUserService
   ) {
   }
 
@@ -75,7 +77,7 @@ export class WorkspaceService {
         const units = await this.unitService.findAll(workspaceId);
         this.logger.log(`Found units: ${units.length}.`);
         await Promise.all(units.map(async unit => {
-          await this.unitService.createUnitUser(userId, unit.id);
+          await this.unitUserService.createUnitUser(userId, unit.id);
         }));
       }));
     });

@@ -21,6 +21,7 @@ import WorkspaceGroupAdmin from './entities/workspace-group-admin.entity';
 import { WorkspaceGroupAdminService } from './services/workspace-group-admin.service';
 import UnitComment from './entities/unit-comment.entity';
 import UnitUser from './entities/unit-user.entity';
+import { UnitUserService } from './services/unit-user.service';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import UnitUser from './entities/unit-user.entity';
     WorkspaceUserService,
     WorkspaceGroupAdminService,
     UnitService,
+    UnitUserService,
     VeronaModulesService,
     SettingService
   ],
@@ -99,6 +101,7 @@ import UnitUser from './entities/unit-user.entity';
     Setting,
     UsersService,
     UnitService,
+    UnitUserService,
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceGroupAdminService,
