@@ -15,4 +15,7 @@ export class UnitInListDto {
 
   @ApiProperty()
   lastCommentChangedAt?: Date;
+
+  @ApiProperty()
+  lastSeenCommentChangedAt?: Date;
 }

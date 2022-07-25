@@ -22,6 +22,10 @@
            (click)="selectUnit(unit.id)"
            [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
           {{ unit.key }}{{ unit.name ? ' - ' + unit.name : ''}}
+          <div *ngIf="unit | hasNewComments"
+                    class="new-comments"
+                    [matTooltip]="'workspace.new-comments' | translate">
+          </div>
         </a>
       </mat-nav-list>
     </div>

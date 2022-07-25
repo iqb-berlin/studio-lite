@@ -1,8 +1,8 @@
 import {
-  Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Patch, Post, Req, UseGuards
+  Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
@@ -35,9 +35,13 @@ export class UnitsController {
   @ApiCreatedResponse({
     type: [UnitInListDto]
   })
+  @ApiQuery({
+    name: 'withLastSeenTimeStamps',
+    type: Boolean
+  })
   @ApiTags('workspace')
-  async findAll(@WorkspaceId() workspaceId: number): Promise<UnitInListDto[]> {
-    return this.unitService.findAll(workspaceId);
+  async findAll(@Req() request, @WorkspaceId() workspaceId: number, @Query('withLastSeenTimeStamps' ) withLastSeenTimeStamps): Promise<UnitInListDto[]> {
+    return this.unitService.findAll(workspaceId, request.user.id, withLastSeenTimeStamps);
   }
 
   @Get('units/metadata')
@@ -102,6 +106,16 @@ export class UnitsController {
   @ApiTags('workspace unit')
   async findOnesComments(@Param('id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitCommentService.findOnesComments(unitId);
+  }
+
+  @Get(':id/comments/last-seen')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
+  @ApiTags('workspace unit')
+  async findLastSeenTimestamp(@Req() request, @Param('id', ParseIntPipe) unitId: number): Promise<Date> {
+    return this.unitUserService.findLastSeenTimestamp(request.user.id, unitId);
   }
 
   @Patch(':id/comments')

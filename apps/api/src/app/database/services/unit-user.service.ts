@@ -17,13 +17,24 @@ export class UnitUserService {
   ) {}
 
   async createUnitUser(userId: number, unitId: number): Promise<void> {
-    this.logger.log(`creating UnitUser with userId ${userId} & unitId ${unitId}`);
+    this.logger.log(`Creating UnitUser with userId ${userId} & unitId ${unitId}`);
     const unitUser = await this.unitUserRepository.create(<UnitUser>{
       userId: userId,
       unitId: unitId,
       lastSeenCommentChangedAt: new Date(2022, 6)
     });
     await this.unitUserRepository.save(unitUser);
+  }
+
+  async findLastSeenTimestamp(userId: number, unitId: number): Promise<Date> {
+    this.logger.log(`Retrieving last seen comment timestamp for userId ${userId} & unitId ${unitId}`);
+    const unitUser = await this.unitUserRepository.findOne({
+      where: {
+        userId: userId,
+        unitId: unitId
+      }
+    });
+    return unitUser.lastSeenCommentChangedAt;
   }
 
   async patchUnitUserCommentsLastSeen(

@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnChanges, SimpleChanges
+  Component, EventEmitter, Input, OnChanges, Output, SimpleChanges
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
@@ -19,6 +19,7 @@ export class CommentsComponent implements OnChanges {
   @Input() userName!: string;
   @Input() unitId!: number;
   @Input() workspaceId!: number;
+  @Output() onCommentsUpdated = new EventEmitter<void>()
 
   comments: Comment[] = [];
   activeComment: ActiveCommentInterface | null = null;
@@ -30,7 +31,9 @@ export class CommentsComponent implements OnChanges {
     private translateService: TranslateService,
     private backendService: BackendService,
     public dialog: MatDialog
-  ) {}
+  ) {
+    this.latestCommentId.subscribe(() => this.onCommentsUpdated.emit());
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     const unitId = 'unitId';

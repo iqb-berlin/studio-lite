@@ -19,7 +19,7 @@ export class UnitCommentsComponent implements OnInit, OnDestroy {
 
   constructor(
     public appService: AppService,
-    private workspaceService: WorkspaceService,
+    public workspaceService: WorkspaceService,
     private backendService: BackendService
   ) {}
 
