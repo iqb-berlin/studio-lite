@@ -10,7 +10,6 @@ import { Subscript } from '@tiptap/extension-subscript';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
-import { BulletListExtension } from './extensions/bullet-list';
 
 @Component({
   selector: 'studio-lite-comment-editor',
@@ -37,7 +36,7 @@ export class CommentEditorComponent {
     });
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
-        TextStyle, Color, BulletListExtension,
+        TextStyle, Color,
         Highlight.configure({
           multicolor: true
         })]
@@ -82,7 +81,6 @@ export class CommentEditorComponent {
 
   toggleBulletList(): void {
     this.editor.chain().toggleBulletList().focus().run();
-    this.editor.commands.setBulletListStyle(this.bulletListStyle);
   }
 
   applyFontColor(): void {
