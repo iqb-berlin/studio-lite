@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { ActiveCommentInterface, ActiveCommentType } from '../../types/active-comment.interface';
+import { ActiveComment, ActiveCommentType } from '../../types/active.comment';
 import { Comment } from '../../types/comment';
 
 @Component({
@@ -12,13 +12,13 @@ import { Comment } from '../../types/comment';
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;
-  @Input() activeComment!: ActiveCommentInterface | null;
+  @Input() activeComment!: ActiveComment | null;
   @Input() replies!: Comment[];
   @Input() userId!: number;
   @Input() parentId!: number | null;
   @Input() latestCommentId!: Subject<number>;
 
-  @Output() setActiveComment = new EventEmitter<ActiveCommentInterface | null>();
+  @Output() setActiveComment = new EventEmitter<ActiveComment | null>();
   @Output() deleteComment = new EventEmitter<number>();
   @Output() addComment = new EventEmitter<{ text: string; parentId: number | null }>();
   @Output() updateComment = new EventEmitter<{ text: string; commentId: number }>();
