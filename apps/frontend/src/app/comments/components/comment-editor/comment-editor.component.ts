@@ -19,7 +19,7 @@ import { Image } from '@tiptap/extension-image';
 })
 export class CommentEditorComponent {
   @Input() submitLabel!: string;
-  @Input() initialText: string = '';
+  @Input() initialHTML: string = '';
 
   @Output() handleSubmit = new EventEmitter<string>();
   @Output() handleCancel = new EventEmitter<void>();
@@ -33,7 +33,7 @@ export class CommentEditorComponent {
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      comment: [this.initialText, Validators.required]
+      comment: [this.initialHTML, Validators.required]
     });
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
