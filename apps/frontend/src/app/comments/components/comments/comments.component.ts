@@ -7,7 +7,7 @@ import {
   switchMap, Subject, takeUntil, of, Observable
 } from 'rxjs';
 import { BackendService } from '../../services/backend.service';
-import { ActiveCommentInterface } from '../../types/active-comment.interface';
+import { ActiveComment } from '../../types/active.comment';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { Comment } from '../../types/comment';
 
@@ -24,7 +24,7 @@ export class CommentsComponent implements OnChanges {
   @Output() onCommentsUpdated = new EventEmitter<void>()
 
   comments: Comment[] = [];
-  activeComment: ActiveCommentInterface | null = null;
+  activeComment: ActiveComment | null = null;
   latestCommentId: Subject<number> = new Subject();
 
   private latestComment!: Comment;
@@ -95,7 +95,7 @@ export class CommentsComponent implements OnChanges {
       });
   }
 
-  setActiveComment(activeComment: ActiveCommentInterface | null): void {
+  setActiveComment(activeComment: ActiveComment | null): void {
     this.activeComment = activeComment;
   }
 
