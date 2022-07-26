@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnChanges, Output, SimpleChanges
+  Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,7 +16,7 @@ import { Comment } from '../../types/comment';
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss']
 })
-export class CommentsComponent implements OnChanges {
+export class CommentsComponent implements OnInit {
   @Input() userId!: number;
   @Input() userName!: string;
   @Input() unitId!: number;
@@ -38,27 +38,25 @@ export class CommentsComponent implements OnChanges {
     this.latestCommentId.subscribe(() => this.onCommentsUpdated.emit());
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    const unitId = 'unitId';
-    const workspaceId = 'workspaceId';
-    if ((changes[unitId] && changes[unitId].currentValue) ||
-    (changes[workspaceId] && changes[workspaceId].currentValue)) {
-      this.getUpdatedComments()
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => {
-          this.setLatestCommentId();
-        });
-    }
+  ngOnInit(): void {
+    this.getUpdatedComments()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.setLatestCommentId();
+      });
   }
 
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
     const updateComment = { body: text, userId: this.userId };
     this.backendService
       .updateComment(commentId, updateComment, this.workspaceId, this.unitId)
-      .pipe(switchMap(() => {
-        this.setActiveComment(null);
-        return this.getUpdatedComments();
-      }))
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(() => {
+          this.setActiveComment(null);
+          return this.getUpdatedComments();
+        })
+      )
       .subscribe(() => {
         this.setLatestCommentId();
       });
@@ -78,19 +76,16 @@ export class CommentsComponent implements OnChanges {
         }
       })
       .afterClosed()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(result => {
-        if (result) {
-          this.confirmDelete(commentId);
-        }
-      });
-  }
-
-  private confirmDelete(commentId: number): void {
-    this.backendService.deleteComment(commentId, this.workspaceId, this.unitId)
-      .pipe(takeUntil(this.ngUnsubscribe),
-        switchMap(() => this.getUpdatedComments()))
-      .subscribe(() => {
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(result => {
+          if (result) {
+            return this.backendService.deleteComment(commentId, this.workspaceId, this.unitId);
+          }
+          return of(null);
+        }),
+        switchMap(() => this.getUpdatedComments())
+      ).subscribe(() => {
         this.setLatestCommentId();
       });
   }
@@ -115,11 +110,13 @@ export class CommentsComponent implements OnChanges {
     };
     this.backendService
       .createComment(comment, this.workspaceId, this.unitId)
-      .pipe(takeUntil(this.ngUnsubscribe),
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
         switchMap(() => {
           this.setActiveComment(null);
           return this.getUpdatedComments();
-        }))
+        })
+      )
       .subscribe(() => {
         this.setLatestCommentId();
       });
