@@ -89,6 +89,12 @@
               (click)="toggleBulletList()">
         <mat-icon>format_list_bulleted</mat-icon>
       </button>
+      <button type="button"
+              mat-icon-button
+              matTooltip="Bild"
+              (click)="addImage()">
+        <mat-icon>image</mat-icon>
+      </button>
     </div>
     <tiptap-editor class="tip-tap-editor"
                    [editor]="editor"

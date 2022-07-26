@@ -10,6 +10,7 @@ import { Subscript } from '@tiptap/extension-subscript';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
+import { Image } from '@tiptap/extension-image';
 
 @Component({
   selector: 'studio-lite-comment-editor',
@@ -37,6 +38,13 @@ export class CommentEditorComponent {
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
         TextStyle, Color,
+        Image.configure({
+          inline: false,
+          allowBase64: true,
+          HTMLAttributes: {
+            style: 'max-width: 500px;'
+          }
+        }),
         Highlight.configure({
           multicolor: true
         })]
@@ -53,6 +61,29 @@ export class CommentEditorComponent {
     this.handleSubmit.emit(this.form.value.comment);
     this.editor.commands.setContent('');
     this.form.reset();
+  }
+
+  async addImage(): Promise<void> {
+    const mediaSrc = await CommentEditorComponent.loadImage(['image/*']);
+    this.editor.commands.setImage({ src: mediaSrc });
+  }
+
+  private static async loadImage(fileTypes: string[] = []): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const fileUploadElement = document.createElement('input');
+      fileUploadElement.type = 'file';
+      fileUploadElement.accept = fileTypes.toString();
+      fileUploadElement.addEventListener('change', event => {
+        const uploadedFile = (event.target as HTMLInputElement).files?.[0];
+        const reader = new FileReader();
+        reader.onload = loadEvent => resolve(loadEvent.target?.result as string);
+        reader.onerror = errorEvent => reject(errorEvent);
+        if (uploadedFile) {
+          reader.readAsDataURL(uploadedFile);
+        }
+      });
+      fileUploadElement.click();
+    });
   }
 
   toggleBold(): void {
