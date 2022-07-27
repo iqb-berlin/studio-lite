@@ -21,5 +21,7 @@ To install a version of this software on a separate server that possibly could b
 3. '.env.prod' (from project root)
 4. 'prod.mk' (from 'scripts/make/prod.mk')
 
-On your server, adjust some environment variables in the '.env.prod' file for security issues, rename 'prod.mk' to 'Makefile', and install 'make' if necessary.
+On your server, adjust some environment variables in the '.env.prod' file for security issues. In file 'prod.mk' adjust 'BASE_DIR := $(shell git rev-parse --show-toplevel)' to 'BASE_DIR := .' and rename it to 'Makefile'. If necessary, install 'make'.
+
 To start the docker services use the command 'make production-ramp-up'. To stop and remove the service containers use the command 'production-shut-down'.
+To install updates, change the 'TAG' variable in the '.env.prod' file to your desired version and call 'make production-ramp-up' (for a hot deployment: without stopping already running services first).
