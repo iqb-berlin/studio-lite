@@ -18,6 +18,7 @@ import { AdminWorkspaceNotFoundException } from '../../exceptions/admin-workspac
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
+import { UnitUserService } from './unit-user.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -34,7 +35,8 @@ export class WorkspaceService {
     private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
     private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
-    private unitService: UnitService
+    private unitService: UnitService,
+    private unitUserService: UnitUserService
   ) {
   }
 
@@ -63,6 +65,7 @@ export class WorkspaceService {
 
   // TODO: setWorkspacesForUser? //was ändert sich hier?
   async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: number[]) {
+    this.logger.log(`Set workspace for userId: ${userId}.`);
     return this.workspaceUserService.deleteAllByWorkspaceGroup(workspaceGroupId, userId).then(async () => {
       await Promise.all(workspaces.map(async workspaceId => {
         const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
@@ -70,6 +73,12 @@ export class WorkspaceService {
           workspaceId: workspaceId
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
+
+        const units = await this.unitService.findAll(workspaceId);
+        this.logger.log(`Found units: ${units.length}.`);
+        await Promise.all(units.map(async unit => {
+          await this.unitUserService.createUnitUser(userId, unit.id);
+        }));
       }));
     });
   }

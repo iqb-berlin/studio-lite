@@ -47,6 +47,7 @@ import {
   PagingModeSelectionComponent
 } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
+import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 
 @NgModule({
   imports: [
@@ -96,7 +97,8 @@ import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.compon
     UserListComponent,
     WorkspaceUserListComponent,
     PagingModeSelectionComponent,
-    UnitCommentsComponent
+    UnitCommentsComponent,
+    HasNewCommentsPipe
   ],
   exports: [
     WorkspaceComponent

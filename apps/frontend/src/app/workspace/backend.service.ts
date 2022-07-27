@@ -1,5 +1,5 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
@@ -21,9 +21,9 @@ export class BackendService {
     private http: HttpClient
   ) {}
 
-  getUnitList(workspaceId: number): Observable <UnitInListDto[]> {
+  getUnitList(workspaceId: number, params?: HttpParams): Observable <UnitInListDto[]> {
     return this.http
-      .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`)
+      .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`, { params: params })
       .pipe(
         catchError(() => [])
       );

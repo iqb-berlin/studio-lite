@@ -12,4 +12,10 @@ export class UnitInListDto {
 
   @ApiProperty()
   groupName?: string;
+
+  @ApiProperty()
+  lastCommentChangedAt?: Date;
+
+  @ApiProperty()
+  lastSeenCommentChangedAt?: Date;
 }

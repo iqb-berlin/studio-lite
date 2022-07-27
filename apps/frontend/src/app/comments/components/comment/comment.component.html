@@ -14,7 +14,7 @@
     <studio-lite-comment-editor
       *ngIf="activeComment | isEditing: comment"
       submitLabel="comment-editor.edit"
-      [initialText]="comment.body"
+      [initialHTML]="comment.body"
       (handleSubmit)="updateComment.emit({ text: $event, commentId: comment.id })"
       (handleCancel)="setActiveComment.emit(null)">
     </studio-lite-comment-editor>

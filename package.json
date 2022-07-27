@@ -55,6 +55,7 @@
     "@tiptap/extension-font-family": "^2.0.0-beta.24",
     "@tiptap/extension-heading": "^2.0.0-beta.29",
     "@tiptap/extension-highlight": "^2.0.0-beta.35",
+    "@tiptap/extension-image": "^2.0.0-beta.30",
     "@tiptap/extension-paragraph": "^2.0.0-beta.26",
     "@tiptap/extension-strike": "^2.0.0-beta.29",
     "@tiptap/extension-subscript": "^2.0.0-beta.13",
@@ -86,7 +87,7 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "14.0.3",
+    "@angular-devkit/build-angular": "^14.1.0",
     "@angular-devkit/schematics": "14.0.3",
     "@angular-devkit/schematics-cli": "14.0.3",
     "@angular-eslint/eslint-plugin": "13.2.1",

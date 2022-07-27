@@ -6,7 +6,7 @@ import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
-  Subscription, map, lastValueFrom
+  Subscription, map, lastValueFrom, takeUntil, Subject
 } from 'rxjs';
 import {
   ConfirmDialogComponent,
@@ -21,6 +21,7 @@ import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import * as _moment from 'moment';
 import { saveAs } from 'file-saver';
+import { HttpParams } from '@angular/common/http';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
@@ -44,6 +45,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
   private uploadSubscription: Subscription | null = null;
+  private ngUnsubscribe = new Subject<void>();
   uploadProcessId = '';
   uploadUrl = '';
   uploadMessages: string[] = [];
@@ -117,11 +119,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.appBackendService.getModuleList('schemer').subscribe(moduleList => {
         this.appService.schemerList = new VeronaModuleCollection(moduleList);
       });
+      this.workspaceService.onCommentsUpdated
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => this.updateUnitList());
     });
   }
 
   updateUnitList(unitToSelect?: number): void {
-    this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId).subscribe(
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('withLastSeenCommentTimeStamp', true);
+    this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams).subscribe(
       uResponse => {
         this.workspaceService.unitList = new UnitCollection(uResponse);
         const newUnitGroups: string[] = [];
@@ -513,7 +520,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           if (typeof uploadStatus === 'number') {
             if (uploadStatus < 0) {
               this.appService.dataLoading = false;
-              console.error(uploadStatus);
             } else {
               this.appService.dataLoading = uploadStatus;
             }
@@ -546,5 +552,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (this.uploadSubscription !== null) {
       this.uploadSubscription.unsubscribe();
     }
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

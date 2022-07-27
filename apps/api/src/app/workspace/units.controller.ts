@@ -1,12 +1,12 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
+  Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
-  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
+  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { ApiUnauthorizedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
@@ -16,11 +16,16 @@ import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
 import { CommentWriteGuard } from './comment-write.guard';
 import { CommentDeleteGuard } from './comment-delete.guard';
+import { UnitUserService } from '../database/services/unit-user.service';
+import { UnitCommentService } from '../database/services/unit-comment.service';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
+  private readonly logger = new Logger(UnitService.name);
   constructor(
-    private unitService: UnitService
+    private unitService: UnitService,
+    private unitUserService: UnitUserService,
+    private unitCommentService: UnitCommentService
   ) {}
 
   @Get('units')
@@ -30,9 +35,16 @@ export class UnitsController {
   @ApiCreatedResponse({
     type: [UnitInListDto]
   })
+  @ApiQuery({
+    name: 'withLastSeenCommentTimeStamp',
+    type: Boolean
+  })
   @ApiTags('workspace')
-  async findAll(@WorkspaceId() workspaceId: number): Promise<UnitInListDto[]> {
-    return this.unitService.findAll(workspaceId);
+  async findAll(
+    @Req() request,
+    @WorkspaceId() workspaceId: number,
+    @Query('withLastSeenCommentTimeStamp' ) withLastSeenCommentTimeStamp): Promise<UnitInListDto[]> {
+    return this.unitService.findAll(workspaceId, request.user.id, withLastSeenCommentTimeStamp);
   }
 
   @Get('units/metadata')
@@ -95,10 +107,31 @@ export class UnitsController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiTags('workspace unit')
-  async findOnesComments(
-    @Param('id', ParseIntPipe) unitId: number
-  ): Promise<UnitCommentDto[]> {
-    return this.unitService.findOnesComments(unitId);
+  async findOnesComments(@Param('id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
+    return this.unitCommentService.findOnesComments(unitId);
+  }
+
+  @Get(':id/comments/last-seen')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
+  @ApiTags('workspace unit')
+  async findLastSeenTimestamp(@Req() request, @Param('id', ParseIntPipe) unitId: number): Promise<Date> {
+    return this.unitUserService.findLastSeenCommentTimestamp(request.user.id, unitId);
+  }
+
+  @Patch(':id/comments')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
+  @ApiTags('workspace unit')
+  async patchOnesUnitUserLastSeen(
+    @Param('id', ParseIntPipe) unitId: number,
+      @Body() updateUnitUser: UpdateUnitUserDto
+  ): Promise<void> {
+    return this.unitUserService.patchUnitUserCommentsLastSeen(unitId, updateUnitUser);
   }
 
   @Post(':id/comments')
@@ -111,7 +144,7 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
-    return this.unitService.createComment(createUnitCommentDto);
+    return this.unitCommentService.createComment(createUnitCommentDto);
   }
 
   @Patch(':unit_id/comments/:id')
@@ -123,7 +156,7 @@ export class UnitsController {
   @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
   @ApiTags('workspace unit')
   async patchCommentBody(@Param('id', ParseIntPipe) id: number, @Body() comment: UpdateUnitCommentDto) {
-    return this.unitService.patchCommentBody(id, comment);
+    return this.unitCommentService.patchCommentBody(id, comment);
   }
 
   @Delete(':unit_id/comments/:id')
@@ -135,7 +168,7 @@ export class UnitsController {
   @ApiUnauthorizedResponse({ description: 'Not authorized to delete comment.' })
   @ApiTags('workspace unit')
   async removeComment(@Param('id', ParseIntPipe) id: number) {
-    return this.unitService.removeComment(id);
+    return this.unitCommentService.removeComment(id);
   }
 
   @Patch(':id/metadata')

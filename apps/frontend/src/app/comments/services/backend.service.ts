@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
+import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../types/comment';
 
 @Injectable()
@@ -17,6 +18,15 @@ export class BackendService {
       .pipe(
         catchError(() => of([])),
         map(comments => comments)
+      );
+  }
+
+  updateComments(updateUnitUser: UpdateUnitUserDto, workspaceId: number, unitId: number): Observable<boolean> {
+    return this.httpClient
+      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`, updateUnitUser)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 

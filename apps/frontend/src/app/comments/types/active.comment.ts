@@ -1,4 +1,4 @@
-export interface ActiveCommentInterface {
+export interface ActiveComment {
   id: number;
   type: ActiveCommentType;
 }

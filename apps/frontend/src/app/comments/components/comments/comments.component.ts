@@ -1,11 +1,13 @@
 import {
-  Component, Input, OnChanges, SimpleChanges
+  Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
+import {
+  switchMap, Subject, takeUntil, of, Observable
+} from 'rxjs';
 import { BackendService } from '../../services/backend.service';
-import { ActiveCommentInterface } from '../../types/active-comment.interface';
+import { ActiveComment } from '../../types/active.comment';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { Comment } from '../../types/comment';
 
@@ -14,41 +16,49 @@ import { Comment } from '../../types/comment';
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss']
 })
-export class CommentsComponent implements OnChanges {
+export class CommentsComponent implements OnInit {
   @Input() userId!: number;
   @Input() userName!: string;
   @Input() unitId!: number;
   @Input() workspaceId!: number;
+  @Output() onCommentsUpdated = new EventEmitter<void>()
 
   comments: Comment[] = [];
-  activeComment: ActiveCommentInterface | null = null;
+  activeComment: ActiveComment | null = null;
   latestCommentId: Subject<number> = new Subject();
 
+  private latestComment!: Comment;
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
     private translateService: TranslateService,
-    private commentsService: BackendService,
+    private backendService: BackendService,
     public dialog: MatDialog
-  ) {}
+  ) {
+    this.latestCommentId.subscribe(() => this.onCommentsUpdated.emit());
+  }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    const unitId = 'unitId';
-    const workspaceId = 'workspaceId';
-    if ((changes[unitId] && changes[unitId].currentValue) ||
-    (changes[workspaceId] && changes[workspaceId].currentValue)) {
-      this.sortComments();
-    }
+  ngOnInit(): void {
+    this.getUpdatedComments()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.setLatestCommentId();
+      });
   }
 
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
     const updateComment = { body: text, userId: this.userId };
-    this.commentsService
+    this.backendService
       .updateComment(commentId, updateComment, this.workspaceId, this.unitId)
-      .pipe(takeUntil(this.ngUnsubscribe))
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(() => {
+          this.setActiveComment(null);
+          return this.getUpdatedComments();
+        })
+      )
       .subscribe(() => {
-        this.activeComment = null;
-        this.sortComments();
+        this.setLatestCommentId();
       });
   }
 
@@ -66,24 +76,28 @@ export class CommentsComponent implements OnChanges {
         }
       })
       .afterClosed()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(result => {
-        if (result) {
-          this.confirmDelete(commentId);
-        }
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(result => {
+          if (result) {
+            return this.backendService.deleteComment(commentId, this.workspaceId, this.unitId);
+          }
+          return of(null);
+        }),
+        switchMap(() => this.getUpdatedComments())
+      ).subscribe(() => {
+        this.setLatestCommentId();
       });
   }
 
-  private confirmDelete(commentId: number): void {
-    this.commentsService.deleteComment(commentId, this.workspaceId, this.unitId)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        this.sortComments();
-      });
-  }
-
-  setActiveComment(activeComment: ActiveCommentInterface | null): void {
+  setActiveComment(activeComment: ActiveComment | null): void {
     this.activeComment = activeComment;
+  }
+
+  private setLatestCommentId(): void {
+    if (this.latestComment) {
+      this.latestCommentId.next(this.latestComment.id);
+    }
   }
 
   addComment({ text, parentId }: { text: string; parentId: number | null; }): void {
@@ -94,30 +108,35 @@ export class CommentsComponent implements OnChanges {
       parentId: parentId,
       unitId: this.unitId
     };
-    this.commentsService
+    this.backendService
       .createComment(comment, this.workspaceId, this.unitId)
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(() => {
+          this.setActiveComment(null);
+          return this.getUpdatedComments();
+        })
+      )
       .subscribe(() => {
-        this.activeComment = null;
-        this.sortComments();
+        this.setLatestCommentId();
       });
   }
 
-  private sortComments(): void {
-    this.commentsService.getComments(this.workspaceId, this.unitId)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(comments => {
-        this.comments = comments.sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        if (this.comments.length) {
-          const latestComment = this.comments
-            .reduce((previousComment, currentComment) => (
-              previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));
-          setTimeout(() => {
-            this.latestCommentId.next(latestComment.id);
-          });
-        }
-      });
+  private getUpdatedComments(): Observable<boolean> {
+    return this.backendService.getComments(this.workspaceId, this.unitId)
+      .pipe(
+        switchMap(comments => {
+          this.comments = comments;
+          if (this.comments.length) {
+            this.latestComment = this.comments
+              .reduce((previousComment, currentComment) => (
+                previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));
+            const updateUnitUser = { lastSeenCommentChangedAt: this.latestComment.changedAt, userId: this.userId };
+            return this.backendService.updateComments(updateUnitUser, this.workspaceId, this.unitId);
+          }
+          return of(false);
+        })
+      );
   }
 
   ngOnDestroy(): void {

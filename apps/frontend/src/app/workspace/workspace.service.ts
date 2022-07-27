@@ -1,7 +1,7 @@
 import {
   BehaviorSubject, lastValueFrom
 } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UnitInListDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
@@ -25,6 +25,7 @@ export class WorkspaceService {
   unitSchemeStore: UnitSchemeStore | undefined;
   unitList = new UnitCollection([]);
   isWorkspaceGroupAdmin = false;
+  @Output() onCommentsUpdated = new EventEmitter<void>()
 
   constructor(
     private backendService: BackendService,
