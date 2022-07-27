@@ -23,6 +23,9 @@ import UnitComment from './entities/unit-comment.entity';
 import UnitUser from './entities/unit-user.entity';
 import { UnitUserService } from './services/unit-user.service';
 import { UnitCommentService } from './services/unit-comment.service';
+import Review from './entities/review.entity';
+import ReviewUnit from './entities/review-unit.entity';
+import { ReviewService } from './services/review.service';
 
 @Module({
   imports: [
@@ -37,6 +40,8 @@ import { UnitCommentService } from './services/unit-comment.service';
     UnitComment,
     UnitUser,
     Setting,
+    Review,
+    ReviewUnit,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -57,7 +62,9 @@ import { UnitCommentService } from './services/unit-comment.service';
           Unit,
           UnitComment,
           UnitUser,
-          WorkspaceGroupAdmin
+          WorkspaceGroupAdmin,
+          Review,
+          ReviewUnit
         ],
         synchronize: false
       }),
@@ -74,7 +81,9 @@ import { UnitCommentService } from './services/unit-comment.service';
       Unit,
       UnitComment,
       UnitUser,
-      WorkspaceGroupAdmin
+      WorkspaceGroupAdmin,
+      Review,
+      ReviewUnit
     ])
   ],
   providers: [
@@ -87,7 +96,8 @@ import { UnitCommentService } from './services/unit-comment.service';
     UnitCommentService,
     UnitUserService,
     VeronaModulesService,
-    SettingService
+    SettingService,
+    ReviewService
   ],
   exports: [
     User,
@@ -101,6 +111,9 @@ import { UnitCommentService } from './services/unit-comment.service';
     WorkspaceGroupAdmin,
     VeronaModule,
     Setting,
+    Review,
+    ReviewUnit,
+    ReviewService,
     UsersService,
     UnitService,
     UnitCommentService,
