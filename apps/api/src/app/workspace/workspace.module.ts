@@ -3,6 +3,7 @@ import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { UnitsController } from './units.controller';
 import { WorkspaceController } from './workspace.controller';
+import { ReviewController } from './review.controller';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { WorkspaceController } from './workspace.controller';
   ],
   controllers: [
     UnitsController,
-    WorkspaceController
+    WorkspaceController,
+    ReviewController
   ]
 })
 export class WorkspaceModule {}

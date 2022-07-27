@@ -36,6 +36,7 @@ import { VeronaModuleCollection } from '../classes/verona-module-collection.clas
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
 import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
+import {ReviewsComponent} from "./dialogs/reviews.component";
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -63,6 +64,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private showUsersDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private uploadReportDialog: MatDialog,
+    private reviewsDialog: MatDialog,
     private snackBar: MatSnackBar,
     private router: Router,
     private route: ActivatedRoute,
@@ -467,6 +469,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         });
       }
+    });
+  }
+
+  reviews(): void {
+    this.reviewsDialog.open(ReviewsComponent, {
+      width: '700px'
     });
   }
 
