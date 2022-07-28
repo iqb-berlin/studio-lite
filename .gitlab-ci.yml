@@ -861,16 +861,19 @@ push-docker-release:
   before_script:
     - if [ -n "$CI_COMMIT_TAG" ]; then export TAG="$CI_COMMIT_TAG"; else export TAG="latest"; fi
     - echo $TAG
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - echo "$DOCKERHUB_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
   script:
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${TAG}
-    - docker push ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${TAG}
-    - docker push ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${TAG}
-    - docker push ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:latest
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:latest
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:latest
+    - docker push -a -q iqbberlin/studio-lite-db
+    - docker push -a -q iqbberlin/studio-lite-backend
+    - docker push -a -q iqbberlin/studio-lite-frontend
   after_script:
     - docker logout $REGISTRY
