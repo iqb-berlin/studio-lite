@@ -19,12 +19,12 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
+  app.setGlobalPrefix(globalPrefix);
+  app.use(json({ limit: '50mb' }));
+  app.enableCors();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-
-  app.use(json({ limit: '50mb' }));
-  app.setGlobalPrefix(globalPrefix);
-  app.enableCors();
 
   await app.listen(port, host);
   Logger.log(
