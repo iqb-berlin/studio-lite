@@ -15,6 +15,9 @@ export class ReviewFullDto {
   link?: string;
 
   @ApiProperty()
+  password?: string;
+
+  @ApiProperty()
   settings?: ReviewSettingsDto;
 
   @ApiProperty()

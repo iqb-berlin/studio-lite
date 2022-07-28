@@ -16,6 +16,9 @@ class Review {
   @Column()
   public link: string;
 
+  @Column()
+  public password: string;
+
   @Column({
     type: 'jsonb',
     array: false,

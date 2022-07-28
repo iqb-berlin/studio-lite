@@ -46,30 +46,17 @@ export class ReviewController {
     return this.reviewService.findOne(reviewId);
   }
 
-  @Patch(':id/name')
+  @Patch(':id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
-  @ApiOkResponse({ description: 'Name of the review changed' })
-  @ApiTags('workspace reviews')
-  async patchOnesName(
-    @Param('id', ParseIntPipe) reviewId: number,
-      @Body() updateReview: ReviewFullDto
-  ): Promise<void> {
-    return this.reviewService.patchName(reviewId, updateReview.name);
-  }
-
-  @Patch(':id/units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
-  @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
-  @ApiOkResponse({ description: 'Units of the review changed' })
+  @ApiOkResponse({ description: 'Review data changed' })
   @ApiTags('workspace reviews')
   async patchOnesUnits(
     @Param('id', ParseIntPipe) reviewId: number,
       @Body() updateReview: ReviewFullDto
   ): Promise<void> {
-    return this.reviewService.patchUnits(reviewId, updateReview.units);
+    return this.reviewService.patch(reviewId, updateReview);
   }
 
   @Post()

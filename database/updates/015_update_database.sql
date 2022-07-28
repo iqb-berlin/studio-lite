@@ -7,6 +7,7 @@ create table review
       on delete cascade,
   name                    varchar(100) not null,
   link                    varchar(100) not null,
+  password                varchar(100),
   settings                jsonb
 );
 
