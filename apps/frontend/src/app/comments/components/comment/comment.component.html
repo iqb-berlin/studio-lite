@@ -12,8 +12,7 @@
       <div>{{ createdAt | date : 'dd.MM.yyyy HH:mm' : timeZone }}</div>
     </div>
 
-    <div class="comment-container"
-         fxLayout="row">
+    <div fxLayout="row">
       <div fxFlex>
         <div *ngIf="!(activeComment | isEditing: comment)"
              class="comment-html"
