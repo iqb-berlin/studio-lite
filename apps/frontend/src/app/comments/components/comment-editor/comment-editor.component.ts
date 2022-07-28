@@ -26,9 +26,8 @@ export class CommentEditorComponent {
 
   form!: FormGroup;
   editor!: Editor;
-  selectedFontSize: string = '20px';
-  selectedFontColor: string = 'lightgrey';
-  selectedHighlightColor: string = 'lightgrey';
+  selectedFontColor: string = 'black';
+  selectedHighlightColor: string = 'black';
   bulletListStyle: string = 'disc';
 
   constructor(private fb: FormBuilder) {
