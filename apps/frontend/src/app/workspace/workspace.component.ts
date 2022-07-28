@@ -36,7 +36,7 @@ import { VeronaModuleCollection } from '../classes/verona-module-collection.clas
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
 import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
-import {ReviewsComponent} from "./dialogs/reviews.component";
+import { ReviewsComponent } from './dialogs/reviews.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -474,7 +474,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   reviews(): void {
     this.reviewsDialog.open(ReviewsComponent, {
-      width: '700px'
+      width: '1000px'
     });
   }
 
