@@ -1,71 +1,51 @@
 <div fxLayout="column" style="height: 100%">
-  <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
-  <div fxLayout="row" fxLayoutGap="20px">
-    <mat-dialog-content fxFlex>
-      <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
-    </mat-dialog-content>
-    <div fxFlex="300px">
-      <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
-      <div fxLayout="column">
-        <div *ngIf="!enablePlayerOption" class="tcMessage margin-bottom">
-          Keine Aufgabe hat einen gültigen Player gesetzt.
+  <h1 mat-dialog-title>Aufgabenfolgen</h1>
+  <div fxLayout="row" fxLayoutGap="5px">
+    <div fxFlex="200px" class="review-list" fxLayout="column" fxLayoutAlign="space-between stretch">
+      <mat-nav-list fxFlex>
+        <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+           *ngFor="let review of reviews"
+           class="review-list-entry"
+           (click)="selectReview(review.id)"
+           [class]="review.id === selectedReviewId ? 'review-list-entry selected' : 'review-list-entry'">
+          {{review.name}}
+        </a>
+      </mat-nav-list>
+      <div fxLayout="row">
+        <button mat-raised-button (click)="addReview()"
+                matTooltip="Aufgabenfolge hinzufügen" matTooltipPosition="above" fxFlex="33">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-raised-button (click)="deleteReview()"
+                matTooltip="Aufgabenfolge löschen" [disabled]="selectedReviewId === 0"
+                matTooltipPosition="above" fxFlex="33">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-raised-button (click)="playReview()"
+                matTooltip="Aufgabenfolge starten" [disabled]="selectedReviewId === 0"
+                matTooltipPosition="above" fxFlex>
+          <mat-icon>play_arrow</mat-icon>
+        </button>
+      </div>
+    </div>
+    <div [class]="changed ? 'review-changed' : 'review-not-changed'" fxLayout="column" fxFlex>
+      <div fxFlex fxLayout="row" style="background: white">
+        <div fxFlex="50%">
+          <p>works</p>
         </div>
-        <div fxLayout="row">
-          <label fxFlex="50%">Logins hinzufügen</label>
-          <div fxLayout="column">
-            <mat-form-field>
-              <input matInput type="number" min="0"
-                     [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
-            </mat-form-field>
-            <mat-form-field>
-              <input matInput type="number" min="0"
-                     [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
-            </mat-form-field>
-            <mat-form-field>
-              <input matInput type="number" min="0"
-                     [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
-            </mat-form-field>
-          </div>
-        </div>
-        <mat-checkbox [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
-                      [(ngModel)]="unitExportSettings.passwordLess" class="margin-bottom">
-          <div>Ohne Kennwort (nur Login-Name)</div>
-        </mat-checkbox>
-        <mat-form-field>
-          <mat-select [placeholder]="'unit-download.booklet-config.paging-mode.label' | translate"
-                      [(ngModel)]="unitExportSettings.bookletSettings[0].value"
-                      [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0">
-            <mat-option [value]="'separate'">
-              {{'unit-download.booklet-config.paging-mode.separate' | translate}}
-            </mat-option>
-            <mat-option [value]="'concat-scroll'">
-              {{'unit-download.booklet-config.paging-mode.concat-scroll' | translate}}
-            </mat-option>
-            <mat-option [value]="'concat-scroll-snap'">
-              {{'unit-download.booklet-config.paging-mode.concat-scroll-snap' | translate}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-select [placeholder]="'unit-download.booklet-config.unit_navibuttons.label' | translate"
-                      [(ngModel)]="unitExportSettings.bookletSettings[1].value"
-                      [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0">
-            <mat-option [value]="'FULL'">
-              {{'unit-download.booklet-config.unit_navibuttons.FULL' | translate}}
-            </mat-option>
-            <mat-option [value]="'ARROWS_ONLY'">
-              {{'unit-download.booklet-config.unit_navibuttons.ARROWS_ONLY' | translate}}
-            </mat-option>
-            <mat-option [value]="'OFF'">
-              {{'unit-download.booklet-config.unit_navibuttons.OFF' | translate}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div *ngIf="unitExportSettings.addPlayers && unitsWithOutPlayer.length > 0"
-             class="tcMessage">
-          Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
-        </div>
+        <mat-dialog-content fxFlex>
+          <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
+        </mat-dialog-content>
+      </div>
+      <div fxFlex fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px" style="padding: 5px">
+        <button mat-raised-button (click)="discardChanges()" matTooltip="Änderungen verwerfen"
+                [disabled]="!changed" matTooltipPosition="below">
+          <mat-icon>close</mat-icon>
+        </button>
+        <button mat-raised-button (click)="saveChanged()" matTooltip="Aufgabenfolge speichern"
+                [disabled]="!changed" matTooltipPosition="below">
+          Speichern <mat-icon>save</mat-icon>
+        </button>
       </div>
     </div>
   </div>
