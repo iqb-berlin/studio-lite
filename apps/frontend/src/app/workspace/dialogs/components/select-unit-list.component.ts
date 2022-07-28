@@ -1,8 +1,11 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import {
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild
+} from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
+import { Subscription } from 'rxjs';
 import { BackendService } from '../../backend.service';
 
 @Component({
@@ -58,11 +61,13 @@ import { BackendService } from '../../backend.service';
     '.disabled-element {color: gray}'
   ]
 })
-export class SelectUnitListComponent {
+export class SelectUnitListComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'key', 'groupName'];
   tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
   disabledUnits: number[] = [];
+  selectionChangedSubscription: Subscription | null = null;
+
   @Input('workspace')
   set workspaceId(value: number) {
     this.tableSelectionCheckbox.clear();
@@ -87,12 +92,25 @@ export class SelectUnitListComponent {
     });
   }
 
+  @Output() selectionChanged = new EventEmitter();
+
   get selectionCount(): number {
     return this.tableSelectionCheckbox.selected.length;
   }
 
   get selectedUnitIds(): number[] {
     return this.tableSelectionCheckbox.selected.map(ud => ud.id);
+  }
+
+  set selectedUnitIds(newUnits: number[]) {
+    if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
+    this.tableSelectionCheckbox.clear();
+    this.objectsDatasource.data.forEach(row => {
+      if (newUnits.includes(row.id)) this.tableSelectionCheckbox.select(row);
+    });
+    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
+      this.selectionChanged.emit();
+    });
   }
 
   get selectedUnitKey(): string {
@@ -113,6 +131,12 @@ export class SelectUnitListComponent {
     private backendService: BackendService
   ) { }
 
+  ngOnInit() {
+    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
+      this.selectionChanged.emit();
+    });
+  }
+
   isAllSelected(): boolean {
     const numSelected = this.tableSelectionCheckbox.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
@@ -123,5 +147,9 @@ export class SelectUnitListComponent {
     this.isAllSelected() || !this.objectsDatasource ?
       this.tableSelectionCheckbox.clear() :
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
+  }
+
+  ngOnDestroy(): void {
+    if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
   }
 }

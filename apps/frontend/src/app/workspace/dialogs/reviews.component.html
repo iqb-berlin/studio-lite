@@ -1,6 +1,6 @@
 <div fxLayout="column" style="height: 100%">
   <h1 mat-dialog-title>Aufgabenfolgen</h1>
-  <div fxLayout="row" fxLayoutGap="5px">
+  <div fxLayout="row" fxLayoutGap="5px" style="height: 100%">
     <div fxFlex="200px" class="review-list" fxLayout="column" fxLayoutAlign="space-between stretch">
       <mat-nav-list fxFlex>
         <a mat-list-item style="height: 22px;text-overflow: ellipsis"
@@ -28,16 +28,20 @@
         </button>
       </div>
     </div>
-    <div [class]="changed ? 'review-changed' : 'review-not-changed'" fxLayout="column" fxFlex>
+    <div [class]="changed ? 'review-changed' : 'review-not-changed'"
+         fxLayout="column" fxFlex>
       <div fxFlex fxLayout="row" style="background: white">
-        <div fxFlex="50%">
+        <div fxFlex="50%" [hidden]="selectedReviewId === 0">
           <p>works</p>
         </div>
         <mat-dialog-content fxFlex>
-          <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
+          <select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
+                            (selectionChanged)="unitSelectionChanged()"
+                            [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
         </mat-dialog-content>
       </div>
-      <div fxFlex fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px" style="padding: 5px">
+      <div fxLayout="row" fxLayoutAlign="end end" fxLayoutGap="5px"
+           style="padding: 5px">
         <button mat-raised-button (click)="discardChanges()" matTooltip="Änderungen verwerfen"
                 [disabled]="!changed" matTooltipPosition="below">
           <mat-icon>close</mat-icon>

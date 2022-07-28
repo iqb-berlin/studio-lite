@@ -57,6 +57,7 @@ export class ReviewService {
   }
 
   async patch(reviewId: number, newData: ReviewFullDto): Promise<void> {
+    this.logger.log(`Patching data for review with id: ${reviewId}`);
     const reviewToUpdate = await this.reviewRepository.findOne({ where: { id: reviewId } });
     let changed = false;
     if (newData.hasOwnProperty('name')) {
@@ -67,19 +68,21 @@ export class ReviewService {
       reviewToUpdate.password = newData.password;
       changed = true;
     }
-    if (!newData.hasOwnProperty('settings')) {
+    if (newData.hasOwnProperty('settings')) {
       reviewToUpdate.settings = newData.settings;
       changed = true;
     }
     if (changed) await this.reviewRepository.save(reviewToUpdate);
-    if (!newData.hasOwnProperty('units')) {
+    if (newData.hasOwnProperty('units')) {
       await this.reviewUnitRepository.delete({ reviewId: reviewId });
+      this.logger.log(`Set units for review with id: ${reviewId}`);
       newData.units.forEach(unitId => {
-        this.reviewUnitRepository.create(<ReviewUnit>{
+        const newReviewUnit = this.reviewUnitRepository.create(<ReviewUnit>{
           reviewId: reviewId,
           unitId: unitId,
           order: newData.units.indexOf(unitId)
         });
+        this.reviewUnitRepository.save(newReviewUnit);
       });
     }
   }
