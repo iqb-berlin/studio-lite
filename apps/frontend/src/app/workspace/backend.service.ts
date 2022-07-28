@@ -3,8 +3,9 @@ import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
+  CreateReviewDto,
   CreateUnitDto,
-  RequestReportDto,
+  RequestReportDto, ReviewFullDto, ReviewInListDto,
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
@@ -186,6 +187,49 @@ export class BackendService {
       .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
       .pipe(
         catchError(() => of(null))
+      );
+  }
+
+  getReviewList(workspaceId: number): Observable <ReviewInListDto[]> {
+    return this.http
+      .get<ReviewInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/reviews`)
+      .pipe(
+        catchError(() => [])
+      );
+  }
+
+  getReview(workspaceId: number, reviewId: number): Observable <ReviewFullDto | null> {
+    return this.http
+      .get<ReviewFullDto>(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviewId}`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  setReview(workspaceId: number, reviewId: number, reviewData: ReviewFullDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviewId}`, reviewData)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  addReview(workspaceId: number, newReview: CreateReviewDto): Observable<number | null> {
+    return this.http
+      .post<number>(`${this.serverUrl}workspace/${workspaceId}/reviews`, newReview)
+      .pipe(
+        catchError(() => of(null)),
+        map(returnId => Number(returnId))
+      );
+  }
+
+  deleteReviews(workspaceId: number, reviews: number[]): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviews.join(';')}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 }

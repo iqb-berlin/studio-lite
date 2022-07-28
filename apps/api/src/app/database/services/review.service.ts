@@ -56,21 +56,32 @@ export class ReviewService {
     };
   }
 
-  async patchName(reviewId: number, newName: string): Promise<void> {
+  async patch(reviewId: number, newData: ReviewFullDto): Promise<void> {
     const reviewToUpdate = await this.reviewRepository.findOne({ where: { id: reviewId } });
-    reviewToUpdate.name = newName;
-    await this.reviewRepository.save(reviewToUpdate);
-  }
-
-  async patchUnits(reviewId: number, newUnits: number[]): Promise<void> {
-    await this.reviewUnitRepository.delete({ reviewId: reviewId });
-    newUnits.forEach(unitId => {
-      this.reviewUnitRepository.create(<ReviewUnit>{
-        reviewId: reviewId,
-        unitId: unitId,
-        order: newUnits.indexOf(unitId)
+    let changed = false;
+    if (newData.hasOwnProperty('name')) {
+      reviewToUpdate.name = newData.name;
+      changed = true;
+    }
+    if (newData.hasOwnProperty('password')) {
+      reviewToUpdate.password = newData.password;
+      changed = true;
+    }
+    if (!newData.hasOwnProperty('settings')) {
+      reviewToUpdate.settings = newData.settings;
+      changed = true;
+    }
+    if (changed) await this.reviewRepository.save(reviewToUpdate);
+    if (!newData.hasOwnProperty('units')) {
+      await this.reviewUnitRepository.delete({ reviewId: reviewId });
+      newData.units.forEach(unitId => {
+        this.reviewUnitRepository.create(<ReviewUnit>{
+          reviewId: reviewId,
+          unitId: unitId,
+          order: newData.units.indexOf(unitId)
+        });
       });
-    });
+    }
   }
 
   async remove(id: number | number[]): Promise<void> {
