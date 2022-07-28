@@ -1,11 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ReviewFullDto, ReviewInListDto } from '@studio-lite-lib/api-dto';
-import {
-  ConfirmDialogComponent,
-  ConfirmDialogData,
-  MessageDialogComponent,
-  MessageDialogData, MessageType
-} from '@studio-lite-lib/iqb-components';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../backend.service';
@@ -52,7 +47,21 @@ export class ReviewsComponent implements OnInit {
 
   selectReview(id: number) {
     this.selectedReviewId = id;
-    // todo load reviewData
+    if (this.selectedReviewId > 0) {
+      this.backendService.getReview(
+        this.workspaceService.selectedWorkspaceId, this.selectedReviewId
+      ).subscribe(data => {
+        if (data) {
+          this.reviewDataOriginal = data;
+          this.reviewDataToChange = ReviewsComponent.copyFrom(data);
+          if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = data.units ? data.units : [];
+        }
+      });
+    } else {
+      this.reviewDataToChange = null;
+      this.reviewDataOriginal = null;
+      if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = [];
+    }
   }
 
   addReview() {
@@ -135,25 +144,66 @@ export class ReviewsComponent implements OnInit {
       });
   }
 
+  unitSelectionChanged(): void {
+    if (this.reviewDataToChange && this.unitSelectionTable) {
+      this.reviewDataToChange.units = this.unitSelectionTable.selectedUnitIds;
+      this.changed = this.detectChanges();
+    }
+  }
+
   discardChanges() {
-    this.messageDialog.open(MessageDialogComponent, {
-      width: '400px',
-      data: <MessageDialogData>{
-        title: 'descard',
-        content: 'coming soon',
-        type: MessageType.error
-      }
-    });
+    this.changed = false;
+    this.reviewDataToChange = this.reviewDataOriginal ? ReviewsComponent.copyFrom(this.reviewDataOriginal) : null;
+    if (this.reviewDataToChange && this.unitSelectionTable) {
+      this.unitSelectionTable.selectedUnitIds = this.reviewDataToChange.units ? this.reviewDataToChange.units : [];
+    }
   }
 
   saveChanged() {
-    this.messageDialog.open(MessageDialogComponent, {
-      width: '400px',
-      data: <MessageDialogData>{
-        title: 'save',
-        content: 'coming soon',
-        type: MessageType.error
+    if (this.reviewDataToChange) {
+      this.backendService.setReview(
+        this.workspaceService.selectedWorkspaceId,
+        this.selectedReviewId,
+        this.reviewDataToChange
+      ).subscribe(ok => {
+        if (ok) {
+          this.snackBar.open(
+            'Aufgabenfolge gespeichert', '', { duration: 1000 }
+          );
+          this.reviewDataOriginal = this.reviewDataToChange;
+          this.changed = false;
+        } else {
+          this.snackBar.open(
+            'Konnte Aufgabenfolge nicht speichern', 'Fehler', { duration: 3000 }
+          );
+        }
+      });
+    }
+  }
+
+  private detectChanges(): boolean {
+    if (this.reviewDataToChange && this.reviewDataOriginal) {
+      if (this.reviewDataOriginal.name === this.reviewDataToChange.name) {
+        if (this.reviewDataOriginal.password === this.reviewDataToChange.password) {
+          if (this.reviewDataOriginal.units && this.reviewDataToChange.units) {
+            if (this.reviewDataOriginal.units.join() === this.reviewDataToChange.units.join()) {
+              return false;
+            }
+          }
+        }
       }
-    });
+    }
+    return true;
+  }
+
+  private static copyFrom(originalData: ReviewFullDto): ReviewFullDto {
+    return {
+      id: originalData.id,
+      name: originalData.name,
+      password: originalData.password,
+      link: originalData.link,
+      settings: originalData.settings,
+      units: originalData.units ? originalData.units.map(u => u) : []
+    };
   }
 }
