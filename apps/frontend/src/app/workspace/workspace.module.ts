@@ -48,7 +48,7 @@ import {
 } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
-import {ReviewsComponent} from "./dialogs/reviews.component";
+import { ReviewsComponent } from './dialogs/reviews.component';
 
 @NgModule({
   imports: [
