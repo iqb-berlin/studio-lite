@@ -4,9 +4,9 @@ import {
 import { Subject, takeUntil } from 'rxjs';
 
 @Directive({
-  selector: '[studioLiteScrollIntoView]'
+  selector: '[studioLiteScrollCommentIntoView]'
 })
-export class ScrollIntoViewDirective implements OnInit, OnDestroy {
+export class ScrollCommentIntoViewDirective implements OnInit, OnDestroy {
   @Input() scrollTargetId!: Subject<number>;
   @Input() id!: number;
 
