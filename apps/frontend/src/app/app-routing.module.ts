@@ -4,7 +4,6 @@ import { AboutComponent } from './home/about.component';
 import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'about', component: AboutComponent },
   {
@@ -18,7 +17,13 @@ const routes: Routes = [
   {
     path: 'wsg-admin/:wsg',
     loadChildren: () => import('./wsg-admin/wsg-admin.module').then(module => module.WsgAdminModule)
-  }
+  },
+  {
+    path: 'review/:review',
+    loadChildren: () => import('./review/review.module').then(module => module.ReviewModule)
+  },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: ':review', redirectTo: 'review/:review', pathMatch: 'full' }
 ];
 
 @NgModule({
