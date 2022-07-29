@@ -22,9 +22,9 @@ export class ReviewComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.appService.appConfig.setPageTitle('Review', true);
       this.reviewService.reviewId = this.route.snapshot.params['review'];
       this.backendService.getReview(this.reviewService.reviewId).subscribe(reviewData => {
+        this.appService.appConfig.setPageTitle('Review', true);
         if (reviewData) {
           this.reviewService.reviewName = reviewData.name ? reviewData.name : '?';
           this.reviewService.units = [];

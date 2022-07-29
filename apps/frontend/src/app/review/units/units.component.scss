@@ -1,0 +1,41 @@
+:host.review-body {
+  height: 100%;
+}
+.review-body {
+  width: 100%;
+  padding: 0;
+}
+
+.pageNav {
+  font-size: 1.2em;
+}
+
+#pageFooter {
+  width: 100%;
+  bottom: 0;
+  background-color: slategray;
+  padding: 0 30px;
+}
+
+#pageNavPrompt {
+  padding: 2px 8px;
+  color: white;
+}
+
+#pageNav button {
+  font-size: 1.1em;
+}
+
+#pageNav button i {
+  font-size: 1.2em;
+}
+
+.pageNavDisabled {
+  height: 5px;
+  background-color: orangered;
+}
+
+.pageNavEnabled {
+  height: 5px;
+  background-color: darkgrey;
+}
