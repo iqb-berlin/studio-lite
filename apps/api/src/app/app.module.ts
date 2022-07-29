@@ -9,6 +9,7 @@ import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { WorkspaceModule } from './workspace/workspace.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     AuthModule,
     DatabaseModule,
     WorkspaceModule,
+    ReviewModule,
     MulterModule
   ],
   controllers: [AppController],

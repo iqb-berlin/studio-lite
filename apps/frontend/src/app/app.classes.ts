@@ -36,6 +36,7 @@ export class AppHttpError {
 export class AppConfig {
   readonly appTitle: string;
   pageTitle: string;
+  hideTitlesOnPage = false;
   readonly introHtml: SafeUrl | undefined;
   readonly imprintHtml: SafeUrl | undefined;
   private readonly _globalWarningText: string;
@@ -73,8 +74,9 @@ export class AppConfig {
     AppConfig.isExpired(this._globalWarningExpiredDay, this._globalWarningExpiredHour) ? '' : this._globalWarningText;
   }
 
-  setPageTitle(newPageTitel: string): void {
+  setPageTitle(newPageTitel: string, hide = false): void {
     this.pageTitle = newPageTitel;
+    this.hideTitlesOnPage = hide;
     this.titleService.setTitle(`${this.appTitle} | ${this.pageTitle}`);
   }
 }
