@@ -1,13 +1,17 @@
 <div class="home-body" fxLayout="row" fxLayoutAlign="center stretch">
-    <div fxFlex="0 0 500px" fxLayout="column" *ngIf="appService.authData.userId === 0" class="box-left">
+    <div fxFlex="0 0 400px" fxLayout="column" *ngIf="appService.authData.userId === 0 && appService.authData.reviews.length === 0" class="box-left">
       <!-- - - - - - - - - - - - - - - - - -->
       <form [formGroup]="loginForm" (ngSubmit)="login()">
         <h1>Anmelden</h1>
         <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
         <div fxLayout="column">
-          <mat-form-field class="full-width">
+          <mat-form-field class="full-width" [class]="loginNamePreset ? 'invisible' : ''">
             <input matInput formControlName="name" placeholder="Anmeldename" (keyup.enter)="pw.focus()">
           </mat-form-field>
+          <p *ngIf="loginNamePreset">
+            Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist
+            noch die Eingabe eines Kennwortes erforderlich.
+          </p>
           <mat-form-field class="full-width">
             <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
           </mat-form-field>
@@ -17,7 +21,7 @@
       </form>
     </div>
 
-    <div fxFlex="0 0 500px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
+    <div fxFlex="0 0 400px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
       <h1 fxLayout="row" fxLayoutAlign="space-between center">
         {{'home.select-workspace' | translate}}
         <div>
@@ -66,7 +70,20 @@
       </div>
     </div>
 
-    <div fxFlex="0 2 500px" fxLayout="column" class="box-right">
+  <div fxFlex="0 0 400px" fxLayout="column" class="box-left" *ngIf="appService.authData.reviews.length > 0">
+    <h1 fxLayout="row" fxLayoutAlign="space-between center">
+      {{'home.select-review' | translate}}
+      <button mat-button (click)="logout()" matTooltip="Abmelden">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </h1>
+    <button mat-button (click)="buttonGotoReview(r)"
+            *ngFor="let r of appService.authData.reviews">
+      {{r.name}}
+    </button>
+  </div>
+
+  <div fxFlex="0 2 400px" fxLayout="column" class="box-right">
       <h1>{{appService.appConfig?.appTitle}}</h1>
       <div [innerHTML]="appService.appConfig?.introHtml" class="scroll-area"></div>
       <div *ngIf="appService.authData.userId === 0">

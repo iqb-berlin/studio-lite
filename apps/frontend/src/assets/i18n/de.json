@@ -41,6 +41,7 @@
   "home": {
     "home-page": "Startseite",
     "select-workspace": "Arbeitsbereich wählen",
+    "select-review": "Aufgabenfolge/Review wählen",
     "goto-admin": "Allgemeine Systemverwaltung",
     "goto-wsg-admin": "Verwaltung der Bereichsgruppe",
     "imprint": "Impressum/Datenschutz"
