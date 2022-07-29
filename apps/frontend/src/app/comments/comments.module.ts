@@ -28,6 +28,7 @@ import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into
 import { AuthInterceptor } from '../auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
 import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
+import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
 
 @NgModule({
   imports: [
@@ -58,7 +59,8 @@ import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-v
     RepliesPipe,
     ScrollCommentIntoViewDirective,
     ScrollEditorIntoViewDirective,
-    CommentBadgeComponent
+    CommentBadgeComponent,
+    MomentFromNowPipe
   ],
   exports: [CommentsComponent],
   providers: [
