@@ -19,7 +19,9 @@ export { CreateUnitDto } from './lib/dto/unit/create-unit-dto';
 export { UnitInListDto } from './lib/dto/unit/unit-in-list-dto';
 export { VeronaModuleMetadataDto } from './lib/dto/verona-module/verona-module-metadata-dto';
 export { VeronaModuleInListDto } from './lib/dto/verona-module/verona-module-in-list-dto';
-export { AuthDataDto, WorkspaceDto, WorkspaceGroupDto } from './lib/dto/auth-data-dto';
+export {
+  AuthDataDto, WorkspaceDto, WorkspaceGroupDto, ReviewDto
+} from './lib/dto/auth-data-dto';
 export { ChangePasswordDto } from './lib/dto/change-password-dto';
 export { WorkspaceGroupInListDto } from './lib/dto/workspace-group/workspace-group-in-list-dto';
 export { WorkspaceGroupFullDto } from './lib/dto/workspace-group/workspace-group-full-dto';

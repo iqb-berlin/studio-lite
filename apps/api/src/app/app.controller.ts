@@ -12,7 +12,8 @@ import { AuthService } from './auth/service/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { WorkspaceService } from './database/services/workspace.service';
 import { UsersService } from './database/services/users.service';
-import { UserId, UserName } from './auth/user.decorator';
+import { ReviewId, UserId, UserName } from './auth/user.decorator';
+import { ReviewService } from './database/services/review.service';
 
 @Controller()
 export class AppController {
@@ -20,7 +21,8 @@ export class AppController {
     private readonly appService: AppService,
     private authService: AuthService,
     private userService: UsersService,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private reviewService: ReviewService
   ) {}
 
   @Post('login')
@@ -39,12 +41,24 @@ export class AppController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'User auth data successfully retrieved.' }) // TODO: Add Exception
   @ApiTags('auth')
-  async findCanDos(@UserId() userId: number, @UserName() userName: string): Promise<AuthDataDto> {
+  async findCanDos(
+    @UserId() userId: number, @UserName() userName: string, @ReviewId() reviewId: number
+  ): Promise<AuthDataDto> {
+    if (userId) {
+      return <AuthDataDto>{
+        userId: userId,
+        userName: userName,
+        isAdmin: await this.authService.isAdminUser(userId),
+        workspaces: await this.workspaceService.findAllGroupwise(userId),
+        reviews: await this.reviewService.findAllByUser(userId)
+      };
+    }
     return <AuthDataDto>{
-      userId: userId,
-      userName: userName,
-      isAdmin: await this.authService.isAdminUser(userId),
-      workspaces: await this.workspaceService.findAllGroupwise(userId)
+      userId: 0,
+      userName: '',
+      isAdmin: false,
+      workspaces: [],
+      reviews: [await this.reviewService.findOneForAuth(reviewId)]
     };
   }
 
@@ -60,7 +74,8 @@ export class AppController {
   @Get('my-data')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'User personal data successfully retrieved.' }) // TODO: Exception & Return Value entfernen
+  // TODO: Exception & Return Value entfernen
+  @ApiOkResponse({ description: 'User personal data successfully retrieved.' })
   @ApiTags('home')
   async findMydata(@UserId() userId: number): Promise<MyDataDto> {
     return this.userService.findOne(userId).then(userData => <MyDataDto>{
@@ -76,7 +91,8 @@ export class AppController {
   @Patch('my-data')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'User personal data successfully updated.' }) // TODO: Exception & Return Value entfernen
+  // TODO: Exception & Return Value entfernen
+  @ApiOkResponse({ description: 'User personal data successfully updated.' })
   @ApiTags('home')
   async setMyData(@Request() req, @Body() myNewData: MyDataDto): Promise<boolean> {
     if (req.user.id !== myNewData.id) throw new UnauthorizedException();
