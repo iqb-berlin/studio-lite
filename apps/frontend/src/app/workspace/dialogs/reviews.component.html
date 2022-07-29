@@ -21,7 +21,7 @@
                 matTooltipPosition="above" fxFlex="33">
           <mat-icon>delete</mat-icon>
         </button>
-        <a mat-raised-button [href]="locationOrigin + '/#/' + reviewDataOriginal.link"
+        <a mat-raised-button [href]="locationOrigin + '/#/review/' + reviewDataOriginal.id"
            target="_blank"
                 matTooltip="Aufgabenfolge starten" [disabled]="selectedReviewId === 0"
                 matTooltipPosition="above" fxFlex>
@@ -43,7 +43,7 @@
                    [disabled]="selectedReviewId === 0"
                    (ngModelChange)="changed = detectChanges()" placeholder="Kennwort">
           </mat-form-field>
-          <div>
+          <div fxLayout="row">
             <button mat-button
                     [disabled]="selectedReviewId === 0"
                     (click)="copyLinkToClipboard()">Kopiere Link in Zwischenablage</button>

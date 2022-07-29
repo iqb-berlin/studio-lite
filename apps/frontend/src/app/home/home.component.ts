@@ -6,7 +6,7 @@ import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MyDataDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
+import { MyDataDto, ReviewDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
 import { Subscription } from 'rxjs';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
@@ -23,6 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   errorMessage = '';
   private routingSubscription: Subscription | null = null;
   redirectTo = '';
+  loginNamePreset = '';
 
   constructor(private fb: UntypedFormBuilder,
               @Inject('APP_VERSION') readonly appVersion: string,
@@ -44,6 +45,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
       this.redirectTo = queryParams['redirectTo'];
+    });
+    this.routingSubscription = this.route.params.subscribe(params => {
+      this.loginNamePreset = params['login'];
+      if (this.loginNamePreset) {
+        this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
+      }
     });
     setTimeout(() => {
       this.appService.appConfig.setPageTitle('Willkommen!');
@@ -167,5 +174,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       });
     });
+  }
+
+  buttonGotoReview(review: ReviewDto) {
+    this.router.navigate([`/review/${review.id}`]);
   }
 }
