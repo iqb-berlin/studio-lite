@@ -1,7 +1,7 @@
 <div fxLayout="row" class="comment">
 
   <studio-lite-comment-badge [userName]="comment.userName"
-                             [ownComment]="canEdit">
+                             [ownComment]="ownComment">
   </studio-lite-comment-badge>
 
   <div fxLayout="column">
@@ -9,14 +9,14 @@
     <div fxLayout="row"
          class="comment-meta">
       <div>{{ comment.userName }}</div>
-      <div>{{ createdAt | date : 'dd.MM.yyyy HH:mm' : timeZone }}</div>
+      <div>{{ comment.createdAt | momentFromNow }}</div>
     </div>
 
     <div fxLayout="row">
       <div fxFlex>
         <div *ngIf="!(activeComment | isEditing: comment)"
              class="comment-html"
-             [class.own-comment]="canEdit"
+             [class.own-comment]="ownComment"
              [innerHTML]="comment.body| safeResourceHTML">
         </div>
 
@@ -39,15 +39,14 @@
       </div>
 
       <div>
-        <button *ngIf="canReply"
-                mat-icon-button
+        <button mat-icon-button
                 class="comment-action"
                 matTooltip = "{{'comment.reply' | translate}}"
                 [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
                 (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
           <mat-icon>reply</mat-icon>
         </button>
-        <button *ngIf="canEdit"
+        <button *ngIf="ownComment"
                 mat-icon-button
                 class="comment-action"
                 matTooltip = "{{'comment.edit' | translate}}"

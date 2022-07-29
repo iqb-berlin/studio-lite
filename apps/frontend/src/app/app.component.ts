@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
+import * as moment from 'moment';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
@@ -19,7 +20,9 @@ export class AppComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
     private titleService: Title
-  ) {}
+  ) {
+    moment.locale('de');
+  }
 
   ngOnInit(): void {
     setTimeout(() => {
