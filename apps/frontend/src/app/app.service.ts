@@ -29,7 +29,8 @@ export class AppService {
     userId: 0,
     userName: 'unbekannt',
     isAdmin: false,
-    workspaces: []
+    workspaces: [],
+    reviews: []
   }
 
   authData = AppService.defaultAuthData;

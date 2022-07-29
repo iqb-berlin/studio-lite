@@ -13,6 +13,9 @@ export class AuthDataDto {
 
   @ApiProperty()
   workspaces!: WorkspaceGroupDto[];
+
+  @ApiProperty()
+  reviews!: ReviewDto[];
 }
 
 export class WorkspaceGroupDto {
@@ -35,4 +38,15 @@ export class WorkspaceDto {
 
   @ApiProperty()
   name!: string;
+}
+
+export class ReviewDto {
+  @ApiProperty()
+  id!: number;
+
+  @ApiProperty()
+  name!: string;
+
+  @ApiProperty()
+  workspaceId!: number;
 }

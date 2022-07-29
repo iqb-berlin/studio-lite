@@ -13,3 +13,10 @@ export const UserName = createParamDecorator(
     return request.user.name;
   }
 );
+
+export const ReviewId = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.user.reviewId;
+  }
+);

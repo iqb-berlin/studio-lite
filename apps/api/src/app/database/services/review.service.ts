@@ -1,14 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   CreateReviewDto,
   ReviewFullDto,
-  ReviewInListDto
+  ReviewInListDto,
+  ReviewDto
 } from '@studio-lite-lib/api-dto';
 import { v4 as uuIdv4 } from 'uuid';
 import Review from '../entities/review.entity';
 import ReviewUnit from '../entities/review-unit.entity';
+import WorkspaceUser from '../entities/workspace-user.entity';
 
 @Injectable()
 export class ReviewService {
@@ -18,7 +20,9 @@ export class ReviewService {
     @InjectRepository(Review)
     private reviewRepository: Repository<Review>,
     @InjectRepository(ReviewUnit)
-    private reviewUnitRepository: Repository<ReviewUnit>
+    private reviewUnitRepository: Repository<ReviewUnit>,
+    @InjectRepository(WorkspaceUser)
+    private workspaceUsersRepository: Repository<WorkspaceUser>
   ) {}
 
   async findAll(workspaceId: number): Promise<ReviewInListDto[]> {
@@ -57,6 +61,38 @@ export class ReviewService {
     };
   }
 
+  async findOneForAuth(reviewId: number): Promise<ReviewDto> {
+    this.logger.log(`Returning data for review for auth: ${reviewId}`);
+    const review = await this.reviewRepository.findOne({ where: { id: reviewId } });
+    return {
+      id: review.id,
+      name: review.name,
+      workspaceId: review.workspaceId
+    };
+  }
+
+  async findAllByUser(userId: number): Promise<ReviewDto[]> {
+    this.logger.log(`Retrieving reviews by userId ${userId}`);
+    const workspaces = await this.workspaceUsersRepository.find({
+      where: { userId: userId }
+    });
+    const workspacesIdList = workspaces.map(ws => ws.workspaceId);
+    const reviews = await this.reviewRepository.find({
+      where: { workspaceId: In(workspacesIdList) },
+      order: { name: 'ASC' },
+      select: {
+        id: true,
+        name: true,
+        workspaceId: true
+      }
+    });
+    return reviews.map(r => <ReviewDto>{
+      id: r.id,
+      name: r.name,
+      workspaceId: r.workspaceId
+    });
+  }
+
   async patch(reviewId: number, newData: ReviewFullDto): Promise<void> {
     this.logger.log(`Patching data for review with id: ${reviewId}`);
     const reviewToUpdate = await this.reviewRepository.findOne({ where: { id: reviewId } });
@@ -90,5 +126,14 @@ export class ReviewService {
 
   async remove(id: number | number[]): Promise<void> {
     await this.reviewRepository.delete(id);
+  }
+
+  async getReviewByKeyAndPassword(name: string, password: string): Promise<number | null> {
+    const review = await this.reviewRepository.findOne({
+      where: { link: name, password: password },
+      select: { id: true }
+    });
+    if (review) return review.id;
+    return null;
   }
 }

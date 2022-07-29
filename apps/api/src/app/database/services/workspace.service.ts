@@ -105,13 +105,8 @@ export class WorkspaceService {
         id: workspaceGroup.id,
         name: workspaceGroup.name,
         isAdmin: isSuperAdmin || workspaceGroupsToAdminList.indexOf(workspaceGroup.id) >= 0,
-        workspaces: []
+        workspaces: workspaces.filter(ws => workspaceGroup.id === ws.groupId)
       };
-      workspaces.forEach(workspace => {
-        if (workspaceGroup.id === workspace.groupId) {
-          localWorkspaceGroup.workspaces.push(workspace);
-        }
-      });
       if (!userId || localWorkspaceGroup.isAdmin || localWorkspaceGroup.workspaces.length > 0) {
         myReturn.push(localWorkspaceGroup);
       }

@@ -11,6 +11,7 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import { AdminUserNotFoundException } from '../../exceptions/admin-user-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
+import Review from '../entities/review.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +25,9 @@ export class UsersService {
     @InjectRepository(WorkspaceGroupAdmin)
     private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
     @InjectRepository(Workspace)
-    private workspaceRepository: Repository<Workspace>
+    private workspaceRepository: Repository<Workspace>,
+    @InjectRepository(Review)
+    private reviewRepository: Repository<Review>
   ) {}
 
   async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
@@ -245,6 +248,15 @@ export class UsersService {
       select: { groupId: true }
     });
     return this.isWorkspaceGroupAdmin(userId, workspace.groupId);
+  }
+
+  async canAccessReview(userId: number, reviewId: number): Promise<boolean> {
+    const review = await this.reviewRepository.findOne({
+      where: { id: reviewId },
+      select: { workspaceId: true }
+    });
+    if (review) return this.canAccessWorkSpace(userId, review.workspaceId);
+    return false;
   }
 
   async isWorkspaceGroupAdmin(userId: number, workspaceGroupId?: number): Promise<boolean> {
