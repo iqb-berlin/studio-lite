@@ -32,7 +32,7 @@ export class CommentEditorComponent {
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      comment: [this.initialHTML, Validators.required]
+      comment: [this.initialHTML, [Validators.minLength(8), Validators.required]]
     });
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
