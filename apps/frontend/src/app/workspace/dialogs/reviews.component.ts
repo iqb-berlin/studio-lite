@@ -6,6 +6,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { BookletConfigComponent } from '@studio-lite/studio-components';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 import { SelectUnitListComponent } from './components/select-unit-list.component';
@@ -14,21 +15,12 @@ import { InputTextComponent } from '../../components/input-text.component';
 
 @Component({
   templateUrl: './reviews.component.html',
-  styles: [
-    '.margin-bottom {margin-bottom: 10px}',
-    '.rev-message {font-style: italic; font-size: smaller}',
-    '.invisible{display: block; visibility: hidden; height: 0; width: 0}',
-    '.selected {background-color: #3957f74f}',
-    '.review-list {overflow: auto; background-color: whitesmoke; border: 2px solid whitesmoke}',
-    '.review-list-entry {overflow: hidden; text-overflow: ellipsis;white-space: nowrap;font-size: 14px}',
-    '.review-changed {background-color: darkorange; padding: 2px}',
-    '.review-not-changed {background-color: transparent; padding: 2px}',
-    '#main-buttons .mat-raised-button {padding: 0; min-width: 25px}'
-  ]
+  styleUrls: ['./reviews.component.scss']
 })
 
 export class ReviewsComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
+  @ViewChild('bookletConfig') bookletConfigElement: BookletConfigComponent | undefined;
   changed = false;
   selectedReviewId = 0;
   reviews: ReviewInListDto[] = [];
@@ -80,6 +72,7 @@ export class ReviewsComponent implements OnInit {
         if (data) {
           this.reviewDataOriginal = data;
           this.reviewDataToChange = ReviewsComponent.copyFrom(data);
+          // if (this.bookletConfigElement) this.bookletConfigElement.config = this.reviewDataToChange.settings;
           this.changed = false;
           if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = data.units ? data.units : [];
         }
@@ -211,14 +204,15 @@ export class ReviewsComponent implements OnInit {
 
   detectChanges(): boolean {
     if (this.reviewDataToChange && this.reviewDataOriginal) {
-      if (this.reviewDataOriginal.name === this.reviewDataToChange.name) {
-        if (this.reviewDataOriginal.password === this.reviewDataToChange.password) {
-          if (this.reviewDataOriginal.units && this.reviewDataToChange.units) {
-            if (this.reviewDataOriginal.units.join() === this.reviewDataToChange.units.join()) {
-              return false;
-            }
-          }
-        }
+      if (this.reviewDataOriginal.name !== this.reviewDataToChange.name) return true;
+      if (this.reviewDataOriginal.password !== this.reviewDataToChange.password) return true;
+      if (this.reviewDataOriginal.units && this.reviewDataToChange.units) {
+        if (this.reviewDataOriginal.units.join() !== this.reviewDataToChange.units.join()) return true;
+      }
+      if (
+        JSON.stringify(this.reviewDataOriginal.settings) === JSON.stringify(this.reviewDataToChange.settings)
+      ) {
+        return false;
       }
     }
     return true;
@@ -230,7 +224,14 @@ export class ReviewsComponent implements OnInit {
       name: originalData.name,
       password: originalData.password,
       link: originalData.link,
-      settings: originalData.settings,
+      settings: {
+        pagingMode: originalData.settings?.pagingMode || '',
+        pageNaviButtons: originalData.settings?.pageNaviButtons || '',
+        unitNaviButtons: originalData.settings?.unitNaviButtons || '',
+        controllerDesign: originalData.settings?.controllerDesign || '',
+        unitScreenHeader: originalData.settings?.unitScreenHeader || '',
+        unitTitle: originalData.settings?.unitTitle || ''
+      },
       units: originalData.units ? originalData.units.map(u => u) : []
     };
   }
@@ -240,5 +241,12 @@ export class ReviewsComponent implements OnInit {
     this.snackBar.open(
       'Link in die Zwischenablage kopiert.', '', { duration: 1000 }
     );
+  }
+
+  configChanged() {
+    if (this.bookletConfigElement) {
+      this.reviewDataToChange.settings = this.bookletConfigElement.config;
+      this.changed = this.detectChanges();
+    }
   }
 }

@@ -372,6 +372,32 @@
         }
       },
       "tags": []
+    },
+    "studio-components": {
+      "projectType": "library",
+      "root": "libs/studio-components",
+      "sourceRoot": "libs/studio-components/src",
+      "prefix": "studio-lite",
+      "architect": {
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/studio-components"],
+          "options": {
+            "jestConfig": "libs/studio-components/jest.config.ts",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/studio-components/**/*.ts",
+              "libs/studio-components/**/*.html"
+            ]
+          }
+        }
+      },
+      "tags": []
     }
   }
 }

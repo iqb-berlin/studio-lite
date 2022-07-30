@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
 
 @Entity()
 class Review {
@@ -25,7 +26,7 @@ class Review {
     default: () => "'{}'",
     nullable: false
   })
-  public settings = {};
+  public settings: ReviewSettingsDto;
 }
 
 export default Review;

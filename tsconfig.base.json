@@ -17,7 +17,8 @@
     "paths": {
       "@studio-lite-lib/api-dto": ["libs/api-dto/src/index.ts"],
       "@studio-lite-lib/iqb-components": ["libs/iqb-components/src/index.ts"],
-      "@studio-lite/shared-code": ["libs/shared-code/src/index.ts"]
+      "@studio-lite/shared-code": ["libs/shared-code/src/index.ts"],
+      "@studio-lite/studio-components": ["libs/studio-components/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
