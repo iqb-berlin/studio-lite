@@ -1,3 +1,62 @@
+:host {
+  width: 100%
+}
+
+#iframe-host {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+  padding: 0;
+  background-color: white;
+}
+
+.with-header #iframe-host {
+  top: 65px;
+}
+
+.with-title #iframe-host {
+  top: 40px;
+}
+
+.with-header.with-title #iframe-host {
+  top: 105px;
+}
+
+.with-footer #iframe-host {
+  bottom: 45px;
+}
+
+#unit-title {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  height: 39px;
+  font-size: 1.5em;
+  background-color: white;
+  border-bottom: solid 1px black;
+  white-space: nowrap;
+  text-overflow: clip;
+  overflow: hidden;
+}
+.with-header #unit-title {
+  top: 65px;
+}
+
+#page-navigation {
+  position: absolute;
+  width: 100%;
+  height: 45px;
+  bottom: 0;
+  padding: 0 16px;
+  font-size: 1.2em;
+}
+
+#page-navigation-prompt {
+  padding-right: 8px;
+  color: white;
+}
+
 h1 {
   font-size: 1.5em;
   color: white;
@@ -23,13 +82,14 @@ h1 {
 
 #header {
   position: absolute;
+  top: 0;
   width: 100%;
   z-index: 444;
   color: white;
   height: 65px;
-  padding-left: 116px;
+  padding-left: 130px;
+  padding-right: 80px;
   pointer-events: none;
-  margin-top: -62px;
 }
 
 #header mat-button-toggle-group {
@@ -43,16 +103,16 @@ h1 {
   border-right: solid 1px rgba(0, 0, 0, 0.12);
 }
 
-#header .main-buttons,
-#header .plus-buttons {
+.comment-button {
   pointer-events: auto;
+  position: absolute;
+  right: 5px;
+  top: 0;
+  height: 65px;
+  z-index: 999;
 }
 
-#header .plus-buttons {
-  min-width: 16px;
-}
-
-#header .plus-buttons button ~ button {
+#header button ~ button {
   min-width: 48px;
   padding-left: 0;
 }
