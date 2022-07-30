@@ -16,12 +16,14 @@ import { InputTextComponent } from '../../components/input-text.component';
   templateUrl: './reviews.component.html',
   styles: [
     '.margin-bottom {margin-bottom: 10px}',
-    '.tcMessage {font-style: italic; font-size: smaller}',
+    '.rev-message {font-style: italic; font-size: smaller}',
+    '.invisible{display: block; visibility: hidden; height: 0; width: 0}',
     '.selected {background-color: #3957f74f}',
     '.review-list {overflow: auto; background-color: whitesmoke; border: 2px solid whitesmoke}',
     '.review-list-entry {overflow: hidden; text-overflow: ellipsis;white-space: nowrap;font-size: 14px}',
     '.review-changed {background-color: darkorange; padding: 2px}',
-    '.review-not-changed {background-color: transparent; padding: 2px}'
+    '.review-not-changed {background-color: transparent; padding: 2px}',
+    '#main-buttons .mat-raised-button {padding: 0; min-width: 25px}'
   ]
 })
 
@@ -34,6 +36,23 @@ export class ReviewsComponent implements OnInit {
   reviewDataToChange: ReviewFullDto = { id: 0 };
   // eslint-disable-next-line no-restricted-globals
   locationOrigin = location.origin;
+  get passwordLength(): number {
+    if (this.selectedReviewId === 0) return -1;
+    if (!this.reviewDataOriginal.password) return 0;
+    return this.reviewDataOriginal.password.length;
+  }
+
+  get passwordNewLength(): number {
+    if (this.selectedReviewId === 0) return -1;
+    if (!this.reviewDataToChange.password) return 0;
+    return this.reviewDataToChange.password.length;
+  }
+
+  get unitCount(): number {
+    if (this.selectedReviewId === 0) return -1;
+    if (!this.reviewDataOriginal.units) return 0;
+    return this.reviewDataOriginal.units.length;
+  }
 
   constructor(
     public workspaceService: WorkspaceService,
