@@ -14,7 +14,7 @@ export class FinishComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.reviewService.currentUnitSequenceId = this.reviewService.units.length;
-      this.reviewService.currentPageHeader = `Endseite ${this.reviewService.reviewName}`;
+      this.reviewService.setHeaderText('Endseite');
     });
   }
 }

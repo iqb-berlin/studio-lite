@@ -14,7 +14,7 @@ export class StartComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.reviewService.currentUnitSequenceId = -1;
-      this.reviewService.currentPageHeader = `Startseite ${this.reviewService.reviewName}`;
+      this.reviewService.setHeaderText('Startseite');
     });
   }
 }

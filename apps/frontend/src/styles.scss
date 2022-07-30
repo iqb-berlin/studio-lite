@@ -29,6 +29,8 @@ body {
   color: white;
   font-size: large;
   padding-right: 20px;
+  padding-left: 150px;
+  height: 70px;
 }
 
 .spinner-container {
@@ -69,4 +71,15 @@ iframe.unitHost {
 .admin-tab-content {
   overflow-x: auto;
   height: calc(100% - 30px);
+}
+
+.logo {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  z-index: 999;
+}
+
+div.logo img {
+  width: 100px;
 }

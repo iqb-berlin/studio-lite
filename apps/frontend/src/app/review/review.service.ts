@@ -14,7 +14,8 @@ export class ReviewService {
   reviewName = '';
   units: UnitData[] = [];
   reviewSettings?: ReviewSettingsDto;
-  currentPageHeader = '';
+  screenHeaderText = '';
+  pageHeaderText = '';
   currentUnitSequenceId = -1;
   private moduleHtmlStore: { [key: string]: string } = {};
 
@@ -31,6 +32,23 @@ export class ReviewService {
       this.router.navigate([`/review/${this.reviewId}/end`]);
     } else {
       this.router.navigate([`/review/${this.reviewId}/u/${targetUnitId}`]);
+    }
+  }
+
+  setHeaderText(pageName: string) {
+    this.pageHeaderText = pageName;
+    if (this.reviewSettings) {
+      if (this.reviewSettings.unitScreenHeader === 'WITH_UNIT_TITLE') {
+        this.screenHeaderText = pageName;
+      } else if (this.reviewSettings.unitScreenHeader === 'WITH_BOOKLET_TITLE') {
+        this.screenHeaderText = `Review '${this.reviewName}' (Testheft)`;
+      } else if (this.reviewSettings.unitScreenHeader === 'WITH_BLOCK_TITLE') {
+        this.screenHeaderText = `Review '${this.reviewName}' (Block)`;
+      } else {
+        this.screenHeaderText = '';
+      }
+    } else {
+      this.screenHeaderText = '';
     }
   }
 

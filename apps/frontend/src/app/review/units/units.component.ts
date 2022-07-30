@@ -199,7 +199,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
         this.unitData.playerId = umd.player ? umd.player : '';
         const playerId = this.unitData.playerId ? this.appService.playerList.getBestMatch(this.unitData.playerId) : '';
         this.unitData.name = `${this.unitData.sequenceId + 1}: ${umd.key}${umd.name ? ` - ${umd.name}` : ''}`;
-        this.reviewService.currentPageHeader = this.unitData.name;
+        this.reviewService.setHeaderText(this.unitData.name);
         if (playerId) {
           if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
             // TODO: Ist das nicht EditorCode, der hier entfernt werden kann?
