@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
@@ -27,6 +28,7 @@ import { ReviewComponent } from './review.component';
     MatTooltipModule,
     MatListModule,
     MatIconModule,
+    StudioComponentsModule,
     MatSidenavModule
   ],
   exports: [ReviewComponent]

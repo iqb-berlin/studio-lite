@@ -1,3 +1,20 @@
-<div style="height: 100%; background-color: whitesmoke;padding: 20px">
-  <p>start works!</p>
+<div class="start-page" fxLayout="column" fxLayoutAlign="center center">
+  <div class="start-data" fxLayout="column">
+    <div>
+      <h4>Review einer Aufgabenfolge</h4>
+      <p>Anzahl der Units: {{reviewService.units.length}}</p>
+      <p>Booklet-Einstellungen:</p>
+    </div>
+    <booklet-config [config]="reviewService.reviewSettings" [disabled]="true" fxFlex>
+
+    </booklet-config>
+    <div fxLayout="row" fxLayoutAlign="end end">
+      <a mat-fab
+         (click)="reviewService.setUnitNavigationRequest(0)"
+         matTooltip="Weiter"
+      >
+        <i class="material-icons">chevron_right</i>
+      </a>
+    </div>
+  </div>
 </div>

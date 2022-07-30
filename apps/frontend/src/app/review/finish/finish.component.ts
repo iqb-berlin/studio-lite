@@ -4,7 +4,10 @@ import { ReviewService } from '../review.service';
 @Component({
   selector: 'studio-lite-finish',
   templateUrl: './finish.component.html',
-  styleUrls: ['./finish.component.scss']
+  styles: [
+    '.finish-page {height: 100%; background-color: whitesmoke; overflow: auto}',
+    '.finish-data {min-width: 500px}'
+  ]
 })
 export class FinishComponent implements OnInit {
   constructor(

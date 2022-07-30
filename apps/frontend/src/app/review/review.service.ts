@@ -14,8 +14,8 @@ export class ReviewService {
   reviewName = '';
   units: UnitData[] = [];
   reviewSettings?: ReviewSettingsDto;
-  screenHeaderText = '';
-  pageHeaderText = '';
+  screenHeaderText = 'Startseite';
+  pageHeaderText = 'Startseite';
   currentUnitSequenceId = -1;
   private moduleHtmlStore: { [key: string]: string } = {};
 
