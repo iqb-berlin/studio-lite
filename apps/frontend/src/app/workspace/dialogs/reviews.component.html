@@ -11,28 +11,33 @@
           {{review.name}}
         </a>
       </mat-nav-list>
-      <div fxLayout="row">
-        <button mat-raised-button (click)="addReview()"
-                matTooltip="Aufgabenfolge hinzufügen" matTooltipPosition="above" fxFlex="33">
+      <div fxLayout="row" id="main-buttons">
+        <button mat-raised-button (click)="addReview()" class="small-button" fxFlex="25%"
+                matTooltip="Aufgabenfolge hinzufügen" matTooltipPosition="above">
           <mat-icon>add</mat-icon>
         </button>
-        <button mat-raised-button (click)="deleteReview()"
+        <button mat-raised-button (click)="deleteReview()" class="small-button"
                 matTooltip="Aufgabenfolge löschen" [disabled]="selectedReviewId === 0"
-                matTooltipPosition="above" fxFlex="33">
+                matTooltipPosition="above" fxFlex="25%">
           <mat-icon>delete</mat-icon>
         </button>
         <a mat-raised-button [href]="locationOrigin + '/#/review/' + reviewDataOriginal.id"
-           target="_blank"
-                matTooltip="Aufgabenfolge starten" [disabled]="selectedReviewId === 0"
-                matTooltipPosition="above" fxFlex>
-          <mat-icon>play_arrow</mat-icon>
+           target="_blank" class="small-button"
+                matTooltip="Aufgabenfolge starten" [disabled]="unitCount < 1"
+                matTooltipPosition="above" fxFlex="25%">
+          <mat-icon>launch</mat-icon>
         </a>
+        <button mat-raised-button matTooltip="Kopiere Link in Zwischenablage"
+                [disabled]="unitCount < 1 || passwordLength < 4" class="small-button"
+                (click)="copyLinkToClipboard()" fxFlex="25%">
+          <mat-icon>link</mat-icon>
+        </button>
       </div>
     </div>
     <div [class]="changed ? 'review-changed' : 'review-not-changed'"
          fxLayout="column" fxFlex>
       <div fxFlex fxLayout="row" style="background: white" fxLayoutGap="30px">
-        <div fxFlex="50%" fxLayout="column">
+        <div fxFlex="30%" fxLayout="column">
           <mat-form-field>
             <input matInput [(ngModel)]="reviewDataToChange.name" placeholder="Name"
                    [disabled]="selectedReviewId === 0"
@@ -43,13 +48,12 @@
                    [disabled]="selectedReviewId === 0"
                    (ngModelChange)="changed = detectChanges()" placeholder="Kennwort">
           </mat-form-field>
-          <div fxLayout="row">
-            <button mat-button
-                    [disabled]="selectedReviewId === 0"
-                    (click)="copyLinkToClipboard()">Kopiere Link in Zwischenablage</button>
+          <div [class]="(selectedReviewId > 0 && passwordNewLength < 4) ? 'rev-message' : 'invisible'">
+            Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)
           </div>
         </div>
         <mat-dialog-content fxFlex>
+          <div [hidden]="selectedReviewId > 0">Bitte links Aufgabenfolge wählen bzw. neu anlegen.</div>
           <select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
                             (selectionChanged)="unitSelectionChanged()"
                             [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
