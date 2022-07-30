@@ -26,7 +26,6 @@ export class UnitsComponent implements OnInit, OnDestroy {
   playerApiVersion = 3;
   private sessionId = '';
   private lastPlayerId = '';
-  showPageNav = false;
   unitData: UnitData = {
     databaseId: 0,
     sequenceId: 0,
@@ -349,7 +348,6 @@ export class UnitsComponent implements OnInit, OnDestroy {
         this.pageList[this.pageList.length - 1].disabled = currentPageIndex === this.pageList.length - 2;
       }
     }
-    this.showPageNav = this.pageList.length > 0;
   }
 
   ngOnDestroy() {

@@ -2,29 +2,24 @@
   width: 100%
 }
 
-#iframe-host {
+#page-host {
   position: fixed;
   width: 100%;
   top: 0;
   bottom: 0;
   padding: 0;
-  background-color: white;
 }
 
-.with-header #iframe-host {
+.with-header #page-host {
   top: 65px;
 }
 
-.with-title #iframe-host {
+.with-title #page-host {
   top: 40px;
 }
 
-.with-header.with-title #iframe-host {
+.with-header.with-title #page-host {
   top: 105px;
-}
-
-.with-footer #iframe-host {
-  bottom: 45px;
 }
 
 #unit-title {
@@ -43,20 +38,6 @@
   top: 65px;
 }
 
-#page-navigation {
-  position: absolute;
-  width: 100%;
-  height: 45px;
-  bottom: 0;
-  padding: 0 16px;
-  font-size: 1.2em;
-}
-
-#page-navigation-prompt {
-  padding-right: 8px;
-  color: white;
-}
-
 h1 {
   font-size: 1.5em;
   color: white;
@@ -66,18 +47,6 @@ h1 {
   text-overflow: clip;
   line-height: 30px;
   max-height: 60px;
-}
-
-.tc-body {
-  overflow-x: auto;
-  position: absolute;
-  width: 100%;
-  top: 0;
-  bottom: 0;
-}
-
-.tc-body.with-header {
-  top: 65px;
 }
 
 #header {
@@ -134,8 +103,6 @@ h1 {
 :host ::ng-deep .mat-list-item-content {
   padding: 0 8px!important;
 }
-
-/* :host ::ng-deep .mat-focus-indicator { background-color: red; } */
 
 #unitNav .mat-list-base,
 #unitNav .mat-list-item {
