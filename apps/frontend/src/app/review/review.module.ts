@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
@@ -29,7 +30,8 @@ import { ReviewComponent } from './review.component';
     MatListModule,
     MatIconModule,
     StudioComponentsModule,
-    MatSidenavModule
+    MatSidenavModule,
+    MatButtonToggleModule
   ],
   exports: [ReviewComponent]
 })

@@ -1,9 +1,7 @@
 <div
   [class]="{
-      'unit-host': true,
-      'with-header': reviewService.reviewSettings?.unitScreenHeader !== 'OFF',
-      'with-title': reviewService.reviewSettings?.unitTitle === 'ON',
-      'with-footer': reviewService.reviewSettings?.pageNaviButtons === 'SEPARATE_BOTTOM'
+    'with-header': reviewService.reviewSettings?.unitScreenHeader !== 'OFF',
+    'with-title': reviewService.reviewSettings?.unitTitle === 'ON'
   }"
 >
   <div
@@ -126,7 +124,7 @@
     </button>
   </div>
 
-  <div id="iframe-host">
+  <div id="page-host">
     <router-outlet></router-outlet>
   </div>
 </div>

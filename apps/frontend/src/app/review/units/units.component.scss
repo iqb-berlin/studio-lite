@@ -1,41 +1,33 @@
-:host.review-body {
+:host#unit-host {
   height: 100%;
 }
-.review-body {
+
+#unit-host {
   width: 100%;
+  height: 100%;
+  background-color: white;
   padding: 0;
 }
 
-.pageNav {
-  font-size: 1.2em;
-}
-
-#pageFooter {
+#page-navigation {
+  position: absolute;
   width: 100%;
+  height: 45px;
   bottom: 0;
-  background-color: slategray;
-  padding: 0 30px;
+  padding: 0 16px;
+  font-size: 1.2em;
+  background: #07465e;
+  color: #f2f2f2;
 }
 
-#pageNavPrompt {
-  padding: 2px 8px;
+#page-navigation-prompt {
+  padding-right: 8px;
   color: white;
 }
 
-#pageNav button {
-  font-size: 1.1em;
+.with-footer {
+  height: calc(100% - 45px);
 }
-
-#pageNav button i {
-  font-size: 1.2em;
-}
-
-.pageNavDisabled {
-  height: 5px;
-  background-color: orangered;
-}
-
-.pageNavEnabled {
-  height: 5px;
-  background-color: darkgrey;
+.with-footer #hosting-iframe {
+  height: calc(100% - 45px);
 }
