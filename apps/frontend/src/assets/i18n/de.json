@@ -101,5 +101,41 @@
   "delete-dialog": {
     "cancel": "Abbrechen",
     "delete": "Löschen"
+  },
+  "booklet-config": {
+    "pagingMode": {
+      "label": "Darstellung der Seiten einer Unit",
+      "separate":  "Getrennt - Zugriff über Navigation",
+      "concat-scroll": "Aneinandergehängt - untereinander ohne Zwischenraum",
+      "concat-scroll-snap": "Aneinandergehängt - schnappen/magnetisch"
+    },
+    "pageNaviButtons": {
+      "label": "Buttons für Seitennavigation",
+      "OFF": "ausblenden",
+      "SEPARATE_BOTTOM": "einblenden unten rechts"
+    },
+    "unitNaviButtons": {
+      "label": "Buttons für Navigation zwischen Units",
+      "OFF": "ausgeblendet",
+      "ARROWS_ONLY": "Nur Pfeil-Buttons oben rechts",
+      "FULL": "Pfeil-Buttons und Unit-Buttons oben rechts"
+    },
+    "controllerDesign": {
+      "label": "Pfeil-Design",
+      "2018": "rund und grün",
+      "2022": "eckig und ohne besondere Farbe"
+    },
+    "unitScreenHeader": {
+      "label": "Bildschirm-Kopfzeile Inhalt",
+      "OFF": "Keine - komplett ausblenden",
+      "WITH_UNIT_TITLE": "Unit-Name",
+      "WITH_BOOKLET_TITLE": "Testheft-Name",
+      "WITH_BLOCK_TITLE": "Block-Name"
+    },
+    "unitTitle": {
+      "label": "Unit-Titel unterhalb der Bildschirm-Kopfzeile",
+      "ON": "eingeblendet",
+      "OFF": "ausgeblendet"
+    }
   }
 }

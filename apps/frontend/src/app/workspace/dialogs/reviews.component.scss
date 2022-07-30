@@ -1,0 +1,45 @@
+.margin-bottom {
+  margin-bottom: 10px
+}
+
+.rev-message {
+  font-style: italic; font-size: smaller
+}
+
+.invisible {
+  display: block;
+  visibility: hidden;
+  height: 0;width: 0
+}
+
+.selected {
+  background-color: #3957f74f
+}
+
+.review-list {
+  overflow: auto;
+  background-color: whitesmoke;
+  border: 2px solid whitesmoke
+}
+
+.review-list-entry {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px
+}
+
+.review-changed {
+  background-color: darkorange;
+  padding: 2px
+}
+
+.review-not-changed {
+  background-color: transparent;
+  padding: 2px
+}
+
+#main-buttons .mat-raised-button {
+  padding: 0;
+  min-width: 25px
+}

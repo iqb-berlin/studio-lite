@@ -57,6 +57,7 @@ export class ReviewService {
       name: review.name,
       link: review.link,
       password: review.password,
+      settings: review.settings,
       units: units.map(u => u.unitId)
     };
   }
