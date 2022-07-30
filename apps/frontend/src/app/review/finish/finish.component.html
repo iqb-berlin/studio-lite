@@ -1,1 +1,15 @@
-<p>finish works!</p>
+<div class="finish-page" fxLayout="column" fxLayoutAlign="center center">
+  <div class="finish-data" fxLayout="column">
+    <div>
+      <h4>Ende der Aufgabenfolge</h4>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="start start">
+      <a mat-fab
+         (click)="reviewService.setUnitNavigationRequest(reviewService.units.length -1)"
+         matTooltip="Zurück"
+      >
+        <i class="material-icons">chevron_left</i>
+      </a>
+    </div>
+  </div>
+</div>

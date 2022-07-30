@@ -4,7 +4,10 @@ import { ReviewService } from '../review.service';
 @Component({
   selector: 'studio-lite-start',
   templateUrl: './start.component.html',
-  styleUrls: ['./start.component.scss']
+  styles: [
+    '.start-page {height: 100%; background-color: whitesmoke; overflow: auto}',
+    '.start-data {min-width: 500px}'
+  ]
 })
 export class StartComponent implements OnInit {
   constructor(
