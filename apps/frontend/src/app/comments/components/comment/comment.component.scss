@@ -1,0 +1,38 @@
+.comment{
+  margin-top: 10px;
+}
+
+:host ::ng-deep .comment-html {
+  padding: 1px 15px 1px 15px;
+  background-color: #f3f3f3;
+  line-height: 1em;
+  border-radius: 5px;
+  min-width: 420px;
+  p {
+    word-break: break-all;
+  }
+}
+
+.own-comment {
+  background-color: #00333322;
+}
+
+.comment-meta{
+  font-size: 0.8em;
+  color: #666666;
+  margin-bottom: 2px;
+  div {
+    margin-right: 10px;
+  }
+}
+
+.comment-action{
+  width: 30px;
+  line-height: 30px;
+  height: 30px;
+  color: #bbbbbb;
+  margin-right: 10px;
+  &:hover{
+    color: #666666;
+  }
+}

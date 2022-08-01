@@ -1,118 +1,130 @@
-<form [formGroup]="form"
+<form class="editor-container"
+      [formGroup]="form"
       (ngSubmit)="onSubmit()"
       (reset)="onReset()">
-  <div>
-    <div fxLayout="row"
-         class="editor-control-panel"
-         fxLayoutAlign="end">
-      <button type="button" mat-icon-button
-              matTooltip="{{'comment-editor.bold' | translate}}"
-              [matTooltipPosition]="'above'"
-              [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('bold')"
-              (click)="toggleBold()">
-        <mat-icon>format_bold</mat-icon>
-      </button>
-      <button type="button" mat-icon-button
-              matTooltip="{{'comment-editor.italic' | translate}}"
-              [matTooltipPosition]="'above'"
-              [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('italic')"
-              (click)="toggleItalic()">
-        <mat-icon>format_italic</mat-icon>
-      </button>
-      <button type="button" mat-icon-button
-              matTooltip="{{'comment-editor.underline' | translate}}"
-              [matTooltipPosition]="'above'"
-              [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('underline')"
-              (click)="toggleUnderline()" style="text-decoration: underline">
-        <mat-icon>format_underlined</mat-icon>
-      </button>
-      <button type="button" mat-icon-button
-              matTooltip="{{'comment-editor.superscript' | translate}}"
-              [matTooltipPosition]="'above'"
-              [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('superscript')"
-              (click)="toggleSuperscript()">
-        <mat-icon>superscript</mat-icon>
-      </button>
-      <button type="button" mat-icon-button
-              matTooltip="{{'comment-editor.subscript' | translate}}"
-              [matTooltipPosition]="'above'"
-              [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('subscript')"
-              (click)="toggleSubscript()">
-        <mat-icon>subscript</mat-icon>
-      </button>
-      <button type="button" mat-icon-button
-              matTooltip="{{'comment-editor.strike' | translate}}"
-              [matTooltipPosition]="'above'"
-              [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('strike')"
-              (click)="toggleStrike()">
-        <mat-icon>strikethrough_s</mat-icon>
-      </button>
-      <div fxLayout="row"
-           [style.background-color]="selectedFontColor"
-           [style.margin-right.px]="1">
-        <button type="button"
-                mat-icon-button
-                matTooltip="{{'comment-editor.text-color' | translate}}"
-                (click)="applyFontColor()">
-          <mat-icon>format_color_text</mat-icon>
-        </button>
-        <mat-select (click)="textColorInput.click()"></mat-select>
-        <input matInput
-               type="color"
-               #textColorInput hidden
-               (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
-      </div>
-      <div fxLayout="row"
-           [style.background-color]="selectedHighlightColor">
-        <button type="button"
-                mat-icon-button
-                matTooltip="{{'comment-editor.text-background' | translate}}"
-                (click)="applyHighlightColor()">
-          <mat-icon>format_color_fill</mat-icon>
-        </button>
-        <mat-select (click)="textHighlightColorInput.click()"></mat-select>
-        <input matInput
-               type="color"
-               #textHighlightColorInput hidden
-               (input)="selectedHighlightColor = $any($event.target).value; applyHighlightColor()">
-      </div>
+  <div fxLayout="row"
+       fxLayoutAlign="end"
+       class="editor-menubar">
+    <button type="button" mat-icon-button
+            matTooltip="{{'comment-editor.bold' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            [class.active]="editor.isActive('bold')"
+            (click)="toggleBold()">
+      <mat-icon>format_bold</mat-icon>
+    </button>
+    <button type="button" mat-icon-button
+            matTooltip="{{'comment-editor.italic' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            [class.active]="editor.isActive('italic')"
+            (click)="toggleItalic()">
+      <mat-icon>format_italic</mat-icon>
+    </button>
+    <button type="button" mat-icon-button
+            matTooltip="{{'comment-editor.underline' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            [class.active]="editor.isActive('underline')"
+            (click)="toggleUnderline()" style="text-decoration: underline">
+      <mat-icon>format_underlined</mat-icon>
+    </button>
+    <button type="button" mat-icon-button
+            matTooltip="{{'comment-editor.superscript' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            [class.active]="editor.isActive('superscript')"
+            (click)="toggleSuperscript()">
+      <mat-icon>superscript</mat-icon>
+    </button>
+    <button type="button" mat-icon-button
+            matTooltip="{{'comment-editor.subscript' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            [class.active]="editor.isActive('subscript')"
+            (click)="toggleSubscript()">
+      <mat-icon>subscript</mat-icon>
+    </button>
+    <button type="button" mat-icon-button
+            matTooltip="{{'comment-editor.strike' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            [class.active]="editor.isActive('strike')"
+            (click)="toggleStrike()">
+      <mat-icon>strikethrough_s</mat-icon>
+    </button>
+    <div fxLayout="row">
       <button type="button"
               mat-icon-button
-              matTooltip="{{'comment-editor.enumeration' | translate}}"
-              [class.active]="editor.isActive('bulletList')"
-              (click)="toggleBulletList()">
-        <mat-icon>format_list_bulleted</mat-icon>
+              matTooltip="{{'comment-editor.text-color' | translate}}"
+              (click)="applyFontColor()">
+        <mat-icon>format_color_text</mat-icon>
       </button>
-      <button type="button"
-              mat-icon-button
-              matTooltip="Bild"
-              (click)="addImage()">
-        <mat-icon>image</mat-icon>
-      </button>
+      <mat-select
+        class="editor-color-select-button"
+        [style.background-image]="'linear-gradient(135deg, white 60%, ' + selectedFontColor +' 60%)'"
+        (click)="textColorInput.click()">
+      </mat-select>
+      <input matInput
+             type="color"
+             #textColorInput hidden
+             (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
     </div>
-    <tiptap-editor class="tip-tap-editor"
+    <div fxLayout="row">
+      <button type="button"
+              mat-icon-button
+              matTooltip="{{'comment-editor.text-background' | translate}}"
+              (click)="applyHighlightColor()">
+        <mat-icon>format_color_fill</mat-icon>
+      </button>
+      <mat-select class="editor-color-select-button"
+                  [style.background-image]="'linear-gradient(135deg, white 60%, ' + selectedHighlightColor +' 60%)'"
+                  (click)="textHighlightColorInput.click()">
+      </mat-select>
+      <input matInput
+             type="color"
+             #textHighlightColorInput hidden
+             (input)="selectedHighlightColor = $any($event.target).value; applyHighlightColor()">
+    </div>
+    <button type="button"
+            mat-icon-button
+            matTooltip="{{'comment-editor.enumeration' | translate}}"
+            [class.active]="editor.isActive('bulletList')"
+            (click)="toggleBulletList()">
+      <mat-icon>format_list_bulleted</mat-icon>
+    </button>
+    <button type="button"
+            mat-icon-button
+            matTooltip="Bild"
+            (click)="addImage()">
+      <mat-icon>image</mat-icon>
+    </button>
+  </div>
+  <div fxLayout="row" class="editor-area">
+    <tiptap-editor class="tip-tap-editor" fxFlex
                    [editor]="editor"
-                   [innerHTML]="initialHTML"
+                   [innerHTML]="initialHTML | safeResourceHTML"
                    mat-dialog-content
                    formControlName="comment"
-                   [style.font-size.px]="18">
+                   [style.font-size.px]="16">
     </tiptap-editor>
-
-    <button mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="form.invalid">
-      {{ submitLabel | translate}}
-    </button>
-    <button mat-flat-button
-            type="reset">
-      {{'comment-editor.cancel' | translate}}
-    </button>
+    <div class="editor-actions"
+         fxLayout="column"
+         fxLayoutAlign="space-between end">
+      <button mat-icon-button
+              matTooltip="{{'comment-editor.cancel' | translate}}"
+              type="reset"
+              class="reset-button">
+        <mat-icon>close</mat-icon>
+      </button>
+      <button mat-fab
+              color="primary"
+              matTooltip="{{ submitLabel | translate}}"
+              type="submit"
+              class="submit-button"
+              [disabled]="form.invalid">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
   </div>
 </form>

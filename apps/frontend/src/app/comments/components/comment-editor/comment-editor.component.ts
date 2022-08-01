@@ -26,14 +26,13 @@ export class CommentEditorComponent {
 
   form!: FormGroup;
   editor!: Editor;
-  selectedFontSize: string = '20px';
-  selectedFontColor: string = 'lightgrey';
-  selectedHighlightColor: string = 'lightgrey';
+  selectedFontColor: string = 'black';
+  selectedHighlightColor: string = 'black';
   bulletListStyle: string = 'disc';
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      comment: [this.initialHTML, Validators.required]
+      comment: [this.initialHTML, [Validators.minLength(8), Validators.required]]
     });
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
