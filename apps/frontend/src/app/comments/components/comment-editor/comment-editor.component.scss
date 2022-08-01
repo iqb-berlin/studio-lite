@@ -1,14 +1,54 @@
-:host ::ng-deep div.ProseMirror {
-  height: 100px;
-  border: 1px solid;
-  overflow: auto;
+.editor-area{
+  border: 1px solid #666666;
+  border-radius: 5px;
+  padding: 0 15px;
+  background-color: #00333308;
 }
 
-:host ::ng-deep .ProseMirror p strong {
-  letter-spacing: 0.04em !important;
-  font-weight: 600 !important;
+.editor-menubar {
+  color: #666666;
 }
+
+.editor-container{
+  margin-top: 1px;
+}
+
+.editor-color-select-button {
+  margin: 5px 14px 7px -8px;
+}
+
+.editor-actions{
+  margin-left: 5px;
+  .mat-fab.mat-button-disabled {
+    background-color: lightgrey;
+  }
+  .reset-button {
+    margin-right: -15px;
+    margin-top: -5px;
+    color: #333333;
+  }
+  .submit-button {
+    margin-right: -25px;
+    margin-bottom: -15px;
+  }
+}
+
+:host ::ng-deep div.ProseMirror {
+  height: 120px;
+  overflow: auto;
+  outline-color: transparent;
+  outline-width: 0;
+  p {
+    word-break: break-all;
+  }
+  p strong {
+    letter-spacing: 0.04em !important;
+    font-weight: 600 !important;
+  }
+}
+
 
 button.active {
   background-color: lightgrey;
 }
+

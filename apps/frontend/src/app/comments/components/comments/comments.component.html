@@ -11,13 +11,13 @@
       (addComment)="addComment($event)"
       (deleteComment)="deleteComment($event)"
       (updateComment)="updateComment($event)"
-      studioLiteScrollIntoView
+      studioLiteScrollCommentIntoView
       [id]="rootComment.id"
       [scrollTargetId]="latestCommentId">
     </studio-lite-comment>
   </div>
 
-  <div>
+  <div class="new-comment">
     <div class="editor-label">{{'comments.write-comment' | translate}}</div>
       <studio-lite-comment-editor
         submitLabel="comment-editor.write"

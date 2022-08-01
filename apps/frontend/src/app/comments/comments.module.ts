@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -25,15 +24,17 @@ import { DeleteDialogComponent } from './components/delete-dialog/delete-dialog.
 import { RootCommentsPipe } from './pipes/root-comments.pipe';
 import { RepliesPipe } from './pipes/replies.pipe';
 import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
-import { ScrollIntoViewDirective } from './directives/scroll-into-view.directive';
+import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into-view.directive';
 import { AuthInterceptor } from '../auth.interceptor';
+import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
+import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
+import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
 
 @NgModule({
   imports: [
     CommonModule,
     ReactiveFormsModule,
     MatIconModule,
-    MatCardModule,
     MatButtonModule,
     TranslateModule,
     MatDialogModule,
@@ -56,7 +57,10 @@ import { AuthInterceptor } from '../auth.interceptor';
     DeleteDialogComponent,
     RootCommentsPipe,
     RepliesPipe,
-    ScrollIntoViewDirective
+    ScrollCommentIntoViewDirective,
+    ScrollEditorIntoViewDirective,
+    CommentBadgeComponent,
+    MomentFromNowPipe
   ],
   exports: [CommentsComponent],
   providers: [
@@ -70,6 +74,5 @@ import { AuthInterceptor } from '../auth.interceptor';
       }
     ]
   ]
-
 })
 export class CommentsModule {}

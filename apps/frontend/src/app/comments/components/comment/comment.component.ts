@@ -23,19 +23,14 @@ export class CommentComponent implements OnInit {
   @Output() addComment = new EventEmitter<{ text: string; parentId: number | null }>();
   @Output() updateComment = new EventEmitter<{ text: string; commentId: number }>();
 
-  createdAt: Date = new Date();
-  canReply: boolean = false;
-  canEdit: boolean = false;
+  ownComment: boolean = false;
   canDelete: boolean = false;
   activeCommentType = ActiveCommentType;
   replyId: number | null = null;
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   ngOnInit(): void {
-    this.createdAt = this.comment.createdAt;
-    this.canReply = Boolean(this.userId);
-    this.canEdit = this.userId === this.comment.userId;
-    this.canDelete = this.userId === this.comment.userId && this.replies.length === 0;
+    this.ownComment = this.userId === this.comment.userId;
+    this.canDelete = this.ownComment && this.replies.length === 0;
     this.replyId = this.parentId ? this.parentId : this.comment.id;
   }
 }
