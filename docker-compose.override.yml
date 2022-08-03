@@ -21,9 +21,11 @@ services:
     image: iqbberlin/studio-lite-backend:latest
     ports:
       - "3333:3333"
+      - "9229:9229" # default debug port
     command:
       - "serve"
       - "api"
+      - "--host=${API_HOST}"
     volumes:
       - ./apps/api/src:/studio-lite/apps/api/src
 
