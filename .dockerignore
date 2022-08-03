@@ -2,5 +2,6 @@
 .gitkeep
 *Dockerfile*
 *docker-compose*
+dist
 node_modules
 cache
