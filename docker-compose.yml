@@ -18,7 +18,7 @@ services:
       DB_USER: ${POSTGRES_DB_USER}
       DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
     volumes:
-      - db_vol:/data/postgres
+      - db_vol:/var/lib/postgresql/data
     networks:
       - backend-network
 
