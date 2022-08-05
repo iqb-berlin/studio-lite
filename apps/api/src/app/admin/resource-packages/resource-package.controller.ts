@@ -1,5 +1,5 @@
 import {
-  Controller, Delete, Get, Param, ParseIntPipe, Post, UploadedFile, UseGuards, UseInterceptors
+  Controller, Delete, Get, Param, ParseIntPipe, Post, UploadedFile, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
@@ -7,10 +7,12 @@ import {
 import { Express } from 'express';
 import 'multer';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcePackageService } from '../../database/services/resource-package.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { IsAdminGuard } from '../is-admin.guard';
+import { ApiFile } from './api-file.decorator';
+import { fileMimetypeFilter } from './file-mimetype-filter';
+import { ParseFile } from './parse-file-pipe';
 
 @Controller('admin/resource-packages')
 export class ResourcePackageController {
@@ -38,13 +40,15 @@ export class ResourcePackageController {
   @Post()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('resourcePackage'))
+  @ApiFile('resourcePackage', true, {
+    fileFilter: fileMimetypeFilter('application/zip')
+  })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new resource package in database',
     type: Number
   })
   @ApiTags('admin resource-packages')
-  async create(@UploadedFile() zippedResourcePackage: Express.Multer.File): Promise<number> {
+  async create(@UploadedFile(ParseFile) zippedResourcePackage: Express.Multer.File): Promise<number> {
     return this.resourcePackageService.create(zippedResourcePackage);
   }
 }
