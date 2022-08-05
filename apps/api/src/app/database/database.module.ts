@@ -26,6 +26,8 @@ import { UnitCommentService } from './services/unit-comment.service';
 import Review from './entities/review.entity';
 import ReviewUnit from './entities/review-unit.entity';
 import { ReviewService } from './services/review.service';
+import ResourcePackage from './entities/resource-package.entity';
+import { ResourcePackageService } from './services/resource-package.service';
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { ReviewService } from './services/review.service';
     UnitComment,
     UnitUser,
     Setting,
+    ResourcePackage,
     Review,
     ReviewUnit,
     TypeOrmModule.forRootAsync({
@@ -58,6 +61,7 @@ import { ReviewService } from './services/review.service';
           WorkspaceUser,
           UnitDefinition,
           VeronaModule,
+          ResourcePackage,
           Setting,
           Unit,
           UnitComment,
@@ -77,6 +81,7 @@ import { ReviewService } from './services/review.service';
       WorkspaceUser,
       UnitDefinition,
       VeronaModule,
+      ResourcePackage,
       Setting,
       Unit,
       UnitComment,
@@ -87,6 +92,7 @@ import { ReviewService } from './services/review.service';
     ])
   ],
   providers: [
+    ResourcePackageService,
     UsersService,
     WorkspaceService,
     WorkspaceGroupService,
@@ -111,6 +117,8 @@ import { ReviewService } from './services/review.service';
     WorkspaceGroupAdmin,
     VeronaModule,
     Setting,
+    ResourcePackage,
+    ResourcePackageService,
     Review,
     ReviewUnit,
     ReviewService,

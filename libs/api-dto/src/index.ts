@@ -10,6 +10,7 @@ export { UnitDownloadSettingsDto } from './lib/dto/unit/unit-download-settings-d
 export { RequestReportDto } from './lib/dto/request-report-dto';
 export { UnitSchemeDto } from './lib/dto/unit/unit-scheme-dto';
 export { AppLogoDto } from './lib/dto/setting/app-logo-dto';
+export { ResourcePackageDto } from './lib/dto/resource-package/resource-package-dto';
 export { ConfigDto } from './lib/dto/setting/config-dto';
 export { VeronaModuleFileDto } from './lib/dto/verona-module/verona-module-file-dto';
 export { UnitDefinitionDto } from './lib/dto/unit/unit-definition-dto';
