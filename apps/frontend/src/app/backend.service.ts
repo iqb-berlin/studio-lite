@@ -10,7 +10,8 @@ import {
   MyDataDto,
   VeronaModuleInListDto,
   WorkspaceFullDto,
-  WorkspaceSettingsDto
+  WorkspaceSettingsDto,
+  ResourcePackageDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -82,6 +83,14 @@ export class BackendService {
       .get<AppLogoDto | null>(`${this.serverUrl}admin/settings/app-logo`, {})
       .pipe(
         catchError(() => of(null))
+      );
+  }
+
+  getResourcePackages(): Observable<ResourcePackageDto[]> {
+    return this.http
+      .get<ResourcePackageDto[]>(`${this.serverUrl}admin/resource-packages`, {})
+      .pipe(
+        catchError(() => of([]))
       );
   }
 
