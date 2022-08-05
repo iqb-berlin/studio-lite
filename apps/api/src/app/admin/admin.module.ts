@@ -7,6 +7,7 @@ import { WorkspacesController } from './workspaces/workspaces.controller';
 import { WorkspaceGroupsController } from './workspaces/workspace-groups.controller';
 import { SettingController } from './settings/setting.controller';
 import { VeronaModulesController } from './verona-modules/verona-modules.controller';
+import { ResourcePackageController } from './resource-packages/resource-package.controller';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { VeronaModulesController } from './verona-modules/verona-modules.control
     UsersController,
     WorkspaceGroupsController,
     SettingController,
+    ResourcePackageController,
     VeronaModulesController
   ]
 })
