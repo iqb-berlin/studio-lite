@@ -39,6 +39,7 @@ import { AuthInterceptor } from './auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './settings/app-logo.component';
 import { UnitExportConfigComponent } from './settings/unit-export-config.component';
+import { ResourcePackagesComponent } from './resource-packages/resource-packages.component';
 
 @NgModule({
   imports: [
@@ -69,9 +70,7 @@ import { UnitExportConfigComponent } from './settings/unit-export-config.compone
     FormsModule,
     TranslateModule
   ],
-  exports: [
-    AdminComponent
-  ],
+  exports: [AdminComponent],
   declarations: [
     WorkspacesComponent,
     UsersComponent,
@@ -84,7 +83,8 @@ import { UnitExportConfigComponent } from './settings/unit-export-config.compone
     EditWorkspaceGroupComponent,
     AppConfigComponent,
     AppLogoComponent,
-    UnitExportConfigComponent
+    UnitExportConfigComponent,
+    ResourcePackagesComponent
   ],
   providers: [
     BackendService,
@@ -98,4 +98,4 @@ import { UnitExportConfigComponent } from './settings/unit-export-config.compone
     ]
   ]
 })
-export class AdminModule { }
+export class AdminModule {}

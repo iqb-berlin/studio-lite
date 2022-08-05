@@ -40,6 +40,7 @@ export class AdminComponent {
     { path: 'users', label: 'Nutzer:innen' },
     { path: 'workspaces', label: 'Bereichsgruppen' },
     { path: 'v-modules', label: 'Module' },
-    { path: 'settings', label: 'Einstellungen' }
+    { path: 'settings', label: 'Einstellungen' },
+    { path: 'packages', label: 'Pakete' }
   ];
 }

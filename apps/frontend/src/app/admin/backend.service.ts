@@ -166,6 +166,24 @@ export class BackendService {
       );
   }
 
+  deleteResourcePackage(id: number): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}admin/resource-packages/${id}`)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  createResourcePackage(zippedResourcePackage: FormData): Observable<boolean> {
+    return this.http
+      .post(`${this.serverUrl}admin/resource-packages`, zippedResourcePackage)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
   getUnitExportConfig(): Observable<UnitExportConfigDto> {
     return this.http
       .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`);
