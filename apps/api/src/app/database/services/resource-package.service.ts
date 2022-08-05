@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable, Logger
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
@@ -6,8 +8,10 @@ import { Express } from 'express';
 import 'multer';
 import * as AdmZip from 'adm-zip';
 import * as fs from 'fs';
-import ResourcePackage from '../entities/resource-package.entity';
+import { CannotCreateFileException } from '@angular-devkit/schematics/src/tree/null';
+import * as util from 'util';
 import { ResourcePackageNotFoundException } from '../../exceptions/resource-package-not-found.exception';
+import ResourcePackage from '../entities/resource-package.entity';
 
 @Injectable()
 export class ResourcePackageService {
@@ -37,18 +41,12 @@ export class ResourcePackageService {
       resourcePackage.elements.forEach(element => {
         const elementPath = `${this.resourcePackagePath}/${element}`;
         if (fs.existsSync(elementPath)) {
-          // eslint-disable-next-line no-empty
           if (fs.lstatSync(elementPath).isDirectory()) {
             // delete all
             fs.rmSync(elementPath, { recursive: true, force: true });
           } else {
             // if there are any rests
-            fs.unlink(elementPath, (err => {
-              if (err) console.log(err);
-              else {
-                console.log(`Deleted file: ${element}`);
-              }
-            }));
+            fs.unlinkSync(elementPath);
           }
         }
       });
@@ -62,16 +60,17 @@ export class ResourcePackageService {
     this.logger.log('Creating resource package.');
     const zip = new AdmZip(zippedResourcePackage.buffer);
     const packageFiles = zip.getEntries().map(entry => entry.entryName);
-    zip.extractAllToAsync(this.resourcePackagePath, true, true, err => {
-      if (err) console.log('##############z#Encountered error while unzipping', err);
-      console.log('######################All files are now unzipped!');
-    });
-    const newResourcePackage = this.resourcePackageRepository.create({
-      name: zippedResourcePackage.originalname,
-      elements: packageFiles,
-      createdAt: new Date()
-    });
-    await this.resourcePackageRepository.save(newResourcePackage);
-    return newResourcePackage.id;
+    const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
+    return zipExtractAllToAsync(this.resourcePackagePath, true, true)
+      .then(async () => {
+        const newResourcePackage = this.resourcePackageRepository.create({
+          name: zippedResourcePackage.originalname,
+          elements: packageFiles,
+          createdAt: new Date()
+        });
+        await this.resourcePackageRepository.save(newResourcePackage);
+        return newResourcePackage.id;
+      })
+      .catch(() => { throw new CannotCreateFileException(this.resourcePackagePath); });
   }
 }
