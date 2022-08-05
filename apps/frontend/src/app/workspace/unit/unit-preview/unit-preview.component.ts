@@ -238,7 +238,8 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           },
           playerConfig: {
             stateReportPolicy: 'eager',
-            pagingMode: this.previewService.pagingMode.value
+            pagingMode: this.previewService.pagingMode.value,
+            directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');

@@ -1,0 +1,30 @@
+<form fxFlex
+      fxLayout="column"
+      fxLayoutAlign="start stretch"
+      [formGroup]="uploadForm">
+  <div fxLayout="row"
+       fxLayoutAlign="start center"
+       fxLayoutGap="10px">
+    <input #hiddenInput
+           type="file"
+           (change)="upload($event)"
+           [hidden]="true"/>
+    <button mat-raised-button
+            (click)="hiddenInput.click()"
+            matTooltip="Resource Package hochladen/aktualisieren" matTooltipPosition="above">
+      <mat-icon>cloud_upload</mat-icon>
+    </button>
+    <p class="warning-warning" *ngIf="imageError">{{imageError}}</p>
+  </div>
+</form>
+
+<div *ngFor="let resourcePackage of resourcePackages | async">
+  {{resourcePackage.name}}
+  <button mat-icon-button
+          type="button"
+          (click)="delete(resourcePackage.id)">
+    <mat-icon>delete
+    </mat-icon>
+  </button>
+</div>
+

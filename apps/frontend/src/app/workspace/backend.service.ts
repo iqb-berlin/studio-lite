@@ -232,4 +232,8 @@ export class BackendService {
         catchError(() => of(false))
       );
   }
+
+  getDirectDownloadLink(): string {
+    return `${this.serverUrl}assets/`;
+  }
 }
