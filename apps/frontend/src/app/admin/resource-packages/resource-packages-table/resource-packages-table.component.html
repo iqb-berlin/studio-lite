@@ -1,0 +1,34 @@
+<mat-table *ngIf="dataSource"
+           matSort
+           matSortDisableClear
+           [dataSource]="dataSource">
+  <ng-container matColumnDef="selectCheckbox">
+    <mat-header-cell *matHeaderCellDef fxFlex="60px">
+      <mat-checkbox
+        [checked]="selectedResourcePackages.value.length === dataSource.filteredData.length"
+        [indeterminate]="selectedResourcePackages.value.length > 0 &&
+                         selectedResourcePackages.value.length < dataSource.filteredData.length"
+        (change)="toggleCheckBoxes($event)">
+      </mat-checkbox>
+    </mat-header-cell>
+    <mat-cell *matCellDef="let row" fxFlex="60px">
+      <mat-checkbox
+        (change)="updateSelectedResourcePackages()">
+      </mat-checkbox>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container *ngFor="let column of resourcePackageProperties"
+                [matColumnDef]="column">
+    <mat-header-cell *matHeaderCellDef
+                     mat-sort-header
+                     [sortActionDescription]="column">
+      {{'resourcePackage.' + column | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element[column]}}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+
