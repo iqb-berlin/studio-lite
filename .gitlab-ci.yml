@@ -7,6 +7,7 @@ variables:
   REGISTRY_PROJECT: "/${CI_PROJECT_PATH}/"
   DOCKER_TLS_CERTDIR: ""
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+  LIQUIBASE_VERSION: "4.15"
 
 stages:
   - .pre
@@ -134,9 +135,9 @@ check-release-rules:
     - if [[ $CI_COMMIT_TAG =~ $SEMVER_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid (pre-)release tag."; else echo "$CI_COMMIT_TAG is not a valid (pre-)release tag!"; fi
 
 
-############################################
-## NON MAIN COMMITS
-############################################
+#############################################################################
+## NON MAIN COMMITS OR MAIN TARGETED PULL REQUESTS, NON (PRE-)RELEASE TAGS
+#############################################################################
 
 install-dependencies:
   stage: build
@@ -168,6 +169,46 @@ install-dependencies:
     paths:
       - node_modules/.cache/nx
       - cache/Cypress
+
+build-db-image:
+  stage: build
+  rules:
+    - !reference [ .default_db_rules, rules ]
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Dockerfile --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
+    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+  after_script:
+    - docker logout $REGISTRY
+
+patch-db-image:
+  stage: build
+  rules:
+    - !reference [.default_db_rules, rules]
+  needs:
+    - build-db-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker network create studio-lite_backend-network
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker run --rm --network studio-lite_backend-network --env-file .env.dev --name studio-lite-db -d ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q liquibase/liquibase:${LIQUIBASE_VERSION}
+    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties status
+    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties validate
+    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties updateSQL
+  script:
+    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties updateTestingRollback
+    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties history
+    - docker commit studio-lite-db ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}_patched
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}_patched
+    - docker logout $REGISTRY
 
 build-app:
   stage: build
@@ -427,35 +468,6 @@ audit-app:
   script:
     - npm audit --audit-level critical
 
-build-docker-db:
-  stage: build-images
-  rules:
-    - !reference [ .default_db_rules, rules ]
-  image: docker:20.10-git
-  services:
-    - docker:20.10-dind
-  before_script:
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
-  script:
-    - docker build -f database/Dockerfile --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
-    - docker push -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
-  after_script:
-    - docker logout $REGISTRY
-
-scan-docker-db:
-  stage: scan-images
-  allow_failure: true
-  rules:
-    - !reference [.default_db_rules, rules]
-  needs:
-    - build-docker-db
-  image: docker:20.10-git
-  services:
-    - docker:20.10-dind
-  script:
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-
 build-docker-app:
   stage: build-images
   extends: .distributed
@@ -489,6 +501,20 @@ build-docker-app:
   after_script:
     - docker logout $REGISTRY
 
+scan-docker-db:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_db_rules, rules]
+  needs:
+    - build-db-image
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  script:
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
 scan-docker-app:
   stage: scan-images
   allow_failure: true
@@ -508,9 +534,9 @@ scan-docker-app:
     - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
 
 
-############################################
-## MAIN COMMITS, TAGS, AND MERGE REQUESTS
-############################################
+#############################################################################
+## MAIN COMMITS, (PRE-)RELEASE TAGS, OR PULL REQUESTS WITH TARGET MAIN
+#############################################################################
 
 build-backend-test-image:
   stage: build
