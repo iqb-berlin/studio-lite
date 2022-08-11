@@ -10,8 +10,22 @@ dev-db-up: ## Start only db container in use with local frontend and backend dev
 dev-db-down: ## Stop db container
 	docker-compose --env-file $(BASE_DIR)/.env.dev.local down
 
+dev-db-update-status:
+	docker run --rm --network studio-lite_backend-network -v $(BASE_DIR)/database/changelog:/liquibase/changelog liquibase/liquibase:4.15 --defaultsFile=changelog/liquibase.docker.properties --logLevel=info status
+
+dev-db-update-history:
+	docker run --rm --network studio-lite_backend-network -v $(BASE_DIR)/database/changelog:/liquibase/changelog liquibase/liquibase:4.15 --defaultsFile=changelog/liquibase.docker.properties --logLevel=info history
+
+dev-db-update-sql:
+	docker run --rm --network studio-lite_backend-network -v $(BASE_DIR)/database/changelog:/liquibase/changelog liquibase/liquibase:4.15 --defaultsFile=changelog/liquibase.docker.properties --logLevel=info updateSQL
+
 dev-db-update: ## Update DB Schema
-	docker exec -it studio-lite-db bash -c ./db_update.sh
+	#docker exec -it studio-lite-db bash -c ./db_update.sh
+	#docker run --rm --network studio-lite_backend-network -v $(BASE_DIR)/database/changelog:/liquibase/changelog liquibase/liquibase:4.15 --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://studio-lite-db:5432/studio-lite --username=superdb --password=jfsdssfdfmsdp9fsumdpfu3094umt394u3 update --log-level debug
+	docker run --rm --network studio-lite_backend-network -v $(BASE_DIR)/database/changelog:/liquibase/changelog liquibase/liquibase:4.15 --defaultsFile=changelog/liquibase.docker.properties --logLevel=info update
+
+dev-db-update-rollbackLastChangeset:
+	docker run --rm --network studio-lite_backend-network -v $(BASE_DIR)/database/changelog:/liquibase/changelog liquibase/liquibase:4.15 --defaultsFile=changelog/liquibase.docker.properties --logLevel=info rollbackCount 1
 
 dev-up: ## Create and start all docker containers
 	docker-compose --env-file $(BASE_DIR)/.env.dev up -d
