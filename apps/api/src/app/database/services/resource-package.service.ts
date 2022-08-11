@@ -31,6 +31,10 @@ export class ResourcePackageService {
       });
   }
 
+  async removeResourcePackages(ids: number[]): Promise<void> {
+    await Promise.all(ids.map(async id => this.removeResourcePackage(id)));
+  }
+
   async removeResourcePackage(id: number): Promise<void> {
     this.logger.log(`Deleting resource package with id ${id}.`);
     const resourcePackage = await this.resourcePackageRepository

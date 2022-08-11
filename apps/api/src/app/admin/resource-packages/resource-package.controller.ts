@@ -1,8 +1,8 @@
 import {
-  Controller, Delete, Get, Param, ParseIntPipe, Post, UploadedFile, UseGuards
+  Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, UploadedFile, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { Express } from 'express';
 import 'multer';
@@ -35,6 +35,23 @@ export class ResourcePackageController {
   @ApiTags('admin resource-packages')
   async removeResourcePackage(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.resourcePackageService.removeResourcePackage(id);
+  }
+
+  @Delete()
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin resource-packages')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: true
+  })
+  @ApiOkResponse({ description: 'Admin resource-packages deleted successfully.' })
+  async removeIds(
+    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) id: number[]
+  ) : Promise<void> {
+    return this.resourcePackageService.removeResourcePackages(id);
   }
 
   @Post()
