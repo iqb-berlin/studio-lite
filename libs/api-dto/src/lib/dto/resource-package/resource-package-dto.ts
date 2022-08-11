@@ -14,5 +14,5 @@ export class ResourcePackageDto {
   elements!: string[];
 
   @ApiProperty()
-  created_at?: Date;
+  createdAt?: Date;
 }
