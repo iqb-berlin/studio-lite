@@ -54,6 +54,7 @@ export class ResourcePackageService {
           }
         }
       });
+      fs.rmSync(`${this.resourcePackagePath}/${resourcePackage.name}`);
       await this.resourcePackageRepository.delete(resourcePackage);
     } else {
       throw new ResourcePackageNotFoundException(id, 'DELETE');
@@ -73,6 +74,10 @@ export class ResourcePackageService {
           createdAt: new Date()
         });
         await this.resourcePackageRepository.save(newResourcePackage);
+        fs.writeFileSync(
+          `${this.resourcePackagePath}/${zippedResourcePackage.originalname}`,
+          zippedResourcePackage.buffer
+        );
         return newResourcePackage.id;
       })
       .catch(() => { throw new CannotCreateFileException(this.resourcePackagePath); });
