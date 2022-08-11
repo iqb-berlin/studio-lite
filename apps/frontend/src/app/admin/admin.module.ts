@@ -23,7 +23,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { AdminRoutingModule } from './admin-routing.module';
 import { WorkspacesComponent } from './workspace-groups/workspaces.component';
@@ -40,6 +40,10 @@ import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './settings/app-logo.component';
 import { UnitExportConfigComponent } from './settings/unit-export-config.component';
 import { ResourcePackagesComponent } from './resource-packages/resource-packages.component';
+import {
+  ResourcePackagesTableComponent
+} from './resource-packages/resource-packages-table/resource-packages-table.component';
+import { TableDataSourcePipe } from './resource-packages/resource-packages-table/table-data-source.pipe';
 
 @NgModule({
   imports: [
@@ -68,7 +72,8 @@ import { ResourcePackagesComponent } from './resource-packages/resource-packages
     FlexLayoutModule,
     MatChipsModule,
     FormsModule,
-    TranslateModule
+    TranslateModule,
+    HttpClientModule
   ],
   exports: [AdminComponent],
   declarations: [
@@ -84,7 +89,9 @@ import { ResourcePackagesComponent } from './resource-packages/resource-packages
     AppConfigComponent,
     AppLogoComponent,
     UnitExportConfigComponent,
-    ResourcePackagesComponent
+    ResourcePackagesComponent,
+    ResourcePackagesTableComponent,
+    TableDataSourcePipe
   ],
   providers: [
     BackendService,
