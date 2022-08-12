@@ -16,7 +16,7 @@ import ResourcePackage from '../entities/resource-package.entity';
 @Injectable()
 export class ResourcePackageService {
   private readonly logger = new Logger(ResourcePackageService.name);
-  private resourcePackagePath = './resourcePackages'; // TODO Konfigurierbar
+  private resourcePackagesPath = './resource-packages'; // TODO Konfigurierbar
 
   constructor(
     @InjectRepository(ResourcePackage)
@@ -43,18 +43,21 @@ export class ResourcePackageService {
       });
     if (resourcePackage) {
       resourcePackage.elements.forEach(element => {
-        const elementPath = `${this.resourcePackagePath}/${element}`;
+        const elementPath = `${this.resourcePackagesPath}/${element}`;
         if (fs.existsSync(elementPath)) {
           if (fs.lstatSync(elementPath).isDirectory()) {
-            // delete all
+            // delete all (in folders)
             fs.rmSync(elementPath, { recursive: true, force: true });
           } else {
-            // if there are any rests
+            // If there are leftovers
             fs.unlinkSync(elementPath);
           }
         }
       });
-      fs.rmSync(`${this.resourcePackagePath}/${resourcePackage.name}`);
+      const zipPath = `${this.resourcePackagesPath}/${resourcePackage.name}`;
+      if (fs.existsSync(zipPath)) {
+        fs.rmSync(`${this.resourcePackagesPath}/${resourcePackage.name}`);
+      }
       await this.resourcePackageRepository.delete(resourcePackage);
     } else {
       throw new ResourcePackageNotFoundException(id, 'DELETE');
@@ -66,7 +69,7 @@ export class ResourcePackageService {
     const zip = new AdmZip(zippedResourcePackage.buffer);
     const packageFiles = zip.getEntries().map(entry => entry.entryName);
     const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
-    return zipExtractAllToAsync(this.resourcePackagePath, true, true)
+    return zipExtractAllToAsync(this.resourcePackagesPath, false, true)
       .then(async () => {
         const newResourcePackage = this.resourcePackageRepository.create({
           name: zippedResourcePackage.originalname,
@@ -75,11 +78,16 @@ export class ResourcePackageService {
         });
         await this.resourcePackageRepository.save(newResourcePackage);
         fs.writeFileSync(
-          `${this.resourcePackagePath}/${zippedResourcePackage.originalname}`,
+          `${this.resourcePackagesPath}/${zippedResourcePackage.originalname}`,
           zippedResourcePackage.buffer
         );
         return newResourcePackage.id;
       })
-      .catch(() => { throw new CannotCreateFileException(this.resourcePackagePath); });
+      .catch(() => { throw new CannotCreateFileException(this.resourcePackagesPath); });
+  }
+
+  getZippedResourcePackage(name: string): Buffer {
+    this.logger.log('Returning zipped resource package.');
+    return fs.readFileSync(`${this.resourcePackagesPath}/${name}`);
   }
 }

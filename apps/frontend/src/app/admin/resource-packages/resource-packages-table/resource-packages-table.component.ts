@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnChanges, QueryList, SimpleChanges, ViewChild, ViewChildren
+  Component, EventEmitter, Input, OnChanges, Output, QueryList, SimpleChanges, ViewChild, ViewChildren
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -13,10 +13,14 @@ import { BehaviorSubject } from 'rxjs';
   styleUrls: ['./resource-packages-table.component.scss']
 })
 export class ResourcePackagesTableComponent implements OnChanges {
-  resourcePackageProperties: string[] = ['id', 'name', 'createdAt'];
+  resourcePackageProperties: string[] = ['name', 'createdAt'];
   displayedColumns: string[] = ['selectCheckbox', ...this.resourcePackageProperties];
+  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   @Input() dataSource!: MatTableDataSource<ResourcePackageDto>;
   @Input() selectedResourcePackages!: BehaviorSubject<number[]>;
+
+  @Output() downloadPackage = new EventEmitter<string>();
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChildren(MatCheckbox) checkBoxes!: QueryList<MatCheckbox>
@@ -28,7 +32,7 @@ export class ResourcePackagesTableComponent implements OnChanges {
     }
   }
 
-  updateSelectedResourcePackages() {
+  updateSelectedResourcePackages(): void {
     const checkedResources = this.checkBoxes.toArray()
       .filter((checkBox, index) => index > 0)
       .map(checkBox => checkBox.checked);
@@ -39,7 +43,7 @@ export class ResourcePackagesTableComponent implements OnChanges {
     );
   }
 
-  toggleCheckBoxes(event: MatCheckboxChange) {
+  toggleCheckBoxes(event: MatCheckboxChange): void {
     this.checkBoxes.forEach(checkBox => { checkBox.checked = event.checked; });
     this.updateSelectedResourcePackages();
   }

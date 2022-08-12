@@ -137,5 +137,10 @@
       "ON": "eingeblendet",
       "OFF": "ausgeblendet"
     }
+  },
+  "resource-packages": {
+    "name": "Name",
+    "createdAt": "Hochgeladen am",
+    "no-packages": "Keine Pakete gespeichert."
   }
 }
