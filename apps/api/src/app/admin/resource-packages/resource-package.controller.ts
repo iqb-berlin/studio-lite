@@ -1,5 +1,15 @@
 import {
-  Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Post, Query, UploadedFile, UseGuards
+  Controller,
+  Delete,
+  Get, Header,
+  Param,
+  ParseArrayPipe,
+  ParseIntPipe,
+  Post,
+  Query,
+  StreamableFile,
+  UploadedFile,
+  UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
@@ -52,6 +62,18 @@ export class ResourcePackageController {
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) id: number[]
   ) : Promise<void> {
     return this.resourcePackageService.removeResourcePackages(id);
+  }
+
+  @Get(':name')
+  @Header('Content-Disposition', 'filename="resource-package.zip"')
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/zip')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin resource-packages')
+  async getZippedResourcePackage(@Param('name') name: string): Promise<StreamableFile> {
+    const file = this.resourcePackageService.getZippedResourcePackage(name);
+    return new StreamableFile(file);
   }
 
   @Post()
