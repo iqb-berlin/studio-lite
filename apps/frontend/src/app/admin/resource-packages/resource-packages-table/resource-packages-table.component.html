@@ -1,7 +1,14 @@
-<mat-table *ngIf="dataSource"
-           matSort
+<p *ngIf="dataSource.filteredData.length === 0">
+  {{'resource-packages.no-packages' | translate}}
+</p>
+<mat-table matSort
            matSortDisableClear
            [dataSource]="dataSource">
+  <mat-header-row
+    [class.hide]="dataSource.filteredData.length === 0"
+    *matHeaderRowDef="displayedColumns">
+  </mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   <ng-container matColumnDef="selectCheckbox">
     <mat-header-cell *matHeaderCellDef fxFlex="60px">
       <mat-checkbox
@@ -17,18 +24,23 @@
       </mat-checkbox>
     </mat-cell>
   </ng-container>
-
   <ng-container *ngFor="let column of resourcePackageProperties"
                 [matColumnDef]="column">
     <mat-header-cell *matHeaderCellDef
                      mat-sort-header
                      [sortActionDescription]="column">
-      {{'resourcePackage.' + column | translate}}
+      {{'resource-packages.' + column | translate}}
     </mat-header-cell>
-    <mat-cell *matCellDef="let element"> {{element[column]}}</mat-cell>
+    <mat-cell *matCellDef="let element">
+      <a *ngIf="column === 'name'"
+         href="#"
+         (click)="$event.preventDefault(); downloadPackage.emit(element[column])">
+        {{element[column]}}
+      </a>
+      <span *ngIf="column === 'createdAt'">
+        {{element[column] | date : 'dd.MM.yyyy HH:mm' : timeZone}}
+      </span>
+    </mat-cell>
   </ng-container>
-
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
 </mat-table>
 

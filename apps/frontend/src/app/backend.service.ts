@@ -94,6 +94,16 @@ export class BackendService {
       );
   }
 
+  getResourcePackage(name: string): Observable<Blob> {
+    return this.http
+      .get(`${this.serverUrl}admin/resource-packages/${name}`, {
+        headers: {
+          Accept: 'application/zip'
+        },
+        responseType: 'blob'
+      });
+  }
+
   setUserPassword(oldPassword: string, newPassword: string): Observable<boolean> {
     return this.http
       .patch<boolean>(
