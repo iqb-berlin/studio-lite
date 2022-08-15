@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnChanges, Output, QueryList, SimpleChanges, ViewChild, ViewChildren
+  Component, Inject, Input, OnChanges, QueryList, SimpleChanges, ViewChild, ViewChildren
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -16,14 +16,17 @@ export class ResourcePackagesTableComponent implements OnChanges {
   resourcePackageProperties: string[] = ['name', 'createdAt'];
   displayedColumns: string[] = ['selectCheckbox', ...this.resourcePackageProperties];
   timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  resourcePackagesPath!: string;
 
   @Input() dataSource!: MatTableDataSource<ResourcePackageDto>;
   @Input() selectedResourcePackages!: BehaviorSubject<number[]>;
 
-  @Output() downloadPackage = new EventEmitter<string>();
-
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChildren(MatCheckbox) checkBoxes!: QueryList<MatCheckbox>
+
+  constructor(@Inject('SERVER_URL') public serverUrl: string) {
+    this.resourcePackagesPath = `${serverUrl}../resource-packages/`;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     const changeProperty = 'dataSource';

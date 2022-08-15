@@ -3,7 +3,6 @@ import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
-import { saveAs } from 'file-saver';
 import { BackendService as ReadBackendService } from '../../backend.service';
 import { BackendService as WriteBackendService } from '../backend.service';
 
@@ -20,7 +19,7 @@ export class ResourcePackagesComponent implements OnInit {
   constructor(
     @Inject('SERVER_URL') public serverUrl: string,
     private snackBar: MatSnackBar,
-    public writeBackendService: WriteBackendService,
+    private writeBackendService: WriteBackendService,
     private readBackendService: ReadBackendService
   ) {
   }
@@ -47,10 +46,5 @@ export class ResourcePackagesComponent implements OnInit {
       .pipe(
         switchMap(() => this.readBackendService.getResourcePackages())
       );
-  }
-
-  downloadPackage(name: string): void {
-    this.readBackendService.getResourcePackage(name)
-      .subscribe(resourcePackage => saveAs(resourcePackage, name));
   }
 }
