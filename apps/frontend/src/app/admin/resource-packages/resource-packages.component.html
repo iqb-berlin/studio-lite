@@ -24,7 +24,6 @@
                         (uploadCompleteEvent)="updateFormFields()">
 </iqb-files-upload-queue>
 <studio-lite-resource-packages-table [dataSource]="(resourcePackages | async) | tableDataSource"
-                                     [selectedResourcePackages]="selectedResourcePackages"
-                                     (downloadPackage)="downloadPackage($event)">
+                                     [selectedResourcePackages]="selectedResourcePackages">
 </studio-lite-resource-packages-table>
 

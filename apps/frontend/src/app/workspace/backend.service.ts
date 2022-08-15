@@ -234,6 +234,6 @@ export class BackendService {
   }
 
   getDirectDownloadLink(): string {
-    return `${this.serverUrl}assets/`;
+    return `${this.serverUrl}../resource-packages/`;
   }
 }
