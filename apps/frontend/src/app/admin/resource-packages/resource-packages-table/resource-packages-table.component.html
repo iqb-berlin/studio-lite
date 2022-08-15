@@ -12,7 +12,8 @@
   <ng-container matColumnDef="selectCheckbox">
     <mat-header-cell *matHeaderCellDef fxFlex="60px">
       <mat-checkbox
-        [checked]="selectedResourcePackages.value.length === dataSource.filteredData.length"
+        [checked]="selectedResourcePackages.value.length === dataSource.filteredData.length &&
+                   selectedResourcePackages.value.length > 0"
         [indeterminate]="selectedResourcePackages.value.length > 0 &&
                          selectedResourcePackages.value.length < dataSource.filteredData.length"
         (change)="toggleCheckBoxes($event)">

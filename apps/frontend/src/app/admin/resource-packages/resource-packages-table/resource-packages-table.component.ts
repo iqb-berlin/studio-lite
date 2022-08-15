@@ -29,6 +29,7 @@ export class ResourcePackagesTableComponent implements OnChanges {
     const changeProperty = 'dataSource';
     if (changes[changeProperty]) {
       this.dataSource.sort = this.sort;
+      setTimeout(() => this.updateSelectedResourcePackages());
     }
   }
 
@@ -45,6 +46,5 @@ export class ResourcePackagesTableComponent implements OnChanges {
 
   toggleCheckBoxes(event: MatCheckboxChange): void {
     this.checkBoxes.forEach(checkBox => { checkBox.checked = event.checked; });
-    this.updateSelectedResourcePackages();
   }
 }
