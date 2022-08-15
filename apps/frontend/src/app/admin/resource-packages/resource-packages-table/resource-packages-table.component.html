@@ -34,8 +34,8 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let element">
       <a *ngIf="column === 'name'"
-         href="#"
-         (click)="$event.preventDefault(); downloadPackage.emit(element[column])">
+         [download]="element[column]"
+         [href]="resourcePackagesPath + element[column] | safeUrl">
         {{element[column]}}
       </a>
       <span *ngIf="column === 'createdAt'">
