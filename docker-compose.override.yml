@@ -28,6 +28,7 @@ services:
       - "--host=${API_HOST}"
     volumes:
       - ./apps/api/src:/studio-lite/apps/api/src
+      - backend_vol:/studio-lite/resource-packages
 
   frontend:
     build:
@@ -47,3 +48,6 @@ services:
       - "--host=${WEB_HOST}"
     volumes:
       - ./apps/frontend/src:/studio-lite/apps/frontend/src
+
+volumes:
+  backend_vol:
