@@ -252,7 +252,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
           playerConfig: {
             stateReportPolicy: 'eager',
             pagingMode: this.reviewService.reviewSettings?.pagingMode,
-            directDownloadUrl: ''
+            directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef || ''
         }, '*');
