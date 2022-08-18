@@ -221,7 +221,7 @@ test-app-e2e:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 test-app-e2e-ui-chrome:
   stage: e2e-test
@@ -252,7 +252,7 @@ test-app-e2e-ui-chrome:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 test-app-e2e-ui-chrome-mobile:
   stage: e2e-test
@@ -283,7 +283,7 @@ test-app-e2e-ui-chrome-mobile:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 test-app-e2e-ui-firefox:
   stage: e2e-test
@@ -314,7 +314,7 @@ test-app-e2e-ui-firefox:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 test-app-e2e-ui-firefox-mobile:
   stage: e2e-test
@@ -345,7 +345,7 @@ test-app-e2e-ui-firefox-mobile:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 test-app-e2e-ui-edge:
   stage: e2e-test
@@ -376,7 +376,7 @@ test-app-e2e-ui-edge:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 test-app-e2e-ui-edge-mobile:
   stage: e2e-test
@@ -407,7 +407,7 @@ test-app-e2e-ui-edge-mobile:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
-    - pkill npx
+    #- pkill npx
 
 lint-app:
   stage: lint
