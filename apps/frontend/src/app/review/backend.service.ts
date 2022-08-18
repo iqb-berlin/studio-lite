@@ -49,4 +49,8 @@ export class BackendService {
         catchError(() => of(null))
       );
   }
+
+  getDirectDownloadLink(): string {
+    return `${this.serverUrl}../resource-packages/`;
+  }
 }
