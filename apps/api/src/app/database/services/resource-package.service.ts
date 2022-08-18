@@ -8,7 +8,6 @@ import { Express } from 'express';
 import 'multer';
 import * as AdmZip from 'adm-zip';
 import * as fs from 'fs';
-import { CannotCreateFileException } from '@angular-devkit/schematics/src/tree/null';
 import * as util from 'util';
 import { ResourcePackageNotFoundException } from '../../exceptions/resource-package-not-found.exception';
 import ResourcePackage from '../entities/resource-package.entity';
@@ -83,7 +82,9 @@ export class ResourcePackageService {
         );
         return newResourcePackage.id;
       })
-      .catch(() => { throw new CannotCreateFileException(this.resourcePackagesPath); });
+      .catch(error => {
+        throw new Error(error.message);
+      });
   }
 
   getZippedResourcePackage(name: string): Buffer {
