@@ -164,7 +164,8 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           type: 'voeStartCommand',
           sessionId: this.sessionId,
           editorConfig: {
-            definitionReportPolicy: 'eager'
+            definitionReportPolicy: 'eager',
+            directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
