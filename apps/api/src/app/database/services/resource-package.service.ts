@@ -68,7 +68,7 @@ export class ResourcePackageService {
     const zip = new AdmZip(zippedResourcePackage.buffer);
     const packageFiles = zip.getEntries().map(entry => entry.entryName);
     const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
-    return zipExtractAllToAsync(this.resourcePackagesPath, false, true)
+    return zipExtractAllToAsync(this.resourcePackagesPath, true, true)
       .then(async () => {
         const newResourcePackage = this.resourcePackageRepository.create({
           name: zippedResourcePackage.originalname,
