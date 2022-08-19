@@ -1,12 +1,23 @@
 #!/bin/bash
 set -e
 
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/010_update_database.sql
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/011_update_database.sql
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/012_update_database.sql
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/013_update_database.sql
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/014_update_database.sql
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/015_update_database.sql
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file updates/016_update_database.sql
+for COUNTER in {1..120}
+do
+   sleep 1s
+   echo "Check db is ready $COUNTER time(s)"
+   pg_isready --username "$POSTGRES_USER" --dbname "$POSTGRES_DB"
+   if [ $? -eq 0 ]
+   then
+     break
+   fi
+done
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --file changelog/studiolite.changelog-2.0.0-beta10.sql
+echo "Try to execute update script(s) ..."
+bash /opt/liquibase/liquibase --url="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"  --username=$POSTGRES_USER --password=$POSTGRES_PASSWORD --classpath=changelog --changeLogFile=studio-lite.changelog-root.xml update
+
+if [ $? -ne 0 ]
+then
+  echo "Update script error!"
+else
+  echo "Update script(s) successfully executed!"
+fi

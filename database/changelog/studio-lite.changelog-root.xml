@@ -8,6 +8,6 @@
       http://www.liquibase.org/xml/ns/pro
       http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.15.xsd">
   <!--includeAll path="liquibase/changelog/"/ does not work with docker!!! -->
-  <include file="studio-lite.changelog-2.0.0-beta10.sql"/>
   <include file="studio-lite.changelog-2.0.0-beta11.sql"/>
+  <include file="studio-lite.changelog-2.0.0-beta12.sql"/>
 </databaseChangeLog>

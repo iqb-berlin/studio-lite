@@ -8,8 +8,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./database/init:/docker-entrypoint-initdb.d
-      - ./database/updates:/studio-lite-db/updates
+      - ./database/changelog:/studio-lite-db/changelog
+      - ./database/changelogDocs:/studio-lite-db/changelogDocs
 
   backend:
     build:

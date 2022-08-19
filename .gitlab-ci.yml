@@ -5,9 +5,11 @@ variables:
   REGISTRY_USER: $CI_REGISTRY_USER
   REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD
   REGISTRY_PROJECT: "/${CI_PROJECT_PATH}/"
+  DOCKER_IMAGE: "docker:20.10-git"
+  DOCKER_SERVICE: "docker:20.10-dind"
   DOCKER_TLS_CERTDIR: ""
+  CYPRESS_IMAGE: "cypress/browsers:node16.14.2-slim-chrome100-ff99-edge"
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
-  LIQUIBASE_VERSION: "4.15"
 
 stages:
   - .pre
@@ -174,9 +176,9 @@ build-db-image:
   stage: build
   rules:
     - !reference [ .default_db_rules, rules ]
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
@@ -191,24 +193,19 @@ patch-db-image:
     - !reference [.default_db_rules, rules]
   needs:
     - build-db-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
-    - docker network create studio-lite_backend-network
+    - export $(grep -v '^#' .env.dev | xargs)
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run --rm --network studio-lite_backend-network --env-file .env.dev --name studio-lite-db -d ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull -q liquibase/liquibase:${LIQUIBASE_VERSION}
-    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties status
-    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties validate
-    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties updateSQL
+    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.dev --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL"
   script:
-    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties updateTestingRollback
-    - docker run --rm --network studio-lite_backend-network -v $PWD/database/changelog:/liquibase/changelog liquibase/liquibase:${LIQUIBASE_VERSION} --defaultsFile=changelog/liquibase.docker.properties history
-    - docker commit studio-lite-db ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}_patched
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}_patched
-    - docker logout $REGISTRY
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
 
 build-app:
   stage: build
@@ -238,62 +235,52 @@ test-app-e2e:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .default_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 test-app-e2e-ui-chrome:
   stage: e2e-test
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .default_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 test-app-e2e-ui-chrome-mobile:
   stage: e2e-test
@@ -302,22 +289,23 @@ test-app-e2e-ui-chrome-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
@@ -333,22 +321,23 @@ test-app-e2e-ui-firefox:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
@@ -364,22 +353,23 @@ test-app-e2e-ui-firefox-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
@@ -395,22 +385,23 @@ test-app-e2e-ui-edge:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
@@ -426,22 +417,23 @@ test-app-e2e-ui-edge-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: ${POSTGRES_HOST}
     POSTGRES_PORT: ${POSTGRES_PORT}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
-  image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  image: $CYPRESS_IMAGE
   services:
-    - postgres:14.4-bullseye
+    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
+      alias: ${POSTGRES_HOST}
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    - export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
+    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
@@ -477,8 +469,8 @@ build-docker-app:
     - install-dependencies
     - build-app
     - test-app
-#    - test-app-e2e
-#    - test-app-e2e-ui-chrome
+    - test-app-e2e
+    - test-app-e2e-ui-chrome
 #    - test-app-e2e-ui-chrome-mobile
 #    - test-app-e2e-ui-firefox
 #    - test-app-e2e-ui-firefox-mobile
@@ -486,9 +478,9 @@ build-docker-app:
 #    - test-app-e2e-ui-edge-mobile
     - audit-app
     - lint-app
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - apk add --no-cache npm
     - npm i -g npx
@@ -508,9 +500,9 @@ scan-docker-db:
     - !reference [.default_db_rules, rules]
   needs:
     - build-db-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   script:
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -524,9 +516,9 @@ scan-docker-app:
   needs:
     - install-dependencies
     - build-docker-app
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - apk add --no-cache npm
     - npm i -g npx
@@ -542,9 +534,9 @@ build-backend-test-image:
   stage: build
   rules:
     - !reference [.release_rules, rules]
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
@@ -557,9 +549,9 @@ build-frontend-test-image:
   stage: build
   rules:
     - !reference [.release_rules, rules]
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
@@ -572,9 +564,9 @@ build-frontend-e2e-test-image:
   stage: build
   rules:
     - !reference [.release_rules, rules]
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
@@ -587,9 +579,9 @@ build-db-release-image:
   stage: build
   rules:
     - !reference [.release_rules, rules]
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
@@ -598,15 +590,35 @@ build-db-release-image:
   after_script:
     - docker logout $CI_REGISTRY
 
+patch-db-release-image:
+  stage: build
+  rules:
+    - !reference [.release_rules, rules]
+  needs:
+    - build-db-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.prod --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL"
+  script:
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
+
 build-backend-release-image:
   stage: build
   rules:
     - !reference [.release_rules, rules]
   needs:
     - build-backend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
@@ -622,9 +634,9 @@ build-frontend-release-image:
     - !reference [.release_rules, rules]
   needs:
     - build-frontend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
@@ -641,9 +653,9 @@ test-backend:
     - !reference [.release_rules, rules]
   needs:
     - build-backend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
   script:
@@ -656,9 +668,9 @@ test-frontend:
     - !reference [.release_rules, rules]
   needs:
     - build-frontend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
   script:
@@ -668,15 +680,15 @@ test-release-e2e:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
+    - !reference [.release_rules, rules]
   needs:
-    - build-db-release-image
+    - patch-db-release-image
     - build-backend-release-image
     - build-frontend-release-image
     - build-frontend-e2e-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -690,10 +702,15 @@ test-release-e2e-ui-chrome:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
-  image: docker:20.10-git
+    - !reference [.release_rules, rules]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -708,9 +725,14 @@ test-release-e2e-ui-chrome-mobile:
   allow_failure: true
   rules:
     - !reference [.release_manual_rules, rules]
-  image: docker:20.10-git
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -725,9 +747,14 @@ test-release-e2e-ui-firefox:
   allow_failure: true
   rules:
     - !reference [.release_manual_rules, rules]
-  image: docker:20.10-git
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -742,9 +769,14 @@ test-release-e2e-ui-firefox-mobile:
   allow_failure: true
   rules:
     - !reference [.release_manual_rules, rules]
-  image: docker:20.10-git
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -759,9 +791,14 @@ test-release-e2e-ui-edge:
   allow_failure: true
   rules:
     - !reference [.release_manual_rules, rules]
-  image: docker:20.10-git
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -776,9 +813,14 @@ test-release-e2e-ui-edge-mobile:
   allow_failure: true
   rules:
     - !reference [.release_manual_rules, rules]
-  image: docker:20.10-git
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
@@ -795,9 +837,9 @@ lint-backend:
     - !reference [.release_rules, rules]
   needs:
     - build-backend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
   script:
@@ -810,9 +852,9 @@ lint-frontend:
     - !reference [.release_rules, rules]
   needs:
     - build-frontend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
   script:
@@ -825,9 +867,9 @@ lint-frontend-e2e:
     - !reference [.release_rules, rules]
   needs:
     - build-frontend-e2e-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
   script:
@@ -839,9 +881,9 @@ audit-backend:
     - !reference [.release_rules, rules]
   needs:
     - build-backend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
   script:
@@ -853,9 +895,9 @@ audit-frontend:
     - !reference [.release_rules, rules]
   needs:
     - build-frontend-test-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
   script:
@@ -868,9 +910,9 @@ scan-release-db:
     - !reference [.release_rules, rules]
   needs:
     - build-db-release-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
     - docker pull -q aquasec/trivy:0.29.2
@@ -884,9 +926,9 @@ scan-release-backend:
     - !reference [.release_rules, rules]
   needs:
     - build-backend-release-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
     - docker pull -q aquasec/trivy:0.29.2
@@ -900,9 +942,9 @@ scan-release-frontend:
     - !reference [.release_rules, rules]
   needs:
     - build-frontend-release-image
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
     - docker pull -q aquasec/trivy:0.29.2
@@ -914,13 +956,13 @@ push-docker-release:
   rules:
     - !reference [.release_push_rules, rules]
   needs:
-    - build-db-release-image
+    - patch-db-release-image
     - build-backend-release-image
     - build-frontend-release-image
     - test-backend
     - test-frontend
-    #- test-release-e2e
-    #- test-release-e2e-ui-chrome
+    - test-release-e2e
+    - test-release-e2e-ui-chrome
     #- test-release-e2e-ui-chrome-mobile
     #- test-release-e2e-ui-firefox
     #- test-release-e2e-ui-firefox-mobile
@@ -934,9 +976,9 @@ push-docker-release:
     - scan-release-db
     - scan-release-backend
     - scan-release-frontend
-  image: docker:20.10-git
+  image: $DOCKER_IMAGE
   services:
-    - docker:20.10-dind
+    - $DOCKER_SERVICE
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
