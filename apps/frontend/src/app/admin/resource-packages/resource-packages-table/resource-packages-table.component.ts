@@ -25,7 +25,7 @@ export class ResourcePackagesTableComponent implements OnChanges {
   @ViewChildren(MatCheckbox) checkBoxes!: QueryList<MatCheckbox>
 
   constructor(@Inject('SERVER_URL') public serverUrl: string) {
-    this.resourcePackagesPath = `${serverUrl}../resource-packages/`;
+    this.resourcePackagesPath = `${serverUrl}packages/`;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
