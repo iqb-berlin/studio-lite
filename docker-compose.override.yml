@@ -28,7 +28,7 @@ services:
       - "--host=${API_HOST}"
     volumes:
       - ./apps/api/src:/studio-lite/apps/api/src
-      - backend_vol:/studio-lite/resource-packages
+      - backend_vol:/studio-lite/packages
 
   frontend:
     build:
