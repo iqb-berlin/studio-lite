@@ -4,13 +4,8 @@ services:
 
   backend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
-    volumes:
-      - backend_vol:/studio-lite-api/resource-packages
 
   frontend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     ports:
       - "80:80"
-
-volumes:
-  backend_vol:
