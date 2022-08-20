@@ -9,7 +9,7 @@ import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useStaticAssets('./resource-packages', { prefix: '/resource-packages' });
+  app.useStaticAssets('./packages', { prefix: '/api/packages' });
   const configService = app.get(ConfigService);
   const host = configService.get('API_HOST') || 'localhost';
   const port = configService.get('API_PORT') || 3333;
