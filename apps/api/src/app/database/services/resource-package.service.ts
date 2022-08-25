@@ -41,21 +41,9 @@ export class ResourcePackageService {
         where: { id: id }
       });
     if (resourcePackage) {
-      resourcePackage.elements.forEach(element => {
-        const elementPath = `${this.resourcePackagesPath}/${element}`;
-        if (fs.existsSync(elementPath)) {
-          if (fs.lstatSync(elementPath).isDirectory()) {
-            // delete all (in folders)
-            fs.rmSync(elementPath, { recursive: true, force: true });
-          } else {
-            // If there are leftovers
-            fs.unlinkSync(elementPath);
-          }
-        }
-      });
-      const zipPath = `${this.resourcePackagesPath}/${resourcePackage.name}`;
-      if (fs.existsSync(zipPath)) {
-        fs.rmSync(`${this.resourcePackagesPath}/${resourcePackage.name}`);
+      const elementPath = `${this.resourcePackagesPath}/${resourcePackage.name}`;
+      if (fs.existsSync(elementPath)) {
+        fs.rmSync(elementPath, { recursive: true, force: true });
       }
       await this.resourcePackageRepository.delete(resourcePackage);
     } else {
@@ -66,29 +54,42 @@ export class ResourcePackageService {
   async create(zippedResourcePackage: Express.Multer.File): Promise<number> {
     this.logger.log('Creating resource package.');
     const zip = new AdmZip(zippedResourcePackage.buffer);
-    const packageFiles = zip.getEntries().map(entry => entry.entryName);
-    const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
-    return zipExtractAllToAsync(this.resourcePackagesPath, true, true)
-      .then(async () => {
-        const newResourcePackage = this.resourcePackageRepository.create({
-          name: zippedResourcePackage.originalname,
-          elements: packageFiles,
-          createdAt: new Date()
+    const packageNameArray = zippedResourcePackage.originalname.split('.itcr.zip');
+    if (packageNameArray.length === 2) {
+      const packageName = packageNameArray[0];
+      const resourcePackage = await this.resourcePackageRepository
+        .findOne({
+          where: { name: packageName }
         });
-        await this.resourcePackageRepository.save(newResourcePackage);
-        fs.writeFileSync(
-          `${this.resourcePackagesPath}/${zippedResourcePackage.originalname}`,
-          zippedResourcePackage.buffer
-        );
-        return newResourcePackage.id;
-      })
-      .catch(error => {
-        throw new Error(error.message);
-      });
+      if (!resourcePackage) {
+        const packageFiles = zip.getEntries()
+          .map(entry => entry.entryName);
+        const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
+        return zipExtractAllToAsync(`${this.resourcePackagesPath}/${packageName}`, true, true)
+          .then(async () => {
+            const newResourcePackage = this.resourcePackageRepository.create({
+              name: packageName,
+              elements: packageFiles,
+              createdAt: new Date()
+            });
+            await this.resourcePackageRepository.save(newResourcePackage);
+            fs.writeFileSync(
+              `${this.resourcePackagesPath}/${packageName}/${zippedResourcePackage.originalname}`,
+              zippedResourcePackage.buffer
+            );
+            return newResourcePackage.id;
+          })
+          .catch(error => {
+            throw new Error(error.message);
+          });
+      }
+      throw new Error('Package is already installed');
+    }
+    throw new Error('No Resource Package');
   }
 
   getZippedResourcePackage(name: string): Buffer {
     this.logger.log('Returning zipped resource package.');
-    return fs.readFileSync(`${this.resourcePackagesPath}/${name}`);
+    return fs.readFileSync(`${this.resourcePackagesPath}/${name}/${name}.itcr.zip`);
   }
 }
