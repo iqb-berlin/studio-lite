@@ -53,10 +53,11 @@
             (click)="toggleStrike()">
       <mat-icon>strikethrough_s</mat-icon>
     </button>
-    <div fxLayout="row">
+    <div fxLayout="row"
+         matTooltip="{{'comment-editor.text-color' | translate}}"
+         [matTooltipPosition]="'above'">
       <button type="button"
               mat-icon-button
-              matTooltip="{{'comment-editor.text-color' | translate}}"
               (click)="applyFontColor()">
         <mat-icon>format_color_text</mat-icon>
       </button>
@@ -70,10 +71,11 @@
              #textColorInput hidden
              (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
     </div>
-    <div fxLayout="row">
+    <div fxLayout="row"
+         matTooltip="{{'comment-editor.text-background' | translate}}"
+         [matTooltipPosition]="'above'">
       <button type="button"
               mat-icon-button
-              matTooltip="{{'comment-editor.text-background' | translate}}"
               (click)="applyHighlightColor()">
         <mat-icon>format_color_fill</mat-icon>
       </button>
@@ -89,13 +91,15 @@
     <button type="button"
             mat-icon-button
             matTooltip="{{'comment-editor.enumeration' | translate}}"
+            [matTooltipPosition]="'above'"
             [class.active]="editor.isActive('bulletList')"
             (click)="toggleBulletList()">
       <mat-icon>format_list_bulleted</mat-icon>
     </button>
     <button type="button"
             mat-icon-button
-            matTooltip="Bild"
+            matTooltip="{{'comment-editor.image' | translate}}"
+            [matTooltipPosition]="'above'"
             (click)="addImage()">
       <mat-icon>image</mat-icon>
     </button>
@@ -113,6 +117,7 @@
          fxLayoutAlign="space-between end">
       <button mat-icon-button
               matTooltip="{{'comment-editor.cancel' | translate}}"
+              [matTooltipPosition]="'above'"
               type="reset"
               class="reset-button">
         <mat-icon>close</mat-icon>
@@ -120,6 +125,7 @@
       <button mat-fab
               color="primary"
               matTooltip="{{ submitLabel | translate}}"
+              [matTooltipPosition]="'above'"
               type="submit"
               class="submit-button"
               [disabled]="form.invalid">
