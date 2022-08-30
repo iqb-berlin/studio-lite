@@ -36,8 +36,7 @@
 :host ::ng-deep div.ProseMirror {
   height: 120px;
   overflow: auto;
-  outline-color: transparent;
-  outline-width: 0;
+  outline: transparent none 0;
   p {
     word-break: break-all;
   }
