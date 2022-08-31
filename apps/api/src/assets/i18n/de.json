@@ -1,15 +1,1 @@
-{
-  "unit-upload": {
-    "api-error": {
-      "zip": "Zip-Datei konnte nicht extrahiert werden"
-    },
-    "api-warning": {
-      "missing-definition": "Korrespondierende Unit-Definition (separate Datei?) nicht gefunden.",
-      "xml-parse": "Nicht als Unit-Xml erkannt",
-      "ignore-file": "Datei wurde ignoriert"
-    }
-  },
-  "unit-patch": {
-    "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
-  }
-}
+{}
