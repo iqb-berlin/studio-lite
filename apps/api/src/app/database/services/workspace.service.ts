@@ -201,8 +201,9 @@ export class WorkspaceService {
       messages: []
     };
     const files: FileIo[] = [];
+    const zipMimeTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'];
     originalFiles.forEach(f => {
-      if (f.mimetype === 'application/zip') {
+      if (zipMimeTypes.indexOf(f.mimetype) >= 0) {
         try {
           const zip = new AdmZip(f.buffer);
           const zipEntries = zip.getEntries();
