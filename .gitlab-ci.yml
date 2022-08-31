@@ -199,12 +199,16 @@ patch-db-image:
   before_script:
     - export $(grep -v '^#' .env.dev | xargs)
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.dev --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL"
+    - docker run -d --rm --hostname=${POSTGRES_HOST} --env-file=.env.dev --entrypoint=docker-entrypoint.sh --name=$POSTGRES_HOST --health-cmd="sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" --health-interval=1s --health-retries=60 ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
+    #- apk add --no-cache postgresql-client
+    #- export PGPASSWORD=$POSTGRES_PASSWORD
+    #- for COUNTER in {1..120}; do echo "Check db is ready $COUNTER time(s)"; pg_isready --host=${POSTGRES_HOST} --port=$POSTGRES_PORT --username=$POSTGRES_USER --dbname=$POSTGRES_DB; echo pg_isready returns $?; if [ $? -eq 0 ]; sleep 1s; then break; fi; done
+    #- sleep 10s # wait for db start to finish
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
   script:
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
     - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
 
 build-app:
@@ -586,7 +590,7 @@ build-db-release-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker build -f database/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -602,12 +606,13 @@ patch-db-release-image:
   before_script:
     - export $(grep -v '^#' .env.prod | xargs)
     - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.prod --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL"
+    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.prod --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} --health-cmd="sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" --health-interval=1s --health-retries=60 ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
+    #- sleep 10s # wait for db start to finish
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog --logLevel=debug status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
   script:
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback"
+    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
     - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
 
 build-backend-release-image:
