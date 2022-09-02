@@ -1,11 +1,4 @@
 services:
-  db:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
-
-  backend:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
-
   frontend:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     ports:
       - "80:80"

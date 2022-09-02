@@ -11,21 +11,42 @@ x-env-api: &env-api
 
 services:
   db:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
     container_name: studio-lite-db
     restart: always
     environment:
       <<: *env-postgres
-      DB_USER: ${POSTGRES_DB_USER}
-      DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
     volumes:
       - db_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"
+      interval: "1s"
+      retries: 60
     networks:
       - backend-network
 
+  db-change-management:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
+    container_name: studio-lite-liquibase
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      <<: *env-postgres
+      DB_USER: ${POSTGRES_DB_USER}
+      DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    networks:
+      - backend-network
+    command: ["liquibase", "--url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update", "-Ddb.user=${POSTGRES_DB_USER}", "-Ddb.password=${POSTGRES_DB_PASSWORD}"]
+
   backend:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
     container_name: studio-lite-backend
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      db-change-management:
+        condition: service_completed_successfully
     restart: always
     environment:
       <<: *env-api
@@ -34,10 +55,15 @@ services:
       - backend-network
 
   frontend:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     container_name: studio-lite-frontend
     depends_on:
-      - db
-      - backend
+      db:
+        condition: service_healthy
+      db-change-management:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
     restart: always
     environment:
       <<: *env-api

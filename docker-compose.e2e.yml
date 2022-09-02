@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -37,7 +37,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -54,7 +54,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -72,7 +72,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -89,7 +89,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -107,7 +107,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
@@ -124,7 +124,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend-e2e/Dockerfile
-    image: iqbberlin/studio-lite-frontend-e2e:latest
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
       - "frontend-e2e"
