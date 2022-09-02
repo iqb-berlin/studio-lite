@@ -182,8 +182,23 @@ build-db-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Dockerfile --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
+    - docker build -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
     - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+  after_script:
+    - docker logout $REGISTRY
+
+build-db-change-management-image:
+  stage: build
+  rules:
+    - !reference [ .default_db_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:latest .
+    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase
   after_script:
     - docker logout $REGISTRY
 
@@ -193,23 +208,21 @@ patch-db-image:
     - !reference [.default_db_rules, rules]
   needs:
     - build-db-image
+    - build-db-change-management-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
+    - docker compose --env-file .env.dev pull -q db db-change-management
+    - docker compose --env-file .env.dev up -d db
     - export $(grep -v '^#' .env.dev | xargs)
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run -d --rm --hostname=${POSTGRES_HOST} --env-file=.env.dev --entrypoint=docker-entrypoint.sh --name=$POSTGRES_HOST --health-cmd="sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" --health-interval=1s --health-retries=60 ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
-    #- apk add --no-cache postgresql-client
-    #- export PGPASSWORD=$POSTGRES_PASSWORD
-    #- for COUNTER in {1..120}; do echo "Check db is ready $COUNTER time(s)"; pg_isready --host=${POSTGRES_HOST} --port=$POSTGRES_PORT --username=$POSTGRES_USER --dbname=$POSTGRES_DB; echo pg_isready returns $?; if [ $? -eq 0 ]; sleep 1s; then break; fi; done
-    #- sleep 10s # wait for db start to finish
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker compose --env-file .env.dev run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
   script:
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
+    - docker compose --env-file .env.dev run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-app:
   stage: build
@@ -241,23 +254,22 @@ test-app-e2e:
   rules:
     - !reference [ .default_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
-    - npx nx serve api --watch=false & # start backend
+    - npx nx serve api --verbose --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-chrome:
@@ -267,21 +279,20 @@ test-app-e2e-ui-chrome:
   rules:
     - !reference [ .default_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
@@ -293,30 +304,23 @@ test-app-e2e-ui-chrome-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
-    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 test-app-e2e-ui-firefox:
   stage: e2e-test
@@ -325,30 +329,23 @@ test-app-e2e-ui-firefox:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
-    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 test-app-e2e-ui-firefox-mobile:
   stage: e2e-test
@@ -357,30 +354,23 @@ test-app-e2e-ui-firefox-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
-    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 test-app-e2e-ui-edge:
   stage: e2e-test
@@ -389,30 +379,23 @@ test-app-e2e-ui-edge:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
-    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 test-app-e2e-ui-edge-mobile:
   stage: e2e-test
@@ -421,30 +404,23 @@ test-app-e2e-ui-edge-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
   variables:
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    DB_USER: ${POSTGRES_DB_USER}
-    DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
-    #POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
-      alias: ${POSTGRES_HOST}
+    - $DOCKER_SERVICE
   before_script:
-    #- apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
-    #- export PGPASSWORD=$POSTGRES_PASSWORD  # Prepare test db ...
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f database/init/000_init_database.sql
-    #- psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO public.user (name, password, is_admin) VALUES ('$DB_USER' , crypt('$DB_PASSWORD', gen_salt('bf',11)), 'True');;"
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull db-change-management
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
     - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
     - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
-    #- pkill npx
 
 lint-app:
   stage: lint
@@ -508,8 +484,22 @@ scan-docker-db:
   services:
     - $DOCKER_SERVICE
   script:
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+scan-docker-db-change-management:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_db_rules, rules]
+  needs:
+    - build-db-change-management-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
 
 scan-docker-app:
   stage: scan-images
@@ -589,10 +579,25 @@ build-db-release-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker build -f database/Postgres.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
     - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
+
+build-db-change-management-release-image:
+  stage: build
+  rules:
+    - !reference [.release_rules, rules]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $REGISTRY
 
 patch-db-release-image:
   stage: build
@@ -600,20 +605,22 @@ patch-db-release-image:
     - !reference [.release_rules, rules]
   needs:
     - build-db-release-image
+    - build-db-change-management-release-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q db db-change-management
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d db
     - export $(grep -v '^#' .env.prod | xargs)
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.prod --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} --health-cmd="sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" --health-interval=1s --health-retries=60 ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
-    #- sleep 10s # wait for db start to finish
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog --logLevel=debug status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
   script:
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-backend-release-image:
   stage: build
@@ -662,7 +669,7 @@ test-backend:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
   script:
     - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test test api
 
@@ -677,7 +684,7 @@ test-frontend:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
   script:
     - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test test frontend
 
@@ -695,13 +702,13 @@ test-release-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-api
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-api test-e2e-api
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
 test-release-e2e-ui-chrome:
   stage: e2e-test
@@ -717,13 +724,13 @@ test-release-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-chrome
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
 test-release-e2e-ui-chrome-mobile:
   stage: e2e-test
@@ -739,13 +746,13 @@ test-release-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-chrome-mobile
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
 test-release-e2e-ui-firefox:
   stage: e2e-test
@@ -761,13 +768,13 @@ test-release-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-#    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-firefox
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
 test-release-e2e-ui-firefox-mobile:
   stage: e2e-test
@@ -783,13 +790,13 @@ test-release-e2e-ui-firefox-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-firefox-mobile
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
 
 test-release-e2e-ui-edge:
   stage: e2e-test
@@ -805,13 +812,13 @@ test-release-e2e-ui-edge:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-edge
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
 
 test-release-e2e-ui-edge-mobile:
   stage: e2e-test
@@ -827,13 +834,13 @@ test-release-e2e-ui-edge-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-#    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - export $(grep -v '^#' .env.prod | xargs)
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
   script:
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml build --no-cache -q test-e2e-ui-edge-mobile
-    - export $(grep -v '^#' .env.prod | xargs) && docker compose -f docker-compose.e2e.yml up --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
 
 lint-backend:
   stage: lint
@@ -924,6 +931,22 @@ scan-release-db:
   script:
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
 
+scan-release-db-change-management:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.release_rules, rules]
+  needs:
+    - build-db-change-management-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+
 scan-release-backend:
   stage: scan-images
   allow_failure: true
@@ -979,6 +1002,7 @@ push-docker-release:
     - audit-backend
     - audit-frontend
     - scan-release-db
+    - scan-release-db-change-management
     - scan-release-backend
     - scan-release-frontend
   image: $DOCKER_IMAGE
@@ -987,16 +1011,20 @@ push-docker-release:
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
     - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
   script:
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:latest
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:latest
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:latest
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:latest
     - docker push -a -q iqbberlin/studio-lite-db
+    - docker push -a -q iqbberlin/studio-lite-liquibase
     - docker push -a -q iqbberlin/studio-lite-backend
     - docker push -a -q iqbberlin/studio-lite-frontend
   after_script:
