@@ -2,14 +2,20 @@ services:
   db:
     build:
       context: .
-      dockerfile: database/Dockerfile
-      target: base
+      dockerfile: database/Postgres.Dockerfile
     image: iqbberlin/studio-lite-db:latest
     ports:
       - "5432:5432"
+
+  db-change-management:
+    build:
+      context: .
+      dockerfile: database/Liquibase.Dockerfile
+      target: base
+    image: iqbberlin/studio-lite-liquibase:latest
     volumes:
-      - ./database/changelog:/studio-lite-db/changelog
-      - ./database/changelogDocs:/studio-lite-db/changelogDocs
+      - ./database/changelog:/liquibase/changelog
+      - ./database/changelogDocs:/liquibase/changelogDocs
 
   backend:
     build:
@@ -22,13 +28,13 @@ services:
     ports:
       - "3333:3333"
       - "9229:9229" # default debug port
+    volumes:
+      - ./apps/api/src:/studio-lite/apps/api/src
+      - backend_vol:/studio-lite/packages
     command:
       - "serve"
       - "api"
       - "--host=${API_HOST}"
-    volumes:
-      - ./apps/api/src:/studio-lite/apps/api/src
-      - backend_vol:/studio-lite/packages
 
   frontend:
     build:
@@ -42,12 +48,12 @@ services:
     image: iqbberlin/studio-lite-frontend:latest
     ports:
       - "4200:4200"
+    volumes:
+      - ./apps/frontend/src:/studio-lite/apps/frontend/src
     command:
       - "serve"
       - "frontend"
       - "--host=${WEB_HOST}"
-    volumes:
-      - ./apps/frontend/src:/studio-lite/apps/frontend/src
 
 volumes:
   backend_vol:

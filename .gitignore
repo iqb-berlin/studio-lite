@@ -2,6 +2,7 @@
 
 #custom folders
 /packages
+/database/changelogDocs
 
 # compiled output
 /dist

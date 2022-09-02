@@ -182,8 +182,23 @@ build-db-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Dockerfile --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
+    - docker build -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
     - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+  after_script:
+    - docker logout $REGISTRY
+
+build-db-change-management-image:
+  stage: build
+  rules:
+    - !reference [ .default_db_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:latest .
+    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase
   after_script:
     - docker logout $REGISTRY
 
@@ -193,23 +208,21 @@ patch-db-image:
     - !reference [.default_db_rules, rules]
   needs:
     - build-db-image
+    - build-db-change-management-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml pull -q db db-change-management
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml up -d db
     - export $(grep -v '^#' .env.dev | xargs)
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run -d --rm --hostname=${POSTGRES_HOST} --env-file=.env.dev --entrypoint=docker-entrypoint.sh --name=$POSTGRES_HOST --health-cmd="sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" --health-interval=1s --health-retries=60 ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
-    #- apk add --no-cache postgresql-client
-    #- export PGPASSWORD=$POSTGRES_PASSWORD
-    #- for COUNTER in {1..120}; do echo "Check db is ready $COUNTER time(s)"; pg_isready --host=${POSTGRES_HOST} --port=$POSTGRES_PORT --username=$POSTGRES_USER --dbname=$POSTGRES_DB; echo pg_isready returns $?; if [ $? -eq 0 ]; sleep 1s; then break; fi; done
-    #- sleep 10s # wait for db start to finish
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
   script:
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-app:
   stage: build
@@ -248,6 +261,7 @@ test-app-e2e:
     POSTGRES_DB: ${POSTGRES_DB}
     DB_USER: ${POSTGRES_DB_USER}
     DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    #docker-compose run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB) --username=$(POSTGRES_USER) --password=$(POSTGRES_PASSWORD) --classpath=changelog --logLevel=info update -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
   image: $CYPRESS_IMAGE
   services:
     - name: ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest
@@ -508,8 +522,22 @@ scan-docker-db:
   services:
     - $DOCKER_SERVICE
   script:
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+scan-docker-db-change-management:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.default_db_rules, rules]
+  needs:
+    - build-db-change-management-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
 
 scan-docker-app:
   stage: scan-images
@@ -589,10 +617,25 @@ build-db-release-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker build -f database/Postgres.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
     - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
+
+build-db-change-management-release-image:
+  stage: build
+  rules:
+    - !reference [.release_rules, rules]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $REGISTRY
 
 patch-db-release-image:
   stage: build
@@ -600,20 +643,22 @@ patch-db-release-image:
     - !reference [.release_rules, rules]
   needs:
     - build-db-release-image
+    - build-db-change-management-release-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q db db-change-management
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d db
     - export $(grep -v '^#' .env.prod | xargs)
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run -d --rm --hostname ${POSTGRES_HOST} --env-file .env.prod --entrypoint docker-entrypoint.sh --name ${POSTGRES_HOST} --health-cmd="sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" --health-interval=1s --health-retries=60 ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} postgres
-    #- sleep 10s # wait for db start to finish
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog --logLevel=debug status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
   script:
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}"
-    - docker exec ${POSTGRES_HOST} sh -c "/opt/liquibase/liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history"
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-backend-release-image:
   stage: build
@@ -697,6 +742,7 @@ test-release-e2e:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -719,6 +765,7 @@ test-release-e2e-ui-chrome:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -741,6 +788,7 @@ test-release-e2e-ui-chrome-mobile:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -763,6 +811,7 @@ test-release-e2e-ui-firefox:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -785,6 +834,7 @@ test-release-e2e-ui-firefox-mobile:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -807,6 +857,7 @@ test-release-e2e-ui-edge:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -829,6 +880,7 @@ test-release-e2e-ui-edge-mobile:
   before_script:
 #    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
   script:
@@ -924,6 +976,22 @@ scan-release-db:
   script:
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
 
+scan-release-db-change-management:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [.release_rules, rules]
+  needs:
+    - build-db-change-management-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+
 scan-release-backend:
   stage: scan-images
   allow_failure: true
@@ -979,6 +1047,7 @@ push-docker-release:
     - audit-backend
     - audit-frontend
     - scan-release-db
+    - scan-release-db-change-management
     - scan-release-backend
     - scan-release-frontend
   image: $DOCKER_IMAGE

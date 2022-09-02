@@ -2,6 +2,9 @@ services:
   db:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
 
+  db-change-management:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
+
   backend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
 
