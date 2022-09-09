@@ -3,6 +3,7 @@
 #custom folders
 /packages
 /database/changelogDocs
+/ssl
 
 # compiled output
 /dist

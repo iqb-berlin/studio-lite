@@ -2,3 +2,7 @@ services:
   frontend:
     ports:
       - "80:80"
+    volumes:
+      - ./ssl/default.conf.template.ssl:/etc/nginx/templates/default.conf.template
+      - ./ssl/www.iqb-studio.de.crt:/etc/nginx/www.iqb-studio.de.crt
+      - ./ssl/www.iqb-studio.de.key:/etc/nginx/www.iqb-studio.de.key
