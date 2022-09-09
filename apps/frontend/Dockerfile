@@ -30,8 +30,10 @@ ARG project
 COPY apps/frontend/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /studio-lite/dist/apps/$project /usr/share/nginx/html
 
-
-FROM base AS prod
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+
+
+FROM base AS prod
+EXPOSE 443
