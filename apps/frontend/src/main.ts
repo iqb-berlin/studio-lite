@@ -23,8 +23,8 @@ platformBrowserDynamic([
   },
   {
     provide: 'APP_VERSION',
-    useValue: '2.0.0'
+    useValue: '2.1.0'
   }
 ])
   .bootstrapModule(AppModule)
-  .catch((err) => console.log(err));
+  .catch(err => console.log(err));
