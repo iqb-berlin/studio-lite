@@ -27,7 +27,7 @@ export const defaultAppConfig = <ConfigDto>{
 export class AppService {
   public static defaultAuthData = <AuthDataDto>{
     userId: 0,
-    userName: 'unbekannt',
+    userName: '',
     isAdmin: false,
     workspaces: [],
     reviews: []
