@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import * as moment from 'moment';
+import { Router, RouterState } from '@angular/router';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
@@ -18,7 +19,8 @@ export class AppComponent implements OnInit {
     private backendService: BackendService,
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
-    private titleService: Title
+    private titleService: Title,
+    private router: Router
   ) {
     moment.locale('de');
   }
@@ -68,5 +70,14 @@ export class AppComponent implements OnInit {
       return `${(progressValue / 1048576).toFixed(1)} MB`;
     }
     return this.translateService.instant('application.wait-message');
+  }
+
+  logout_from_error() {
+    const state: RouterState = this.router.routerState;
+    const { snapshot } = state;
+    const snapshotUrl = (snapshot.url === '/') ? '' : snapshot.url;
+    this.backendService.logout();
+    this.appService.clearErrorMessages();
+    this.router.navigate(['/'], { queryParams: { redirectTo: snapshotUrl } });
   }
 }

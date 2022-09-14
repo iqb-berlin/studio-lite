@@ -7,6 +7,11 @@
      fxLayout="column" fxLayoutAlign="start center">
   <div *ngFor="let e of appService.errorMessages" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
     <div [matTooltip]="e.message" fxFlex>{{('app-http-error.' + e.status) | translate}}</div>
+    <button mat-raised-button
+            *ngIf="[401, 403, 410].indexOf(e.status) >= 0"
+            (click)="logout_from_error()">
+      {{'app-http-error.login' | translate}}
+    </button>
     <button mat-button (click)="appService.removeErrorMessage(e)" [matTooltip]="'app-http-error.close' | translate">
       <mat-icon>close</mat-icon>
     </button>
