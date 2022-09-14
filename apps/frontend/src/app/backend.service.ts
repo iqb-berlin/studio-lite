@@ -119,7 +119,7 @@ export class BackendService {
     return this.http
       .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(<VeronaModuleInListDto[]>[]))
       );
   }
 

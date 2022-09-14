@@ -5,7 +5,6 @@ import * as moment from 'moment';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
-import { VeronaModuleCollection } from './classes/verona-module-collection.class';
 
 @Component({
   selector: 'app-root',
@@ -27,15 +26,6 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.appService.dataLoading = true;
-      this.backendService.getModuleList('editor').subscribe(moduleList => {
-        this.appService.editorList = new VeronaModuleCollection(moduleList);
-      });
-      this.backendService.getModuleList('player').subscribe(moduleList => {
-        this.appService.playerList = new VeronaModuleCollection(moduleList);
-      });
-      this.backendService.getModuleList('schemer').subscribe(moduleList => {
-        this.appService.schemerList = new VeronaModuleCollection(moduleList);
-      });
       this.backendService.getConfig().subscribe(newConfig => {
         if (newConfig) {
           this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
