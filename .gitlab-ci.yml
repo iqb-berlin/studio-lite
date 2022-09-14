@@ -707,6 +707,7 @@ test-release-e2e:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
@@ -729,6 +730,7 @@ test-release-e2e-ui-chrome:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
@@ -751,6 +753,7 @@ test-release-e2e-ui-chrome-mobile:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
@@ -773,6 +776,7 @@ test-release-e2e-ui-firefox:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
@@ -795,6 +799,7 @@ test-release-e2e-ui-firefox-mobile:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
 
@@ -817,6 +822,7 @@ test-release-e2e-ui-edge:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
 
@@ -839,6 +845,7 @@ test-release-e2e-ui-edge-mobile:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - export $(grep -v '^#' .env.prod | xargs)
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm db-change-management liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
   script:
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
 
