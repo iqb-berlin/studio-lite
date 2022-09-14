@@ -70,7 +70,7 @@
       </div>
     </div>
 
-  <div fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="4px" *ngIf="appService.authData.reviews.length > 0">
+  <div fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px" *ngIf="appService.authData.reviews.length > 0">
     <h1 fxLayout="row" fxLayoutAlign="space-between center">
       {{'home.select-review' | translate}}
       <button mat-button (click)="logout()" *ngIf="appService.authData.userId === 0"
