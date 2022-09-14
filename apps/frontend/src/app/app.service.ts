@@ -9,7 +9,7 @@ export const standardLogo: AppLogoDto = {
   data: 'assets/IQB-LogoA.png',
   alt: 'Zur Startseite',
   // eslint-disable-next-line max-len
-  bodyBackground: 'linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%, rgba(1,201,241,1) 92%, rgba(237,178,255,1) 100%)',
+  bodyBackground: 'linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%)',
   boxBackground: 'lightgray'
 };
 export const defaultAppConfig = <ConfigDto>{
