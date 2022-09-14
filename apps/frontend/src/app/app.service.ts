@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
-import { AppConfig } from './app.classes';
+import { AppConfig, AppHttpError } from './app.classes';
 import { VeronaModuleCollection } from './classes/verona-module-collection.class';
 
 export const standardLogo: AppLogoDto = {
@@ -36,7 +36,9 @@ export class AppService {
   authData = AppService.defaultAuthData;
   appConfig: AppConfig;
   appLogo: AppLogoDto | null = null;
-  errorMessage = '';
+  errorMessages: AppHttpError[] = [];
+  errorMessageCounter = 0;
+  errorMessagesDisabled = false;
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();
   dataLoading: boolean | number = false;
@@ -66,5 +68,21 @@ export class AppService {
       });
     });
     return myReturn;
+  }
+
+  addErrorMessage(error: AppHttpError) {
+    if (!this.errorMessagesDisabled) {
+      this.errorMessageCounter += 1;
+      error.id = this.errorMessageCounter;
+      this.errorMessages.push(error);
+    }
+  }
+
+  removeErrorMessage(error: AppHttpError) {
+    for (let i = 0; i < this.errorMessages.length; i++) {
+      if (this.errorMessages[i].id === error.id) {
+        this.errorMessages.splice(i, 1);
+      }
+    }
   }
 }

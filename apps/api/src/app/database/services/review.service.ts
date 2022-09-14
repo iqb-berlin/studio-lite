@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
@@ -48,6 +48,7 @@ export class ReviewService {
   async findOne(reviewId: number): Promise<ReviewFullDto> {
     this.logger.log(`Returning data for review with id: ${reviewId}`);
     const review = await this.reviewRepository.findOne({ where: { id: reviewId } });
+    if (!review) throw new NotFoundException();
     const units = await this.reviewUnitRepository.find({
       where: { reviewId: reviewId },
       order: { order: 'ASC' }

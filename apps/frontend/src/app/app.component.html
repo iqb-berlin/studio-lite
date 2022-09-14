@@ -3,6 +3,15 @@
   <mat-spinner fxFlex="100px"></mat-spinner>
   <button mat-button *ngIf="dataLoadingIsNumber()" fxFlex>{{dataLoadingAsText()}}</button>
 </div>
+<div class="error-container" *ngIf="appService.errorMessages.length > 0"
+     fxLayout="column" fxLayoutAlign="start center">
+  <div *ngFor="let e of appService.errorMessages" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+    <div [matTooltip]="e.message" fxFlex>{{('app-http-error.' + e.status) | translate}}</div>
+    <button mat-button (click)="appService.removeErrorMessage(e)" [matTooltip]="'app-http-error.close' | translate">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>
 <div class="logo">
   <a [routerLink]="['/']" aria-label="Gehe zur Startseite">
     <img [src]="appService.appLogo?.data"

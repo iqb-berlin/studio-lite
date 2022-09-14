@@ -5,24 +5,36 @@ import {
   HttpEvent,
   HttpInterceptor
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
+import { AppHttpError } from './app.classes';
+import { AppService } from './app.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthInterceptor implements HttpInterceptor {
+  constructor(private appService: AppService) {}
+
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const idToken = localStorage.getItem('id_token');
-
-    if (idToken) {
-      const cloned = req.clone({
-        headers: req.headers.set('Authorization',
-          `Bearer ${idToken}`)
-      });
-
-      return next.handle(cloned);
-    }
-
-    return next.handle(req);
+    let httpErrorInfo: AppHttpError | null = null;
+    return next.handle(idToken ? req.clone({
+      headers: req.headers.set('Authorization',
+        `Bearer ${idToken}`)
+    }) : req)
+      .pipe(
+        tap({
+          error: error => {
+            httpErrorInfo = new AppHttpError(error);
+          }
+        }),
+        finalize(() => {
+          if (httpErrorInfo) {
+            httpErrorInfo.method = req.method;
+            httpErrorInfo.urlWithParams = req.urlWithParams;
+            this.appService.addErrorMessage(httpErrorInfo);
+          }
+        })
+      );
   }
 }

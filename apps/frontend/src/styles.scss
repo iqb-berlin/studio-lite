@@ -46,6 +46,19 @@ body {
   z-index: 999;
 }
 
+.error-container {
+  width: 600px;
+  max-height: 600px;
+  overflow-y: auto;
+  top: 20px;
+  left: 20px;
+  margin: auto;
+  position: fixed;
+  background-color: darksalmon;
+  padding: 10px;
+  z-index: 1111;
+}
+
 .spinner-container .mat-progress-spinner {
   height: 100px;
   width: 100px;

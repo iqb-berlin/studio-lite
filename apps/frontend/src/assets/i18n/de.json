@@ -143,5 +143,14 @@
     "name": "Name",
     "createdAt": "Hochgeladen am",
     "no-packages": "Keine Pakete gespeichert."
+  },
+  "app-http-error": {
+    "999": "Fehler in der Netzwerkverbindung",
+    "401": "Bitte für diese Aktion erst anmelden!",
+    "403": "Für diese Funktion haben Sie keine Berechtigung.",
+    "404": "Daten/Objekt nicht gefunden.",
+    "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
+    "500": "Allgemeines Server-Problem.",
+    "close": "Fehlermeldung ausblenden"
   }
 }

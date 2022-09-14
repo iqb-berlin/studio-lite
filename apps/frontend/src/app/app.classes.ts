@@ -12,24 +12,14 @@ export interface WorkspaceDataFlat {
 }
 
 export class AppHttpError {
-  code: number | undefined;
-  info: string | undefined;
-  constructor(errorObj?: HttpErrorResponse) {
-    if (errorObj) {
-      this.code = errorObj.status;
-      this.info = errorObj.message;
-      if (errorObj.status === 401) {
-        this.info = 'Zugriff verweigert - bitte (neu) anmelden!';
-      } else if (errorObj.status === 503) {
-        this.info = 'Server meldet Datenbankproblem.';
-      } else if (errorObj.error instanceof ErrorEvent) {
-        this.info = `Fehler: ${(<ErrorEvent>errorObj.error).message}`;
-      }
-    }
-  }
-
-  msg(): string {
-    return `${this.info} (Fehler ${this.code})`;
+  status: number;
+  message: string;
+  method = '';
+  urlWithParams = '';
+  id = 0;
+  constructor(errorObj: HttpErrorResponse) {
+    this.status = errorObj.error instanceof ErrorEvent ? 999 : errorObj.status;
+    this.message = errorObj.error instanceof ErrorEvent ? (<ErrorEvent>errorObj.error).message : errorObj.message;
   }
 }
 

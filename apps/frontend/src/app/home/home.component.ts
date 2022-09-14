@@ -19,7 +19,6 @@ import { EditMyDataComponent } from './edit-my-data.component';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   loginForm: UntypedFormGroup;
-  isError = false;
   errorMessage = '';
   private routingSubscription: Subscription | null = null;
   redirectTo = '';
@@ -65,10 +64,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   login(): void {
-    this.isError = false;
     this.errorMessage = '';
-    this.appService.dataLoading = true;
     if (this.loginForm && this.loginForm.valid) {
+      this.appService.dataLoading = true;
+      this.appService.errorMessagesDisabled = true;
       this.backendService.login(
         this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value
       ).subscribe(ok => {
@@ -80,6 +79,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         } else {
           this.snackBar.open('Login nicht erfolgreich', 'Fehler', { duration: 3000 });
         }
+        this.appService.errorMessagesDisabled = false;
       });
     }
   }
