@@ -34,7 +34,7 @@ export class UnitUserService {
         unitId: unitId
       }
     });
-    return unitUser.lastSeenCommentChangedAt;
+    return unitUser ? unitUser.lastSeenCommentChangedAt : new Date(2022, 6);
   }
 
   async patchUnitUserCommentsLastSeen(
