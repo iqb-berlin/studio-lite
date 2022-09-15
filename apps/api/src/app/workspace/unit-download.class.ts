@@ -3,7 +3,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { VeronaModuleKeyCollection, VeronaVariable } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
@@ -58,6 +58,43 @@ export class UnitDownloadClass {
           Definition: {
             '@player': unitMetadata.player || '',
             '@editor': unitMetadata.editor || ''
+          }
+        });
+      }
+      if (definitionData.variables && definitionData.variables.length > 0) {
+        const variablesElement = unitXml.root().ele('BaseVariables');
+        definitionData.variables.forEach(v => {
+          const transformedVariable = new VeronaVariable(v);
+          const variableElement = variablesElement.ele({
+            Variable: {
+              '@id': transformedVariable.id,
+              '@type': transformedVariable.type,
+              '@format': transformedVariable.format,
+              '@nullable': transformedVariable.nullable,
+              '@multiple': transformedVariable.multiple
+            }
+          });
+          if (transformedVariable.values.length > 0) {
+            const valuesElement = variableElement.ele('Values');
+            transformedVariable.values.forEach(val => {
+              valuesElement.ele({ Value: { '#': val } });
+            });
+          }
+        });
+      }
+      const schemeData = await unitService.findOnesScheme(unitId);
+      if (schemeData && schemeData.scheme) {
+        unitXml.root().ele({
+          CodingSchemeRef: {
+            '@schemer': unitMetadata.schemer || '',
+            '#': `${unitMetadata.key}.vocs`
+          }
+        });
+        zip.addFile(`${unitMetadata.key}.vocs`, Buffer.from(schemeData.scheme));
+      } else {
+        unitXml.root().ele({
+          CodingSchemeRef: {
+            '@schemer': unitMetadata.schemer || ''
           }
         });
       }
