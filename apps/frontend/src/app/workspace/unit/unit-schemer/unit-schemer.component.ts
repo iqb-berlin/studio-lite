@@ -13,7 +13,7 @@ import { UnitMetadataStore, UnitSchemeStore } from '../../workspace.classes';
     <div id="iFrameHostSchemer">
       <iframe id="hosting-iframe" class="unitHost"></iframe>
     </div>`,
-  styles: ['#iFrameHostSchemer {height: calc(100% - 49px);}']
+  styles: ['#iFrameHostSchemer {height: 100%;}']
 })
 export class UnitSchemerComponent implements OnInit {
   private readonly postMessageSubscription: Subscription;
