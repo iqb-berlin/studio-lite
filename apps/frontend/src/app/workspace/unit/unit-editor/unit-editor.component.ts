@@ -15,7 +15,7 @@ import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes'
     <div id="iFrameHostEditor">
       <iframe id="hosting-iframe" class="unitHost"></iframe>
     </div>`,
-  styles: ['#iFrameHostEditor {height: calc(100% - 49px);}']
+  styles: ['#iFrameHostEditor {height: 100%;}']
 })
 export class UnitEditorComponent implements OnInit, OnDestroy {
   private readonly postMessageSubscription: Subscription;

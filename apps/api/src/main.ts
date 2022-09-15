@@ -17,7 +17,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('IQB Studio Lite')
     .setDescription('The IQB Studio Lite API description and try-out')
-    .setVersion('2.1.0-rc1')
+    .setVersion('2.1.0-rc2')
     .addBearerAuth()
     .build();
   app.setGlobalPrefix(globalPrefix);
