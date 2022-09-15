@@ -8,6 +8,7 @@ import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api
 import { SettingService } from '../../database/services/setting.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { IsAdminGuard } from '../is-admin.guard';
+import { AppVersionGuard } from '../../app-version.guard';
 
 @Controller('admin/settings')
 export class SettingController {
@@ -16,6 +17,7 @@ export class SettingController {
   ) {}
 
   @Get('config')
+  @UseGuards(AppVersionGuard)
   @ApiOkResponse({ description: 'Config settings retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findConfig(): Promise<ConfigDto> {

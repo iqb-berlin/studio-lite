@@ -8,6 +8,7 @@ import { WorkspaceGroupsController } from './workspaces/workspace-groups.control
 import { SettingController } from './settings/setting.controller';
 import { VeronaModulesController } from './verona-modules/verona-modules.controller';
 import { ResourcePackageController } from './resource-packages/resource-package.controller';
+import { AppVersionProvider } from '../app-version.guard';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ResourcePackageController } from './resource-packages/resource-package.
     SettingController,
     ResourcePackageController,
     VeronaModulesController
-  ]
+  ],
+  providers: [AppVersionProvider]
 })
 export class AdminModule {}

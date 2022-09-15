@@ -14,6 +14,7 @@ import { WorkspaceService } from './database/services/workspace.service';
 import { UsersService } from './database/services/users.service';
 import { ReviewId, UserId, UserName } from './auth/user.decorator';
 import { ReviewService } from './database/services/review.service';
+import { AppVersionGuard } from './app-version.guard';
 
 @Controller()
 export class AppController {
@@ -26,7 +27,7 @@ export class AppController {
   ) {}
 
   @Post('login')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalAuthGuard, AppVersionGuard)
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiQuery({ type: String, name: 'password', required: true })
@@ -37,7 +38,7 @@ export class AppController {
   }
 
   @Get('auth-data')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AppVersionGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'User auth data successfully retrieved.' }) // TODO: Add Exception
   @ApiTags('auth')
@@ -72,7 +73,7 @@ export class AppController {
   }
 
   @Get('my-data')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AppVersionGuard)
   @ApiBearerAuth()
   // TODO: Exception & Return Value entfernen
   @ApiOkResponse({ description: 'User personal data successfully retrieved.' })

@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { ReviewModule } from './review/review.module';
+import { AppVersionProvider } from './app-version.guard';
 
 @Module({
   imports: [
@@ -25,6 +26,6 @@ import { ReviewModule } from './review/review.module';
     MulterModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService, AppVersionProvider]
 })
 export class AppModule {}

@@ -162,6 +162,7 @@
     "404": "Daten/Objekt nicht gefunden.",
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "500": "Allgemeines Server-Problem.",
+    "520": "Bitte Anwendung neu laden",
     "close": "Fehlermeldung ausblenden",
     "login": "Login"
   }
