@@ -25,7 +25,7 @@ stages:
 .default_rules:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
       when: never
 
 .default_db_rules:
@@ -33,31 +33,35 @@ stages:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       changes:
         - database/*
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
       when: never
 
 .default_manual_rules:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       when: manual
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
       when: never
 
 .release_rules:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == "main" || $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
 
 .release_manual_rules:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == "main" || $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
       when: manual
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
       when: manual
+
+.prerelease_push_rules:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?)$/
 
 .release_push_rules:
   rules:
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)$/
 
 check-config:
   stage: .pre
@@ -66,7 +70,6 @@ check-config:
   script:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_COMMIT_TAG
-    - echo $SEMVER_REGEX
     - echo $CI_PIPELINE_SOURCE
     - echo $CI_EXTERNAL_PULL_REQUEST_IID
     - echo $CI_EXTERNAL_PULL_REQUEST_SOURCE_REPOSITORY
@@ -90,7 +93,8 @@ check-default-rules:
     - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
       when: never
   before_script:
-    - SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)([1-9][0-9]*)?))?$"
+    - PRERELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)([1-9][0-9]*)?))?$"
+    - RELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
   script:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
@@ -107,7 +111,8 @@ check-default-rules:
     - if [ "${CI_COMMIT_BRANCH}" == "main" -o "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}" == "main" ]; then echo "commit branch or pull request target branch is 'main'" ; else echo "commit branch '$CI_COMMIT_BRANCH' != 'main' && pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
     - if [ "${CI_PIPELINE_SOURCE}" != "external_pull_request_event" ]; then echo "ci pipeline source is not 'external_pull_request_event'" ; else echo "ci pipeline source '$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
     - if [ "${CI_PIPELINE_SOURCE}" == "external_pull_request_event" ]; then echo "ci pipeline source is 'external_pull_request_event'" ; else echo "ci pipeline source '$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [[ $CI_COMMIT_TAG =~ $SEMVER_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid (pre-)release tag."; else echo "$CI_COMMIT_TAG is not a valid (pre-)release tag!"; fi
+    - if [[ $CI_COMMIT_TAG =~ $PRERELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid pre-release tag."; else echo "$CI_COMMIT_TAG is not a valid pre-release tag!"; fi
+    - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid release tag."; else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
 
 check-release-rules:
   stage: .pre
@@ -117,7 +122,8 @@ check-release-rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == "main" || $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
     - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
   before_script:
-    - SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)([1-9][0-9]*)?))?$"
+    - PRERELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-((alpha|beta|rc)([1-9][0-9]*)?)$"
+    - RELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
   script:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
@@ -134,7 +140,8 @@ check-release-rules:
     - if [ "${CI_COMMIT_BRANCH}" == "main" -o "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}" == "main" ]; then echo "commit branch or pull request target branch is 'main'" ; else echo "commit branch '$CI_COMMIT_BRANCH' != 'main' && pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
     - if [ "${CI_PIPELINE_SOURCE}" != "external_pull_request_event" ]; then echo "ci pipeline source is not 'external_pull_request_event'" ; else echo "ci pipeline source '$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
     - if [ "${CI_PIPELINE_SOURCE}" == "external_pull_request_event" ]; then echo "ci pipeline source is 'external_pull_request_event'" ; else echo "ci pipeline source '$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [[ $CI_COMMIT_TAG =~ $SEMVER_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid (pre-)release tag."; else echo "$CI_COMMIT_TAG is not a valid (pre-)release tag!"; fi
+    - if [[ $CI_COMMIT_TAG =~ $PRERELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid pre-release tag."; else echo "$CI_COMMIT_TAG is not a valid pre-release tag!"; fi
+    - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid release tag."; else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
 
 
 #############################################################################
@@ -985,6 +992,53 @@ scan-release-frontend:
     - docker pull -q aquasec/trivy:0.29.2
   script:
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+
+push-docker-pre-release:
+  stage: push-images
+  rules:
+    - !reference [.prerelease_push_rules, rules]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - test-backend
+    - test-frontend
+    - test-release-e2e
+    - test-release-e2e-ui-chrome
+    #- test-release-e2e-ui-chrome-mobile
+    #- test-release-e2e-ui-firefox
+    #- test-release-e2e-ui-firefox-mobile
+    #- test-release-e2e-ui-edge
+    #- test-release-e2e-ui-edge-mobile
+    - lint-backend
+    - lint-frontend
+    - lint-frontend-e2e
+    - audit-backend
+    - audit-frontend
+    - scan-release-db
+    - scan-release-db-change-management
+    - scan-release-backend
+    - scan-release-frontend
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  script:
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
+    - docker push -q iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
+    - docker push -q iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
+    - docker push -q iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
+    - docker push -q iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
+  after_script:
+    - docker logout
 
 push-docker-release:
   stage: push-images
