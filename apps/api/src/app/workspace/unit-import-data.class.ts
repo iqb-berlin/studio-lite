@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { VeronaVariable } from '@studio-lite/shared-code';
 import { FileIo } from '../interfaces/file-io.interface';
 
 export class UnitImportData {
@@ -10,6 +11,10 @@ export class UnitImportData {
   definitionFileName: string;
   player: string;
   editor: string;
+  schemer: string;
+  baseVariables: VeronaVariable[] = [];
+  codingScheme: string;
+  codingSchemeFileName: string;
 
   constructor(fileIo: FileIo) {
     this.fileName = fileIo.originalname;
@@ -40,6 +45,29 @@ export class UnitImportData {
       }
     }
     if (!this.definition && !this.definitionFileName) throw new Error('definition and definition file empty');
+    const baseVariablesElement = xmlDocument('BaseVariables').first();
+    if (baseVariablesElement.length > 0) {
+      baseVariablesElement.find('Variable').each((i, varElement) => {
+        const valuesElement = baseVariablesElement.find('Values').first();
+        this.baseVariables.push(new VeronaVariable({
+          id: varElement.attribs['id'],
+          type: varElement.attribs['type'],
+          format: varElement.attribs['format'],
+          nullable: varElement.attribs['nullable'],
+          multiple: varElement.attribs['multiple'],
+          valuesComplete: valuesElement.length > 0 ? valuesElement.attr['complete'] : false,
+          values: valuesElement.length > 0 ?
+            valuesElement.children['Value'].map(varValueElement => varValueElement.text()) : []
+        }));
+      });
+    }
+    this.codingSchemeFileName = '';
+    this.schemer = '';
+    const codingSchemeElement = xmlDocument('CodingSchemeRef').first();
+    if (codingSchemeElement.length > 0) {
+      this.schemer = codingSchemeElement.attr('schemer');
+      this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
+    }
   }
 
   private getFolder(): string {

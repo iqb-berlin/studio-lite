@@ -257,15 +257,25 @@ export class WorkspaceService {
           id: newUnitId,
           editor: u.editor,
           player: u.player,
+          schemer: u.schemer,
           description: u.description
         });
         await this.unitService.patchDefinition(newUnitId, {
-          definition: u.definition
+          definition: u.definition,
+          variables: u.baseVariables
         });
         if (!u.definition) {
           functionReturn.messages.push(
             { objectKey: u.fileName, messageKey: 'unit-upload.api-warning.missing-definition' }
           );
+        }
+        if (u.codingSchemeFileName && notXmlFiles[u.codingSchemeFileName]) {
+          u.codingScheme = notXmlFiles[u.codingSchemeFileName].buffer.toString();
+          usedFiles.push(u.codingSchemeFileName);
+          await this.unitService.patchScheme(newUnitId, {
+            scheme: u.codingScheme,
+            schemeType: ''
+          });
         }
       } else {
         functionReturn.messages.push({
