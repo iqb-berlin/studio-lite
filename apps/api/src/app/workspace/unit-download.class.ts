@@ -75,7 +75,11 @@ export class UnitDownloadClass {
             }
           });
           if (transformedVariable.values.length > 0) {
-            const valuesElement = variableElement.ele('Values');
+            const valuesElement = variableElement.ele({
+              Values: {
+                '@complete': transformedVariable.valuesComplete
+              }
+            });
             transformedVariable.values.forEach(val => {
               valuesElement.ele({ Value: { '#': val } });
             });
