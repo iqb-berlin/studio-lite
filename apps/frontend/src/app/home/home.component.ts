@@ -79,13 +79,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.loginForm && this.loginForm.valid) {
       this.appService.dataLoading = true;
       this.appService.errorMessagesDisabled = true;
+      const initLoginMode = !this.appService.appConfig.hasUsers;
       this.backendService.login(
-        this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value
+        this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value, initLoginMode
       ).subscribe(ok => {
         this.appService.dataLoading = false;
         if (ok) {
           if (this.redirectTo) {
             this.router.navigate([this.redirectTo]);
+          } else if (initLoginMode) {
+            this.router.navigate(['/admin']);
           }
         } else {
           this.snackBar.open('Login nicht erfolgreich', 'Fehler', { duration: 3000 });
