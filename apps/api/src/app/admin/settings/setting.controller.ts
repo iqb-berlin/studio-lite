@@ -1,8 +1,8 @@
 import {
-  Body, Controller, Get, Patch, UseGuards
+  Body, Controller, Get, Inject, Patch, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags
 } from '@nestjs/swagger';
 import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 import { SettingService } from '../../database/services/setting.service';
@@ -13,11 +13,18 @@ import { AppVersionGuard } from '../../app-version.guard';
 @Controller('admin/settings')
 export class SettingController {
   constructor(
-    private settingService: SettingService
+    private settingService: SettingService,
+    @Inject('APP_VERSION') readonly appVersion: string
   ) {}
 
   @Get('config')
   @UseGuards(AppVersionGuard)
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
   @ApiOkResponse({ description: 'Config settings retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findConfig(): Promise<ConfigDto> {
