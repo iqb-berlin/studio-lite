@@ -18,4 +18,7 @@ export class ConfigDto {
 
   @ApiProperty()
   globalWarningExpiredHour?: number;
+
+  @ApiProperty()
+  hasUsers = true;
 }

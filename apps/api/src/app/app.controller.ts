@@ -1,9 +1,9 @@
 import {
-  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException
+  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException, Query
 } from '@nestjs/common';
 
 import {
-  ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { AuthDataDto, ChangePasswordDto, MyDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
@@ -29,6 +29,12 @@ export class AppController {
   @Post('login')
   @UseGuards(LocalAuthGuard, AppVersionGuard)
   @ApiTags('auth')
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
   @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiQuery({ type: String, name: 'password', required: true })
   @ApiQuery({ type: String, name: 'username', required: true })
@@ -37,8 +43,34 @@ export class AppController {
     return `"${token}"`;
   }
 
+  @Post('init-login')
+  @UseGuards(AppVersionGuard)
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
+  @ApiQuery({ type: String, name: 'username', required: true })
+  @ApiQuery({ type: String, name: 'password', required: true })
+  async initLogin(
+  @Query('username') username: string,
+    @Query('password') password: string
+  ) {
+    const token = await this.authService.initLogin(username, password);
+    return `"${token}"`;
+  }
+
   @Get('auth-data')
   @UseGuards(JwtAuthGuard, AppVersionGuard)
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'User auth data successfully retrieved.' }) // TODO: Add Exception
   @ApiTags('auth')
@@ -74,6 +106,12 @@ export class AppController {
 
   @Get('my-data')
   @UseGuards(JwtAuthGuard, AppVersionGuard)
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
   @ApiBearerAuth()
   // TODO: Exception & Return Value entfernen
   @ApiOkResponse({ description: 'User personal data successfully retrieved.' })

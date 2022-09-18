@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../database/services/users.service';
 import { WorkspaceService } from '../../database/services/workspace.service';
@@ -30,6 +30,19 @@ export class AuthService {
       `User with id '${user.id}' is logging in.` :
       `Review with id '${user.reviewId}' is logging in.`);
     const payload = { username: user.name, sub: user.id, sub2: user.reviewId };
+    return this.jwtService.sign(payload);
+  }
+
+  async initLogin(username: string, password: string) {
+    if (await this.usersService.hasUsers()) throw new ForbiddenException();
+    const newUserId = await this.usersService.create({
+      name: username,
+      password: password,
+      isAdmin: true,
+      description: 'first initial user'
+    });
+    this.logger.log(`First User with id '${newUserId}' is logging in.`);
+    const payload = { username: username, sub: newUserId, sub2: 0 };
     return this.jwtService.sign(payload);
   }
 

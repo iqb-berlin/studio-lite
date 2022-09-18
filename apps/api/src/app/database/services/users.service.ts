@@ -1,5 +1,5 @@
 import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
@@ -187,6 +187,16 @@ export class UsersService {
       };
     }
     throw new AdminUserNotFoundException(id, 'GET');
+  }
+
+  async hasUsers(): Promise<boolean> {
+    this.logger.log('Checking hasUsers');
+    const user = await this.usersRepository.findOne({
+      where: { id: MoreThan(0) },
+      select: { id: true }
+    });
+    this.logger.log(user);
+    return !!user;
   }
 
   async create(user: CreateUserDto): Promise<number> {

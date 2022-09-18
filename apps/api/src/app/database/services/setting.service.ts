@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api-dto';
 import Setting from '../entities/setting.entity';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class SettingService {
@@ -10,20 +11,25 @@ export class SettingService {
 
   constructor(
     @InjectRepository(Setting)
-    private settingsRepository: Repository<Setting>
+    private settingsRepository: Repository<Setting>,
+    private usersService: UsersService
   ) {}
 
   async findConfig(): Promise<ConfigDto> {
     this.logger.log('Returning settings config.');
     const setting = await this.settingsRepository.findOne({ where: { key: 'config' } });
+    const hasUsers = await this.usersService.hasUsers();
     if (setting) {
-      return JSON.parse(setting.content) as ConfigDto;
+      const settings = JSON.parse(setting.content) as ConfigDto;
+      settings.hasUsers = hasUsers;
+      return settings;
     }
     // TODO: Template ist Aufgabe des Frontends (findConfig ist get):
     return <ConfigDto> {
       appTitle: 'IQB-Studio-Lite',
       introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
-      imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>'
+      imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
+      hasUsers: hasUsers
     };
     // TODO: Exception anstatt des Templates
   }
