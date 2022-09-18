@@ -25,11 +25,13 @@ export class BackendService {
     private http: HttpClient
   ) { }
 
-  login(name: string, password: string): Observable<boolean> {
+  login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
     const queryParams = new HttpParams()
       .set('username', name)
       .set('password', password);
-    return this.http.post<string>(`${this.serverUrl}login?${queryParams.toString()}`, 'jojo')
+    return this.http.post<string>(
+      `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}?${queryParams.toString()}`, 'jojo'
+    )
       .pipe(
         catchError(() => of(false)),
         switchMap(loginToken => {
