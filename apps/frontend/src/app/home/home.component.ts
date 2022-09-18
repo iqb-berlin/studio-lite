@@ -8,10 +8,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MyDataDto, ReviewDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, Title } from '@angular/platform-browser';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
 import { ChangePasswordComponent } from './change-password.component';
 import { EditMyDataComponent } from './edit-my-data.component';
+import { AppConfig } from '../app.classes';
 
 @Component({
   templateUrl: './home.component.html',
@@ -33,6 +35,8 @@ export class HomeComponent implements OnInit, OnDestroy {
               private changePasswordDialog: MatDialog,
               private editMyDataDialog: MatDialog,
               private snackBar: MatSnackBar,
+              private titleService: Title,
+              private sanitizer: DomSanitizer,
               private route: ActivatedRoute,
               private router: Router) {
     this.loginForm = this.fb.group({
@@ -52,6 +56,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     });
     setTimeout(() => {
+      this.backendService.getConfig().subscribe(newConfig => {
+        if (newConfig) {
+          this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
+          this.appService.dataLoading = false;
+          this.appService.globalWarning = this.appService.appConfig.globalWarningText();
+        }
+      });
       this.appService.appConfig.setPageTitle('Willkommen!');
       this.appService.dataLoading = false;
       const token = localStorage.getItem('id_token');

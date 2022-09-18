@@ -33,6 +33,7 @@ export class AppConfig {
   private readonly _globalWarningExpiredDay: Date | undefined;
   private readonly _globalWarningExpiredHour: number | undefined;
   private readonly titleService: Title;
+  readonly hasUsers: boolean;
 
   constructor(titleService: Title, appConfig?: ConfigDto, sanitizer?: DomSanitizer) {
     this.appTitle = appConfig ? appConfig.appTitle : 'IQB-Studio-Lite';
@@ -46,6 +47,7 @@ export class AppConfig {
     this._globalWarningText = appConfig ? appConfig.globalWarningText : '';
     this._globalWarningExpiredDay = appConfig ? appConfig.globalWarningExpiredDay : undefined;
     this._globalWarningExpiredHour = appConfig ? appConfig.globalWarningExpiredHour : undefined;
+    this.hasUsers = appConfig ? appConfig.hasUsers : true;
     this.titleService = titleService;
   }
 

@@ -1,74 +1,74 @@
-<div class="home-body" fxLayout="row" fxLayoutAlign="center stretch">
-    <div fxFlex="0 0 400px" fxLayout="column" *ngIf="appService.authData.userId === 0 && appService.authData.reviews.length === 0" class="box-left">
-      <!-- - - - - - - - - - - - - - - - - -->
-      <form [formGroup]="loginForm" (ngSubmit)="login()">
-        <h1>Anmelden</h1>
-        <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
-        <div fxLayout="column">
-          <mat-form-field class="full-width" [class]="loginNamePreset ? 'invisible' : ''">
-            <input matInput formControlName="name" placeholder="Anmeldename" (keyup.enter)="pw.focus()">
-          </mat-form-field>
-          <p *ngIf="loginNamePreset">
-            Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist
-            noch die Eingabe eines Kennwortes erforderlich.
-          </p>
-          <mat-form-field class="full-width">
-            <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
-          </mat-form-field>
-        </div>
-        <p *ngIf="errorMessage" class="error-message">{{errorMessage}}</p>
-        <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
-      </form>
-    </div>
+<div class="home-body" fxLayout="row" fxLayoutAlign="center stretch" *ngIf="appService.appConfig.hasUsers">
+  <div fxFlex="0 0 400px" fxLayout="column" *ngIf="appService.authData.userId === 0 && appService.authData.reviews.length === 0" class="box-left">
+    <!-- - - - - - - - - - - - - - - - - -->
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <h1>Anmelden</h1>
+      <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
+      <div fxLayout="column">
+        <mat-form-field class="full-width" [class]="loginNamePreset ? 'invisible' : ''">
+          <input matInput formControlName="name" placeholder="Anmeldename" (keyup.enter)="pw.focus()">
+        </mat-form-field>
+        <p *ngIf="loginNamePreset">
+          Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist
+          noch die Eingabe eines Kennwortes erforderlich.
+        </p>
+        <mat-form-field class="full-width">
+          <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
+        </mat-form-field>
+      </div>
+      <p *ngIf="errorMessage" class="error-message">{{errorMessage}}</p>
+      <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
+    </form>
+  </div>
 
-    <div fxFlex="0 0 400px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
-      <h1 fxLayout="row" fxLayoutAlign="space-between center">
-        {{'home.select-workspace' | translate}}
-        <div>
-          <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
-                  [matTooltip]="'home.goto-admin' | translate">
+  <div fxFlex="0 0 400px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
+    <h1 fxLayout="row" fxLayoutAlign="space-between center">
+      {{'home.select-workspace' | translate}}
+      <div>
+        <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
+                [matTooltip]="'home.goto-admin' | translate">
+          <mat-icon>settings</mat-icon>
+        </button>
+        <button mat-button [matMenuTriggerFor]="menuUser" matTooltip="Meine Daten/Anmelden" matTooltipPosition="above" fxFlex>
+          <mat-icon>account_box</mat-icon>
+        </button>
+      </div>
+      <mat-menu #menuUser="matMenu">
+        <button mat-menu-item (click)="changeUserData()">
+          <mat-icon>edit</mat-icon>Name/E-Mail ändern
+        </button>
+        <button mat-menu-item (click)="changePassword()">
+          <mat-icon>lock</mat-icon>Kennwort ändern
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>Abmelden
+        </button>
+      </mat-menu>
+    </h1>
+    <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
+    <div fxFlex *ngIf="appService.authData.workspaces.length === 0">
+      <p>Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.</p>
+    </div>
+    <div fxFlex *ngIf="appService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
+      <div *ngFor="let wsg of appService.authData.workspaces" fxLayout="column">
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="workspace-group-header"
+             *ngIf="wsg.workspaces.length > 0 || wsg.isAdmin">
+          <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
+          <button mat-button [routerLink]="['/wsg-admin/' + wsg.id]"
+                  *ngIf="wsg.isAdmin"
+                  [matTooltip]="'home.goto-wsg-admin' | translate">
             <mat-icon>settings</mat-icon>
           </button>
-          <button mat-button [matMenuTriggerFor]="menuUser" matTooltip="Meine Daten/Anmelden" matTooltipPosition="above" fxFlex>
-            <mat-icon>account_box</mat-icon>
-          </button>
         </div>
-        <mat-menu #menuUser="matMenu">
-          <button mat-menu-item (click)="changeUserData()">
-            <mat-icon>edit</mat-icon>Name/E-Mail ändern
+        <div fxLayout="column" fxLayoutAlign="start start" *ngIf="wsg.workspaces.length > 0">
+          <button mat-button (click)="buttonGotoWorkspace(ws)"
+                  *ngFor="let ws of wsg.workspaces">
+            {{ws.name}}
           </button>
-          <button mat-menu-item (click)="changePassword()">
-            <mat-icon>lock</mat-icon>Kennwort ändern
-          </button>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>Abmelden
-          </button>
-        </mat-menu>
-      </h1>
-      <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
-      <div fxFlex *ngIf="appService.authData.workspaces.length === 0">
-        <p>Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.</p>
-      </div>
-      <div fxFlex *ngIf="appService.authData.workspaces.length > 0" fxLayout="column" class="scroll-area">
-        <div *ngFor="let wsg of appService.authData.workspaces" fxLayout="column">
-          <div fxLayout="row" fxLayoutAlign="space-between center" class="workspace-group-header"
-               *ngIf="wsg.workspaces.length > 0 || wsg.isAdmin">
-            <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
-            <button mat-button [routerLink]="['/wsg-admin/' + wsg.id]"
-                    *ngIf="wsg.isAdmin"
-                    [matTooltip]="'home.goto-wsg-admin' | translate">
-              <mat-icon>settings</mat-icon>
-            </button>
-          </div>
-          <div fxLayout="column" fxLayoutAlign="start start" *ngIf="wsg.workspaces.length > 0">
-            <button mat-button (click)="buttonGotoWorkspace(ws)"
-                    *ngFor="let ws of wsg.workspaces">
-              {{ws.name}}
-            </button>
-          </div>
         </div>
       </div>
     </div>
+  </div>
 
   <div fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px" *ngIf="appService.authData.reviews.length > 0">
     <h1 fxLayout="row" fxLayoutAlign="space-between center">
@@ -85,17 +85,21 @@
   </div>
 
   <div fxFlex="0 2 400px" fxLayout="column" class="box-right">
-      <h1>{{appService.appConfig?.appTitle}}</h1>
-      <div [innerHTML]="appService.appConfig?.introHtml" class="scroll-area"></div>
-      <div>
-        <ul>
-          <li>Kennung der Anwendung: {{appName}}</li>
-          <li>Version: {{appVersion}}</li>
-          <li *ngIf="appService.authData.userId === 0">{{ appService.authData.reviews.length > 0 ? 'Für Aufgabenfolge/Review angemeldet' : 'nicht angemeldet'}}</li>
-          <li *ngIf="appService.authData.userId > 0">angemeldet als: {{appService.authData.userName}}</li>
-          <li *ngIf="appService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
-        </ul>
-      </div>
-      <button mat-raised-button color="primary" [routerLink]="['/about']">{{'home.imprint' | translate}}</button>
+    <h1>{{appService.appConfig?.appTitle}}</h1>
+    <div [innerHTML]="appService.appConfig?.introHtml" class="scroll-area"></div>
+    <div>
+      <ul>
+        <li>Kennung der Anwendung: {{appName}}</li>
+        <li>Version: {{appVersion}}</li>
+        <li *ngIf="appService.authData.userId === 0">{{ appService.authData.reviews.length > 0 ? 'Für Aufgabenfolge/Review angemeldet' : 'nicht angemeldet'}}</li>
+        <li *ngIf="appService.authData.userId > 0">angemeldet als: {{appService.authData.userName}}</li>
+        <li *ngIf="appService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
+      </ul>
     </div>
+    <button mat-raised-button color="primary" [routerLink]="['/about']">{{'home.imprint' | translate}}</button>
   </div>
+</div>
+
+<div class="home-body" fxLayout="row" fxLayoutAlign="center stretch" *ngIf="!appService.appConfig.hasUsers">
+  <p>ja nee</p>
+</div>
