@@ -37,7 +37,16 @@ export class AppComponent implements OnInit {
         }
       });
       this.backendService.getAppLogo().subscribe(newLogo => {
-        this.appService.appLogo = newLogo || standardLogo;
+        this.appService.appLogo = standardLogo;
+        if (newLogo) {
+          if (newLogo.data && newLogo.data.length > 0) this.appService.appLogo.data = newLogo.data;
+          if (newLogo.bodyBackground && newLogo.bodyBackground.length > 0) {
+            this.appService.appLogo.bodyBackground = newLogo.bodyBackground;
+          }
+          if (newLogo.boxBackground && newLogo.boxBackground.length > 0) {
+            this.appService.appLogo.boxBackground = newLogo.boxBackground;
+          }
+        }
         if (this.appService.appLogo.bodyBackground) {
           document.documentElement.style.setProperty('--st-body-background', this.appService.appLogo.bodyBackground);
         }

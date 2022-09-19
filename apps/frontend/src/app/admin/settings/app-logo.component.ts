@@ -4,7 +4,6 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { BackendService as WriteBackendService } from '../backend.service';
 import { BackendService as ReadBackendService } from '../../backend.service';
-import { standardLogo } from '../../app.service';
 
 @Component({
   selector: 'app-app-logo',
@@ -51,7 +50,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
         this.configDataChangedSubscription = null;
       }
       if (appLogo) {
-        this.logoImageBase64 = appLogo.data;
+        if (appLogo.data && appLogo.data.length > 0) this.logoImageBase64 = appLogo.data;
         this.configForm.setValue({
           alt: appLogo.alt,
           bodyBackground: appLogo.bodyBackground ? appLogo.bodyBackground : '',
@@ -139,7 +138,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
   }
 
   removeLogoImg(): void {
-    this.logoImageBase64 = standardLogo.data;
+    this.logoImageBase64 = '';
     this.dataChanged = true;
   }
 
