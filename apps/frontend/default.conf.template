@@ -23,7 +23,7 @@ server {
 
     # pass api calls to studio-lite backend host
     location /api/ {
-        proxy_pass  http://${API_HOST}:${API_PORT};
+        proxy_pass  http://backend:3333;
     }
 
     # deny access to .htaccess files, if Apache's document root

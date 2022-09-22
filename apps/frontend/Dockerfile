@@ -16,10 +16,8 @@ RUN nx build $project --prod
 
 FROM build AS dev
 ARG project
-ARG apihost
-ARG apiport
 
-RUN sed -i "s/localhost.*$/${apihost}:${apiport}\",/" apps/${project}/proxy.conf.json
+RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${project}/proxy.conf.json
 
 ENTRYPOINT ["nx"]
 

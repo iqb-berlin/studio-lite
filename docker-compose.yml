@@ -1,18 +1,13 @@
 x-env-postgres: &env-postgres
-  POSTGRES_HOST: ${POSTGRES_HOST}
-  POSTGRES_PORT: ${POSTGRES_PORT}
+  POSTGRES_HOST: db
+  POSTGRES_PORT: 5432
   POSTGRES_USER: ${POSTGRES_USER}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_DB: ${POSTGRES_DB}
 
-x-env-api: &env-api
-  API_HOST: ${API_HOST}
-  API_PORT: ${API_PORT}
-
 services:
   db:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
-    container_name: studio-lite-db
     restart: always
     environment:
       <<: *env-postgres
@@ -25,9 +20,8 @@ services:
     networks:
       - backend-network
 
-  db-change-management:
+  liquibase:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
-    container_name: studio-lite-liquibase
     depends_on:
       db:
         condition: service_healthy
@@ -35,38 +29,33 @@ services:
       <<: *env-postgres
       DB_USER: ${POSTGRES_DB_USER}
       DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    command: ["liquibase", "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update", "-Ddb.user=${POSTGRES_DB_USER}", "-Ddb.password=${POSTGRES_DB_PASSWORD}"]
     networks:
       - backend-network
-    command: ["liquibase", "--url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update", "-Ddb.user=${POSTGRES_DB_USER}", "-Ddb.password=${POSTGRES_DB_PASSWORD}"]
 
   backend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
-    container_name: studio-lite-backend
     depends_on:
       db:
         condition: service_healthy
-      db-change-management:
+      liquibase:
         condition: service_completed_successfully
     restart: always
     environment:
-      <<: *env-api
       <<: *env-postgres
     networks:
       - backend-network
 
   frontend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
-    container_name: studio-lite-frontend
     depends_on:
       db:
         condition: service_healthy
-      db-change-management:
+      liquibase:
         condition: service_completed_successfully
       backend:
         condition: service_started
     restart: always
-    environment:
-      <<: *env-api
     networks:
       - backend-network
       - frontend-network

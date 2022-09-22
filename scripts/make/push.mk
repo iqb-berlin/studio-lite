@@ -1,6 +1,6 @@
 .PHONY: push-dockerhub push-iqb-registry
 BASE_DIR := $(shell git rev-parse --show-toplevel)
-TAG := "dev"
+TAG := dev
 
 .build:
 	cd $(BASE_DIR) && docker build --pull -f $(BASE_DIR)/database/Postgres.Dockerfile --no-cache --rm -t iqbberlin/studio-lite-db:$(TAG) -t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-db:$(TAG) .

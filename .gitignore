@@ -5,6 +5,7 @@
 /database/changelogDocs
 
 # config files
+ssl/default.conf.template.*
 *.pem
 *.cer
 *.crt
