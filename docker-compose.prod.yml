@@ -1,9 +1,9 @@
 services:
   frontend:
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT}:80"
+      - "${HTTPS_PORT}:443"
     volumes:
-      - ./ssl/default.conf.template.ssl:/etc/nginx/templates/default.conf.template
-      - ./ssl/www.iqb-studio.de.crt:/etc/nginx/ssl/www.iqb-studio.de.crt
-      - ./ssl/www.iqb-studio.de.key:/etc/nginx/ssl/www.iqb-studio.de.key
+      - ./ssl/default.conf.template.ssl:/etc/nginx/templates/default.conf.template:ro
+      - ./ssl/www.iqb-studio.de.crt:/etc/nginx/ssl/www.iqb-studio.de.crt:ro
+      - ./ssl/www.iqb-studio.de.key:/etc/nginx/ssl/www.iqb-studio.de.key:ro
