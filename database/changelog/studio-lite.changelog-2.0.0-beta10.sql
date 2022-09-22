@@ -30,11 +30,6 @@ CREATE TABLE "public"."review"
 -- rollback DROP TABLE "public"."review";
 
 -- changeset mechtelm:3
-ALTER TABLE "public"."review"
-  OWNER TO "superdb";
--- rollback ALTER TABLE public.review OWNER TO pg_database_owner;
-
--- changeset mechtelm:4
 CREATE TABLE "public"."review_unit"
 (
   "unit_id"   INTEGER NOT NULL
@@ -47,8 +42,3 @@ CREATE TABLE "public"."review_unit"
   PRIMARY KEY ("unit_id", "review_id")
 );
 -- rollback DROP TABLE "public"."review_unit";
-
--- changeset jojohoch:5
-ALTER TABLE "public"."review_unit"
-  OWNER TO "superdb";
--- rollback ALTER TABLE public.review_unit OWNER TO pg_database_owner;

@@ -1,9 +1,10 @@
+.angular
 .git
 .gitkeep
+.vscode
 *Dockerfile*
 *docker-compose*
-dist
-node_modules
 cache
 changelogDocs
-ssl
+dist
+node_modules
