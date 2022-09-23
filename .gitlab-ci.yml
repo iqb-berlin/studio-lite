@@ -224,11 +224,11 @@ patch-db-image:
     - docker compose --env-file .env.dev pull -q db liquibase
     - docker compose --env-file .env.dev up -d db
     - export $(grep -v '^#' .env.dev | xargs)
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
   script:
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
     - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-app:
@@ -622,11 +622,11 @@ patch-db-release-image:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d db
     - export $(grep -v '^#' .env.prod | xargs)
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback -Ddb.user=${POSTGRES_DB_USER} -Ddb.password=${POSTGRES_DB_PASSWORD}
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-backend-release-image:
