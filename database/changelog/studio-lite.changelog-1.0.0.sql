@@ -107,12 +107,3 @@ CREATE TABLE "public"."verona_module"
   "file_datetime" TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 -- rollback DROP TABLE "public"."verona_module";
-
--- changeset svwolter:9
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
--- rollback DROP EXTENSION pgcrypto;
-
--- changeset svwolter:10
-INSERT INTO "public"."user" ("name", "password", "is_admin")
-VALUES ('${db.user}', crypt('${db.password}', gen_salt('bf', 11)), 'True');
--- rollback DELETE FROM "public"."user" WHERE "name" = '${db.user}'
