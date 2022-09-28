@@ -102,27 +102,36 @@ export class BackendService {
   }
 
   getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
-    return this.http
-      .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)
-      .pipe(
-        catchError(() => of(null))
-      );
+    if (workspaceId > 0 && unitId > 0) {
+      return this.http
+        .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
   }
 
   getUnitDefinition(workspaceId: number, unitId: number): Observable<UnitDefinitionDto | null> {
-    return this.http
-      .get<UnitDefinitionDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`)
-      .pipe(
-        catchError(() => of(null))
-      );
+    if (workspaceId > 0 && unitId > 0) {
+      return this.http
+        .get<UnitDefinitionDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`)
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
   }
 
   getUnitScheme(workspaceId: number, unitId: number): Observable<UnitSchemeDto | null> {
-    return this.http
-      .get<UnitSchemeDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/scheme`)
-      .pipe(
-        catchError(() => of(null))
-      );
+    if (workspaceId > 0 && unitId > 0) {
+      return this.http
+        .get<UnitSchemeDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/scheme`)
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
   }
 
   setUnitMetadata(workspaceId: number, unitData: UnitMetadataDto): Observable<boolean> {
