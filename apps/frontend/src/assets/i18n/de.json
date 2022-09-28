@@ -158,6 +158,7 @@
   "app-http-error": {
     "0": "Allgemeiner Fehler (Server erreichbar?)",
     "999": "Fehler in der Netzwerkverbindung",
+    "400": "Server meldet fehlerhaften Aufruf",
     "401": "Bitte für diese Aktion erst anmelden!",
     "403": "Für diese Funktion haben Sie keine Berechtigung.",
     "404": "Daten/Objekt nicht gefunden.",

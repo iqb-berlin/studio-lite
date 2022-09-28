@@ -1,5 +1,7 @@
 <form [formGroup]="unitForm" fxFlex>
-  <div fxLayout="row wrap" style="margin: 10px" fxLayoutGap="10px" fxLayoutAlign="space-between stretch" fxFlex>
+  <div
+    fxLayout="row wrap" style="margin: 10px"
+       fxLayoutGap="10px" fxLayoutAlign="space-between stretch" fxFlex>
     <div fxLayout="column" fxFlex="1 0 300px">
       <mat-form-field>
         <mat-label>Kurzname</mat-label>
@@ -12,7 +14,8 @@
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" placeholder="Name">
       </mat-form-field>
-      <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+      <div fxLayout="row" fxLayoutAlign="space-around center"
+           fxLayoutGap="10px">
         <mat-form-field fxFlex>
           <mat-label>Gruppe</mat-label>
           <mat-select placeholder="Gruppe" formControlName="group">
@@ -22,7 +25,9 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <button mat-icon-button (click)="newGroup()" matTooltip="Neue Gruppe anlegen">
+        <button mat-icon-button (click)="newGroup()"
+                [disabled]="unitForm.disabled"
+                matTooltip="Neue Gruppe anlegen">
           <mat-icon>add_circle</mat-icon>
         </button>
       </div>
@@ -36,20 +41,29 @@
     <div style="background-color: #f2f2f2" fxFlex="10px"></div>
     <div fxLayout="column" fxFlex="1 0 300px">
       <div fxLayout="row" fxLayoutAlign="space-between start">
-        <div fxFlex="40%">{{'modules.editor-name' | translate}}</div>
+        <div
+          [hidden]="unitForm.disabled"
+          fxFlex="40%">{{'modules.editor-name' | translate}}</div>
         <app-select-module #editor [moduleList]="this.appService.editorList"
+                           [hidden]="unitForm.disabled"
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="editor"></app-select-module>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between start">
-        <div fxFlex="40%">{{'modules.player-name' | translate}}</div>
+        <div
+          [hidden]="unitForm.disabled"
+          fxFlex="40%">{{'modules.player-name' | translate}}</div>
         <app-select-module #player [moduleList]="this.appService.playerList"
+                           [hidden]="unitForm.disabled"
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="player"></app-select-module>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between start">
-        <div fxFlex="40%">{{'modules.schemer-name' | translate}}</div>
+        <div
+          [hidden]="unitForm.disabled"
+          fxFlex="40%">{{'modules.schemer-name' | translate}}</div>
         <app-select-module #schemer [moduleList]="this.appService.schemerList"
+                           [hidden]="unitForm.disabled"
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="schemer"></app-select-module>
       </div>
