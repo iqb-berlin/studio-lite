@@ -87,11 +87,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
         const unitParam = params['u'];
-        if (unitParam) {
-          this.workspaceService.selectedUnit$.next(Number(params['u']));
-        } else {
-          this.workspaceService.selectedUnit$.next(0);
-        }
+        let unitParamNum = unitParam ? Number(unitParam) : 0;
+        if (Number.isNaN(unitParamNum)) unitParamNum = 0;
+        this.workspaceService.selectedUnit$.next(unitParamNum);
       });
 
       this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspaceId).subscribe(

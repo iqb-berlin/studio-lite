@@ -78,7 +78,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   }
 
   private setupForm() {
-    if (this.workspaceService.unitMetadataStore) {
+    const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
+    if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
@@ -115,6 +116,15 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           this.unitForm.get('group')?.value
         );
       });
+      this.unitForm.enable();
+    } else {
+      this.unitForm.setValue({
+        key: '',
+        name: '',
+        description: '',
+        group: ''
+      }, { emitEvent: false });
+      this.unitForm.disable();
     }
   }
 
