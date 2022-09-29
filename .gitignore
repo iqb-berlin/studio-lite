@@ -3,6 +3,7 @@
 # custom folders
 /packages
 /database/changelogDocs
+/database_dumps
 
 # config files
 ssl/default.conf.template.*
