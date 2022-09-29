@@ -40,6 +40,7 @@ services:
         condition: service_completed_successfully
     restart: always
     environment:
+      API_HOST: backend
       <<: *env-postgres
     networks:
       - backend-network
