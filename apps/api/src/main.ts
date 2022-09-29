@@ -12,7 +12,7 @@ async function bootstrap() {
   app.useStaticAssets('./packages', { prefix: '/api/packages' });
   const configService = app.get(ConfigService);
   const host = configService.get('API_HOST') || 'localhost';
-  const port = configService.get('API_PORT') || 3333;
+  const port = 3333;
   const globalPrefix = 'api';
   const config = new DocumentBuilder()
     .setTitle('IQB Studio Lite')
