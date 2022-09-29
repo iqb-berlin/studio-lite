@@ -6,5 +6,6 @@
 *docker-compose*
 cache
 changelogDocs
+database_dumps
 dist
 node_modules
