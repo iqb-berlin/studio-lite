@@ -6,11 +6,16 @@
 /database_dumps
 
 # config files
-ssl/default.conf.template.*
+config/frontend/tls
+config/frontend/default.conf.template
+config/frontend/default.conf.template.bkp
 *.pem
 *.cer
 *.crt
 *.key
+
+# environment files
+.env.prod
 
 # compiled output
 /dist

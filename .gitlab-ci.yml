@@ -617,17 +617,17 @@ patch-db-release-image:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d db
-    - export $(grep -v '^#' .env.prod | xargs)
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d db
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 build-backend-release-image:
   stage: build
@@ -709,13 +709,13 @@ test-release-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
 test-release-e2e-ui-chrome:
@@ -732,13 +732,13 @@ test-release-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
 test-release-e2e-ui-chrome-mobile:
@@ -755,13 +755,13 @@ test-release-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
 test-release-e2e-ui-firefox:
@@ -778,13 +778,13 @@ test-release-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
 test-release-e2e-ui-firefox-mobile:
@@ -804,7 +804,7 @@ test-release-e2e-ui-firefox-mobile:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
@@ -827,7 +827,7 @@ test-release-e2e-ui-edge:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
@@ -850,7 +850,7 @@ test-release-e2e-ui-edge-mobile:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
     - export $(grep -v '^#' .env.prod | xargs)
-    - cp apps/frontend/default.conf.template ssl/default.conf.template.ssl
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
