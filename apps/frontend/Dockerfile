@@ -25,7 +25,7 @@ ENTRYPOINT ["nx"]
 FROM nginx:stable AS base
 ARG project
 
-COPY apps/frontend/default.conf.template /etc/nginx/templates/default.conf.template
+COPY config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
 COPY --from=build /studio-lite/dist/apps/$project /usr/share/nginx/html
 
 EXPOSE 80

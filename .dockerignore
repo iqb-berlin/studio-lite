@@ -6,6 +6,7 @@
 *docker-compose*
 cache
 changelogDocs
+config/frontend/tls
 database_dumps
 dist
 node_modules
