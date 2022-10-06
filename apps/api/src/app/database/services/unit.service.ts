@@ -75,10 +75,15 @@ export class UnitService {
         newUnit.player = unitSourceMetadata.player;
         newUnit.editor = unitSourceMetadata.editor;
         newUnit.schemer = unitSourceMetadata.schemer;
+        newUnit.schemeType = unitSourceMetadata.schemeType;
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
           await this.patchDefinition(newUnit.id, unitSourceDefinition);
+        }
+        const unitSourceScheme = await this.findOnesScheme(unit.createFrom);
+        if (unitSourceScheme) {
+          await this.patchScheme(newUnit.id, unitSourceScheme);
         }
       }
     } else {
@@ -119,6 +124,7 @@ export class UnitService {
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
     if (dataKeys.indexOf('groupName') >= 0) unitToUpdate.groupName = newData.groupName;
+    unitToUpdate.lastChangedMetadata = new Date();
     await this.unitsRepository.save(unitToUpdate);
   }
 
@@ -228,6 +234,7 @@ export class UnitService {
       where: { id: unitId }
     });
     let newUnitDefinitionId = -1;
+    unitToUpdate.lastChangedDefinition = new Date();
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
         where: { id: unitToUpdate.definitionId }
@@ -252,6 +259,7 @@ export class UnitService {
     });
     unitToUpdate.scheme = unitSchemeDto.scheme;
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
+    unitToUpdate.lastChangedScheme = new Date();
     await this.unitsRepository.save(unitToUpdate);
   }
 }
