@@ -76,6 +76,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   login(): void {
     this.errorMessage = '';
+    this.appService.clearErrorMessages();
     if (this.loginForm && this.loginForm.valid) {
       this.appService.dataLoading = true;
       this.appService.errorMessagesDisabled = true;
