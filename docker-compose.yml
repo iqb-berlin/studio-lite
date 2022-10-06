@@ -61,6 +61,7 @@ services:
 
 volumes:
   db_vol:
+  backend_vol:
 
 networks:
   backend-network:

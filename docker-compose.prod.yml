@@ -1,4 +1,8 @@
 services:
+  backend:
+    volumes:
+      - backend_vol:/studio-lite-api/packages
+
   frontend:
     ports:
       - "${HTTP_PORT}:80"

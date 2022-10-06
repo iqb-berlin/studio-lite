@@ -43,7 +43,7 @@ ARG project
 
 # Copy the build artifacts from the previous stage
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project .
-
+RUN mkdir packages && chown -R node:node packages
 
 FROM source AS prod
 ENTRYPOINT ["/usr/bin/tini", "--"]
