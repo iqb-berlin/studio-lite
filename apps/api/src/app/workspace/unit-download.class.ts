@@ -91,6 +91,7 @@ export class UnitDownloadClass {
         unitXml.root().ele({
           CodingSchemeRef: {
             '@schemer': unitMetadata.schemer || '',
+            '@schemeType': unitMetadata.schemeType || '',
             '#': `${unitMetadata.key}.vocs`
           }
         });

@@ -25,6 +25,9 @@ export class UnitMetadataDto {
   @ApiProperty()
   schemer?: string;
 
+  @ApiProperty()
+  schemeType?: string;
+
   @ApiProperty({
     type: 'string',
     format: 'date-time'

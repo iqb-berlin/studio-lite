@@ -94,7 +94,7 @@ export class UnitService {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     return this.unitsRepository.findOne({
       where: { id: unitId },
-      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata',
+      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
     });
   }
@@ -103,7 +103,7 @@ export class UnitService {
     return this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
-      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata',
+      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
     });
   }
@@ -117,6 +117,7 @@ export class UnitService {
     if (dataKeys.indexOf('editor') >= 0) unitToUpdate.editor = newData.editor;
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
+    if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
     if (dataKeys.indexOf('groupName') >= 0) unitToUpdate.groupName = newData.groupName;
     await this.unitsRepository.save(unitToUpdate);
   }
