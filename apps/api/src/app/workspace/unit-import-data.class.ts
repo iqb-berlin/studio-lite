@@ -12,6 +12,7 @@ export class UnitImportData {
   player: string;
   editor: string;
   schemer: string;
+  schemeType: string;
   baseVariables: VeronaVariable[] = [];
   codingScheme: string;
   codingSchemeFileName: string;
@@ -66,6 +67,7 @@ export class UnitImportData {
     const codingSchemeElement = xmlDocument('CodingSchemeRef').first();
     if (codingSchemeElement.length > 0) {
       this.schemer = codingSchemeElement.attr('schemer');
+      this.schemeType = codingSchemeElement.attr('schemetype');
       this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
     }
   }

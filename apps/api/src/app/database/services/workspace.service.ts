@@ -274,7 +274,7 @@ export class WorkspaceService {
           usedFiles.push(u.codingSchemeFileName);
           await this.unitService.patchScheme(newUnitId, {
             scheme: u.codingScheme,
-            schemeType: ''
+            schemeType: u.schemeType
           });
         }
       } else {
