@@ -49,6 +49,3 @@ services:
       - "frontend"
       - "--host=frontend"
       - "--port=80"
-
-volumes:
-  backend_vol:
