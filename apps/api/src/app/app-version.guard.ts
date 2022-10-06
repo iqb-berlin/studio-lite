@@ -16,7 +16,7 @@ export class AppVersionGuard implements CanActivate {
     const canAccess = headerAppVersion === this.appVersion;
     if (!canAccess) {
       throw new HttpException(
-        `Unexpected app version: ${headerAppVersion} - must be ${this.appVersion}`, 520
+        `Unexpected app version: ${headerAppVersion} - must be ${this.appVersion}`, 521
       );
     }
     return true;
