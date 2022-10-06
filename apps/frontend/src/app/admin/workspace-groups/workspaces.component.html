@@ -1,15 +1,15 @@
 <div fxLayout="row" fxLayoutAlign="space-between start" class="admin-tab-content">
   <div class="object-list" fxLayout="column" fxFlex="50">
     <div fxLayout="row">
-      <button mat-raised-button (click)="addObject()" matTooltip="Gruppe hinzufügen" matTooltipPosition="above">
+      <button mat-raised-button (click)="addObject()" matTooltip="Gruppe hinzufügen">
           <mat-icon>add</mat-icon>
         </button>
       <button mat-raised-button (click)="deleteObject()" [disabled]="selectedWorkspaceGroupId === 0 && this.tableSelectionCheckbox.selected.length === 0"
-              matTooltip="Markierte Gruppe/n löschen" matTooltipPosition="above">
+              matTooltip="Markierte Gruppe/n löschen">
         <mat-icon>delete</mat-icon>
       </button>
       <button mat-raised-button (click)="changeObject()" [disabled]="selectedWorkspaceGroupId === 0 && this.tableSelectionCheckbox.selected.length !== 1"
-              matTooltip="Gruppe ändern" matTooltipPosition="above">
+              matTooltip="Gruppe ändern">
         <mat-icon>edit</mat-icon>
       </button>
     </div>
