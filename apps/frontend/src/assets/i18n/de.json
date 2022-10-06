@@ -158,13 +158,14 @@
   "app-http-error": {
     "0": "Allgemeiner Fehler (Server erreichbar?)",
     "999": "Fehler in der Netzwerkverbindung",
-    "400": "Server meldet fehlerhaften Aufruf",
+    "400": "Server meldet fehlerhaften Aufruf.",
     "401": "Bitte für diese Aktion erst anmelden!",
     "403": "Für diese Funktion haben Sie keine Berechtigung.",
     "404": "Daten/Objekt nicht gefunden.",
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "500": "Allgemeines Server-Problem.",
-    "520": "Bitte Anwendung neu laden",
+    "520": "Server derzeit nicht erreichbar.",
+    "521": "Bitte Anwendung neu laden!",
     "close": "Fehlermeldung ausblenden",
     "login": "Login"
   }
