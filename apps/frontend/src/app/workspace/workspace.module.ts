@@ -27,6 +27,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
@@ -108,7 +109,8 @@ import { ReviewsComponent } from './dialogs/reviews.component';
     WorkspaceComponent
   ],
   providers: [
-    UnitRoutingCanDeactivateGuard
+    UnitRoutingCanDeactivateGuard,
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
   ]
 })
 export class WorkspaceModule {}

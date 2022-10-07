@@ -3,12 +3,11 @@ import {
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { PageData, StatusVisual } from './unit-preview.classes';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
+import { UnitDefinitionStore } from '../../workspace.classes';
 import { PreviewService } from './preview.service';
 
 @Component({
@@ -158,19 +157,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(() => {
           this.message = '';
-          if (this.workspaceService.unitMetadataStore) {
-            this.sendUnitDataToPlayer();
-          } else {
-            const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-            this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
-              selectedUnitId)
-              .subscribe(unitData => {
-                this.workspaceService.unitMetadataStore = new UnitMetadataStore(
-                  unitData || <UnitMetadataDto>{ id: selectedUnitId }
-                );
-                this.sendUnitDataToPlayer();
-              });
-          }
+          this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToPlayer());
         });
     });
   }

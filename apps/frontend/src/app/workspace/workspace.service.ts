@@ -4,7 +4,8 @@ import {
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
-import { UnitInListDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { DatePipe } from '@angular/common';
 import { BackendService } from './backend.service';
 import {
   UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
@@ -25,6 +26,11 @@ export class WorkspaceService {
   unitSchemeStore: UnitSchemeStore | undefined;
   unitList = new UnitCollection([]);
   isWorkspaceGroupAdmin = false;
+  lastChangedMetadata?: Date;
+  lastChangedDefinition?: Date;
+  lastChangedScheme?: Date;
+  unitLastChanged: Date | undefined;
+  unitLastChangedText = '';
   @Output() onCommentsUpdated = new EventEmitter<void>()
 
   constructor(
@@ -58,8 +64,13 @@ export class WorkspaceService {
 
   resetUnitData(): void {
     this.unitMetadataStore = undefined;
+    this.lastChangedMetadata = undefined;
     this.unitDefinitionStore = undefined;
+    this.lastChangedDefinition = undefined;
     this.unitSchemeStore = undefined;
+    this.lastChangedScheme = undefined;
+    this.unitLastChanged = undefined;
+    this.unitLastChangedText = '';
   }
 
   isChanged(): boolean {
@@ -81,6 +92,40 @@ export class WorkspaceService {
     return null;
   }
 
+  async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
+    if (this.unitMetadataStore) return this.unitMetadataStore;
+    const selectedUnitId = this.selectedUnit$.getValue();
+    return lastValueFrom(this.backendService.getUnitMetadata(this.selectedWorkspaceId, selectedUnitId)
+      .pipe(
+        map(unitData => {
+          this.unitMetadataStore = new UnitMetadataStore(
+            unitData || <UnitMetadataDto>{ id: selectedUnitId }
+          );
+          // explicit Date object due to timezone
+          this.lastChangedMetadata = unitData && unitData.lastChangedMetadata ?
+            new Date(unitData.lastChangedMetadata) : undefined;
+          this.lastChangedDefinition = unitData && unitData.lastChangedDefinition ?
+            new Date(unitData.lastChangedDefinition) : undefined;
+          this.lastChangedScheme = unitData && unitData.lastChangedScheme ?
+            new Date(unitData.lastChangedScheme) : undefined;
+          this.setUnitLastChanged();
+          return this.unitMetadataStore;
+        })
+      ));
+  }
+
+  setUnitLastChanged() {
+    let last: Date | undefined;
+    if (this.lastChangedMetadata) last = this.lastChangedMetadata;
+    if (this.lastChangedDefinition && (!last || this.lastChangedDefinition > last)) last = this.lastChangedDefinition;
+    if (this.lastChangedScheme && (!last || this.lastChangedScheme > last)) last = this.lastChangedScheme;
+    this.unitLastChanged = last;
+    const datePipe = new DatePipe('de-DE');
+    this.unitLastChangedText = `Eigenschaften: ${this.lastChangedMetadata ? datePipe.transform(this.lastChangedMetadata, 'dd.MM.yyyy HH:mm') : '-'}
+Definition:  ${this.lastChangedDefinition ? datePipe.transform(this.lastChangedDefinition, 'dd.MM.yyyy HH:mm') : '-'}
+Kodierschema:  ${this.lastChangedScheme ? datePipe.transform(this.lastChangedScheme, 'dd.MM.yyyy HH:mm') : '-'}`;
+  }
+
   async saveUnitData(): Promise<boolean> {
     let reloadUnitList = false;
     let saveOk = true;
@@ -92,19 +137,26 @@ export class WorkspaceService {
       if (saveOk) {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupChanged();
         this.unitMetadataStore.applyChanges();
+        this.lastChangedMetadata = new Date();
       }
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
         this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
       ));
-      if (saveOk) this.unitDefinitionStore.applyChanges();
+      if (saveOk) {
+        this.unitDefinitionStore.applyChanges();
+        this.lastChangedDefinition = new Date();
+      }
     }
     if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
       saveOk = await lastValueFrom(this.backendService.setUnitScheme(
         this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
       ));
-      if (saveOk) this.unitSchemeStore.applyChanges();
+      if (saveOk) {
+        this.unitSchemeStore.applyChanges();
+        this.lastChangedScheme = new Date();
+      }
     }
     if (reloadUnitList) {
       saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId)
@@ -117,6 +169,7 @@ export class WorkspaceService {
         ));
     }
     this.appService.dataLoading = false;
+    this.setUnitLastChanged();
     return saveOk;
   }
 }
