@@ -98,16 +98,27 @@ export class WorkspaceService {
     return lastValueFrom(this.backendService.getUnitMetadata(this.selectedWorkspaceId, selectedUnitId)
       .pipe(
         map(unitData => {
-          this.unitMetadataStore = new UnitMetadataStore(
-            unitData || <UnitMetadataDto>{ id: selectedUnitId }
-          );
+          this.lastChangedMetadata = undefined;
+          this.lastChangedDefinition = undefined;
+          this.lastChangedScheme = undefined;
           // explicit Date object due to timezone
-          this.lastChangedMetadata = unitData && unitData.lastChangedMetadata ?
-            new Date(unitData.lastChangedMetadata) : undefined;
-          this.lastChangedDefinition = unitData && unitData.lastChangedDefinition ?
-            new Date(unitData.lastChangedDefinition) : undefined;
-          this.lastChangedScheme = unitData && unitData.lastChangedScheme ?
-            new Date(unitData.lastChangedScheme) : undefined;
+          if (unitData) {
+            if (unitData.lastChangedMetadata) {
+              unitData.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
+              this.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
+            }
+            if (unitData.lastChangedDefinition) {
+              unitData.lastChangedDefinition = new Date(unitData.lastChangedDefinition);
+              this.lastChangedDefinition = new Date(unitData.lastChangedDefinition);
+            }
+            if (unitData.lastChangedScheme) {
+              unitData.lastChangedScheme = new Date(unitData.lastChangedScheme);
+              this.lastChangedScheme = new Date(unitData.lastChangedScheme);
+            }
+            this.unitMetadataStore = new UnitMetadataStore(unitData);
+          } else {
+            this.unitMetadataStore = new UnitMetadataStore(<UnitMetadataDto>{ id: selectedUnitId });
+          }
           this.setUnitLastChanged();
           return this.unitMetadataStore;
         })

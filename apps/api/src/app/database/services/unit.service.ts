@@ -124,7 +124,17 @@ export class UnitService {
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
     if (dataKeys.indexOf('groupName') >= 0) unitToUpdate.groupName = newData.groupName;
-    unitToUpdate.lastChangedMetadata = new Date();
+    if (dataKeys.indexOf('lastChangedMetadata') >= 0) {
+      unitToUpdate.lastChangedMetadata = newData.lastChangedMetadata;
+    } else {
+      unitToUpdate.lastChangedMetadata = new Date();
+    }
+    if (dataKeys.indexOf('lastChangedDefinition') >= 0) {
+      unitToUpdate.lastChangedDefinition = newData.lastChangedDefinition;
+    }
+    if (dataKeys.indexOf('lastChangedScheme') >= 0) {
+      unitToUpdate.lastChangedScheme = newData.lastChangedScheme;
+    }
     await this.unitsRepository.save(unitToUpdate);
   }
 

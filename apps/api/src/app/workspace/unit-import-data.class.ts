@@ -16,10 +16,16 @@ export class UnitImportData {
   baseVariables: VeronaVariable[] = [];
   codingScheme: string;
   codingSchemeFileName: string;
+  lastChangedMetadata: Date;
+  lastChangedDefinition: Date;
+  lastChangedScheme: Date;
 
   constructor(fileIo: FileIo) {
     this.fileName = fileIo.originalname;
-    const xmlDocument = cheerio.load(fileIo.buffer.toString());
+    const xmlDocument = cheerio.load(fileIo.buffer.toString(), {
+      xmlMode: true,
+      recognizeSelfClosing: true
+    });
     const metadataElement = xmlDocument('Metadata').first();
     if (metadataElement.length === 0) throw new Error('metadata element missing');
     const unitIdElement = metadataElement.find('Id').first();
@@ -30,18 +36,31 @@ export class UnitImportData {
     this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
     const unitDescriptionElement = metadataElement.find('Description').first();
     this.description = unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';
+    const unitLastChangeElement = metadataElement.find('Lastchange').first();
+    if (unitLastChangeElement.length > 0) {
+      this.lastChangedMetadata = new Date(unitLastChangeElement.text());
+      this.lastChangedDefinition = new Date(unitLastChangeElement.text());
+      this.lastChangedScheme = new Date(unitLastChangeElement.text());
+    }
+    const lastChangedMetadata = metadataElement.attr('lastchange');
+    if (lastChangedMetadata) this.lastChangedMetadata = new Date(lastChangedMetadata);
+
     const definitionRefElement = xmlDocument('DefinitionRef').first();
     this.definition = '';
     this.definitionFileName = '';
     if (definitionRefElement.length > 0) {
       this.player = definitionRefElement.attr('player');
       this.editor = definitionRefElement.attr('editor');
+      const lastChangedDefinition = definitionRefElement.attr('lastchange');
+      if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
       this.definitionFileName = this.getFolder() + definitionRefElement.text();
     } else {
       const definitionElement = xmlDocument('Definition').first();
       if (definitionElement.length > 0) {
         this.player = definitionElement.attr('player');
         this.editor = definitionElement.attr('editor');
+        const lastChangedDefinition = definitionElement.attr('lastchange');
+        if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
         this.definition = definitionElement.text();
       }
     }
@@ -68,6 +87,8 @@ export class UnitImportData {
     if (codingSchemeElement.length > 0) {
       this.schemer = codingSchemeElement.attr('schemer');
       this.schemeType = codingSchemeElement.attr('schemetype');
+      const lastChangedScheme = codingSchemeElement.attr('lastchange');
+      if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
       this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
     }
   }

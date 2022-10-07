@@ -37,6 +37,7 @@ export class UnitDownloadClass {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.unitXsdUrl,
           Metadata: {
+            '@lastChange': unitMetadata.lastChangedMetadata ? unitMetadata.lastChangedMetadata.toISOString() : '',
             Id: unitMetadata.key,
             Label: unitMetadata.name,
             Description: unitMetadata.description
@@ -49,6 +50,7 @@ export class UnitDownloadClass {
           DefinitionRef: {
             '@player': unitMetadata.player || '',
             '@editor': unitMetadata.editor || '',
+            '@lastChange': unitMetadata.lastChangedDefinition ? unitMetadata.lastChangedDefinition.toISOString() : '',
             '#': `${unitMetadata.key}.voud`
           }
         });
@@ -57,7 +59,8 @@ export class UnitDownloadClass {
         unitXml.root().ele({
           Definition: {
             '@player': unitMetadata.player || '',
-            '@editor': unitMetadata.editor || ''
+            '@editor': unitMetadata.editor || '',
+            '@lastChange': unitMetadata.lastChangedDefinition ? unitMetadata.lastChangedDefinition.toISOString() : ''
           }
         });
       }
@@ -92,6 +95,7 @@ export class UnitDownloadClass {
           CodingSchemeRef: {
             '@schemer': unitMetadata.schemer || '',
             '@schemeType': unitMetadata.schemeType || '',
+            '@lastChange': unitMetadata.lastChangedScheme ? unitMetadata.lastChangedScheme.toISOString() : '',
             '#': `${unitMetadata.key}.vocs`
           }
         });
@@ -99,7 +103,8 @@ export class UnitDownloadClass {
       } else {
         unitXml.root().ele({
           CodingSchemeRef: {
-            '@schemer': unitMetadata.schemer || ''
+            '@schemer': unitMetadata.schemer || '',
+            '@lastChange': unitMetadata.lastChangedScheme ? unitMetadata.lastChangedScheme.toISOString() : ''
           }
         });
       }
