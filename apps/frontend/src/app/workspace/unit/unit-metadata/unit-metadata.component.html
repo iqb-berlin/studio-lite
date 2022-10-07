@@ -67,6 +67,10 @@
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="schemer"></app-select-module>
       </div>
+      <div *ngIf="workspaceService.unitLastChanged"
+           [matTooltip]="workspaceService.unitLastChangedText"
+           matTooltipClass="mat-tooltip-linebreaks"
+      >Letzte Änderung: {{workspaceService.unitLastChanged | date : 'dd.MM.yyyy HH:mm' : timeZone}}</div>
     </div>
   </div>
 

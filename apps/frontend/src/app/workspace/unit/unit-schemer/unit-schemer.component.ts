@@ -1,11 +1,10 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
-import { UnitMetadataStore, UnitSchemeStore } from '../../workspace.classes';
+import { UnitSchemeStore } from '../../workspace.classes';
 
 @Component({
   template: `
@@ -70,18 +69,7 @@ export class UnitSchemerComponent implements OnInit {
       this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
         this.message = '';
-        if (this.workspaceService.unitMetadataStore) {
-          this.sendUnitDataToSchemer();
-        } else {
-          const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
-            selectedUnitId).subscribe(unitData => {
-            this.workspaceService.unitMetadataStore = new UnitMetadataStore(
-              unitData || <UnitMetadataDto>{ id: selectedUnitId }
-            );
-            this.sendUnitDataToSchemer();
-          });
-        }
+        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToSchemer());
       });
     });
   }

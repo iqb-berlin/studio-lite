@@ -3,11 +3,10 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import { UnitDefinitionStore, UnitMetadataStore } from '../../workspace.classes';
+import { UnitDefinitionStore } from '../../workspace.classes';
 
 @Component({
   template: `
@@ -99,18 +98,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
       this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
       this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
         this.message = '';
-        if (this.workspaceService.unitMetadataStore) {
-          this.sendUnitDataToEditor();
-        } else {
-          const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-          this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
-            selectedUnitId).subscribe(unitData => {
-            this.workspaceService.unitMetadataStore = new UnitMetadataStore(
-              unitData || <UnitMetadataDto>{ id: selectedUnitId }
-            );
-            this.sendUnitDataToEditor();
-          });
-        }
+        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToEditor());
       });
     });
   }
