@@ -3,21 +3,21 @@ import {
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { BackendService as AppBackendService } from '../../../backend.service';
 import { SelectModuleComponent } from './select-module.component';
-import { UnitMetadataStore } from '../../workspace.classes';
 import { InputTextComponent } from '../../../components/input-text.component';
 import { AppService } from '../../../app.service';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
-  styles: ['.mat-tab-body-wrapper {height: 100%;}',
-    'mat-tab-body {height: 100%;}']
+  styles: [
+    '.mat-tab-body-wrapper {height: 100%;}',
+    'mat-tab-body {height: 100%;}'
+  ]
 })
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
@@ -63,18 +63,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
-    if (this.workspaceService.unitMetadataStore) {
-      this.setupForm();
-    } else {
-      const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-      this.backendService.getUnitMetadata(this.workspaceService.selectedWorkspaceId,
-        selectedUnitId).subscribe(unitData => {
-        this.workspaceService.unitMetadataStore = new UnitMetadataStore(
-          unitData || <UnitMetadataDto>{ id: selectedUnitId }
-        );
-        this.setupForm();
-      });
-    }
+    this.workspaceService.loadUnitMetadata().then(() => this.setupForm());
   }
 
   private setupForm() {

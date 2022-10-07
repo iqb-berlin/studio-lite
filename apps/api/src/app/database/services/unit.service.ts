@@ -82,7 +82,7 @@ export class UnitService {
           await this.patchDefinition(newUnit.id, unitSourceDefinition);
         }
         const unitSourceScheme = await this.findOnesScheme(unit.createFrom);
-        if (unitSourceScheme) {
+        if (unitSourceScheme && unitSourceScheme.scheme) {
           await this.patchScheme(newUnit.id, unitSourceScheme);
         }
       }

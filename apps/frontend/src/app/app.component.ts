@@ -3,6 +3,8 @@ import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import * as moment from 'moment';
 import { Router, RouterState } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
@@ -60,6 +62,8 @@ export class AppComponent implements OnInit {
           this.appService.authData = authData;
         });
       }
+
+      registerLocaleData(localeDe);
 
       window.addEventListener('message', event => {
         this.appService.processMessagePost(event);
