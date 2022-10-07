@@ -253,13 +253,6 @@ export class WorkspaceService {
           u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
           usedFiles.push(u.definitionFileName);
         }
-        await this.unitService.patchMetadata(newUnitId, {
-          id: newUnitId,
-          editor: u.editor,
-          player: u.player,
-          schemer: u.schemer,
-          description: u.description
-        });
         await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition,
           variables: u.baseVariables
@@ -277,6 +270,16 @@ export class WorkspaceService {
             schemeType: u.schemeType
           });
         }
+        await this.unitService.patchMetadata(newUnitId, {
+          id: newUnitId,
+          editor: u.editor,
+          player: u.player,
+          schemer: u.schemer,
+          description: u.description,
+          lastChangedMetadata: u.lastChangedMetadata,
+          lastChangedDefinition: u.lastChangedDefinition,
+          lastChangedScheme: u.lastChangedScheme
+        });
       } else {
         functionReturn.messages.push({
           objectKey: u.fileName, messageKey: 'unit-patch.duplicate-unit-id'
