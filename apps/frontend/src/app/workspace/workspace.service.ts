@@ -7,6 +7,7 @@ import { map } from 'rxjs/operators';
 import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { DatePipe } from '@angular/common';
 import { BackendService } from './backend.service';
+import { BackendService as AppBackendService } from '../backend.service';
 import {
   UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
 } from './workspace.classes';
@@ -35,6 +36,7 @@ export class WorkspaceService {
 
   constructor(
     private backendService: BackendService,
+    private appBackendService: AppBackendService,
     private appService: AppService
   ) {
     this.workspaceSettings = {
@@ -83,7 +85,7 @@ export class WorkspaceService {
   async getModuleHtml(key: string): Promise<string | null> {
     if (Object.keys(this.moduleHtmlStore).indexOf(key) >= 0) return this.moduleHtmlStore[key];
     this.appService.dataLoading = true;
-    const fileData = await lastValueFrom(this.backendService.getModuleHtml(key));
+    const fileData = await lastValueFrom(this.appBackendService.getModuleHtml(key));
     this.appService.dataLoading = false;
     if (fileData) {
       this.moduleHtmlStore[key] = fileData.file;

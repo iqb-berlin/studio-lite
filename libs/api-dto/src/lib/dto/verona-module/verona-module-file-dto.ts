@@ -9,4 +9,7 @@ export class VeronaModuleFileDto {
 
   @ApiProperty()
   file!: string;
+
+  @ApiProperty()
+  fileName?: string;
 }

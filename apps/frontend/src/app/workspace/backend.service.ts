@@ -9,8 +9,7 @@ import {
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
-  UnitSchemeDto, UsersInWorkspaceDto,
-  VeronaModuleFileDto
+  UnitSchemeDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -188,14 +187,6 @@ export class BackendService {
       .pipe(
         map(() => true),
         catchError(() => of(false))
-      );
-  }
-
-  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
-    return this.http
-      .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
-      .pipe(
-        catchError(() => of(null))
       );
   }
 
