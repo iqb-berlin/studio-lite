@@ -26,6 +26,7 @@ export class VeronaModulesService {
       return <VeronaModuleFileDto>{
         key: file.key,
         name: file.metadata.name,
+        fileName: `${file.metadata.id}-${file.metadata.version}.html`,
         file: file.file.toString()
       };
     }

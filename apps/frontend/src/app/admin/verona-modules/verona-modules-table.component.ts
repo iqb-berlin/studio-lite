@@ -1,12 +1,13 @@
 import {
   AfterViewInit,
-  Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
+import { saveAs } from 'file-saver';
 import { BackendService } from '../backend.service';
 import { BackendService as AppBackendService } from '../../backend.service';
 import { VeronaModuleCollection } from '../../classes/verona-module-collection.class';
@@ -18,7 +19,6 @@ import { AppService } from '../../app.service';
 })
 export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
   @Input() type!: 'player' | 'editor' | 'schemer';
-  @Input() downloadPath = '';
   @Output() selectionChanged = new EventEmitter();
   @ViewChild(MatSort) sort = new MatSort();
   objectsDatasource = new MatTableDataSource<VeronaModuleInListDto>();
@@ -28,7 +28,6 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(
-    @Inject('SERVER_URL') public serverUrl: string,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
     private appService: AppService
@@ -100,5 +99,11 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
     if (this.selectionChangedSubscription) {
       this.selectionChangedSubscription.unsubscribe();
     }
+  }
+
+  downloadModule(key: string, id: string, version: string) {
+    this.backendService.downloadModule(key).subscribe(b => {
+      saveAs(b, `${id}-${version}.html`);
+    });
   }
 }

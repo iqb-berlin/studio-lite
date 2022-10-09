@@ -31,7 +31,7 @@ export class UnitService {
     this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      order: { key: 'ASC' },
+      order: { groupName: 'ASC', key: 'ASC' },
       select: {
         id: true,
         key: true,

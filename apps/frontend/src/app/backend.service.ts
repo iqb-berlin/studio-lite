@@ -11,7 +11,7 @@ import {
   VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto
+  ResourcePackageDto, VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -117,11 +117,19 @@ export class BackendService {
       );
   }
 
-  getModuleList(type: string): Observable<VeronaModuleInListDto[]> {
+  getModuleList(type?: string): Observable<VeronaModuleInListDto[]> {
     return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}admin/verona-modules/${type}`)
+      .get<VeronaModuleInListDto[]>(`${this.serverUrl}verona-modules${type ? `?type=${type}` : ''}`)
       .pipe(
         catchError(() => of(<VeronaModuleInListDto[]>[]))
+      );
+  }
+
+  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
+    return this.http
+      .get<VeronaModuleFileDto>(`${this.serverUrl}verona-module/${moduleId}`)
+      .pipe(
+        catchError(() => of(null))
       );
   }
 

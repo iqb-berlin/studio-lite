@@ -209,4 +209,16 @@ export class BackendService {
         map(() => true)
       );
   }
+
+  downloadModule(moduleKey: string): Observable<Blob> {
+    return this.http.get(
+      `${this.serverUrl}admin/verona-modules/download/${moduleKey}`,
+      {
+        headers: {
+          Accept: 'text/html'
+        },
+        responseType: 'blob'
+      }
+    );
+  }
 }

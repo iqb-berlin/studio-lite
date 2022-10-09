@@ -5,8 +5,7 @@ import { Inject, Injectable } from '@angular/core';
 import {
   ReviewFullDto,
   UnitDefinitionDto,
-  UnitMetadataDto,
-  VeronaModuleFileDto
+  UnitMetadataDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -17,14 +16,6 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
-
-  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
-    return this.http
-      .get<VeronaModuleFileDto>(`${this.serverUrl}admin/verona-module/${moduleId}`)
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
 
   getUnitMetadata(reviewId: number, unitId: number): Observable<UnitMetadataDto | null> {
     return this.http

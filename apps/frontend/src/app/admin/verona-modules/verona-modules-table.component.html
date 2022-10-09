@@ -21,7 +21,7 @@
   <ng-container matColumnDef="name">
     <mat-header-cell *matHeaderCellDef mat-sort-header="metadata.name" class="namecell" fxFlex> Name </mat-header-cell>
     <mat-cell *matCellDef="let element" class="namecell" fxFlex>
-      <a target="_blank" [href]="downloadPath + element.filelink" [matTooltip]="element.metadata.description">{{element.metadata.name}}</a>
+      <a mat-button (click)="downloadModule(element.key, element.metadata.id, element.metadata.version)" [matTooltip]="element.metadata.description">{{element.metadata.name}}</a>
     </mat-cell>
   </ng-container>
 
