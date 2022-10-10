@@ -37,6 +37,7 @@ import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
 import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 import { ReviewsComponent } from './dialogs/reviews.component';
+import { GroupManageComponent } from './dialogs/group-manage.component';
 
 @Component({
   templateUrl: './workspace.component.html',
@@ -65,6 +66,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private deleteConfirmDialog: MatDialog,
     private uploadReportDialog: MatDialog,
     private reviewsDialog: MatDialog,
+    private groupDialog: MatDialog,
     private snackBar: MatSnackBar,
     private router: Router,
     private route: ActivatedRoute,
@@ -453,6 +455,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         });
       }
+    });
+  }
+
+  manageGroups() {
+    this.groupDialog.open(GroupManageComponent, {
+      width: '1000px',
+      height: '800px'
     });
   }
 
