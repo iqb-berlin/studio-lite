@@ -51,6 +51,7 @@ import {
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
+import { GroupManageComponent } from './dialogs/group-manage.component';
 
 @NgModule({
   imports: [
@@ -102,6 +103,7 @@ import { ReviewsComponent } from './dialogs/reviews.component';
     WorkspaceUserListComponent,
     PagingModeSelectionComponent,
     UnitCommentsComponent,
+    GroupManageComponent,
     HasNewCommentsPipe,
     ReviewsComponent
   ],

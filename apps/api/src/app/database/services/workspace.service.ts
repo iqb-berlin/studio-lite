@@ -11,6 +11,7 @@ import * as AdmZip from 'adm-zip';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
+import Unit from '../entities/unit.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
 import { UnitImportData } from '../../workspace/unit-import-data.class';
 import { UnitService } from './unit.service';
@@ -33,6 +34,8 @@ export class WorkspaceService {
     private workspaceGroupRepository: Repository<WorkspaceGroup>,
     @InjectRepository(WorkspaceGroupAdmin)
     private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
+    @InjectRepository(Unit)
+    private unitsRepository: Repository<Unit>,
     private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
     private unitService: UnitService,
@@ -151,11 +154,40 @@ export class WorkspaceService {
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
 
+  async findAllWorkspaceGroups(id: number): Promise<string[]> {
+    this.logger.log(`Returning groups of workspace with id: ${id}`);
+    const workspace = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    if (workspace) {
+      return workspace.settings ? workspace.settings.unitGroups : [];
+    }
+    throw new AdminWorkspaceNotFoundException(id, 'GET');
+  }
+
   async create(workspace: CreateWorkspaceDto): Promise<number> {
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
     const newWorkspace = await this.workspacesRepository.create(workspace);
     await this.workspacesRepository.save(newWorkspace);
     return newWorkspace.id;
+  }
+
+  async createGroup(id: number, newGroup: string): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    const settings = workspaceToUpdate.settings || {
+      defaultEditor: '',
+      defaultPlayer: '',
+      defaultSchemer: '',
+      unitGroups: []
+    };
+    const transformedGroups = settings.unitGroups.map(g => g.toUpperCase());
+    if (transformedGroups.indexOf(newGroup.toUpperCase()) < 0) {
+      settings.unitGroups.push(newGroup);
+      workspaceToUpdate.settings = settings;
+      await this.workspacesRepository.save(workspaceToUpdate);
+    }
   }
 
   // TODO: id als Parameter
@@ -171,6 +203,50 @@ export class WorkspaceService {
     } else {
       throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
     }
+  }
+
+  async patchGroupName(id: number, oldName: string, newName: string): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    const settings = workspaceToUpdate.settings || {
+      defaultEditor: '',
+      defaultPlayer: '',
+      defaultSchemer: '',
+      unitGroups: []
+    };
+    const groupPos = settings.unitGroups.indexOf(oldName);
+    if (groupPos >= 0) settings.unitGroups = settings.unitGroups.filter(g => g !== oldName);
+    settings.unitGroups.push(newName);
+    workspaceToUpdate.settings = settings;
+    await this.workspacesRepository.save(workspaceToUpdate);
+    await this.unitsRepository.update({
+      workspaceId: id,
+      groupName: oldName
+    },
+    {
+      groupName: newName
+    });
+  }
+
+  async removeGroup(id: number, groupName: string): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    if (workspaceToUpdate.settings) {
+      const groupPos = workspaceToUpdate.settings.unitGroups.indexOf(groupName);
+      if (groupPos >= 0) {
+        workspaceToUpdate.settings.unitGroups = workspaceToUpdate.settings.unitGroups.filter(g => g !== groupName);
+      }
+      await this.workspacesRepository.save(workspaceToUpdate);
+    }
+    await this.unitsRepository.update({
+      workspaceId: id,
+      groupName: groupName
+    },
+    {
+      groupName: ''
+    });
   }
 
   async patchName(id: number, newName: string): Promise<void> {

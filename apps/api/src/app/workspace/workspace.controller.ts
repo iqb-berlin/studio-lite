@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
+  Controller, Delete, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import {
@@ -51,6 +51,48 @@ export class WorkspaceController {
   @ApiTags('workspace')
   async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
     return this.usersService.findAllWorkspaceUsers(workspaceId);
+  }
+
+  @Get('groups')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: [String]
+  })
+  @ApiTags('workspace')
+  async findGroups(@WorkspaceId() workspaceId: number): Promise<string[]> {
+    return this.workspaceService.findAllWorkspaceGroups(workspaceId);
+  }
+
+  @Post('group')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async addUnitGroup(@WorkspaceId() workspaceId: number,
+    @Body() newGroup) {
+    return this.workspaceService.createGroup(workspaceId, newGroup.body);
+  }
+
+  @Patch('group/:name')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async renameUnitGroup(@WorkspaceId() workspaceId: number,
+    @Param('name') oldGroupName: string,
+    @Body() newGroupName) {
+    return this.workspaceService.patchGroupName(workspaceId, oldGroupName, newGroupName.body);
+  }
+
+  @Delete('group/:name')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
+    return this.workspaceService.removeGroup(workspaceId, groupName);
   }
 
   @Post('upload')

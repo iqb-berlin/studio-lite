@@ -39,16 +39,19 @@ export class UnitService {
         groupName: true
       }
     });
-    return Promise.all(units.map(async unit => {
-      const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id);
-      return {
-        ...unit,
-        lastCommentChangedAt:
-          comment ? comment.changedAt : new Date(2022, 6),
-        lastSeenCommentChangedAt:
-          withLastSeenCommentTimeStamp ? await this.unitUserService.findLastSeenCommentTimestamp(userId, unit.id) : null
-      };
-    }));
+    if (userId && withLastSeenCommentTimeStamp) {
+      return Promise.all(units.map(async unit => {
+        const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id);
+        return {
+          ...unit,
+          lastCommentChangedAt:
+            comment ? comment.changedAt : new Date(2022, 6),
+          lastSeenCommentChangedAt:
+            await this.unitUserService.findLastSeenCommentTimestamp(userId, unit.id)
+        };
+      }));
+    }
+    return units;
   }
 
   async create(workspaceId: number, unit: CreateUnitDto): Promise<number> {

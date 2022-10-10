@@ -236,4 +236,51 @@ export class BackendService {
   getDirectDownloadLink(): string {
     return `${this.serverUrl}packages/`;
   }
+
+  getUnitGroups(workspaceId: number): Observable <string[]> {
+    return this.http
+      .get<string[]>(`${this.serverUrl}workspace/${workspaceId}/groups`)
+      .pipe(
+        catchError(() => [])
+      );
+  }
+
+  addUnitGroup(workspaceId: number, newGroup: string): Observable <boolean> {
+    return this.http
+      .post(
+        `${this.serverUrl}workspace/${workspaceId}/group`,
+        { body: newGroup }
+      )
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  deleteUnitGroup(workspaceId: number, group: string): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}workspace/${workspaceId}/group/${group}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  renameUnitGroup(workspaceId: number, oldGroupName: string, newGroupName: string): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/group/${oldGroupName}`, { body: newGroupName })
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  setGroupUnits(workspaceId: number, groupName: string, units: number[]): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/group/${groupName}`, units)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
 }
