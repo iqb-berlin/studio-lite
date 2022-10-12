@@ -168,7 +168,7 @@ export class WorkspaceService {
       const groups = unitGroups.map(u => u.groupName).filter(
         (value, index, self) => (self.indexOf(value) === index) && (settingsGroups.indexOf(value) < 0)
       );
-      return [...groups, ...settingsGroups].sort();
+      return [...groups, ...settingsGroups].filter(g => !!g).sort();
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
