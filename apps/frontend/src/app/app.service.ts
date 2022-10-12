@@ -18,7 +18,8 @@ export const defaultAppConfig = <ConfigDto>{
   imprintHtml: '<p>nicht definiert</p>',
   globalWarningText: '',
   globalWarningExpiredHour: 0,
-  globalWarningExpiredDay: new Date()
+  globalWarningExpiredDay: new Date(),
+  hasUsers: true
 };
 
 @Injectable({
