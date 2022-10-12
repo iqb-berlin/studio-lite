@@ -31,7 +31,7 @@ export class UnitService {
     this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      order: { groupName: 'ASC', key: 'ASC' },
+      order: { key: 'ASC' },
       select: {
         id: true,
         key: true,
@@ -79,6 +79,7 @@ export class UnitService {
         newUnit.editor = unitSourceMetadata.editor;
         newUnit.schemer = unitSourceMetadata.schemer;
         newUnit.schemeType = unitSourceMetadata.schemeType;
+        newUnit.groupName = '';
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {

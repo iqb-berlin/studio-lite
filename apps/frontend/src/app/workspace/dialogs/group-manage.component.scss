@@ -22,24 +22,38 @@
   border: 2px solid whitesmoke
 }
 
+.group-list-buttons {
+  margin-top: 6px;
+  background-color: whitesmoke;
+}
+
 .group-list-entry {
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 14px
+  font-size: 14px;
+  margin-right: 12px;
+}
+
+.badge-holder {
+  width: 2px;
+  margin-right: 6px;
+  background-color: transparent;
 }
 
 .group-changed {
-  background-color: darkorange;
+  border: 2px solid darkorange;
   padding: 2px
 }
 
 .group-not-changed {
-  background-color: transparent;
+  border: 2px solid transparent;
   padding: 2px
 }
 
 #main-buttons .mat-raised-button {
   padding: 0;
   min-width: 25px
+}
+
+.mat-list-base {
+  padding-top: 12px;
 }

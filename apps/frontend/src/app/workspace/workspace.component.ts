@@ -29,7 +29,6 @@ import { WorkspaceService } from './workspace.service';
 
 import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
 import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
-import { UnitCollection } from './workspace.classes';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { VeronaModuleCollection } from '../classes/verona-module-collection.class';
@@ -84,7 +83,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.workspaceService.unitList = new UnitCollection([]);
+      this.workspaceService.resetUnitList([]);
       this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params['ws']);
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
@@ -130,20 +129,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   updateUnitList(unitToSelect?: number): void {
     let queryParams = new HttpParams();
     queryParams = queryParams.append('withLastSeenCommentTimeStamp', true);
+    this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId).subscribe(groups => {
+      this.workspaceService.workspaceSettings.unitGroups = groups;
+    });
     this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams).subscribe(
       uResponse => {
-        this.workspaceService.unitList = new UnitCollection(uResponse);
-        const newUnitGroups: string[] = [];
-        if (this.workspaceService.workspaceSettings.unitGroups) {
-          this.workspaceService.workspaceSettings.unitGroups.forEach(g => {
-            if (g && newUnitGroups.indexOf(g) < 0) newUnitGroups.push(g);
-          });
-        }
-        this.workspaceService.unitList.groups.forEach(g => {
-          if (g.name && newUnitGroups.indexOf(g.name) < 0) newUnitGroups.push(g.name);
-        });
-        newUnitGroups.sort();
-        this.workspaceService.workspaceSettings.unitGroups = newUnitGroups;
+        this.workspaceService.resetUnitList(uResponse);
         if (unitToSelect) this.selectUnit(unitToSelect);
         if (uResponse.length === 0) {
           this.workspaceService.selectedUnit$.next(0);
@@ -397,7 +388,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   exportUnit(): void {
-    if (this.workspaceService.unitList.units().length > 0) {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
         width: '900px'
       });
@@ -462,6 +453,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.groupDialog.open(GroupManageComponent, {
       width: '1000px',
       height: '800px'
+    }).afterClosed().subscribe(() => {
+      this.updateUnitList();
     });
   }
 

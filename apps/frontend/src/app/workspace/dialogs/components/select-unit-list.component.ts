@@ -68,6 +68,11 @@ export class SelectUnitListComponent implements OnInit, OnDestroy {
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
 
+  @Input('show-groups')
+  set showGroups(value: boolean) {
+    this.displayedColumns = value ? ['selectCheckbox', 'key', 'groupName'] : ['selectCheckbox', 'key'];
+  }
+
   @Input('workspace')
   set workspaceId(value: number) {
     this.tableSelectionCheckbox.clear();

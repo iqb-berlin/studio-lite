@@ -1,8 +1,10 @@
 import {
   Body,
-  Controller, Delete, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
+  Controller, Delete, Get, Header, Param, Patch, Post, Query, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiCreatedResponse, ApiQuery, ApiTags
+} from '@nestjs/swagger';
 import {
   WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
@@ -70,6 +72,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
+  // todo: declare body parameter {body: 'xxx'} or parse body as string
   async addUnitGroup(@WorkspaceId() workspaceId: number,
     @Body() newGroup) {
     return this.workspaceService.createGroup(workspaceId, newGroup.body);
@@ -80,10 +83,27 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
+  // todo: declare body parameter {body: 'xxx'} or parse body as string
   async renameUnitGroup(@WorkspaceId() workspaceId: number,
     @Param('name') oldGroupName: string,
     @Body() newGroupName) {
     return this.workspaceService.patchGroupName(workspaceId, oldGroupName, newGroupName.body);
+  }
+
+  @Patch('group/:name/units')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiQuery({
+    name: 'units',
+    type: String
+  })
+  @ApiTags('workspace')
+  async patchUnitsGroup(@WorkspaceId() workspaceId: number,
+    @Param('name') groupName: string,
+    @Query('units') ids: string) {
+    const idsAsNumberArray = ids ? ids.split(';').map(s => parseInt(s, 10)) : [];
+    return this.workspaceService.patchUnitsGroup(workspaceId, groupName, idsAsNumberArray);
   }
 
   @Delete('group/:name')

@@ -1,59 +1,61 @@
-<div fxLayout="column" style="height: 100%">
-  <h1 mat-dialog-title>Aufgabengruppen verwalten</h1>
-  <div fxLayout="row" fxLayoutGap="5px" style="height: 100%">
-    <div fxFlex="200px" class="group-list" fxLayout="column" fxLayoutAlign="space-between stretch">
-      <mat-nav-list fxFlex>
-        <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-           *ngFor="let group of groups | keyvalue"
-           class="group-list-entry"
-           (click)="selectGroup(group.key)"
-           [class]="group.key === selectedGroup ? 'group-list-entry selected' : 'group-list-entry'">
-          {{group.key}}
-        </a>
-      </mat-nav-list>
-      <div fxLayout="row" id="main-buttons">
-        <button mat-raised-button (click)="addGroup()" class="small-button" fxFlex="33%"
-                matTooltip="Gruppe hinzufügen" matTooltipPosition="above">
-          <mat-icon>add</mat-icon>
-        </button>
-        <button mat-raised-button (click)="renameGroup()" class="small-button"
-                matTooltip="Gruppe umbenennen" [disabled]="!selectedGroup"
-                matTooltipPosition="above" fxFlex="33%">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-raised-button (click)="deleteGroup()" class="small-button"
-                matTooltip="Gruppe löschen" [disabled]="!selectedGroup"
-                matTooltipPosition="above" fxFlex>
-          <mat-icon>delete</mat-icon>
-        </button>
+<h1 mat-dialog-title>Aufgabengruppen verwalten</h1>
+<div mat-dialog-content fxLayout="row" fxLayoutGap="5px" style="height: 100%">
+  <div fxFlex="200px" fxLayout="column" fxLayoutAlign="space-between stretch">
+    <mat-nav-list fxFlex fxLayout="column" class="group-list">
+      <div
+         *ngFor="let group of groups | keyvalue"
+         class="group-list-entry"
+         fxLayout="row"
+         (click)="selectGroup(group.key)"
+         [class]="group.key === selectedGroup ? 'group-list-entry selected' : 'group-list-entry'">
+        <a mat-list-item fxFlex
+           style="text-overflow: ellipsis; overflow: hidden">{{group.key}}</a>
+        <div *ngIf="group.value > 0" class="badge-holder" [matBadge]="group.value"></div>
       </div>
-    </div>
-    <div [class]="changed ? 'review-changed' : 'review-not-changed'"
-         fxLayout="column" fxFlex>
-      <mat-dialog-content fxFlex>
-        <div [hidden]="selectedGroup">Bitte links Gruppe wählen bzw. neu anlegen.</div>
-        <select-unit-list #unitSelectionTable [hidden]="selectedGroup === ''"
-                          (selectionChanged)="unitSelectionChanged()"
-                          [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
-      </mat-dialog-content>
-      <div fxLayout="row" fxLayoutAlign="end end" fxLayoutGap="5px"
-           style="padding: 5px">
-        <button mat-raised-button (click)="discardChanges()" matTooltip="Änderungen verwerfen"
-                [disabled]="!changed" matTooltipPosition="below">
-          <mat-icon>close</mat-icon>
-        </button>
-        <button mat-raised-button (click)="saveChanged()" matTooltip="Aufgabenfolge speichern"
-                [disabled]="!changed" matTooltipPosition="below">
-          Speichern <mat-icon>save</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
-  <mat-dialog-actions fxLayout="column">
-    <div fxLayout="row">
-      <button mat-raised-button [mat-dialog-close]="false">
-        {{'dialogs.close' | translate}}
+    </mat-nav-list>
+    <div fxLayout="row" id="main-buttons" class="group-list-buttons">
+      <button mat-button (click)="addGroup()" class="small-button" fxFlex="33%"
+              matTooltip="Gruppe hinzufügen" matTooltipPosition="above">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button mat-button (click)="renameGroup()" class="small-button"
+              matTooltip="Gruppe umbenennen" [disabled]="!selectedGroup"
+              matTooltipPosition="above" fxFlex="33%">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-button (click)="deleteGroup()" class="small-button"
+              matTooltip="Gruppe löschen" [disabled]="!selectedGroup"
+              matTooltipPosition="above" fxFlex>
+        <mat-icon>delete</mat-icon>
       </button>
     </div>
-  </mat-dialog-actions>
+  </div>
+  <div [class]="changed ? 'group-changed' : 'group-not-changed'"
+       fxLayout="column" fxFlex>
+    <mat-dialog-content fxFlex>
+      <div [hidden]="selectedGroup">Bitte links Gruppe wählen bzw. neu anlegen.</div>
+      <select-unit-list #unitSelectionTable [hidden]="selectedGroup === ''"
+                        (selectionChanged)="unitSelectionChanged()"
+                        [show-groups]="false"
+                        [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
+    </mat-dialog-content>
+    <div fxLayout="row" fxLayoutAlign="end end" fxLayoutGap="5px"
+         style="padding: 5px">
+      <button mat-raised-button (click)="discardChanges()" matTooltip="Änderungen verwerfen"
+              [disabled]="!changed" matTooltipPosition="below">
+        <mat-icon>close</mat-icon>
+      </button>
+      <button mat-raised-button (click)="saveChanged()" matTooltip="Aufgabenfolge speichern"
+              [disabled]="!changed" matTooltipPosition="below">
+        Speichern <mat-icon>save</mat-icon>
+      </button>
+    </div>
+  </div>
 </div>
+<mat-dialog-actions fxLayout="column">
+  <div fxLayout="row">
+    <button mat-raised-button [mat-dialog-close]="false">
+      {{'dialogs.close' | translate}}
+    </button>
+  </div>
+</mat-dialog-actions>

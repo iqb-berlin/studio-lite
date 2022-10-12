@@ -55,8 +55,11 @@ export class BackendService {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
   }
 
-  getMyData(): Observable<MyDataDto> {
-    return this.http.get<MyDataDto>(`${this.serverUrl}my-data`);
+  getMyData(): Observable<MyDataDto | null> {
+    return this.http.get<MyDataDto>(`${this.serverUrl}my-data`)
+      .pipe(
+        catchError(() => of(null))
+      );
   }
 
   setMyData(newMyData: MyDataDto): Observable<boolean> {
