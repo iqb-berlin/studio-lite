@@ -12,10 +12,10 @@
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxFlex class="unit-list">
-      <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList.groups">
-        <div class="unit-group-header">{{unitGroup.name}}</div>
+      <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList | keyvalue">
+        <div class="unit-group-header">{{unitGroup.key}}</div>
         <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-           *ngFor="let unit of unitGroup.units"
+           *ngFor="let unit of unitGroup.value"
            class="unit-list-entry"
            [matTooltip]="unit.name ? unit.name : unit.id.toString()"
            matTooltipPosition="right"
@@ -58,7 +58,7 @@
           <mat-icon>settings</mat-icon>Einstellungen
         </button>
         <button mat-menu-item (click)="manageGroups()">
-          <mat-icon>edit_note</mat-icon>Gruppen verwalten
+          <mat-icon>format_align_right</mat-icon>Gruppen verwalten
         </button>
         <button mat-menu-item (click)="reviews()">
           <mat-icon>slideshow</mat-icon>Aufgabenfolgen

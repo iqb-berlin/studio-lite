@@ -79,6 +79,7 @@ export class UnitService {
         newUnit.editor = unitSourceMetadata.editor;
         newUnit.schemer = unitSourceMetadata.schemer;
         newUnit.schemeType = unitSourceMetadata.schemeType;
+        newUnit.groupName = '';
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {

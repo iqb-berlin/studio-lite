@@ -28,17 +28,19 @@ export class UnitCommentsComponent implements OnDestroy {
       this.backendService.getMyData()
     ])
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(result => this.updateComments(result[0], result[1]));
+      .subscribe(result => this.updateComments(result[0], result[1] ? result[1] : undefined));
   }
 
-  private updateComments(unitId: number, userData: MyDataDto) {
+  private updateComments(unitId: number, userData?: MyDataDto) {
     this.reset();
     setTimeout(() => {
       this.unitId = unitId;
       this.workspaceId = this.workspaceService.selectedWorkspaceId;
       this.userId = this.appService.authData.userId;
-      const displayName = (userData.lastName ? userData.lastName : this.appService.authData.userName) as string;
-      this.userName = userData.firstName ? `${displayName}, ${userData.firstName}` : displayName;
+      const displayName = (userData && userData.lastName ?
+        userData.lastName : this.appService.authData.userName) as string;
+      this.userName = userData && userData.firstName ?
+        `${displayName}, ${userData.firstName}` : displayName;
     });
   }
 

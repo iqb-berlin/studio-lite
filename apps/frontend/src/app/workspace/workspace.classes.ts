@@ -1,45 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import {
-  UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-
-export interface UnitGroup {
-  name: string;
-  units: UnitInListDto[];
-}
-
-export class UnitCollection {
-  groups: UnitGroup[] = [];
-
-  constructor(units: UnitInListDto[]) {
-    units.forEach(u => {
-      const groupName = u.groupName ? u.groupName : '';
-      let groupFound = false;
-      this.groups.forEach(g => {
-        if (g.name === groupName) {
-          g.units.push(u);
-          groupFound = true;
-        }
-      });
-      if (!groupFound) {
-        this.groups.push({
-          name: groupName,
-          units: [u]
-        });
-      }
-    });
-  }
-
-  units(): UnitInListDto[] {
-    const myUnits: UnitInListDto[] = [];
-    this.groups.forEach(g => {
-      g.units.forEach(u => {
-        myUnits.push(u);
-      });
-    });
-    return myUnits;
-  }
-}
 
 export class UnitMetadataStore {
   private originalData: UnitMetadataDto;
@@ -67,7 +29,6 @@ export class UnitMetadataStore {
   }
 
   setSchemer(newSchemer: string) {
-    console.log(newSchemer);
     if (newSchemer === this.originalData.schemer) {
       if (this.changedData.schemer) delete this.changedData.schemer;
     } else {
@@ -108,7 +69,6 @@ export class UnitMetadataStore {
   }
 
   getChangedData(): UnitMetadataDto {
-    console.log(this.changedData);
     return this.changedData;
   }
 
