@@ -72,7 +72,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList.units())]);
+        WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList)]);
       this.unitForm.setValue({
         key: unitMetadata.key,
         name: unitMetadata.name,

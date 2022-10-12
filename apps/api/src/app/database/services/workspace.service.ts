@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
@@ -160,7 +160,15 @@ export class WorkspaceService {
       where: { id: id }
     });
     if (workspace) {
-      return workspace.settings ? workspace.settings.unitGroups : [];
+      const settingsGroups = workspace.settings ? workspace.settings.unitGroups : [];
+      const unitGroups = await this.unitsRepository.find({
+        where: { workspaceId: id },
+        select: { groupName: true }
+      });
+      const groups = unitGroups.map(u => u.groupName).filter(
+        (value, index, self) => (self.indexOf(value) === index) && (settingsGroups.indexOf(value) < 0)
+      );
+      return [...groups, ...settingsGroups].sort();
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
@@ -226,6 +234,24 @@ export class WorkspaceService {
     },
     {
       groupName: newName
+    });
+  }
+
+  async patchUnitsGroup(id: number, groupName: string, units: number[]): Promise<void> {
+    await this.unitsRepository.update({
+      workspaceId: id,
+      groupName: groupName,
+      id: Not(In(units))
+    },
+    {
+      groupName: ''
+    });
+    await this.unitsRepository.update({
+      workspaceId: id,
+      id: In(units)
+    },
+    {
+      groupName: groupName
     });
   }
 

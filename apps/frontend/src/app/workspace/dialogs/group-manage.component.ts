@@ -125,7 +125,8 @@ export class GroupManageComponent implements OnInit {
       width: '400px',
       data: <ConfirmDialogData>{
         title: 'Aufgabengruppe löschen',
-        content: `Die aktuell ausgewählte Gruppe '${this.selectedGroup}' wird gelöscht. Fortsetzen?`,
+        content:
+          `Die aktuell ausgewählte Gruppe '${this.selectedGroup}' wird gelöscht. Alle Aufgaben bleiben erhalten. Fortsetzen?`,
         confirmButtonLabel: 'Löschen',
         showCancel: true
       }
@@ -219,6 +220,7 @@ export class GroupManageComponent implements OnInit {
   }
 
   detectChanges(): boolean {
-    return JSON.stringify(this.groupUnitsOriginal) !== JSON.stringify(this.groupUnitsToChange);
+    return this.groupUnitsOriginal.reduce((a, b) => a + b, 0) !==
+      this.groupUnitsToChange.reduce((a, b) => a + b, 0);
   }
 }

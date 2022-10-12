@@ -1,5 +1,7 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import {
+  Component, ElementRef, Inject, ViewChild
+} from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { WorkspaceService } from '../workspace.service';
 
@@ -70,7 +72,7 @@ export class NewUnitComponent {
     this.newUnitForm = this.fb.group({
       key: this.fb.control(data.key, [Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        WorkspaceService.unitKeyUniquenessValidator(0, this.ds.unitList.units())]),
+        WorkspaceService.unitKeyUniquenessValidator(0, this.ds.unitList)]),
       label: this.fb.control(data.label),
       groupSelect: this.fb.control(''),
       groupDirect: this.fb.control('')
@@ -84,6 +86,6 @@ export class NewUnitComponent {
       if (b && this.newGroupInput) {
         this.newGroupInput.nativeElement.focus();
       }
-    }, 100)
+    }, 100);
   }
 }

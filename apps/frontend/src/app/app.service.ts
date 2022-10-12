@@ -13,7 +13,7 @@ export const standardLogo: AppLogoDto = {
   boxBackground: 'lightgray'
 };
 export const defaultAppConfig = <ConfigDto>{
-  appTitle: 'IQB-Teststudio',
+  appTitle: 'IQB-Studio',
   introHtml: '<p>nicht definiert</p>',
   imprintHtml: '<p>nicht definiert</p>',
   globalWarningText: '',

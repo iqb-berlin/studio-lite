@@ -9,7 +9,7 @@ import { DatePipe } from '@angular/common';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
 import {
-  UnitCollection, UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
+  UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
 } from './workspace.classes';
 import { AppService } from '../app.service';
 
@@ -25,7 +25,7 @@ export class WorkspaceService {
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;
   unitSchemeStore: UnitSchemeStore | undefined;
-  unitList = new UnitCollection([]);
+  unitList: { [key: string]: UnitInListDto[] } = {};
   isWorkspaceGroupAdmin = false;
   lastChangedMetadata?: Date;
   lastChangedDefinition?: Date;
@@ -48,16 +48,15 @@ export class WorkspaceService {
     };
   }
 
-  static unitKeyUniquenessValidator(unitId: number, unitList: UnitInListDto[]): ValidatorFn {
+  static unitKeyUniquenessValidator(unitId: number, unitList: { [key: string]: UnitInListDto[] }): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const newKeyNormalised = control.value.toUpperCase().trim();
-      let isUnique = true;
-      unitList.forEach(u => {
-        if (u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId) {
-          isUnique = false;
-        }
+      let allUnits: UnitInListDto[] = [];
+      Object.values(unitList).forEach(units => {
+        allUnits = [...allUnits, ...units];
       });
-      if (!isUnique) {
+      const allreadyIn = allUnits.filter(u => u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId);
+      if (allreadyIn && allreadyIn.length > 0) {
         return { keyNotUnique: 'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.' };
       }
       return null;
@@ -80,6 +79,18 @@ export class WorkspaceService {
       (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||
       (this.unitSchemeStore && this.unitSchemeStore.isChanged())
     );
+  }
+
+  resetUnitList(data: UnitInListDto[]) {
+    this.unitList = {};
+    data.forEach(u => {
+      const groupName = u.groupName ? u.groupName : '';
+      if (this.unitList[groupName]) {
+        this.unitList[groupName].push(u);
+      } else {
+        this.unitList[groupName] = [u];
+      }
+    });
   }
 
   async getModuleHtml(key: string): Promise<string | null> {
@@ -134,8 +145,10 @@ export class WorkspaceService {
     if (this.lastChangedScheme && (!last || this.lastChangedScheme > last)) last = this.lastChangedScheme;
     this.unitLastChanged = last;
     const datePipe = new DatePipe('de-DE');
-    this.unitLastChangedText = `Eigenschaften: ${this.lastChangedMetadata ? datePipe.transform(this.lastChangedMetadata, 'dd.MM.yyyy HH:mm') : '-'}
-Definition:  ${this.lastChangedDefinition ? datePipe.transform(this.lastChangedDefinition, 'dd.MM.yyyy HH:mm') : '-'}
+    this.unitLastChangedText = `Eigenschaften: ${this.lastChangedMetadata ?
+      datePipe.transform(this.lastChangedMetadata, 'dd.MM.yyyy HH:mm') : '-'}
+Definition:  ${this.lastChangedDefinition ?
+    datePipe.transform(this.lastChangedDefinition, 'dd.MM.yyyy HH:mm') : '-'}
 Kodierschema:  ${this.lastChangedScheme ? datePipe.transform(this.lastChangedScheme, 'dd.MM.yyyy HH:mm') : '-'}`;
   }
 
@@ -175,7 +188,7 @@ Kodierschema:  ${this.lastChangedScheme ? datePipe.transform(this.lastChangedSch
       saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId)
         .pipe(
           map(uResponse => {
-            this.unitList = new UnitCollection(uResponse);
+            this.resetUnitList(uResponse);
             this.appService.dataLoading = false;
             return true;
           })
