@@ -15,7 +15,7 @@ import { AppService } from '../app.service';
             <mat-select placeholder="Editor" formControlName="editorSelector">
               <mat-option [value]=""></mat-option>
               <mat-option *ngFor="let m of appService.editorList.getEntries(false)" [value]="m.key">
-                {{m.metadata?.name}} {{m.metadata?.version}}
+                {{m.metadata.name}} {{m.metadata.version}}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -24,7 +24,7 @@ import { AppService } from '../app.service';
             <mat-select placeholder="Player" formControlName="playerSelector">
               <mat-option [value]=""></mat-option>
               <mat-option *ngFor="let m of appService.playerList.getEntries(false)" [value]="m.key">
-                {{m.metadata?.name}} {{m.metadata?.version}}
+                {{m.metadata.name}} {{m.metadata.version}}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -33,7 +33,7 @@ import { AppService } from '../app.service';
             <mat-select placeholder="Kodierung" formControlName="schemerSelector">
               <mat-option [value]=""></mat-option>
               <mat-option *ngFor="let m of appService.schemerList.getEntries(false)" [value]="m.key">
-                {{m.metadata?.name}} {{m.metadata?.version}}
+                {{m.metadata.name}} {{m.metadata.version}}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -52,7 +52,7 @@ import { AppService } from '../app.service';
     </div>
   `,
   styles: [
-    '.margin-bottom {margin-bottom: 10px}'
+  '.margin-bottom {margin-bottom: 10px}'
   ]
 })
 export class EditWorkspaceSettingsComponent {
