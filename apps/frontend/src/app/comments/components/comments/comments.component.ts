@@ -21,7 +21,7 @@ export class CommentsComponent implements OnInit {
   @Input() userName!: string;
   @Input() unitId!: number;
   @Input() workspaceId!: number;
-  @Output() onCommentsUpdated = new EventEmitter<void>()
+  @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];
   activeComment: ActiveComment | null = null;

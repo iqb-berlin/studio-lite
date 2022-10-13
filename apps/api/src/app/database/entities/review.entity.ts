@@ -4,21 +4,21 @@ import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
 @Entity()
 class Review {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column({
     name: 'workspace_id'
   })
-  public workspaceId: number;
+    workspaceId: number;
 
   @Column()
-  public name: string;
+    name: string;
 
   @Column()
-  public link: string;
+    link: string;
 
   @Column()
-  public password: string;
+    password: string;
 
   @Column({
     type: 'jsonb',
@@ -26,7 +26,7 @@ class Review {
     default: () => "'{}'",
     nullable: false
   })
-  public settings: ReviewSettingsDto;
+    settings: ReviewSettingsDto;
 }
 
 export default Review;

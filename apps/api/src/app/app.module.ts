@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
-
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
@@ -26,6 +23,6 @@ import { AppVersionProvider } from './app-version.guard';
     MulterModule
   ],
   controllers: [AppController],
-  providers: [AppService, AppVersionProvider]
+  providers: [AppVersionProvider]
 })
 export class AppModule {}

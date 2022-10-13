@@ -27,6 +27,7 @@ export class ReviewComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.reviewService.reviewId = this.route.snapshot.params['review'];
       this.appBackendService.getModuleList('editor').subscribe((moduleList: VeronaModuleInListDto[]) => {
         this.appService.editorList = new VeronaModuleCollection(moduleList);

@@ -52,7 +52,7 @@ import { AppService } from '../app.service';
     </div>
   `,
   styles: [
-  '.margin-bottom {margin-bottom: 10px}'
+    '.margin-bottom {margin-bottom: 10px}'
   ]
 })
 export class EditWorkspaceSettingsComponent {

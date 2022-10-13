@@ -3,10 +3,10 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 @Entity()
 class Setting {
   @PrimaryColumn()
-  public key: string;
+    key: string;
 
   @Column()
-  public content: string;
+    content: string;
 }
 
 export default Setting;

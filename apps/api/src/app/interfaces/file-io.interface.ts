@@ -1,4 +1,4 @@
-export interface FileIo  {
+export interface FileIo {
   fieldname: string;
   originalname: string;
   encoding: string;
