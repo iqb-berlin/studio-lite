@@ -48,16 +48,16 @@
   <div class="object-list" fxLayout="column" fxFlex="40">
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <div *ngIf="selectedWorkspaceId === 0">Zugriffsrechte: Bitte links Arbeitsbereich wählen</div>
-      <div *ngIf="selectedWorkspaceId > 0" >Zugriffsrechte für {{ tableSelectionRow.selected[0]?.name }}:</div>
+      <div *ngIf="selectedWorkspaceId > 0" >Zugriffsrechte für {{ tableSelectionRow.selected[0].name }}:</div>
       <button mat-raised-button (click)="saveUsers()" matTooltip="Speichern"
-              matTooltipPosition="above" [disabled]="!workspaceUsers?.hasChanged">
+              matTooltipPosition="above" [disabled]="!workspaceUsers.hasChanged">
         <mat-icon>save</mat-icon>
       </button>
     </div>
 
     <div class="scroll-area" fxLayout="column">
       <div fxLayout="row" fxLayoutAlign="start start" *ngFor="let u of workspaceUsers.entries">
-        <mat-checkbox (change)="workspaceUsers?.updateHasChanged()" fxFlex
+        <mat-checkbox (change)="workspaceUsers.updateHasChanged()" fxFlex
                       [(ngModel)]="u.isChecked" [disabled]="selectedWorkspaceId === 0" style="margin-left: 20px;">
           {{u.displayName}} ({{u.name}})</mat-checkbox>
           <div style="color: gray; margin: 3px" fxFlex>{{u.description}}</div>

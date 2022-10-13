@@ -8,14 +8,16 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@nrwl/node:webpack",
+          "builder": "@nrwl/webpack:webpack",
           "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/apps/api",
             "main": "apps/api/src/main.ts",
             "tsConfig": "apps/api/tsconfig.app.json",
             "assets": ["apps/api/src/assets"],
-            "generatePackageJson": true
+            "generatePackageJson": true,
+            "target": "node",
+            "compiler": "tsc"
           },
           "configurations": {
             "production": {
@@ -65,7 +67,7 @@
           }
         },
         "docker-build": {
-          "builder": "@nrwl/workspace:run-commands",
+          "builder": "nx:run-commands",
           "options": {
             "commands": [
               {
@@ -79,7 +81,7 @@
           }
         },
         "docker-scan": {
-          "builder": "@nrwl/workspace:run-commands",
+          "builder": "nx:run-commands",
           "options": {
             "commands": [
               "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}",
@@ -268,7 +270,7 @@
           }
         },
         "docker-build": {
-          "builder": "@nrwl/workspace:run-commands",
+          "builder": "nx:run-commands",
           "options": {
             "commands": [
               {
@@ -282,7 +284,7 @@
           }
         },
         "docker-scan": {
-          "builder": "@nrwl/workspace:run-commands",
+          "builder": "nx:run-commands",
           "options": {
             "commands": [
               "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}",

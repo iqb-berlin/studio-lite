@@ -26,8 +26,8 @@
 </div>
 
 <div class="page-title" fxLayout="row" fxLayoutAlign="space-between center">
-  <div *ngIf="!appService.appConfig?.hideTitlesOnPage">{{ appService.appConfig?.appTitle }}</div>
-  <div *ngIf="appService.appConfig?.pageTitle && !appService.appConfig?.hideTitlesOnPage">{{ appService.appConfig?.pageTitle }}</div>
+  <div *ngIf="!appService.appConfig?.hideTitlesOnPage">{{ appService.appConfig.appTitle }}</div>
+  <div *ngIf="appService.appConfig?.pageTitle && !appService.appConfig.hideTitlesOnPage">{{ appService.appConfig.pageTitle }}</div>
 </div>
 
 <router-outlet></router-outlet>
