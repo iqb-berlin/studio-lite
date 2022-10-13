@@ -126,7 +126,9 @@ export class GroupManageComponent implements OnInit {
       data: <ConfirmDialogData>{
         title: 'Aufgabengruppe löschen',
         content:
-          `Die aktuell ausgewählte Gruppe '${this.selectedGroup}' wird gelöscht. Alle Aufgaben bleiben erhalten. Fortsetzen?`,
+          `Die aktuell ausgewählte Gruppe '${
+            this.selectedGroup
+          }' wird gelöscht. Alle Aufgaben bleiben erhalten. Fortsetzen?`,
         confirmButtonLabel: 'Löschen',
         showCancel: true
       }

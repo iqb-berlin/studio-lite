@@ -26,13 +26,13 @@ export const defaultAppConfig = <ConfigDto>{
   providedIn: 'root'
 })
 export class AppService {
-  public static defaultAuthData = <AuthDataDto>{
+  static defaultAuthData = <AuthDataDto>{
     userId: 0,
     userName: '',
     isAdmin: false,
     workspaces: [],
     reviews: []
-  }
+  };
 
   authData = AppService.defaultAuthData;
   appConfig: AppConfig;

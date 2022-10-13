@@ -18,8 +18,8 @@ import { AppService } from '../app.service';
     </div>
   `,
   styles: ['div.intro-main {margin: 40px; max-width: 600px;}',
-  '.single-box {background: var(--st-box-background)}']
-  })
+    '.single-box {background: var(--st-box-background)}']
+})
 
 export class AboutComponent implements OnInit {
   constructor(

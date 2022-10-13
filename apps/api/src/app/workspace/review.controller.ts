@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Patch, Post, UseGuards
+  Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags

@@ -22,7 +22,7 @@ export class ResourcePackagesTableComponent implements OnChanges {
   @Input() selectedResourcePackages!: BehaviorSubject<number[]>;
 
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChildren(MatCheckbox) checkBoxes!: QueryList<MatCheckbox>
+  @ViewChildren(MatCheckbox) checkBoxes!: QueryList<MatCheckbox>;
 
   constructor(@Inject('SERVER_URL') public serverUrl: string) {
     this.resourcePackagesPath = `${serverUrl}packages/`;

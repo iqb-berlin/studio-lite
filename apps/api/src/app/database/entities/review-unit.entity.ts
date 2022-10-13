@@ -5,15 +5,15 @@ class ReviewUnit {
   @PrimaryColumn({
     name: 'unit_id'
   })
-  public unitId: number;
+    unitId: number;
 
   @PrimaryColumn({
     name: 'review_id'
   })
-  public reviewId: number;
+    reviewId: number;
 
   @Column()
-  public order: number;
+    order: number;
 }
 
 export default ReviewUnit;

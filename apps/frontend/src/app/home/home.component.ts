@@ -47,9 +47,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.redirectTo = queryParams['redirectTo'];
     });
     this.routingSubscription = this.route.params.subscribe(params => {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.loginNamePreset = params['login'];
       if (this.loginNamePreset) {
         this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
@@ -128,7 +130,8 @@ export class HomeComponent implements OnInit, OnDestroy {
           respOk => {
             this.snackBar.open(
               respOk ? 'Neues Kennwort gespeichert' : 'Konnte Kennwort nicht ändern.',
-              respOk ? 'OK' : 'Fehler', { duration: 3000 }
+              respOk ? 'OK' : 'Fehler',
+              { duration: 3000 }
             );
           }
         );

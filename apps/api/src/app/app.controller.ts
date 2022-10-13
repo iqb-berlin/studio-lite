@@ -12,7 +12,6 @@ import {
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
-import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/service/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -26,7 +25,6 @@ import { VeronaModulesService } from './database/services/verona-modules.service
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService,
     private authService: AuthService,
     private userService: UsersService,
     private workspaceService: WorkspaceService,

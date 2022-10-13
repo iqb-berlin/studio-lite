@@ -99,19 +99,23 @@ export class ReviewService {
     this.logger.log(`Patching data for review with id: ${reviewId}`);
     const reviewToUpdate = await this.reviewRepository.findOne({ where: { id: reviewId } });
     let changed = false;
+    // eslint-disable-next-line no-prototype-builtins
     if (newData.hasOwnProperty('name')) {
       reviewToUpdate.name = newData.name;
       changed = true;
     }
+    // eslint-disable-next-line no-prototype-builtins
     if (newData.hasOwnProperty('password')) {
       reviewToUpdate.password = newData.password;
       changed = true;
     }
+    // eslint-disable-next-line no-prototype-builtins
     if (newData.hasOwnProperty('settings')) {
       reviewToUpdate.settings = newData.settings;
       changed = true;
     }
     if (changed) await this.reviewRepository.save(reviewToUpdate);
+    // eslint-disable-next-line no-prototype-builtins
     if (newData.hasOwnProperty('units')) {
       await this.reviewUnitRepository.delete({ reviewId: reviewId });
       this.logger.log(`Set units for review with id: ${reviewId}`);
