@@ -20,7 +20,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 import { HttpParams } from '@angular/common/http';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
