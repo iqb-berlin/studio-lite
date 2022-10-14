@@ -7,7 +7,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
 import { BackendService as AppBackendService } from '../../backend.service';
 import { VeronaModuleCollection } from '../../classes/verona-module-collection.class';
