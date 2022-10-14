@@ -454,13 +454,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  manageGroups() {
-    this.groupDialog.open(GroupManageComponent, {
-      width: '1000px',
-      height: '800px'
-    }).afterClosed().subscribe(() => {
-      this.updateUnitList();
-    });
+  async manageGroups() {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      this.groupDialog.open(GroupManageComponent, {
+        width: '1000px',
+        height: '800px'
+      }).afterClosed().subscribe(() => {
+        this.updateUnitList();
+      });
+    }
   }
 
   userList(): void {

@@ -62,8 +62,10 @@ export class UnitService {
     if (existingUnitId) return 0;
     const newUnit = await this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
+    newUnit.groupName = unit.groupName;
     await this.unitsRepository.save(newUnit);
 
+    // todo: notwendig? Kann doch erst beim ersten Anschauen der Unitkommentare angelegt werden.
     const workspaceUsers = await this.workspaceUserRepository
       .find({ where: { workspaceId: workspaceId } });
     await Promise.all(workspaceUsers.map(async workspaceUser => {
@@ -71,15 +73,18 @@ export class UnitService {
     }));
 
     if (unit.createFrom) {
-      const unitSourceMetadata = await this.findOnesMetadata(unit.createFrom);
-      if (unitSourceMetadata) {
-        newUnit.description = unitSourceMetadata.description;
+      const unitSourceData = await this.unitsRepository.findOne({
+        where: { id: unit.createFrom },
+        select: ['id', 'editor', 'schemer', 'metadata', 'schemeType',
+          'player', 'description']
+      });
+      if (unitSourceData) {
+        newUnit.description = unitSourceData.description;
         // todo: newUnit.metadata = unitSource.metadata;
-        newUnit.player = unitSourceMetadata.player;
-        newUnit.editor = unitSourceMetadata.editor;
-        newUnit.schemer = unitSourceMetadata.schemer;
-        newUnit.schemeType = unitSourceMetadata.schemeType;
-        newUnit.groupName = '';
+        newUnit.player = unitSourceData.player;
+        newUnit.editor = unitSourceData.editor;
+        newUnit.schemer = unitSourceData.schemer;
+        newUnit.schemeType = unitSourceData.schemeType;
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
@@ -94,6 +99,7 @@ export class UnitService {
       if (unit.player) newUnit.player = unit.player;
       if (unit.editor) newUnit.editor = unit.editor;
       if (unit.schemer) newUnit.schemer = unit.schemer;
+      newUnit.groupName = unit.groupName;
       await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
@@ -127,7 +133,7 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
-    if (dataKeys.indexOf('groupName') >= 0) unitToUpdate.groupName = newData.groupName;
+    unitToUpdate.groupName = newData.groupName ? newData.groupName : '';
     if (dataKeys.indexOf('lastChangedMetadata') >= 0) {
       unitToUpdate.lastChangedMetadata = newData.lastChangedMetadata;
     } else {
@@ -164,6 +170,7 @@ export class UnitService {
         };
       }
       unitToUpdate.workspaceId = newWorkspace;
+      unitToUpdate.groupName = '';
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
         source: 'unit-patch-workspace',
@@ -189,7 +196,7 @@ export class UnitService {
       const newUnitId = await this.create(newWorkspace, {
         key: unitToCopy.key,
         name: unitToCopy.name,
-        groupName: unitToCopy.groupName,
+        groupName: '',
         createFrom: unitToCopy.id
       });
       return <RequestReportDto>{
