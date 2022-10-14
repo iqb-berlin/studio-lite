@@ -23,6 +23,9 @@ import { AppVersionProvider } from './app-version.guard';
     MulterModule
   ],
   controllers: [AppController],
-  providers: [AppVersionProvider]
+  providers: [AppVersionProvider],
+  exports: [
+    AppVersionProvider
+  ]
 })
 export class AppModule {}

@@ -18,6 +18,7 @@ import { CommentWriteGuard } from './comment-write.guard';
 import { CommentDeleteGuard } from './comment-delete.guard';
 import { UnitUserService } from '../database/services/unit-user.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
+import { AppVersionGuard } from '../app-version.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -29,7 +30,7 @@ export class UnitsController {
   ) {}
 
   @Get('units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
