@@ -26,6 +26,8 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
+import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
+import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -97,6 +99,15 @@ export function createTranslateLoader(http: HttpClient) {
     {
       provide: LocationStrategy,
       useClass: HashLocationStrategy
+    },
+    {
+      provide: MAT_DATE_LOCALE,
+      useValue: 'de'
+    },
+    {
+      provide: DateAdapter,
+      useClass: DateFnsAdapter,
+      useValue: [MAT_DATE_LOCALE]
     },
     {
       provide: HTTP_INTERCEPTORS,

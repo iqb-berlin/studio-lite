@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as moment from 'moment';
+import { formatDistanceToNow } from 'date-fns';
 
 @Pipe({
   name: 'momentFromNow'
@@ -7,6 +7,6 @@ import * as moment from 'moment';
 export class MomentFromNowPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(date: Date): string {
-    return moment(date).fromNow();
+    return formatDistanceToNow(new Date(date));
   }
 }

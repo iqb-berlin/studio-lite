@@ -1,6 +1,7 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { format } from 'date-fns';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Component, OnDestroy, OnInit, ViewChild
@@ -19,7 +20,6 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
-import * as _moment from 'moment';
 import { saveAs } from 'file-saver';
 import { HttpParams } from '@angular/common/http';
 import { AppService } from '../app.service';
@@ -409,7 +409,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               if (typeof b === 'number') {
                 this.appService.dataLoading = b;
               } else {
-                const thisMoment = _moment().format('YYYY-MM-DD');
+                const thisMoment = format(new Date(), 'yyyy-MM-dd');
                 saveAs(b, `${thisMoment} studio unit download.zip`);
                 this.appService.dataLoading = false;
               }
