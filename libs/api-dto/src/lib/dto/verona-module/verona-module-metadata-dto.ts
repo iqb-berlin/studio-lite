@@ -6,22 +6,22 @@ export class VeronaModuleMetadataDto {
   [index: string]: any;
 
   @ApiProperty()
-  type!: VeronaModuleType;
+    type!: VeronaModuleType;
 
   @ApiProperty()
-  id!: string;
+    id!: string;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 
   @ApiProperty()
-  version!: string;
+    version!: string;
 
   @ApiProperty()
-  specVersion!: string;
+    specVersion!: string;
 
   @ApiProperty()
-  isStable!: boolean;
+    isStable!: boolean;
 
   static getFromJsonLd(jsonMetadata: {
     type: VeronaModuleType;
@@ -58,6 +58,7 @@ export class VeronaModuleMetadataDto {
       returnData = {
         type: jsonMetadata['@type'] as VeronaModuleType,
         id: jsonMetadata['@id'],
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         name: nameList['de'] || (nameList['en'] || jsonMetadata['@id']),
         version: jsonMetadata.version,
         specVersion: jsonMetadata.apiVersion,
@@ -75,7 +76,7 @@ export class VeronaModuleMetadataDto {
   }
 
   static isPreStableVersion(version: string): boolean {
-    const regexPatternSuffix = /.\d+-[a-z]+\d+$/;
+    const regexPatternSuffix = /\d+-[a-z]+/;
     return !!regexPatternSuffix.exec(version);
   }
 }
