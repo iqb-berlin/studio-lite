@@ -5,12 +5,12 @@ class WorkspaceGroupAdmin {
   @PrimaryColumn({
     name: 'workspace_group_id'
   })
-  public workspaceGroupId: number;
+    workspaceGroupId: number;
 
   @PrimaryColumn({
     name: 'user_id'
   })
-  public userId: number;
+    userId: number;
 }
 
 export default WorkspaceGroupAdmin;

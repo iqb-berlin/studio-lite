@@ -2,20 +2,20 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitInListDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  key!: string;
+    key!: string;
 
   @ApiProperty()
-  name?: string;
+    name?: string;
 
   @ApiProperty()
-  groupName?: string;
+    groupName?: string;
 
   @ApiProperty()
-  lastCommentChangedAt?: Date;
+    lastCommentChangedAt?: Date;
 
   @ApiProperty()
-  lastSeenCommentChangedAt?: Date;
+    lastSeenCommentChangedAt?: Date;
 }

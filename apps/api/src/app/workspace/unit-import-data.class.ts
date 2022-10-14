@@ -70,13 +70,20 @@ export class UnitImportData {
       baseVariablesElement.find('Variable').each((i, varElement) => {
         const valuesElement = baseVariablesElement.find('Values').first();
         this.baseVariables.push(new VeronaVariable({
+          // eslint-disable-next-line @typescript-eslint/dot-notation
           id: varElement.attribs['id'],
+          // eslint-disable-next-line @typescript-eslint/dot-notation
           type: varElement.attribs['type'],
+          // eslint-disable-next-line @typescript-eslint/dot-notation
           format: varElement.attribs['format'],
+          // eslint-disable-next-line @typescript-eslint/dot-notation
           nullable: varElement.attribs['nullable'],
+          // eslint-disable-next-line @typescript-eslint/dot-notation
           multiple: varElement.attribs['multiple'],
+          // eslint-disable-next-line @typescript-eslint/dot-notation
           valuesComplete: valuesElement.length > 0 ? valuesElement.attr['complete'] : false,
           values: valuesElement.length > 0 ?
+            // eslint-disable-next-line @typescript-eslint/dot-notation
             valuesElement.children['Value'].map(varValueElement => varValueElement.text()) : []
         }));
       });

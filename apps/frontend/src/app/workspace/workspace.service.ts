@@ -32,7 +32,7 @@ export class WorkspaceService {
   lastChangedScheme?: Date;
   unitLastChanged: Date | undefined;
   unitLastChangedText = '';
-  @Output() onCommentsUpdated = new EventEmitter<void>()
+  @Output() onCommentsUpdated = new EventEmitter<void>();
 
   constructor(
     private backendService: BackendService,

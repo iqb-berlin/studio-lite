@@ -3,26 +3,26 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class Unit {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column({
     name: 'workspace_id'
   })
-  public workspaceId: number;
+    workspaceId: number;
 
   @Column()
-  public key: string;
+    key: string;
 
   @Column()
-  public name: string;
+    name: string;
 
   @Column({
     name: 'group_name'
   })
-  public groupName: string;
+    groupName: string;
 
   @Column()
-  public description: string;
+    description: string;
 
   @Column({
     type: 'jsonb',
@@ -30,18 +30,18 @@ class Unit {
     default: () => "'{}'",
     nullable: false
   })
-  public metadata = {};
+    metadata = {};
 
   @Column()
-  public player: string;
+    player: string;
 
   @Column()
-  public editor: string;
+    editor: string;
 
   @Column({
     name: 'definition_id'
   })
-  public definitionId: number;
+    definitionId: number;
 
   @Column({
     type: 'jsonb',
@@ -49,36 +49,36 @@ class Unit {
     default: () => "'[]'",
     nullable: false
   })
-  public variables = [];
+    variables = [];
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_definition'
   })
-  public lastChangedDefinition: Date;
+    lastChangedDefinition: Date;
 
   @Column()
-  public schemer: string;
+    schemer: string;
 
   @Column()
-  public scheme: string;
+    scheme: string;
 
   @Column({
     name: 'scheme_type'
   })
-  public schemeType: string;
+    schemeType: string;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_scheme'
   })
-  public lastChangedScheme: Date;
+    lastChangedScheme: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_metadata'
   })
-  public lastChangedMetadata: Date;
+    lastChangedMetadata: Date;
 }
 
 export default Unit;

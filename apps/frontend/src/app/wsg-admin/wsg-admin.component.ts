@@ -56,6 +56,7 @@ export class WsgAdminComponent {
 
   ngOnInit(): void {
     setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.wsgAdminService.selectedWorkspaceGroupId = Number(this.route.snapshot.params['wsg']);
       this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(wsgData => {
         if (wsgData) {

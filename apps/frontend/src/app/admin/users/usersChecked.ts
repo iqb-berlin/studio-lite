@@ -2,11 +2,11 @@
 import { UserInListDto } from '@studio-lite-lib/api-dto';
 
 export class UserChecked {
-  public id: number;
-  public name: string;
-  public displayName: string | undefined;
-  public description: string | undefined;
-  public isChecked: boolean;
+  id: number;
+  name: string;
+  displayName: string | undefined;
+  description: string | undefined;
+  isChecked: boolean;
   constructor(userDto: UserInListDto) {
     this.id = userDto.id;
     this.name = userDto.name;
@@ -17,9 +17,9 @@ export class UserChecked {
 }
 
 export class UserToCheckCollection {
-  public entries: UserChecked[]
+  entries: UserChecked[];
   private workspacesUsersIds: number[] = [];
-  public hasChanged = false;
+  hasChanged = false;
 
   constructor(users: UserInListDto[]) {
     this.entries = [];

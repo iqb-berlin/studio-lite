@@ -84,9 +84,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     setTimeout(() => {
       this.workspaceService.resetUnitList([]);
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params['ws']);
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         const unitParam = params['u'];
         let unitParamNum = unitParam ? Number(unitParam) : 0;
         if (Number.isNaN(unitParamNum)) unitParamNum = 0;
@@ -195,7 +197,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
       ).subscribe(isOK => {
         this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
-          isOK ? '' : 'Fehler', { duration: 3000 });
+          isOK ? '' : 'Fehler',
+          { duration: 3000 });
       });
     }
   }
@@ -360,11 +363,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.backendService.moveOrCopyUnits(
               this.workspaceService.selectedWorkspaceId,
               dialogComponent.selectedUnits,
-              dialogComponent.targetWorkspace, moveOnly
+              dialogComponent.targetWorkspace,
+              moveOnly
             ).subscribe(uploadStatus => {
               if (typeof uploadStatus === 'boolean') {
                 this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,
-                  'Fehler', { duration: 3000 });
+                  'Fehler',
+                  { duration: 3000 });
               } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
                 const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
                   width: '500px',

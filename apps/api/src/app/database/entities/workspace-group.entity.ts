@@ -3,10 +3,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class WorkspaceGroup {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column()
-  public name: string;
+    name: string;
 
   @Column({
     type: 'jsonb',
@@ -14,7 +14,7 @@ class WorkspaceGroup {
     default: () => "'{}'",
     nullable: false
   })
-  public settings = {};
+    settings = {};
 }
 
 export default WorkspaceGroup;

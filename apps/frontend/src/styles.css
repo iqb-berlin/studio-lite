@@ -22,10 +22,6 @@ iframe.unitHost {
   border: none;
 }
 
-.mat-tab-body-wrapper{
-  flex-grow: 1;
-}
-
 #iFrameHost > p {
   margin: 20px;
 }

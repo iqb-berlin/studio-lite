@@ -2,9 +2,9 @@
 import { WorkspaceDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 
 export class WorkspaceChecked {
-  public id: number;
-  public name: string;
-  public isChecked: boolean;
+  id: number;
+  name: string;
+  isChecked: boolean;
   constructor(workspaceDto: WorkspaceDto) {
     this.id = workspaceDto.id;
     this.name = workspaceDto.name;
@@ -13,9 +13,9 @@ export class WorkspaceChecked {
 }
 
 export class WorkspaceToCheckCollection {
-  public entries: WorkspaceChecked[]
+  entries: WorkspaceChecked[];
   private userWorkspacesIds: number[] = [];
-  public hasChanged = false;
+  hasChanged = false;
 
   constructor(workspaces: WorkspaceInListDto[]) {
     this.entries = [];
