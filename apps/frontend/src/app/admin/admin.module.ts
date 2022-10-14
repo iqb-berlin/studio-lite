@@ -15,7 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatBadgeModule } from '@angular/material/badge';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -98,7 +98,6 @@ import { SafeUrlPipe } from './resource-packages/resource-packages-table/safe-re
   providers: [
     BackendService,
     [
-      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
       {
         provide: HTTP_INTERCEPTORS,
         useClass: AuthInterceptor,

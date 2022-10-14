@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import * as moment from 'moment';
 import { Router, RouterState } from '@angular/router';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
+import { de } from 'date-fns/locale';
+import { setDefaultOptions } from 'date-fns';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
@@ -24,7 +25,7 @@ export class AppComponent implements OnInit {
     private titleService: Title,
     private router: Router
   ) {
-    moment.locale('de');
+    setDefaultOptions({ locale: de });
   }
 
   ngOnInit(): void {
