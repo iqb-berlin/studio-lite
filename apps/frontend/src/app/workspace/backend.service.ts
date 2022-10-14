@@ -259,7 +259,7 @@ export class BackendService {
 
   deleteUnitGroup(workspaceId: number, group: string): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}workspace/${workspaceId}/group/${group}`)
+      .delete(`${this.serverUrl}workspace/${workspaceId}/group/${encodeURIComponent(group)}`)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -268,7 +268,9 @@ export class BackendService {
 
   renameUnitGroup(workspaceId: number, oldGroupName: string, newGroupName: string): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/group/${oldGroupName}`, { body: newGroupName })
+      .patch(`${this.serverUrl}workspace/${workspaceId}/group/${
+        encodeURIComponent(oldGroupName)
+      }`, { body: newGroupName })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -277,7 +279,9 @@ export class BackendService {
 
   setGroupUnits(workspaceId: number, groupName: string, units: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/group/${groupName}/units?units=${units.join(';')}`, {})
+      .patch(`${this.serverUrl}workspace/${workspaceId}/group/${
+        encodeURIComponent(groupName)
+      }/units?units=${units.join(';')}`, {})
       .pipe(
         map(() => true),
         catchError(() => of(false))

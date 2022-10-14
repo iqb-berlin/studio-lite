@@ -2,23 +2,23 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUnitDto {
   @ApiProperty({ example: 'EL2443' })
-  key!: string;
+    key!: string;
 
   @ApiPropertyOptional()
-  name?: string;
+    name?: string;
 
   @ApiPropertyOptional()
-  groupName?: string;
+    groupName?: string;
 
   @ApiProperty()
-  createFrom?: number;
+    createFrom?: number;
 
   @ApiProperty()
-  player?: string;
+    player?: string;
 
   @ApiProperty()
-  editor?: string;
+    editor?: string;
 
   @ApiProperty()
-  schemer?: string;
+    schemer?: string;
 }
