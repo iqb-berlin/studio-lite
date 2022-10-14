@@ -38,19 +38,13 @@ export class VeronaModulesService {
     const veronaModules = await this.veronaModulesRepository.query(
       'SELECT key, metadata, file_size, file_datetime from verona_module'
     );
-    const returnVeronaModules: VeronaModuleInListDto[] = [];
-    veronaModules.forEach(veronaModule => {
-      if (!type || veronaModule.metadata.type === type) {
-        returnVeronaModules.push(<VeronaModuleInListDto>{
-          key: veronaModule.key,
-          sortKey: VeronaModuleKeyCollection.getSortKey(veronaModule.key),
-          metadata: veronaModule.metadata,
-          fileSize: veronaModule.file_size,
-          fileDateTime: veronaModule.file_datetime
-        });
-      }
+    return veronaModules.filter(vm => !type || vm.metadata.type === type).map(vm => <VeronaModuleInListDto>{
+      key: vm.key,
+      sortKey: VeronaModuleKeyCollection.getSortKey(vm.key),
+      metadata: vm.metadata,
+      fileSize: vm.file_size,
+      fileDateTime: vm.file_datetime
     });
-    return returnVeronaModules;
   }
 
   async upload(fileData: Buffer) {
