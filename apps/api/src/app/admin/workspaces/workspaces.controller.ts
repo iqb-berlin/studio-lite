@@ -59,7 +59,8 @@ export class WorkspacesController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in workspaceService.remove
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
+  // TODO: not implemented in workspaceService.remove
   @ApiTags('admin workspaces')
   async remove(@WorkspaceGroupId() workspaceGroupId: number, @Param('ids') ids: string): Promise<void> {
     const idsAsNumberArray: number[] = [];

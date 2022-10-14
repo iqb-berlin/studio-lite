@@ -42,8 +42,8 @@ export class UnitsController {
   @ApiTags('workspace')
   async findAll(
     @Req() request,
-    @WorkspaceId() workspaceId: number,
-    @Query('withLastSeenCommentTimeStamp' ) withLastSeenCommentTimeStamp): Promise<UnitInListDto[]> {
+      @WorkspaceId() workspaceId: number,
+      @Query('withLastSeenCommentTimeStamp') withLastSeenCommentTimeStamp): Promise<UnitInListDto[]> {
     return this.unitService.findAll(workspaceId, request.user.id, withLastSeenCommentTimeStamp);
   }
 

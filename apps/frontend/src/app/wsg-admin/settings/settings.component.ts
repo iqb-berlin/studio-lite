@@ -39,8 +39,10 @@ export class SettingsComponent implements OnInit {
     private wsgAdminService: WsgAdminService
   ) {}
 
+  // eslint-disable-next-line class-methods-use-this
   ngOnInit(): void {
     setTimeout(() => {
+      // eslint-disable-next-line no-console
       console.log('yoyo');
     });
   }

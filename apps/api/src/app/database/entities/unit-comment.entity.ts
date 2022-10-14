@@ -3,46 +3,42 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class UnitComment {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column()
-  public body: string;
+    body: string;
 
   @Column({
     name: 'user_name'
   })
-  public userName: string;
+    userName: string;
 
   @Column({
     name: 'user_id'
   })
-  public userId: number;
+    userId: number;
 
   @Column({
     name: 'parent_id'
   })
-  public parentId: number | null;
+    parentId: number | null;
 
   @Column({
     name: 'unit_id'
   })
-  public unitId: number;
-
-  @Column({
-    name: 'unit_id'
-  })
+    unitId: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-  public createdAt: Date;
+    createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-  public changedAt: Date;
+    changedAt: Date;
 }
 
 export default UnitComment;

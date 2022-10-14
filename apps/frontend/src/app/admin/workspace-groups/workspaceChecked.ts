@@ -2,9 +2,9 @@
 import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 
 export class WorkspaceGroupToCheck {
-  public id: number;
-  public name: string;
-  public isChecked: boolean;
+  id: number;
+  name: string;
+  isChecked: boolean;
   constructor(workspaceGroup: WorkspaceGroupInListDto) {
     this.id = workspaceGroup.id;
     this.name = workspaceGroup.name;
@@ -13,8 +13,8 @@ export class WorkspaceGroupToCheck {
 }
 
 export class WorkspaceGroupToCheckCollection {
-  public entries: WorkspaceGroupToCheck[]
-  public hasChanged = false;
+  entries: WorkspaceGroupToCheck[];
+  hasChanged = false;
   private userWorkspacesIds: number[] = [];
   constructor(workspaceGroups: WorkspaceGroupInListDto[]) {
     this.entries = workspaceGroups.map(wsg => new WorkspaceGroupToCheck(wsg));

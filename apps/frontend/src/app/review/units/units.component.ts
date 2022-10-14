@@ -49,6 +49,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
       this.postMessageSubscription = this.appService.postMessage$
         .subscribe(messageEvent => this.handleIncomingMessage(messageEvent));
       this.routingSubscription = this.route.params.subscribe(params => {
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         this.reviewService.currentUnitSequenceId = parseInt(params['u'], 10);
         const unitData = this.reviewService.units.filter(
           u => u.sequenceId === this.reviewService.currentUnitSequenceId

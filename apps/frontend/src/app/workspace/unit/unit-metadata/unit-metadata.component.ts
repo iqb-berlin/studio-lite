@@ -15,7 +15,6 @@ import { AppService } from '../../../app.service';
 @Component({
   templateUrl: './unit-metadata.component.html',
   styles: [
-    '.mat-tab-body-wrapper {height: 100%;}',
     'mat-tab-body {height: 100%;}'
   ]
 })
@@ -70,6 +69,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
         WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList)]);

@@ -3,39 +3,39 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class User {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column()
-  public name: string;
+    name: string;
 
   @Column()
-  public password: string;
+    password: string;
 
   @Column()
-  public description: string | null;
+    description: string | null;
 
   @Column({
     name: 'is_admin'
   })
-  public isAdmin: boolean;
+    isAdmin: boolean;
 
   @Column({
     name: 'last_name'
   })
-  public lastName: string | null;
+    lastName: string | null;
 
   @Column({
     name: 'first_name'
   })
-  public firstName: string | null;
+    firstName: string | null;
 
   @Column()
-  public email: string | null;
+    email: string | null;
 
   @Column({
     name: 'email_publish_approved'
   })
-  public emailPublishApproved: boolean;
+    emailPublishApproved: boolean;
 }
 
 export default User;

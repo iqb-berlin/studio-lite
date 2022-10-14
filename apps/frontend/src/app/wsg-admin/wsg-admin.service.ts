@@ -5,9 +5,9 @@ import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
   providedIn: 'root'
 })
 export class WsgAdminService {
-  public selectedWorkspaceGroupId = 0;
-  public selectedWorkspaceGroupName = '';
-  public selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto = {
+  selectedWorkspaceGroupId = 0;
+  selectedWorkspaceGroupName = '';
+  selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto = {
     defaultSchemer: '',
     defaultPlayer: '',
     defaultEditor: ''

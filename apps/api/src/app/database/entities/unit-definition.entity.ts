@@ -3,10 +3,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class UnitDefinition {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column()
-  public data: string;
+    data: string;
 }
 
 export default UnitDefinition;

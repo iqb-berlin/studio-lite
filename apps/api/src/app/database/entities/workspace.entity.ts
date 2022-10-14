@@ -4,15 +4,15 @@ import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 @Entity()
 class Workspace {
   @PrimaryGeneratedColumn()
-  public id: number;
+    id: number;
 
   @Column()
-  public name: string;
+    name: string;
 
   @Column({
     name: 'group_id'
   })
-  public groupId: number;
+    groupId: number;
 
   @Column({
     type: 'jsonb',
@@ -20,7 +20,7 @@ class Workspace {
     default: () => "'{}'",
     nullable: false
   })
-  public settings: WorkspaceSettingsDto;
+    settings: WorkspaceSettingsDto;
 }
 
 export default Workspace;
