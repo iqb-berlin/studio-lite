@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
+@Entity('workspace_group_admin')
 class WorkspaceGroupAdmin {
   @PrimaryColumn({
     name: 'workspace_group_id'
