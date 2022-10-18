@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('resource_package')
+@Entity('resource_package', {name: "resource_package"})
 class ResourcePackage {
   @PrimaryGeneratedColumn()
     id: number;
