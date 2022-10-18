@@ -43,13 +43,15 @@ export class VeronaModuleKeyCollection {
 
   static getSortKey(key: string): string {
     const regexPattern1 = /^([A-Za-z\d_-]+)@(\d+)\.(\d+)/;
-    const regexPatternSuffix = /(\d+)-([a-z]+)(\d+)$/;
+    const regexPatternSuffix = /(\d+)-([a-z-]+)\.?(\d*)$/;
     const matches1 = regexPattern1.exec(key);
     if (matches1 && matches1.length === 4) {
       const sortString = `${matches1[1]}@${matches1[2].padStart(20, '0')}.${matches1[3].padStart(20, '0')}`;
       const matchesSuffix = regexPatternSuffix.exec(key);
-      if (matchesSuffix && matchesSuffix.length === 4) {
-        return `${sortString}.${matchesSuffix[1].padStart(20, '0')}-${matchesSuffix[2]}${matchesSuffix[3].padStart(20, '0')}`;
+      if (matchesSuffix && matchesSuffix.length > 2) {
+        return `${sortString}.${matchesSuffix[1].padStart(20, '0')}-${
+          matchesSuffix[2]
+        }.${matchesSuffix.length > 3 ? matchesSuffix[3].padStart(20, '0') : ''}`;
       }
       return sortString;
     }

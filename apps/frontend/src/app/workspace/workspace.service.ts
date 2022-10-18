@@ -21,7 +21,6 @@ export class WorkspaceService {
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
   workspaceSettings: WorkspaceSettingsDto;
-  moduleHtmlStore: { [key: string]: string } = {};
   unitMetadataStore: UnitMetadataStore | undefined;
   unitDefinitionStore: UnitDefinitionStore | undefined;
   unitSchemeStore: UnitSchemeStore | undefined;
@@ -91,18 +90,6 @@ export class WorkspaceService {
         this.unitList[groupName] = [u];
       }
     });
-  }
-
-  async getModuleHtml(key: string): Promise<string | null> {
-    if (Object.keys(this.moduleHtmlStore).indexOf(key) >= 0) return this.moduleHtmlStore[key];
-    this.appService.dataLoading = true;
-    const fileData = await lastValueFrom(this.appBackendService.getModuleHtml(key));
-    this.appService.dataLoading = false;
-    if (fileData) {
-      this.moduleHtmlStore[key] = fileData.file;
-      return this.moduleHtmlStore[key];
-    }
-    return null;
   }
 
   async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {

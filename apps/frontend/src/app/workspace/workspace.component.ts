@@ -31,7 +31,6 @@ import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
 import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
-import { VeronaModuleCollection } from '../classes/verona-module-collection.class';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
 import { EditWorkspaceSettingsComponent } from '../components/edit-workspace-settings.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
@@ -113,15 +112,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         }
       );
-      this.appBackendService.getModuleList('editor').subscribe(moduleList => {
-        this.appService.editorList = new VeronaModuleCollection(moduleList);
-      });
-      this.appBackendService.getModuleList('player').subscribe(moduleList => {
-        this.appService.playerList = new VeronaModuleCollection(moduleList);
-      });
-      this.appBackendService.getModuleList('schemer').subscribe(moduleList => {
-        this.appService.schemerList = new VeronaModuleCollection(moduleList);
-      });
       this.workspaceService.onCommentsUpdated
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(() => this.updateUnitList());

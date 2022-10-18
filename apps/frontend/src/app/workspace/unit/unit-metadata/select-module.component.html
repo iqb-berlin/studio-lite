@@ -9,7 +9,7 @@
   <div fxLayout="column">
     <mat-form-field>
       <mat-select [placeholder]="'modules.'+moduleType+'-name' | translate" formControlName="moduleSelector">
-        <mat-option *ngFor="let m of moduleList.getEntries(stableOnly)" [value]="m.key">
+        <mat-option *ngFor="let m of moduleList" [value]="m.key">
           {{m.metadata.name}} {{m.metadata.version}}
         </mat-option>
       </mat-select>

@@ -11,10 +11,11 @@ import {
   MessageDialogData,
   MessageType
 } from '@studio-lite-lib/iqb-components';
-import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../backend.service';
 import { AppService } from '../../app.service';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
+import { ModuleService } from '../../module.service';
+import { VeronaModuleClass } from '../../classes/verona-module.class';
 
 @Component({
   templateUrl: './verona-modules.component.html',
@@ -25,13 +26,14 @@ import { VeronaModulesTableComponent } from './verona-modules-table.component';
 })
 export class VeronaModulesComponent implements OnInit {
   @ViewChildren(VeronaModulesTableComponent) moduleTables!: QueryList<VeronaModulesTableComponent>;
-  selectedModules: VeronaModuleInListDto[] = [];
+  selectedModules: VeronaModuleClass[] = [];
   uploadUrl = '';
   token: string | undefined;
 
   constructor(
     @Inject('SERVER_URL') public serverUrl: string,
     private appService: AppService,
+    public moduleService: ModuleService,
     private backendService: BackendService,
     private newItemAuthoringToolDialog: MatDialog,
     private editItemAuthoringToolDialog: MatDialog,
@@ -46,19 +48,20 @@ export class VeronaModulesComponent implements OnInit {
     setTimeout(() => {
       this.appService.appConfig.setPageTitle('Admin: Verona-Module');
       const t = localStorage.getItem('t');
+      this.loadModuleList();
       this.token = t || '';
     });
   }
 
-  updateTables() {
-    this.moduleTables.forEach(tab => {
-      tab.updateList();
+  loadModuleList() {
+    this.appService.dataLoading = true;
+    this.moduleService.loadList().then(() => {
+      this.appService.dataLoading = false;
     });
-    this.appService.dataLoading = false;
   }
 
-  changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleInListDto[] }) {
-    const newSelection: VeronaModuleInListDto[] = [];
+  changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleClass[] }) {
+    const newSelection: VeronaModuleClass[] = [];
     this.selectedModules.forEach(m => {
       if (m.metadata.type !== selection.type) {
         newSelection.push(m);
@@ -96,7 +99,7 @@ export class VeronaModulesComponent implements OnInit {
             (deleteFilesOk: boolean) => {
               if (deleteFilesOk) {
                 this.snackBar.open('Verona-Modul(e) hochgeladen', '', { duration: 1000 });
-                this.updateTables();
+                this.loadModuleList();
               } else {
                 this.snackBar.open('Konnte Verona-Modul(e) nicht hochladen', '', { duration: 3000 });
                 this.appService.dataLoading = false;

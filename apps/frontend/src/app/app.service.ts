@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
 import { AppConfig, AppHttpError } from './app.classes';
-import { VeronaModuleCollection } from './classes/verona-module-collection.class';
 
 export const standardLogo: AppLogoDto = {
   data: 'assets/IQB-LogoA.png',
@@ -43,9 +42,6 @@ export class AppService {
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();
   dataLoading: boolean | number = false;
-  editorList = new VeronaModuleCollection([]);
-  playerList = new VeronaModuleCollection([]);
-  schemerList = new VeronaModuleCollection([]);
 
   constructor(
     private titleService: Title
