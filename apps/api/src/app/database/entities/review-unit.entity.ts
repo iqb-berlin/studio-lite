@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity('review_unit', {name: "review_unit"})
+@Entity()
 class ReviewUnit {
   @PrimaryColumn({
     name: 'unit_id'

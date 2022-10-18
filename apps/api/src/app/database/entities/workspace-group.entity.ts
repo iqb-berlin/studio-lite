@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('workspace_group', {name: "workspace_group"})
+@Entity()
 class WorkspaceGroup {
   @PrimaryGeneratedColumn()
     id: number;
