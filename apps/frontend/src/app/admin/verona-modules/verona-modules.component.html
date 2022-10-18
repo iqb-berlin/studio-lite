@@ -19,22 +19,25 @@
                               [token]="token"
                               [folderName]="'i'"
                               [folder]="'y'"
-                              (uploadCompleteEvent)="updateTables()">
+                              (uploadCompleteEvent)="loadModuleList()">
       </iqb-files-upload-queue>
-      <div fxLayout="column">
-        <h1>{{'modules.editor-name' | translate}}</h1>
-        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
-                                  type="editor"></app-verona-modules-table>
-      </div>
       <div fxLayout="column">
         <h1>{{'modules.player-name' | translate}}</h1>
         <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
-                                  type="player"></app-verona-modules-table>
+                                  type="player"
+                                  [modules]="moduleService.players"></app-verona-modules-table>
+      </div>
+      <div fxLayout="column">
+        <h1>{{'modules.editor-name' | translate}}</h1>
+        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
+                                  type="editor"
+                                  [modules]="moduleService.editors"></app-verona-modules-table>
       </div>
       <div fxLayout="column">
         <h1>{{'modules.schemer-name' | translate}}</h1>
         <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
-                                  type="schemer"></app-verona-modules-table>
+                                  type="schemer"
+                                  [modules]="moduleService.schemers"></app-verona-modules-table>
       </div>
     </div>
   </div>

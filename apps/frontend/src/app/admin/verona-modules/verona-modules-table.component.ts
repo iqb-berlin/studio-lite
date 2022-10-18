@@ -1,36 +1,37 @@
 import {
-  AfterViewInit,
-  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import { VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
-import { BackendService as AppBackendService } from '../../backend.service';
-import { VeronaModuleCollection } from '../../classes/verona-module-collection.class';
-import { AppService } from '../../app.service';
+import { VeronaModuleClass } from '../../classes/verona-module.class';
 
 @Component({
   selector: 'app-verona-modules-table',
   templateUrl: './verona-modules-table.component.html'
 })
-export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
-  @Input() type!: 'player' | 'editor' | 'schemer';
+export class VeronaModulesTableComponent implements OnInit, OnDestroy {
+  @Input() type!: 'editor' | 'player' | 'schemer';
+  @Input()
+  set modules(value: { [key: string]: VeronaModuleClass }) {
+    this.objectsDatasource = new MatTableDataSource(
+      Object.keys(value).map(m => value[m])
+    );
+  }
+
   @Output() selectionChanged = new EventEmitter();
   @ViewChild(MatSort) sort = new MatSort();
-  objectsDatasource = new MatTableDataSource<VeronaModuleInListDto>();
-  tableSelectionCheckboxes = new SelectionModel <VeronaModuleInListDto>(true, []);
+  objectsDatasource = new MatTableDataSource<VeronaModuleClass>();
+  tableSelectionCheckboxes = new SelectionModel <VeronaModuleClass>(true, []);
   timeZone = 'Europe/Berlin';
   displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(
-    private backendService: BackendService,
-    private appBackendService: AppBackendService,
-    private appService: AppService
+    private backendService: BackendService
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
@@ -39,41 +40,6 @@ export class VeronaModulesTableComponent implements OnChanges, OnInit, OnDestroy
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {
       this.selectionChanged.emit({ type: this.type, selectedModules: this.tableSelectionCheckboxes.selected });
     });
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.updateList();
-    });
-  }
-
-  updateList() {
-    this.appBackendService.getModuleList(this.type).subscribe(
-      (fileData: VeronaModuleInListDto[]) => {
-        if (fileData) {
-          const moduleCollection = new VeronaModuleCollection(fileData);
-          if (this.type === 'editor') {
-            this.appService.editorList = moduleCollection;
-          } else if (this.type === 'player') {
-            this.appService.playerList = moduleCollection;
-          } else {
-            this.appService.schemerList = moduleCollection;
-          }
-          this.objectsDatasource = new MatTableDataSource(fileData);
-          this.objectsDatasource.sortingDataAccessor = (item, property) => ((property.includes('.')) ?
-            property.split('.')
-              .reduce((metaData: unknown, i: string) => (metaData as VeronaModuleMetadataDto)[i], item) :
-            (item)[property]);
-          this.objectsDatasource.sort = this.sort;
-        } else {
-          this.objectsDatasource = new MatTableDataSource();
-        }
-      }
-    );
-  }
-
-  ngOnChanges(): void {
-    this.updateList();
   }
 
   isAllSelected(): boolean {

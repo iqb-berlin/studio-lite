@@ -3,17 +3,37 @@ import {
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { VeronaModuleCollection } from '../../../classes/verona-module-collection.class';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { VeronaModuleClass } from '../../../classes/verona-module.class';
 
 @Component({
   selector: 'app-select-module',
   templateUrl: './select-module.component.html'
 })
 export class SelectModuleComponent implements OnDestroy {
-  @Input() moduleList = new VeronaModuleCollection([]);
+  private allModules: VeronaModuleClass[] = [];
+  @Input()
+  set modules(value: { [key: string]: VeronaModuleClass }) {
+    this.allModules = Object.keys(value).map(m => value[m]);
+    this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
+      !this.stableOnly || this.selectedModuleId === m.key);
+  }
+
+  private _stableOnly = false;
+  @Input()
+  get stableOnly(): boolean {
+    return this._stableOnly;
+  }
+
+  set stableOnly(value: boolean) {
+    this._stableOnly = value;
+    this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
+      !this.stableOnly || this.selectedModuleId === m.key);
+  }
+
+  moduleList: VeronaModuleClass[] = [];
   selectedModuleId!: string;
   @Input() moduleType = '?';
-  @Input() stableOnly = false;
   @Output() selectionChanged = new EventEmitter();
   hasListEntries = false;
   moduleForm: UntypedFormGroup;
@@ -38,19 +58,21 @@ export class SelectModuleComponent implements OnDestroy {
   private setData(): void {
     let newModuleSelectorValue = '';
     if (this.moduleFormDataChangedSubscription) this.moduleFormDataChangedSubscription.unsubscribe();
-    this.hasListEntries = this.moduleList && this.moduleList.hasEntries();
+    this.hasListEntries = this.moduleList && this.moduleList.length > 0;
     this.isValid = true;
     this.isEmpty = true;
     this.moduleSubstitute = '';
     this.isEmpty = !this.selectedModuleId;
     if (!this.isEmpty) {
-      const checkModuleId = this.moduleList.isValid(this.selectedModuleId);
+      const allKeys = this.moduleList.map(m => m.key);
+      const checkModuleId = VeronaModuleFactory.isValid(this.selectedModuleId, allKeys);
       if (checkModuleId === false) {
         this.isValid = false;
       } else if (checkModuleId === true) {
         newModuleSelectorValue = this.selectedModuleId;
       } else if (this.moduleList) {
-        this.moduleSubstitute = this.moduleList.getNameAndVersion(checkModuleId);
+        const moduleSubstituteObjects = this.moduleList.filter(m => m.key === checkModuleId);
+        this.moduleSubstitute = moduleSubstituteObjects[0].nameAndVersion;
       }
     }
     this.moduleFormDataChangedSubscription = this.moduleForm.valueChanges.subscribe(() => {
