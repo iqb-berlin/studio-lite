@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn } from 'typeorm';
 
-@Entity('workspace_user')
+@Entity('workspace_user', {name: "workspace_user"})
 class WorkspaceUser {
   @PrimaryColumn({
     name: 'workspace_id'

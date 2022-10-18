@@ -3,7 +3,7 @@ import {
 } from 'typeorm';
 import { VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 
-@Entity('verona_module')
+@Entity('verona_module', {name: "verona_module"})
 class VeronaModule {
   @PrimaryColumn()
     key: string;
