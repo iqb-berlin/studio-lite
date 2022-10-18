@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 
-@Entity('workspace', {name: "workspace"})
+@Entity()
 class Workspace {
   @PrimaryGeneratedColumn()
     id: number;
