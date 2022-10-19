@@ -22,6 +22,7 @@ import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import { saveAs } from 'file-saver-es';
 import { HttpParams } from '@angular/common/http';
+import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
@@ -61,6 +62,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private messsageDialog: MatDialog,
     private editSettingsDialog: MatDialog,
     private showUsersDialog: MatDialog,
+    private moduleService: ModuleService,
     private deleteConfirmDialog: MatDialog,
     private uploadReportDialog: MatDialog,
     private reviewsDialog: MatDialog,
@@ -105,6 +107,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.workspaceService.isWorkspaceGroupAdmin =
               this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
             this.updateUnitList();
+            this.moduleService.loadList();
           } else {
             this.snackBar.open(
               'Konnte Daten für Arbeitsbereich nicht laden', 'Fehler', { duration: 3000 }
@@ -427,10 +430,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        this.workspaceService.workspaceSettings.defaultEditor = result.controls.editorSelector.value;
-        this.workspaceService.workspaceSettings.defaultPlayer = result.controls.playerSelector.value;
-        this.workspaceService.workspaceSettings.defaultSchemer = result.controls.schemerSelector.value;
-        this.workspaceService.workspaceSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
+        this.workspaceService.workspaceSettings.defaultEditor = result.defaultEditor;
+        this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
+        this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
+        this.workspaceService.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {

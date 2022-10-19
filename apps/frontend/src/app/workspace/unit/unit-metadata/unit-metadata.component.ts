@@ -5,10 +5,10 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ModuleService, SelectModuleComponent } from '@studio-lite/studio-components';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { BackendService as AppBackendService } from '../../../backend.service';
-import { SelectModuleComponent } from './select-module.component';
 import { InputTextComponent } from '../../../components/input-text.component';
 import { AppService } from '../../../app.service';
 
@@ -37,6 +37,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     private appBackendService: AppBackendService,
     public workspaceService: WorkspaceService,
     public appService: AppService,
+    public moduleService: ModuleService,
     private inputTextDialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
@@ -57,7 +58,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     });
   }
 
-  private readData(): void {
+  private async readData() {
+    if (Object.keys(this.moduleService.editors).length === 0) await this.moduleService.loadList();
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
@@ -80,19 +82,19 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         group: unitMetadata.groupName
       }, { emitEvent: false });
       if (this.editorSelector) {
-        this.editorSelector.setModule(unitMetadata.editor || '');
+        this.editorSelector.value = unitMetadata.editor || '';
         this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setEditor(selectedValue);
         });
       }
       if (this.playerSelector) {
-        this.playerSelector.setModule(unitMetadata.player || '');
+        this.playerSelector.value = unitMetadata.player || '';
         this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setPlayer(selectedValue);
         });
       }
       if (this.schemerSelector) {
-        this.schemerSelector.setModule(unitMetadata.schemer || '');
+        this.schemerSelector.value = unitMetadata.schemer || '';
         this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
           this.workspaceService.unitMetadataStore?.setSchemer(selectedValue);
         });

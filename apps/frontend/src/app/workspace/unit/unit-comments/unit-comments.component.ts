@@ -28,7 +28,9 @@ export class UnitCommentsComponent implements OnDestroy {
       this.backendService.getMyData()
     ])
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(result => this.updateComments(result[0], result[1] ? result[1] : undefined));
+      .subscribe(result => {
+        this.updateComments(result[0], result[1] ? result[1] : undefined);
+      });
   }
 
   private updateComments(unitId: number, userData?: MyDataDto) {

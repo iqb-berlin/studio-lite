@@ -44,8 +44,8 @@
         <div
           [hidden]="unitForm.disabled"
           fxFlex="40%">{{'modules.editor-name' | translate}}</div>
-        <app-select-module #editor [moduleList]="this.appService.editorList"
-                           [hidden]="unitForm.disabled"
+        <app-select-module #editor [modules]="this.moduleService.editors"
+                           [hidden]="unitForm.disabled" type="editor"
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="editor"></app-select-module>
       </div>
@@ -53,8 +53,8 @@
         <div
           [hidden]="unitForm.disabled"
           fxFlex="40%">{{'modules.player-name' | translate}}</div>
-        <app-select-module #player [moduleList]="this.appService.playerList"
-                           [hidden]="unitForm.disabled"
+        <app-select-module #player [modules]="this.moduleService.players"
+                           [hidden]="unitForm.disabled" type="player"
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="player"></app-select-module>
       </div>
@@ -62,8 +62,8 @@
         <div
           [hidden]="unitForm.disabled"
           fxFlex="40%">{{'modules.schemer-name' | translate}}</div>
-        <app-select-module #schemer [moduleList]="this.appService.schemerList"
-                           [hidden]="unitForm.disabled"
+        <app-select-module #schemer [modules]="this.moduleService.schemers"
+                           [hidden]="unitForm.disabled" type="schemer"
                            [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                            fxFlex="55%" moduleType="schemer"></app-select-module>
       </div>

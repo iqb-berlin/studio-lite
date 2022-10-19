@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { ModuleService } from '@studio-lite/studio-components';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 import { SelectUnitListComponent } from './components/select-unit-list.component';
@@ -33,6 +35,7 @@ export class ExportUnitComponent implements OnInit {
   constructor(
     public workspaceService: WorkspaceService,
     public appService: AppService,
+    private moduleService: ModuleService,
     private backendService: BackendService
   ) {}
 
@@ -43,7 +46,7 @@ export class ExportUnitComponent implements OnInit {
       ).subscribe(unitsWithMetadata => {
         unitsWithMetadata.forEach(umd => {
           if (umd.player) {
-            const validPlayerId = this.appService.playerList.isValid(umd.player);
+            const validPlayerId = VeronaModuleFactory.isValid(umd.player, Object.keys(this.moduleService.players));
             if (validPlayerId === false) this.unitsWithOutPlayer.push(umd.id);
           } else {
             this.unitsWithOutPlayer.push(umd.id);

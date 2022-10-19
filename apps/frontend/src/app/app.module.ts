@@ -28,6 +28,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
+import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -91,7 +92,8 @@ export function createTranslateLoader(http: HttpClient) {
     }),
     MatCheckboxModule,
     MatSelectModule,
-    FormsModule
+    FormsModule,
+    StudioComponentsModule
   ],
   providers: [
     BackendService,

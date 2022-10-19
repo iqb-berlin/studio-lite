@@ -40,7 +40,6 @@ import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
-import { SelectModuleComponent } from './unit/unit-metadata/select-module.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
@@ -97,7 +96,6 @@ import { GroupManageComponent } from './dialogs/group-manage.component';
     UnitEditorComponent,
     SaveOrDiscardComponent,
     UnitPreviewComponent,
-    SelectModuleComponent,
     ExportUnitComponent,
     UnitSchemerComponent,
     SelectUnitListComponent,

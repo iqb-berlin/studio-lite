@@ -3,6 +3,8 @@ import {
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { ModuleService } from '@studio-lite/studio-components';
 import { PageData, StatusVisual } from './unit-preview.classes';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
@@ -55,6 +57,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private backendService: BackendService,
     private workspaceService: WorkspaceService,
+    private moduleService: ModuleService,
     public previewService: PreviewService
   ) {
     this.appService.postMessage$
@@ -162,14 +165,16 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  sendUnitDataToPlayer(): void {
+  async sendUnitDataToPlayer() {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
-      const playerId = unitMetadata.player ? this.appService.playerList.getBestMatch(unitMetadata.player) : '';
+      if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
+      const playerId = unitMetadata.player ?
+        VeronaModuleFactory.getBestMatch(unitMetadata.player, Object.keys(this.moduleService.players)) : '';
       if (playerId) {
         if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
           // TODO: Ist das nicht EditorCode, der hier entfernt werden kann?
@@ -249,7 +254,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (playerId) {
-        this.workspaceService.getModuleHtml(playerId)
+        this.moduleService.getModuleHtml(this.moduleService.players[playerId])
           .then(playerData => {
             this.playerName = playerId;
             if (playerData) {
