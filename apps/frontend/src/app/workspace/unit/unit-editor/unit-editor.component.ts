@@ -3,6 +3,8 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { ModuleService } from '@studio-lite/studio-components';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
@@ -30,6 +32,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     private backendService: BackendService,
     private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
+    private moduleService: ModuleService,
     private appService: AppService
   ) {
     this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
@@ -103,11 +106,13 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  sendUnitDataToEditor(): void {
+  async sendUnitDataToEditor() {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
-      const editorId = unitMetadata.editor ? this.appService.editorList.getBestMatch(unitMetadata.editor) : '';
+      if (Object.keys(this.moduleService.editors).length === 0) await this.moduleService.loadList();
+      const editorId = unitMetadata.editor ?
+        VeronaModuleFactory.getBestMatch(unitMetadata.editor, Object.keys(this.moduleService.editors)) : '';
       if (editorId) {
         if ((editorId === this.lastEditorId) && this.postMessageTarget) {
           if (this.workspaceService.unitDefinitionStore) {
@@ -166,7 +171,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (editorId) {
-        this.workspaceService.getModuleHtml(editorId).then(editorData => {
+        this.moduleService.getModuleHtml(this.moduleService.editors[editorId]).then(editorData => {
           if (editorData) {
             this.setupEditorIFrame(editorData);
             this.lastEditorId = editorId;
@@ -198,6 +203,7 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
     if (this.postMessageSubscription !== null) this.postMessageSubscription.unsubscribe();
   }
 }

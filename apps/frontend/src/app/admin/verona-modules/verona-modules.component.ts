@@ -11,11 +11,10 @@ import {
   MessageDialogData,
   MessageType
 } from '@studio-lite-lib/iqb-components';
+import { ModuleService, VeronaModuleClass } from '@studio-lite/studio-components';
 import { BackendService } from '../backend.service';
 import { AppService } from '../../app.service';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
-import { ModuleService } from '../../module.service';
-import { VeronaModuleClass } from '../../classes/verona-module.class';
 
 @Component({
   templateUrl: './verona-modules.component.html',

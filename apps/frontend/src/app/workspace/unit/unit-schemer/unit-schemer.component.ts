@@ -1,6 +1,8 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { ModuleService } from '@studio-lite/studio-components';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
@@ -27,6 +29,7 @@ export class UnitSchemerComponent implements OnInit {
     private backendService: BackendService,
     private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
+    private moduleService: ModuleService,
     private appService: AppService
   ) {
     this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
@@ -74,12 +77,13 @@ export class UnitSchemerComponent implements OnInit {
     });
   }
 
-  sendUnitDataToSchemer(): void {
+  async sendUnitDataToSchemer() {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      if (Object.keys(this.moduleService.schemers).length === 0) await this.moduleService.loadList();
       const schemerId = unitMetadata.schemer ?
-        this.appService.schemerList.getBestMatch(unitMetadata.schemer) : '';
+        VeronaModuleFactory.getBestMatch(unitMetadata.schemer, Object.keys(this.moduleService.schemers)) : '';
       if (schemerId) {
         if ((schemerId === this.lastSchemerId) && this.postMessageTarget) {
           if (this.workspaceService.unitSchemeStore) {
@@ -132,7 +136,7 @@ export class UnitSchemerComponent implements OnInit {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (schemerId) {
-        this.workspaceService.getModuleHtml(schemerId).then(schemerData => {
+        this.moduleService.getModuleHtml(this.moduleService.schemers[schemerId]).then(schemerData => {
           if (schemerData) {
             this.setupSchemerIFrame(schemerData);
             this.lastSchemerId = schemerId;
@@ -164,6 +168,7 @@ export class UnitSchemerComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
     if (this.postMessageSubscription !== null) this.postMessageSubscription.unsubscribe();
   }
 }

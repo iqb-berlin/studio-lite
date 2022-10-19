@@ -17,7 +17,7 @@
         <a mat-list-item style="height: 22px;text-overflow: ellipsis"
            *ngFor="let unit of unitGroup.value"
            class="unit-list-entry"
-           [matTooltip]="unit.name ? unit.name : unit.id.toString()"
+           [matTooltip]="unit.name ? unit.name : ''"
            matTooltipPosition="right"
            (click)="selectUnit(unit.id)"
            [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">

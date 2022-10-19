@@ -4,11 +4,12 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { VeronaModuleClass } from '../../../classes/verona-module.class';
+import { VeronaModuleClass } from './verona-module.class';
 
 @Component({
   selector: 'app-select-module',
-  templateUrl: './select-module.component.html'
+  templateUrl: './select-module.component.html',
+  styles: ['p { font-size: smaller }']
 })
 export class SelectModuleComponent implements OnDestroy {
   private allModules: VeronaModuleClass[] = [];
@@ -17,6 +18,7 @@ export class SelectModuleComponent implements OnDestroy {
     this.allModules = Object.keys(value).map(m => value[m]);
     this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
       !this.stableOnly || this.selectedModuleId === m.key);
+    this.setData();
   }
 
   private _stableOnly = false;
@@ -29,6 +31,17 @@ export class SelectModuleComponent implements OnDestroy {
     this._stableOnly = value;
     this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
       !this.stableOnly || this.selectedModuleId === m.key);
+    this.setData();
+  }
+
+  @Input()
+  get value(): string {
+    return this.selectedModuleId;
+  }
+
+  set value(value: string) {
+    this.selectedModuleId = value;
+    this.setData();
   }
 
   moduleList: VeronaModuleClass[] = [];
@@ -48,11 +61,6 @@ export class SelectModuleComponent implements OnDestroy {
     this.moduleForm = this.fb.group({
       moduleSelector: this.fb.control('')
     });
-  }
-
-  setModule(newModule: string): void {
-    this.selectedModuleId = newModule;
-    this.setData();
   }
 
   private setData(): void {

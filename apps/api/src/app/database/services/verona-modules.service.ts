@@ -44,7 +44,10 @@ export class VeronaModulesService {
       metadata: vm.metadata,
       fileSize: vm.file_size,
       fileDateTime: vm.file_datetime
-    });
+    }).sort((
+      a: VeronaModuleInListDto,
+      b: VeronaModuleInListDto
+    ) => (a.metadata.name + a.sortKey).localeCompare(b.metadata.name + b.sortKey));
   }
 
   async upload(fileData: Buffer) {

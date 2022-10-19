@@ -137,10 +137,10 @@ export class WorkspacesComponent implements OnInit {
             dialogRef.afterClosed().subscribe(result => {
               if (result !== false) {
                 this.appService.dataLoading = true;
-                wsSettings.defaultEditor = result.controls.editorSelector.value;
-                wsSettings.defaultPlayer = result.controls.playerSelector.value;
-                wsSettings.defaultSchemer = result.controls.schemerSelector.value;
-                wsSettings.stableModulesOnly = result.controls.stableModulesOnlyCheckbox.value;
+                wsSettings.defaultEditor = result.defaultEditor;
+                wsSettings.defaultPlayer = result.defaultPlayer;
+                wsSettings.defaultSchemer = result.defaultSchemer;
+                wsSettings.stableModulesOnly = result.stableModulesOnly;
                 this.appBackendService.setWorkspaceSettings(selectedRows[0].id, wsSettings).subscribe(isOK => {
                   this.appService.dataLoading = false;
                   if (!isOK) {

@@ -4,6 +4,8 @@ import {
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../../app.service';
 import { ReviewService } from '../review.service';
 import { UnitPage } from '../classes/unit-page.class';
@@ -40,6 +42,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private backendService: BackendService,
     public appService: AppService,
+    private moduleService: ModuleService,
     public reviewService: ReviewService
   ) {}
 
@@ -197,7 +200,8 @@ export class UnitsComponent implements OnInit, OnDestroy {
     this.backendService.getUnitMetadata(this.reviewService.reviewId, this.unitData.databaseId).subscribe(umd => {
       if (umd) {
         this.unitData.playerId = umd.player ? umd.player : '';
-        const playerId = this.unitData.playerId ? this.appService.playerList.getBestMatch(this.unitData.playerId) : '';
+        const playerId = this.unitData.playerId ?
+          VeronaModuleFactory.getBestMatch(this.unitData.playerId, Object.keys(this.moduleService.players)) : '';
         this.unitData.name = `${this.unitData.sequenceId + 1}: ${umd.key}${umd.name ? ` - ${umd.name}` : ''}`;
         this.reviewService.setHeaderText(this.unitData.name);
         if (playerId) {
@@ -266,7 +270,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (playerId) {
-        this.reviewService.getModuleHtml(playerId)
+        this.moduleService.getModuleHtml(this.moduleService.players[playerId])
           .then(playerData => {
             if (playerData) {
               this.setupPlayerIFrame(playerData);

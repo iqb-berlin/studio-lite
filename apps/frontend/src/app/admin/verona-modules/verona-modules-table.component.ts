@@ -6,8 +6,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { saveAs } from 'file-saver-es';
+import { VeronaModuleClass } from '@studio-lite/studio-components';
 import { BackendService } from '../backend.service';
-import { VeronaModuleClass } from '../../classes/verona-module.class';
 
 @Component({
   selector: 'app-verona-modules-table',
@@ -20,6 +20,7 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
     this.objectsDatasource = new MatTableDataSource(
       Object.keys(value).map(m => value[m])
     );
+    this.objectsDatasource.sort = this.sort;
   }
 
   @Output() selectionChanged = new EventEmitter();
@@ -52,13 +53,6 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
     this.isAllSelected() || !this.objectsDatasource ?
       this.tableSelectionCheckboxes.clear() :
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
-  }
-
-  hasObjects(): boolean {
-    if (this.objectsDatasource == null) {
-      return false;
-    }
-    return this.objectsDatasource.data.length > 0;
   }
 
   ngOnDestroy(): void {

@@ -1,7 +1,8 @@
 import { Component, Inject } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../app.service';
 
 @Component({
@@ -9,42 +10,42 @@ import { AppService } from '../app.service';
     <div fxLayout="column" style="height: 100%">
       <h1 mat-dialog-title>Einstellungen für den Arbeitsbereich</h1>
       <mat-dialog-content>
-        <form [formGroup]="settingsForm" fxLayout="column">
-          <mat-form-field>
-            <mat-label>Voreingestellter Editor</mat-label>
-            <mat-select placeholder="Editor" formControlName="editorSelector">
-              <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of appService.editorList.getEntries(false)" [value]="m.key">
-                {{m.metadata.name}} {{m.metadata.version}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Voreingestellter Player</mat-label>
-            <mat-select placeholder="Player" formControlName="playerSelector">
-              <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of appService.playerList.getEntries(false)" [value]="m.key">
-                {{m.metadata.name}} {{m.metadata.version}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Voreingestellter Schemer</mat-label>
-            <mat-select placeholder="Kodierung" formControlName="schemerSelector">
-              <mat-option [value]=""></mat-option>
-              <mat-option *ngFor="let m of appService.schemerList.getEntries(false)" [value]="m.key">
-                {{m.metadata.name}} {{m.metadata.version}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+        <div fxLayout="column">
+          <div fxLayout="row" fxLayoutAlign="space-between start">
+                  <mat-label>Voreingestellter Editor</mat-label>
+                  <app-select-module [modules]="this.moduleService.editors"
+                                     type="editor" [value]="dialogData.defaultEditor"
+                                     (selectionChanged)="selectModul('editor', $event)"
+                                     [stableOnly]="false"
+                                     fxFlex="55%" moduleType="editor"></app-select-module>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="space-between start">
+                  <mat-label>Voreingestellter Player</mat-label>
+                  <app-select-module [modules]="this.moduleService.players"
+                                     type="player" [value]="dialogData.defaultPlayer"
+                                     [stableOnly]="false"
+                                     (selectionChanged)="selectModul('player', $event)"
+                                     fxFlex="55%" moduleType="player"></app-select-module>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="space-between start">
+                  <mat-label>Voreingestellter Schemer</mat-label>
+                  <app-select-module [modules]="this.moduleService.schemers"
+                                     type="schemer" [value]="dialogData.defaultSchemer"
+                                     [stableOnly]="false"
+                                     (selectionChanged)="selectModul('schemer', $event)"
+                                     fxFlex="55%" moduleType="schemer"></app-select-module>
+          </div>
           <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="15px" class="margin-bottom">
-            <mat-checkbox formControlName="stableModulesOnlyCheckbox"></mat-checkbox>
+            <mat-checkbox (click)="$event.stopPropagation()"
+                          (change)="$event ? setStableChecked($event) : null"
+                          [checked]="dialogData.stableModulesOnly">
+            </mat-checkbox>
             <div>Nur Module zur Auswahl anzeigen, die als "stabil" markiert sind (keine Beta-Versionen).</div>
           </div>
-        </form>
+        </div>
       </mat-dialog-content>
       <mat-dialog-actions>
-        <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="settingsForm">
+        <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="dialogData">
           Speichern
         </button>
         <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
@@ -56,18 +57,27 @@ import { AppService } from '../app.service';
   ]
 })
 export class EditWorkspaceSettingsComponent {
-  settingsForm: UntypedFormGroup;
+  dialogData: WorkspaceSettingsDto;
 
   constructor(
-    private fb: UntypedFormBuilder,
     public appService: AppService,
+    public moduleService: ModuleService,
     @Inject(MAT_DIALOG_DATA) public data: unknown
   ) {
-    this.settingsForm = this.fb.group({
-      editorSelector: this.fb.control((this.data as WorkspaceSettingsDto).defaultEditor),
-      playerSelector: this.fb.control((this.data as WorkspaceSettingsDto).defaultPlayer),
-      schemerSelector: this.fb.control((this.data as WorkspaceSettingsDto).defaultSchemer),
-      stableModulesOnlyCheckbox: this.fb.control((this.data as WorkspaceSettingsDto).stableModulesOnly)
-    });
+    this.dialogData = this.data as WorkspaceSettingsDto;
+  }
+
+  setStableChecked($event: MatCheckboxChange) {
+    this.dialogData.stableModulesOnly = $event.checked;
+  }
+
+  selectModul(modulType: string, newValue: string) {
+    if (modulType === 'editor') {
+      this.dialogData.defaultEditor = newValue;
+    } else if (modulType === 'schemer') {
+      this.dialogData.defaultSchemer = newValue;
+    } else if (modulType === 'player') {
+      this.dialogData.defaultPlayer = newValue;
+    }
   }
 }

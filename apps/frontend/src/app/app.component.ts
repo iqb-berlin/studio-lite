@@ -9,7 +9,6 @@ import { setDefaultOptions } from 'date-fns';
 import { AppService, standardLogo } from './app.service';
 import { BackendService } from './backend.service';
 import { AppConfig } from './app.classes';
-import { ModuleService } from './module.service';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +19,6 @@ import { ModuleService } from './module.service';
 export class AppComponent implements OnInit {
   constructor(
     public appService: AppService,
-    private moduleService: ModuleService,
     private backendService: BackendService,
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
@@ -63,7 +61,6 @@ export class AppComponent implements OnInit {
       if (token) {
         this.backendService.getAuthData().subscribe(authData => {
           this.appService.authData = authData;
-          this.moduleService.loadList();
         });
       }
 
