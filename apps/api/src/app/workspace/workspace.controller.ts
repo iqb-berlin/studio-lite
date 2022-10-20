@@ -87,7 +87,8 @@ export class WorkspaceController {
   async renameUnitGroup(@WorkspaceId() workspaceId: number,
     @Param('name') oldGroupName: string,
     @Body() newGroupName) {
-    return this.workspaceService.patchGroupName(workspaceId, decodeURIComponent(oldGroupName), newGroupName.body);
+    const b = Buffer.from(oldGroupName, 'hex')
+    return this.workspaceService.patchGroupName(workspaceId, b.toString(), newGroupName.body);
   }
 
   @Patch('group/:name/units')
@@ -102,8 +103,9 @@ export class WorkspaceController {
   async patchUnitsGroup(@WorkspaceId() workspaceId: number,
     @Param('name') groupName: string,
     @Query('units') ids: string) {
+    const b = Buffer.from(groupName, 'hex')
     const idsAsNumberArray = ids ? ids.split(';').map(s => parseInt(s, 10)) : [];
-    return this.workspaceService.patchUnitsGroup(workspaceId, decodeURIComponent(groupName), idsAsNumberArray);
+    return this.workspaceService.patchUnitsGroup(workspaceId, b.toString(), idsAsNumberArray);
   }
 
   @Delete('group/:name')
@@ -112,7 +114,8 @@ export class WorkspaceController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
-    return this.workspaceService.removeGroup(workspaceId, decodeURIComponent(groupName));
+    const b = Buffer.from(groupName, 'hex')
+    return this.workspaceService.removeGroup(workspaceId, b.toString());
   }
 
   @Post('upload')
