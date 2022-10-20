@@ -33,12 +33,19 @@ Nach der Installation ist kein User-Account angelegt. Sie bekommen beim Aufruf d
 4. Ändern von Texten: Startseite und Impressum/Datenschutz. Sie sind dazu verpflichtet, wenn Ihr Server öffentlich erreichbar ist.
 
 Gehen Sie dann zur Startseite zurück (Klick auf das Logo links oben) und rufen Sie die Admin-Funktion einer Arbeitsbereichsgruppe auf (Zahnrad-Symbol neben dem Gruppennamen).
+
 5. Fügen Sie einen Arbeitsbereich hinzu.
 6. Weisen Sie vorhandenen Nutzern Zugriffsrechte dafür zu.
 
 Jetzt (zurück zur Startseite) ist man in der Lage, einen Arbeitsbereich aufzurufen und Aufgaben zu definieren.
 
 # Update/Anpassen
-Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.prod`. Beispielsweise legt `TAG` fest, welches Release zur Installation verwendet werden soll. Eine vorhandene Installation kann aktualisiert werden, indem man mit einem Texteditor den Eintrag auf die neue Version ändert.
+Achtung: Sorgen Sie vor einem Update stets für ein Backup (z. B. Snapshot-Funktion des Servers). Sie sollten das Zurückspielen eines Backups (sog. Restore) zumindest einmal erprobt haben, um auf diese Situation vorbereitet zu sein.
 
-Nach den Änderungen ist erneut `make production-ramp-up` aufzurufen. Die vorhandenen Docker-Container werden gestoppt, neue Docker-Images eingespielt und dann wieder gestartet. Dieser Prozess sollte nicht länger als eine Minute dauern. Da die Daten nicht Teil der Container sind, sondern dauerhaft auf dem Server in speziellen Verzeichnissen gespeichert sind (z. B. die Datenbank), wird hierdurch nur die Programmierung ausgetauscht. Die Arbeit kann unmittelbar fortgesetzt werden.  
+Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.prod`. Hier finden Sie z. B. die Ports, auf denen Frontend antwortet.
+
+Für die Festlegung, welche Version installiert werden soll, ist in dieser Datei der Eintrag `TAG` verantwortlich. Bei der Erstinstallation ist hier `latest` eingetragen. Das bedeutet, dass die jeweils letzte stabile Version installiert wird. Man kann aber auch manuell eine andere Version eintragen. Darüber ist es möglich, eine Vorversion im Entwicklungsstadium (sog. Pre-release) festzulegen. Die Liste aller Releases finden Sie [hier](https://github.com/iqb-berlin/studio-lite/releases).
+
+Für das Update ist dann erneut `make production-ramp-up` aufzurufen. Die vorhandenen Docker-Container werden gestoppt, neue Docker-Images eingespielt und dann wieder gestartet. Dieser Prozess sollte nicht länger als eine Minute dauern. Da die Daten nicht Teil der Container sind, sondern dauerhaft auf dem Server in speziellen Verzeichnissen gespeichert sind (z. B. die Datenbank), wird hierdurch nur die Programmierung ausgetauscht. Die Arbeit kann unmittelbar fortgesetzt werden.  
+
+Achtung: Sollten bei einem Update Änderungen an der Datenbankstruktur nötig sein, erfolgt dies automatisch. Allerdings trifft dies nur zu, wenn Sie zu einer neueren Version wechseln. Wenn Sie eine ältere Programmierung als die aktuell installierte abrufen, kann die alte Datenbankstruktur eventuell nicht mehr hergestellt werden.
