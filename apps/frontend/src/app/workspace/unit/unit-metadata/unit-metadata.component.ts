@@ -134,7 +134,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         title: 'Neue Gruppe',
         default: '',
         okButtonLabel: 'Speichern',
-        prompt: 'Namen der Gruppe'
+        prompt: 'Name der Gruppe'
       }
     });
 

@@ -210,8 +210,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               return <CreateUnitDto>{
                 key: (<UntypedFormGroup>dialogResult).get('key')?.value.trim(),
                 name: (<UntypedFormGroup>dialogResult).get('label')?.value,
-                groupName: (<UntypedFormGroup>dialogResult).get('groupSelect')?.value ||
-                  (<UntypedFormGroup>dialogResult).get('groupDirect')?.value || ''
+                groupName: (<UntypedFormGroup>dialogResult).get('groupDirect')?.value ||
+                  (<UntypedFormGroup>dialogResult).get('groupSelect')?.value || ''
               };
             }
           }
