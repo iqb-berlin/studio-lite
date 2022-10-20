@@ -147,7 +147,7 @@ export class GroupManageComponent implements OnInit {
             this.loadGroups();
           } else {
             this.snackBar.open(
-              'Konnte AGruppe nicht löschen', 'Fehler', { duration: 3000 }
+              'Konnte Gruppe nicht löschen', 'Fehler', { duration: 3000 }
             );
           }
         });
