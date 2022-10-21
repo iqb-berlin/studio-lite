@@ -24,13 +24,13 @@ stages:
 
 .default_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
     - if: $CI_COMMIT_TAG
       when: never
 
 .default_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
@@ -38,8 +38,24 @@ stages:
 
 .default_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.development_rules:
+  rules:
+    #- if: $CI_COMMIT_BRANCH == "develop" && ! $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.development_db_rules:
+  rules:
+    #- if: $CI_COMMIT_BRANCH == "develop" && ! $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - database/*
     - if: $CI_COMMIT_TAG
       when: never
 
@@ -160,7 +176,8 @@ install-dependencies:
   stage: build
   interruptible: true
   rules:
-    - !reference [.default_rules, rules]
+    - !reference [ .default_rules, rules ]
+    - !reference [ .development_rules, rules ]
   cache:
     key:
       files:
@@ -191,6 +208,7 @@ build-db-image:
   stage: build
   rules:
     - !reference [ .default_db_rules, rules ]
+    - !reference [ .development_db_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -206,6 +224,7 @@ build-liquibase-image:
   stage: build
   rules:
     - !reference [ .default_db_rules, rules ]
+    - !reference [ .development_db_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -220,7 +239,7 @@ build-liquibase-image:
 patch-db-image:
   stage: build
   rules:
-    - !reference [.default_db_rules, rules]
+    - !reference [ .default_db_rules, rules ]
   needs:
     - build-db-image
     - build-liquibase-image
@@ -455,44 +474,11 @@ audit-app:
   script:
     - npm audit --audit-level critical
 
-build-docker-app:
-  stage: build-images
-  extends: .distributed
-  rules:
-    - !reference [ .default_rules, rules ]
-  needs:
-    - install-dependencies
-    - build-app
-    - test-app
-    - test-app-e2e
-    - test-app-e2e-ui-chrome
-#    - test-app-e2e-ui-chrome-mobile
-#    - test-app-e2e-ui-firefox
-#    - test-app-e2e-ui-firefox-mobile
-#    - test-app-e2e-ui-edge
-#    - test-app-e2e-ui-edge-mobile
-    - audit-app
-    - lint-app
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - apk add --no-cache npm
-    - npm i -g npx
-    - echo "$REGISTRY_PASSWORD"
-    - echo $REGISTRY_USER
-    - echo $REGISTRY
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
-  script:
-    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
-  after_script:
-    - docker logout $REGISTRY
-
 scan-docker-db:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.default_db_rules, rules]
+    - !reference [ .development_db_rules, rules ]
   needs:
     - build-db-image
   image: $DOCKER_IMAGE
@@ -506,7 +492,7 @@ scan-docker-liquibase:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.default_db_rules, rules]
+    - !reference [ .development_db_rules, rules ]
   needs:
     - build-liquibase-image
   image: $DOCKER_IMAGE
@@ -516,12 +502,31 @@ scan-docker-liquibase:
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
 
+build-docker-app:
+  stage: build-images
+  extends: .distributed
+  rules:
+    - !reference [ .development_rules, rules ]
+  needs:
+    - install-dependencies
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
+  after_script:
+    - docker logout $REGISTRY
+
 scan-docker-app:
   stage: scan-images
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .development_rules, rules ]
   needs:
     - install-dependencies
     - build-docker-app
@@ -542,7 +547,7 @@ scan-docker-app:
 build-backend-test-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -557,7 +562,7 @@ build-backend-test-image:
 build-frontend-test-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -572,7 +577,7 @@ build-frontend-test-image:
 build-frontend-e2e-test-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -587,7 +592,7 @@ build-frontend-e2e-test-image:
 build-db-release-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -602,7 +607,7 @@ build-db-release-image:
 build-liquibase-release-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -617,7 +622,7 @@ build-liquibase-release-image:
 patch-db-release-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-db-release-image
     - build-liquibase-release-image
@@ -640,7 +645,7 @@ patch-db-release-image:
 build-backend-release-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -658,7 +663,7 @@ build-backend-release-image:
 build-frontend-release-image:
   stage: build
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -677,7 +682,7 @@ test-backend:
   stage: unit-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -692,7 +697,7 @@ test-frontend:
   stage: unit-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -707,7 +712,7 @@ test-release-e2e:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -730,7 +735,7 @@ test-release-e2e-ui-chrome:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -753,7 +758,7 @@ test-release-e2e-ui-chrome-mobile:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_manual_rules, rules]
+    - !reference [ .prepare_release_manual_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -776,7 +781,7 @@ test-release-e2e-ui-firefox:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_manual_rules, rules]
+    - !reference [ .prepare_release_manual_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -799,7 +804,7 @@ test-release-e2e-ui-firefox-mobile:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_manual_rules, rules]
+    - !reference [ .prepare_release_manual_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -822,7 +827,7 @@ test-release-e2e-ui-edge:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_manual_rules, rules]
+    - !reference [ .prepare_release_manual_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -845,7 +850,7 @@ test-release-e2e-ui-edge-mobile:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.prepare_release_manual_rules, rules]
+    - !reference [ .prepare_release_manual_rules, rules ]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -868,7 +873,7 @@ lint-backend:
   stage: lint
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -883,7 +888,7 @@ lint-frontend:
   stage: lint
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -898,7 +903,7 @@ lint-frontend-e2e:
   stage: lint
   allow_failure: true
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-frontend-e2e-test-image
   image: $DOCKER_IMAGE
@@ -912,7 +917,7 @@ lint-frontend-e2e:
 audit-backend:
   stage: audit
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -926,7 +931,7 @@ audit-backend:
 audit-frontend:
   stage: audit
   rules:
-    - !reference [.prepare_release_rules, rules]
+    - !reference [ .prepare_release_rules, rules ]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -941,7 +946,7 @@ scan-release-db:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.build_release_rules, rules]
+    - !reference [ .build_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -960,7 +965,7 @@ scan-release-liquibase:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.build_release_rules, rules]
+    - !reference [ .build_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -979,7 +984,7 @@ scan-release-backend:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.build_release_rules, rules]
+    - !reference [ .build_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -998,7 +1003,7 @@ scan-release-frontend:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.build_release_rules, rules]
+    - !reference [ .build_release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -1016,7 +1021,7 @@ scan-release-frontend:
 push-docker-pre-release:
   stage: push-images
   rules:
-    - !reference [.prerelease_push_rules, rules]
+    - !reference [ .prerelease_push_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -1041,7 +1046,7 @@ push-docker-pre-release:
 push-docker-release:
   stage: push-images
   rules:
-    - !reference [.release_push_rules, rules]
+    - !reference [ .release_push_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
