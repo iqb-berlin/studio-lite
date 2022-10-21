@@ -25,7 +25,7 @@ stages:
 .default_rules:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG
       when: never
 
 .default_db_rules:
@@ -33,27 +33,34 @@ stages:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       changes:
         - database/*
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG
       when: never
 
 .default_manual_rules:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       when: manual
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG
       when: never
 
-.release_rules:
+.prepare_release_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == "main" || $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_COMMIT_TAG
+      when: never
 
-.release_manual_rules:
+.prepare_release_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == "main" || $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
       when: manual
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)(?:-(?P<PRERELEASE>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
-      when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.build_release_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_TAG
+      when: never
 
 .prerelease_push_rules:
   rules:
@@ -90,7 +97,7 @@ check-default-rules:
   allow_failure: true
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
-    - if: $CI_COMMIT_TAG =~ /^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(alpha|beta|rc)(?:[1-9]\d*)?))?$/
+    - if: $CI_COMMIT_TAG
       when: never
   before_script:
     - PRERELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)([1-9][0-9]*)?))?$"
@@ -534,7 +541,7 @@ scan-docker-app:
 build-backend-test-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -549,7 +556,7 @@ build-backend-test-image:
 build-frontend-test-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -564,7 +571,7 @@ build-frontend-test-image:
 build-frontend-e2e-test-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -579,7 +586,7 @@ build-frontend-e2e-test-image:
 build-db-release-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -594,7 +601,7 @@ build-db-release-image:
 build-liquibase-release-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -609,7 +616,7 @@ build-liquibase-release-image:
 patch-db-release-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-db-release-image
     - build-liquibase-release-image
@@ -632,7 +639,7 @@ patch-db-release-image:
 build-backend-release-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -650,7 +657,7 @@ build-backend-release-image:
 build-frontend-release-image:
   stage: build
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -669,7 +676,7 @@ test-backend:
   stage: unit-test
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -684,7 +691,7 @@ test-frontend:
   stage: unit-test
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -699,7 +706,7 @@ test-release-e2e:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -722,7 +729,7 @@ test-release-e2e-ui-chrome:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -745,7 +752,7 @@ test-release-e2e-ui-chrome-mobile:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
+    - !reference [.prepare_release_manual_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -768,7 +775,7 @@ test-release-e2e-ui-firefox:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
+    - !reference [.prepare_release_manual_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -791,7 +798,7 @@ test-release-e2e-ui-firefox-mobile:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
+    - !reference [.prepare_release_manual_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -814,7 +821,7 @@ test-release-e2e-ui-edge:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
+    - !reference [.prepare_release_manual_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -837,7 +844,7 @@ test-release-e2e-ui-edge-mobile:
   stage: e2e-test
   allow_failure: true
   rules:
-    - !reference [.release_manual_rules, rules]
+    - !reference [.prepare_release_manual_rules, rules]
   needs:
     - patch-db-release-image
     - build-backend-release-image
@@ -860,7 +867,7 @@ lint-backend:
   stage: lint
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -875,7 +882,7 @@ lint-frontend:
   stage: lint
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -890,7 +897,7 @@ lint-frontend-e2e:
   stage: lint
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-frontend-e2e-test-image
   image: $DOCKER_IMAGE
@@ -904,7 +911,7 @@ lint-frontend-e2e:
 audit-backend:
   stage: audit
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-backend-test-image
   image: $DOCKER_IMAGE
@@ -918,7 +925,7 @@ audit-backend:
 audit-frontend:
   stage: audit
   rules:
-    - !reference [.release_rules, rules]
+    - !reference [.prepare_release_rules, rules]
   needs:
     - build-frontend-test-image
   image: $DOCKER_IMAGE
@@ -933,9 +940,9 @@ scan-release-db:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
-  needs:
-    - build-db-release-image
+    - !reference [.build_release_rules, rules]
+#  needs:
+#    - build-db-release-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -949,9 +956,9 @@ scan-release-liquibase:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
-  needs:
-    - build-liquibase-release-image
+    - !reference [.build_release_rules, rules]
+#  needs:
+#    - build-liquibase-release-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -965,9 +972,9 @@ scan-release-backend:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
-  needs:
-    - build-backend-release-image
+    - !reference [.build_release_rules, rules]
+#  needs:
+#    - build-backend-release-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -981,9 +988,9 @@ scan-release-frontend:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.release_rules, rules]
-  needs:
-    - build-frontend-release-image
+    - !reference [.build_release_rules, rules]
+#  needs:
+#    - build-frontend-release-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -997,28 +1004,28 @@ push-docker-pre-release:
   stage: push-images
   rules:
     - !reference [.prerelease_push_rules, rules]
-  needs:
-    - patch-db-release-image
-    - build-backend-release-image
-    - build-frontend-release-image
-    - test-backend
-    - test-frontend
-    - test-release-e2e
-    - test-release-e2e-ui-chrome
+#  needs:
+#    - patch-db-release-image
+#    - build-backend-release-image
+#    - build-frontend-release-image
+#    - test-backend
+#    - test-frontend
+#    - test-release-e2e
+#    - test-release-e2e-ui-chrome
     #- test-release-e2e-ui-chrome-mobile
     #- test-release-e2e-ui-firefox
     #- test-release-e2e-ui-firefox-mobile
     #- test-release-e2e-ui-edge
     #- test-release-e2e-ui-edge-mobile
-    - lint-backend
-    - lint-frontend
-    - lint-frontend-e2e
-    - audit-backend
-    - audit-frontend
-    - scan-release-db
-    - scan-release-liquibase
-    - scan-release-backend
-    - scan-release-frontend
+#    - lint-backend
+#    - lint-frontend
+#    - lint-frontend-e2e
+#    - audit-backend
+#    - audit-frontend
+#    - scan-release-db
+#    - scan-release-liquibase
+#    - scan-release-backend
+#    - scan-release-frontend
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -1044,28 +1051,28 @@ push-docker-release:
   stage: push-images
   rules:
     - !reference [.release_push_rules, rules]
-  needs:
-    - patch-db-release-image
-    - build-backend-release-image
-    - build-frontend-release-image
-    - test-backend
-    - test-frontend
-    - test-release-e2e
-    - test-release-e2e-ui-chrome
+#  needs:
+#    - patch-db-release-image
+#    - build-backend-release-image
+#    - build-frontend-release-image
+#    - test-backend
+#    - test-frontend
+#    - test-release-e2e
+#    - test-release-e2e-ui-chrome
     #- test-release-e2e-ui-chrome-mobile
     #- test-release-e2e-ui-firefox
     #- test-release-e2e-ui-firefox-mobile
     #- test-release-e2e-ui-edge
     #- test-release-e2e-ui-edge-mobile
-    - lint-backend
-    - lint-frontend
-    - lint-frontend-e2e
-    - audit-backend
-    - audit-frontend
-    - scan-release-db
-    - scan-release-liquibase
-    - scan-release-backend
-    - scan-release-frontend
+#    - lint-backend
+#    - lint-frontend
+#    - lint-frontend-e2e
+#    - audit-backend
+#    - audit-frontend
+#    - scan-release-db
+#    - scan-release-liquibase
+#    - scan-release-backend
+#    - scan-release-frontend
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
