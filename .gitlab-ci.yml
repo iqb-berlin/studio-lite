@@ -24,13 +24,13 @@ stages:
 
 .default_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
     - if: $CI_COMMIT_TAG
       when: never
 
 .default_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
@@ -38,8 +38,24 @@ stages:
 
 .default_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
       when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.development_rules:
+  rules:
+    #- if: $CI_COMMIT_BRANCH == "develop" && ! $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.development_db_rules:
+  rules:
+    #- if: $CI_COMMIT_BRANCH == "develop" && ! $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - database/*
     - if: $CI_COMMIT_TAG
       when: never
 
@@ -459,20 +475,20 @@ build-docker-app:
   stage: build-images
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
-  needs:
-    - install-dependencies
-    - build-app
-    - test-app
-    - test-app-e2e
-    - test-app-e2e-ui-chrome
+    - !reference [ .development_rules, rules ]
+  #needs:
+   # - install-dependencies
+    #- build-app
+    #- test-app
+    #- test-app-e2e
+    #- test-app-e2e-ui-chrome
 #    - test-app-e2e-ui-chrome-mobile
 #    - test-app-e2e-ui-firefox
 #    - test-app-e2e-ui-firefox-mobile
 #    - test-app-e2e-ui-edge
 #    - test-app-e2e-ui-edge-mobile
-    - audit-app
-    - lint-app
+    #- audit-app
+    #- lint-app
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -492,39 +508,39 @@ scan-docker-db:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.default_db_rules, rules]
-  needs:
-    - build-db-image
+    - !reference [.development_db_rules, rules]
+#  needs:
+#    - build-db-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA}
 
 scan-docker-liquibase:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [.default_db_rules, rules]
-  needs:
-    - build-liquibase-image
+    - !reference [.development_db_rules, rules]
+#  needs:
+#    - build-liquibase-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA}
 
 scan-docker-app:
   stage: scan-images
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
-  needs:
-    - install-dependencies
-    - build-docker-app
+    - !reference [ .development_rules, rules ]
+#  needs:
+#    - install-dependencies
+#    - build-docker-app
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
