@@ -1,4 +1,8 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import {
+  Column, Entity, JoinColumn, ManyToOne, PrimaryColumn
+} from 'typeorm';
+// eslint-disable-next-line import/no-cycle
+import Review from './review.entity';
 
 @Entity()
 class ReviewUnit {
@@ -14,6 +18,12 @@ class ReviewUnit {
 
   @Column()
     order: number;
+
+  @ManyToOne(() => Review, review => review.units)
+  @JoinColumn({
+    name: 'review_id'
+  })
+    review: Review;
 }
 
 export default ReviewUnit;
