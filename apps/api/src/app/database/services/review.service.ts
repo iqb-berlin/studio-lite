@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import {
   CreateReviewDto,
   ReviewFullDto,
@@ -80,7 +80,10 @@ export class ReviewService {
     });
     const workspacesIdList = workspaces.map(ws => ws.workspaceId);
     const reviews = await this.reviewRepository.find({
-      where: { workspaceId: In(workspacesIdList) },
+      where: {
+        workspaceId: In(workspacesIdList),
+        units: MoreThan(0)
+      },
       order: { name: 'ASC' },
       select: {
         id: true,
