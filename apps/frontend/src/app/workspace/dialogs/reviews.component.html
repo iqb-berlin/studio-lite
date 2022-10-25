@@ -79,7 +79,7 @@
   </div>
   <mat-dialog-actions fxLayout="column">
     <div fxLayout="row">
-      <button mat-raised-button [mat-dialog-close]="false">
+      <button mat-raised-button [mat-dialog-close]="false" [disabled]="changed">
         {{'dialogs.close' | translate}}
       </button>
     </div>
