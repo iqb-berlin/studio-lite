@@ -224,14 +224,10 @@ export class ReviewsComponent implements OnInit {
       name: originalData.name,
       password: originalData.password,
       link: originalData.link,
-      settings: {
-        pagingMode: originalData.settings?.pagingMode || '',
-        pageNaviButtons: originalData.settings?.pageNaviButtons || '',
-        unitNaviButtons: originalData.settings?.unitNaviButtons || '',
-        controllerDesign: originalData.settings?.controllerDesign || '',
-        unitScreenHeader: originalData.settings?.unitScreenHeader || '',
-        unitTitle: originalData.settings?.unitTitle || ''
-      },
+      settings: originalData.settings ? {
+        bookletConfig: { ...originalData.settings.bookletConfig },
+        reviewConfig: { ...originalData.settings.reviewConfig }
+      } : originalData.settings,
       units: originalData.units ? originalData.units.map(u => u) : []
     };
   }
@@ -245,7 +241,14 @@ export class ReviewsComponent implements OnInit {
 
   configChanged() {
     if (this.bookletConfigElement) {
-      this.reviewDataToChange.settings = this.bookletConfigElement.config;
+      if (this.reviewDataToChange.settings) {
+        this.reviewDataToChange.settings.bookletConfig = this.bookletConfigElement.config;
+      } else {
+        this.reviewDataToChange.settings = {
+          reviewConfig: {},
+          bookletConfig: this.bookletConfigElement.config
+        };
+      }
       this.changed = this.detectChanges();
     }
   }

@@ -1,9 +1,9 @@
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
-  ReviewFullDto,
+  ReviewFullDto, ReviewSettingsDto,
   UnitDefinitionDto,
   UnitMetadataDto
 } from '@studio-lite-lib/api-dto';
@@ -37,6 +37,17 @@ export class BackendService {
     return this.http
       .get<ReviewFullDto>(`${this.serverUrl}review/${reviewId}`)
       .pipe(
+        map(r => {
+          if (r.settings) {
+            if (!r.settings.bookletConfig) {
+              r.settings = <ReviewSettingsDto>{
+                bookletConfig: r.settings,
+                reviewConfig: {}
+              };
+            }
+          }
+          return r;
+        }),
         catchError(() => of(null))
       );
   }

@@ -50,7 +50,12 @@ export class ReviewComponent implements OnInit {
               counter += 1;
             });
           }
-          this.reviewService.reviewSettings = reviewData.settings;
+          this.reviewService.reviewConfig = reviewData.settings && reviewData.settings.reviewConfig ?
+            reviewData.settings.reviewConfig : {};
+          this.reviewService.bookletConfig = reviewData.settings && reviewData.settings.bookletConfig ?
+            reviewData.settings.bookletConfig : {};
+          this.reviewService.reviewConfig.canComment = true;
+          this.reviewService.reviewConfig.showMetadata = true;
         }
       });
     });
@@ -63,6 +68,17 @@ export class ReviewComponent implements OnInit {
         title: 'ReviewDialog',
         content: 'coming soon',
         type: MessageType.warning
+      }
+    });
+  }
+
+  showInfoDialog() {
+    this.messageDialog.open(MessageDialogComponent, {
+      width: '400px',
+      data: <MessageDialogData>{
+        title: 'infoDialog',
+        content: 'coming soon',
+        type: MessageType.info
       }
     });
   }

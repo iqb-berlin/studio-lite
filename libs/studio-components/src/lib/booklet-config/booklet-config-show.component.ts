@@ -1,7 +1,7 @@
 import {
   Component, Input
 } from '@angular/core';
-import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
+import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 
 const bookletConfigDefault = {
   pagingMode: '',
@@ -43,14 +43,14 @@ const bookletConfigDefault = {
     </div>
   `,
   styles: [
-    '.booklet-config > div { margin: 1px 0; background-color: lightgray; padding: 4px }',
-    '.booklet-config { background-color: darkgray; padding: 2px }'
+    '.booklet-config > div { margin: 1px 0; background-color: whitesmoke; padding: 4px }',
+    '.booklet-config { background-color: lightgray; padding: 2px }'
   ]
 })
 export class BookletConfigShowComponent {
-  bookletConfig: ReviewSettingsDto = bookletConfigDefault;
+  bookletConfig: BookletConfigDto = bookletConfigDefault;
   @Input('config')
-  set config(value: ReviewSettingsDto | undefined) {
+  set config(value: BookletConfigDto | undefined) {
     this.bookletConfig = value || bookletConfigDefault;
   }
 }

@@ -57,7 +57,7 @@ h1 {
   color: white;
   height: 65px;
   padding-left: 130px;
-  padding-right: 80px;
+  padding-right: 100px;
   pointer-events: none;
 }
 
@@ -72,13 +72,18 @@ h1 {
   border-right: solid 1px rgba(0, 0, 0, 0.12);
 }
 
-.comment-button {
+.plus-buttons {
   pointer-events: auto;
   position: absolute;
   right: 5px;
   top: 0;
   height: 65px;
   z-index: 999;
+}
+
+.plus-buttons button {
+  min-width: 0;
+  padding: 0 6px;
 }
 
 #header button ~ button {

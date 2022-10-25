@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@angular/core';
 import {
   CreateReviewDto,
   CreateUnitDto,
-  RequestReportDto, ReviewFullDto, ReviewInListDto,
+  RequestReportDto, ReviewFullDto, ReviewInListDto, ReviewSettingsDto,
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
@@ -202,6 +202,17 @@ export class BackendService {
     return this.http
       .get<ReviewFullDto>(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviewId}`)
       .pipe(
+        map(r => {
+          if (r.settings) {
+            if (!r.settings.bookletConfig) {
+              r.settings = <ReviewSettingsDto>{
+                bookletConfig: r.settings,
+                reviewConfig: {}
+              };
+            }
+          }
+          return r;
+        }),
         catchError(() => of(null))
       );
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
+import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { Router } from '@angular/router';
 import { UnitData } from './classes/unit-data.class';
 
@@ -11,7 +11,8 @@ export class ReviewService {
   reviewName = '';
   workspaceName = '';
   units: UnitData[] = [];
-  reviewSettings?: ReviewSettingsDto;
+  reviewConfig: ReviewConfigDto = {};
+  bookletConfig: BookletConfigDto = {};
   screenHeaderText = 'Startseite';
   pageHeaderText = 'Startseite';
   currentUnitSequenceId = -1;
@@ -32,12 +33,12 @@ export class ReviewService {
 
   setHeaderText(pageName: string) {
     this.pageHeaderText = pageName;
-    if (this.reviewSettings) {
-      if (this.reviewSettings.unitScreenHeader === 'WITH_UNIT_TITLE') {
+    if (this.bookletConfig) {
+      if (this.bookletConfig.unitScreenHeader === 'WITH_UNIT_TITLE') {
         this.screenHeaderText = pageName;
-      } else if (this.reviewSettings.unitScreenHeader === 'WITH_BOOKLET_TITLE') {
+      } else if (this.bookletConfig.unitScreenHeader === 'WITH_BOOKLET_TITLE') {
         this.screenHeaderText = `Review '${this.reviewName}' (Testheft)`;
-      } else if (this.reviewSettings.unitScreenHeader === 'WITH_BLOCK_TITLE') {
+      } else if (this.bookletConfig.unitScreenHeader === 'WITH_BLOCK_TITLE') {
         this.screenHeaderText = `Review '${this.reviewName}' (Block)`;
       } else {
         this.screenHeaderText = '';
