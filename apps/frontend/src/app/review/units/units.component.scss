@@ -41,3 +41,19 @@
 .with-footer #hosting-iframe {
   height: calc(100% - 45px);
 }
+
+#info-pane {
+  width: 200px;
+  background-color: teal;
+}
+#splitter {
+  cursor: col-resize;
+  background-color: lightgray;
+  width: 6px;
+  height: 100%;
+
+  /* Prevent the browser's built-in drag from interfering */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

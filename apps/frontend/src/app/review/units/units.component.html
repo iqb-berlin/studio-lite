@@ -4,7 +4,11 @@
   }"
 >
   <div *ngIf="message" style="margin: 30px">{{message}}</div>
-  <iframe id="hosting-iframe" class="unitHost"></iframe>
+  <div fxLayout="row" style="height: 100%;">
+    <iframe id="hosting-iframe" class="unitHost"></iframe>
+    <div id="splitter"></div>
+    <div id="info_pane"></div>
+  </div>
   <div
     id="page-navigation"
     fxLayout="row"
