@@ -1,3 +1,5 @@
+export { ReviewConfigDto } from './lib/dto/review/review-config-dto';
+export { BookletConfigDto } from './lib/dto/review/booklet-config-dto';
 export { CreateReviewDto } from './lib/dto/review/create-review-dto';
 export { ReviewSettingsDto } from './lib/dto/review/review-settings-dto';
 export { ReviewInListDto } from './lib/dto/review/review-in-list-dto';

@@ -1,11 +1,11 @@
 <div
   [class]="{
-    'with-header': reviewService.reviewSettings?.unitScreenHeader !== 'OFF',
-    'with-title': reviewService.reviewSettings?.unitTitle === 'ON'
+    'with-header': reviewService.bookletConfig.unitScreenHeader !== 'OFF',
+    'with-title': reviewService.bookletConfig.unitTitle === 'ON'
   }"
 >
   <div
-    *ngIf="reviewService.reviewSettings?.unitTitle === 'ON'"
+    *ngIf="reviewService.bookletConfig?.unitTitle === 'ON'"
     id="unit-title"
     fxLayout="column"
     fxLayoutAlign="center center"
@@ -13,19 +13,19 @@
     <p>{{reviewService.pageHeaderText}}</p>
   </div>
   <div id="header" fxLayout="row" fxLayoutAlign="space-between center"
-       *ngIf="reviewService.reviewSettings?.unitScreenHeader !== 'OFF'">
+       *ngIf="reviewService.bookletConfig?.unitScreenHeader !== 'OFF'">
     <div fxFlex="0 1 auto">
       <h1>{{reviewService.screenHeaderText}}</h1>
     </div>
     <div
-      *ngIf="reviewService.reviewSettings?.unitNaviButtons !== 'OFF'"
+      *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'OFF'"
       id="unitNav"
       fxFlex="0 1 auto"
       fxLayout="row"
       fxLayoutAlign="end center"
     >
       <a mat-fab
-         *ngIf="reviewService.reviewSettings?.controllerDesign === '2018'"
+         *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
          [disabled]="reviewService.currentUnitSequenceId < 0"
          (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)"
          matTooltip="Zurück"
@@ -34,7 +34,7 @@
         <i class="material-icons">chevron_left</i>
       </a>
       <a mat-flat-button
-         *ngIf="reviewService.reviewSettings?.controllerDesign !== '2018'"
+         *ngIf="reviewService.bookletConfig?.controllerDesign !== '2018'"
          [disabled]="reviewService.currentUnitSequenceId < 0"
          (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)"
          matTooltip="Zurück"
@@ -43,7 +43,7 @@
         <i class="material-icons">chevron_left</i>
       </a>
       <mat-selection-list #unitList [multiple]="false"
-                          *ngIf="reviewService.reviewSettings?.unitNaviButtons !== 'ARROWS_ONLY'"
+                          *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'ARROWS_ONLY'"
                           (selectionChange)="reviewService.setUnitNavigationRequest(unitList.selectedOptions.selected[0].value)"
                           fxLayout="row wrap"
                           fxLayoutAlign="start center"
@@ -95,7 +95,7 @@
       </mat-selection-list>
 
       <a mat-fab
-         *ngIf="reviewService.reviewSettings?.controllerDesign === '2018'"
+         *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
          [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
          (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
          matTooltip="Weiter"
@@ -104,7 +104,7 @@
         <i class="material-icons">chevron_right</i>
       </a>
       <a mat-flat-button
-         *ngIf="reviewService.reviewSettings?.controllerDesign !== '2018'"
+         *ngIf="reviewService.bookletConfig?.controllerDesign !== '2018'"
          [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
          (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
          matTooltip="Weiter"
@@ -114,16 +114,22 @@
       </a>
     </div>
   </div>
-  <div class="comment-button" fxLayout="row" fxLayoutAlign="center center">
-    <button
+  <div class="plus-buttons" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="4px">
+    <button *ngIf="reviewService.reviewConfig.canComment"
       mat-raised-button
       (click)="showReviewDialog()"
       matTooltip="Kommentar senden"
     >
       <mat-icon>rate_review</mat-icon>
     </button>
+    <button *ngIf="reviewService.reviewConfig.showMetadata"
+            mat-raised-button
+            (click)="showInfoDialog()"
+            matTooltip="Weitere Informationen"
+    >
+      <mat-icon>info</mat-icon>
+    </button>
   </div>
-
   <div id="page-host">
     <router-outlet></router-outlet>
   </div>

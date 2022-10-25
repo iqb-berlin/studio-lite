@@ -1,7 +1,7 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
+import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 
 const bookletConfigDefault = {
   pagingMode: '',
@@ -86,15 +86,15 @@ export class BookletConfigEditComponent {
   controllerDesignOptions = ['2018', '2022'];
   unitScreenHeaderOptions = ['OFF', 'WITH_UNIT_TITLE', 'WITH_BOOKLET_TITLE', 'WITH_BLOCK_TITLE', 'EMPTY'];
   unitTitleOptions = ['OFF', 'ON'];
-  bookletConfig: ReviewSettingsDto = bookletConfigDefault;
+  bookletConfig: BookletConfigDto = bookletConfigDefault;
   @Output() configChanged = new EventEmitter();
   @Input('disabled') disabled = false;
   @Input('config')
-  set config(value: ReviewSettingsDto | undefined) {
+  set config(value: BookletConfigDto | undefined) {
     this.bookletConfig = value || bookletConfigDefault;
   }
 
-  get config(): ReviewSettingsDto {
+  get config(): BookletConfigDto {
     return this.bookletConfig;
   }
 }

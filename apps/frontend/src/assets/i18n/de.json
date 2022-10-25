@@ -142,7 +142,8 @@
       "OFF": "Keine - komplett ausblenden",
       "WITH_UNIT_TITLE": "Unit-Name",
       "WITH_BOOKLET_TITLE": "Testheft-Name",
-      "WITH_BLOCK_TITLE": "Block-Name"
+      "WITH_BLOCK_TITLE": "Block-Name",
+      "EMPTY": "Leer"
     },
     "unitTitle": {
       "label": "Unit-Titel unterhalb der Bildschirm-Kopfzeile",

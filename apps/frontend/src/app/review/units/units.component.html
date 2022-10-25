@@ -1,6 +1,6 @@
 <div id="unit-host"
   [class]="{
-    'with-footer': reviewService.reviewSettings?.pageNaviButtons === 'SEPARATE_BOTTOM'
+    'with-footer': reviewService.bookletConfig.pageNaviButtons === 'SEPARATE_BOTTOM'
   }"
 >
   <div *ngIf="message" style="margin: 30px">{{message}}</div>
@@ -10,7 +10,7 @@
     fxLayout="row"
     fxLayoutAlign="end center"
     fxLayoutGap="10px"
-    *ngIf="reviewService.reviewSettings?.pageNaviButtons === 'SEPARATE_BOTTOM'"
+    *ngIf="reviewService.bookletConfig?.pageNaviButtons === 'SEPARATE_BOTTOM'"
   >
     <div *ngIf="pageList.length > 3">
       {{pageList.length - 2}} pages found but page navigation is currently disabled

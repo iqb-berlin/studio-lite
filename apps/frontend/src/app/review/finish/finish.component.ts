@@ -5,9 +5,9 @@ import { ReviewService } from '../review.service';
   selector: 'studio-lite-finish',
   templateUrl: './finish.component.html',
   styles: [
-    '#finish-page {height: 100%; background-color: whitesmoke; overflow: auto}',
-    '.finish-data {min-width: 500px}',
-    '#backwards-button { margin-top: 10px}'
+    '#finish-page { height: 100%; background-color: whitesmoke; overflow: auto }',
+    '.finish-data { min-width: 400px; max-width: 600px }',
+    '#backwards-button { margin-top: 10px }'
   ]
 })
 export class FinishComponent implements OnInit {

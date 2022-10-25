@@ -256,7 +256,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
           },
           playerConfig: {
             stateReportPolicy: 'eager',
-            pagingMode: this.reviewService.reviewSettings?.pagingMode,
+            pagingMode: this.reviewService.bookletConfig?.pagingMode,
             directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef || ''
