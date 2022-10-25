@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { BookletConfigEditComponent } from '@studio-lite/studio-components';
+import { lastValueFrom } from 'rxjs';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 import { SelectUnitListComponent } from './components/select-unit-list.component';
@@ -52,8 +53,9 @@ export class ReviewsComponent implements OnInit {
     private backendService: BackendService,
     private snackBar: MatSnackBar,
     private messageDialog: MatDialog,
+    private confirmDiscardDialog: MatDialog,
     private inputTextDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog,
+    private confirmDiscardChangesDialog: MatDialog,
     private clipboard: Clipboard
   ) {}
 
@@ -64,61 +66,74 @@ export class ReviewsComponent implements OnInit {
   }
 
   selectReview(id: number) {
-    this.selectedReviewId = id;
-    if (this.selectedReviewId > 0) {
-      this.backendService.getReview(
-        this.workspaceService.selectedWorkspaceId, this.selectedReviewId
-      ).subscribe(data => {
-        if (data) {
-          this.reviewDataOriginal = data;
-          this.reviewDataToChange = ReviewsComponent.copyFrom(data);
-          // if (this.bookletConfigElement) this.bookletConfigElement.config = this.reviewDataToChange.settings;
+    this.checkForChangesAndContinue().then(go => {
+      if (go) {
+        this.changed = false;
+        this.selectedReviewId = id;
+        if (this.selectedReviewId > 0) {
+          this.backendService.getReview(
+            this.workspaceService.selectedWorkspaceId, this.selectedReviewId
+          )
+            .subscribe(data => {
+              if (data) {
+                this.reviewDataOriginal = data;
+                this.reviewDataToChange = ReviewsComponent.copyFrom(data);
+                // if (this.bookletConfigElement) this.bookletConfigElement.config = this.reviewDataToChange.settings;
+                this.changed = false;
+                if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = data.units ? data.units : [];
+              }
+            });
+        } else {
+          this.reviewDataToChange = { id: 0 };
+          this.reviewDataOriginal = { id: 0 };
           this.changed = false;
-          if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = data.units ? data.units : [];
+          if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = [];
         }
-      });
-    } else {
-      this.reviewDataToChange = { id: 0 };
-      this.reviewDataOriginal = { id: 0 };
-      this.changed = false;
-      if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = [];
-    }
+      }
+    });
   }
 
   addReview() {
-    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
-      width: '500px',
-      data: {
-        title: 'Neue Aufgabenfolge',
-        default: '',
-        okButtonLabel: 'Speichern',
-        prompt: 'Name der Aufgabenfolge'
-      }
-    });
+    this.checkForChangesAndContinue().then(go => {
+      if (go) {
+        this.changed = false;
+        const dialogRef = this.inputTextDialog.open(InputTextComponent, {
+          width: '500px',
+          data: {
+            title: 'Neue Aufgabenfolge',
+            default: '',
+            okButtonLabel: 'Speichern',
+            prompt: 'Name der Aufgabenfolge'
+          }
+        });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result === 'string') {
-        if (result.length > 1) {
-          this.backendService.addReview(
-            this.workspaceService.selectedWorkspaceId,
-            {
-              workspaceId: this.workspaceService.selectedWorkspaceId,
-              name: result
-            }
-          ).subscribe(isOK => {
-            if (typeof isOK === 'number') {
-              this.loadReviewList(isOK);
-            } else {
-              this.snackBar.open('Konnte neue Aufgabenfolge nicht anlegen.', '', { duration: 3000 });
+        dialogRef.afterClosed()
+          .subscribe(result => {
+            if (typeof result === 'string') {
+              if (result.length > 1) {
+                this.backendService.addReview(
+                  this.workspaceService.selectedWorkspaceId,
+                  {
+                    workspaceId: this.workspaceService.selectedWorkspaceId,
+                    name: result
+                  }
+                )
+                  .subscribe(isOK => {
+                    if (typeof isOK === 'number') {
+                      this.loadReviewList(isOK);
+                    } else {
+                      this.snackBar.open('Konnte neue Aufgabenfolge nicht anlegen.', '', { duration: 3000 });
+                    }
+                  });
+              }
             }
           });
-        }
       }
     });
   }
 
   deleteReview() {
-    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+    const dialogRef = this.confirmDiscardChangesDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: <ConfirmDialogData>{
         title: 'Aufgabenfolge löschen',
@@ -130,6 +145,7 @@ export class ReviewsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
+        this.changed = false;
         this.appService.dataLoading = true;
         this.backendService.deleteReviews(
           this.workspaceService.selectedWorkspaceId,
@@ -147,6 +163,20 @@ export class ReviewsComponent implements OnInit {
         });
       }
     });
+  }
+
+  private async checkForChangesAndContinue(): Promise<boolean> {
+    if (!this.changed) return true;
+    const dialogResult = await lastValueFrom(this.confirmDiscardChangesDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: 'Verwerfen der Änderungen',
+        content: 'Die Änderungen an der Aufgabenfolge werden verworfen. Fortsetzen?',
+        confirmButtonLabel: 'Verwerfen',
+        showCancel: true
+      }
+    }).afterClosed());
+    return dialogResult !== false;
   }
 
   private loadReviewList(id = 0) {
