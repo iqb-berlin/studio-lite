@@ -20,9 +20,19 @@
   color: #f2f2f2;
 }
 
-#page-navigation-prompt {
-  padding-right: 8px;
+#pageNavPrompt {
+  margin-right: 16px;
   color: white;
+}
+
+#page-navigation .pageNavDisabled {
+  height: 5px;
+  background-color: orangered;
+}
+
+#page-navigation .pageNavEnabled {
+  height: 5px;
+  background-color: darkgrey;
 }
 
 .with-footer {
