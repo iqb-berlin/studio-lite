@@ -3,23 +3,26 @@ import { ReviewSettingsDto } from './review-settings-dto';
 
 export class ReviewFullDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name?: string;
+    name?: string;
 
   @ApiProperty()
-  workspaceId?: number;
+    workspaceId?: number;
 
   @ApiProperty()
-  link?: string;
+    workspaceName?: string;
 
   @ApiProperty()
-  password?: string;
+    link?: string;
 
   @ApiProperty()
-  settings?: ReviewSettingsDto;
+    password?: string;
 
   @ApiProperty()
-  units?: number[];
+    settings?: ReviewSettingsDto;
+
+  @ApiProperty()
+    units?: number[];
 }

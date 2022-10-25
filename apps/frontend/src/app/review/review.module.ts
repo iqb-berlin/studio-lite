@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
@@ -31,7 +32,8 @@ import { ReviewComponent } from './review.component';
     MatIconModule,
     StudioComponentsModule,
     MatSidenavModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatExpansionModule
   ],
   exports: [ReviewComponent]
 })

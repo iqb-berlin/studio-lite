@@ -5,8 +5,9 @@ import { ReviewService } from '../review.service';
   selector: 'studio-lite-start',
   templateUrl: './start.component.html',
   styles: [
-    '.start-page {height: 100%; background-color: whitesmoke; overflow: auto}',
-    '.start-data {min-width: 500px}'
+    '#start-page {height: 100%; background-color: whitesmoke; overflow: auto}',
+    '.start-data {min-width: 500px}',
+    '#continue-button { margin-top: 10px}'
   ]
 })
 export class StartComponent implements OnInit {
