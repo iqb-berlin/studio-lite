@@ -206,7 +206,6 @@ export class UnitsComponent implements OnInit, OnDestroy {
         this.reviewService.setHeaderText(this.unitData.name);
         if (playerId) {
           if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
-            // TODO: Ist das nicht EditorCode, der hier entfernt werden kann?
             if (this.unitData.definition) {
               this.postUnitDef(this.unitData.definition);
             } else {
