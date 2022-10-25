@@ -152,7 +152,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
             this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
           }
           if (msgData.unitState) {
-            this.unitData.responses = msgData.unitState.responseProgress;
+            this.unitData.responses = msgData.unitState.dataParts;
           }
           break;
 
@@ -250,7 +250,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
           type: 'vopStartCommand',
           sessionId: this.sessionId,
           unitState: {
-            dataParts: {},
+            dataParts: this.unitData.responses,
             presentationProgress: 'none',
             responseProgress: 'none'
           },
