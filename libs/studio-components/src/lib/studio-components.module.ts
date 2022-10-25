@@ -4,10 +4,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { BookletConfigComponent } from './booklet-config/booklet-config.component';
+import { BookletConfigEditComponent } from './booklet-config/booklet-config-edit.component';
 import { SelectModuleComponent } from './modules/select-module.component';
 import { VeronaModuleClass } from './modules/verona-module.class';
 import { ModuleService } from './modules/module.service';
+import { BookletConfigShowComponent } from './booklet-config/booklet-config-show.component';
 
 @NgModule({
   imports: [
@@ -19,11 +20,13 @@ import { ModuleService } from './modules/module.service';
     ReactiveFormsModule
   ],
   declarations: [
-    BookletConfigComponent,
+    BookletConfigEditComponent,
+    BookletConfigShowComponent,
     SelectModuleComponent
   ],
   exports: [
-    BookletConfigComponent,
+    BookletConfigEditComponent,
+    BookletConfigShowComponent,
     SelectModuleComponent
   ]
 })
@@ -33,5 +36,6 @@ export {
   VeronaModuleClass,
   ModuleService,
   SelectModuleComponent,
-  BookletConfigComponent
+  BookletConfigEditComponent,
+  BookletConfigShowComponent
 };

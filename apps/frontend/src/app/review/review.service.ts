@@ -9,6 +9,7 @@ import { UnitData } from './classes/unit-data.class';
 export class ReviewService {
   reviewId = 0;
   reviewName = '';
+  workspaceName = '';
   units: UnitData[] = [];
   reviewSettings?: ReviewSettingsDto;
   screenHeaderText = 'Startseite';

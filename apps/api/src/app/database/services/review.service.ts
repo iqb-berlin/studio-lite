@@ -56,9 +56,19 @@ export class ReviewService {
       where: { reviewId: reviewId },
       order: { order: 'ASC' }
     });
+    const workspaceData = await this.workspaceRepository.findOne({
+      where: {
+        id: review.workspaceId
+      },
+      relations: [
+        'workspaceGroup'
+      ]
+    });
     return {
       id: review.id,
       name: review.name,
+      workspaceId: review.workspaceId,
+      workspaceName: `Arbeitsbereich ${workspaceData.name} (Gruppe ${workspaceData.workspaceGroup.name})`,
       link: review.link,
       password: review.password,
       settings: review.settings,

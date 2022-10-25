@@ -17,15 +17,6 @@
   stroke: blueviolet!important;
 }
 
-iframe.unitHost {
-  width: 100%;
-  border: none;
-}
-
-#iFrameHost > p {
-  margin: 20px;
-}
-
 .admin-tab-content {
   overflow-x: auto;
   height: calc(100% - 30px);

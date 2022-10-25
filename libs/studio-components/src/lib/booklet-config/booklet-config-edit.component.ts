@@ -13,7 +13,7 @@ const bookletConfigDefault = {
 };
 
 @Component({
-  selector: 'booklet-config',
+  selector: 'booklet-config-edit',
   template: `
     <dix fxLayout="column">
       <mat-form-field>
@@ -79,7 +79,7 @@ const bookletConfigDefault = {
     </dix>
   `
 })
-export class BookletConfigComponent {
+export class BookletConfigEditComponent {
   pagingModeOptions = ['separate', 'concat-scroll', 'concat-scroll-snap'];
   pageNaviButtonsOptions = ['OFF', 'SEPARATE_BOTTOM'];
   unitNaviButtonsOptions = ['OFF', 'ARROWS_ONLY', 'FULL'];

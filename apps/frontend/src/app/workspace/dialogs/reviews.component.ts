@@ -6,7 +6,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { BookletConfigComponent } from '@studio-lite/studio-components';
+import { BookletConfigEditComponent } from '@studio-lite/studio-components';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
 import { SelectUnitListComponent } from './components/select-unit-list.component';
@@ -20,7 +20,7 @@ import { InputTextComponent } from '../../components/input-text.component';
 
 export class ReviewsComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
-  @ViewChild('bookletConfig') bookletConfigElement: BookletConfigComponent | undefined;
+  @ViewChild('bookletConfig') bookletConfigElement: BookletConfigEditComponent | undefined;
   changed = false;
   selectedReviewId = 0;
   reviews: ReviewInListDto[] = [];
