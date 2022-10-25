@@ -11,6 +11,7 @@ import { v4 as uuIdv4 } from 'uuid';
 import Review from '../entities/review.entity';
 import ReviewUnit from '../entities/review-unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
+import Workspace from '../entities/workspace.entity';
 
 @Injectable()
 export class ReviewService {
@@ -22,7 +23,9 @@ export class ReviewService {
     @InjectRepository(ReviewUnit)
     private reviewUnitRepository: Repository<ReviewUnit>,
     @InjectRepository(WorkspaceUser)
-    private workspaceUsersRepository: Repository<WorkspaceUser>
+    private workspaceUsersRepository: Repository<WorkspaceUser>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>
   ) {}
 
   async findAll(workspaceId: number): Promise<ReviewInListDto[]> {
@@ -79,6 +82,18 @@ export class ReviewService {
       where: { userId: userId }
     });
     const workspacesIdList = workspaces.map(ws => ws.workspaceId);
+    const workspaceList = await this.workspaceRepository.find({
+      where: {
+        id: In(workspacesIdList)
+      },
+      relations: [
+        'workspaceGroup'
+      ]
+    });
+    const workspaceInfo: { [key: string]: string } = {};
+    workspaceList.forEach(ws => {
+      workspaceInfo[ws.id] = `Arbeitsbereich ${ws.name} (Gruppe ${ws.workspaceGroup.name})`;
+    });
     const reviews = await this.reviewRepository.find({
       where: {
         workspaceId: In(workspacesIdList),
@@ -94,7 +109,8 @@ export class ReviewService {
     return reviews.map(r => <ReviewDto>{
       id: r.id,
       name: r.name,
-      workspaceId: r.workspaceId
+      workspaceId: r.workspaceId,
+      workspaceName: workspaceInfo[r.workspaceId]
     });
   }
 

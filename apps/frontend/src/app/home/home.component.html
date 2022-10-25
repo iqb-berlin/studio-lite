@@ -83,7 +83,7 @@
         <mat-icon>logout</mat-icon>
       </button>
     </h1>
-    <a mat-raised-button (click)="buttonGotoReview(r)"
+    <a mat-raised-button (click)="buttonGotoReview(r)" [matTooltip]="r.workspaceName ? r.workspaceName : ''"
             *ngFor="let r of appService.authData.reviews">
       {{r.name}}
     </a>
