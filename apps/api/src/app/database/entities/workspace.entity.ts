@@ -1,5 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn
+} from 'typeorm';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import WorkspaceGroup from './workspace-group.entity';
 
 @Entity()
 class Workspace {
@@ -21,6 +24,12 @@ class Workspace {
     nullable: false
   })
     settings: WorkspaceSettingsDto;
+
+  @OneToOne(() => WorkspaceGroup)
+  @JoinColumn({
+    name: 'group_id'
+  })
+    workspaceGroup: WorkspaceGroup;
 }
 
 export default Workspace;

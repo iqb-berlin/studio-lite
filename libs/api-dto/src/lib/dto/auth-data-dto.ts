@@ -3,50 +3,56 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AuthDataDto {
   @ApiProperty()
-  userId!: number;
+    userId!: number;
 
   @ApiProperty()
-  userName!: string;
+    userName!: string;
 
   @ApiProperty()
-  isAdmin!: boolean;
+    isAdmin!: boolean;
 
   @ApiProperty()
-  workspaces!: WorkspaceGroupDto[];
+    workspaces!: WorkspaceGroupDto[];
 
   @ApiProperty()
-  reviews!: ReviewDto[];
+    reviews!: ReviewDto[];
 }
 
 export class WorkspaceGroupDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 
   @ApiProperty()
-  isAdmin!: boolean;
+    isAdmin!: boolean;
 
   @ApiProperty()
-  workspaces!: WorkspaceDto[];
+    workspaces!: WorkspaceDto[];
 }
 
 export class WorkspaceDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 }
 
 export class ReviewDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 
   @ApiProperty()
-  workspaceId!: number;
+    workspaceId!: number;
+
+  @ApiProperty()
+    workspaceName?: string;
+
+  @ApiProperty()
+    numberOfUnits?: number;
 }
