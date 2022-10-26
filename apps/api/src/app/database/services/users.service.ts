@@ -282,6 +282,18 @@ export class UsersService {
     return !!wsgAdmin;
   }
 
+  async getLongName(userId: number): Promise<string> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: { lastName: true, firstName: true, name: true }
+    });
+    if (user) {
+      if (user.lastName) return user.firstName ? `${user.lastName}, ${user.firstName}` : user.lastName;
+      return user.firstName || '';
+    }
+    return '';
+  }
+
   async remove(id: number | number[]): Promise<void> {
     this.logger.log(`Deleting user with id: ${id}`);
     await this.usersRepository.delete(id);

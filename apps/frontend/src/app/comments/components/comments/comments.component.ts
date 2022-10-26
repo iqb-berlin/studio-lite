@@ -21,6 +21,7 @@ export class CommentsComponent implements OnInit {
   @Input() userName!: string;
   @Input() unitId!: number;
   @Input() workspaceId!: number;
+  @Input() reviewId = 0;
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];
@@ -49,7 +50,7 @@ export class CommentsComponent implements OnInit {
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
     const updateComment = { body: text, userId: this.userId };
     this.backendService
-      .updateComment(commentId, updateComment, this.workspaceId, this.unitId)
+      .updateComment(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
       .pipe(
         takeUntil(this.ngUnsubscribe),
         switchMap(() => {
@@ -80,7 +81,7 @@ export class CommentsComponent implements OnInit {
         takeUntil(this.ngUnsubscribe),
         switchMap(result => {
           if (result) {
-            return this.backendService.deleteComment(commentId, this.workspaceId, this.unitId);
+            return this.backendService.deleteComment(commentId, this.workspaceId, this.unitId, this.reviewId);
           }
           return of(null);
         }),
@@ -109,7 +110,7 @@ export class CommentsComponent implements OnInit {
       unitId: this.unitId
     };
     this.backendService
-      .createComment(comment, this.workspaceId, this.unitId)
+      .createComment(comment, this.workspaceId, this.unitId, this.reviewId)
       .pipe(
         takeUntil(this.ngUnsubscribe),
         switchMap(() => {
@@ -123,7 +124,7 @@ export class CommentsComponent implements OnInit {
   }
 
   private getUpdatedComments(): Observable<boolean> {
-    return this.backendService.getComments(this.workspaceId, this.unitId)
+    return this.backendService.getComments(this.workspaceId, this.unitId, this.reviewId)
       .pipe(
         switchMap(comments => {
           this.comments = comments;

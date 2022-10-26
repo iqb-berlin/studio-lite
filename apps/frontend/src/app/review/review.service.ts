@@ -9,6 +9,7 @@ import { UnitData } from './classes/unit-data.class';
 export class ReviewService {
   reviewId = 0;
   reviewName = '';
+  workspaceId = 0;
   workspaceName = '';
   units: UnitData[] = [];
   reviewConfig: ReviewConfigDto = {};

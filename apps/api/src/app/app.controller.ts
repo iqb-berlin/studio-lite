@@ -87,6 +87,7 @@ export class AppController {
       return <AuthDataDto>{
         userId: userId,
         userName: userName,
+        userLongName: await this.userService.getLongName(userId),
         isAdmin: await this.authService.isAdminUser(userId),
         workspaces: await this.workspaceService.findAllGroupwise(userId),
         reviews: await this.reviewService.findAllByUser(userId)

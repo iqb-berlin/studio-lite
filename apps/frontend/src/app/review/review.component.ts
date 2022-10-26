@@ -35,6 +35,7 @@ export class ReviewComponent implements OnInit {
         if (reviewData) {
           this.reviewService.reviewName = reviewData.name ? reviewData.name : '?';
           this.reviewService.workspaceName = reviewData.workspaceName ? reviewData.workspaceName : '?';
+          this.reviewService.workspaceId = reviewData.workspaceId ? reviewData.workspaceId : 0;
           this.reviewService.units = [];
           if (reviewData.units) {
             let counter = 0;

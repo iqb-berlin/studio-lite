@@ -12,9 +12,12 @@ export class BackendService {
     private httpClient: HttpClient
   ) {}
 
-  getComments(workspaceId: number, unitId: number): Observable<Comment[]> {
+  getComments(workspaceId: number, unitId: number, reviewId: number): Observable<Comment[]> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}review/${reviewId}/${unitId}/comments` :
+      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`;
     return this.httpClient
-      .get<Comment[]>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`)
+      .get<Comment[]>(url)
       .pipe(
         catchError(() => of([])),
         map(comments => comments)
@@ -30,27 +33,40 @@ export class BackendService {
       );
   }
 
-  createComment(comment: Partial<Comment>, workspaceId: number, unitId: number): Observable<number | null> {
+  createComment(
+    comment: Partial<Comment>, workspaceId: number, unitId: number, reviewId: number
+  ): Observable<number | null> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}review/${reviewId}/${unitId}/comments` :
+      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`;
     return this.httpClient
-      .post<number>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`, comment)
+      .post<number>(url, comment)
       .pipe(
         catchError(() => of(null)),
         map(returnId => Number(returnId))
       );
   }
 
-  updateComment(id: number, body: Partial<Comment>, workspaceId: number, unitId: number): Observable<boolean> {
+  updateComment(
+    id: number, body: Partial<Comment>, workspaceId: number, unitId: number, reviewId: number
+  ): Observable<boolean> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}review/${reviewId}/${unitId}/comments/${id}` :
+      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`;
     return this.httpClient
-      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`, body)
+      .patch(url, body)
       .pipe(
         map(() => true),
         catchError(() => of(false))
       );
   }
 
-  deleteComment(id: number, workspaceId: number, unitId: number): Observable<unknown> {
+  deleteComment(id: number, workspaceId: number, unitId: number, reviewId: number): Observable<unknown> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}review/${reviewId}/${unitId}/comments/${id}` :
+      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`;
     return this.httpClient
-      .delete(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`)
+      .delete(url)
       .pipe(
         map(() => true),
         catchError(() => of(false))

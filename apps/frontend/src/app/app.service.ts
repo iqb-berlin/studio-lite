@@ -28,6 +28,7 @@ export class AppService {
   static defaultAuthData = <AuthDataDto>{
     userId: 0,
     userName: '',
+    userLongName: '',
     isAdmin: false,
     workspaces: [],
     reviews: []
