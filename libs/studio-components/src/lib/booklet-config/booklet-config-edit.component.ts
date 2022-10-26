@@ -15,7 +15,7 @@ const bookletConfigDefault = {
 @Component({
   selector: 'booklet-config-edit',
   template: `
-    <dix fxLayout="column">
+    <div fxLayout="column">
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.pagingMode.label' | translate"
                     (selectionChange)="configChanged.emit();"
@@ -76,7 +76,7 @@ const bookletConfigDefault = {
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </dix>
+    </div>
   `
 })
 export class BookletConfigEditComponent {

@@ -13,6 +13,7 @@ import { WorkspaceService } from '../workspace.service';
 import { SelectUnitListComponent } from './components/select-unit-list.component';
 import { AppService } from '../../app.service';
 import { InputTextComponent } from '../../components/input-text.component';
+import { ReviewConfigEditComponent } from './components/review-config-edit.component';
 
 @Component({
   templateUrl: './reviews.component.html',
@@ -22,6 +23,7 @@ import { InputTextComponent } from '../../components/input-text.component';
 export class ReviewsComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
   @ViewChild('bookletConfig') bookletConfigElement: BookletConfigEditComponent | undefined;
+  @ViewChild('reviewConfig') reviewConfigElement: ReviewConfigEditComponent | undefined;
   changed = false;
   selectedReviewId = 0;
   reviews: ReviewInListDto[] = [];
@@ -270,12 +272,13 @@ export class ReviewsComponent implements OnInit {
   }
 
   configChanged() {
-    if (this.bookletConfigElement) {
+    if (this.bookletConfigElement && this.reviewConfigElement) {
       if (this.reviewDataToChange.settings) {
         this.reviewDataToChange.settings.bookletConfig = this.bookletConfigElement.config;
+        this.reviewDataToChange.settings.reviewConfig = this.reviewConfigElement.config;
       } else {
         this.reviewDataToChange.settings = {
-          reviewConfig: {},
+          reviewConfig: this.reviewConfigElement.config,
           bookletConfig: this.bookletConfigElement.config
         };
       }

@@ -54,9 +54,6 @@ export class ReviewComponent implements OnInit {
             reviewData.settings.reviewConfig : {};
           this.reviewService.bookletConfig = reviewData.settings && reviewData.settings.bookletConfig ?
             reviewData.settings.bookletConfig : {};
-          // todo: remove these lines!
-          this.reviewService.reviewConfig.canComment = true;
-          this.reviewService.reviewConfig.showMetadata = false;
         }
       });
     });
