@@ -14,13 +14,15 @@ import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
 import { ReviewComponent } from './review.component';
+import { UnitInfoComponent } from './units/unit-info.component';
 
 @NgModule({
   declarations: [
     ReviewComponent,
     StartComponent,
     FinishComponent,
-    UnitsComponent
+    UnitsComponent,
+    UnitInfoComponent
   ],
   imports: [
     CommonModule,
