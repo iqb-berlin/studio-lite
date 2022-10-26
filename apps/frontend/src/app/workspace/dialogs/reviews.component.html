@@ -56,6 +56,9 @@
           <booklet-config-edit #bookletConfig (configChanged)="configChanged()"
                           [disabled]="selectedReviewId === 0"
                           [config]="reviewDataToChange.settings?.bookletConfig"></booklet-config-edit>
+          <review-config-edit #reviewConfig (configChanged)="configChanged()"
+                               [disabled]="selectedReviewId === 0"
+                               [config]="reviewDataToChange.settings?.reviewConfig"></review-config-edit>
         </div>
         <mat-dialog-content fxFlex>
           <div [hidden]="selectedReviewId > 0">Bitte links Aufgabenfolge wählen bzw. neu anlegen.</div>
