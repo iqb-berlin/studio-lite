@@ -18,6 +18,11 @@ export class ReviewService {
   pageHeaderText = 'Startseite';
   currentUnitSequenceId = -1;
 
+  get unitDbId(): number {
+    const unitData = this.units.filter(u => u.sequenceId === this.currentUnitSequenceId);
+    return unitData && unitData.length > 0 ? unitData[0].databaseId : 0;
+  }
+
   constructor(
     private router: Router
   ) {}

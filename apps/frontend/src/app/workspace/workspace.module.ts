@@ -110,7 +110,8 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
     ReviewConfigEditComponent
   ],
   exports: [
-    WorkspaceComponent
+    WorkspaceComponent,
+    UnitCommentsComponent
   ],
   providers: [
     UnitRoutingCanDeactivateGuard,

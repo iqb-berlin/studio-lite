@@ -128,7 +128,7 @@ export class CommentsComponent implements OnInit {
       .pipe(
         switchMap(comments => {
           this.comments = comments;
-          if (this.comments.length) {
+          if (this.comments.length && this.reviewId <= 0) {
             this.latestComment = this.comments
               .reduce((previousComment, currentComment) => (
                 previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));

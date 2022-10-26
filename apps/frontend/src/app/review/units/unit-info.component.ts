@@ -43,7 +43,6 @@ export class UnitInfoComponent implements OnInit {
   _unitId = 0;
   @Input('unitId')
   set unitId(value: number) {
-    console.log('set unitId', value);
     this._unitId = value;
   }
 
@@ -59,15 +58,9 @@ export class UnitInfoComponent implements OnInit {
     this.infoPane = <HTMLDivElement>document.querySelector('#unit-info-content');
     // this.infoPane.setAttribute('width', '201px');
     const divHeight2 = this.infoPane ? this.infoPane.clientWidth : -1;
-    console.log(divHeight1, divHeight2);
-
-    console.log('UnitInfoComponent ngOnInit', this._unitId);
   }
 
   onMouseDown(e: MouseEvent) {
-    console.log(this.infoPane);
-    console.log(this.splitter);
-
     if (this.infoPane) {
       this.currentInfoPaneWidth = this.infoPane.clientWidth;
       this.mouseStartPositionX = e.clientX;

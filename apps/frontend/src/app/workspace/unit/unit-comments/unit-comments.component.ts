@@ -4,7 +4,6 @@ import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
 
 @Component({
-  selector: 'studio-lite-unit-comments',
   templateUrl: './unit-comments.component.html',
   styleUrls: ['./unit-comments.component.scss']
 })
