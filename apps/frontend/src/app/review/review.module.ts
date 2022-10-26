@@ -9,12 +9,16 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDialogModule } from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
 import { ReviewComponent } from './review.component';
 import { UnitInfoComponent } from './units/unit-info.component';
+import { CommentDialogComponent } from './comment-dialog.component';
+import { CommentsModule } from '../comments/comments.module';
 
 @NgModule({
   declarations: [
@@ -22,11 +26,13 @@ import { UnitInfoComponent } from './units/unit-info.component';
     StartComponent,
     FinishComponent,
     UnitsComponent,
-    UnitInfoComponent
+    UnitInfoComponent,
+    CommentDialogComponent
   ],
   imports: [
     CommonModule,
     ReviewRoutingModule,
+    CommentsModule,
     FlexModule,
     MatButtonModule,
     MatTooltipModule,
@@ -35,7 +41,9 @@ import { UnitInfoComponent } from './units/unit-info.component';
     StudioComponentsModule,
     MatSidenavModule,
     MatButtonToggleModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatDialogModule,
+    TranslateModule
   ],
   exports: [ReviewComponent]
 })

@@ -117,6 +117,7 @@
   <div class="plus-buttons" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="4px">
     <button *ngIf="reviewService.reviewConfig.canComment"
       mat-raised-button
+            [disabled]="reviewService.unitDbId <= 0"
       (click)="showReviewDialog()"
       matTooltip="Kommentar senden"
     >

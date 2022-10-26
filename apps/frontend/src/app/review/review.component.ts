@@ -7,6 +7,7 @@ import { ReviewService } from './review.service';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
 import { AppService } from '../app.service';
+import { CommentDialogComponent } from './comment-dialog.component';
 
 @Component({
   selector: 'studio-lite-review',
@@ -20,6 +21,7 @@ export class ReviewComponent implements OnInit {
     private backendService: BackendService,
     private appBackendService: AppBackendService,
     private messageDialog: MatDialog,
+    private commentDialog: MatDialog,
     private moduleService: ModuleService,
     public reviewService: ReviewService
   ) {
@@ -61,13 +63,9 @@ export class ReviewComponent implements OnInit {
   }
 
   showReviewDialog() {
-    this.messageDialog.open(MessageDialogComponent, {
-      width: '400px',
-      data: <MessageDialogData>{
-        title: 'ReviewDialog',
-        content: 'coming soon',
-        type: MessageType.warning
-      }
+    this.commentDialog.open(CommentDialogComponent, {
+      width: '800px',
+      height: '800px'
     });
   }
 
