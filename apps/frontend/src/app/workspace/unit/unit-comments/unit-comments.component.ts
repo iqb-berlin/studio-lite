@@ -1,9 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-import { combineLatest, Subject, takeUntil } from 'rxjs';
-import { MyDataDto } from '@studio-lite-lib/api-dto';
+import { Subject, takeUntil } from 'rxjs';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../../backend.service';
 
 @Component({
   selector: 'studio-lite-unit-comments',
@@ -20,29 +18,22 @@ export class UnitCommentsComponent implements OnDestroy {
 
   constructor(
     public appService: AppService,
-    public workspaceService: WorkspaceService,
-    private backendService: BackendService
+    public workspaceService: WorkspaceService
   ) {
-    combineLatest([
-      this.workspaceService.selectedUnit$,
-      this.backendService.getMyData()
-    ])
+    this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(result => {
-        this.updateComments(result[0], result[1] ? result[1] : undefined);
+        this.updateComments(result);
       });
   }
 
-  private updateComments(unitId: number, userData?: MyDataDto) {
+  private updateComments(unitId: number) {
     this.reset();
     setTimeout(() => {
       this.unitId = unitId;
       this.workspaceId = this.workspaceService.selectedWorkspaceId;
       this.userId = this.appService.authData.userId;
-      const displayName = (userData && userData.lastName ?
-        userData.lastName : this.appService.authData.userName) as string;
-      this.userName = userData && userData.firstName ?
-        `${displayName}, ${userData.firstName}` : displayName;
+      this.userName = this.appService.authData.userLongName || this.appService.authData.userName;
     });
   }
 

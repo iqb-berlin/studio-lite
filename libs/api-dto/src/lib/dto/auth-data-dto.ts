@@ -9,6 +9,9 @@ export class AuthDataDto {
     userName!: string;
 
   @ApiProperty()
+    userLongName!: string;
+
+  @ApiProperty()
     isAdmin!: boolean;
 
   @ApiProperty()

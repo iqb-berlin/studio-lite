@@ -97,7 +97,11 @@
         <li>Kennung der Anwendung: {{appName}}</li>
         <li>Version: {{appVersion}}</li>
         <li *ngIf="appService.authData.userId === 0">{{ appService.authData.reviews.length > 0 ? 'Für Aufgabenfolge/Review angemeldet' : 'nicht angemeldet'}}</li>
-        <li *ngIf="appService.authData.userId > 0">angemeldet als: {{appService.authData.userName}}</li>
+        <li *ngIf="appService.authData.userId > 0">
+          angemeldet als:
+          {{appService.authData.userName}}
+          {{appService.authData.userLongName ? ' - ' + appService.authData.userLongName : ''}}
+        </li>
         <li *ngIf="appService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
       </ul>
     </div>
