@@ -19,10 +19,6 @@ import { BackendService } from '../backend.service';
   styleUrls: ['./units.component.scss']
 })
 export class UnitsComponent implements OnInit, OnDestroy {
-  splitter?: HTMLDivElement;
-  infoPane?: HTMLDivElement;
-  currentInfoPaneWidth = 0;
-  mouseStartPositionX = 0;
   routingSubscription: Subscription | null = null;
   postMessageSubscription: Subscription | null = null;
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -52,14 +48,6 @@ export class UnitsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.splitter = <HTMLDivElement>document.querySelector('#splitter');
-      if (this.splitter) this.splitter.onmousedown = this.onMouseDown;
-      const divHeight1 = this.splitter ? this.splitter.clientWidth : -1;
-      this.infoPane = <HTMLDivElement>document.querySelector('#info_pane');
-      this.infoPane.setAttribute('width', '201px');
-      const divHeight2 = this.infoPane ? this.infoPane.clientWidth : -1;
-      console.log(divHeight1, divHeight2);
-
       this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
       this.postMessageSubscription = this.appService.postMessage$
         .subscribe(messageEvent => this.handleIncomingMessage(messageEvent));
@@ -310,31 +298,6 @@ export class UnitsComponent implements OnInit, OnDestroy {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
       const divHeight = this.iFrameElement.parentElement.clientHeight;
       this.iFrameElement.height = `${String(divHeight - 5)}px`;
-    }
-  }
-
-  onMouseDown(e: MouseEvent) {
-    console.log(this.infoPane);
-    console.log(this.splitter);
-    console.log(this.iFrameElement);
-
-    if (this.infoPane) {
-      this.currentInfoPaneWidth = this.infoPane.clientWidth;
-      this.mouseStartPositionX = e.clientX;
-      console.log('delta');
-    }
-    document.onmousemove = this.onMouseMove;
-    document.onmouseup = () => {
-      document.onmousemove = document.onmouseup = null;
-    }
-  }
-
-  onMouseMove(e: MouseEvent) {
-    console.log(this.infoPane);
-    if (this.infoPane) {
-      const delta = e.clientX - this.mouseStartPositionX;
-      console.log(delta);
-      this.infoPane.setAttribute('width', `${String(this.currentInfoPaneWidth + delta)}px`);
     }
   }
 
