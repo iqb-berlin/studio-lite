@@ -11,6 +11,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
@@ -43,7 +46,10 @@ import { CommentsModule } from '../comments/comments.module';
     MatButtonToggleModule,
     MatExpansionModule,
     MatDialogModule,
-    TranslateModule
+    TranslateModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatInputModule
   ],
   exports: [ReviewComponent]
 })

@@ -1,7 +1,6 @@
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
@@ -17,23 +16,19 @@ import { Image } from '@tiptap/extension-image';
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.scss']
 })
-export class CommentEditorComponent {
+export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
   @Input() initialHTML: string = '';
 
   @Output() handleSubmit = new EventEmitter<string>();
   @Output() handleCancel = new EventEmitter<void>();
 
-  form!: FormGroup;
   editor!: Editor;
   selectedFontColor: string = 'black';
   selectedHighlightColor: string = 'black';
   bulletListStyle: string = 'disc';
 
-  constructor(private fb: FormBuilder) {
-    this.form = this.fb.group({
-      comment: [this.initialHTML, [Validators.minLength(8), Validators.required]]
-    });
+  ngOnInit() {
     this.editor = new Editor({
       extensions: [StarterKit, Underline, Superscript, Subscript,
         TextStyle, Color,
@@ -46,20 +41,25 @@ export class CommentEditorComponent {
         }),
         Highlight.configure({
           multicolor: true
-        })]
+        })],
+      content: this.initialHTML
     });
+    this.editor.commands.focus();
   }
 
   onReset(): void {
     this.handleCancel.emit();
-    this.editor.commands.setContent('');
-    this.form.reset();
+    this.editor.commands.clearContent();
   }
 
   onSubmit(): void {
-    this.handleSubmit.emit(this.form.value.comment);
-    this.editor.commands.setContent('');
-    this.form.reset();
+    const textContent = this.editor.getText();
+    if (textContent) {
+      this.handleSubmit.emit(this.editor.getHTML());
+    } else {
+      this.handleCancel.emit();
+    }
+    this.editor.commands.clearContent();
   }
 
   async addImage(): Promise<void> {

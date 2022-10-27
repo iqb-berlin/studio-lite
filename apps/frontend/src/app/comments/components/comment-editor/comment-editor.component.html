@@ -1,7 +1,4 @@
-<form class="editor-container"
-      [formGroup]="form"
-      (ngSubmit)="onSubmit()"
-      (reset)="onReset()">
+<div class="editor-container">
   <div fxLayout="row"
        fxLayoutAlign="end"
        class="editor-menubar">
@@ -107,9 +104,7 @@
   <div fxLayout="row" class="editor-area">
     <tiptap-editor class="tip-tap-editor" fxFlex
                    [editor]="editor"
-                   [innerHTML]="initialHTML | safeResourceHTML"
                    mat-dialog-content
-                   formControlName="comment"
                    [style.font-size.px]="16">
     </tiptap-editor>
     <div class="editor-actions"
@@ -118,7 +113,7 @@
       <button mat-icon-button
               matTooltip="{{'comment-editor.cancel' | translate}}"
               [matTooltipPosition]="'above'"
-              type="reset"
+              (click)="onReset()"
               class="reset-button">
         <mat-icon>close</mat-icon>
       </button>
@@ -126,11 +121,10 @@
               color="primary"
               matTooltip="{{ submitLabel | translate}}"
               [matTooltipPosition]="'above'"
-              type="submit"
-              class="submit-button"
-              [disabled]="form.invalid">
+              (click)="onSubmit()"
+              class="submit-button">
         <mat-icon>send</mat-icon>
       </button>
     </div>
   </div>
-</form>
+</div>
