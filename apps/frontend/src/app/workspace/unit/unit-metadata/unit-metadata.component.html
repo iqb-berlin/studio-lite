@@ -19,7 +19,7 @@
         <mat-form-field fxFlex>
           <mat-label>Gruppe</mat-label>
           <mat-select placeholder="Gruppe" formControlName="group">
-            <mat-option [value]=""></mat-option>
+            <mat-option [value]="''"></mat-option>
             <mat-option *ngFor="let g of workspaceService.workspaceSettings.unitGroups" [value]="g">
               {{g}}
             </mat-option>
