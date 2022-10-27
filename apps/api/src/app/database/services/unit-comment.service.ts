@@ -48,7 +48,11 @@ export class UnitCommentService {
 
   async removeComment(id: number): Promise<void> {
     this.logger.log(`Deleting comment with id: ${id}`);
-    await this.unitCommentsRepository.delete(id);
+    const allChildren = await this.unitCommentsRepository.find({
+      where: { parentId: id },
+      select: { id: true }
+    });
+    await this.unitCommentsRepository.delete([id, ...allChildren.map(ch => ch.id)]);
   }
 
   async findOneComment(id: number): Promise<UnitCommentDto> {
