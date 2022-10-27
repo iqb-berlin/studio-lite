@@ -108,6 +108,8 @@
   "comments": {
     "comment-delete-title": "Kommentar löschen",
     "comment-delete-question": "Soll der Kommentar gelöscht werden?",
+    "comments-delete-title": "Kommentare löschen",
+    "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
     "write-comment": "Neuen Kommentar verfassen:"
   },
   "delete-dialog": {

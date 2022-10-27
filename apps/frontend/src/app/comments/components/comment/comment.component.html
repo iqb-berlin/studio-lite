@@ -59,7 +59,7 @@
                 class="comment-action"
                 matTooltip = "{{'comment.delete' | translate}}"
                 [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-                (click)="deleteComment.emit(comment.id)">
+                (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
