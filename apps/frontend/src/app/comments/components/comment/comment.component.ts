@@ -20,7 +20,7 @@ export class CommentComponent implements OnInit {
   @Input() adminMode = false;
 
   @Output() setActiveComment = new EventEmitter<ActiveComment | null>();
-  @Output() deleteComment = new EventEmitter<number>();
+  @Output() deleteComment = new EventEmitter<{ commentId: number; numberOfReplies: number }>();
   @Output() addComment = new EventEmitter<{ text: string; parentId: number | null }>();
   @Output() updateComment = new EventEmitter<{ text: string; commentId: number }>();
 

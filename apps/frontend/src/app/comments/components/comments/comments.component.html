@@ -7,6 +7,7 @@
       [replies]="comments | replies: rootComment.id"
       [activeComment]="activeComment"
       [latestCommentId]="latestCommentId"
+      [adminMode]="adminMode"
       (setActiveComment)="setActiveComment($event)"
       (addComment)="addComment($event)"
       (deleteComment)="deleteComment($event)"

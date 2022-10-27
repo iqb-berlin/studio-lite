@@ -23,6 +23,7 @@ export class CommentsComponent implements OnInit {
   @Input() workspaceId!: number;
   @Input() reviewId = 0;
   @Input() newCommentOnly = false;
+  @Input() adminMode = false;
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];
@@ -66,17 +67,20 @@ export class CommentsComponent implements OnInit {
     }
   }
 
-  deleteComment(commentId: number): void {
-    this.openDeleteDialog(commentId);
+  deleteComment({ commentId, numberOfReplies }: { commentId: number; numberOfReplies: number; }): void {
+    this.openDeleteDialog(commentId, numberOfReplies > 0);
   }
 
-  private openDeleteDialog(commentId: number): void {
+  private openDeleteDialog(commentId: number, withReplies: boolean): void {
     this.dialog
       .open(DeleteDialogComponent, {
         width: '400px',
         data: {
-          title: this.translateService.instant('comments.comment-delete-title'),
-          content: this.translateService.instant('comments.comment-delete-question')
+          title: this.translateService.instant(
+            withReplies ? 'comments.comments-delete-title' : 'comments.comment-delete-title'
+          ),
+          content: this.translateService.instant(
+            withReplies ? 'comments.comments-delete-question' : 'comments.comment-delete-question')
         }
       })
       .afterClosed()

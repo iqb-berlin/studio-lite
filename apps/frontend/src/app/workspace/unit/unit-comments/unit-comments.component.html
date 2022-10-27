@@ -5,6 +5,7 @@
     [userId]="userId"
     [unitId]="unitId"
     [workspaceId]="workspaceId"
+    [adminMode]="workspaceService.isWorkspaceGroupAdmin"
     (onCommentsUpdated)="workspaceService.onCommentsUpdated.emit()">
   </studio-lite-comments>
 </div>
