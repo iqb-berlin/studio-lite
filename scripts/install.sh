@@ -15,19 +15,19 @@ ENV_VARS[HTTP_PORT]=80
 ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB HTTP_PORT)
 
 check_prerequisites() {
-  for app in "${REQUIRED_PACKAGES[@]}"; do
+  for APP in "${REQUIRED_PACKAGES[@]}"; do
     {
-      $app >/dev/null 2>&1
+      $APP >/dev/null 2>&1
     } || {
-      echo "$app not found, please install before running!"
+      echo "$APP not found, please install before running!"
       exit 1
     }
   done
-  for app in "${OPTIONAL_PACKAGES[@]}"; do
+  for APP in "${OPTIONAL_PACKAGES[@]}"; do
     {
-      $app >/dev/null 2>&1
+      $APP >/dev/null 2>&1
     } || {
-      echo "$app not found! It is recommended to have it installed."
+      echo "$APP not found! It is recommended to have it installed."
       read -p 'Continue anyway? (y/N): ' -er -n 1 CONTINUE
 
       if [[ ! $CONTINUE =~ ^[yY]$ ]]; then
@@ -38,9 +38,9 @@ check_prerequisites() {
 }
 
 get_release_version() {
-  latest_version_tag=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
-  while read -p '1. Name the desired release tag: ' -er -i "${latest_version_tag}" chosen_version_tag; do
-    if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/README.md 2>/dev/null; then
+  LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+  while read -p '1. Name the desired release tag: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
+    if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
     else
       break
@@ -49,7 +49,7 @@ get_release_version() {
 }
 
 prepare_installation_dir() {
-  read -p '2. Determine installation directory: ' -er -i "$(pwd)/$APP_NAME" TARGET_DIR
+  read -p '2. Determine installation directory: ' -er -i "$PWD/$APP_NAME" TARGET_DIR
 
   if [ -z "$(find "$TARGET_DIR" -maxdepth 0 -type d -empty 2>/dev/null)" -a $? = 0 ]; then
     read -p "You have selected a non empty directory. Continue anyway? (y/N)" -er -n 1 CONTINUE
@@ -59,6 +59,7 @@ prepare_installation_dir() {
   fi
   printf "\n"
 
+  mkdir -p "$TARGET_DIR"/backup/release
   mkdir -p "$TARGET_DIR"/config/frontend
 
   cd "$TARGET_DIR"
@@ -66,15 +67,15 @@ prepare_installation_dir() {
 
 download_files() {
   echo "Downloading files..."
-  wget -nv -O docker-compose.yml https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/docker-compose.yml
-  wget -nv -O docker-compose.prod.yml https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/docker-compose.prod.yml
-  wget -nv -O .env.prod.template https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/.env.prod.template
-  wget -nv -O config/frontend/default.conf.http-template https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/config/frontend/default.conf.http-template
-  wget -nv -O config/frontend/default.conf.https-template https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/config/frontend/default.conf.https-template
-  wget -nv -O Makefile https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/scripts/make/prod.mk
-  wget -nv -O update.sh https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/scripts/update.sh
-  wget -nv -O https_on.sh https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/scripts/https_on.sh
-  wget -nv -O https_off.sh https://raw.githubusercontent.com/${REPO_URL}/"${chosen_version_tag}"/scripts/https_off.sh
+  wget -nv -O docker-compose.yml https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/docker-compose.yml
+  wget -nv -O docker-compose.prod.yml https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/docker-compose.prod.yml
+  wget -nv -O .env.prod.template https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/.env.prod.template
+  wget -nv -O config/frontend/default.conf.http-template https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/config/frontend/default.conf.http-template
+  wget -nv -O config/frontend/default.conf.https-template https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/config/frontend/default.conf.https-template
+  wget -nv -O Makefile https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/make/prod.mk
+  wget -nv -O update.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh
+  wget -nv -O https_on.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/https_on.sh
+  wget -nv -O https_off.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/https_off.sh
   chmod +x update.sh
   chmod +x https_on.sh
   chmod +x https_off.sh
@@ -88,20 +89,19 @@ customize_settings() {
   # Init nginx http configuration
   cp ./config/frontend/default.conf.http-template config/frontend/default.conf.template
 
-  printf "3. Set Environment variables:\n\n"
-
   # Set application BASE_DIR
   sed -i "s#BASE_DIR :=.*#BASE_DIR := \.#" Makefile
   sed -i "s#BASE_DIR=.*#BASE_DIR=\.#" https_on.sh
   sed -i "s#BASE_DIR=.*#BASE_DIR=\.#" https_off.sh
 
   # Write chosen version tag to env file
-  sed -i "s#TAG.*#TAG=$chosen_version_tag#" .env.prod
+  sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
 
   # Set environment variables in .env.prod
+  printf "3. Set Environment variables (default postgres password is generated randomly):\n\n"
   for var in "${ENV_VAR_ORDER[@]}"; do
-    read -p "$var: " -er -i ${ENV_VARS[$var]} new_var
-    sed -i "s#$var.*#$var=$new_var#" .env.prod
+    read -p "$var: " -er -i ${ENV_VARS[$var]} NEW_ENV_VAR_VALUE
+    sed -i "s#$var.*#$var=$NEW_ENV_VAR_VALUE#" .env.prod
   done
 
   printf "\n\n"
@@ -116,12 +116,12 @@ set_tls() {
     . .env.prod
 
     # Set server name
-    read -p "SERVER_NAME: " -er -i "${SERVER_NAME}" new_var
-    sed -i "s#SERVER_NAME.*#SERVER_NAME=$new_var#" .env.prod
+    read -p "SERVER_NAME: " -er -i "${SERVER_NAME}" NEW_SERVER_NAME
+    sed -i "s#SERVER_NAME.*#SERVER_NAME=$NEW_SERVER_NAME#" .env.prod
 
     # Set https port
-    read -p "HTTPS_PORT: " -er -i "${HTTPS_PORT}" new_var
-    sed -i "s#HTTPS_PORT.*#HTTPS_PORT=$new_var#" .env.prod
+    read -p "HTTPS_PORT: " -er -i "${HTTPS_PORT}" NEW_HTTPS_PORT
+    sed -i "s#HTTPS_PORT.*#HTTPS_PORT=$NEW_HTTPS_PORT#" .env.prod
     printf "\n"
 
     ./https_on.sh
