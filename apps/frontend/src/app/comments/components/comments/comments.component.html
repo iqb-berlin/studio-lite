@@ -1,5 +1,5 @@
 <div fxLayout="column" fxFlex="100%">
-  <div fxFlex class="comments">
+  <div fxFlex class="comments" *ngIf="!newCommentOnly">
     <studio-lite-comment
       *ngFor="let rootComment of comments | rootComments"
       [comment]="rootComment"
@@ -25,5 +25,3 @@
       </studio-lite-comment-editor>
   </div>
 </div>
-
-

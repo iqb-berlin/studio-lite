@@ -28,6 +28,11 @@ const reviewConfigDefault: ReviewConfigDto = {
                     [(ngModel)]="reviewConfig.canComment">
         Kommentare möglich
       </mat-checkbox>
+      <mat-checkbox (change)="configChanged.emit();"
+                    [disabled]="disabled"
+                    [(ngModel)]="reviewConfig.showOthersComments">
+        Zeige bereits vergebene Kommentare
+      </mat-checkbox>
     </div>
   `
 })

@@ -476,7 +476,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   reviews(): void {
     this.reviewsDialog.open(ReviewsComponent, {
       width: '1000px',
-      height: '800px'
+      height: '820px'
     });
   }
 

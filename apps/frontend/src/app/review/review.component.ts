@@ -65,7 +65,7 @@ export class ReviewComponent implements OnInit {
   showReviewDialog() {
     this.commentDialog.open(CommentDialogComponent, {
       width: '800px',
-      height: '800px'
+      height: this.reviewService.reviewConfig.showOthersComments ? '800px' : '350px'
     });
   }
 
