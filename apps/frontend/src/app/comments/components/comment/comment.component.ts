@@ -29,7 +29,7 @@ export class CommentComponent implements OnInit {
   replyId: number | null = null;
 
   ngOnInit(): void {
-    this.ownComment = this.userId === this.comment.userId;
+    this.ownComment = this.userId > 0 && this.userId === this.comment.userId;
     this.canDelete = this.ownComment && this.replies.length === 0;
     this.replyId = this.parentId ? this.parentId : this.comment.id;
   }
