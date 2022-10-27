@@ -4,9 +4,6 @@ SELECTED_RELEASE=$1
 REPO_URL=iqb-berlin/studio-lite
 
 get_new_release_version() {
-  . .env.prod
-
-  SOURCE_TAG=$TAG
   LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
 
   if [ "$SOURCE_TAG" = "latest" ]; then
@@ -14,7 +11,7 @@ get_new_release_version() {
   fi
 
   printf "Installed version: %s\n" "$SOURCE_TAG"
-  printf "Latest available version: %s\n\n" "$LATEST_RELEASE"
+  printf "Latest available release: %s\n\n" "$LATEST_RELEASE"
 
   if [ "$SOURCE_TAG" = "$LATEST_RELEASE" ]; then
     echo "Latest version is already installed."
@@ -33,13 +30,13 @@ get_new_release_version() {
 create_backup() {
   mkdir -p ./backup/release/"$SOURCE_TAG"
   rsync -a --exclude='backup' . backup/release/"$SOURCE_TAG"
-  echo "Backup created! Current release files have been saved at: $PWD/backup/release/$SOURCE_TAG"
+  printf "\nBackup created! Current release files have been saved at: %s\n\n" "$PWD/backup/release/$SOURCE_TAG"
 }
 
 run_update_script_in_selected_version() {
-  if curl --silent https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh | diff -q - ./backup/release/"$SOURCE_TAG"/update.sh &>/dev/null; then
+  if ! curl --silent https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh | diff -q - ./backup/release/"$SOURCE_TAG"/update.sh &>/dev/null; then
     # source update script end target update script differ
-    printf "Update script has been modified in newer version!\n\nThis update script will download the new update script, terminate itself, and start the new one!\n\n"
+    printf "Update script has been modified in newer version!\nThis update script will download the new update script, terminate itself, and start the new one!\n\n"
     echo "Downloading new update script ..."
     wget -nv -O update.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh
     chmod +x update.sh
@@ -64,15 +61,22 @@ update_files() {
 }
 
 get_modificated_file() {
-  if curl --silent https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/"$2" | diff -q - ./backup/release/"$SOURCE_TAG"/"$1" &>/dev/null; then
+  if ! curl --silent https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/"$2" | diff -q - ./backup/release/"$SOURCE_TAG"/"$1" &>/dev/null; then
     # source file end target file differ
     mv "$1" "$1".bkp 2>/dev/null
     wget -nv -O "$1" https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/"$2"
     if [ "$3" == "env-file" ]; then
-      printf "Environment file template '%s' has been modified. Please enrich your current .env.prod file with new environment variables, or delete obsolete variables!\n\n" "$1"
+      printf "\t- Environment file template '%s' has been modified. Please enrich your current .env.prod file with new environment variables, or delete obsolete variables!\n" "$1"
     fi
     if [ "$3" == "conf-file" ]; then
-      printf "Configuration file template '%s' has been modified. Please adjust the template with your current configuration file information, if necessary!\n\n" "$1"
+      printf "\t- Configuration file template '%s' has been modified. Please adjust the template with your current configuration file information, if necessary!\n" "$1"
+    fi
+  else
+    if [ "$3" == "env-file" ]; then
+      printf "\t- Environment file template '%s' has not been modified.\n" "$1"
+    fi
+    if [ "$3" == "conf-file" ]; then
+      printf "\t- Configuration file template '%s' has not been modified.\n" "$1"
     fi
   fi
 }
@@ -105,9 +109,6 @@ switch_tls() {
   printf "\n"
 
   if [[ $TLS =~ ^[yY]$ ]]; then
-    # Load sample values for environment variables in .env.prod
-    . .env.prod
-
     # Set server name
     read -p "SERVER_NAME: " -er -i "${SERVER_NAME}" NEW_SERVER_NAME
     sed -i "s#SERVER_NAME.*#SERVER_NAME=$NEW_SERVER_NAME#" .env.prod
@@ -144,6 +145,10 @@ application_cold_restart() {
     exit 0
   fi
 }
+
+# Load current environment variables in .env.prod
+. .env.prod
+SOURCE_TAG=$TAG
 
 if [ -z "$SELECTED_RELEASE" ]; then
   echo "1. Update version"
