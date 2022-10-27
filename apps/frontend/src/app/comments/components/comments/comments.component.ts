@@ -22,6 +22,7 @@ export class CommentsComponent implements OnInit {
   @Input() unitId!: number;
   @Input() workspaceId!: number;
   @Input() reviewId = 0;
+  @Input() newCommentOnly = false;
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];
@@ -48,19 +49,21 @@ export class CommentsComponent implements OnInit {
   }
 
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
-    const updateComment = { body: text, userId: this.userId };
-    this.backendService
-      .updateComment(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
-      .pipe(
-        takeUntil(this.ngUnsubscribe),
-        switchMap(() => {
-          this.setActiveComment(null);
-          return this.getUpdatedComments();
-        })
-      )
-      .subscribe(() => {
-        this.setLatestCommentId();
-      });
+    if (!this.newCommentOnly) {
+      const updateComment = { body: text, userId: this.userId };
+      this.backendService
+        .updateComment(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
+        .pipe(
+          takeUntil(this.ngUnsubscribe),
+          switchMap(() => {
+            this.setActiveComment(null);
+            return this.getUpdatedComments();
+          })
+        )
+        .subscribe(() => {
+          this.setLatestCommentId();
+        });
+    }
   }
 
   deleteComment(commentId: number): void {
@@ -115,6 +118,7 @@ export class CommentsComponent implements OnInit {
         takeUntil(this.ngUnsubscribe),
         switchMap(() => {
           this.setActiveComment(null);
+          if (this.newCommentOnly) this.onCommentsUpdated.emit();
           return this.getUpdatedComments();
         })
       )
@@ -124,6 +128,7 @@ export class CommentsComponent implements OnInit {
   }
 
   private getUpdatedComments(): Observable<boolean> {
+    if (this.newCommentOnly) return of(true);
     return this.backendService.getComments(this.workspaceId, this.unitId, this.reviewId)
       .pipe(
         switchMap(comments => {
