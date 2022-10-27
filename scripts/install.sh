@@ -84,7 +84,7 @@ download_files() {
 
 customize_settings() {
   # Activate environment file
-  mv .env.prod.template .env.prod
+  cp .env.prod.template .env.prod
 
   # Init nginx http configuration
   cp ./config/frontend/default.conf.http-template config/frontend/default.conf.template
