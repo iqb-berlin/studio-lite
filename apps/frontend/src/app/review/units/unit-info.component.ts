@@ -32,7 +32,7 @@ const PanelWidthOffset = 40;
           <mat-icon>chevron_left</mat-icon>
         </button>
       </div>
-      <div #infoPanelSplitter class="infoPanelSplitter" fxFlex="6px">&nbsp;</div>
+      <div #infoPanelSplitter class="infoPanelSplitter" fxFlex="6px"></div>
       <div #infoPanel class="infoPanel" fxFlex>{{reviewService.unitInfoPanelWidth}}</div>
     </div>
   `,
@@ -77,8 +77,7 @@ export class UnitInfoComponent implements OnInit, AfterViewInit, OnDestroy {
     return parseInt(this.elementRef.nativeElement.style.width, 10) - PanelWidthOffset;
   }
 
-  private counter = 0;
-  private widthList = [300, 400, 500];
+  private mouseXOffset = 0;
 
   constructor(
     private backendService: BackendService,
@@ -93,19 +92,33 @@ export class UnitInfoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     setTimeout(() => {
       this.elementWidth = this.reviewService.unitInfoPanelWidth;
-      console.log(this.splitterElement);
       if (this.splitterElement) {
-        this.splitterElement.nativeElement.onmousedown = () => {
-          this.counter += 1;
-          if (this.counter > 2) this.counter = 0;
-          this.elementWidth = this.widthList[this.counter];
-          console.log(this.widthList[this.counter]);
+        this.splitterElement.nativeElement.onmousedown = ($eventDown: MouseEvent) => {
+          this.mouseXOffset = $eventDown.clientX + this.elementWidth;
+          this.elementRef.nativeElement.onmousemove = ($eventMove: MouseEvent) => {
+            if ($eventMove.buttons) {
+              this.elementWidth = this.mouseXOffset - $eventMove.clientX;
+            } else {
+              this.elementRef.nativeElement.onmousemove = null;
+              this.elementRef.nativeElement.onmouseup = null;
+              this.mouseXOffset = 0;
+            }
+          };
+          this.elementRef.nativeElement.onmouseup = () => {
+            this.elementRef.nativeElement.onmousemove = null;
+            this.elementRef.nativeElement.onmouseup = null;
+            this.mouseXOffset = 0;
+          };
         };
       }
     });
   }
 
   ngOnDestroy(): void {
-    if (this.splitterElement) this.splitterElement.nativeElement.onmousedown = null;
+    if (this.splitterElement) {
+      this.splitterElement.nativeElement.onmousedown = null;
+      this.elementRef.nativeElement.onmousemove = null;
+      this.elementRef.nativeElement.onmouseup = null;
+    }
   }
 }
