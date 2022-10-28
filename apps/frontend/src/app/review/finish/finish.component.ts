@@ -17,7 +17,14 @@ export class FinishComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.reviewService.currentUnitSequenceId = this.reviewService.units.length;
+      if (this.reviewService.units.length === 0) {
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        this.reviewService.loadReviewData().then(() => {
+          this.reviewService.currentUnitSequenceId = this.reviewService.units.length;
+        });
+      } else {
+        this.reviewService.currentUnitSequenceId = this.reviewService.units.length;
+      }
       this.reviewService.setHeaderText('Endseite');
     });
   }

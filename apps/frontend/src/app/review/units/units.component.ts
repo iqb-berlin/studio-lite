@@ -53,17 +53,28 @@ export class UnitsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     setTimeout(() => {
       this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.postMessageSubscription = this.appService.postMessage$
         .subscribe(messageEvent => this.handleIncomingMessage(messageEvent));
       this.routingSubscription = this.route.params.subscribe(params => {
         // eslint-disable-next-line @typescript-eslint/dot-notation
         this.reviewService.currentUnitSequenceId = parseInt(params['u'], 10);
-        const unitData = this.reviewService.units.filter(
-          u => u.sequenceId === this.reviewService.currentUnitSequenceId
-        );
-        this.unitData = unitData[0];
-        this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
-        this.sendUnitDataToPlayer();
+        if (this.reviewService.units.length === 0) {
+          // eslint-disable-next-line @typescript-eslint/dot-notation
+          this.reviewService.loadReviewData().then(() => {
+            const unitData = this.reviewService.units.filter(
+              u => u.sequenceId === this.reviewService.currentUnitSequenceId
+            );
+            this.unitData = unitData[0];
+            this.sendUnitDataToPlayer();
+          });
+        } else {
+          const unitData = this.reviewService.units.filter(
+            u => u.sequenceId === this.reviewService.currentUnitSequenceId
+          );
+          this.unitData = unitData[0];
+          this.sendUnitDataToPlayer();
+        }
       });
     });
   }

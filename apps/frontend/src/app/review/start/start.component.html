@@ -17,7 +17,7 @@
       </booklet-config-show>
     </mat-expansion-panel>
     <div id="continue-button" fxLayout="row" fxLayoutAlign="end end">
-      <a mat-fab
+      <a mat-fab [disabled]="reviewService.units.length === 0"
          (click)="reviewService.setUnitNavigationRequest(0)"
          matTooltip="Weiter"
       >
