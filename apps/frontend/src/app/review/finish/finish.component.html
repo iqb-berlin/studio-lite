@@ -6,7 +6,7 @@
       <h2>{{reviewService.workspaceName}}</h2>
     </div>
     <div fxLayout="row" fxLayoutAlign="start start" id="backwards-button">
-      <a mat-fab
+      <a mat-fab [disabled]="reviewService.units.length === 0"
          (click)="reviewService.setUnitNavigationRequest(reviewService.units.length -1)"
          matTooltip="Zurück"
       >

@@ -17,8 +17,12 @@ export class StartComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.reviewService.currentUnitSequenceId = -1;
+      if (this.reviewService.units.length === 0) {
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        this.reviewService.loadReviewData();
+      }
       this.reviewService.setHeaderText('Startseite');
+      this.reviewService.currentUnitSequenceId = -1;
     });
   }
 }
