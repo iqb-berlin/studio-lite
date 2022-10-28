@@ -37,6 +37,10 @@ export class UnitsComponent implements OnInit, OnDestroy {
     name: ''
   };
 
+  get iFrameElementWidth(): number {
+    return this.iFrameElement ? parseInt(this.iFrameElement.style.width, 10) : window.innerWidth;
+  }
+
   constructor(
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,

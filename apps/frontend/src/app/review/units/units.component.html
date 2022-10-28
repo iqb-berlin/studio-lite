@@ -5,7 +5,7 @@
 >
   <div *ngIf="message" style="margin: 30px">{{message}}</div>
   <div fxLayout="row" style="height: 100%;">
-    <iframe id="hosting-iframe" class="unitHost"></iframe>
+    <iframe id="hosting-iframe" class="unitHost" fxFlex></iframe>
     <unit-info [unitId]="reviewService.currentUnitSequenceId"
                *ngIf="reviewService.reviewConfig.showMetadata || reviewService.reviewConfig.showCoding"></unit-info>
   </div>

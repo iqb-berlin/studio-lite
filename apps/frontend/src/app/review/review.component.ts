@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
 import { ModuleService } from '@studio-lite/studio-components';
 import { ReviewService } from './review.service';
 import { BackendService } from './backend.service';
@@ -20,7 +19,6 @@ export class ReviewComponent implements OnInit {
     public appService: AppService,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
-    private messageDialog: MatDialog,
     private commentDialog: MatDialog,
     private moduleService: ModuleService,
     public reviewService: ReviewService
@@ -31,33 +29,34 @@ export class ReviewComponent implements OnInit {
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.reviewService.reviewId = this.route.snapshot.params['review'];
-      this.moduleService.loadList();
-      this.backendService.getReview(this.reviewService.reviewId).subscribe(reviewData => {
-        this.appService.appConfig.setPageTitle('Review', true);
-        if (reviewData) {
-          this.reviewService.reviewName = reviewData.name ? reviewData.name : '?';
-          this.reviewService.workspaceName = reviewData.workspaceName ? reviewData.workspaceName : '?';
-          this.reviewService.workspaceId = reviewData.workspaceId ? reviewData.workspaceId : 0;
-          this.reviewService.units = [];
-          if (reviewData.units) {
-            let counter = 0;
-            reviewData.units.forEach(u => {
-              this.reviewService.units.push({
-                databaseId: u,
-                sequenceId: counter,
-                name: `Aufgabe ${(counter + 1).toString()}`,
-                definition: '',
-                playerId: '',
-                responses: ''
+      this.moduleService.loadList().then(() => {
+        this.backendService.getReview(this.reviewService.reviewId).subscribe(reviewData => {
+          this.appService.appConfig.setPageTitle('Review', true);
+          if (reviewData) {
+            this.reviewService.reviewName = reviewData.name ? reviewData.name : '?';
+            this.reviewService.workspaceName = reviewData.workspaceName ? reviewData.workspaceName : '?';
+            this.reviewService.workspaceId = reviewData.workspaceId ? reviewData.workspaceId : 0;
+            this.reviewService.units = [];
+            if (reviewData.units) {
+              let counter = 0;
+              reviewData.units.forEach(u => {
+                this.reviewService.units.push({
+                  databaseId: u,
+                  sequenceId: counter,
+                  name: `Aufgabe ${(counter + 1).toString()}`,
+                  definition: '',
+                  playerId: '',
+                  responses: ''
+                });
+                counter += 1;
               });
-              counter += 1;
-            });
+            }
+            this.reviewService.reviewConfig = reviewData.settings && reviewData.settings.reviewConfig ?
+              reviewData.settings.reviewConfig : {};
+            this.reviewService.bookletConfig = reviewData.settings && reviewData.settings.bookletConfig ?
+              reviewData.settings.bookletConfig : {};
           }
-          this.reviewService.reviewConfig = reviewData.settings && reviewData.settings.reviewConfig ?
-            reviewData.settings.reviewConfig : {};
-          this.reviewService.bookletConfig = reviewData.settings && reviewData.settings.bookletConfig ?
-            reviewData.settings.bookletConfig : {};
-        }
+        });
       });
     });
   }
@@ -66,17 +65,6 @@ export class ReviewComponent implements OnInit {
     this.commentDialog.open(CommentDialogComponent, {
       width: '800px',
       height: this.reviewService.reviewConfig.showOthersComments ? '800px' : '350px'
-    });
-  }
-
-  showInfoDialog() {
-    this.messageDialog.open(MessageDialogComponent, {
-      width: '400px',
-      data: <MessageDialogData>{
-        title: 'infoDialog',
-        content: 'coming soon',
-        type: MessageType.info
-      }
     });
   }
 }
