@@ -5,8 +5,9 @@ import { Inject, Injectable } from '@angular/core';
 import {
   ReviewFullDto, ReviewSettingsDto,
   UnitDefinitionDto,
-  UnitMetadataDto
+  UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
+import { Comment } from '../comments/types/comment';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +50,23 @@ export class BackendService {
           return r;
         }),
         catchError(() => of(null))
+      );
+  }
+
+  getUnitCoding(reviewId: number, unitId: number): Observable<UnitSchemeDto | null> {
+    return this.http
+      .get<UnitSchemeDto>(`${this.serverUrl}review/${reviewId}/${unitId}/scheme`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  getUnitComments(reviewId: number, unitId: number): Observable<Comment[]> {
+    return this.http
+      .get<Comment[]>(`${this.serverUrl}review/${reviewId}/${unitId}/comments`)
+      .pipe(
+        catchError(() => of([])),
+        map(comments => comments)
       );
   }
 

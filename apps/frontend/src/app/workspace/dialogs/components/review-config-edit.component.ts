@@ -14,11 +14,6 @@ const reviewConfigDefault: ReviewConfigDto = {
   template: `
     <div fxLayout="column">
       <mat-checkbox (change)="configChanged.emit();"
-                  [disabled]="disabled"
-                  [(ngModel)]="reviewConfig.showMetadata">
-        Zeige Metadaten/Eigenschaften
-      </mat-checkbox>
-      <mat-checkbox (change)="configChanged.emit();"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.showCoding">
         Zeige Kodierung

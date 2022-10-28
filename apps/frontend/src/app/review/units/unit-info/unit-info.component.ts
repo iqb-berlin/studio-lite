@@ -1,18 +1,15 @@
 import {
   AfterViewInit,
-  Component, ElementRef, Input, OnDestroy, OnInit, ViewChild
+  Component, ElementRef, Input, OnDestroy, ViewChild
 } from '@angular/core';
-import { BackendService } from '../backend.service';
-import { ReviewService } from '../review.service';
-
-export interface SelectUnitData {
-  title: string,
-  buttonLabel: string,
-  fromOtherWorkspacesToo: boolean,
-  multiple: boolean
-}
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { DatePipe } from '@angular/common';
+import { BackendService } from '../../backend.service';
+import { ReviewService } from '../../review.service';
 
 const PanelWidthOffset = 40;
+const datePipe = new DatePipe('de-DE');
+
 @Component({
   selector: 'unit-info',
   template: `
@@ -33,7 +30,16 @@ const PanelWidthOffset = 40;
         </button>
       </div>
       <div #infoPanelSplitter class="infoPanelSplitter" fxFlex="6px"></div>
-      <div #infoPanel class="infoPanel" fxFlex>{{reviewService.unitInfoPanelWidth}}</div>
+      <div #infoPanel class="infoPanel" fxFlex>
+        <h1>{{_unitMetadata?.key}}</h1>
+        <h2 *ngIf="_unitMetadata && _unitMetadata.name">{{_unitMetadata.name}}</h2>
+        <p *ngIf="_unitLastChangeText" [innerHTML]="_unitLastChangeText"></p>
+        <p *ngIf="_unitDescription" [innerHTML]="_unitDescription"></p>
+        <unit-info-coding *ngIf="reviewService.reviewConfig.showCoding && _unitMetadata"
+                          [unitDbId]="_unitMetadata.id"></unit-info-coding>
+        <unit-info-comments *ngIf="reviewService.reviewConfig.showOthersComments && _unitMetadata"
+                          [unitDbId]="_unitMetadata.id"></unit-info-comments>
+      </div>
     </div>
   `,
   styles: [
@@ -51,19 +57,44 @@ const PanelWidthOffset = 40;
     }`,
     `.infoPanel {
       padding: 10px;
+      overflow-x: auto;
     }`,
     `.infoPanelSplitter {
       background-color: lightgray;
       cursor: col-resize;
+    }`,
+    `.infoPanel p {
+      text-indent: -1em;
+      margin-left: 1em;
     }`
   ]
 })
-export class UnitInfoComponent implements OnInit, AfterViewInit, OnDestroy {
+export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;
   _unitId = 0;
   @Input('unitId')
   set unitId(value: number) {
     this._unitId = value;
+  }
+
+  _unitMetadata?: UnitMetadataDto;
+  _unitLastChangeText = '';
+  _unitDescription = '';
+  @Input('unitMetadata')
+  set unitMetadata(value: UnitMetadataDto | undefined) {
+    this._unitMetadata = value;
+    if (value) {
+      this._unitLastChangeText = `Zuletzt geändert:<br/>Eigenschaften: ${value.lastChangedMetadata ?
+        datePipe.transform(value.lastChangedMetadata, 'dd.MM.yyyy HH:mm') : '-'}<br/>
+Definition:  ${value.lastChangedDefinition ?
+    datePipe.transform(value.lastChangedDefinition, 'dd.MM.yyyy HH:mm') : '-'}<br/>
+Kodierschema: ${value.lastChangedScheme ? datePipe.transform(value.lastChangedScheme, 'dd.MM.yyyy HH:mm') : '-'}`;
+      this._unitDescription = value.description ?
+        `Beschreibung:<br/> ${value.description.replace(/\n/g, '<br/>')}` : '';
+    } else {
+      this._unitLastChangeText = '';
+      this._unitDescription = '';
+    }
   }
 
   set elementWidth(value: number) {
@@ -84,10 +115,6 @@ export class UnitInfoComponent implements OnInit, AfterViewInit, OnDestroy {
     public reviewService: ReviewService,
     private elementRef: ElementRef
   ) {}
-
-  ngOnInit(): void {
-    console.log('UnitInfoComponent');
-  }
 
   ngAfterViewInit() {
     setTimeout(() => {

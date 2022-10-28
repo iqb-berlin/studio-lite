@@ -214,6 +214,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
     this.setPageList([], '');
     this.backendService.getUnitMetadata(this.reviewService.reviewId, this.unitData.databaseId).subscribe(umd => {
       if (umd) {
+        this.unitData.dbMetadata = umd;
         this.unitData.playerId = umd.player ? umd.player : '';
         const playerId = this.unitData.playerId ?
           VeronaModuleFactory.getBestMatch(this.unitData.playerId, Object.keys(this.moduleService.players)) : '';

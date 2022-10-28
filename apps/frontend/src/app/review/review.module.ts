@@ -19,9 +19,11 @@ import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
 import { ReviewComponent } from './review.component';
-import { UnitInfoComponent } from './units/unit-info.component';
+import { UnitInfoComponent } from './units/unit-info/unit-info.component';
 import { CommentDialogComponent } from './comment-dialog.component';
 import { CommentsModule } from '../comments/comments.module';
+import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.component';
+import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +32,8 @@ import { CommentsModule } from '../comments/comments.module';
     FinishComponent,
     UnitsComponent,
     UnitInfoComponent,
+    UnitInfoCodingComponent,
+    UnitInfoCommentsComponent,
     CommentDialogComponent
   ],
   imports: [
