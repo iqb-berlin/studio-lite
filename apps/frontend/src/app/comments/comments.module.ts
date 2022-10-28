@@ -29,6 +29,7 @@ import { AuthInterceptor } from '../auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
 import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
 import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
+import { Comment } from './types/comment';
 
 @NgModule({
   imports: [
@@ -62,7 +63,9 @@ import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
     CommentBadgeComponent,
     MomentFromNowPipe
   ],
-  exports: [CommentsComponent],
+  exports: [
+    CommentsComponent
+  ],
   providers: [
     BackendService,
     [
@@ -76,3 +79,4 @@ import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
   ]
 })
 export class CommentsModule {}
+export { Comment };

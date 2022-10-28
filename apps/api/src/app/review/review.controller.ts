@@ -7,7 +7,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateUnitCommentDto,
-  ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UpdateUnitCommentDto
+  ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { ApiUnauthorizedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
@@ -70,9 +70,22 @@ export class ReviewController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
-  @ApiTags('workspace unit')
+  @ApiTags('review unit')
   async findOnesComments(@Param('id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitCommentService.findOnesComments(unitId);
+  }
+
+  @Get(':id/scheme')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    type: UnitSchemeDto
+  })
+  @ApiTags('review unit')
+  async findOnesScheme(
+    @Param('id', ParseIntPipe) unitId: number
+  ): Promise<UnitSchemeDto> {
+    return this.unitService.findOnesScheme(unitId);
   }
 
   @Post(':id/comments')
@@ -82,7 +95,7 @@ export class ReviewController {
     description: 'Sends back the id of the new comment in database',
     type: Number
   })
-  @ApiTags('workspace unit')
+  @ApiTags('review unit')
   async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
     return this.unitCommentService.createComment(createUnitCommentDto);
   }
