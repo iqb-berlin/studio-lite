@@ -17,6 +17,8 @@ export class ReviewService {
   screenHeaderText = 'Startseite';
   pageHeaderText = 'Startseite';
   currentUnitSequenceId = -1;
+  unitInfoPanelWidth = 300;
+  unitInfoPanelOn = false;
 
   get unitDbId(): number {
     const unitData = this.units.filter(u => u.sequenceId === this.currentUnitSequenceId);
