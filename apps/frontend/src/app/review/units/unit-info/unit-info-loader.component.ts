@@ -6,7 +6,7 @@ import {
 @Component({
   selector: 'unit-info-loader',
   template: `
-    <div id="unit_info_loader_div">
+    <div id="unit_info_loader_div" [style.height]="spinnerOn ? '30px' : '0'">
       <mat-spinner *ngIf="spinnerOn" [diameter]="20"></mat-spinner>
     </div>
   `,
@@ -22,9 +22,10 @@ import {
   ]
 })
 export class UnitInfoLoaderComponent implements AfterViewInit, OnDestroy {
-  @Output() onEnter = new EventEmitter<UnitInfoLoaderComponent>();
+  @Output() onEnter = new EventEmitter();
   intersectionObserver: IntersectionObserver;
   spinnerOn = false;
+  isInView = false;
   @Input('loaderOn')
   set loaderOn(value: boolean) {
     this.spinnerOn = value;
@@ -34,13 +35,13 @@ export class UnitInfoLoaderComponent implements AfterViewInit, OnDestroy {
     private elementRef: ElementRef
   ) {
     this.intersectionObserver = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[], observer: IntersectionObserver): void => {
+      (entries: IntersectionObserverEntry[]): void => {
         const intersectingEntries = entries.filter(e => e.isIntersecting);
-        console.log('# entering');
         if (intersectingEntries && intersectingEntries.length > 0) {
-          console.log('# intersecting');
-          this.onEnter.emit(this);
-          observer.unobserve(this.elementRef.nativeElement);
+          this.isInView = true;
+          this.onEnter.emit();
+        } else {
+          this.isInView = false;
         }
       }, {
         root: document
@@ -55,6 +56,7 @@ export class UnitInfoLoaderComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.intersectionObserver.unobserve(this.elementRef.nativeElement);
     this.intersectionObserver.disconnect();
   }
 }
