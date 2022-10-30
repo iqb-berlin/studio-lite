@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
@@ -58,6 +59,9 @@ import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.comp
     MatFormFieldModule,
     FormsModule,
     MatInputModule
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
   ],
   exports: [ReviewComponent]
 })
