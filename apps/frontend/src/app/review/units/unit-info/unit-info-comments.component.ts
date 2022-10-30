@@ -5,12 +5,14 @@ import {
 import { BackendService } from '../../backend.service';
 import { ReviewService } from '../../review.service';
 import { Comment } from '../../../comments/types/comment';
+import { UnitInfoLoaderComponent } from './unit-info-loader.component';
 
 @Component({
   selector: 'unit-info-comments',
   template: `
     <div fxLayout="column">
       <div class="unit-info-comment-header">Kommentare</div>
+      <unit-info-loader (onEnter)="startLoading($event)"></unit-info-loader>
       <div class="unit-info-comment-content" *ngFor="let c of allComments">
         <h4>{{c.userName}}</h4>
         <div [innerHTML]="c.body"></div>
@@ -49,6 +51,11 @@ export class UnitInfoCommentsComponent implements AfterViewInit {
     setTimeout(() => {
       this.updateContent();
     });
+  }
+
+  startLoading(infoLoader: UnitInfoLoaderComponent) {
+    console.log('#-comments');
+    // loader.spinnerOn = true;
   }
 
   updateContent() {

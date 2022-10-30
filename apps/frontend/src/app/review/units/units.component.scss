@@ -35,9 +35,6 @@
   background-color: darkgrey;
 }
 
-.with-footer {
-  height: calc(100% - 45px);
-}
-.with-footer #hosting-iframe {
+.with-footer, .with-footer unit-info, .with-footer #hosting-iframe {
   height: calc(100% - 45px);
 }

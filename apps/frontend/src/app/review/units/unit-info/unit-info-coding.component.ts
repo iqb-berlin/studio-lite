@@ -5,12 +5,14 @@ import {
 import { CodingSchemeDto } from '@studio-lite/shared-code';
 import { BackendService } from '../../backend.service';
 import { ReviewService } from '../../review.service';
+import { UnitInfoLoaderComponent } from './unit-info-loader.component';
 
 @Component({
   selector: 'unit-info-coding',
   template: `
-    <div fxLayout="column">
+    <div fxLayout="column" [style.minHeight.px]="600">
       <div class="unit-info-coding-header">Kodierung</div>
+      <unit-info-loader #loader (onEnter)="startLoading($event)"></unit-info-loader>
       <div #codingContent class="unit-info-coding-content"></div>
     </div>
   `,
@@ -41,6 +43,11 @@ export class UnitInfoCodingComponent implements AfterViewInit {
     setTimeout(() => {
       this.updateContent();
     });
+  }
+
+  startLoading(infoLoader: UnitInfoLoaderComponent) {
+    console.log('#-coding');
+    // loader.spinnerOn = true;
   }
 
   updateContent() {
