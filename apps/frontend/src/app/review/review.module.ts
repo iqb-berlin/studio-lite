@@ -14,6 +14,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
@@ -24,6 +25,7 @@ import { CommentDialogComponent } from './comment-dialog.component';
 import { CommentsModule } from '../comments/comments.module';
 import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.component';
 import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.component';
+import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +36,7 @@ import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.
     UnitInfoComponent,
     UnitInfoCodingComponent,
     UnitInfoCommentsComponent,
+    UnitInfoLoaderComponent,
     CommentDialogComponent
   ],
   imports: [
@@ -48,6 +51,7 @@ import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.
     StudioComponentsModule,
     MatSidenavModule,
     MatButtonToggleModule,
+    MatProgressSpinnerModule,
     MatExpansionModule,
     MatDialogModule,
     TranslateModule,
