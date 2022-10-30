@@ -23,9 +23,9 @@ platformBrowserDynamic([
   },
   {
     provide: 'APP_VERSION',
-    useValue: '2.3.0-beta'
+    useValue: '2.3.0-rc.1'
   }
 ])
   .bootstrapModule(AppModule)
   // eslint-disable-next-line no-console
-  .catch((err) => console.log(err));
+  .catch(err => console.log(err));
