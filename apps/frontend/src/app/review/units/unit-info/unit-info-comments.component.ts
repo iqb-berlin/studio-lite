@@ -15,10 +15,10 @@ import { UnitInfoLoaderComponent } from './unit-info-loader.component';
       <div *ngIf="allComments.length === 0">{{ loader?.spinnerOn ? 'lade...' : 'Keine Kommentare verfügbar.'}}</div>
       <div class="unit-info-comment-content" *ngFor="let c of allComments">
         <div fxLayout="row" fxLayoutAlign="space-between">
-            <h4>{{c.userName}}</h4>
+            <h4><mat-icon *ngIf="c.parentId">subdirectory_arrow_right</mat-icon>{{c.userName}}</h4>
             <p>{{c.changedAt | date : 'dd.MM.yyyy' : timeZone}}</p>
         </div>
-        <div [innerHTML]="c.body"></div>
+        <div [innerHTML]="c.body" [class]="c.parentId ? 'reply-comment' : ''"></div>
       </div>
     </div>
   `,
@@ -31,6 +31,9 @@ import { UnitInfoLoaderComponent } from './unit-info-loader.component';
     }`,
     `.unit-info-comment-content {
       border-top: 1px solid darkgray;
+    }`,
+    `.reply-comment {
+      margin-left: 20px;
     }`,
     `.unit-info-comment-content h4 {
       margin-top: 2px;
@@ -68,11 +71,20 @@ export class UnitInfoCommentsComponent {
           this.reviewService.reviewId, unitData.databaseId
         ).subscribe(unitComments => {
           if (this.loader) this.loader.spinnerOn = false;
-          unitData.comments = unitComments;
-          this.allComments = unitComments;
+          unitData.comments = UnitInfoCommentsComponent.sortComments(unitComments);
+          this.allComments = unitData.comments;
           this.minHeight = 0;
         });
       }
     }
+  }
+
+  static sortComments(sourceComments: Comment[]): Comment[] {
+    const firstLevelComments = sourceComments.filter(c => !c.parentId);
+    let returnComments: Comment[] = [];
+    firstLevelComments.forEach(c => {
+      returnComments = [...returnComments, c, ...sourceComments.filter(cChild => cChild.parentId === c.id)];
+    });
+    return returnComments;
   }
 }
