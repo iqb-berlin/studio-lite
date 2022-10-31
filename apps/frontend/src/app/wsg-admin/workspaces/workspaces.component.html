@@ -16,6 +16,9 @@
               matTooltip="Einstellungen des Arbeitsbereiches ändern">
         <mat-icon>settings</mat-icon>
       </button>
+      <button mat-raised-button (click)="xlsxDownloadWorkspaceReport()" matTooltip="Xlsx Bericht Arbeitsbereiche: Module">
+        <mat-icon>save_alt</mat-icon>
+      </button>
     </div>
 
     <mat-table [dataSource]="objectsDatasource" matSort matSortDisableClear class="scroll-area">

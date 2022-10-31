@@ -16,10 +16,14 @@ import {
 import {
   UserInListDto, CreateWorkspaceGroupDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
+import { DatePipe } from '@angular/common';
+import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
 import { AppService } from '../../app.service';
 import { UserToCheckCollection } from '../users/usersChecked';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
+
+const datePipe = new DatePipe('de-DE');
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -282,5 +286,12 @@ export class WorkspacesComponent implements OnInit {
 
   selectRow(row: WorkspaceGroupInListDto): void {
     this.tableSelectionRow.select(row);
+  }
+
+  xlsxDownloadWorkspaceReport() {
+    this.backendService.getXlsWorkspaces().subscribe(b => {
+      const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+      saveAs(b, `${thisDate} Bericht Arbeitsbereiche.xlsx`);
+    });
   }
 }

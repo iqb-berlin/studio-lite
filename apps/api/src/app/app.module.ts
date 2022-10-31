@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { ReviewModule } from './review/review.module';
 import { AppVersionProvider } from './app-version.guard';
+import { DownloadModule } from './download/download.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AppVersionProvider } from './app-version.guard';
     DatabaseModule,
     WorkspaceModule,
     ReviewModule,
+    DownloadModule,
     MulterModule
   ],
   controllers: [AppController],
