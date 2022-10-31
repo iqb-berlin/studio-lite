@@ -71,12 +71,12 @@ export class UnitInfoCodingComponent {
           this.reviewService.reviewId, unitData.databaseId
         ).subscribe(unitScheme => {
           if (this.loader) this.loader.spinnerOn = false;
+          this.minHeight = 0;
           if (unitScheme) {
             try {
               const codingScheme: CodingSchemeDto = JSON.parse(unitScheme.scheme);
               unitData.codingSchemeVariables = codingScheme.variableCodings || [];
               this.allVariables = codingScheme.variableCodings || [];
-              this.minHeight = 0;
             } catch (error) {
               // eslint-disable-next-line no-console
               console.warn(`invalid coding scheme for ${unitData.databaseId}/${unitData.name}`);
