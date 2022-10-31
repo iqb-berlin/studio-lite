@@ -7,7 +7,7 @@
   <div fxLayout="row" style="height: 100%;">
     <iframe id="hosting-iframe" class="unitHost" fxFlex></iframe>
     <unit-info [unitId]="reviewService.currentUnitSequenceId" [unitMetadata]="unitData.dbMetadata"
-               *ngIf="reviewService.reviewConfig.showMetadata || reviewService.reviewConfig.showCoding"></unit-info>
+               *ngIf="reviewService.reviewConfig.showMetadata || reviewService.reviewConfig.showCoding || reviewService.reviewConfig.showOthersComments"></unit-info>
   </div>
   <div
     id="page-navigation"
