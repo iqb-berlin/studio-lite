@@ -113,4 +113,16 @@ export class BackendService {
         catchError(() => of(null))
       );
   }
+
+  getXlsWorkspaces(workspaceGroupId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.serverUrl}download/xlsx/workspaces/${workspaceGroupId}`,
+      {
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'blob'
+      }
+    );
+  }
 }

@@ -221,4 +221,16 @@ export class BackendService {
       }
     );
   }
+
+  getXlsWorkspaces(): Observable<Blob> {
+    return this.http.get(
+      `${this.serverUrl}download/xlsx/workspaces`,
+      {
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'blob'
+      }
+    );
+  }
 }

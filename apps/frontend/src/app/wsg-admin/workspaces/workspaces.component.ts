@@ -15,6 +15,8 @@ import {
 import {
   CreateWorkspaceDto, UserInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
+import { DatePipe } from '@angular/common';
+import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
 import { BackendService as AppBackendService } from '../../backend.service';
 import { AppService } from '../../app.service';
@@ -22,6 +24,8 @@ import { UserToCheckCollection } from '../users/usersChecked';
 import { WsgAdminService } from '../wsg-admin.service';
 import { InputTextComponent } from '../../components/input-text.component';
 import { EditWorkspaceSettingsComponent } from '../../components/edit-workspace-settings.component';
+
+const datePipe = new DatePipe('de-DE');
 
 @Component({
   templateUrl: './workspaces.component.html',
@@ -338,5 +342,12 @@ export class WorkspacesComponent implements OnInit {
         }
       });
     }
+  }
+
+  xlsxDownloadWorkspaceReport() {
+    this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(b => {
+      const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+      saveAs(b, `${thisDate} Bericht Arbeitsbereiche.xlsx`);
+    });
   }
 }
