@@ -48,6 +48,7 @@ export class UnitInfoCommentsComponent {
   @Input('unitId')
   set unitId(value: number) {
     this._unitId = value;
+    this.minHeight = 1000;
     this.updateContent();
   }
 
@@ -64,9 +65,9 @@ export class UnitInfoCommentsComponent {
       const unitData = this.reviewService.units[this._unitId];
       if (unitData.comments && unitData.comments.length > 0) {
         this.allComments = unitData.comments;
+        this.minHeight = 0;
       } else {
         this.loader.spinnerOn = true;
-        this.minHeight = 1000;
         this.backendService.getUnitComments(
           this.reviewService.reviewId, unitData.databaseId
         ).subscribe(unitComments => {

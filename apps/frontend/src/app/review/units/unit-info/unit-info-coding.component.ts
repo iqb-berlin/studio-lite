@@ -48,6 +48,7 @@ export class UnitInfoCodingComponent {
   @Input('unitId')
   set unitId(value: number) {
     this._unitId = value;
+    this.minHeight = 1000;
     this.updateContent();
   }
 
@@ -64,9 +65,9 @@ export class UnitInfoCodingComponent {
       const unitData = this.reviewService.units[this._unitId];
       if (unitData.codingSchemeVariables) {
         this.allVariables = unitData.codingSchemeVariables || [];
+        this.minHeight = 0;
       } else {
         this.loader.spinnerOn = true;
-        this.minHeight = 1000;
         this.backendService.getUnitCoding(
           this.reviewService.reviewId, unitData.databaseId
         ).subscribe(unitScheme => {

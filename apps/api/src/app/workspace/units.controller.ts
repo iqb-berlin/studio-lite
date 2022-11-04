@@ -15,7 +15,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
 import { CommentWriteGuard } from './comment-write.guard';
-import { CommentDeleteGuard } from './comment-delete.guard';
 import { UnitUserService } from '../database/services/unit-user.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
 import { AppVersionGuard } from '../app-version.guard';
@@ -160,8 +159,9 @@ export class UnitsController {
     return this.unitCommentService.patchCommentBody(id, comment);
   }
 
+  // todo CommentDeleteGuard: but include workspacegroupadmin
   @Delete(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentDeleteGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
