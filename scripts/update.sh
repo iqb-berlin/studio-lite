@@ -29,7 +29,7 @@ get_new_release_version() {
 
 create_backup() {
   mkdir -p ./backup/release/"$SOURCE_TAG"
-  rsync -a --exclude='backup' . backup/release/"$SOURCE_TAG"
+  mv !(backup) .* backup/release/"$SOURCE_TAG" >/dev/null 2>&1
   printf "\nBackup created! Current release files have been saved at: %s\n\n" "$PWD/backup/release/$SOURCE_TAG"
 }
 
