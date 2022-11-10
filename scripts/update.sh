@@ -14,11 +14,17 @@ get_new_release_version() {
   printf "Latest available release: %s\n\n" "$LATEST_RELEASE"
 
   if [ "$SOURCE_TAG" = "$LATEST_RELEASE" ]; then
-    echo "Latest version is already installed."
-    exit 0
+    echo "Latest release is already installed!"
+    read -p "Continue anyway? (Y/n) " -er -n 1 CONTINUE
+
+    if [[ $CONTINUE =~ ^[nN]$ ]]; then
+      exit 0
+    fi
+
+    printf "\n"
   fi
 
-  while read -p 'Name the desired release tag: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
+  while read -p 'Name the desired version tag: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
     if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
     else
