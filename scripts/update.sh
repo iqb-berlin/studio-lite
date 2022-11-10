@@ -126,21 +126,33 @@ switch_tls() {
 
 application_warm_restart() {
   printf "Version update applied. Warm restart needed!\n\n"
-  read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
-  if [[ ! $RESTART =~ [nN] ]]; then
-    make production-ramp-up
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
+    if [[ ! $RESTART =~ [nN] ]]; then
+      make production-ramp-up
+    else
+      echo 'Update script finished.'
+      exit 0
+    fi
   else
+    printf 'You can start the updated docker services now.\n\n'
     echo 'Update script finished.'
     exit 0
   fi
 }
 
 application_cold_restart() {
-  read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
-  if [[ ! $RESTART =~ [nN] ]]; then
-    make production-shut-down
-    make production-ramp-up
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
+    if [[ ! $RESTART =~ [nN] ]]; then
+      make production-shut-down
+      make production-ramp-up
+    else
+      echo 'Update script finished.'
+      exit 0
+    fi
   else
+    printf 'You can restart the docker services now.\n\n'
     echo 'Update script finished.'
     exit 0
   fi

@@ -134,10 +134,16 @@ set_tls() {
 
 application_start() {
   printf "\nInstallation done!\n"
-  read -p "Do you want to start the application now? [Y/n]:" -er -n 1 START_NOW
-  if [[ ! $START_NOW =~ [nN] ]]; then
-    make production-ramp-up
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to start the application now? [Y/n]:" -er -n 1 START_NOW
+    if [[ ! $START_NOW =~ [nN] ]]; then
+      make production-ramp-up
+    else
+      echo 'Installation script finished.'
+      exit 0
+    fi
   else
+    printf 'You can start the docker services now.\n\n'
     echo 'Installation script finished.'
     exit 0
   fi
