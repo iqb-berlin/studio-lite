@@ -63,6 +63,7 @@ prepare_installation_dir() {
   mkdir -p "$TARGET_DIR"/config/frontend/tls
   printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/config/frontend/tls/studio.crt
   printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/config/frontend/tls/studio.key
+  mkdir -p "$TARGET_DIR"/database_dumps
 
   cd "$TARGET_DIR"
 }
