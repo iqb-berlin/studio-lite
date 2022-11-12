@@ -1,7 +1,9 @@
 #!/bin/bash
 
-SELECTED_RELEASE=$1
+SELECTED_VERSION=$1
 REPO_URL=iqb-berlin/studio-lite
+HAS_ENV_FILE_UPDATE=false
+HAS_CONFIG_FILE_UPDATE=false
 
 get_new_release_version() {
   LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
@@ -14,75 +16,151 @@ get_new_release_version() {
   printf "Latest available release: %s\n\n" "$LATEST_RELEASE"
 
   if [ "$SOURCE_TAG" = "$LATEST_RELEASE" ]; then
-    echo "Latest version is already installed."
-    exit 0
+    echo "Latest release is already installed!"
+    read -p "Continue anyway? (Y/n) " -er -n 1 CONTINUE
+
+    if [[ $CONTINUE =~ ^[nN]$ ]]; then
+      exit 0
+    fi
+
+    printf "\n"
   fi
 
-  while read -p 'Name the desired release tag: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
+  while read -p 'Name the desired version: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
     if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
+
     else
       break
     fi
+
   done
 }
 
 create_backup() {
   mkdir -p ./backup/release/"$SOURCE_TAG"
-  rsync -a --exclude='backup' . backup/release/"$SOURCE_TAG"
-  printf "\nBackup created! Current release files have been saved at: %s\n\n" "$PWD/backup/release/$SOURCE_TAG"
+  tar -cf - --exclude='./backup' --exclude='./database_dumps' . | tar -xf - -C ./backup/release/"$SOURCE_TAG"
+  printf "\nBackup created!\nCurrent release files have been saved at: '%s'\n\n" "$PWD/backup/release/$SOURCE_TAG"
 }
 
 run_update_script_in_selected_version() {
-  if ! curl --silent https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh | diff -q - ./backup/release/"$SOURCE_TAG"/update.sh &>/dev/null; then
-    # source update script end target update script differ
-    printf "Update script has been modified in newer version!\nThis update script will download the new update script, terminate itself, and start the new one!\n\n"
-    echo "Downloading new update script ..."
-    wget -nv -O update.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh
-    chmod +x update.sh
-    printf "Download done!\n\n"
+  CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update.sh
+  NEW_UPDATE_SCRIPT=https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh
 
-    printf "Downloaded update script version %s will be started now.\n\n" "${TARGET_TAG}"
+  if [ ! -f CURRENT_UPDATE_SCRIPT ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
+    if [ ! -f CURRENT_UPDATE_SCRIPT ]; then
+      echo "Update script 'update.sh' does not exist!"
+
+    elif ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
+      echo 'Update script has been modified in newer version!'
+    fi
+
+    printf "The running update script will download the desired update script, terminate itself, and start the new one!\n\n"
+    echo 'Downloading the desired update script ...'
+    if wget -q -O update.sh https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/scripts/update.sh; then
+      echo 'Download successful!'
+    else
+      echo 'Download failed!'
+      echo 'Update script finished with error'
+      exit 1
+    fi
+
+    printf "\nDownloaded update script version %s will be started now.\n\n" "${TARGET_TAG}"
     ./update.sh "${TARGET_TAG}"
     exit $?
   fi
 }
 
-update_files() {
-  echo "Downloading files..."
-  wget -nv -O docker-compose.yml https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/docker-compose.yml
-  wget -nv -O docker-compose.prod.yml https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/docker-compose.prod.yml
-  wget -nv -O Makefile https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/make/prod.mk
-  wget -nv -O https_on.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/https_on.sh
-  wget -nv -O https_off.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/https_off.sh
-  chmod +x https_on.sh
-  chmod +x https_off.sh
-  printf "Download done!\n\n"
-}
-
-get_modificated_file() {
-  if ! curl --silent https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/"$2" | diff -q - ./backup/release/"$SOURCE_TAG"/"$1" &>/dev/null; then
-    # source file end target file differ
-    mv "$1" "$1".bkp 2>/dev/null
-    wget -nv -O "$1" https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/"$2"
-    if [ "$3" == "env-file" ]; then
-      printf "\t- Environment file template '%s' has been modified. Please enrich your current .env.prod file with new environment variables, or delete obsolete variables!\n" "$1"
-    fi
-    if [ "$3" == "conf-file" ]; then
-      printf "\t- Configuration file template '%s' has been modified. Please adjust the template with your current configuration file information, if necessary!\n" "$1"
-    fi
+download_file() {
+  if wget -q -O "$1" https://raw.githubusercontent.com/$REPO_URL/"${TARGET_TAG}"/"$2"; then
+    printf -- "- File '%s' successfully downloaded.\n" "$1"
   else
-    if [ "$3" == "env-file" ]; then
-      printf "\t- Environment file template '%s' has not been modified.\n" "$1"
-    fi
-    if [ "$3" == "conf-file" ]; then
-      printf "\t- Configuration file template '%s' has not been modified.\n" "$1"
-    fi
+    printf -- "- File '%s' download failed.\n\n" "$1"
+    echo 'Update script finished with error'
+    exit 1
   fi
 }
 
-check_config_files_modifications() {
-  echo "Check config files for modifications ..."
+update_files() {
+  echo "Downloading files..."
+  download_file docker-compose.yml docker-compose.yml
+  download_file docker-compose.prod.yml docker-compose.prod.yml
+  download_file Makefile scripts/make/prod.mk
+  download_file https_on.sh scripts/https_on.sh
+  download_file https_off.sh scripts/https_off.sh
+  printf "Downloads done!\n\n"
+}
+
+get_modificated_file() {
+  SOURCE_FILE=./backup/release/"$SOURCE_TAG"/"$1"
+  TARGET_FILE=https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/"$2"
+  CURRENT_ENV_FILE=.env.prod
+  CURRENT_CONFIG_FILE=config/frontend/default.conf.template
+
+  if [ ! -f "$SOURCE_FILE" ] || ! curl --stderr /dev/null "$TARGET_FILE" | diff -q - "$SOURCE_FILE" &>/dev/null; then
+
+    # no source file exists anymore
+    if [ ! -f "$SOURCE_FILE" ]; then
+      if [ "$3" == "env-file" ]; then
+        printf -- "- Environment template file '%s' does not exist anymore!\n" "$1"
+        printf "  A version %s environment template file will be downloaded now.\n" "$TARGET_TAG"
+        printf "  Please compare your current '%s' file with the new template file and update it with new environment variables, or delete obsolete variables, if necessary.\n" $CURRENT_ENV_FILE
+      fi
+
+      if [ "$3" == "conf-file" ]; then
+        printf -- "- Configuration template file '%s' does not exist anymore!\n" "$1"
+        printf "  A version %s configuration template file will be downloaded now.\n" "$TARGET_TAG"
+        printf "  Please compare your current '%s' file with the new template file and update it, if necessary!\n" $CURRENT_CONFIG_FILE
+      fi
+
+    # source file and target file differ
+    elif ! curl --stderr /dev/null "$TARGET_FILE" | diff -q - "$SOURCE_FILE" &>/dev/null; then
+      if [ "$3" == "env-file" ]; then
+        printf -- "- A new version of the current environment template file '%s' is available and will be downloaded now!\n" "$1"
+        printf "  Please compare your current '%s' file with the new template file and update it with new environment variables, or delete obsolete variables, if necessary.\n" $CURRENT_ENV_FILE
+      fi
+
+      if [ "$3" == "conf-file" ]; then
+        mv "$1" "$1".old 2>/dev/null
+        cp $CURRENT_CONFIG_FILE ${CURRENT_CONFIG_FILE}.old
+        printf -- "- A new version of the current configuration template file '%s' is available and will be downloaded now!\n" "$1"
+        printf "  Please compare your current '%s' file with the new template file and update it, if necessary!\n" $CURRENT_CONFIG_FILE
+      fi
+
+    fi
+
+    if wget -q -O "$1" "$TARGET_FILE"; then
+      printf "  File '%s' was downloaded successfully.\n" "$1"
+
+      if [ "$3" == "env-file" ]; then
+        HAS_ENV_FILE_UPDATE=true
+      fi
+
+      if [ "$3" == "conf-file" ]; then
+        HAS_CONFIG_FILE_UPDATE=true
+      fi
+
+    else
+      printf "  File '%s' download failed.\n\n" "$1"
+      echo 'Update script finished with error'
+      exit 1
+
+    fi
+
+  else
+    if [ "$3" == "env-file" ]; then
+      printf -- "- No update of environment template file '%s' available.\n" "$1"
+    fi
+
+    if [ "$3" == "conf-file" ]; then
+      printf -- "- No update of configuration template file '%s' available.\n" "$1"
+    fi
+
+  fi
+}
+
+check_template_files_modifications() {
+  echo "Check template files for updates ..."
 
   # check environment file
   get_modificated_file .env.prod.template .env.prod.template "env-file"
@@ -91,7 +169,7 @@ check_config_files_modifications() {
   get_modificated_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
   get_modificated_file config/frontend/default.conf.https-template config/frontend/default.conf.https-template "conf-file"
 
-  printf "Config files modification check done!\n\n"
+  printf "Template files update check done.\n\n"
 }
 
 customize_settings() {
@@ -119,39 +197,88 @@ switch_tls() {
     printf "\n"
 
     ./https_on.sh
+
   else
     ./https_off.sh
   fi
+
 }
 
 application_warm_restart() {
-  printf "Version update applied. Warm restart needed!\n\n"
-  read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
-  if [[ ! $RESTART =~ [nN] ]]; then
-    make production-ramp-up
-  else
+  if [ $HAS_ENV_FILE_UPDATE == "true" ] || [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
+    if [ $HAS_ENV_FILE_UPDATE == "true" ] && [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
+      echo 'Version, environment, and configuration update applied!'
+      printf "\nPlease check your environment and configuration file for modifications!\n"
+    elif [ $HAS_ENV_FILE_UPDATE == "true" ]; then
+      echo 'Version and environment update applied!'
+      printf "\nPlease check your environment file for modifications!\n"
+    elif [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
+      echo 'Version and configuration update applied!'
+      printf "\nPlease check your configuration file for modifications!\n"
+    fi
+
+    if command make -v >/dev/null 2>&1; then
+      printf "\nAfter that you could run 'make production-ramp-up' at the command line for the update to take effect.\n\n"
+
+    else
+      printf '\nAfter that you could restart the docker services for the update to take effect.\n\n'
+    fi
+
     echo 'Update script finished.'
     exit 0
+
+  else
+    printf "Version update applied. Warm restart needed!\n\n"
+
+    if command make -v >/dev/null 2>&1; then
+      read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
+
+      if [[ ! $RESTART =~ [nN] ]]; then
+        make production-ramp-up
+
+      else
+        echo 'Update script finished.'
+        exit 0
+      fi
+
+    else
+      printf 'You could start the updated docker services now.\n\n'
+      echo 'Update script finished.'
+      exit 0
+    fi
+
   fi
 }
 
 application_cold_restart() {
-  read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
-  if [[ ! $RESTART =~ [nN] ]]; then
-    make production-shut-down
-    make production-ramp-up
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
+
+    if [[ ! $RESTART =~ [nN] ]]; then
+      make production-shut-down
+      make production-ramp-up
+
+    else
+      echo 'Update script finished.'
+      exit 0
+    fi
+
   else
+    printf 'You can restart the docker services now.\n\n'
     echo 'Update script finished.'
     exit 0
   fi
+
 }
 
 # Load current environment variables in .env.prod
 . .env.prod
 SOURCE_TAG=$TAG
 
-if [ -z "$SELECTED_RELEASE" ]; then
-  echo "1. Update version"
+if [ -z "$SELECTED_VERSION" ]; then
+  echo "Update script started ..."
+  echo
+  echo "1. Update application"
   echo "2. Switch TLS on/off"
   read -p 'What do you want to do (1/2): ' -er -n 1 CHOICE
   printf "\n"
@@ -161,18 +288,20 @@ if [ -z "$SELECTED_RELEASE" ]; then
     create_backup
     run_update_script_in_selected_version
     update_files
-    check_config_files_modifications
+    check_template_files_modifications
     customize_settings
     application_warm_restart
+
   elif [ "$CHOICE" = 2 ]; then
     switch_tls
     application_cold_restart
   fi
+
 else
-  TARGET_TAG="$SELECTED_RELEASE"
+  TARGET_TAG="$SELECTED_VERSION"
 
   update_files
-  check_config_files_modifications
+  check_template_files_modifications
   customize_settings
   application_warm_restart
 fi
