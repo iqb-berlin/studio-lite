@@ -39,9 +39,8 @@ get_new_release_version() {
 
 create_backup() {
   mkdir -p ./backup/release/"$SOURCE_TAG"
-  mv !(backup|config|database_dumps|.env.prod) .* backup/release/"$SOURCE_TAG" >/dev/null 2>&1
-  cp config .env.prod backup/release/"$SOURCE_TAG"
-  printf "\nBackup created! Current release files have been saved at: %s\n\n" "$PWD/backup/release/$SOURCE_TAG"
+  tar -cf - --exclude='./backup' --exclude='./database_dumps' . | tar -xf - -C ./backup/release/"$SOURCE_TAG"
+  printf "\nBackup created!\nCurrent release files have been saved at: '%s'\n\n" "$PWD/backup/release/$SOURCE_TAG"
 }
 
 run_update_script_in_selected_version() {
