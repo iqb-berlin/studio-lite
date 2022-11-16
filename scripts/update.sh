@@ -45,7 +45,7 @@ create_backup() {
 
 run_update_script_in_selected_version() {
   CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update.sh
-  NEW_UPDATE_SCRIPT=https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh
+  NEW_UPDATE_SCRIPT=https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/scripts/update.sh
 
   if [ ! -f CURRENT_UPDATE_SCRIPT ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
     if [ ! -f CURRENT_UPDATE_SCRIPT ]; then
@@ -58,6 +58,7 @@ run_update_script_in_selected_version() {
     printf "The running update script will download the desired update script, terminate itself, and start the new one!\n\n"
     echo 'Downloading the desired update script ...'
     if wget -q -O update.sh https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/scripts/update.sh; then
+      chmod +x update.sh
       echo 'Download successful!'
     else
       echo 'Download failed!'
@@ -65,14 +66,14 @@ run_update_script_in_selected_version() {
       exit 1
     fi
 
-    printf "\nDownloaded update script version %s will be started now.\n\n" "${TARGET_TAG}"
-    ./update.sh "${TARGET_TAG}"
+    printf "\nDownloaded update script version %s will be started now.\n\n" "$TARGET_TAG"
+    ./update.sh "$TARGET_TAG"
     exit $?
   fi
 }
 
 download_file() {
-  if wget -q -O "$1" https://raw.githubusercontent.com/$REPO_URL/"${TARGET_TAG}"/"$2"; then
+  if wget -q -O "$1" https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/"$2"; then
     printf -- "- File '%s' successfully downloaded.\n" "$1"
   else
     printf -- "- File '%s' download failed.\n\n" "$1"
@@ -87,7 +88,9 @@ update_files() {
   download_file docker-compose.prod.yml docker-compose.prod.yml
   download_file Makefile scripts/make/prod.mk
   download_file https_on.sh scripts/https_on.sh
+  chmod +x https_on.sh
   download_file https_off.sh scripts/https_off.sh
+  chmod +x https_off.sh
   printf "Downloads done!\n\n"
 }
 
