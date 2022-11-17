@@ -240,6 +240,32 @@ test-app-e2e:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
+
+test-app-e2e-api:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --verbose --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-chrome:
@@ -247,8 +273,8 @@ test-app-e2e-ui-chrome:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
