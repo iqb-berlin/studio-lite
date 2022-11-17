@@ -1,0 +1,480 @@
+
+#############################################################################
+## FEATURE COMMITS, 'DEVELOP' TARGETED PULL REQUESTS, PRE-RELEASE TAGS
+#############################################################################
+
+# https://gitlab.com/gitlab-org/gitlab/-/issues/206960
+# https://docs.gitlab.com/ee/ci/jobs/job_control.html#cicd-variable-expressions
+.default_base_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.default_db_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+      changes:
+        - database/*
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.default_manual_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.prerelease_base_rules:
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.prerelease_db_rules:
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+      changes:
+        - database/*
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.prerelease_manual_rules:
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.prerelease_push_rules:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(?:\.)(?:[1-9]\d*)?)$/
+
+check-default-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_TAG
+      when: never
+  script:
+    - echo $CI_COMMIT_BRANCH
+    - echo $$CI_PIPELINE_SOURCE
+    - echo $CI_COMMIT_TAG
+    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" -a "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "commit branch and not a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" -o "$CI_PIPELINE_SOURCE" == "external_pull_request_event" ]; then echo "no commit branch or pull request " ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" == "external_pull_request_event" ]; then echo "ci pipeline source is 'external_pull_request_event'" ; else echo "ci pipeline source '$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "ci pipeline source is not 'external_pull_request_event'" ; else echo "ci pipeline source '$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+
+check-pull-request-target-develop-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_COMMIT_TAG
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "develop" ]; then echo "pull request target branch is not 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "develop" ]; then echo "pull request target branch is 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+
+check-prerelease-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(?:\.)(?:[1-9]\d*)?)$/
+  before_script:
+    - PRERELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)(\.)?([1-9][0-9]*)?))?$"
+  script:
+    - echo $PRERELEASE_REGEX
+    - if [[ $CI_COMMIT_TAG =~ $PRERELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid pre-release tag."; else echo "$CI_COMMIT_TAG is not a valid pre-release tag!"; fi
+
+install-dependencies:
+  stage: build
+  interruptible: true
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules
+      - .npm/
+      - cache/Cypress
+  script:
+    - npm ci --cache .npm --prefer-offline --no-fund
+  artifacts:
+    paths:
+      - node_modules
+      - cache/Cypress
+
+.distributed:
+  interruptible: true
+  rules:
+    - !reference [.default_base_rules, rules]
+    - !reference [.prerelease_base_rules, rules]
+  needs:
+    - install-dependencies
+  artifacts:
+    paths:
+      - node_modules/.cache/nx
+      - cache/Cypress
+
+build-db-image:
+  stage: build
+  rules:
+    - !reference [ .default_db_rules, rules ]
+    - !reference [ .prerelease_db_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
+    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+  after_script:
+    - docker logout $REGISTRY
+
+build-liquibase-image:
+  stage: build
+  rules:
+    - !reference [ .default_db_rules, rules ]
+    - !reference [ .prerelease_db_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:latest .
+    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase
+  after_script:
+    - docker logout $REGISTRY
+
+patch-db-image:
+  stage: build
+  rules:
+    - !reference [ .default_db_rules, rules ]
+    - !reference [ .prerelease_db_rules, rules ]
+  needs:
+    - build-db-image
+    - build-liquibase-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
+    - docker compose --env-file .env.dev pull -q db liquibase
+    - docker compose --env-file .env.dev up -d db
+    - export $(grep -v '^#' .env.dev | xargs)
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+  script:
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+
+build-app:
+  stage: build
+  extends: .distributed
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=build --parallel=3
+  artifacts:
+    paths:
+      - dist
+
+test-app:
+  stage: unit-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=test --parallel=2
+
+test-app-e2e:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --verbose --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/api/*" || ( pkill npx && exit 1 )
+
+test-app-e2e-ui-chrome:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+
+test-app-e2e-ui-chrome-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+
+test-app-e2e-ui-firefox:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+
+test-app-e2e-ui-firefox-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+
+test-app-e2e-ui-edge:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" || ( pkill npx && exit 1 )
+
+test-app-e2e-ui-edge-mobile:
+  stage: e2e-test
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prerelease_manual_rules, rules ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  image: $CYPRESS_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
+    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker compose --env-file .env.dev up -d --quiet-pull db
+    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
+    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
+    - $(npm bin)/cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - npx nx serve api --watch=false & # start backend
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/integration/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+
+lint-app:
+  stage: lint
+  extends: .distributed
+  allow_failure: true
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=lint --parallel=2
+
+audit-app:
+  stage: audit
+  allow_failure: true
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .prerelease_base_rules, rules ]
+  script:
+    - npm audit --audit-level critical
+
+scan-docker-db:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .prerelease_db_rules, rules ]
+  needs:
+    - build-db-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+scan-docker-liquibase:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .prerelease_db_rules, rules ]
+  needs:
+    - build-liquibase-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+
+build-docker-app:
+  stage: build-images
+  extends: .distributed
+  rules:
+    - !reference [ .prerelease_base_rules, rules ]
+  needs:
+    - install-dependencies
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
+  after_script:
+    - docker logout $REGISTRY
+
+scan-docker-app:
+  stage: scan-images
+  allow_failure: true
+  extends: .distributed
+  rules:
+    - !reference [ .prerelease_base_rules, rules ]
+  needs:
+    - install-dependencies
+    - build-docker-app
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - apk add --no-cache npm
+    - npm i -g npx
+  script:
+    - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
