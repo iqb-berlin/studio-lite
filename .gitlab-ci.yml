@@ -22,36 +22,74 @@ stages:
   - scan-images
   - push-images
 
-.default_rules:
+#include:
+#  - local: .gitlab-ci/*.gitlab-ci.yml
+
+#.default_rules:
+#  rules:
+#    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+#    - if: $CI_COMMIT_TAG
+#      when: never
+
+#.default_db_rules:
+#  rules:
+#    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+#      changes:
+#        - database/*
+#    - if: $CI_COMMIT_TAG
+#      when: never
+
+#.default_manual_rules:
+#  rules:
+#    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+#      when: manual
+#    - if: $CI_COMMIT_TAG
+#      when: never
+
+#.development_rules:
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+#    - if: $CI_COMMIT_TAG
+#      when: never
+
+#.development_db_rules:
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+#      changes:
+#        - database/*
+#    - if: $CI_COMMIT_TAG
+#      when: never
+
+.prepare_prerelease_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_TAG
       when: never
 
-.default_db_rules:
+.prepare_prerelease_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
       when: never
 
-.default_manual_rules:
+.prepare_prerelease_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
 
-.development_rules:
+.build_prerelease_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_TAG
       when: never
 
-.development_db_rules:
+.build_prerelease_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" && $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME != "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
@@ -89,6 +127,7 @@ check-config:
   interruptible: true
   allow_failure: true
   script:
+    - echo $CI_DEFAULT_BRANCH
     - echo $CI_COMMIT_BRANCH
     - echo $CI_COMMIT_TAG
     - echo $CI_PIPELINE_SOURCE
@@ -99,12 +138,14 @@ check-config:
     - echo $CI_EXTERNAL_PULL_REQUEST_SOURCE_BRANCH_SHA
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA
+    - echo $CI_MERGE_REQUEST_IID
     - echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_BEFORE_SHA
     - echo $CI_COMMIT_SHA
     - echo $CI_COMMIT_SHORT_SHA
     - echo $CI_COMMIT_REF_NAME
+    - echo $CI_COMMIT_REF_PROTECTED
 
 check-default-rules:
   stage: .pre
@@ -174,8 +215,8 @@ install-dependencies:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .default_rules, rules ]
-    - !reference [ .development_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
+    - !reference [ .build_prerelease_rules, rules ]
   cache:
     key:
       files:
@@ -194,7 +235,7 @@ install-dependencies:
 .distributed:
   interruptible: true
   rules:
-    - !reference [.default_rules, rules]
+    - !reference [.prepare_prerelease_rules, rules]
   needs:
     - install-dependencies
   artifacts:
@@ -205,8 +246,8 @@ install-dependencies:
 build-db-image:
   stage: build
   rules:
-    - !reference [ .default_db_rules, rules ]
-    - !reference [ .development_db_rules, rules ]
+    - !reference [ .prepare_prerelease_db_rules, rules ]
+    - !reference [ .build_prerelease_db_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -221,8 +262,8 @@ build-db-image:
 build-liquibase-image:
   stage: build
   rules:
-    - !reference [ .default_db_rules, rules ]
-    - !reference [ .development_db_rules, rules ]
+    - !reference [ .prepare_prerelease_db_rules, rules ]
+    - !reference [ .build_prerelease_db_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -237,7 +278,7 @@ build-liquibase-image:
 patch-db-image:
   stage: build
   rules:
-    - !reference [ .default_db_rules, rules ]
+    - !reference [ .prepare_prerelease_db_rules, rules ]
   needs:
     - build-db-image
     - build-liquibase-image
@@ -260,7 +301,7 @@ build-app:
   stage: build
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
 
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
@@ -274,7 +315,7 @@ test-app:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=test --parallel=2
@@ -284,7 +325,7 @@ test-app-e2e:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -309,7 +350,7 @@ test-app-e2e-ui-chrome:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -334,7 +375,7 @@ test-app-e2e-ui-chrome-mobile:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prepare_prerelease_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -359,7 +400,7 @@ test-app-e2e-ui-firefox:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prepare_prerelease_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -384,7 +425,7 @@ test-app-e2e-ui-firefox-mobile:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prepare_prerelease_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -409,7 +450,7 @@ test-app-e2e-ui-edge:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prepare_prerelease_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -434,7 +475,7 @@ test-app-e2e-ui-edge-mobile:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
+    - !reference [ .prepare_prerelease_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -459,7 +500,7 @@ lint-app:
   extends: .distributed
   allow_failure: true
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=lint --parallel=2
@@ -468,7 +509,7 @@ audit-app:
   stage: audit
   allow_failure: true
   rules:
-    - !reference [ .default_rules, rules ]
+    - !reference [ .prepare_prerelease_rules, rules ]
   script:
     - npm audit --audit-level critical
 
@@ -476,7 +517,7 @@ scan-docker-db:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .development_db_rules, rules ]
+    - !reference [ .build_prerelease_db_rules, rules ]
   needs:
     - build-db-image
   image: $DOCKER_IMAGE
@@ -490,7 +531,7 @@ scan-docker-liquibase:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .development_db_rules, rules ]
+    - !reference [ .build_prerelease_db_rules, rules ]
   needs:
     - build-liquibase-image
   image: $DOCKER_IMAGE
@@ -504,7 +545,7 @@ build-docker-app:
   stage: build-images
   extends: .distributed
   rules:
-    - !reference [ .development_rules, rules ]
+    - !reference [ .build_prerelease_rules, rules ]
   needs:
     - install-dependencies
   image: $DOCKER_IMAGE
@@ -524,7 +565,7 @@ scan-docker-app:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .development_rules, rules ]
+    - !reference [ .build_prerelease_rules, rules ]
   needs:
     - install-dependencies
     - build-docker-app
