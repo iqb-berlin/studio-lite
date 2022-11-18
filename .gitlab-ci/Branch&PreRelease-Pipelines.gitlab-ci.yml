@@ -26,13 +26,13 @@
     - if: $CI_COMMIT_TAG
       when: never
 
-.prerelease_base_rules:
+.develop_pr_base_rules:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_TAG
       when: never
 
-.prerelease_db_rules:
+.develop_pr_db_rules:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       changes:
@@ -40,25 +40,23 @@
     - if: $CI_COMMIT_TAG
       when: never
 
-.prerelease_manual_rules:
+.develop_pr_manual_rules:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
 
-.prerelease_push_rules:
+.pre-release_rules:
   rules:
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(?:\.)(?:[1-9]\d*)?)$/
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(\.)?(?:[1-9]\d*)?)$/
 
 check-default-rules:
   stage: .pre
   interruptible: true
   allow_failure: true
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
-    - if: $CI_COMMIT_TAG
-      when: never
+    - !reference [ .default_base_rules, rules ]
   script:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
@@ -76,27 +74,26 @@ check-default-rules:
     - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
-check-pull-request-target-develop-rules:
+check-develop-pr-rules:
   stage: .pre
   interruptible: true
   allow_failure: true
   rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
-    - if: $CI_COMMIT_TAG
+    - !reference [ .develop_pr_base_rules, rules ]
   script:
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "develop" ]; then echo "pull request target branch is not 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
     - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "develop" ]; then echo "pull request target branch is 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "develop" ]; then echo "pull request target branch is not 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
     - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
-check-prerelease-rules:
+check-pre-release-rules:
   stage: .pre
   interruptible: true
   allow_failure: true
   rules:
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(?:\.)(?:[1-9]\d*)?)$/
+    - !reference [ .pre-release_rules, rules ]
   before_script:
     - PRERELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)(\.)?([1-9][0-9]*)?))?$"
   script:
@@ -108,7 +105,7 @@ install-dependencies:
   interruptible: true
   rules:
     - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   cache:
     key:
       files:
@@ -128,7 +125,7 @@ install-dependencies:
   interruptible: true
   rules:
     - !reference [.default_base_rules, rules]
-    - !reference [.prerelease_base_rules, rules]
+    - !reference [.develop_pr_base_rules, rules]
   needs:
     - install-dependencies
   artifacts:
@@ -140,7 +137,7 @@ build-db-image:
   stage: build
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .prerelease_db_rules, rules ]
+    - !reference [ .develop_pr_db_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -156,7 +153,7 @@ build-liquibase-image:
   stage: build
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .prerelease_db_rules, rules ]
+    - !reference [ .develop_pr_db_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -172,7 +169,7 @@ patch-db-image:
   stage: build
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .prerelease_db_rules, rules ]
+    - !reference [ .develop_pr_db_rules, rules ]
   needs:
     - build-db-image
     - build-liquibase-image
@@ -196,7 +193,7 @@ build-app:
   extends: .distributed
   rules:
     - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
 
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
@@ -211,7 +208,7 @@ test-app:
   extends: .distributed
   rules:
     - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=test --parallel=2
@@ -222,7 +219,7 @@ test-app-e2e:
   extends: .distributed
   rules:
     - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -248,7 +245,7 @@ test-app-e2e-api:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -274,7 +271,7 @@ test-app-e2e-ui-chrome:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -300,7 +297,7 @@ test-app-e2e-ui-chrome-mobile:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -326,7 +323,7 @@ test-app-e2e-ui-firefox:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -352,7 +349,7 @@ test-app-e2e-ui-firefox-mobile:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -378,7 +375,7 @@ test-app-e2e-ui-edge:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -404,7 +401,7 @@ test-app-e2e-ui-edge-mobile:
   extends: .distributed
   rules:
     - !reference [ .default_manual_rules, rules ]
-    - !reference [ .prerelease_manual_rules, rules ]
+    - !reference [ .develop_pr_manual_rules, rules ]
   variables:
     DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
@@ -430,7 +427,7 @@ lint-app:
   allow_failure: true
   rules:
     - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=lint --parallel=2
@@ -440,7 +437,7 @@ audit-app:
   allow_failure: true
   rules:
     - !reference [ .default_base_rules, rules ]
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   script:
     - npm audit --audit-level critical
 
@@ -448,7 +445,7 @@ build-docker-app:
   stage: build-images
   extends: .distributed
   rules:
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   needs:
     - install-dependencies
   image: $DOCKER_IMAGE
@@ -467,7 +464,7 @@ scan-docker-db:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .prerelease_db_rules, rules ]
+    - !reference [ .develop_pr_db_rules, rules ]
   needs:
     - build-db-image
   image: $DOCKER_IMAGE
@@ -481,7 +478,7 @@ scan-docker-liquibase:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .prerelease_db_rules, rules ]
+    - !reference [ .develop_pr_db_rules, rules ]
   needs:
     - build-liquibase-image
   image: $DOCKER_IMAGE
@@ -496,7 +493,7 @@ scan-docker-app:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .prerelease_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   needs:
     - install-dependencies
     - build-docker-app
@@ -509,10 +506,10 @@ scan-docker-app:
   script:
     - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
 
-push-docker-pre-release:
-  stage: push-images
+build-pre-release:
+  stage: build-images
   rules:
-    - !reference [ .prerelease_push_rules, rules ]
+    - !reference [ .pre-release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
