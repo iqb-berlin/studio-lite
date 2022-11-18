@@ -74,8 +74,8 @@
                 "command": "docker login {args.registry}",
                 "forwardAllArgs": false
               },
-              "docker build -f apps/api/Dockerfile --build-arg project=api --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag} .",
-              "docker push {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}"
+              "docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag} -t {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:latest .",
+              "docker push -q -a {args.registry}{args.registryProject}iqbberlin/studio-lite-backend"
             ],
             "parallel": false
           }
@@ -277,8 +277,8 @@
                 "command": "docker login {args.registry}",
                 "forwardAllArgs": false
               },
-              "docker build -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag} .",
-              "docker push {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}"
+              "docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag} -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:latest .",
+              "docker push -q -a {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend"
             ],
             "parallel": false
           }
