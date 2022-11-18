@@ -1,0 +1,563 @@
+
+#############################################################################
+## 'MAIN' TARGETED PULL REQUESTS, RELEASE TAGS
+#############################################################################
+
+.release_base_rules:
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.release_manual_rules:
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.release_push_rules:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)$/
+
+check-pull-request-target-main-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_COMMIT_TAG
+      when: never
+  script:
+    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_COMMIT_TAG
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "main" ]; then echo "pull request target branch is not 'main'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'main'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "main" ]; then echo "pull request target branch is 'main'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+
+check-release-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)$/
+  before_script:
+    - RELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
+  script:
+    - echo $PRERELEASE_REGEX
+    - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid release tag."; else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
+
+build-backend-test-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/api/Dockerfile --build-arg project=api --target=dev -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-frontend-test-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/frontend/Dockerfile --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333 --target=dev -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-frontend-e2e-test-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/frontend-e2e/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA} -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest .
+    - docker push -a ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-db-release-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f database/Postgres.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-liquibase-release-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $REGISTRY
+
+patch-db-release-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-db-release-image
+    - build-liquibase-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d db
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+  script:
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+
+build-backend-release-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-backend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-frontend-release-image:
+  stage: build
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-frontend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+test-backend:
+  stage: unit-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-backend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test test api
+
+test-frontend:
+  stage: unit-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-frontend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test test frontend
+
+test-release-e2e:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e test-e2e
+
+test-release-e2e-api:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
+
+test-release-e2e-ui-chrome:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
+
+test-release-e2e-ui-chrome-mobile:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+
+test-release-e2e-ui-firefox:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
+
+test-release-e2e-ui-firefox-mobile:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - export $(grep -v '^#' .env.prod | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+
+test-release-e2e-ui-edge:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - export $(grep -v '^#' .env.prod | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
+
+test-release-e2e-ui-edge-mobile:
+  stage: e2e-test
+  allow_failure: true
+  rules:
+    - !reference [ .release_manual_rules, rules ]
+  needs:
+    - patch-db-release-image
+    - build-backend-release-image
+    - build-frontend-release-image
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.prod
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
+    - export $(grep -v '^#' .env.prod | xargs)
+    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+  script:
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+
+lint-backend:
+  stage: lint
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-backend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test lint api
+
+lint-frontend:
+  stage: lint
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-frontend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test lint frontend
+
+lint-frontend-e2e:
+  stage: lint
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-frontend-e2e-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA}
+  script:
+    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_COMMIT_SHA} lint frontend-e2e
+
+audit-backend:
+  stage: audit
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-backend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}_test audit --audit-level critical
+
+audit-frontend:
+  stage: audit
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-frontend-test-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test
+  script:
+    - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}_test audit --audit-level critical
+
+scan-release-db:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-db-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+scan-release-liquibase:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-liquibase-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+
+scan-release-backend:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-backend-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+
+scan-release-frontend:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .release_base_rules, rules ]
+  needs:
+    - build-frontend-release-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+
+push-docker-release:
+  stage: push-images
+  rules:
+    - !reference [ .release_push_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  script:
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:latest
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:latest
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:latest
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:latest
+    - docker push -a -q iqbberlin/studio-lite-db
+    - docker push -a -q iqbberlin/studio-lite-liquibase
+    - docker push -a -q iqbberlin/studio-lite-backend
+    - docker push -a -q iqbberlin/studio-lite-frontend
+  after_script:
+    - docker logout

@@ -39,8 +39,8 @@ check_prerequisites() {
 
 get_release_version() {
   LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
-  while read -p '1. Name the desired release tag: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
-    if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/README.md 2>/dev/null; then
+  while read -p '1. Name the desired release tag: ' -er -i "$LATEST_RELEASE" TARGET_TAG; do
+    if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
     else
       break
@@ -49,35 +49,55 @@ get_release_version() {
 }
 
 prepare_installation_dir() {
-  read -p '2. Determine installation directory: ' -er -i "$PWD/$APP_NAME" TARGET_DIR
-
-  if [ -z "$(find "$TARGET_DIR" -maxdepth 0 -type d -empty 2>/dev/null)" -a $? = 0 ]; then
-    read -p "You have selected a non empty directory. Continue anyway? (y/N)" -er -n 1 CONTINUE
-    if [[ ! $CONTINUE =~ ^[yY]$ ]]; then
-      exit 1
+  while read -p '2. Determine installation directory: ' -er -i "$PWD/$APP_NAME" TARGET_DIR; do
+    if [ ! -e "$TARGET_DIR" ]; then
+      break
+    elif [ -d "$TARGET_DIR" ] && [ -z "$(find "$TARGET_DIR" -maxdepth 0 -type d -empty 2>/dev/null)" ]; then
+      read -p "You have selected a non empty directory. Continue anyway? (y/N)" -er -n 1 CONTINUE
+      if [[ ! $CONTINUE =~ ^[yY]$ ]]; then
+        echo 'Installation script finished.'
+        exit 0
+      fi
+      break
+    else
+      printf "'%s' is not a directory!\n\n" "$TARGET_DIR"
     fi
-  fi
+  done
+
   printf "\n"
 
   mkdir -p "$TARGET_DIR"/backup/release
-  mkdir -p "$TARGET_DIR"/config/frontend
+  mkdir -p "$TARGET_DIR"/config/frontend/tls
+  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/config/frontend/tls/studio.crt
+  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/config/frontend/tls/studio.key
+  mkdir -p "$TARGET_DIR"/database_dumps
 
   cd "$TARGET_DIR"
 }
 
+download_file() {
+  if wget -q -O "$1" https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/"$2"; then
+    printf -- "- File '%s' successfully downloaded.\n" "$1"
+  else
+    printf -- "- File '%s' download failed.\n\n" "$1"
+    echo 'Install script finished with error'
+    exit 1
+  fi
+}
+
 download_files() {
   echo "Downloading files..."
-  wget -nv -O docker-compose.yml https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/docker-compose.yml
-  wget -nv -O docker-compose.prod.yml https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/docker-compose.prod.yml
-  wget -nv -O .env.prod.template https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/.env.prod.template
-  wget -nv -O config/frontend/default.conf.http-template https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/config/frontend/default.conf.http-template
-  wget -nv -O config/frontend/default.conf.https-template https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/config/frontend/default.conf.https-template
-  wget -nv -O Makefile https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/make/prod.mk
-  wget -nv -O update.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/update.sh
-  wget -nv -O https_on.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/https_on.sh
-  wget -nv -O https_off.sh https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/scripts/https_off.sh
+  download_file docker-compose.yml docker-compose.yml
+  download_file docker-compose.prod.yml docker-compose.prod.yml
+  download_file .env.prod.template .env.prod.template
+  download_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template
+  download_file config/frontend/default.conf.https-template config/frontend/default.conf.https-template
+  download_file Makefile scripts/make/prod.mk
+  download_file update.sh scripts/update.sh
   chmod +x update.sh
+  download_file https_on.sh scripts/https_on.sh
   chmod +x https_on.sh
+  download_file https_off.sh scripts/https_off.sh
   chmod +x https_off.sh
   printf "Download done!\n\n"
 }
@@ -134,10 +154,16 @@ set_tls() {
 
 application_start() {
   printf "\nInstallation done!\n"
-  read -p "Do you want to start the application now? [Y/n]:" -er -n 1 START_NOW
-  if [[ ! $START_NOW =~ [nN] ]]; then
-    make production-ramp-up
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to start the application now? [Y/n]:" -er -n 1 START_NOW
+    if [[ ! $START_NOW =~ [nN] ]]; then
+      make production-ramp-up
+    else
+      echo 'Installation script finished.'
+      exit 0
+    fi
   else
+    printf 'You can start the docker services now.\n\n'
     echo 'Installation script finished.'
     exit 0
   fi
