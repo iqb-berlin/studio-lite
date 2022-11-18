@@ -1,13 +1,13 @@
 stages:
   - .pre
   - build
+  - db-test
   - unit-test
   - e2e-test
   - lint
   - audit
   - build-images
   - scan-images
-  - push-images
 
 image: node:16.15-bullseye-slim
 
