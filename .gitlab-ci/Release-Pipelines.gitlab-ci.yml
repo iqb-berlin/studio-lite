@@ -432,7 +432,7 @@ lint-main-pr-backend:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
     - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test lint api
 
@@ -447,7 +447,7 @@ lint-main-pr-frontend:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
     - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test lint frontend
 
@@ -462,7 +462,7 @@ lint-main-pr-frontend-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   script:
     - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} lint frontend-e2e
 
@@ -476,7 +476,7 @@ audit-main-pr-backend:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
     - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
 
@@ -490,7 +490,7 @@ audit-main-pr-frontend:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - docker pull ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
     - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
 
@@ -503,9 +503,9 @@ build-main-commit-db-image:
     - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA}
   script:
-    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA} -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
     - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -519,9 +519,9 @@ build-main-commit-liquibase-image:
     - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA}
   script:
-    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA} -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
     - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -535,9 +535,9 @@ build-main-commit-backend-image:
     - $DOCKER_SERVICE
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_BEFORE_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_BEFORE_SHA}
   script:
-    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_BEFORE_SHA} -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
+    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
     - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -551,9 +551,9 @@ build-main-commit-frontend-image:
       - $DOCKER_SERVICE
     before_script:
       - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-      - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_BEFORE_SHA}
+      - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_BEFORE_SHA}
     script:
-      - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_BEFORE_SHA} -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
+      - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
       - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
     after_script:
       - docker logout $CI_REGISTRY
@@ -632,10 +632,10 @@ build-release:
     - $DOCKER_SERVICE
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
   script:
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
     - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:latest

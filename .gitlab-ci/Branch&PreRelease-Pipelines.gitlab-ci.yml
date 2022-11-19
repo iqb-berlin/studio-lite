@@ -1,4 +1,3 @@
-
 #############################################################################
 ## FEATURE COMMITS, 'DEVELOP' TARGETED PULL REQUESTS, PRE-RELEASE TAGS
 #############################################################################
@@ -47,6 +46,12 @@
     - if: $CI_COMMIT_TAG
       when: never
 
+.develop_commit_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_TAG
+      when: never
+
 .pre-release_rules:
   rules:
     - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)-(?P<PRERELEASE>(alpha|beta|rc)(\.)?(?:[1-9]\d*)?)$/
@@ -88,6 +93,27 @@ check-develop-pr-rules:
     - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
+check-develop-commit-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  script:
+    - echo $CI_COMMIT_BRANCH
+    - echo $CI_PIPELINE_SOURCE
+    - echo $CI_COMMIT_TAG
+    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "develop" ]; then echo "commit branch is 'develop'" ; else echo "'$CI_COMMIT_BRANCH' != 'develop'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "develop" ]; then echo "commit branch is not 'develop'" ; else echo "'$CI_COMMIT_BRANCH' == 'develop'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "pipeline source is not 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "pipeline source is 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "commit branch exists, is 'develop', and it's not a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "commit branch doesn't exist or isn't 'develop' or it's a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+
 check-pre-release-rules:
   stage: .pre
   interruptible: true
@@ -124,8 +150,8 @@ install-dependencies:
 .distributed:
   interruptible: true
   rules:
-    - !reference [.default_base_rules, rules]
-    - !reference [.develop_pr_base_rules, rules]
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   needs:
     - install-dependencies
   artifacts:
@@ -194,7 +220,6 @@ build-app:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
-
   script:
     - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=build --parallel=3
@@ -441,70 +466,194 @@ audit-app:
   script:
     - npm audit --audit-level critical
 
-build-docker-app:
+#build-docker-app:
+#  stage: build-images
+#  extends: .distributed
+#  rules:
+#    - !reference [ .develop_pr_base_rules, rules ]
+#  needs:
+#    - install-dependencies
+#  image: $DOCKER_IMAGE
+#  services:
+#    - $DOCKER_SERVICE
+#  before_script:
+#    - apk add --no-cache npm
+#    - npm i -g npx
+#    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+#  script:
+#    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
+#  after_script:
+#    - docker logout $REGISTRY
+#
+#scan-docker-db:
+#  stage: scan-images
+#  allow_failure: true
+#  rules:
+#    - !reference [ .develop_pr_db_rules, rules ]
+#  needs:
+#    - build-db-image
+#  image: $DOCKER_IMAGE
+#  services:
+#    - $DOCKER_SERVICE
+#  script:
+#    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+#    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+#
+#scan-docker-liquibase:
+#  stage: scan-images
+#  allow_failure: true
+#  rules:
+#    - !reference [ .develop_pr_db_rules, rules ]
+#  needs:
+#    - build-liquibase-image
+#  image: $DOCKER_IMAGE
+#  services:
+#    - $DOCKER_SERVICE
+#  script:
+#    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+#    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+#
+#scan-docker-app:
+#  stage: scan-images
+#  allow_failure: true
+#  extends: .distributed
+#  rules:
+#    - !reference [ .develop_pr_base_rules, rules ]
+#  needs:
+#    - install-dependencies
+#    - build-docker-app
+#  image: $DOCKER_IMAGE
+#  services:
+#    - $DOCKER_SERVICE
+#  before_script:
+#    - apk add --no-cache npm
+#    - npm i -g npx
+#  script:
+#    - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
+
+build-develop-commit-db-image:
   stage: build-images
-  extends: .distributed
   rules:
-    - !reference [ .develop_pr_base_rules, rules ]
-  needs:
-    - install-dependencies
+    - !reference [ .develop_commit_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   before_script:
-    - apk add --no-cache npm
-    - npm i -g npx
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
+    - docker build -q -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
   after_script:
-    - docker logout $REGISTRY
+    - docker logout $CI_REGISTRY
 
-scan-docker-db:
-  stage: scan-images
-  allow_failure: true
+build-develop-commit-liquibase-image:
+  stage: build-images
   rules:
-    - !reference [ .develop_pr_db_rules, rules ]
-  needs:
-    - build-db-image
+    - !reference [ .develop_commit_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
+    - docker build -q -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
+    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-develop-commit-backend-image:
+  stage: build-images
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
+    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-develop-commit-frontend-image:
+  stage: build-images
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
+    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+scan-develop-commit-db-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  needs:
+    - build-develop-commit-db-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
     - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
 
-scan-docker-liquibase:
+scan-develop-commit-liquibase-image:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .develop_pr_db_rules, rules ]
+    - !reference [ .develop_commit_rules, rules ]
   needs:
-    - build-liquibase-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-
-scan-docker-app:
-  stage: scan-images
-  allow_failure: true
-  extends: .distributed
-  rules:
-    - !reference [ .develop_pr_base_rules, rules ]
-  needs:
-    - install-dependencies
-    - build-docker-app
+    - build-develop-commit-liquibase-image
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
   before_script:
-    - apk add --no-cache npm
-    - npm i -g npx
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
   script:
-    - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+
+scan-develop-commit-backend-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  needs:
+    - build-develop-commit-backend-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+
+scan-develop-commit-frontend-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  needs:
+    - build-develop-commit-frontend-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
 
 build-pre-release:
   stage: build-images
