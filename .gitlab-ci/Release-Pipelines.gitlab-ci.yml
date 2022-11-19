@@ -16,9 +16,15 @@
     - if: $CI_COMMIT_TAG
       when: never
 
-.main_commit_rules:
+.main_commit_push_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "main") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "main") && ($CI_PIPELINE_SOURCE == "push")
+    - if: $CI_COMMIT_TAG
+      when: never
+
+.main_commit_web_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "main") && ($CI_PIPELINE_SOURCE == "web")
     - if: $CI_COMMIT_TAG
       when: never
 
@@ -40,12 +46,12 @@ check-main-pr-rules:
     - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
     - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
-check-main-commit-rules:
+check-main-commit-push-rules:
   stage: .pre
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   script:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
@@ -54,10 +60,31 @@ check-main-commit-rules:
     - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
     - if [ "$CI_COMMIT_BRANCH" = "main" ]; then echo "commit branch is 'main'" ; else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
     - if [ "$CI_COMMIT_BRANCH" != "main" ]; then echo "commit branch is not 'main'" ; else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "pipeline source is not 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "pipeline source is 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "commit branch exists, is 'main', and it's not a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "commit branch doesn't exist or isn't 'main' or it's a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "push" ]; then echo "pipeline source is 'push'" ; else echo "'$CI_PIPELINE_SOURCE' != 'push'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "push" ]; then echo "pipeline source is not 'push'" ; else echo "'$CI_PIPELINE_SOURCE' == 'push'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "push" ]; then echo "commit branch exists, is 'main', and it's a push" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "push" ]; then echo "commit branch doesn't exist or isn't 'main' or it isn't a push" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+
+check-main-commit-web-rules:
+  stage: .pre
+  interruptible: true
+  allow_failure: true
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  script:
+    - echo $CI_COMMIT_BRANCH
+    - echo $CI_PIPELINE_SOURCE
+    - echo $CI_COMMIT_TAG
+    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then echo "commit branch is 'main'" ; else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "main" ]; then echo "commit branch is not 'main'" ; else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "web" ]; then echo "pipeline source is 'web'" ; else echo "'$CI_PIPELINE_SOURCE' != 'web'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "web" ]; then echo "pipeline source is not 'web'" ; else echo "'$CI_PIPELINE_SOURCE' == 'web'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "web" ]; then echo "commit branch exists, is 'main', and it's a web gui call" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "web" ]; then echo "commit branch doesn't exist or isn't 'main' or it isn't a web gui call" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
     - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
@@ -497,7 +524,7 @@ audit-main-pr-frontend:
 build-main-commit-db-image:
   stage: build-images
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -513,7 +540,7 @@ build-main-commit-db-image:
 build-main-commit-liquibase-image:
   stage: build-images
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -529,7 +556,7 @@ build-main-commit-liquibase-image:
 build-main-commit-backend-image:
   stage: build-images
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
@@ -545,7 +572,7 @@ build-main-commit-backend-image:
 build-main-commit-frontend-image:
     stage: build-images
     rules:
-      - !reference [ .main_commit_rules, rules ]
+      - !reference [ .main_commit_push_rules, rules ]
     image: $DOCKER_IMAGE
     services:
       - $DOCKER_SERVICE
@@ -558,11 +585,71 @@ build-main-commit-frontend-image:
     after_script:
       - docker logout $CI_REGISTRY
 
+build-main-commit-web-db-image:
+  stage: build-images
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-main-commit-web-liquibase-image:
+  stage: build-images
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f database/Liquibase.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
+    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $REGISTRY
+
+build-main-commit-web-backend-image:
+  stage: build-images
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
+build-main-commit-web-frontend-image:
+  stage: build-images
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
+    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+
 scan-main-commit-db-image:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-db-image
   image: $DOCKER_IMAGE
@@ -578,7 +665,7 @@ scan-main-commit-liquibase-image:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-liquibase-image
   image: $DOCKER_IMAGE
@@ -594,7 +681,7 @@ scan-main-commit-backend-image:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-backend-image
   image: $DOCKER_IMAGE
@@ -610,7 +697,7 @@ scan-main-commit-frontend-image:
   stage: scan-images
   allow_failure: true
   rules:
-    - !reference [ .main_commit_rules, rules ]
+    - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-frontend-image
   image: $DOCKER_IMAGE
@@ -622,6 +709,69 @@ scan-main-commit-frontend-image:
   script:
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
 
+scan-main-commit-web-db-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  needs:
+    - build-main-commit-web-db-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+
+scan-main-commit-web-liquibase-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  needs:
+    - build-main-commit-web-liquibase-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+
+scan-main-commit-web-backend-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  needs:
+    - build-main-commit-web-backend-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+
+scan-main-commit-web-frontend-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .main_commit_web_rules, rules ]
+  needs:
+    - build-main-commit-web-frontend-image
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  before_script:
+    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q aquasec/trivy:0.29.2
+  script:
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
 
 build-release:
   stage: build-images
