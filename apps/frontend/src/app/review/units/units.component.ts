@@ -270,8 +270,8 @@ export class UnitsComponent implements OnInit, OnDestroy {
             responseProgress: 'none'
           },
           playerConfig: {
-            stateReportPolicy: 'eager',
             pagingMode: this.reviewService.bookletConfig?.pagingMode,
+            enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end'],
             directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef || ''
