@@ -189,13 +189,8 @@ export class UnitsComponent implements OnInit, OnDestroy {
           break;
 
         case 'vo.FromPlayer.UnitNavigationRequest':
-          this.snackBar.open(`Player sendet UnitNavigationRequest: "${
-            msgData.navigationTarget}"`, '', { duration: 3000 });
-          break;
-
         case 'vopUnitNavigationRequestedNotification':
-          this.snackBar.open(`Player sendet UnitNavigationRequest: "${
-            msgData.target}"`, '', { duration: 3000 });
+          this.gotoUnit(msgData.target);
           break;
 
         case 'vopWindowFocusChangedNotification':
@@ -207,6 +202,21 @@ export class UnitsComponent implements OnInit, OnDestroy {
           console.warn(`processMessagePost ignored message: ${msgType}`);
           break;
       }
+    }
+  }
+
+  private gotoUnit(target: string) {
+    if (target === 'next') {
+      this.reviewService.setUnitNavigationRequest(this.reviewService.currentUnitSequenceId + 1);
+    } else if (target === 'last' || target === 'end') {
+      this.reviewService.setUnitNavigationRequest(this.reviewService.units.length);
+    } else if (target === 'first') {
+      this.reviewService.setUnitNavigationRequest(-1);
+    } else if (target === 'previous') {
+      this.reviewService.setUnitNavigationRequest(this.reviewService.currentUnitSequenceId - 1);
+    } else {
+      this.snackBar.open(`Player sendet unbekannten UnitNavigationRequest: "${
+        target}"`, '', { duration: 3000 });
     }
   }
 
@@ -270,8 +280,8 @@ export class UnitsComponent implements OnInit, OnDestroy {
             responseProgress: 'none'
           },
           playerConfig: {
-            stateReportPolicy: 'eager',
             pagingMode: this.reviewService.bookletConfig?.pagingMode,
+            enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end'],
             directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef || ''
