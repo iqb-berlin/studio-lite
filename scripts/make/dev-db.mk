@@ -6,10 +6,10 @@ include $(BASE_DIR)/.env.dev
 .EXPORT_ALL_VARIABLES: ## exports all variables (especially those of the included .env.dev file!)
 
 dev-db-up: ## Start db container (e.g. for a localhost dev environment with non containerized frontend and backend servers)
-	docker compose --env-file $(BASE_DIR)/.env.dev.local up --build -d db liquibase
+	docker compose --env-file $(BASE_DIR)/.env.dev up --build -d db liquibase
 
 dev-db-down: ## Stop db container
-	docker compose --env-file $(BASE_DIR)/.env.dev.local down
+	docker compose --env-file $(BASE_DIR)/.env.dev down
 
 dev-db-update-status: .EXPORT_ALL_VARIABLES ## Outputs the count of changesets that have not been deployed (https://docs.liquibase.com/commands/status/status.html)
 	cd $(BASE_DIR) && docker compose run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/$(POSTGRES_DB) --username=$(POSTGRES_USER) --password=$(POSTGRES_PASSWORD) --classpath=changelog --logLevel=info status
