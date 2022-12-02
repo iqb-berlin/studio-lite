@@ -13,7 +13,7 @@ import { DownloadModule } from './download/download.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env.dev.local',
+      envFilePath: '.env.dev',
       cache: true
     }),
     AdminModule,
@@ -26,8 +26,6 @@ import { DownloadModule } from './download/download.module';
   ],
   controllers: [AppController],
   providers: [AppVersionProvider],
-  exports: [
-    AppVersionProvider
-  ]
+  exports: [AppVersionProvider]
 })
 export class AppModule {}
