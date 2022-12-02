@@ -1,12 +1,13 @@
 #!/bin/bash
 
 SELECTED_VERSION=$1
-REPO_URL=iqb-berlin/studio-lite
+REPO_URL='https://raw.githubusercontent.com/iqb-berlin/studio-lite'
+REPO_API='https://api.github.com/repos/iqb-berlin/studio-lite'
 HAS_ENV_FILE_UPDATE=false
 HAS_CONFIG_FILE_UPDATE=false
 
 get_new_release_version() {
-  LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+  LATEST_RELEASE=$(curl -s $REPO_API/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
 
   if [ "$SOURCE_TAG" = "latest" ]; then
     SOURCE_TAG="$LATEST_RELEASE"
@@ -27,7 +28,7 @@ get_new_release_version() {
   fi
 
   while read -p 'Name the desired version: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
-    if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/${REPO_URL}/"${TARGET_TAG}"/README.md 2>/dev/null; then
+    if ! curl --head --silent --fail --output /dev/null $REPO_URL/"${TARGET_TAG}"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
 
     else
@@ -45,10 +46,10 @@ create_backup() {
 
 run_update_script_in_selected_version() {
   CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update.sh
-  NEW_UPDATE_SCRIPT=https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/scripts/update.sh
+  NEW_UPDATE_SCRIPT=$REPO_URL/"$TARGET_TAG"/scripts/update.sh
 
-  if [ ! -f CURRENT_UPDATE_SCRIPT ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
-    if [ ! -f CURRENT_UPDATE_SCRIPT ]; then
+  if [ ! -f "$CURRENT_UPDATE_SCRIPT" ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
+    if [ ! -f "$CURRENT_UPDATE_SCRIPT" ]; then
       echo "Update script 'update.sh' does not exist!"
 
     elif ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
@@ -57,7 +58,7 @@ run_update_script_in_selected_version() {
 
     printf "The running update script will download the desired update script, terminate itself, and start the new one!\n\n"
     echo 'Downloading the desired update script ...'
-    if wget -q -O update.sh https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/scripts/update.sh; then
+    if wget -q -O update.sh $REPO_URL/"$TARGET_TAG"/scripts/update.sh; then
       chmod +x update.sh
       echo 'Download successful!'
     else
@@ -73,7 +74,7 @@ run_update_script_in_selected_version() {
 }
 
 download_file() {
-  if wget -q -O "$1" https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/"$2"; then
+  if wget -q -O "$1" $REPO_URL/"$TARGET_TAG"/"$2"; then
     printf -- "- File '%s' successfully downloaded.\n" "$1"
   else
     printf -- "- File '%s' download failed.\n\n" "$1"
@@ -94,9 +95,9 @@ update_files() {
   printf "Downloads done!\n\n"
 }
 
-get_modificated_file() {
+get_modified_file() {
   SOURCE_FILE=./backup/release/"$SOURCE_TAG"/"$1"
-  TARGET_FILE=https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/"$2"
+  TARGET_FILE=$REPO_URL/"$TARGET_TAG"/"$2"
   CURRENT_ENV_FILE=.env.prod
   CURRENT_CONFIG_FILE=config/frontend/default.conf.template
 
@@ -166,11 +167,11 @@ check_template_files_modifications() {
   echo "Check template files for updates ..."
 
   # check environment file
-  get_modificated_file .env.prod.template .env.prod.template "env-file"
+  get_modified_file .env.prod.template .env.prod.template "env-file"
 
   # check nginx configuration files
-  get_modificated_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
-  get_modificated_file config/frontend/default.conf.https-template config/frontend/default.conf.https-template "conf-file"
+  get_modified_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
+  get_modified_file config/frontend/default.conf.https-template config/frontend/default.conf.https-template "conf-file"
 
   printf "Template files update check done.\n\n"
 }
