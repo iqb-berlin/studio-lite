@@ -13,6 +13,7 @@ production-logs: ## Get logs of running containers
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml logs -f
 
 production-ramp-up: ## Pull newest images, create and start docker containers
+	if [ ! -f $(BASE_DIR)/config/frontend/default.conf.template ]; then cp $(BASE_DIR)/config/frontend/default.conf.http-template $(BASE_DIR)/config/frontend/default.conf.template; fi
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml pull
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d
 
