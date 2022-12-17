@@ -191,8 +191,21 @@ build-liquibase-image:
   after_script:
     - docker logout $REGISTRY
 
-patch-db-image:
+build-app:
   stage: build
+  extends: .distributed
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - npx nx affected --base=HEAD~1 --target=build --parallel=3
+  artifacts:
+    paths:
+      - dist
+
+test-db:
+  stage: db-test
   rules:
     - !reference [ .default_db_rules, rules ]
     - !reference [ .develop_pr_db_rules, rules ]
@@ -213,19 +226,6 @@ patch-db-image:
   script:
     - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
     - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-
-build-app:
-  stage: build
-  extends: .distributed
-  rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
-  script:
-    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
-    - npx nx affected --base=HEAD~1 --target=build --parallel=3
-  artifacts:
-    paths:
-      - dist
 
 test-app:
   stage: unit-test
