@@ -12,6 +12,7 @@ import {
   MessageType
 } from '@studio-lite-lib/iqb-components';
 import { ModuleService, VeronaModuleClass } from '@studio-lite/studio-components';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../backend.service';
 import { AppService } from '../../app.service';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
@@ -38,7 +39,8 @@ export class VeronaModulesComponent implements OnInit {
     private editItemAuthoringToolDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private messsageDialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
   ) {
     this.uploadUrl = `${this.serverUrl}admin/verona-modules`;
   }
@@ -97,10 +99,14 @@ export class VeronaModulesComponent implements OnInit {
           this.backendService.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
             (deleteFilesOk: boolean) => {
               if (deleteFilesOk) {
-                this.snackBar.open('Verona-Modul(e) hochgeladen', '', { duration: 1000 });
+                const message = this.translateService.instant('modules.delete', {
+                  count: this.selectedModules.length
+                });
+                this.snackBar.open(message, '', { duration: 1000 });
                 this.loadModuleList();
               } else {
-                this.snackBar.open('Konnte Verona-Modul(e) nicht hochladen', '', { duration: 3000 });
+                const message = this.translateService.instant('modules.delete-error');
+                this.snackBar.open(message, '', { duration: 3000 });
                 this.appService.dataLoading = false;
               }
             }
