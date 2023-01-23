@@ -53,9 +53,9 @@ export class CommentEditorComponent implements OnInit {
   }
 
   onSubmit(): void {
-    const textContent = this.editor.getText();
-    if (textContent) {
-      this.handleSubmit.emit(this.editor.getHTML());
+    const editorContent = this.editor.getHTML();
+    if (editorContent !== '<p></p>') {
+      this.handleSubmit.emit(editorContent);
     } else {
       this.handleCancel.emit();
     }
