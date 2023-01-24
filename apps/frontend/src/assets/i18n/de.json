@@ -69,7 +69,9 @@
   "modules": {
     "editor-name": "Editor",
     "player-name": "Vorschau (Player)",
-    "schemer-name": "Kodierung (Schemer)"
+    "schemer-name": "Kodierung (Schemer)",
+    "delete": "{{count}} Verona Modul(e) gelöscht",
+    "delete-error": "Konnte Verona Modul(e) nicht löschen"
   },
   "application": {
     "wait-message": "Bitte warten"
