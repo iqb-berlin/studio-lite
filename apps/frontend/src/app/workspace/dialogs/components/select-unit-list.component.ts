@@ -17,6 +17,13 @@ import { BackendService } from '../../backend.service';
         <p *ngIf="selectionCount === 1">Eine Aufgabe ausgewählt.</p>
         <p *ngIf="selectionCount > 1">{{selectionCount}} Aufgaben ausgewählt.</p>
       </div>
+
+      <mat-form-field appearance="standard">
+        <mat-label>Aufgaben und Gruppen filtern</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Zeichenfolge eingeben" #input>
+      </mat-form-field>
+
+
       <mat-table [dataSource]="objectsDatasource" matSort class="unit-list">
         <ng-container matColumnDef="selectCheckbox">
           <mat-header-cell *matHeaderCellDef fxFlex="70px">
@@ -152,6 +159,11 @@ export class SelectUnitListComponent implements OnInit, OnDestroy {
     this.isAllSelected() || !this.objectsDatasource ?
       this.tableSelectionCheckbox.clear() :
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.objectsDatasource.filter = filterValue.trim().toLowerCase();
   }
 
   ngOnDestroy(): void {
