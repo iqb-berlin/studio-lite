@@ -13,6 +13,7 @@ describe('HomeWorkspacesComponent', () => {
 
     fixture = TestBed.createComponent(HomeWorkspacesComponent);
     component = fixture.componentInstance;
+    component.workspaceGroups = [];
     fixture.detectChanges();
   });
 
