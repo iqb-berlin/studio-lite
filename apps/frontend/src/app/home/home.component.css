@@ -36,21 +36,6 @@ h1 {
   font-size: 1.2em;
 }
 
-.workspace-group-header {
-  padding: 4px 0 4px 10px;
-  background-color: lightgray;
-  margin-bottom: 2px;
-}
-
-.workspace-group-header div {
-  font-size: larger;
-  font-weight: normal;
-}
-
-.scroll-area .mat-button {
-  line-height: 24px;
-}
-
 .mat-raised-button {
   min-width: 160px;
 }

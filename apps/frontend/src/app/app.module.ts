@@ -1,6 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClient,
+  HttpClientModule
+} from '@angular/common/http';
 import { NgModule, ApplicationModule } from '@angular/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -41,6 +45,7 @@ import { RequestMessageDialogComponent } from './components/request-message-dial
 import { InputTextComponent } from './components/input-text.component';
 import { EditMyDataComponent } from './home/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings.component';
+import { HomeWorkspacesComponent } from './home/home-workspaces/home-workspaces.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -55,7 +60,8 @@ export function createTranslateLoader(http: HttpClient) {
     RequestMessageDialogComponent,
     InputTextComponent,
     EditMyDataComponent,
-    EditWorkspaceSettingsComponent
+    EditWorkspaceSettingsComponent,
+    HomeWorkspacesComponent
   ],
   imports: [
     ApplicationModule,
@@ -86,7 +92,7 @@ export function createTranslateLoader(http: HttpClient) {
       defaultLanguage: 'de',
       loader: {
         provide: TranslateLoader,
-        useFactory: (createTranslateLoader),
+        useFactory: createTranslateLoader,
         deps: [HttpClient]
       }
     }),
@@ -119,4 +125,4 @@ export function createTranslateLoader(http: HttpClient) {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
