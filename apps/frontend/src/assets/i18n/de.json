@@ -86,6 +86,11 @@
     },
     "new-comments": "Neue Kommentare"
   },
+  "select-unit-list": {
+    "filter": "Suche nach Aufgaben und Gruppen",
+    "delete-filter": "Suchbegriff zurücksetzen",
+    "enter-filter": "Suchbegriff"
+  },
   "comment-editor": {
     "write": "Verfassen",
     "edit": "Bearbeiten",
