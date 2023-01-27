@@ -1,8 +1,8 @@
 <div class="home-body" fxLayout="row" fxLayoutAlign="center stretch">
   <studio-lite-login *ngIf="appService.authData.userId === 0 && appService.authData.reviews.length === 0"
-       fxFlex="0 0 400px" fxLayout="column"
-       class="box-left"
-       [loginMessage]="appService.appConfig.hasUsers ? 'home.login' : 'home.first-login'">
+                     fxFlex="0 0 400px" fxLayout="column"
+                     class="box-left"
+                     [loginMessage]="appService.appConfig.hasUsers ? 'home.login' : 'home.first-login'">
   </studio-lite-login>
   <div *ngIf="appService.authData.userId > 0"
        fxFlex="0 0 400px" fxLayout="column" class="box-left">

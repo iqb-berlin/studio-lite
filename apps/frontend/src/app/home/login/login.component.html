@@ -1,26 +1,36 @@
 <form [formGroup]="loginForm" (ngSubmit)="login()">
   <div class="area-title ">{{loginMessage | translate}}</div>
-  <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
-  <h2 *ngIf="!appService.appConfig.hasUsers" class="warning">
-    Dieses System hat aktuell keine User angelegt. Mit den Anmeldedaten unten legen Sie einen ersten Account mit
-    Administrationsrechten an. Bitte notieren Sie sich die Daten!
-  </h2>
+  <div *ngIf="appService.globalWarning"
+      class="warning">{{appService.globalWarning}}
+  </div>
+  <div *ngIf="!appService.appConfig.hasUsers"
+      class="warning">
+    {{'home.no-user' | translate}}
+  </div>
   <div fxLayout="column">
-    <mat-form-field class="full-width"
-                    [class]="loginNamePreset ? 'invisible' : ''">
+    <mat-form-field [class.invisible]="loginNamePreset">
       <input matInput formControlName="name"
-             placeholder="Anmeldename"
+             [placeholder]="'home.user-name' | translate"
              (keyup.enter)="pw.focus()">
     </mat-form-field>
     <p *ngIf="loginNamePreset">
-      Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist
-      noch die Eingabe eines Kennwortes erforderlich.
+      {{'home.login-with-preset' | translate}}
     </p>
-    <mat-form-field
-      class="full-width">
-      <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
+    <mat-form-field>
+      <input matInput #pw
+             type="password"
+             formControlName="pw"
+             [placeholder]="'home.password' | translate"
+             (keyup.enter)="login()">
     </mat-form-field>
   </div>
-  <p *ngIf="errorMessage" class="error-message">{{errorMessage}}</p>
-  <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
+  <p *ngIf="errorMessage"
+     class="error-message">
+    {{errorMessage}}
+  </p>
+  <button mat-raised-button
+          type="submit"
+          [disabled]="loginForm.invalid"
+          color="primary">{{'next' | translate}}
+  </button>
 </form>
