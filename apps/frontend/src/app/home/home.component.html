@@ -4,29 +4,7 @@
        class="box-left">
   </studio-lite-login>
   <div fxFlex="0 0 400px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
-    <h1 fxLayout="row" fxLayoutAlign="space-between center">
-      {{'home.select-workspace' | translate}}
-      <div>
-        <button mat-button *ngIf="appService.authData.isAdmin" [routerLink]="['/admin']"
-                [matTooltip]="'home.goto-admin' | translate">
-          <mat-icon>settings</mat-icon>
-        </button>
-        <button mat-button [matMenuTriggerFor]="menuUser" matTooltip="Meine Daten/Anmelden" matTooltipPosition="above" fxFlex>
-          <mat-icon>account_box</mat-icon>
-        </button>
-      </div>
-      <mat-menu #menuUser="matMenu">
-        <button mat-menu-item (click)="changeUserData()">
-          <mat-icon>edit</mat-icon>Name/E-Mail ändern
-        </button>
-        <button mat-menu-item (click)="changePassword()">
-          <mat-icon>lock</mat-icon>Kennwort ändern
-        </button>
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon>Abmelden
-        </button>
-      </mat-menu>
-    </h1>
+    <studio-lite-user-menu></studio-lite-user-menu>
     <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
     <studio-lite-home-workspaces
       fxFlex fxLayout="column"

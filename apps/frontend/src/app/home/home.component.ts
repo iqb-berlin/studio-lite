@@ -2,16 +2,12 @@ import { Router } from '@angular/router';
 import {
   Component, Inject, OnInit
 } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MyDataDto, ReviewDto } from '@studio-lite-lib/api-dto';
+import { ReviewDto } from '@studio-lite-lib/api-dto';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
-import { ChangePasswordComponent } from './change-password.component';
-import { EditMyDataComponent } from './edit-my-data.component';
 import { AppConfig } from '../app.classes';
 
 @Component({
@@ -24,9 +20,6 @@ export class HomeComponent implements OnInit {
               public appService: AppService,
               private backendService: BackendService,
               public confirmDialog: MatDialog,
-              private changePasswordDialog: MatDialog,
-              private editMyDataDialog: MatDialog,
-              private snackBar: MatSnackBar,
               private titleService: Title,
               private sanitizer: DomSanitizer,
               private router: Router) {
@@ -66,73 +59,6 @@ export class HomeComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         this.backendService.logout();
-      }
-    });
-  }
-
-  changePassword() : void {
-    const dialogRef = this.changePasswordDialog.open(ChangePasswordComponent, {
-      width: '400px'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
-        this.backendService.setUserPassword(result.controls.pw_old.value, result.controls.pw_new1.value).subscribe(
-          respOk => {
-            this.snackBar.open(
-              respOk ? 'Neues Kennwort gespeichert' : 'Konnte Kennwort nicht ändern.',
-              respOk ? 'OK' : 'Fehler',
-              { duration: 3000 }
-            );
-          }
-        );
-      }
-    });
-  }
-
-  changeUserData() {
-    this.backendService.getMyData().subscribe(myData => {
-      if (myData) {
-        const dialogRef = this.editMyDataDialog.open(EditMyDataComponent, {
-          width: '600px',
-          data: {
-            description: myData.description,
-            firstName: myData.firstName,
-            lastName: myData.lastName,
-            email: myData.email,
-            emailPublishApproved: myData.emailPublishApproved
-          }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-          if (typeof result !== 'undefined') {
-            if (result !== false) {
-              this.appService.dataLoading = true;
-              const newFirstName: string = (<UntypedFormGroup>result).get('firstName')?.value;
-              const newLastName: string = (<UntypedFormGroup>result).get('lastName')?.value;
-              const newEmail: string = (<UntypedFormGroup>result).get('email')?.value;
-              const newEmailApproval: boolean = (<UntypedFormGroup>result).get('emailPublishApproval')?.value;
-              const newDescription: string = (<UntypedFormGroup>result).get('description')?.value;
-              const changedData: MyDataDto = { id: this.appService.authData.userId };
-              if (newDescription !== myData.description) changedData.description = newDescription;
-              if (newFirstName !== myData.firstName) changedData.firstName = newFirstName;
-              if (newLastName !== myData.lastName) changedData.lastName = newLastName;
-              if (newEmail !== myData.email) changedData.email = newEmail;
-              if (newEmailApproval !== myData.emailPublishApproved) changedData.emailPublishApproved = newEmailApproval;
-              this.appService.dataLoading = true;
-              this.backendService.setMyData(changedData).subscribe(
-                respOk => {
-                  this.appService.dataLoading = false;
-                  if (respOk) {
-                    this.snackBar.open('Nutzerdaten geändert', '', { duration: 1000 });
-                  } else {
-                    this.snackBar.open('Konnte Nutzerdaten nicht ändern', 'Fehler', { duration: 3000 });
-                  }
-                }
-              );
-            }
-          }
-        });
       }
     });
   }
