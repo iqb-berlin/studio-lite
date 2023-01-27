@@ -8,11 +8,11 @@
        fxFlex="0 0 400px" fxLayout="column" class="box-left">
     <studio-lite-user-menu></studio-lite-user-menu>
     <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
-    <studio-lite-home-workspaces
+    <studio-lite-user-workspaces
       fxFlex fxLayout="column"
       class="scroll-area"
       [workspaceGroups]="appService.authData.workspaces">
-    </studio-lite-home-workspaces>
+    </studio-lite-user-workspaces>
   </div>
 
   <div *ngIf="appService.authData.reviews.length > 0"
