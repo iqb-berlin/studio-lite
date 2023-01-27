@@ -20,17 +20,6 @@
   background: white;
 }
 
-.error-message {
-  color: red;
-  padding: 5px;
-}
-
-.warning {
-  background-color: salmon;
-  padding: 4px;
-  font-size: smaller;
-}
-
 h1 {
   font-weight: normal;
   font-size: 1.2em;

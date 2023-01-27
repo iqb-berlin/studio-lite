@@ -1,13 +1,12 @@
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
-  Component, Inject, OnDestroy, OnInit
+  Component, Inject, OnInit
 } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MyDataDto, ReviewDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
-import { Subscription } from 'rxjs';
+import { MyDataDto, ReviewDto } from '@studio-lite-lib/api-dto';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
@@ -19,15 +18,8 @@ import { AppConfig } from '../app.classes';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  loginForm: UntypedFormGroup;
-  errorMessage = '';
-  private routingSubscription: Subscription | null = null;
-  redirectTo = '';
-  loginNamePreset = '';
-
-  constructor(private fb: UntypedFormBuilder,
-              @Inject('APP_VERSION') readonly appVersion: string,
+export class HomeComponent implements OnInit {
+  constructor(@Inject('APP_VERSION') readonly appVersion: string,
               @Inject('APP_NAME') readonly appName: string,
               public appService: AppService,
               private backendService: BackendService,
@@ -37,26 +29,10 @@ export class HomeComponent implements OnInit, OnDestroy {
               private snackBar: MatSnackBar,
               private titleService: Title,
               private sanitizer: DomSanitizer,
-              private route: ActivatedRoute,
               private router: Router) {
-    this.loginForm = this.fb.group({
-      name: this.fb.control('', [Validators.required, Validators.minLength(1)]),
-      pw: this.fb.control('', [Validators.required, Validators.minLength(1)])
-    });
   }
 
   ngOnInit(): void {
-    this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.redirectTo = queryParams['redirectTo'];
-    });
-    this.routingSubscription = this.route.params.subscribe(params => {
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.loginNamePreset = params['login'];
-      if (this.loginNamePreset) {
-        this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
-      }
-    });
     setTimeout(() => {
       this.backendService.getConfig().subscribe(newConfig => {
         if (newConfig) {
@@ -74,31 +50,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
       }
     });
-  }
-
-  login(): void {
-    this.errorMessage = '';
-    this.appService.clearErrorMessages();
-    if (this.loginForm && this.loginForm.valid) {
-      this.appService.dataLoading = true;
-      this.appService.errorMessagesDisabled = true;
-      const initLoginMode = !this.appService.appConfig.hasUsers;
-      this.backendService.login(
-        this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value, initLoginMode
-      ).subscribe(ok => {
-        this.appService.dataLoading = false;
-        if (ok) {
-          if (this.redirectTo) {
-            this.router.navigate([this.redirectTo]);
-          } else if (initLoginMode) {
-            this.router.navigate(['/admin']);
-          }
-        } else {
-          this.snackBar.open('Login nicht erfolgreich', 'Fehler', { duration: 3000 });
-        }
-        this.appService.errorMessagesDisabled = false;
-      });
-    }
   }
 
   logout(): void {
@@ -137,16 +88,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         );
       }
     });
-  }
-
-  buttonGotoWorkspace(selectedWorkspace: WorkspaceDto): void {
-    this.router.navigate([`/a/${selectedWorkspace.id}`]);
-  }
-
-  ngOnDestroy(): void {
-    if (this.routingSubscription !== null) {
-      this.routingSubscription.unsubscribe();
-    }
   }
 
   changeUserData() {

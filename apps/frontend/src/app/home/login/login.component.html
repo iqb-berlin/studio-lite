@@ -1,0 +1,27 @@
+<form [formGroup]="loginForm" (ngSubmit)="login()">
+  <h1 *ngIf="appService.appConfig.hasUsers">Anmelden</h1>
+  <h1 *ngIf="!appService.appConfig.hasUsers">Anlegen eines ersten User-Accounts</h1>
+  <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
+  <h2 *ngIf="!appService.appConfig.hasUsers" class="warning">
+    Dieses System hat aktuell keine User angelegt. Mit den Anmeldedaten unten legen Sie einen ersten Account mit
+    Administrationsrechten an. Bitte notieren Sie sich die Daten!
+  </h2>
+  <div fxLayout="column">
+    <mat-form-field class="full-width"
+                    [class]="loginNamePreset ? 'invisible' : ''">
+      <input matInput formControlName="name"
+             placeholder="Anmeldename"
+             (keyup.enter)="pw.focus()">
+    </mat-form-field>
+    <p *ngIf="loginNamePreset">
+      Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist
+      noch die Eingabe eines Kennwortes erforderlich.
+    </p>
+    <mat-form-field
+      class="full-width">
+      <input matInput #pw type="password" formControlName="pw" placeholder="Kennwort" (keyup.enter)="login()">
+    </mat-form-field>
+  </div>
+  <p *ngIf="errorMessage" class="error-message">{{errorMessage}}</p>
+  <button mat-raised-button type="submit" [disabled]="loginForm.invalid" color="primary">Weiter</button>
+</form>
