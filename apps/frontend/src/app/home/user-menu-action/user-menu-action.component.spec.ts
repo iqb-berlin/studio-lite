@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
 import { UserMenuActionComponent } from './user-menu-action.component';
 
 describe('UserMenuActionComponent', () => {
@@ -8,7 +10,11 @@ describe('UserMenuActionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UserMenuActionComponent]
+      declarations: [UserMenuActionComponent],
+      imports: [
+        MatIconModule,
+        TranslateModule.forRoot()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserMenuActionComponent);
