@@ -2,8 +2,6 @@ import { Router } from '@angular/router';
 import {
   Component, Inject, OnInit
 } from '@angular/core';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { MatDialog } from '@angular/material/dialog';
 import { ReviewDto } from '@studio-lite-lib/api-dto';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { BackendService } from '../backend.service';
@@ -19,7 +17,6 @@ export class HomeComponent implements OnInit {
               @Inject('APP_NAME') readonly appName: string,
               public appService: AppService,
               private backendService: BackendService,
-              public confirmDialog: MatDialog,
               private titleService: Title,
               private sanitizer: DomSanitizer,
               private router: Router) {
@@ -41,24 +38,6 @@ export class HomeComponent implements OnInit {
         this.backendService.getAuthData().subscribe(authData => {
           this.appService.authData = authData;
         });
-      }
-    });
-  }
-
-  logout(): void {
-    const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      height: '300px',
-      data: <ConfirmDialogData>{
-        title: 'Abmelden',
-        content: 'Möchten Sie sich abmelden?',
-        confirmButtonLabel: 'Abmelden',
-        showCancel: true
-      }
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.backendService.logout();
       }
     });
   }

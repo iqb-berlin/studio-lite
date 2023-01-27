@@ -10,14 +10,20 @@
     </button>
   </div>
   <mat-menu #menuUser="matMenu">
-    <button mat-menu-item (click)="changeUserData()">
-      <mat-icon>edit</mat-icon>Name/E-Mail ändern
-    </button>
-    <button mat-menu-item (click)="changePassword()">
-      <mat-icon>lock</mat-icon>Kennwort ändern
-    </button>
-    <button mat-menu-item (click)="logout()">
-      <mat-icon>logout</mat-icon>Abmelden
-    </button>
+    <studio-lite-user-menu-action
+      [type]="'changePassword'"
+      [iconName]="'lock'"
+      studioLiteChangePassword>
+    </studio-lite-user-menu-action>
+    <studio-lite-user-menu-action
+      [type]="'editMyData'"
+      [iconName]="'edit'"
+      studioLiteEditMyData>
+    </studio-lite-user-menu-action>
+    <studio-lite-user-menu-action
+      [type]="'logout'"
+      [iconName]="'logout'"
+      studioLiteLogout>
+    </studio-lite-user-menu-action>
   </mat-menu>
 </h1>

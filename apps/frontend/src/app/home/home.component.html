@@ -3,7 +3,8 @@
        fxFlex="0 0 400px" fxLayout="column"
        class="box-left">
   </studio-lite-login>
-  <div fxFlex="0 0 400px" fxLayout="column" class="box-left" *ngIf="appService.authData.userId > 0">
+  <div *ngIf="appService.authData.userId > 0"
+       fxFlex="0 0 400px" fxLayout="column" class="box-left">
     <studio-lite-user-menu></studio-lite-user-menu>
     <h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
     <studio-lite-home-workspaces
@@ -13,13 +14,16 @@
     </studio-lite-home-workspaces>
   </div>
 
-  <div fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px" *ngIf="appService.authData.reviews.length > 0">
+  <div *ngIf="appService.authData.reviews.length > 0"
+       fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px">
     <h1 fxLayout="row" fxLayoutAlign="space-between center">
       {{'home.select-review' | translate}}
-      <button mat-button (click)="logout()" *ngIf="appService.authData.userId === 0"
-              matTooltip="Abmelden">
-        <mat-icon>logout</mat-icon>
-      </button>
+      <studio-lite-user-menu-action *ngIf="appService.authData.userId === 0"
+                                    [type]="'logout'"
+                                    [iconName]="'logout'"
+                                    [matTooltip]="'home.logout' | translate"
+                                    studioLiteLogout>
+      </studio-lite-user-menu-action>
     </h1>
     <a mat-raised-button (click)="buttonGotoReview(r)"
        [matTooltip]="r.workspaceName ? r.workspaceName : ''"

@@ -48,6 +48,10 @@ import { EditWorkspaceSettingsComponent } from './components/edit-workspace-sett
 import { HomeWorkspacesComponent } from './home/home-workspaces/home-workspaces.component';
 import { LoginComponent } from './home/login/login.component';
 import { UserMenuComponent } from './home/user-menu/user-menu.component';
+import { UserMenuActionComponent } from './home/user-menu-action/user-menu-action.component';
+import { ChangePasswordDirective } from './home/user-menu-action/change-password.directive';
+import { EditMyDataDirective } from './home/user-menu-action/edit-my-data.directive';
+import { LogoutDirective } from './home/user-menu-action/logout.directive';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -65,7 +69,11 @@ export function createTranslateLoader(http: HttpClient) {
     EditWorkspaceSettingsComponent,
     HomeWorkspacesComponent,
     LoginComponent,
-    UserMenuComponent
+    UserMenuComponent,
+    UserMenuActionComponent,
+    ChangePasswordDirective,
+    EditMyDataDirective,
+    LogoutDirective
   ],
   imports: [
     ApplicationModule,

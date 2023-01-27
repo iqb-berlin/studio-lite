@@ -55,7 +55,10 @@
     "select-review": "Aufgabenfolge/Review starten",
     "goto-admin": "Allgemeine Systemverwaltung",
     "goto-wsg-admin": "Verwaltung der Bereichsgruppe",
-    "imprint": "Impressum/Datenschutz"
+    "imprint": "Impressum/Datenschutz",
+    "logout": "Abmelden",
+    "changePassword": "Kennwort ändern",
+    "editMyData": "Name/E-Mail ändern"
   },
   "dialogs": {
     "close": "Schließen",
