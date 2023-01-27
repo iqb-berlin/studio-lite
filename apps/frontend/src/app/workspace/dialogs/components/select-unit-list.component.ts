@@ -17,6 +17,24 @@ import { BackendService } from '../../backend.service';
         <p *ngIf="selectionCount === 1">Eine Aufgabe ausgewählt.</p>
         <p *ngIf="selectionCount > 1">{{selectionCount}} Aufgaben ausgewählt.</p>
       </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{'select-unit-list.filter' | translate}}</mat-label>
+        <input #filterInput
+               matInput
+               [placeholder]="'select-unit-list.enter-filter' | translate"
+               (keyup)="applyFilter(filterInput)">
+        <button matSuffix
+                mat-icon-button
+                [attr.aria-label]="'select-unit-list.delete-filter' | translate"
+                [disabled]="!filterInput.value"
+                [matTooltip]="'select-unit-list.delete-filter' | translate"
+                matTooltipPosition="above"
+                (click)="filterInput.value=''; applyFilter(filterInput)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
       <mat-table [dataSource]="objectsDatasource" matSort class="unit-list">
         <ng-container matColumnDef="selectCheckbox">
           <mat-header-cell *matHeaderCellDef fxFlex="70px">
@@ -152,6 +170,11 @@ export class SelectUnitListComponent implements OnInit, OnDestroy {
     this.isAllSelected() || !this.objectsDatasource ?
       this.tableSelectionCheckbox.clear() :
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
+  }
+
+  applyFilter(input: HTMLInputElement) {
+    const filterValue = input.value;
+    this.objectsDatasource.filter = filterValue.trim().toLowerCase();
   }
 
   ngOnDestroy(): void {
