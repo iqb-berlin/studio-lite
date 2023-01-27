@@ -58,7 +58,9 @@
     "imprint": "Impressum/Datenschutz",
     "logout": "Abmelden",
     "changePassword": "Kennwort ändern",
-    "editMyData": "Name/E-Mail ändern"
+    "editMyData": "Name/E-Mail ändern",
+    "login": "Anmelden",
+    "first-login": "Anlegen eines ersten User-Accounts"
   },
   "dialogs": {
     "close": "Schließen",
