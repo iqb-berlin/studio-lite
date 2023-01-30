@@ -1,0 +1,19 @@
+<div fxLayout="row" fxLayoutAlign="space-between center">
+  <studio-lite-area-title
+    [title]="'home.select-review' | translate">
+  </studio-lite-area-title>
+  <button *ngIf="isReviewUser"
+          mat-button
+          [matTooltip]="'home.logout' | translate"
+          studioLiteLogout>
+    <mat-icon>logout</mat-icon>
+  </button>
+</div>
+
+<a *ngFor="let review of reviews"
+   mat-raised-button
+   [routerLink]="['/review/' + review.id]"
+   [matTooltip]="review.workspaceName ? review.workspaceName : ''"
+   matTooltipPosition="right">
+  {{review.name}}
+</a>

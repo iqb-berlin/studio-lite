@@ -1,8 +1,6 @@
-import { Router } from '@angular/router';
 import {
   Component, Inject, OnInit
 } from '@angular/core';
-import { ReviewDto } from '@studio-lite-lib/api-dto';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { BackendService } from '../backend.service';
 import { AppService } from '../app.service';
@@ -18,8 +16,7 @@ export class HomeComponent implements OnInit {
               public appService: AppService,
               private backendService: BackendService,
               private titleService: Title,
-              private sanitizer: DomSanitizer,
-              private router: Router) {
+              private sanitizer: DomSanitizer) {
   }
 
   ngOnInit(): void {
@@ -40,9 +37,5 @@ export class HomeComponent implements OnInit {
         });
       }
     });
-  }
-
-  buttonGotoReview(review: ReviewDto) {
-    this.router.navigate([`/review/${review.id}`]);
   }
 }

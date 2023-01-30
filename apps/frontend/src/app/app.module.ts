@@ -56,6 +56,7 @@ import { UserWorkspacesAreaComponent } from './home/user-workspaces-area/user-wo
 import { WarningComponent } from './home/warning/warning.component';
 import { AreaTitleComponent } from './home/area-title/area-title.component';
 import { AppInfoComponent } from './home/app-info/app-info.component';
+import { UserReviewsComponent } from './home/user-reviews/user-reviews.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -81,7 +82,8 @@ export function createTranslateLoader(http: HttpClient) {
     UserWorkspacesAreaComponent,
     WarningComponent,
     AreaTitleComponent,
-    AppInfoComponent
+    AppInfoComponent,
+    UserReviewsComponent
   ],
   imports: [
     ApplicationModule,

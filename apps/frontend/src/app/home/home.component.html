@@ -3,29 +3,17 @@
                      fxFlex="0 0 400px" fxLayout="column"
                      class="box-left">
   </studio-lite-login>
+
   <studio-lite-user-workspaces-area *ngIf="appService.authData.userId > 0"
                                     fxFlex="0 0 400px" fxLayout="column"
                                     class="box-left">
   </studio-lite-user-workspaces-area>
 
-  <div *ngIf="appService.authData.reviews.length > 0"
-       fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px">
-    <h1 fxLayout="row" fxLayoutAlign="space-between center">
-      {{'home.select-review' | translate}}
-      <studio-lite-account-action *ngIf="appService.authData.userId === 0"
-                                    [type]="'logout'"
-                                    [iconName]="'logout'"
-                                    [matTooltip]="'home.logout' | translate"
-                                    studioLiteLogout>
-      </studio-lite-account-action>
-    </h1>
-    <a mat-raised-button (click)="buttonGotoReview(r)"
-       [matTooltip]="r.workspaceName ? r.workspaceName : ''"
-       matTooltipPosition="right"
-       *ngFor="let r of appService.authData.reviews">
-      {{r.name}}
-    </a>
-  </div>
+  <studio-lite-user-reviews *ngIf="appService.authData.reviews.length > 0"
+                            fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px"
+                            [reviews]="appService.authData.reviews"
+                            [isReviewUser]="appService.authData.userId === 0">
+  </studio-lite-user-reviews>
 
   <studio-lite-app-info fxFlex="0 2 400px" fxLayout="column" class="box-right"
                         [appTitle]="appService.appConfig.appTitle"
