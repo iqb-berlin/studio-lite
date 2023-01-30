@@ -1,5 +1,5 @@
 <div *ngIf="workspaceGroups.length === 0">
-  <p>Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.</p>
+  <p>{{'home.no-user-workspaces' | translate}}</p>
 </div>
 <div *ngIf="workspaceGroups.length > 0">
   <div *ngFor="let wsg of workspaceGroups"

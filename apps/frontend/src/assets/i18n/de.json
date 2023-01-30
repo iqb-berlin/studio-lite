@@ -66,7 +66,8 @@
     "first-login": "Anlegen eines ersten User-Accounts",
     "no-user": " Dieses System hat aktuell keine User angelegt. Mit den Anmeldedaten unten legen Sie einen ersten Account mit Administrationsrechten an. Bitte notieren Sie sich die Daten!",
     "login-with-preset": "Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist noch die Eingabe eines Kennwortes erforderlich.",
-    "no-user-workspaces": "Für diese Anmeldung wurden keine Arbeitsbereiche gefunden."
+    "no-user-workspaces": "Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.",
+    "user-menu": "Meine Daten/Anmelden"
   },
   "dialogs": {
     "close": "Schließen",
