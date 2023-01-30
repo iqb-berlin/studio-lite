@@ -48,10 +48,10 @@ import { EditWorkspaceSettingsComponent } from './components/edit-workspace-sett
 import { UserWorkspacesComponent } from './home/user-workspaces/user-workspaces.component';
 import { LoginComponent } from './home/login/login.component';
 import { UserMenuComponent } from './home/user-menu/user-menu.component';
-import { UserMenuActionComponent } from './home/user-menu-action/user-menu-action.component';
-import { ChangePasswordDirective } from './home/user-menu-action/change-password.directive';
-import { EditMyDataDirective } from './home/user-menu-action/edit-my-data.directive';
-import { LogoutDirective } from './home/user-menu-action/logout.directive';
+import { AccountActionComponent } from './home/account-action/account-action.component';
+import { ChangePasswordDirective } from './home/account-action/change-password.directive';
+import { EditMyDataDirective } from './home/account-action/edit-my-data.directive';
+import { LogoutDirective } from './home/account-action/logout.directive';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -70,7 +70,7 @@ export function createTranslateLoader(http: HttpClient) {
     UserWorkspacesComponent,
     LoginComponent,
     UserMenuComponent,
-    UserMenuActionComponent,
+    AccountActionComponent,
     ChangePasswordDirective,
     EditMyDataDirective,
     LogoutDirective

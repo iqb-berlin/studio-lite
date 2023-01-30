@@ -19,12 +19,12 @@
        fxFlex="0 0 400px" fxLayout="column" class="box-left" fxLayoutGap="6px">
     <h1 fxLayout="row" fxLayoutAlign="space-between center">
       {{'home.select-review' | translate}}
-      <studio-lite-user-menu-action *ngIf="appService.authData.userId === 0"
+      <studio-lite-account-action *ngIf="appService.authData.userId === 0"
                                     [type]="'logout'"
                                     [iconName]="'logout'"
                                     [matTooltip]="'home.logout' | translate"
                                     studioLiteLogout>
-      </studio-lite-user-menu-action>
+      </studio-lite-account-action>
     </h1>
     <a mat-raised-button (click)="buttonGotoReview(r)"
        [matTooltip]="r.workspaceName ? r.workspaceName : ''"

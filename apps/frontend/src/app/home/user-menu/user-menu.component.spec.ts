@@ -9,8 +9,8 @@ describe('UserMenuComponent', () => {
   let component: UserMenuComponent;
   let fixture: ComponentFixture<UserMenuComponent>;
 
-  @Component({ selector: 'studio-lite-user-menu-action', template: '' })
-  class MockStudioLiteUserMenuActionComponent {
+  @Component({ selector: 'studio-lite-account-action', template: '' })
+  class MockAccountActionComponentComponent {
     @Input() type!: string;
     @Input() iconName!: string;
   }
@@ -19,7 +19,7 @@ describe('UserMenuComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         UserMenuComponent,
-        MockStudioLiteUserMenuActionComponent
+        MockAccountActionComponentComponent
       ],
       imports: [
         MatIconModule,

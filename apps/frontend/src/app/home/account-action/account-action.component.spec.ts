@@ -2,22 +2,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
-import { UserMenuActionComponent } from './user-menu-action.component';
+import { AccountActionComponent } from './account-action.component';
 
-describe('UserMenuActionComponent', () => {
-  let component: UserMenuActionComponent;
-  let fixture: ComponentFixture<UserMenuActionComponent>;
+describe('AccountActionComponent', () => {
+  let component: AccountActionComponent;
+  let fixture: ComponentFixture<AccountActionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UserMenuActionComponent],
+      declarations: [AccountActionComponent],
       imports: [
         MatIconModule,
         TranslateModule.forRoot()
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserMenuActionComponent);
+    fixture = TestBed.createComponent(AccountActionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
