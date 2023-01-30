@@ -3,6 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserMenuComponent } from './user-menu.component';
 
 describe('UserMenuComponent', () => {
@@ -22,6 +23,7 @@ describe('UserMenuComponent', () => {
         MockAccountActionComponentComponent
       ],
       imports: [
+        MatTooltipModule,
         MatIconModule,
         MatMenuModule,
         TranslateModule.forRoot()
