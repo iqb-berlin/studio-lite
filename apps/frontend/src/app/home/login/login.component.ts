@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnDestroy, OnInit
+  Component, OnDestroy, OnInit
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -14,7 +14,6 @@ import { BackendService } from '../../backend.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  @Input() loginMessage!: string;
   loginForm: UntypedFormGroup;
   loginNamePreset = '';
   redirectTo = '';

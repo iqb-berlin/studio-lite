@@ -1,5 +1,7 @@
 <div fxLayout="row" fxLayoutAlign="space-between center">
-  <ng-content></ng-content>
+  <studio-lite-area-title
+    [title]="'home.select-workspace' | translate">
+  </studio-lite-area-title>
   <div>
     <button mat-button *ngIf="appService.authData.isAdmin"
             [routerLink]="['/admin']"
@@ -10,7 +12,9 @@
     <studio-lite-user-menu></studio-lite-user-menu>
   </div>
 </div>
-<h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
+<studio-lite-warning *ngIf="appService.globalWarning"
+  [warnMessage]="appService.globalWarning">
+</studio-lite-warning>
 <studio-lite-user-workspaces
   fxFlex fxLayout="column"
   class="scroll-area"

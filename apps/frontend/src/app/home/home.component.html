@@ -1,13 +1,11 @@
 <div class="home-body" fxLayout="row" fxLayoutAlign="center stretch">
   <studio-lite-login *ngIf="appService.authData.userId === 0 && appService.authData.reviews.length === 0"
                      fxFlex="0 0 400px" fxLayout="column"
-                     class="box-left"
-                     [loginMessage]="appService.appConfig.hasUsers ? 'home.login' : 'home.first-login'">
+                     class="box-left">
   </studio-lite-login>
   <studio-lite-user-workspaces-area *ngIf="appService.authData.userId > 0"
                                     fxFlex="0 0 400px" fxLayout="column"
                                     class="box-left">
-    <div class="area-title" >{{'home.select-workspace' | translate}}</div>
   </studio-lite-user-workspaces-area>
 
   <div *ngIf="appService.authData.reviews.length > 0"

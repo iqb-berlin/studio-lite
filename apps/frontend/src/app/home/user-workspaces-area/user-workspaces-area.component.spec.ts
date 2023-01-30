@@ -2,6 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
 import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
+import { TranslateModule } from '@ngx-translate/core';
 import { UserWorkspacesAreaComponent } from './user-workspaces-area.component';
 
 describe('UserWorkspacesAreaComponent', () => {
@@ -16,12 +17,27 @@ describe('UserWorkspacesAreaComponent', () => {
     @Input() workspaceGroups!: WorkspaceGroupDto[];
   }
 
+  @Component({ selector: 'studio-lite-warning', template: '' })
+  class MockWarningComponent {
+    @Input() warnMessage!: string;
+  }
+
+  @Component({ selector: 'studio-lite-area-title', template: '' })
+  class MockAreaTitleComponent {
+    @Input() title!: string;
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
         UserWorkspacesAreaComponent,
         MockUserMenuComponent,
-        MockUserWorkspacesComponent
+        MockUserWorkspacesComponent,
+        MockAreaTitleComponent,
+        MockWarningComponent
+      ],
+      imports: [
+        TranslateModule.forRoot()
       ]
     }).compileComponents();
 

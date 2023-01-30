@@ -1,12 +1,14 @@
+<studio-lite-area-title
+  [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
+</studio-lite-area-title>
+<studio-lite-warning *ngIf="appService.globalWarning"
+                     [warnMessage]="appService.globalWarning">
+</studio-lite-warning>
+<studio-lite-warning *ngIf="!appService.appConfig.hasUsers"
+                     [warnMessage]="'home.no-user' | translate">
+</studio-lite-warning>
+
 <form [formGroup]="loginForm" (ngSubmit)="login()">
-  <div class="area-title ">{{loginMessage | translate}}</div>
-  <div *ngIf="appService.globalWarning"
-      class="warning">{{appService.globalWarning}}
-  </div>
-  <div *ngIf="!appService.appConfig.hasUsers"
-      class="warning">
-    {{'home.no-user' | translate}}
-  </div>
   <div fxLayout="column">
     <mat-form-field [class.invisible]="loginNamePreset">
       <input matInput formControlName="name"
