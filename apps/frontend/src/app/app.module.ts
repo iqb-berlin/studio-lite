@@ -52,6 +52,7 @@ import { AccountActionComponent } from './home/account-action/account-action.com
 import { ChangePasswordDirective } from './home/account-action/change-password.directive';
 import { EditMyDataDirective } from './home/account-action/edit-my-data.directive';
 import { LogoutDirective } from './home/account-action/logout.directive';
+import { UserWorkspacesAreaComponent } from './home/user-workspaces-area/user-workspaces-area.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -73,7 +74,8 @@ export function createTranslateLoader(http: HttpClient) {
     AccountActionComponent,
     ChangePasswordDirective,
     EditMyDataDirective,
-    LogoutDirective
+    LogoutDirective,
+    UserWorkspacesAreaComponent
   ],
   imports: [
     ApplicationModule,

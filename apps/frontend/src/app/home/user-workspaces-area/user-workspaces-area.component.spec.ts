@@ -1,0 +1,36 @@
+// eslint-disable-next-line max-classes-per-file
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, Input } from '@angular/core';
+import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
+import { UserWorkspacesAreaComponent } from './user-workspaces-area.component';
+
+describe('UserWorkspacesAreaComponent', () => {
+  let component: UserWorkspacesAreaComponent;
+  let fixture: ComponentFixture<UserWorkspacesAreaComponent>;
+
+  @Component({ selector: 'studio-lite-user-menu', template: '' })
+  class MockUserMenuComponent {}
+
+  @Component({ selector: 'studio-lite-user-workspaces', template: '' })
+  class MockUserWorkspacesComponent {
+    @Input() workspaceGroups!: WorkspaceGroupDto[];
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [
+        UserWorkspacesAreaComponent,
+        MockUserMenuComponent,
+        MockUserWorkspacesComponent
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(UserWorkspacesAreaComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

@@ -1,0 +1,18 @@
+<div fxLayout="row" fxLayoutAlign="space-between center">
+  <ng-content></ng-content>
+  <div>
+    <button mat-button *ngIf="appService.authData.isAdmin"
+            [routerLink]="['/admin']"
+            [matTooltip]="'home.goto-admin' | translate"
+            matTooltipPosition="above">
+      <mat-icon>settings</mat-icon>
+    </button>
+    <studio-lite-user-menu></studio-lite-user-menu>
+  </div>
+</div>
+<h2 *ngIf="appService.globalWarning" class="warning">{{appService.globalWarning}}</h2>
+<studio-lite-user-workspaces
+  fxFlex fxLayout="column"
+  class="scroll-area"
+  [workspaceGroups]="appService.authData.workspaces">
+</studio-lite-user-workspaces>
