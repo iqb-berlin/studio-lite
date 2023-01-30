@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { AppService } from '../../app.service';
+import { Component, Input } from '@angular/core';
+import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 
 @Component({
   selector: 'studio-lite-user-workspaces-area',
@@ -7,5 +7,7 @@ import { AppService } from '../../app.service';
   styleUrls: ['./user-workspaces-area.component.scss']
 })
 export class UserWorkspacesAreaComponent {
-  constructor(public appService: AppService) {}
+  @Input() workspaceGroups!: WorkspaceGroupDto[];
+  @Input() warning!: string;
+  @Input() isAdmin!: boolean;
 }

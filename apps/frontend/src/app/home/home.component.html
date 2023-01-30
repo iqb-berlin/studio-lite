@@ -5,6 +5,9 @@
   </studio-lite-login>
 
   <studio-lite-user-workspaces-area *ngIf="appService.authData.userId > 0"
+                                    [workspaceGroups]="appService.authData.workspaces"
+                                    [warning]="appService.globalWarning"
+                                    [isAdmin]="appService.authData.isAdmin"
                                     fxFlex="0 0 400px" fxLayout="column"
                                     class="box-left">
   </studio-lite-user-workspaces-area>

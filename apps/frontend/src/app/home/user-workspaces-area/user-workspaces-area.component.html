@@ -3,7 +3,7 @@
     [title]="'home.select-workspace' | translate">
   </studio-lite-area-title>
   <div>
-    <button mat-button *ngIf="appService.authData.isAdmin"
+    <button mat-button *ngIf="isAdmin"
             [routerLink]="['/admin']"
             [matTooltip]="'home.goto-admin' | translate"
             matTooltipPosition="above">
@@ -12,11 +12,11 @@
     <studio-lite-user-menu></studio-lite-user-menu>
   </div>
 </div>
-<studio-lite-warning *ngIf="appService.globalWarning"
-  [warnMessage]="appService.globalWarning">
+<studio-lite-warning *ngIf="warning"
+  [warnMessage]="warning">
 </studio-lite-warning>
 <studio-lite-user-workspaces
   fxFlex fxLayout="column"
   class="scroll-area"
-  [workspaceGroups]="appService.authData.workspaces">
+  [workspaceGroups]="workspaceGroups">
 </studio-lite-user-workspaces>
