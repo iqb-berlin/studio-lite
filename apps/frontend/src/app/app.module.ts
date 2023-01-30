@@ -55,6 +55,7 @@ import { LogoutDirective } from './home/account-action/logout.directive';
 import { UserWorkspacesAreaComponent } from './home/user-workspaces-area/user-workspaces-area.component';
 import { WarningComponent } from './home/warning/warning.component';
 import { AreaTitleComponent } from './home/area-title/area-title.component';
+import { AppInfoComponent } from './home/app-info/app-info.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -79,7 +80,8 @@ export function createTranslateLoader(http: HttpClient) {
     LogoutDirective,
     UserWorkspacesAreaComponent,
     WarningComponent,
-    AreaTitleComponent
+    AreaTitleComponent,
+    AppInfoComponent
   ],
   imports: [
     ApplicationModule,

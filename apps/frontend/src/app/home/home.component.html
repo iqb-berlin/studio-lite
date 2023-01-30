@@ -27,22 +27,15 @@
     </a>
   </div>
 
-  <div fxFlex="0 2 400px" fxLayout="column" class="box-right">
-    <h1>{{appService.appConfig.appTitle}}</h1>
-    <div [innerHTML]="appService.appConfig.introHtml" class="scroll-area"></div>
-    <div>
-      <ul>
-        <li>Kennung der Anwendung: {{appName}}</li>
-        <li>Version: {{appVersion}}</li>
-        <li *ngIf="appService.authData.userId === 0">{{ appService.authData.reviews.length > 0 ? 'Für Aufgabenfolge/Review angemeldet' : 'nicht angemeldet'}}</li>
-        <li *ngIf="appService.authData.userId > 0">
-          angemeldet als:
-          {{appService.authData.userName}}
-          {{appService.authData.userLongName ? ' - ' + appService.authData.userLongName : ''}}
-        </li>
-        <li *ngIf="appService.authData.isAdmin">Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen</li>
-      </ul>
-    </div>
-    <button mat-raised-button color="primary" [routerLink]="['/about']">{{'home.imprint' | translate}}</button>
-  </div>
+  <studio-lite-app-info fxFlex="0 2 400px" fxLayout="column" class="box-right"
+                        [appTitle]="appService.appConfig.appTitle"
+                        [introHtml]="appService.appConfig.introHtml"
+                        [hasReviews]="appService.authData.reviews.length > 0"
+                        [appName]="appName"
+                        [appVersion]="appVersion"
+                        [userName]="appService.authData.userName"
+                        [userLongName]="appService.authData.userLongName "
+                        [userId]="appService.authData.userId"
+                        [isAdmin]="appService.authData.isAdmin">
+  </studio-lite-app-info>
 </div>

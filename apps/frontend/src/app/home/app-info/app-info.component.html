@@ -1,0 +1,23 @@
+<studio-lite-area-title
+  [title]="appTitle">
+</studio-lite-area-title>
+<div class="scroll-area"
+     [innerHTML]="introHtml">
+</div>
+<div>
+  <ul>
+    <li>{{'home.appName' | translate: {name: appName} }}</li>
+    <li>{{'home.appVersion' | translate: {version: appVersion} }}</li>
+    <li *ngIf="userId === 0">
+      {{(hasReviews ? 'home.logged-in-for-review' : 'home.not-logged-in') | translate}}
+    </li>
+    <li *ngIf="userId > 0">
+      {{'home.logged-in-as' | translate: {name: (userLongName ? userName + ' - ' + userLongName: userName) } }}
+    </li>
+    <li *ngIf="isAdmin">{{'home.isAdminMessage' | translate}}</li>
+  </ul>
+</div>
+<button mat-raised-button color="primary"
+        [routerLink]="['/about']">
+  {{'home.imprint' | translate}}
+</button>
