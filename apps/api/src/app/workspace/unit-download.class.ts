@@ -121,7 +121,7 @@ export class UnitDownloadClass {
           const bestMatch = veronaKeyList.getBestMatch(p);
           if (bestMatch && addedPlayers.indexOf(bestMatch) < 0) {
             const playerData: VeronaModuleFileDto = await veronaModuleService.findFileById(bestMatch);
-            zip.addFile(`${bestMatch}.html`, Buffer.from(playerData.file));
+            zip.addFile(playerData.fileName, Buffer.from(playerData.file));
             addedPlayers.push(bestMatch);
           }
         }

@@ -45,10 +45,11 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           case 'voeReadyNotification':
           case 'vo.FromAuthoringModule.ReadyNotification':
             if (msgType === 'voeReadyNotification') {
-              const majorVersion = msgData.apiVersion.match(/\d+/);
+              const majorVersion = msgData.metadata ?
+                msgData.metadata.specVersion.match(/\d+/) :
+                msgData.apiVersion.match(/\d+/);
               if (majorVersion.length > 0) {
-                const majorVersionNumber = Number(majorVersion[0]);
-                this.editorApiVersion = majorVersionNumber > 2 ? 3 : 2;
+                this.editorApiVersion = Number(majorVersion[0]);
               } else {
                 this.editorApiVersion = 2;
               }

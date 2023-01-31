@@ -71,11 +71,15 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             case 'player':
             case 'vo.FromPlayer.ReadyNotification':
               if (msgType === 'vopReadyNotification' || msgType === 'player') {
-                const majorVersion = msgData.apiVersion ?
-                  msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+                let majorVersion;
+                if (msgData.metadata) {
+                  majorVersion = msgData.metadata.specVersion.match(/\d+/);
+                } else {
+                  majorVersion = msgData.apiVersion ?
+                    msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+                }
                 if (majorVersion.length > 0) {
-                  const majorVersionNumber = Number(majorVersion[0]);
-                  this.playerApiVersion = majorVersionNumber > 2 ? 3 : 2;
+                  this.playerApiVersion = Number(majorVersion[0]);
                 } else {
                   this.playerApiVersion = 2;
                 }

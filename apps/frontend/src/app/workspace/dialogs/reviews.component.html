@@ -3,7 +3,7 @@
   <div fxLayout="row" fxLayoutGap="5px" style="height: 100%">
     <div fxFlex="200px" class="review-list" fxLayout="column" fxLayoutAlign="space-between stretch">
       <mat-nav-list fxFlex>
-        <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+        <a mat-list-item style="height: unset;text-overflow: ellipsis"
            *ngFor="let review of reviews"
            class="review-list-entry"
            (click)="selectReview(review.id)"
