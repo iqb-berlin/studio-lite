@@ -12,8 +12,8 @@ describe('UserWorkspacesAreaComponent', () => {
   @Component({ selector: 'studio-lite-user-menu', template: '' })
   class MockUserMenuComponent {}
 
-  @Component({ selector: 'studio-lite-user-workspaces', template: '' })
-  class MockUserWorkspacesComponent {
+  @Component({ selector: 'studio-lite-user-workspaces-groups', template: '' })
+  class MockUserWorkspacesGroupsComponent {
     @Input() workspaceGroups!: WorkspaceGroupDto[];
   }
 
@@ -32,7 +32,7 @@ describe('UserWorkspacesAreaComponent', () => {
       declarations: [
         UserWorkspacesAreaComponent,
         MockUserMenuComponent,
-        MockUserWorkspacesComponent,
+        MockUserWorkspacesGroupsComponent,
         MockAreaTitleComponent,
         MockWarningComponent
       ],

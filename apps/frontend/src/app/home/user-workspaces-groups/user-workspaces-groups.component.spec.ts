@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { UserWorkspacesComponent } from './user-workspaces.component';
+import { UserWorkspacesGroupsComponent } from './user-workspaces-groups.component';
 
-describe('UserWorkspacesComponent', () => {
-  let component: UserWorkspacesComponent;
-  let fixture: ComponentFixture<UserWorkspacesComponent>;
+describe('UserWorkspacesGroupsComponent', () => {
+  let component: UserWorkspacesGroupsComponent;
+  let fixture: ComponentFixture<UserWorkspacesGroupsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UserWorkspacesComponent],
+      declarations: [UserWorkspacesGroupsComponent],
       imports: [TranslateModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserWorkspacesComponent);
+    fixture = TestBed.createComponent(UserWorkspacesGroupsComponent);
     component = fixture.componentInstance;
     component.workspaceGroups = [];
     fixture.detectChanges();

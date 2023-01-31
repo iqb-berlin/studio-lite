@@ -45,7 +45,7 @@ import { RequestMessageDialogComponent } from './components/request-message-dial
 import { InputTextComponent } from './components/input-text.component';
 import { EditMyDataComponent } from './home/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings.component';
-import { UserWorkspacesComponent } from './home/user-workspaces/user-workspaces.component';
+import { UserWorkspacesGroupsComponent } from './home/user-workspaces-groups/user-workspaces-groups.component';
 import { LoginComponent } from './home/login/login.component';
 import { UserMenuComponent } from './home/user-menu/user-menu.component';
 import { AccountActionComponent } from './home/account-action/account-action.component';
@@ -74,7 +74,7 @@ export function createTranslateLoader(http: HttpClient) {
     InputTextComponent,
     EditMyDataComponent,
     EditWorkspaceSettingsComponent,
-    UserWorkspacesComponent,
+    UserWorkspacesGroupsComponent,
     LoginComponent,
     UserMenuComponent,
     AccountActionComponent,
