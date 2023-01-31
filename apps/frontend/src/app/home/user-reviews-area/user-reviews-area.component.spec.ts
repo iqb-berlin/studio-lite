@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
-import { UserReviewsComponent } from './user-reviews.component';
+import { UserReviewsAreaComponent } from './user-reviews-area.component';
 
-describe('UserReviewsComponent', () => {
-  let component: UserReviewsComponent;
-  let fixture: ComponentFixture<UserReviewsComponent>;
+describe('UserReviewsAreaComponent', () => {
+  let component: UserReviewsAreaComponent;
+  let fixture: ComponentFixture<UserReviewsAreaComponent>;
 
   @Component({ selector: 'studio-lite-area-title', template: '' })
   class MockAreaTitleComponent {
@@ -15,7 +15,7 @@ describe('UserReviewsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UserReviewsComponent,
+        UserReviewsAreaComponent,
         MockAreaTitleComponent
       ],
       imports: [
@@ -23,7 +23,7 @@ describe('UserReviewsComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserReviewsComponent);
+    fixture = TestBed.createComponent(UserReviewsAreaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

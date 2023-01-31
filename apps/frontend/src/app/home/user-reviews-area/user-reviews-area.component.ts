@@ -4,11 +4,11 @@ import {
 import { ReviewDto } from '@studio-lite-lib/api-dto';
 
 @Component({
-  selector: 'studio-lite-user-reviews',
-  templateUrl: './user-reviews.component.html',
-  styleUrls: ['./user-reviews.component.scss']
+  selector: 'studio-lite-user-reviews-area',
+  templateUrl: './user-reviews-area.component.html',
+  styleUrls: ['./user-reviews-area.component.scss']
 })
-export class UserReviewsComponent {
+export class UserReviewsAreaComponent {
   @Input() reviews!: ReviewDto[];
   @Input() isReviewUser!: boolean;
 }

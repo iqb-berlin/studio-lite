@@ -10,11 +10,11 @@
                                     [isAdmin]="appService.authData.isAdmin">
   </studio-lite-user-workspaces-area>
 
-  <studio-lite-user-reviews *ngIf="appService.authData.reviews.length > 0"
-                            class="fx-column-start-stretch box-left"
-                            [reviews]="appService.authData.reviews"
-                            [isReviewUser]="appService.authData.userId === 0">
-  </studio-lite-user-reviews>
+  <studio-lite-user-reviews-area *ngIf="appService.authData.reviews.length > 0"
+                                 class="fx-column-start-stretch box-left"
+                                 [reviews]="appService.authData.reviews"
+                                 [isReviewUser]="appService.authData.userId === 0">
+  </studio-lite-user-reviews-area>
 
   <studio-lite-app-info class="fx-column-start-stretch box-right"
                         [appTitle]="appService.appConfig.appTitle"
