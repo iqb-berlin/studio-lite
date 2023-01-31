@@ -1,12 +1,12 @@
 <div *ngIf="workspaceGroups.length === 0">
   <p>{{'home.no-user-workspaces' | translate}}</p>
 </div>
-<div *ngIf="workspaceGroups.length > 0">
+<div *ngIf="workspaceGroups.length > 0"
+     class="fx-column-start-stretch workspace-gap">
   <div *ngFor="let wsg of workspaceGroups"
-       fxLayout="column">
+       class="fx-column-start-stretch">
     <div *ngIf="wsg.workspaces.length > 0 || wsg.isAdmin"
-         fxLayout="row" fxLayoutAlign="space-between center"
-         class="workspace-group-header">
+         class="fx-row-space-between-center workspace-group-header">
       <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
       <a *ngIf="wsg.isAdmin"
               mat-button
@@ -16,7 +16,7 @@
       </a>
     </div>
     <div *ngIf="wsg.workspaces.length > 0"
-         fxLayout="column" fxLayoutAlign="start start">
+         class="fx-column-start-start">
       <a *ngFor="let ws of wsg.workspaces"
               mat-button
               [routerLink]="['/a/' + ws.id]">

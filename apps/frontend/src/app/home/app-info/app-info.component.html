@@ -17,7 +17,8 @@
     <li *ngIf="isAdmin">{{'home.isAdminMessage' | translate}}</li>
   </ul>
 </div>
-<button mat-raised-button color="primary"
+<a mat-raised-button color="primary"
+        class="full-width"
         [routerLink]="['/about']">
   {{'home.imprint' | translate}}
-</button>
+</a>

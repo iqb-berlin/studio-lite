@@ -1,11 +1,14 @@
 .workspace-group-header {
   padding: 4px 0 4px 10px;
   background-color: lightgray;
-  margin-bottom: 2px;
   div {
     font-size: larger;
     font-weight: normal;
   }
+}
+
+.workspace-gap {
+  row-gap: 2px;
 }
 
 .mat-button {

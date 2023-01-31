@@ -1,4 +1,4 @@
-<div fxLayout="row" fxLayoutAlign="space-between center">
+<div class="fx-row-space-between-center">
   <studio-lite-area-title
     [title]="'home.select-review' | translate">
   </studio-lite-area-title>
@@ -10,10 +10,12 @@
   </button>
 </div>
 
-<a *ngFor="let review of reviews"
-   mat-raised-button
-   [routerLink]="['/review/' + review.id]"
-   [matTooltip]="review.workspaceName ? review.workspaceName : ''"
-   matTooltipPosition="right">
-  {{review.name}}
-</a>
+<div class="fx-column-start-stretch review-gap">
+  <a *ngFor="let review of reviews"
+     mat-raised-button
+     [routerLink]="['/review/' + review.id]"
+     [matTooltip]="review.workspaceName ? review.workspaceName : ''"
+     matTooltipPosition="right">
+    {{review.name}}
+  </a>
+</div>

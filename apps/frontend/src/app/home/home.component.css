@@ -10,14 +10,18 @@
 .box-right, .box-left {
   padding: 20px;
   margin: 10px;
+  flex-grow: 0;
+  flex-basis: 400px;
 }
 
 .box-right {
   background-color: var(--st-box-background);
+  flex-shrink: 2;
 }
 
 .box-left {
   background: white;
+  flex-shrink: 0;
 }
 
 h1 {
