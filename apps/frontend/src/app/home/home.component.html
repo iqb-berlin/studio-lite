@@ -26,7 +26,7 @@
                         [appVersion]="appVersion"
                         [userName]="appService.authData.userName"
                         [userLongName]="appService.authData.userLongName "
-                        [userId]="appService.authData.userId"
+                        [isUserLoggedIn]="appService.authData.userId > 0"
                         [isAdmin]="appService.authData.isAdmin">
   </studio-lite-app-info>
 </div>

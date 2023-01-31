@@ -13,7 +13,7 @@ export class AppInfoComponent {
   @Input() appVersion!: string;
   @Input() userName!: string;
   @Input() userLongName!: string;
-  @Input() userId!: number;
+  @Input() isUserLoggedIn!: boolean;
   @Input() isAdmin!: boolean;
   @Input() hasReviews!: boolean;
 }
