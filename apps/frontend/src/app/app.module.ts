@@ -57,6 +57,8 @@ import { WarningComponent } from './home/warning/warning.component';
 import { AreaTitleComponent } from './home/area-title/area-title.component';
 import { AppInfoComponent } from './home/app-info/app-info.component';
 import { UserReviewsAreaComponent } from './home/user-reviews-area/user-reviews-area.component';
+import { UserIssuesComponent } from './home/user-issues/user-issues.component';
+import { UserIssuesPipe } from './home/user-issues/issues-pipe.pipe';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -83,7 +85,9 @@ export function createTranslateLoader(http: HttpClient) {
     WarningComponent,
     AreaTitleComponent,
     AppInfoComponent,
-    UserReviewsAreaComponent
+    UserReviewsAreaComponent,
+    UserIssuesComponent,
+    UserIssuesPipe
   ],
   imports: [
     ApplicationModule,

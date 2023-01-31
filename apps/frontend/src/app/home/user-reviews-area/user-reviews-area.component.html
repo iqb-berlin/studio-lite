@@ -10,12 +10,11 @@
   </button>
 </div>
 
-<div class="fx-column-start-stretch review-gap">
-  <a *ngFor="let review of reviews"
-     mat-raised-button
-     [routerLink]="['/review/' + review.id]"
-     [matTooltip]="review.workspaceName ? review.workspaceName : ''"
-     matTooltipPosition="right">
-    {{review.name}}
-  </a>
+<div class="fx-row-start-stretch"
+     [style.overflow-y]="'auto'">
+  <studio-lite-user-issues
+    class="fx-column-start-stretch"
+    layout="big"
+    [issues]="reviews | userIssues: 'review'">
+  </studio-lite-user-issues>
 </div>

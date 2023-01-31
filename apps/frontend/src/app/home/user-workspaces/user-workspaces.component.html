@@ -16,12 +16,13 @@
       </a>
     </div>
     <div *ngIf="wsg.workspaces.length > 0"
-         class="fx-column-start-start">
-      <a *ngFor="let ws of wsg.workspaces"
-              mat-button
-              [routerLink]="['/a/' + ws.id]">
-        {{ws.name}}
-      </a>
+         class="fx-row-start-stretch"
+         [style.overflow-y]="'auto'">
+      <studio-lite-user-issues
+        class="fx-column-start-start"
+        layout="small"
+        [issues]="wsg.workspaces | userIssues: 'a'">
+      </studio-lite-user-issues>
     </div>
   </div>
 </div>

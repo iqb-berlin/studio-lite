@@ -1,0 +1,23 @@
+.issue-item {
+  color: black;
+  text-decoration: none;
+  &:hover {
+    background-color: #eee;
+  }
+}
+
+.big {
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+  &:hover {
+    border-bottom-color: #999;
+  }
+}
+
+.small {
+  border-radius: 4px;
+  padding: 4px 15px;
+  font-size: 14px;
+  font-weight: 500;
+}
