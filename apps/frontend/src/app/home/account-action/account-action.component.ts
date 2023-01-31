@@ -6,6 +6,6 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./account-action.component.scss']
 })
 export class AccountActionComponent {
-  @Input() type!: string;
+  @Input() type!: 'changePassword' | 'logout' | 'editMyData';
   @Input() iconName!: string;
 }
