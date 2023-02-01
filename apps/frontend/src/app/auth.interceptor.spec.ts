@@ -5,7 +5,10 @@ import { AuthInterceptor } from './auth.interceptor';
 describe('AuthInterceptor', () => {
   beforeEach(() => TestBed.configureTestingModule({
     providers: [
-      AuthInterceptor
+      {
+        provide: 'APP_VERSION',
+        useValue: '0.0.0'
+      }
     ]
   }));
 
