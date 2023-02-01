@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommentBadgeComponent } from './comment-badge.component';
 
 describe('CommentBadgeComponent', () => {
@@ -8,11 +8,13 @@ describe('CommentBadgeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CommentBadgeComponent]
+      declarations: [CommentBadgeComponent],
+      imports: [MatTooltipModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CommentBadgeComponent);
     component = fixture.componentInstance;
+    component.userName = 'user';
     fixture.detectChanges();
   });
 
