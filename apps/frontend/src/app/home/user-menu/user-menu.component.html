@@ -1,0 +1,24 @@
+<button mat-button
+        [matMenuTriggerFor]="menuUser"
+        [matTooltip]="'home.user-menu' | translate"
+        matTooltipPosition="above">
+  <mat-icon>account_box</mat-icon>
+</button>
+<mat-menu #menuUser="matMenu">
+  <studio-lite-account-action
+    [type]="'changePassword'"
+    [iconName]="'lock'"
+    studioLiteChangePassword>
+  </studio-lite-account-action>
+  <studio-lite-account-action
+    [type]="'editMyData'"
+    [iconName]="'edit'"
+    studioLiteEditMyData>
+  </studio-lite-account-action>
+  <studio-lite-account-action
+    [type]="'logout'"
+    [iconName]="'logout'"
+    studioLiteLogout>
+  </studio-lite-account-action>
+</mat-menu>
+

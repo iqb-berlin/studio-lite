@@ -1,0 +1,23 @@
+<div class="fx-row-space-between-center">
+  <studio-lite-area-title
+    [title]="'home.select-workspace' | translate">
+  </studio-lite-area-title>
+  <div>
+    <button mat-button *ngIf="isAdmin"
+            [routerLink]="['/admin']"
+            [matTooltip]="'home.goto-admin' | translate"
+            matTooltipPosition="above">
+      <mat-icon>settings</mat-icon>
+    </button>
+    <studio-lite-user-menu></studio-lite-user-menu>
+  </div>
+</div>
+<studio-lite-warning *ngIf="warning"
+  [warnMessage]="warning">
+</studio-lite-warning>
+
+<studio-lite-user-workspaces-groups
+  class="fx-row-start-stretch"
+  [style.overflow-y]="'auto'"
+  [workspaceGroups]="workspaceGroups">
+</studio-lite-user-workspaces-groups>

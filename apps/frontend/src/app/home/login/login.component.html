@@ -1,0 +1,41 @@
+<studio-lite-area-title
+  [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
+</studio-lite-area-title>
+
+<studio-lite-warning *ngIf="appService.globalWarning"
+                     [warnMessage]="appService.globalWarning">
+</studio-lite-warning>
+<studio-lite-warning *ngIf="!appService.appConfig.hasUsers"
+                     [warnMessage]="'home.no-user' | translate">
+</studio-lite-warning>
+
+<form class="fx-column-start-stretch"
+      [formGroup]="loginForm"
+      (ngSubmit)="login()">
+  <div class="fx-column-start-stretch">
+    <mat-form-field [class.invisible]="loginNamePreset">
+      <input matInput formControlName="name"
+             [placeholder]="'home.user-name' | translate"
+             (keyup.enter)="pw.focus()">
+    </mat-form-field>
+    <p *ngIf="loginNamePreset">
+      {{'home.login-with-preset' | translate}}
+    </p>
+    <mat-form-field>
+      <input matInput #pw
+             type="password"
+             formControlName="pw"
+             [placeholder]="'home.password' | translate"
+             (keyup.enter)="login()">
+    </mat-form-field>
+  </div>
+  <p *ngIf="errorMessage"
+     class="error-message">
+    {{errorMessage}}
+  </p>
+  <button mat-raised-button
+          type="submit"
+          [disabled]="loginForm.invalid"
+          color="primary">{{'next' | translate}}
+  </button>
+</form>

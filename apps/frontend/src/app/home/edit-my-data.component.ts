@@ -14,8 +14,8 @@ export type EditMyDataComponentData = {
   template: `
       <h1 mat-dialog-title>Meine Daten ändern</h1>
 
-      <mat-dialog-content fxLayout="column">
-        <form [formGroup]="editUserForm" fxLayout="column">
+      <mat-dialog-content class="fx-column-start-stretch">
+        <form [formGroup]="editUserForm" class="fx-column-start-stretch">
           <mat-form-field>
             <input matInput formControlName="lastName" type="text" placeholder="Nachname" [value]="data.lastName"/>
           </mat-form-field>
@@ -25,7 +25,7 @@ export type EditMyDataComponentData = {
           <mat-form-field>
             <input matInput formControlName="email" type="text" placeholder="E-Mail" [value]="data.email"/>
           </mat-form-field>
-          <div fxLayout="row" fxLayoutGap="10px">
+          <div class="fx-row-start-stretch" [style.column-gap.px]="10">
             <mat-checkbox formControlName="emailPublishApproval"
                           [value]="data.emailPublishApproved ? data.emailPublishApproved.toString() : 'false'">
             </mat-checkbox>

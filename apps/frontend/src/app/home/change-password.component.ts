@@ -6,7 +6,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
     <form [formGroup]="changePasswordForm">
       <h1 mat-dialog-title>Kennwort ändern</h1>
 
-      <mat-dialog-content fxLayout="column">
+      <mat-dialog-content class="fx-column-start-stretch">
         <p>
           Das Kennwort
           muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.
