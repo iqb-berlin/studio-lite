@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
 import { PagingModeSelectionComponent } from './paging-mode-selection.component';
 
 describe('PagingModeSelectionComponent', () => {
@@ -8,7 +9,11 @@ describe('PagingModeSelectionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PagingModeSelectionComponent]
+      declarations: [PagingModeSelectionComponent],
+      imports: [
+        FormsModule,
+        TranslateModule.forRoot()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PagingModeSelectionComponent);
