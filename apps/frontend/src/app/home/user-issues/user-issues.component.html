@@ -1,0 +1,8 @@
+<a *ngFor="let issue of issues"
+   [class]="'issue-item ' + layout"
+   [routerLink]="issue.link"
+   [matTooltip]="issue.toolTip"
+   matTooltipPosition="right">
+  {{issue.name}}
+</a>
+

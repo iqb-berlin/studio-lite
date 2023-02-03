@@ -1,4 +1,5 @@
 {
+  "next": "Weiter",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
   },
@@ -55,7 +56,24 @@
     "select-review": "Aufgabenfolge/Review starten",
     "goto-admin": "Allgemeine Systemverwaltung",
     "goto-wsg-admin": "Verwaltung der Bereichsgruppe",
-    "imprint": "Impressum/Datenschutz"
+    "imprint": "Impressum/Datenschutz",
+    "logout": "Abmelden",
+    "changePassword": "Kennwort ändern",
+    "password": "Kennwort",
+    "user-name": "Anmeldename",
+    "editMyData": "Name/E-Mail ändern",
+    "login": "Anmelden",
+    "first-login": "Anlegen eines ersten User-Accounts",
+    "no-user": " Dieses System hat aktuell keine User angelegt. Mit den Anmeldedaten unten legen Sie einen ersten Account mit Administrationsrechten an. Bitte notieren Sie sich die Daten!",
+    "login-with-preset": "Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist noch die Eingabe eines Kennwortes erforderlich.",
+    "no-user-workspaces": "Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.",
+    "user-menu": "Meine Daten/Anmelden",
+    "appName": "Kennung der Anwendung: {{name}}",
+    "appVersion": "Version: {{version}}",
+    "not-logged-in": "Nicht angemeldet",
+    "logged-in-for-review": "Für Aufgabenfolge/Review angemeldet",
+    "logged-in-as": "Angemeldet als: {{name}}",
+    "isAdminMessage": "Berechtigung zum Ändern von Nutzerrechten und Arbeitsbereichen"
   },
   "dialogs": {
     "close": "Schließen",
@@ -69,7 +87,9 @@
   "modules": {
     "editor-name": "Editor",
     "player-name": "Vorschau (Player)",
-    "schemer-name": "Kodierung (Schemer)"
+    "schemer-name": "Kodierung (Schemer)",
+    "delete": "{{count}} Verona Modul(e) gelöscht",
+    "delete-error": "Konnte Verona Modul(e) nicht löschen"
   },
   "application": {
     "wait-message": "Bitte warten"
@@ -83,6 +103,11 @@
       "comments": "Kommentare"
     },
     "new-comments": "Neue Kommentare"
+  },
+  "select-unit-list": {
+    "filter": "Suche nach Aufgaben und Gruppen",
+    "delete-filter": "Suchbegriff zurücksetzen",
+    "enter-filter": "Suchbegriff"
   },
   "comment-editor": {
     "write": "Verfassen",

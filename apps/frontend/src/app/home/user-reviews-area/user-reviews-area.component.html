@@ -1,0 +1,20 @@
+<div class="fx-row-space-between-center">
+  <studio-lite-area-title
+    [title]="'home.select-review' | translate">
+  </studio-lite-area-title>
+  <button *ngIf="isReviewUser"
+          mat-button
+          [matTooltip]="'home.logout' | translate"
+          studioLiteLogout>
+    <mat-icon>logout</mat-icon>
+  </button>
+</div>
+
+<div class="fx-row-start-stretch"
+     [style.overflow-y]="'auto'">
+  <studio-lite-user-issues
+    class="fx-column-start-stretch"
+    layout="big"
+    [issues]="reviews | userIssues: 'review'">
+  </studio-lite-user-issues>
+</div>

@@ -1,6 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClient,
+  HttpClientModule
+} from '@angular/common/http';
 import { NgModule, ApplicationModule } from '@angular/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -41,6 +45,20 @@ import { RequestMessageDialogComponent } from './components/request-message-dial
 import { InputTextComponent } from './components/input-text.component';
 import { EditMyDataComponent } from './home/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings.component';
+import { UserWorkspacesGroupsComponent } from './home/user-workspaces-groups/user-workspaces-groups.component';
+import { LoginComponent } from './home/login/login.component';
+import { UserMenuComponent } from './home/user-menu/user-menu.component';
+import { AccountActionComponent } from './home/account-action/account-action.component';
+import { ChangePasswordDirective } from './home/account-action/change-password.directive';
+import { EditMyDataDirective } from './home/account-action/edit-my-data.directive';
+import { LogoutDirective } from './home/account-action/logout.directive';
+import { UserWorkspacesAreaComponent } from './home/user-workspaces-area/user-workspaces-area.component';
+import { WarningComponent } from './home/warning/warning.component';
+import { AreaTitleComponent } from './home/area-title/area-title.component';
+import { AppInfoComponent } from './home/app-info/app-info.component';
+import { UserReviewsAreaComponent } from './home/user-reviews-area/user-reviews-area.component';
+import { UserIssuesComponent } from './home/user-issues/user-issues.component';
+import { UserIssuesPipe } from './home/user-issues/issues-pipe.pipe';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -55,7 +73,21 @@ export function createTranslateLoader(http: HttpClient) {
     RequestMessageDialogComponent,
     InputTextComponent,
     EditMyDataComponent,
-    EditWorkspaceSettingsComponent
+    EditWorkspaceSettingsComponent,
+    UserWorkspacesGroupsComponent,
+    LoginComponent,
+    UserMenuComponent,
+    AccountActionComponent,
+    ChangePasswordDirective,
+    EditMyDataDirective,
+    LogoutDirective,
+    UserWorkspacesAreaComponent,
+    WarningComponent,
+    AreaTitleComponent,
+    AppInfoComponent,
+    UserReviewsAreaComponent,
+    UserIssuesComponent,
+    UserIssuesPipe
   ],
   imports: [
     ApplicationModule,
@@ -86,7 +118,7 @@ export function createTranslateLoader(http: HttpClient) {
       defaultLanguage: 'de',
       loader: {
         provide: TranslateLoader,
-        useFactory: (createTranslateLoader),
+        useFactory: createTranslateLoader,
         deps: [HttpClient]
       }
     }),
@@ -119,4 +151,4 @@ export function createTranslateLoader(http: HttpClient) {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

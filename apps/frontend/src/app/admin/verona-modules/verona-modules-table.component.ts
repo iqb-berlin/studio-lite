@@ -21,6 +21,7 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
       Object.keys(value).map(m => value[m])
     );
     this.objectsDatasource.sort = this.sort;
+    setTimeout(() => this.tableSelectionCheckboxes.clear());
   }
 
   @Output() selectionChanged = new EventEmitter();
