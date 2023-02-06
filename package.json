@@ -1,6 +1,6 @@
 {
   "name": "studio-lite",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "scripts": {
@@ -37,6 +37,7 @@
     "@angular/platform-browser": "14.2.6",
     "@angular/platform-browser-dynamic": "14.2.6",
     "@angular/router": "14.2.6",
+    "@golevelup/ts-jest": "^0.3.4",
     "@nestjs/cli": "^8.2.8",
     "@nestjs/common": "9.1.4",
     "@nestjs/config": "^2.1.0",
@@ -163,4 +164,3 @@
     ]
   }
 }
-
