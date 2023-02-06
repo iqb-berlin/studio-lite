@@ -8,6 +8,6 @@ describe('api-login', () => {
     // cy.login('my-email@something.com', 'myPassword');
 
     // Function helper example, see `../support/app.po.ts` file
-    getAppTitle().contains('IQB-Studio-Lite');
+    getAppTitle().contains('Anmelden');
   });
 });

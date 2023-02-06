@@ -1,1 +1,1 @@
-export const getAppTitle = () => cy.get('h1');
+export const getAppTitle = () => cy.get('.area-title');
