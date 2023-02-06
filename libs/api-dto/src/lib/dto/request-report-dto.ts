@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class RequestReportDto {
   @ApiProperty()
-  source!: string;
+    source!: string;
 
   @ApiProperty()
-  messages: { objectKey: string, messageKey: string }[] = []
+    messages: { objectKey: string, messageKey: string }[] = [];
 }

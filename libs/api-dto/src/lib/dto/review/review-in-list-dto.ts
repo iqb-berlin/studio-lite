@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ReviewInListDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name?: string;
+    name?: string;
 
   @ApiProperty()
-  link?: string;
+    link?: string;
 }

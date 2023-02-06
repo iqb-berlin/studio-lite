@@ -3,11 +3,11 @@ import { UserInListDto } from '@studio-lite-lib/api-dto';
 
 export class UsersInWorkspaceDto {
   @ApiProperty()
-  users!: UserInListDto[];
+    users!: UserInListDto[];
 
   @ApiProperty()
-  workspaceGroupAdmins!: UserInListDto[];
+    workspaceGroupAdmins!: UserInListDto[];
 
   @ApiProperty()
-  admins!: UserInListDto[];
+    admins!: UserInListDto[];
 }

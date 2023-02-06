@@ -3,9 +3,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
 export class ServerError {
-  public code: number;
-  public labelNice: string;
-  public labelSystem: string;
+  code: number;
+  labelNice: string;
+  labelSystem: string;
 
   constructor(code: number, labelNice: string, labelSystem: string) {
     this.code = code;
@@ -15,8 +15,8 @@ export class ServerError {
 }
 
 export class IqbComponentsConfig {
-  public id: string | undefined;
-  public name: string | undefined;
+  id: string | undefined;
+  name: string | undefined;
 }
 
 export class ErrorHandler {

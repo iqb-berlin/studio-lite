@@ -2,23 +2,23 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'hugo' })
-  name!: string;
+    name!: string;
 
   @ApiProperty({ example: 'duhastaberaucheintalent' })
-  password!: string;
+    password!: string;
 
   @ApiPropertyOptional({ type: Boolean, example: false })
-  isAdmin = false;
+    isAdmin = false;
 
   @ApiPropertyOptional({ type: String, example: 'Student im HuDel-Projekt' })
-  description = '';
+    description = '';
 
   @ApiProperty()
-  email?: string;
+    email?: string;
 
   @ApiProperty()
-  lastName?: string;
+    lastName?: string;
 
   @ApiProperty()
-  firstName?: string;
+    firstName?: string;
 }

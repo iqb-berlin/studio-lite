@@ -2,26 +2,26 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitCommentDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  body!: string;
+    body!: string;
 
   @ApiProperty()
-  userName!: string;
+    userName!: string;
 
   @ApiProperty()
-  userId!: number;
+    userId!: number;
 
   @ApiProperty()
-  parentId?: number | null;
+    parentId?: number | null;
 
   @ApiProperty()
-  unitId?: number;
+    unitId?: number;
 
   @ApiProperty()
-  createdAt?: Date;
+    createdAt?: Date;
 
   @ApiProperty()
-  changedAt?: Date;
+    changedAt?: Date;
 }

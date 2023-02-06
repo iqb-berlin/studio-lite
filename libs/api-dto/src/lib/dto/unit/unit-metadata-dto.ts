@@ -2,47 +2,47 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitMetadataDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  key?: string;
+    key?: string;
 
   @ApiProperty()
-  name?: string;
+    name?: string;
 
   @ApiProperty()
-  description?: string;
+    description?: string;
 
   @ApiProperty()
-  groupName?: string;
+    groupName?: string;
 
   @ApiProperty()
-  player?: string;
+    player?: string;
 
   @ApiProperty()
-  editor?: string;
+    editor?: string;
 
   @ApiProperty()
-  schemer?: string;
+    schemer?: string;
 
   @ApiProperty()
-  schemeType?: string;
+    schemeType?: string;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-  lastChangedMetadata?: Date;
+    lastChangedMetadata?: Date;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-  lastChangedDefinition?: Date;
+    lastChangedDefinition?: Date;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-  lastChangedScheme?: Date;
+    lastChangedScheme?: Date;
 }
