@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AppLogoDto {
   @ApiProperty()
-  data!: string;
+    data!: string;
 
   @ApiProperty()
-  alt = '';
+    alt = '';
 
   @ApiProperty()
-  bodyBackground?: string;
+    bodyBackground?: string;
 
   @ApiProperty()
-  boxBackground?: string;
+    boxBackground?: string;
 }

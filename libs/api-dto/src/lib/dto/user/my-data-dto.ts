@@ -2,20 +2,20 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MyDataDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  description?: string;
+    description?: string;
 
   @ApiProperty()
-  email?: string;
+    email?: string;
 
   @ApiProperty()
-  lastName?: string;
+    lastName?: string;
 
   @ApiProperty()
-  firstName?: string;
+    firstName?: string;
 
   @ApiProperty()
-  emailPublishApproved?: boolean;
+    emailPublishApproved?: boolean;
 }

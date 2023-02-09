@@ -6,7 +6,14 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 describe('ConfirmDialogComponent', () => {
   let fixture;
-  let component: { ngOnInit: () => void; confirmdata: { title: any; confirmbuttonlabel: any; content: any; }; };
+  let component: {
+    ngOnInit: () => void;
+    confirmData: {
+      title: string;
+      confirmButtonLabel: string;
+      content: string;
+    };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -19,9 +26,8 @@ describe('ConfirmDialogComponent', () => {
           provide: MAT_DIALOG_DATA,
           useValue: {
             title: '',
-            content: 'content',
-            confirmbuttonlabel: '',
-            showcancel: true
+            content: '',
+            confirmButtonLabel: ''
           }
         },
         {
@@ -41,8 +47,8 @@ describe('ConfirmDialogComponent', () => {
 
   it('should take default properties for those which are omitted on #ngOnInit()', async () => {
     component.ngOnInit();
-    expect(component.confirmdata.title).toEqual('Bitte bestätigen!');
-    expect(component.confirmdata.confirmbuttonlabel).toEqual('Bestätigen');
-    expect(component.confirmdata.content).toEqual('content');
+    expect(component.confirmData.title).toEqual('Bitte bestätigen!');
+    expect(component.confirmData.confirmButtonLabel).toEqual('Bestätigen');
+    expect(component.confirmData.content).toEqual('');
   });
 });

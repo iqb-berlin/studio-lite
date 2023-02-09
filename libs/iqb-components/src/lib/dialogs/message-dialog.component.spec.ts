@@ -6,7 +6,13 @@ import { MessageDialogComponent } from './message-dialog.component';
 
 describe('MessageDialogComponent', () => {
   let fixture;
-  let component: { ngOnInit: () => void; msgdata: { title: any; closebuttonlabel: any; content: any; }; };
+  let component: { ngOnInit: () => void;
+    messageData: {
+      title: string;
+      closeButtonLabel: string;
+      content: string;
+    };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -19,8 +25,8 @@ describe('MessageDialogComponent', () => {
           useValue: {
             type: 0,
             title: '',
-            content: 'content',
-            closebuttonlabel: 'close'
+            content: '',
+            closeButtonLabel: ''
           }
         }
       ],
@@ -36,8 +42,8 @@ describe('MessageDialogComponent', () => {
 
   it('should take default properties for those which are omitted on #ngOnInit()', async () => {
     component.ngOnInit();
-    expect(component.msgdata.title).toEqual('Achtung: Fehler');
-    expect(component.msgdata.closebuttonlabel).toEqual('close');
-    expect(component.msgdata.content).toEqual('content');
+    expect(component.messageData.title).toEqual('Achtung: Fehler');
+    expect(component.messageData.closeButtonLabel).toEqual('Schließen');
+    expect(component.messageData.content).toEqual('');
   });
 });

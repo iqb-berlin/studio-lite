@@ -13,26 +13,26 @@ export class VeronaVariable {
     Object.keys(transformedData).forEach(k => {
       switch (k) {
         case 'id':
-          this.id = transformedData['id'];
+          this.id = transformedData[k];
           break;
         case 'type':
-          this.type = transformedData['type'];
+          this.type = transformedData[k];
           break;
         case 'format':
-          this.format = transformedData['format'] === 'coloredSelectionRange' ?
-            'text-selection' : transformedData['format'];
+          this.format = transformedData[k] === 'coloredSelectionRange' ?
+            'text-selection' : transformedData[k];
           break;
         case 'nullable':
-          this.nullable = transformedData['nullable'];
+          this.nullable = transformedData[k];
           break;
         case 'multiple':
-          this.multiple = transformedData['multiple'];
+          this.multiple = transformedData[k];
           break;
         case 'valuesComplete':
-          this.valuesComplete = transformedData['valuesComplete'];
+          this.valuesComplete = transformedData[k];
           break;
         case 'values':
-          this.values = (transformedData['values'] as string[]).map(s => s);
+          this.values = (transformedData[k] as string[]).map(s => s);
           break;
         default:
           this.unknownKeys.push(k);

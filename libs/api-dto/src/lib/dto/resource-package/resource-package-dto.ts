@@ -3,16 +3,16 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ResourcePackageDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 
   @ApiProperty()
   @IsString({ each: true })
   @IsNotEmpty()
-  elements!: string[];
+    elements!: string[];
 
   @ApiProperty()
-  createdAt?: Date;
+    createdAt?: Date;
 }

@@ -2,17 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class WorkspaceSettingsDto {
   @ApiProperty()
-  defaultEditor = '';
+    defaultEditor = '';
 
   @ApiProperty()
-  defaultPlayer = '';
+    defaultPlayer = '';
 
   @ApiProperty()
-  defaultSchemer = '';
+    defaultSchemer = '';
 
   @ApiProperty()
-  unitGroups?: string[];
+    unitGroups?: string[];
 
   @ApiProperty()
-  stableModulesOnly?: boolean = true;
+    stableModulesOnly?: boolean = true;
 }
