@@ -24,7 +24,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=chrome"
-      - "--spec=\"./apps/frontend-e2e/src/integration/api/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/api/*\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
@@ -40,7 +40,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=chrome"
-      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
@@ -56,7 +56,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=chrome"
-      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
       - "--config=\"viewportWidth=375,viewportHeight=667\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
@@ -73,7 +73,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=firefox"
-      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
@@ -89,7 +89,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=firefox"
-      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
       - "--config=\"viewportWidth=375,viewportHeight=667\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
@@ -106,7 +106,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=edge"
-      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
@@ -122,7 +122,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:80"
       - "--browser=edge"
-      - "--spec=\"./apps/frontend-e2e/src/integration/ui/*\""
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
       - "--config=\"viewportWidth=375,viewportHeight=667\""
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
