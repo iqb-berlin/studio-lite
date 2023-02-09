@@ -304,8 +304,9 @@
         "e2e": {
           "builder": "@nrwl/cypress:cypress",
           "options": {
-            "cypressConfig": "apps/frontend-e2e/cypress.json",
-            "devServerTarget": "frontend:serve:development"
+            "cypressConfig": "apps/frontend-e2e/cypress.config.ts",
+            "devServerTarget": "frontend:serve:development",
+            "testingType": "e2e"
           },
           "configurations": {
             "production": {
