@@ -1,95 +1,64 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+
 stages:
-  - .pre
+  - ".pre"
   - build
-  - db-test
-  - unit-test
-  - e2e-test
+  - test
+  - test-db
+  - test-units
+  - test-e2e
   - lint
   - audit
+  - scan-dependencies
   - build-images
   - scan-images
 
-image: node:16.15-bullseye-slim
+image: node:18-bullseye-slim
 
 variables:
-  REGISTRY: $CI_REGISTRY
-  REGISTRY_USER: $CI_REGISTRY_USER
-  REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD
+  REGISTRY: "$CI_REGISTRY"
+  REGISTRY_USER: "$CI_REGISTRY_USER"
+  REGISTRY_PASSWORD: "$CI_REGISTRY_PASSWORD"
   REGISTRY_PROJECT: "/${CI_PROJECT_PATH}/"
-  DOCKER_IMAGE: "docker:20.10-git"
-  DOCKER_SERVICE: "docker:20.10-dind"
-  DOCKER_TLS_CERTDIR: ""
-  CYPRESS_IMAGE: "cypress/browsers:node16.14.2-slim-chrome100-ff99-edge"
+  DOCKER_IMAGE: docker:20.10-git
+  DOCKER_SERVICE: docker:20.10-dind
+  DOCKER_TLS_CERTDIR: ''
+  CYPRESS_IMAGE: cypress/browsers:node16.18.0-chrome107-ff106-edge
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+  TRIVY_IMAGE: aquasec/trivy:0.36.1
 
 include:
-  - local: .gitlab-ci/*.gitlab-ci.yml
-
-#var-is-undefined-check:
-#  stage: .pre
-#  variables:
-#    VAR: $CI_PIPELINE_SOURCE
-#  script:
-#    - echo $VAR
-#  rules:
-#    - if: $VAR == null
-#
-#var-is-not-undefined-check:
-#  stage: .pre
-#  variables:
-#    VAR: $CI_PIPELINE_SOURCE
-#  script:
-#    - echo $VAR
-#  rules:
-#    - if: $VAR != null
-#
-#var-is-empty-check:
-#  stage: .pre
-#  variables:
-#    VAR: $CI_PIPELINE_SOURCE
-#  script:
-#    - echo $VAR
-#  rules:
-#    - if: $VAR == ""
-#
-#var-is-not-empty-check:
-#  stage: .pre
-#  variables:
-#    VAR: $CI_PIPELINE_SOURCE
-#  script:
-#    - echo $VAR
-#  rules:
-#    - if: $VAR != ""
-#
-#var1-equals-var2-check:
-#  stage: .pre
-#  variables:
-#    VAR1: $CI_PIPELINE_SOURCE
-#    VAR2: "external_pull_request_event"
-#  script:
-#    - echo $VAR1 == $VAR2
-#  rules:
-#    - if: $VAR1 == $VAR2
-#
-#var1-equals-not-var2-check:
-#  stage: .pre
-#  variables:
-#    VAR1: $CI_PIPELINE_SOURCE
-#    VAR2: "external_pull_request_event"
-#  script:
-#    - echo $VAR1 != $VAR2
-#  rules:
-#    - if: $VAR1 != $VAR2
+  - local: ".gitlab-ci/*.gitlab-ci.yml"
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
 
 check-config:
-  stage: .pre
+  stage: ".pre"
   interruptible: true
   allow_failure: true
+  rules:
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
+    - if: "$CI_COMMIT_BRANCH"
+    - if: "$CI_COMMIT_TAG"
   script:
+    - echo $CI_PIPELINE_SOURCE
+    - echo $CI_REGISTRY
+    - echo $CI_REGISTRY_IMAGE
+    - echo $CI_PROJECT_PATH
     - echo $CI_DEFAULT_BRANCH
     - echo $CI_COMMIT_BRANCH
     - echo $CI_COMMIT_TAG
-    - echo $CI_PIPELINE_SOURCE
+    - echo $CI_COMMIT_BEFORE_SHA
+    - echo $CI_COMMIT_SHA
+    - echo $CI_COMMIT_SHORT_SHA
+    - echo $CI_COMMIT_REF_NAME
+    - echo $CI_COMMIT_REF_SLUG
+    - echo $CI_COMMIT_REF_PROTECTED
     - echo $CI_EXTERNAL_PULL_REQUEST_IID
     - echo $CI_EXTERNAL_PULL_REQUEST_SOURCE_REPOSITORY
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_REPOSITORY
@@ -101,9 +70,6 @@ check-config:
     - echo $CI_MERGE_REQUEST_LABELS
     - echo $CI_MERGE_REQUEST_EVENT_TYPE
     - echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - echo $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
     - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - echo $CI_COMMIT_BEFORE_SHA
-    - echo $CI_COMMIT_SHA
-    - echo $CI_COMMIT_SHORT_SHA
-    - echo $CI_COMMIT_REF_NAME
-    - echo $CI_COMMIT_REF_PROTECTED
+    - echo $CI_MERGE_REQUEST_TARGET_BRANCH_SHA
