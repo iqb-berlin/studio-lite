@@ -1,13 +1,13 @@
 #!/bin/bash
 
 SELECTED_VERSION=$1
-REPO_URL='https://raw.githubusercontent.com/iqb-berlin/studio-lite'
-REPO_API='https://api.github.com/repos/iqb-berlin/studio-lite'
+REPO_URL='https://scm.cms.hu-berlin.de/iqb/studio-lite/-/raw'
+REPO_API='https://scm.cms.hu-berlin.de/api/v4/projects/6054'
 HAS_ENV_FILE_UPDATE=false
 HAS_CONFIG_FILE_UPDATE=false
 
 get_new_release_version() {
-  LATEST_RELEASE=$(curl -s $REPO_API/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+  LATEST_RELEASE=$(curl -s "$REPO_API"/releases | grep -o -E '\"tag_name\":"[^"]*' | grep -m 1 -o '[^"]*$')
 
   if [ "$SOURCE_TAG" = "latest" ]; then
     SOURCE_TAG="$LATEST_RELEASE"
@@ -28,7 +28,7 @@ get_new_release_version() {
   fi
 
   while read -p 'Name the desired version: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
-    if ! curl --head --silent --fail --output /dev/null $REPO_URL/"${TARGET_TAG}"/README.md 2>/dev/null; then
+    if ! curl --head --silent --fail --output /dev/null $REPO_URL/"$TARGET_TAG"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
 
     else
@@ -208,7 +208,7 @@ switch_tls() {
 
 }
 
-application_warm_restart() {
+finalize_update() {
   if [ $HAS_ENV_FILE_UPDATE == "true" ] || [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
     if [ $HAS_ENV_FILE_UPDATE == "true" ] && [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
       echo 'Version, environment, and configuration update applied!'
@@ -222,39 +222,46 @@ application_warm_restart() {
     fi
 
     if command make -v >/dev/null 2>&1; then
-      printf "\nAfter that you could run 'make production-ramp-up' at the command line for the update to take effect.\n\n"
+      printf "\nWhen your files are checked, you could restart the application with 'make production-ramp-up' at the \
+      command line to put the update into effect.\n\n"
 
     else
-      printf '\nAfter that you could restart the docker services for the update to take effect.\n\n'
+      printf '\nWhen your files are checked, you could restart the docker services to put the update into effect.\n\n'
     fi
+
+    echo 'The application will now shut down ...'
+    make production-shut-down
 
     echo 'Update script finished.'
     exit 0
 
   else
-    printf "Version update applied. Warm restart needed!\n\n"
-
-    if command make -v >/dev/null 2>&1; then
-      read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
-
-      if [[ ! $RESTART =~ [nN] ]]; then
-        make production-ramp-up
-
-      else
-        echo 'Update script finished.'
-        exit 0
-      fi
-
-    else
-      printf 'You could start the updated docker services now.\n\n'
-      echo 'Update script finished.'
-      exit 0
-    fi
-
+    printf "Version update applied.\n\n"
+    # application_reload --> Seems not to work with liquibase containers!
+    application_restart
   fi
 }
 
-application_cold_restart() {
+application_reload() {
+      if command make -v >/dev/null 2>&1; then
+        read -p "Do you want to reload the application now? [Y/n]:" -er -n 1 RESTART
+
+        if [[ ! $RESTART =~ [nN] ]]; then
+          make production-ramp-up
+
+        else
+          echo 'Update script finished.'
+          exit 0
+        fi
+
+      else
+        printf 'You could start the updated docker services now.\n\n'
+        echo 'Update script finished.'
+        exit 0
+      fi
+}
+
+application_restart() {
   if command make -v >/dev/null 2>&1; then
     read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
 
@@ -272,7 +279,6 @@ application_cold_restart() {
     echo 'Update script finished.'
     exit 0
   fi
-
 }
 
 # Load current environment variables in .env.prod
@@ -294,11 +300,11 @@ if [ -z "$SELECTED_VERSION" ]; then
     update_files
     check_template_files_modifications
     customize_settings
-    application_warm_restart
+    finalize_update
 
   elif [ "$CHOICE" = 2 ]; then
     switch_tls
-    application_cold_restart
+    application_restart
   fi
 
 else
@@ -307,5 +313,5 @@ else
   update_files
   check_template_files_modifications
   customize_settings
-  application_warm_restart
+  finalize_update
 fi
