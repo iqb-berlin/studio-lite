@@ -14,7 +14,7 @@ test-frontend: ## Run frontend tests (only in combination with 'make dev-up')
 	docker compose --env-file $(BASE_DIR)/.env.dev exec -it frontend bash -c "nx test frontend"
 
 test-e2e-build: ## Build docker e2e test image (e.g. at nx workspace updates)
-	cd $(BASE_DIR) && docker build --pull -f $(BASE_DIR)/apps/frontend-e2e/Dockerfile -t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend-e2e:latest -t iqbberlin/studio-lite-frontend-e2e:latest .
+	cd $(BASE_DIR) && docker build --pull --progress plain -f $(BASE_DIR)/apps/frontend-e2e/Dockerfile -t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend-e2e:latest .
 
 test-e2e-dev: ## Run all e2e tests in dev environment (only in combination with 'make dev-up')
 	docker compose --env-file $(BASE_DIR)/.env.dev -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e

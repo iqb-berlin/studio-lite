@@ -20,7 +20,7 @@ dev-stop: ## Stop all docker containers
 	docker compose --env-file $(BASE_DIR)/.env.dev stop
 
 dev-build: ## Build docker image
-	docker compose --env-file $(BASE_DIR)/.env.dev build --pull
+	docker compose --env-file $(BASE_DIR)/.env.dev build --pull --progress plain
 
 dev-config: ## Show services configuration
 	docker compose --env-file $(BASE_DIR)/.env.dev config
