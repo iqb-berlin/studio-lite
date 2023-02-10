@@ -1,74 +1,147 @@
-.PHONY: production-status production-logs production-ramp-up production-shut-down production-start production-stop \
-production-connect-db production-dump-all production-restore-all production-dump-db production-restore-db \
-production-dump-db-data-only production-restore-db-data-only production-config production-clean
+.PHONY: production-ramp-up production-shut-down production-start production-stop production-status production-logs \
+production-config production-clean production-liquibase-status production-connect-db production-dump-all \
+production-restore-all production-dump-db production-restore-db production-dump-db-data-only \
+production-restore-db-data-only
 BASE_DIR := $(shell git rev-parse --show-toplevel)
+CMD ?= status
 include $(BASE_DIR)/.env.prod
 
-.EXPORT_ALL_VARIABLES: ## exports all variables (especially those of the included .env.prod file!)
+## exports all variables (especially those of the included .env.prod file!)
+.EXPORT_ALL_VARIABLES:
 
-production-status: ## Get status list of all containers
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml ps -a
+## Pull newest images, create and start docker containers
+production-ramp-up:
+	if [ ! -f $(BASE_DIR)/config/frontend/default.conf.template ]; \
+		then cp $(BASE_DIR)/config/frontend/default.conf.http-template $(BASE_DIR)/config/frontend/default.conf.template; fi
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		--env-file $(BASE_DIR)/.env.prod pull
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		--env-file $(BASE_DIR)/.env.prod up -d
 
-production-logs: ## Get logs of running containers
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml logs -f
+## Stop and remove docker containers
+production-shut-down:
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down
 
-production-ramp-up: ## Pull newest images, create and start docker containers
-	if [ ! -f $(BASE_DIR)/config/frontend/default.conf.template ]; then cp $(BASE_DIR)/config/frontend/default.conf.http-template $(BASE_DIR)/config/frontend/default.conf.template; fi
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml pull
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d
+## Start docker containers
+# Param (optional): SERVICE - Start the specified service only, e.g. `SERVICE=db make production-start`
+production-start:
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod start $(SERVICE)
 
-production-shut-down: ## Stop and remove docker containers
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
+## Stop docker containers
+production-stop:
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod stop $(SERVICE)
 
-production-start: ## Start docker containers
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml start
+## Show status of containers
+# Param (optional): SERVICE - Show status of the specified service only, e.g. `SERVICE=db make production-status`
+production-status:
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod ps -a $(SERVICE)
 
-production-stop: ## Stop docker containers
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml stop
+## Show service logs
+# Param (optional): SERVICE - Show log of the specified service only, e.g. `SERVICE=db make production-logs`
+production-logs:
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod logs -f $(SERVICE)
 
-production-connect-db: .EXPORT_ALL_VARIABLES
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+## Show services configuration
+# Param (optional): SERVICE - Show config of the specified service only, e.g. `SERVICE=db make production-config`
+production-config:
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		--env-file $(BASE_DIR)/.env.prod config $(SERVICE)
 
-production-dump-all: production-shut-down .EXPORT_ALL_VARIABLES	## Extract a database cluster into a script file (https://www.postgresql.org/docs/current/app-pg-dumpall.html)
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d db
-	sleep 5 ## wait until db startup is completed
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db pg_dumpall --verbose -U $(POSTGRES_USER)  > $(BASE_DIR)/database_dumps/all.sql
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
-
-production-restore-all: production-shut-down .EXPORT_ALL_VARIABLES	## PostgreSQL interactive terminal reads commands from the dump file all.sql (https://www.postgresql.org/docs/14/app-psql.html)
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d db
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml cp $(BASE_DIR)/database_dumps/all.sql db:/tmp/
-	sleep 10	## wait until file upload is completed
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db psql -U $(POSTGRES_USER) -f /tmp/all.sql postgres
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
-
-production-dump-db: production-shut-down .EXPORT_ALL_VARIABLES	## Extract a database into a script file or other archive file (https://www.postgresql.org/docs/current/app-pgdump.html)
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d db
-	sleep 5 ## wait until db startup is completed
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db pg_dump --verbose -U $(POSTGRES_USER) -F t $(POSTGRES_DB) > $(BASE_DIR)/database_dumps/$(POSTGRES_DB).tar
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
-
-production-restore-db: production-shut-down .EXPORT_ALL_VARIABLES	## Restore a database from an archive file created by pg_dump (https://www.postgresql.org/docs/current/app-pgrestore.html)
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d db
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml cp $(BASE_DIR)/database_dumps/$(POSTGRES_DB).tar db:/tmp/
-	sleep 10	## wait until file upload is completed
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db pg_restore --verbose --single-transaction -U $(POSTGRES_USER) -d $(POSTGRES_DB) /tmp/$(POSTGRES_DB).tar
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
-
-production-dump-db-data-only: production-shut-down .EXPORT_ALL_VARIABLES	## Extract a database data into a script file or other archive file (https://www.postgresql.org/docs/current/app-pgdump.html)
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d db liquibase
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db pg_dump --verbose --data-only --exclude-table=public.databasechangelog --exclude-table=public.databasechangeloglock -U $(POSTGRES_USER) -F t $(POSTGRES_DB) > $(BASE_DIR)/database_dumps/$(POSTGRES_DB)_data.tar
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
-
-production-restore-db-data-only: production-shut-down .EXPORT_ALL_VARIABLES	## Restore a database data from an archive file created by pg_dump (https://www.postgresql.org/docs/current/app-pgrestore.html)
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml up -d db liquibase
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml cp $(BASE_DIR)/database_dumps/$(POSTGRES_DB)_data.tar db:/tmp/
-	sleep 10	## wait until file upload is completed
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml exec -it db pg_restore --verbose --data-only --single-transaction --disable-triggers -U $(POSTGRES_USER) -d $(POSTGRES_DB) /tmp/$(POSTGRES_DB)_data.tar
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml down
-
-production-config: ## Show services configuration
-	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml config
-
-production-clean: ## Remove unused (dangling) images, containers, networks, etc. Data volumes will stay untouched!
+## Remove unused (dangling) images, containers, networks, etc. Data volumes will stay untouched!
+production-clean:
 	docker system prune
+
+## Outputs the count of changesets that have not been deployed
+# (https://docs.liquibase.com/commands/status/status.html)
+production-liquibase-status: .EXPORT_ALL_VARIABLES
+	cd $(BASE_DIR) && docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		--env-file $(BASE_DIR)/.env.prod run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml \
+    --url=jdbc:postgresql://db:5432/$(POSTGRES_DB) --username=$(POSTGRES_USER) --password=$(POSTGRES_PASSWORD) \
+    --classpath=changelog --logLevel=info $(CMD)
+
+## Open DB console
+production-connect-db: .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		--env-file $(BASE_DIR)/.env.prod exec -it db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+
+## Extract a database cluster into a script file
+# (https://www.postgresql.org/docs/current/app-pg-dumpall.html)
+production-dump-all: production-shut-down .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod up -d db
+	sleep 5 ## wait until db startup is completed
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod exec -it db pg_dumpall --verbose -U $(POSTGRES_USER) > \
+		 $(BASE_DIR)/database_dumps/all.sql
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down
+
+## PostgreSQL interactive terminal reads commands from the dump file all.sql
+# (https://www.postgresql.org/docs/14/app-psql.html)
+production-restore-all: production-shut-down .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod up -d db
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod cp $(BASE_DIR)/database_dumps/all.sql db:/tmp/
+	sleep 10	## wait until file upload is completed
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod exec -it db psql -U $(POSTGRES_USER) -f /tmp/all.sql postgres
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down
+
+## Extract a database into a script file or other archive file
+# (https://www.postgresql.org/docs/current/app-pgdump.html)
+production-dump-db: production-shut-down .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod up -d db
+	sleep 5 ## wait until db startup is completed
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod exec -it db pg_dump --verbose -U $(POSTGRES_USER) -F t $(POSTGRES_DB) > \
+		 $(BASE_DIR)/database_dumps/$(POSTGRES_DB).tar
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down
+
+## Restore a database from an archive file created by pg_dump
+# (https://www.postgresql.org/docs/current/app-pgrestore.html)
+production-restore-db: production-shut-down .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod up -d db
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod cp $(BASE_DIR)/database_dumps/$(POSTGRES_DB).tar db:/tmp/
+	sleep 10	## wait until file upload is completed
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod exec -it db pg_restore --verbose --single-transaction -U $(POSTGRES_USER) \
+		 -d $(POSTGRES_DB) /tmp/$(POSTGRES_DB).tar
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down
+
+## Extract a database data into a script file or other archive file
+# (https://www.postgresql.org/docs/current/app-pgdump.html)
+production-dump-db-data-only: production-shut-down .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod up -d db liquibase
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod exec -it db pg_dump --verbose --data-only \
+		 --exclude-table=public.databasechangelog --exclude-table=public.databasechangeloglock -U $(POSTGRES_USER) -F \
+		 t $(POSTGRES_DB) > $(BASE_DIR)/database_dumps/$(POSTGRES_DB)_data.tar
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down
+
+## Restore a database data from an archive file created by pg_dump
+# (https://www.postgresql.org/docs/current/app-pgrestore.html)
+production-restore-db-data-only: production-shut-down .EXPORT_ALL_VARIABLES
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod up -d db liquibase
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod cp $(BASE_DIR)/database_dumps/$(POSTGRES_DB)_data.tar db:/tmp/
+	sleep 10	## wait until file upload is completed
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod exec -it db pg_restore --verbose --data-only --single-transaction \
+		 --disable-triggers -U $(POSTGRES_USER) -d $(POSTGRES_DB) /tmp/$(POSTGRES_DB)_data.tar
+	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
+		 --env-file $(BASE_DIR)/.env.prod down

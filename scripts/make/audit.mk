@@ -1,10 +1,13 @@
 .PHONY: audit-app audit-backend audit-frontend
 BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-audit-app: audit-backend audit-frontend ## Run all audits (only in combination with 'make dev-up')
+## Run all audits (only in combination with 'make dev-up')
+audit-app: audit-backend audit-frontend
 
-audit-backend: ## Run backend audit (only in combination with 'make dev-up')
+## Run backend audit (only in combination with 'make dev-up')
+audit-backend:
 	docker compose --env-file $(BASE_DIR)/.env.dev exec -it backend npm audit --audit-level critical
 
-audit-frontend: ## Run frontend audit (only in combination with 'make dev-up')
+## Run frontend audit (only in combination with 'make dev-up')
+audit-frontend:
 	docker compose --env-file $(BASE_DIR)/.env.dev exec -it frontend npm audit --audit-level critical
