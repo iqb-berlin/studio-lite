@@ -1,18 +1,18 @@
 #############################################################################
-## FEATURE COMMITS, 'DEVELOP' TARGETED PULL REQUESTS, PRE-RELEASE TAGS
+## FEATURE COMMITS, 'DEVELOP' TARGETED MERGE REQUESTS, PRE-RELEASE TAGS
 #############################################################################
 
 # https://gitlab.com/gitlab-org/gitlab/-/issues/206960
 # https://docs.gitlab.com/ee/ci/jobs/job_control.html#cicd-variable-expressions
 .default_base_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
     - if: $CI_COMMIT_TAG
       when: never
 
 .default_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
@@ -20,35 +20,27 @@
 
 .default_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
 
 .develop_pr_base_rules:
   rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
-    - if: $CI_COMMIT_TAG
-      when: never
-
-.develop_pr_db_rules:
-  rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
-      changes:
-        - database/*
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_TAG
       when: never
 
 .develop_pr_manual_rules:
   rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
 
 .develop_commit_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
     - if: $CI_COMMIT_TAG
       when: never
 
@@ -66,18 +58,42 @@ check-default-rules:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
     - echo $CI_COMMIT_TAG
-    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ "$CI_COMMIT_BRANCH" != "main" ]; then echo "commit branch is not 'main'" ; else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
-    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then echo "commit branch is 'main'" ; else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
-    - if [ "$CI_COMMIT_BRANCH" != "develop" ]; then echo "commit branch is not 'develop'" ; else echo "'$CI_COMMIT_BRANCH' == 'develop'"; fi
-    - if [ "$CI_COMMIT_BRANCH" = "develop" ]; then echo "commit branch is 'develop'" ; else echo "'$CI_COMMIT_BRANCH' != 'develop'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "pipeline source is not 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "pipeline source is 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" != "main" ] && [ "$CI_COMMIT_BRANCH" != "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "commit branch exists, isn't 'main', isn't 'develop', and it's not a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "commit branch doesn't exist or is 'main' or is 'develop' or it's a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is nonzero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is zero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "main" ];
+      then echo "commit branch is not 'main'";
+      else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "main" ];
+      then echo "commit branch is 'main'";
+      else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "develop" ];
+      then echo "commit branch is not 'develop'";
+      else echo "'$CI_COMMIT_BRANCH' == 'develop'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "develop" ];
+      then echo "commit branch is 'develop'";
+      else echo "'$CI_COMMIT_BRANCH' != 'develop'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
+      then echo "pipeline source is not 'merge_request_event'";
+      else echo "'$CI_PIPELINE_SOURCE' == 'merge_request_event'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
+      then echo "pipeline source is 'merge_request_event'" ;
+      else echo "'$CI_PIPELINE_SOURCE' != 'merge_request_event'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" != "main" ] && [ "$CI_COMMIT_BRANCH" != "develop" ] && [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
+      then echo "commit branch exists, isn't 'main', isn't 'develop', and it's not a merge request";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "develop" ] || [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
+      then echo "commit branch doesn't exist or is 'main' or is 'develop' or it's a merge request";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is zero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is nonzero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
 check-develop-pr-rules:
   stage: .pre
@@ -86,12 +102,20 @@ check-develop-pr-rules:
   rules:
     - !reference [ .develop_pr_base_rules, rules ]
   script:
-    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "develop" ]; then echo "pull request target branch is 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "develop" ]; then echo "pull request target branch is not 'develop'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" == "develop" ];
+      then echo "merge request target branch is 'develop'";
+      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
+    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "develop" ];
+      then echo "merge request target branch is not 'develop'";
+      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is zero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is nonzero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
 check-develop-commit-rules:
   stage: .pre
@@ -103,16 +127,36 @@ check-develop-commit-rules:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
     - echo $CI_COMMIT_TAG
-    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ "$CI_COMMIT_BRANCH" = "develop" ]; then echo "commit branch is 'develop'" ; else echo "'$CI_COMMIT_BRANCH' != 'develop'"; fi
-    - if [ "$CI_COMMIT_BRANCH" != "develop" ]; then echo "commit branch is not 'develop'" ; else echo "'$CI_COMMIT_BRANCH' == 'develop'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "pipeline source is not 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "pipeline source is 'external_pull_request_event'" ; else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ]; then echo "commit branch exists, is 'develop', and it's not a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ]; then echo "commit branch doesn't exist or isn't 'develop' or it's a pull request" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is nonzero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is zero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "develop" ];
+      then echo "commit branch is 'develop'";
+      else echo "'$CI_COMMIT_BRANCH' != 'develop'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "develop" ];
+      then echo "commit branch is not 'develop'";
+      else echo "'$CI_COMMIT_BRANCH' == 'develop'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
+      then echo "pipeline source is not 'merge_request_event'";
+      else echo "'$CI_PIPELINE_SOURCE' == 'merge_request_event'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
+      then echo "pipeline source is 'merge_request_event'";
+      else echo "'$CI_PIPELINE_SOURCE' != 'merge_request_event'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "develop" ] && [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
+      then echo "commit branch exists, is 'develop', and it's not a merge request";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "develop" ] || [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
+      then echo "commit branch doesn't exist or isn't 'develop' or it's a merge request";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is zero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is nonzero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
 check-pre-release-rules:
   stage: .pre
@@ -124,7 +168,9 @@ check-pre-release-rules:
     - PRERELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)(\.)?([1-9][0-9]*)?))?$"
   script:
     - echo $PRERELEASE_REGEX
-    - if [[ $CI_COMMIT_TAG =~ $PRERELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid pre-release tag."; else echo "$CI_COMMIT_TAG is not a valid pre-release tag!"; fi
+    - if [[ $CI_COMMIT_TAG =~ $PRERELEASE_REGEX ]];
+      then echo "$CI_COMMIT_TAG is a valid pre-release tag.";
+      else echo "$CI_COMMIT_TAG is not a valid pre-release tag!"; fi
 
 install-dependencies:
   stage: build
@@ -161,38 +207,45 @@ install-dependencies:
 
 build-db-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .develop_pr_db_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:latest .
-    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db
+    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
+    - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
     - docker logout $REGISTRY
 
 build-liquibase-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .develop_pr_db_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:latest .
-    - docker push -q -a ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase
+    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
+    - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
     - docker logout $REGISTRY
 
 build-app:
   stage: build
+  interruptible: true
   extends: .distributed
   rules:
     - !reference [ .default_base_rules, rules ]
@@ -205,10 +258,11 @@ build-app:
       - dist
 
 test-db:
-  stage: db-test
+  stage: test-db
+  interruptible: true
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .develop_pr_db_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
   needs:
     - build-db-image
     - build-liquibase-image
@@ -220,15 +274,26 @@ test-db:
     - docker compose --env-file .env.dev pull -q db liquibase
     - docker compose --env-file .env.dev up -d db
     - export $(grep -v '^#' .env.dev | xargs)
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
+      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
+      --classpath=changelog status
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
+      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
+      --classpath=changelog validate
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
+      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
+      --classpath=changelog updateSQL
   script:
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
+      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
+      --classpath=changelog updateTestingRollback
+    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
+      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
+      --classpath=changelog history
 
 test-app:
-  stage: unit-test
+  stage: test-units
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -239,7 +304,8 @@ test-app:
     - npx nx affected --base=HEAD~1 --target=test --parallel=2
 
 test-app-e2e:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -265,7 +331,8 @@ test-app-e2e:
     - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
 
 test-app-e2e-api:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -291,7 +358,8 @@ test-app-e2e-api:
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/api/*" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-chrome:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -317,7 +385,8 @@ test-app-e2e-ui-chrome:
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-chrome-mobile:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -340,10 +409,12 @@ test-app-e2e-ui-chrome-mobile:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*"
+      --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-firefox:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -369,7 +440,8 @@ test-app-e2e-ui-firefox:
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-firefox-mobile:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -392,10 +464,12 @@ test-app-e2e-ui-firefox-mobile:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*"
+      --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-edge:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -421,7 +495,8 @@ test-app-e2e-ui-edge:
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
 
 test-app-e2e-ui-edge-mobile:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   extends: .distributed
   rules:
@@ -444,11 +519,13 @@ test-app-e2e-ui-edge-mobile:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*" --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*"
+      --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
 
 lint-app:
   stage: lint
   extends: .distributed
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .default_base_rules, rules ]
@@ -459,6 +536,7 @@ lint-app:
 
 audit-app:
   stage: audit
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .default_base_rules, rules ]
@@ -466,70 +544,12 @@ audit-app:
   script:
     - npm audit --audit-level critical
 
-#build-docker-app:
-#  stage: build-images
-#  extends: .distributed
-#  rules:
-#    - !reference [ .develop_pr_base_rules, rules ]
-#  needs:
-#    - install-dependencies
-#  image: $DOCKER_IMAGE
-#  services:
-#    - $DOCKER_SERVICE
-#  before_script:
-#    - apk add --no-cache npm
-#    - npm i -g npx
-#    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
-#  script:
-#    - npx nx affected --base=HEAD~1 --target=docker-build --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA} --parallel=2
-#  after_script:
-#    - docker logout $REGISTRY
-#
-#scan-docker-db:
-#  stage: scan-images
-#  allow_failure: true
-#  rules:
-#    - !reference [ .develop_pr_db_rules, rules ]
-#  needs:
-#    - build-db-image
-#  image: $DOCKER_IMAGE
-#  services:
-#    - $DOCKER_SERVICE
-#  script:
-#    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-#    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-#
-#scan-docker-liquibase:
-#  stage: scan-images
-#  allow_failure: true
-#  rules:
-#    - !reference [ .develop_pr_db_rules, rules ]
-#  needs:
-#    - build-liquibase-image
-#  image: $DOCKER_IMAGE
-#  services:
-#    - $DOCKER_SERVICE
-#  script:
-#    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-#    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-#
-#scan-docker-app:
-#  stage: scan-images
-#  allow_failure: true
-#  extends: .distributed
-#  rules:
-#    - !reference [ .develop_pr_base_rules, rules ]
-#  needs:
-#    - install-dependencies
-#    - build-docker-app
-#  image: $DOCKER_IMAGE
-#  services:
-#    - $DOCKER_SERVICE
-#  before_script:
-#    - apk add --no-cache npm
-#    - npm i -g npx
-#  script:
-#    - npx nx affected --base=HEAD~1 --target=docker-scan --registry=$REGISTRY --registryProject=$REGISTRY_PROJECT --tag=${CI_COMMIT_SHA}
+gemnasium-dependency_scanning:
+  stage: scan-dependencies
+  interruptible: true
+  allow_failure: true
+  rules:  # TODO: Overwriting of rules does not work
+    - !reference [ .develop_pr_base_rules, rules ]
 
 build-develop-commit-db-image:
   stage: build-images
@@ -538,11 +558,13 @@ build-develop-commit-db-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker build -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -553,11 +575,13 @@ build-develop-commit-liquibase-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Liquibase.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker build -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -568,11 +592,14 @@ build-develop-commit-backend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod
+      -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -583,11 +610,14 @@ build-develop-commit-frontend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
+      -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -598,14 +628,40 @@ scan-develop-commit-db-image:
     - !reference [ .develop_commit_rules, rules ]
   needs:
     - build-develop-commit-db-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-develop-commit-liquibase-image:
   stage: scan-images
@@ -614,14 +670,40 @@ scan-develop-commit-liquibase-image:
     - !reference [ .develop_commit_rules, rules ]
   needs:
     - build-develop-commit-liquibase-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-develop-commit-backend-image:
   stage: scan-images
@@ -630,14 +712,40 @@ scan-develop-commit-backend-image:
     - !reference [ .develop_commit_rules, rules ]
   needs:
     - build-develop-commit-backend-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-develop-commit-frontend-image:
   stage: scan-images
@@ -646,14 +754,40 @@ scan-develop-commit-frontend-image:
     - !reference [ .develop_commit_rules, rules ]
   needs:
     - build-develop-commit-frontend-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 build-pre-release:
   stage: build-images
@@ -662,17 +796,22 @@ build-pre-release:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker pull ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   script:
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
+    - docker tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
+    - docker tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
+    - docker tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
+    - docker tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
     - docker push -q iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
     - docker push -q iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
     - docker push -q iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
