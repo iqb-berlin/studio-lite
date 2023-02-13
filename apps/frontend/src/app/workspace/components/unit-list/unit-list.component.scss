@@ -1,0 +1,17 @@
+.unit-list-entry {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.unit-group-header {
+  color: whitesmoke;
+  background-color: lightslategray;
+  font-size: 16px;
+  padding: 2px;
+}
+
+.selected {
+  background-color: #3957f74f;
+}

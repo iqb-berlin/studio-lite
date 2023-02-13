@@ -11,24 +11,12 @@
       </button>
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <div fxFlex class="unit-list">
-      <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList | keyvalue">
-        <div class="unit-group-header">{{unitGroup.key}}</div>
-        <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-           *ngFor="let unit of unitGroup.value"
-           class="unit-list-entry"
-           [matTooltip]="unit.name ? unit.name : ''"
-           matTooltipPosition="right"
-           (click)="selectUnit(unit.id)"
-           [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
-          {{ unit.key }}{{ unit.name ? ' - ' + unit.name : ''}}
-          <div *ngIf="unit | hasNewComments"
-                    class="new-comments"
-                    [matTooltip]="'workspace.new-comments' | translate">
-          </div>
-        </a>
-      </mat-nav-list>
-    </div>
+    <studio-lite-unit-list fxFlex
+                           class="unit-list"
+                           [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
+                           [unitList]="workspaceService.unitList"
+                           (unitSelect)="selectUnit($event)">
+    </studio-lite-unit-list>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
       <button mat-raised-button [matMenuTriggerFor]="menuNew" matTooltip="Aufgabe(n) hinzufügen" matTooltipPosition="above" fxFlex="33">
