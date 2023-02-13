@@ -54,6 +54,7 @@ import { ReviewsComponent } from './dialogs/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
 import { ReviewConfigEditComponent } from './dialogs/components/review-config-edit.component';
 import { UnitListComponent } from './components/unit-list/unit-list.component';
+import { UnitChangeComponent } from './components/unit-change/unit-change.component';
 
 @NgModule({
   imports: [
@@ -109,12 +110,10 @@ import { UnitListComponent } from './components/unit-list/unit-list.component';
     HasNewCommentsPipe,
     ReviewsComponent,
     ReviewConfigEditComponent,
-    UnitListComponent
+    UnitListComponent,
+    UnitChangeComponent
   ],
-  exports: [
-    WorkspaceComponent,
-    UnitCommentsComponent
-  ],
+  exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
     UnitRoutingCanDeactivateGuard,
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
