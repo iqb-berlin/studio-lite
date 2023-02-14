@@ -3,9 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import {
-  Subscription, map, lastValueFrom, takeUntil, Subject
-} from 'rxjs';
+import { Subscription, takeUntil, Subject } from 'rxjs';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,7 +14,6 @@ import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
 import { WorkspaceService } from './workspace.service';
-import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from './dialogs/move-unit.component';
@@ -133,61 +130,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     );
   }
 
-  deleteUnit(): void {
-    this.deleteUnitDialog().then((unitsToDelete: number[] | boolean) => {
-      if (typeof unitsToDelete !== 'boolean') {
-        this.backendService.deleteUnits(
-          this.workspaceService.selectedWorkspaceId,
-          unitsToDelete
-        ).subscribe(
-          ok => {
-            // todo db-error?
-            if (ok) {
-              this.updateUnitList();
-              this.snackBar.open('Aufgabe(n) gelöscht', '', { duration: 1000 });
-            } else {
-              this.snackBar.open('Konnte Aufgabe(n) nicht löschen.', 'Fehler', { duration: 3000 });
-              this.appService.dataLoading = false;
-            }
-          }
-        );
-      }
-    });
-  }
-
-  private async deleteUnitDialog(): Promise<number[] | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '500px',
-        height: '700px',
-        data: <SelectUnitData>{
-          title: 'Aufgabe(n) löschen',
-          buttonLabel: 'Löschen',
-          fromOtherWorkspacesToo: false,
-          multiple: true
-        }
-      });
-      return lastValueFrom(dialogRef.afterClosed().pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            const dialogComponent = dialogRef.componentInstance;
-            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-              return dialogComponent.selectedUnitIds;
-            }
-          }
-          return false;
-        })
-      ));
-    }
-    return false;
-  }
-
   moveOrCopyUnit(moveOnly: boolean): void {
     const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
       width: '500px',
       height: '700px',
-      data: <MoveUnitData>{
+      data: <MoveUnitData> {
         title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',
         buttonLabel: moveOnly ? 'Verschieben' : 'Kopieren',
         currentWorkspaceId: this.workspaceService.selectedWorkspaceId

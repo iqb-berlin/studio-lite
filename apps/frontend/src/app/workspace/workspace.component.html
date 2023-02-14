@@ -17,9 +17,11 @@
                             (unitListUpdate)="updateUnitList($event)">
       </studio-lite-add-unit>
 
-      <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
-          <mat-icon>delete</mat-icon>
-      </button>
+      <studio-lite-delete-unit fxFlex="33"
+                               [navLinks]="navLinks"
+                               [selectedRouterLink]="selectedRouterLink"
+                               (unitListUpdate)="updateUnitList($event)">
+      </studio-lite-delete-unit>
 
       <button mat-button [matMenuTriggerFor]="menuOther" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
         <mat-icon>menu</mat-icon>
