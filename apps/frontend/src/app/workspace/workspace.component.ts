@@ -1,5 +1,4 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -8,9 +7,7 @@ import {
   Subscription, map, lastValueFrom, takeUntil, Subject
 } from 'rxjs';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
-import {
-  CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto
-} from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { saveAs } from 'file-saver-es';
 import { HttpParams } from '@angular/common/http';
@@ -19,8 +16,6 @@ import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
 import { WorkspaceService } from './workspace.service';
-
-import { NewUnitComponent, NewUnitData } from './dialogs/new-unit.component';
 import { SelectUnitComponent, SelectUnitData } from './dialogs/select-unit.component';
 import { RequestMessageDialogComponent } from '../components/request-message-dialog.component';
 import { ExportUnitComponent } from './dialogs/export-unit.component';
@@ -36,7 +31,6 @@ import { GroupManageComponent } from './dialogs/group-manage.component';
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private routingSubscription: Subscription | null = null;
-  private uploadSubscription: Subscription | null = null;
   private ngUnsubscribe = new Subject<void>();
   uploadProcessId = '';
   navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
@@ -47,13 +41,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     public workspaceService: WorkspaceService,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
-    private newUnitDialog: MatDialog,
     private selectUnitDialog: MatDialog,
     private messsageDialog: MatDialog,
     private editSettingsDialog: MatDialog,
     private showUsersDialog: MatDialog,
     private moduleService: ModuleService,
-    private deleteConfirmDialog: MatDialog,
     private uploadReportDialog: MatDialog,
     private reviewsDialog: MatDialog,
     private groupDialog: MatDialog,
@@ -141,77 +133,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     );
   }
 
-  addUnit() {
-    this.addUnitDialog({
-      title: 'Neue Aufgabe',
-      subTitle: '',
-      key: '',
-      label: '',
-      groups: this.workspaceService.workspaceSettings.unitGroups || []
-    }).then((createUnitDto: CreateUnitDto | boolean) => {
-      if (typeof createUnitDto !== 'boolean') {
-        this.appService.dataLoading = true;
-        createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
-        createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
-        createUnitDto.schemer = this.workspaceService.workspaceSettings.defaultSchemer;
-        this.backendService.addUnit(
-          this.workspaceService.selectedWorkspaceId, createUnitDto
-        ).subscribe(
-          respOk => {
-            if (respOk) {
-              this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
-              this.addUnitGroup(createUnitDto.groupName);
-              this.updateUnitList(respOk);
-            } else {
-              this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
-            }
-            this.appService.dataLoading = false;
-          }
-        );
-      }
-    });
-  }
-
-  private addUnitGroup(newGroup: string | undefined) {
-    if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
-      this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
-      this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
-      this.appBackendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-      ).subscribe(isOK => {
-        this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
-          isOK ? '' : 'Fehler',
-          { duration: 3000 });
-      });
-    }
-  }
-
-  private async addUnitDialog(newUnitData: NewUnitData): Promise<CreateUnitDto | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
-        width: '500px',
-        data: newUnitData
-      });
-      return lastValueFrom(dialogRef.afterClosed().pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            if (dialogResult !== false) {
-              return <CreateUnitDto>{
-                key: (<UntypedFormGroup>dialogResult).get('key')?.value.trim(),
-                name: (<UntypedFormGroup>dialogResult).get('label')?.value,
-                groupName: (<UntypedFormGroup>dialogResult).get('groupDirect')?.value ||
-                  (<UntypedFormGroup>dialogResult).get('groupSelect')?.value || ''
-              };
-            }
-          }
-          return false;
-        })
-      ));
-    }
-    return false;
-  }
-
   deleteUnit(): void {
     this.deleteUnitDialog().then((unitsToDelete: number[] | boolean) => {
       if (typeof unitsToDelete !== 'boolean') {
@@ -253,71 +174,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             const dialogComponent = dialogRef.componentInstance;
             if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
               return dialogComponent.selectedUnitIds;
-            }
-          }
-          return false;
-        })
-      ));
-    }
-    return false;
-  }
-
-  addUnitFromExisting(): void {
-    this.addUnitFromExistingDialog().then((unitSource: UnitInListDto | boolean) => {
-      if (typeof unitSource !== 'boolean') {
-        this.addUnitDialog({
-          title: 'Neue Aufgabe aus vorhandener',
-          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
-          key: unitSource.key,
-          label: unitSource.name || '',
-          groups: this.workspaceService.workspaceSettings.unitGroups || []
-        }).then((createUnitDto: CreateUnitDto | boolean) => {
-          if (typeof createUnitDto !== 'boolean') {
-            this.appService.dataLoading = true;
-            createUnitDto.createFrom = unitSource.id;
-            this.backendService.addUnit(
-              this.workspaceService.selectedWorkspaceId, createUnitDto
-            ).subscribe(
-              respOk => {
-                if (respOk) {
-                  this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
-                  this.addUnitGroup(createUnitDto.groupName);
-                  this.updateUnitList(respOk);
-                } else {
-                  this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
-                }
-                this.appService.dataLoading = false;
-              }
-            );
-          }
-        });
-      }
-    });
-  }
-
-  private async addUnitFromExistingDialog(): Promise<UnitInListDto | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '500px',
-        height: '700px',
-        data: <SelectUnitData>{
-          title: 'Neue Aufgabe (Kopie)',
-          buttonLabel: 'Weiter',
-          fromOtherWorkspacesToo: true,
-          multiple: false
-        }
-      });
-      return lastValueFrom(dialogRef.afterClosed().pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            const dialogComponent = dialogRef.componentInstance;
-            if (dialogResult !== false && dialogComponent.selectedUnitIds.length === 1) {
-              return <UnitInListDto>{
-                id: dialogComponent.selectedUnitIds[0],
-                key: dialogComponent.selectedUnitKey,
-                name: dialogComponent.selectedUnitName
-              };
             }
           }
           return false;
@@ -470,56 +326,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  resetUpload() {
-    if (this.uploadSubscription !== null) {
-      this.uploadSubscription.unsubscribe();
-      this.uploadSubscription = null;
-    }
-  }
-
-  onFileSelected(targetElement: EventTarget | null) {
-    if (targetElement) {
-      const inputElement = targetElement as HTMLInputElement;
-      if (inputElement.files && inputElement.files.length > 0) {
-        this.appService.dataLoading = true;
-        this.uploadSubscription = this.backendService.uploadUnits(
-          this.workspaceService.selectedWorkspaceId,
-          inputElement.files
-        ).subscribe(uploadStatus => {
-          if (typeof uploadStatus === 'number') {
-            if (uploadStatus < 0) {
-              this.appService.dataLoading = false;
-            } else {
-              this.appService.dataLoading = uploadStatus;
-            }
-          } else {
-            this.appService.dataLoading = false;
-            if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-              const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
-                width: '500px',
-                height: '600px',
-                data: uploadStatus
-              });
-              dialogRef.afterClosed().subscribe(() => {
-                this.resetUpload();
-                this.updateUnitList();
-              });
-            } else {
-              this.resetUpload();
-              this.updateUnitList();
-            }
-          }
-        });
-      }
-    }
-  }
-
   ngOnDestroy(): void {
     if (this.routingSubscription !== null) {
       this.routingSubscription.unsubscribe();
-    }
-    if (this.uploadSubscription !== null) {
-      this.uploadSubscription.unsubscribe();
     }
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

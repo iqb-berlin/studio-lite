@@ -56,6 +56,7 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
 import { UnitListComponent } from './components/unit-list/unit-list.component';
 import { UnitChangeComponent } from './components/unit-change/unit-change.component';
 import { UnitDataComponent } from './components/unit-data/unit-data.component';
+import { AddUnitComponent } from './components/add-unit/add-unit.component';
 
 @NgModule({
   imports: [
@@ -113,7 +114,8 @@ import { UnitDataComponent } from './components/unit-data/unit-data.component';
     ReviewConfigEditComponent,
     UnitListComponent,
     UnitChangeComponent,
-    UnitDataComponent
+    UnitDataComponent,
+    AddUnitComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

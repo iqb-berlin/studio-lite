@@ -10,27 +10,21 @@
     </studio-lite-unit-list>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
-      <button mat-raised-button [matMenuTriggerFor]="menuNew" matTooltip="Aufgabe(n) hinzufügen" matTooltipPosition="above" fxFlex="33">
-        <mat-icon>add</mat-icon>
-      </button>
+
+      <studio-lite-add-unit fxFlex="33"
+                            [navLinks]="navLinks"
+                            [selectedRouterLink]="selectedRouterLink"
+                            (unitListUpdate)="updateUnitList($event)">
+      </studio-lite-add-unit>
+
       <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
           <mat-icon>delete</mat-icon>
       </button>
+
       <button mat-button [matMenuTriggerFor]="menuOther" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
         <mat-icon>menu</mat-icon>
       </button>
 
-      <mat-menu #menuNew="matMenu">
-        <button mat-menu-item (click)="hiddenFileInput.click()">
-          <mat-icon>input</mat-icon>Import von Datei(en)
-        </button>
-        <button mat-menu-item (click)="addUnitFromExisting()">
-          <mat-icon>content_copy</mat-icon>Neu von vorhandener Aufgabe
-        </button>
-        <button mat-menu-item (click)="addUnit()">
-          <mat-icon>add</mat-icon>Neu (leer)
-        </button>
-      </mat-menu>
 
       <mat-menu #menuOther="matMenu">
         <button mat-menu-item (click)="settings()" *ngIf="workspaceService.isWorkspaceGroupAdmin">
@@ -63,8 +57,7 @@
         </button>
       </mat-menu>
     </div>
-    <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
-           multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
+
   </div>
  <studio-lite-unit-data fxFlex fxLayout="column"
    [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
