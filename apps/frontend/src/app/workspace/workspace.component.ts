@@ -3,9 +3,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  Component, OnDestroy, OnInit, ViewChild
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   Subscription, map, lastValueFrom, takeUntil, Subject
 } from 'rxjs';
@@ -13,7 +11,6 @@ import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-
 import {
   CreateUnitDto, UnitDownloadSettingsDto, UnitInListDto
 } from '@studio-lite-lib/api-dto';
-import { MatTabNav } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import { saveAs } from 'file-saver-es';
 import { HttpParams } from '@angular/common/http';
@@ -38,12 +35,12 @@ import { GroupManageComponent } from './dialogs/group-manage.component';
   styleUrls: ['./workspace.component.css']
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
-  @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   private routingSubscription: Subscription | null = null;
   private uploadSubscription: Subscription | null = null;
   private ngUnsubscribe = new Subject<void>();
   uploadProcessId = '';
   navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
+  selectedRouterLink = -1;
 
   constructor(
     public appService: AppService,
@@ -134,7 +131,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   async selectUnit(unitId?: number): Promise<boolean> {
     if (unitId && unitId > 0) {
-      const selectedTab = this.nav ? this.nav.selectedIndex : -1;
+      const selectedTab = this.selectedRouterLink;
       const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
       return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
     }
@@ -526,5 +523,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+  }
+
+  selectRouterLink(selectedRouterLink: number) {
+    this.selectedRouterLink = selectedRouterLink;
   }
 }

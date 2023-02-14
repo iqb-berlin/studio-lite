@@ -1,0 +1,15 @@
+<nav mat-tab-nav-bar>
+  <a #rla="routerLinkActive"
+     (isActiveChange)="onActiveRouterLinkChange($event)"
+     *ngFor="let link of navLinks"
+     [active]="rla.isActive"
+     [disabled]="selectedUnitId === 0"
+     [routerLink]="link"
+     mat-tab-link
+     routerLinkActive="active-link">
+    {{'workspace.routes.' + link | translate}}
+  </a>
+</nav>
+<div fxFlex>
+  <router-outlet></router-outlet>
+</div>

@@ -66,20 +66,9 @@
     <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
            multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
   </div>
-  <div fxFlex class="unitdatacontainer" fxLayout="column">
-    <nav mat-tab-nav-bar>
-      <a mat-tab-link
-         *ngFor="let link of navLinks"
-         [routerLink]="link"
-         routerLinkActive="active-link"
-         #rla="routerLinkActive"
-         [disabled]="(workspaceService.selectedUnit$ | async) === 0"
-         [active]="rla.isActive">
-        {{'workspace.routes.' + link | translate}}
-      </a>
-    </nav>
-    <div fxFlex>
-      <router-outlet></router-outlet>
-    </div>
-  </div>
+ <studio-lite-unit-data fxFlex fxLayout="column"
+   [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
+   [navLinks]="navLinks"
+   (selectedRouterIndexChange)="selectRouterLink($event)">
+ </studio-lite-unit-data>
 </div>
