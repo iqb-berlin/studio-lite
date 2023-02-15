@@ -11,11 +11,11 @@ import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 
 @Component({
-  selector: 'studio-lite-delete-unit',
-  templateUrl: './delete-unit.component.html',
-  styleUrls: ['./delete-unit.component.scss']
+  selector: 'studio-lite-delete-unit-button',
+  templateUrl: './delete-unit-button.component.html',
+  styleUrls: ['./delete-unit-button.component.scss']
 })
-export class DeleteUnitComponent {
+export class DeleteUnitButtonComponent {
   @Input() selectedRouterLink!: number;
   @Input() navLinks!: string[];
   @Output() unitListUpdate: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();

@@ -57,7 +57,7 @@ import { UnitListComponent } from './components/unit-list/unit-list.component';
 import { UnitChangeAreaComponent } from './components/unit-change-area/unit-change-area.component';
 import { UnitDataComponent } from './components/unit-data/unit-data.component';
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
-import { DeleteUnitComponent } from './components/delete-unit/delete-unit.component';
+import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
 import { EditUnitComponent } from './components/edit-unit/edit-unit.component';
 
 @NgModule({
@@ -118,7 +118,7 @@ import { EditUnitComponent } from './components/edit-unit/edit-unit.component';
     UnitChangeAreaComponent,
     UnitDataComponent,
     AddUnitButtonComponent,
-    DeleteUnitComponent,
+    DeleteUnitButtonComponent,
     EditUnitComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],

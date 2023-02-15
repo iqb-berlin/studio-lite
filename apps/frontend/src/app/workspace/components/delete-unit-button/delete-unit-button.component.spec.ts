@@ -5,15 +5,15 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { environment } from '../../../../environments/environment';
-import { DeleteUnitComponent } from './delete-unit.component';
+import { DeleteUnitButtonComponent } from './delete-unit-button.component';
 
-describe('DeleteUnitComponent', () => {
-  let component: DeleteUnitComponent;
-  let fixture: ComponentFixture<DeleteUnitComponent>;
+describe('DeleteUnitButtonComponent', () => {
+  let component: DeleteUnitButtonComponent;
+  let fixture: ComponentFixture<DeleteUnitButtonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DeleteUnitComponent],
+      declarations: [DeleteUnitButtonComponent],
       imports: [
         RouterTestingModule,
         HttpClientModule,
@@ -27,7 +27,7 @@ describe('DeleteUnitComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DeleteUnitComponent);
+    fixture = TestBed.createComponent(DeleteUnitButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
