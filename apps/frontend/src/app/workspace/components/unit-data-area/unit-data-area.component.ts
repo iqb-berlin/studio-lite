@@ -4,11 +4,11 @@ import {
 import { MatTabNav } from '@angular/material/tabs';
 
 @Component({
-  selector: 'studio-lite-unit-data',
-  templateUrl: './unit-data.component.html',
-  styleUrls: ['./unit-data.component.scss']
+  selector: 'studio-lite-unit-data-area',
+  templateUrl: './unit-data-area.component.html',
+  styleUrls: ['./unit-data-area.component.scss']
 })
-export class UnitDataComponent {
+export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
   @Input() selectedUnitId!: number;
   @Input() navLinks!: string[];

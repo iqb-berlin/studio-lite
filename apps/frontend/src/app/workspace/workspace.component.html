@@ -30,9 +30,9 @@
     </div>
 
   </div>
- <studio-lite-unit-data fxFlex fxLayout="column"
+ <studio-lite-unit-data-area fxFlex fxLayout="column"
    [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
    [navLinks]="navLinks"
    (selectedRouterIndexChange)="selectRouterLink($event)">
- </studio-lite-unit-data>
+ </studio-lite-unit-data-area>
 </div>
