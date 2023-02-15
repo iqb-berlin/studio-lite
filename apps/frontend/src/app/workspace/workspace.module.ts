@@ -45,9 +45,7 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
 import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
 import { UserListComponent } from './dialogs/components/user-list.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
-import {
-  PagingModeSelectionComponent
-} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
+import { PagingModeSelectionComponent } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
@@ -58,6 +56,7 @@ import { UnitChangeComponent } from './components/unit-change/unit-change.compon
 import { UnitDataComponent } from './components/unit-data/unit-data.component';
 import { AddUnitComponent } from './components/add-unit/add-unit.component';
 import { DeleteUnitComponent } from './components/delete-unit/delete-unit.component';
+import { EditUnitComponent } from './components/edit-unit/edit-unit.component';
 
 @NgModule({
   imports: [
@@ -117,7 +116,8 @@ import { DeleteUnitComponent } from './components/delete-unit/delete-unit.compon
     UnitChangeComponent,
     UnitDataComponent,
     AddUnitComponent,
-    DeleteUnitComponent
+    DeleteUnitComponent,
+    EditUnitComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

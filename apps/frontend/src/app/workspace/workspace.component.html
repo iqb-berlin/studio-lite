@@ -10,7 +10,6 @@
     </studio-lite-unit-list>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div fxLayout="row">
-
       <studio-lite-add-unit fxFlex="33"
                             [navLinks]="navLinks"
                             [selectedRouterLink]="selectedRouterLink"
@@ -23,41 +22,11 @@
                                (unitListUpdate)="updateUnitList($event)">
       </studio-lite-delete-unit>
 
-      <button mat-button [matMenuTriggerFor]="menuOther" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
-        <mat-icon>menu</mat-icon>
-      </button>
-
-
-      <mat-menu #menuOther="matMenu">
-        <button mat-menu-item (click)="settings()" *ngIf="workspaceService.isWorkspaceGroupAdmin">
-          <mat-icon>settings</mat-icon>Einstellungen
-        </button>
-        <button mat-menu-item (click)="manageGroups()">
-          <mat-icon>format_align_right</mat-icon>Gruppen verwalten
-        </button>
-        <button mat-menu-item (click)="reviews()">
-          <mat-icon>slideshow</mat-icon>Aufgabenfolgen
-        </button>
-        <button mat-menu-item (click)="userList()">
-          <mat-icon>people_alt</mat-icon>Nutzer:innen
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="exportUnit()"
-                matTooltip="Aufgaben als Datei herunterladen"
-                matTooltipPosition="right">
-          <mat-icon>get_app</mat-icon>Export
-        </button>
-        <button mat-menu-item (click)="moveOrCopyUnit(true)"
-                matTooltip="Aufgaben in anderen Arbeitsbereich verschieben"
-                matTooltipPosition="right">
-          <mat-icon>swap_horiz</mat-icon>Verschieben
-        </button>
-        <button mat-menu-item (click)="moveOrCopyUnit(false)"
-                matTooltip="Aufgaben in anderen Arbeitsbereich kopieren"
-                matTooltipPosition="right">
-          <mat-icon>content_copy</mat-icon>Kopieren nach...
-        </button>
-      </mat-menu>
+      <studio-lite-edit-unit fxFlex
+                             [navLinks]="navLinks"
+                             [selectedRouterLink]="selectedRouterLink"
+                             (unitListUpdate)="updateUnitList($event)">
+      </studio-lite-edit-unit>
     </div>
 
   </div>
