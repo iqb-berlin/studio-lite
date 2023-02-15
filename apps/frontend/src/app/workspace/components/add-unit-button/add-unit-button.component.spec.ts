@@ -6,15 +6,15 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { environment } from '../../../../environments/environment';
-import { AddUnitComponent } from './add-unit.component';
+import { AddUnitButtonComponent } from './add-unit-button.component';
 
-describe('AddUnitComponent', () => {
-  let component: AddUnitComponent;
-  let fixture: ComponentFixture<AddUnitComponent>;
+describe('AddUnitButtonComponent', () => {
+  let component: AddUnitButtonComponent;
+  let fixture: ComponentFixture<AddUnitButtonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AddUnitComponent],
+      declarations: [AddUnitButtonComponent],
       imports: [
         RouterTestingModule,
         HttpClientModule,
@@ -29,7 +29,7 @@ describe('AddUnitComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AddUnitComponent);
+    fixture = TestBed.createComponent(AddUnitButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

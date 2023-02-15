@@ -16,11 +16,11 @@ import { BackendService as AppBackendService } from '../../../backend.service';
 import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
 
 @Component({
-  selector: 'studio-lite-add-unit',
-  templateUrl: './add-unit.component.html',
-  styleUrls: ['./add-unit.component.scss']
+  selector: 'studio-lite-add-button-unit',
+  templateUrl: './add-unit-button.component.html',
+  styleUrls: ['./add-unit-button.component.scss']
 })
-export class AddUnitComponent implements OnDestroy {
+export class AddUnitButtonComponent implements OnDestroy {
   @Input() selectedRouterLink!: number;
   @Input() navLinks!: string[];
   @Output() unitListUpdate: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();

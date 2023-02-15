@@ -45,7 +45,9 @@ import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component
 import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
 import { UserListComponent } from './dialogs/components/user-list.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
-import { PagingModeSelectionComponent } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
+import {
+  PagingModeSelectionComponent
+} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
@@ -54,7 +56,7 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
 import { UnitListComponent } from './components/unit-list/unit-list.component';
 import { UnitChangeAreaComponent } from './components/unit-change-area/unit-change-area.component';
 import { UnitDataComponent } from './components/unit-data/unit-data.component';
-import { AddUnitComponent } from './components/add-unit/add-unit.component';
+import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
 import { DeleteUnitComponent } from './components/delete-unit/delete-unit.component';
 import { EditUnitComponent } from './components/edit-unit/edit-unit.component';
 
@@ -115,7 +117,7 @@ import { EditUnitComponent } from './components/edit-unit/edit-unit.component';
     UnitListComponent,
     UnitChangeAreaComponent,
     UnitDataComponent,
-    AddUnitComponent,
+    AddUnitButtonComponent,
     DeleteUnitComponent,
     EditUnitComponent
   ],
