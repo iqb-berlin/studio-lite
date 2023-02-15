@@ -15,7 +15,7 @@ import { RequestMessageDialogComponent } from '../../../components/request-messa
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
-  selector: 'studio-lite-add-button-unit',
+  selector: 'studio-lite-add-unit-button',
   templateUrl: './add-unit-button.component.html',
   styleUrls: ['./add-unit-button.component.scss']
 })

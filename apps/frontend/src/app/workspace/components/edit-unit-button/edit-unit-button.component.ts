@@ -21,7 +21,7 @@ import { AppService } from '../../../app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
-  selector: 'studio-lite-edit-button-unit',
+  selector: 'studio-lite-edit-unit-button',
   templateUrl: './edit-unit-button.component.html',
   styleUrls: ['./edit-unit-button.component.scss']
 })

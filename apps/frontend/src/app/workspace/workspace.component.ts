@@ -1,7 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
@@ -13,9 +12,7 @@ import { SelectUnitDirective } from './directives/select-unit.directive';
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.css']
 })
-export class WorkspaceComponent extends SelectUnitDirective implements OnInit, OnDestroy {
-  private ngUnsubscribe = new Subject<void>();
-
+export class WorkspaceComponent extends SelectUnitDirective implements OnInit {
   uploadProcessId = '';
   override navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
   override selectedRouterLink = -1;
@@ -47,17 +44,6 @@ export class WorkspaceComponent extends SelectUnitDirective implements OnInit, O
     const workspaceKey = 'ws';
     this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params[workspaceKey]);
 
-    this.route.params
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(params => {
-        this.workspaceService.resetUnitData();
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        const unitParam = params['u'];
-        let unitParamNum = unitParam ? Number(unitParam) : 0;
-        if (Number.isNaN(unitParamNum)) unitParamNum = 0;
-        this.workspaceService.selectedUnit$.next(unitParamNum);
-      });
-
     this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspaceId).subscribe(
       wResponse => {
         if (wResponse) {
@@ -77,14 +63,5 @@ export class WorkspaceComponent extends SelectUnitDirective implements OnInit, O
         }
       }
     );
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
-  }
-
-  selectRouterLink(selectedRouterLink: number) {
-    this.selectedRouterLink = selectedRouterLink;
   }
 }

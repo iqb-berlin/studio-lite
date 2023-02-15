@@ -1,37 +1,12 @@
 <div class="authoring-body" fxLayout="row" fxLayoutAlign="space-between stretch">
-
-  <div class="navibar" fxLayout="column" fxFlex="200px">
-
-    <studio-lite-unit-save-button></studio-lite-unit-save-button>
-    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <studio-lite-unit-list fxFlex
-                           class="unit-list"
-                           [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
-                           [navLinks]="navLinks">
-    </studio-lite-unit-list>
-    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <div fxLayout="row">
-      <studio-lite-add-button-unit fxFlex="33"
-                                   [navLinks]="navLinks"
-                                   [selectedRouterLink]="selectedRouterLink">
-      </studio-lite-add-button-unit>
-
-      <studio-lite-delete-unit-button fxFlex="33"
-                                      [navLinks]="navLinks"
-                                      [selectedRouterLink]="selectedRouterLink">
-      </studio-lite-delete-unit-button>
-
-      <studio-lite-edit-button-unit fxFlex
-                                    [navLinks]="navLinks"
-                                    [selectedRouterLink]="selectedRouterLink">
-      </studio-lite-edit-button-unit>
-    </div>
-
-  </div>
+  <studio-lite-unit-list-area
+    [navLinks]="navLinks"
+    [selectedRouterLink]="selectedRouterLink">
+  </studio-lite-unit-list-area>
 
   <studio-lite-unit-data-area fxFlex fxLayout="column"
    [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
    [navLinks]="navLinks"
-   (selectedRouterIndexChange)="selectRouterLink($event)">
+   (selectedRouterIndexChange)="selectedRouterLink = $event">
  </studio-lite-unit-data-area>
 </div>
