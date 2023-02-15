@@ -5,11 +5,11 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { WorkspaceService } from '../../workspace.service';
 
 @Component({
-  selector: 'studio-lite-unit-change',
-  templateUrl: './unit-change.component.html',
-  styleUrls: ['./unit-change.component.scss']
+  selector: 'studio-lite-unit-change-area',
+  templateUrl: './unit-change-area.component.html',
+  styleUrls: ['./unit-change-area.component.scss']
 })
-export class UnitChangeComponent {
+export class UnitChangeAreaComponent {
   constructor(
     public workspaceService: WorkspaceService,
     private deleteConfirmDialog: MatDialog,
