@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { BackendService } from '../../backend.service';
@@ -9,8 +10,9 @@ import { BackendService } from '../../backend.service';
   templateUrl: './unit-list.component.html',
   styleUrls: ['./unit-list.component.scss']
 })
-export class UnitListComponent extends SelectUnitDirective {
+export class UnitListComponent extends SelectUnitDirective implements OnDestroy {
   @Input() selectedUnitId!: number;
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     public workspaceService: WorkspaceService,
@@ -19,5 +21,13 @@ export class UnitListComponent extends SelectUnitDirective {
     public backendService: BackendService
   ) {
     super();
+    this.workspaceService.onCommentsUpdated
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.updateUnitList());
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

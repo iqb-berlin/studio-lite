@@ -1,7 +1,7 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, takeUntil, Subject } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
@@ -15,7 +15,7 @@ import { SelectUnitDirective } from './directives/select-unit.directive';
 })
 export class WorkspaceComponent extends SelectUnitDirective implements OnInit, OnDestroy {
   private routingSubscription: Subscription | null = null;
-  private ngUnsubscribe = new Subject<void>();
+
   uploadProcessId = '';
   override navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
   override selectedRouterLink = -1;
@@ -45,8 +45,8 @@ export class WorkspaceComponent extends SelectUnitDirective implements OnInit, O
     setTimeout(() => {
       this.workspaceService.resetUnitList([]);
       // eslint-disable-next-line @typescript-eslint/dot-notation
-
-      this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params['ws']);
+      const workspaceKey = 'ws';
+      this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params[workspaceKey]);
 
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
@@ -76,10 +76,6 @@ export class WorkspaceComponent extends SelectUnitDirective implements OnInit, O
           }
         }
       );
-
-      this.workspaceService.onCommentsUpdated
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => this.updateUnitList());
     });
   }
 
@@ -87,8 +83,6 @@ export class WorkspaceComponent extends SelectUnitDirective implements OnInit, O
     if (this.routingSubscription !== null) {
       this.routingSubscription.unsubscribe();
     }
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
   }
 
   selectRouterLink(selectedRouterLink: number) {
