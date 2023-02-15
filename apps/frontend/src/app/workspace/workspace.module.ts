@@ -54,7 +54,7 @@ import { ReviewsComponent } from './dialogs/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
 import { ReviewConfigEditComponent } from './dialogs/components/review-config-edit.component';
 import { UnitListComponent } from './components/unit-list/unit-list.component';
-import { UnitChangeAreaComponent } from './components/unit-change-area/unit-change-area.component';
+import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
 import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
@@ -115,7 +115,7 @@ import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit
     ReviewsComponent,
     ReviewConfigEditComponent,
     UnitListComponent,
-    UnitChangeAreaComponent,
+    UnitSaveButtonComponent,
     UnitDataAreaComponent,
     AddUnitButtonComponent,
     DeleteUnitButtonComponent,

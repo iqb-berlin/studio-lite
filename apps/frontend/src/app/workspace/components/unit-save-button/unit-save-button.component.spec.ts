@@ -4,15 +4,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { environment } from '../../../../environments/environment';
-import { UnitChangeAreaComponent } from './unit-change-area.component';
+import { UnitSaveButtonComponent } from './unit-save-button.component';
 
-describe('UnitChangeAreaComponent', () => {
-  let component: UnitChangeAreaComponent;
-  let fixture: ComponentFixture<UnitChangeAreaComponent>;
+describe('UnitSaveButtonComponent', () => {
+  let component: UnitSaveButtonComponent;
+  let fixture: ComponentFixture<UnitSaveButtonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitChangeAreaComponent],
+      declarations: [UnitSaveButtonComponent],
       imports: [
         MatIconModule,
         MatSnackBarModule,
@@ -25,7 +25,7 @@ describe('UnitChangeAreaComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitChangeAreaComponent);
+    fixture = TestBed.createComponent(UnitSaveButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
