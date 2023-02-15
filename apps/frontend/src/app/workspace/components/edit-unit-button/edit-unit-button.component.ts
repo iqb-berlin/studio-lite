@@ -22,11 +22,11 @@ import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 
 @Component({
-  selector: 'studio-lite-edit-unit',
-  templateUrl: './edit-unit.component.html',
-  styleUrls: ['./edit-unit.component.scss']
+  selector: 'studio-lite-edit-button-unit',
+  templateUrl: './edit-unit-button.component.html',
+  styleUrls: ['./edit-unit-button.component.scss']
 })
-export class EditUnitComponent {
+export class EditUnitButtonComponent {
   @Input() selectedRouterLink!: number;
   @Input() navLinks!: string[];
   @Output() unitListUpdate: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();

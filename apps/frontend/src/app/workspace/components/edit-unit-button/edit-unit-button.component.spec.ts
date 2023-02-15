@@ -8,15 +8,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { environment } from '../../../../environments/environment';
-import { EditUnitComponent } from './edit-unit.component';
+import { EditUnitButtonComponent } from './edit-unit-button.component';
 
-describe('EditUnitComponent', () => {
-  let component: EditUnitComponent;
-  let fixture: ComponentFixture<EditUnitComponent>;
+describe('EditUnitButtonComponent', () => {
+  let component: EditUnitButtonComponent;
+  let fixture: ComponentFixture<EditUnitButtonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EditUnitComponent],
+      declarations: [EditUnitButtonComponent],
       imports: [
         RouterTestingModule,
         HttpClientModule,
@@ -33,7 +33,7 @@ describe('EditUnitComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(EditUnitComponent);
+    fixture = TestBed.createComponent(EditUnitButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
