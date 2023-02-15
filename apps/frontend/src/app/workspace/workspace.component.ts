@@ -2,34 +2,35 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, takeUntil, Subject } from 'rxjs';
-import { HttpParams } from '@angular/common/http';
 import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../app.service';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
 import { WorkspaceService } from './workspace.service';
+import { SelectUnitDirective } from './directives/select-unit.directive';
 
 @Component({
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.css']
 })
-export class WorkspaceComponent implements OnInit, OnDestroy {
+export class WorkspaceComponent extends SelectUnitDirective implements OnInit, OnDestroy {
   private routingSubscription: Subscription | null = null;
   private ngUnsubscribe = new Subject<void>();
   uploadProcessId = '';
-  navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
-  selectedRouterLink = -1;
+  override navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
+  override selectedRouterLink = -1;
 
   constructor(
     public appService: AppService,
     public workspaceService: WorkspaceService,
-    private backendService: BackendService,
+    public backendService: BackendService,
     private appBackendService: AppBackendService,
     private moduleService: ModuleService,
     private snackBar: MatSnackBar,
-    private router: Router,
-    private route: ActivatedRoute
+    public router: Router,
+    public route: ActivatedRoute
   ) {
+    super();
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
     this.workspaceService.workspaceSettings = {
       defaultEditor: '',
@@ -44,7 +45,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.workspaceService.resetUnitList([]);
       // eslint-disable-next-line @typescript-eslint/dot-notation
+
       this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params['ws']);
+
       this.routingSubscription = this.route.params.subscribe(params => {
         this.workspaceService.resetUnitData();
         // eslint-disable-next-line @typescript-eslint/dot-notation
@@ -73,40 +76,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         }
       );
+
       this.workspaceService.onCommentsUpdated
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(() => this.updateUnitList());
     });
-  }
-
-  updateUnitList(unitToSelect?: number): void {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('withLastSeenCommentTimeStamp', true);
-    this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId).subscribe(groups => {
-      this.workspaceService.workspaceSettings.unitGroups = groups;
-    });
-    this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams).subscribe(
-      uResponse => {
-        this.workspaceService.resetUnitList(uResponse);
-        if (unitToSelect) this.selectUnit(unitToSelect);
-        if (uResponse.length === 0) {
-          this.workspaceService.selectedUnit$.next(0);
-          this.router.navigate([`/a/${this.workspaceService.selectedWorkspaceId}`]);
-        }
-      }
-    );
-  }
-
-  async selectUnit(unitId?: number): Promise<boolean> {
-    if (unitId && unitId > 0) {
-      const selectedTab = this.selectedRouterLink;
-      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
-      return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
-    }
-    return this.router.navigate(
-      [`a/${this.workspaceService.selectedWorkspaceId}`],
-      { relativeTo: this.route.root }
-    );
   }
 
   ngOnDestroy(): void {

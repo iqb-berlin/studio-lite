@@ -1,6 +1,4 @@
-import {
-  Component, EventEmitter, Input, Output
-} from '@angular/core';
+import { Component } from '@angular/core';
 import { lastValueFrom, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,26 +7,25 @@ import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.c
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
+import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
   selector: 'studio-lite-delete-unit-button',
   templateUrl: './delete-unit-button.component.html',
   styleUrls: ['./delete-unit-button.component.scss']
 })
-export class DeleteUnitButtonComponent {
-  @Input() selectedRouterLink!: number;
-  @Input() navLinks!: string[];
-  @Output() unitListUpdate: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();
-
+export class DeleteUnitButtonComponent extends SelectUnitDirective {
   constructor(
+    public workspaceService: WorkspaceService,
+    public router: Router,
+    public route: ActivatedRoute,
     private appService: AppService,
-    private workspaceService: WorkspaceService,
-    private backendService: BackendService,
+    public backendService: BackendService,
     private snackBar: MatSnackBar,
-    private selectUnitDialog: MatDialog,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+    private selectUnitDialog: MatDialog
+  ) {
+    super();
+  }
 
   deleteUnit(): void {
     this.deleteUnitDialog().then((unitsToDelete: number[] | boolean) => {
@@ -41,7 +38,7 @@ export class DeleteUnitButtonComponent {
             // todo db-error?
             if (ok) {
               this.snackBar.open('Aufgabe(n) gelöscht', '', { duration: 1000 });
-              this.unitListUpdate.emit();
+              this.updateUnitList();
             } else {
               this.snackBar.open('Konnte Aufgabe(n) nicht löschen.', 'Fehler', { duration: 3000 });
               this.appService.dataLoading = false;
@@ -65,30 +62,19 @@ export class DeleteUnitButtonComponent {
           multiple: true
         }
       });
-      return lastValueFrom(dialogRef.afterClosed().pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            const dialogComponent = dialogRef.componentInstance;
-            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-              return dialogComponent.selectedUnitIds;
+      return lastValueFrom(dialogRef.afterClosed()
+        .pipe(
+          map(dialogResult => {
+            if (typeof dialogResult !== 'undefined') {
+              const dialogComponent = dialogRef.componentInstance;
+              if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+                return dialogComponent.selectedUnitIds;
+              }
             }
-          }
-          return false;
-        })
-      ));
+            return false;
+          })
+        ));
     }
     return false;
-  }
-
-  async selectUnit(unitId?: number): Promise<boolean> {
-    if (unitId && unitId > 0) {
-      const selectedTab = this.selectedRouterLink;
-      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
-      return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
-    }
-    return this.router.navigate(
-      [`a/${this.workspaceService.selectedWorkspaceId}`],
-      { relativeTo: this.route.root }
-    );
   }
 }

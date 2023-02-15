@@ -1,6 +1,4 @@
-import {
-  Component, EventEmitter, Input, OnDestroy, Output
-} from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CreateUnitDto, UnitInListDto } from '@studio-lite-lib/api-dto';
 import { lastValueFrom, map, Subscription } from 'rxjs';
 import { UntypedFormGroup } from '@angular/forms';
@@ -14,29 +12,29 @@ import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 import { BackendService as AppBackendService } from '../../../backend.service';
 import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
+import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
   selector: 'studio-lite-add-button-unit',
   templateUrl: './add-unit-button.component.html',
   styleUrls: ['./add-unit-button.component.scss']
 })
-export class AddUnitButtonComponent implements OnDestroy {
-  @Input() selectedRouterLink!: number;
-  @Input() navLinks!: string[];
-  @Output() unitListUpdate: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();
+export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   private uploadSubscription: Subscription | null = null;
   constructor(
-    private workspaceService: WorkspaceService,
+    public workspaceService: WorkspaceService,
+    public router: Router,
+    public route: ActivatedRoute,
     private appService: AppService,
-    private backendService: BackendService,
+    public backendService: BackendService,
     private snackBar: MatSnackBar,
     private appBackendService: AppBackendService,
     private selectUnitDialog: MatDialog,
     private newUnitDialog: MatDialog,
-    private router: Router,
-    private route: ActivatedRoute,
     private uploadReportDialog: MatDialog
-  ) {}
+  ) {
+    super();
+  }
 
   addUnitFromExisting(): void {
     this.addUnitFromExistingDialog().then((unitSource: UnitInListDto | boolean) => {
@@ -58,7 +56,7 @@ export class AddUnitButtonComponent implements OnDestroy {
                 if (respOk) {
                   this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
                   this.addUnitGroup(createUnitDto.groupName);
-                  this.unitListUpdate.emit(respOk);
+                  this.updateUnitList(respOk);
                 } else {
                   this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
                 }
@@ -91,7 +89,7 @@ export class AddUnitButtonComponent implements OnDestroy {
             if (respOk) {
               this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
               this.addUnitGroup(createUnitDto.groupName);
-              this.unitListUpdate.emit(respOk);
+              this.updateUnitList(respOk);
             } else {
               this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
             }
@@ -174,18 +172,6 @@ export class AddUnitButtonComponent implements OnDestroy {
     return false;
   }
 
-  async selectUnit(unitId?: number): Promise<boolean> {
-    if (unitId && unitId > 0) {
-      const selectedTab = this.selectedRouterLink;
-      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
-      return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
-    }
-    return this.router.navigate(
-      [`a/${this.workspaceService.selectedWorkspaceId}`],
-      { relativeTo: this.route.root }
-    );
-  }
-
   onFileSelected(targetElement: EventTarget | null) {
     if (targetElement) {
       const inputElement = targetElement as HTMLInputElement;
@@ -211,11 +197,11 @@ export class AddUnitButtonComponent implements OnDestroy {
               });
               dialogRef.afterClosed().subscribe(() => {
                 this.resetUpload();
-                this.unitListUpdate.emit();
+                this.updateUnitList();
               });
             } else {
               this.resetUpload();
-              this.unitListUpdate.emit();
+              this.updateUnitList();
             }
           }
         });

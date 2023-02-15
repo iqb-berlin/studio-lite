@@ -1,6 +1,4 @@
-import {
-  Component, EventEmitter, Input, Output
-} from '@angular/core';
+import { Component } from '@angular/core';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
@@ -20,34 +18,33 @@ import { EditWorkspaceSettingsComponent } from '../../../components/edit-workspa
 import { BackendService as AppBackendService } from '../../../backend.service';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
+import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
   selector: 'studio-lite-edit-button-unit',
   templateUrl: './edit-unit-button.component.html',
   styleUrls: ['./edit-unit-button.component.scss']
 })
-export class EditUnitButtonComponent {
-  @Input() selectedRouterLink!: number;
-  @Input() navLinks!: string[];
-  @Output() unitListUpdate: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();
-
+export class EditUnitButtonComponent extends SelectUnitDirective {
   constructor(
     public workspaceService: WorkspaceService,
+    public router: Router,
+    public route: ActivatedRoute,
     private editSettingsDialog: MatDialog,
     private appBackendService: AppBackendService,
     private snackBar: MatSnackBar,
     private selectUnitDialog: MatDialog,
-    private backendService: BackendService,
+    public backendService: BackendService,
     private uploadReportDialog: MatDialog,
     private appService: AppService,
     private translate: TranslateService,
     private messsageDialog: MatDialog,
     private showUsersDialog: MatDialog,
     private groupDialog: MatDialog,
-    private reviewsDialog: MatDialog,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+    private reviewsDialog: MatDialog
+  ) {
+    super();
+  }
 
   settings(): void {
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
@@ -107,15 +104,13 @@ export class EditUnitButtonComponent {
                   data: uploadStatus
                 });
                 dialogRef2.afterClosed().subscribe(() => {
-                  // this.updateUnitList();
-                  this.unitListUpdate.emit();
+                  this.updateUnitList();
                 });
               } else {
                 this.snackBar.open(
                   `Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', { duration: 1000 }
                 );
-                this.unitListUpdate.emit();
-                // this.updateUnitList();
+                this.updateUnitList();
               }
             });
           }
@@ -189,21 +184,8 @@ export class EditUnitButtonComponent {
         width: '1000px',
         height: '800px'
       }).afterClosed().subscribe(() => {
-        // this.updateUnitList();
-        this.unitListUpdate.emit();
+        this.updateUnitList();
       });
     }
-  }
-
-  async selectUnit(unitId?: number): Promise<boolean> {
-    if (unitId && unitId > 0) {
-      const selectedTab = this.selectedRouterLink;
-      const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
-      return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
-    }
-    return this.router.navigate(
-      [`a/${this.workspaceService.selectedWorkspaceId}`],
-      { relativeTo: this.route.root }
-    );
   }
 }
