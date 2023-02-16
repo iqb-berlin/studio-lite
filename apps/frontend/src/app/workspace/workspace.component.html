@@ -5,7 +5,6 @@
   </studio-lite-unit-list-area>
 
   <studio-lite-unit-data-area fxFlex fxLayout="column"
-   [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
    [navLinks]="navLinks"
    (selectedRouterIndexChange)="selectedRouterLink = $event">
  </studio-lite-unit-data-area>

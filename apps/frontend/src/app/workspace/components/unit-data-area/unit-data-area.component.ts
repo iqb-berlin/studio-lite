@@ -2,6 +2,7 @@ import {
   Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { MatTabNav } from '@angular/material/tabs';
+import { WorkspaceService } from '../../workspace.service';
 
 @Component({
   selector: 'studio-lite-unit-data-area',
@@ -10,9 +11,11 @@ import { MatTabNav } from '@angular/material/tabs';
 })
 export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
-  @Input() selectedUnitId!: number;
   @Input() navLinks!: string[];
   @Output() selectedRouterIndexChange: EventEmitter<number> = new EventEmitter<number>();
+
+  constructor(public workspaceService: WorkspaceService) { }
+
   onActiveRouterLinkChange(isActive: boolean) {
     if (this.nav && isActive) {
       this.selectedRouterIndexChange.emit(this.nav.selectedIndex);

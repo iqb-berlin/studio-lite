@@ -1,12 +1,12 @@
 <nav mat-tab-nav-bar>
-  <a #rla="routerLinkActive"
-     (isActiveChange)="onActiveRouterLinkChange($event)"
-     *ngFor="let link of navLinks"
-     [active]="rla.isActive"
-     [disabled]="selectedUnitId === 0"
-     [routerLink]="link"
+  <a *ngFor="let link of navLinks"
      mat-tab-link
-     routerLinkActive="active-link">
+     routerLinkActive="active-link"
+     [disabled]="(workspaceService.selectedUnit$ | async) === 0"
+     [routerLink]="link"
+     #rla="routerLinkActive"
+     [active]="rla.isActive"
+     (isActiveChange)="onActiveRouterLinkChange($event)">
     {{'workspace.routes.' + link | translate}}
   </a>
 </nav>
