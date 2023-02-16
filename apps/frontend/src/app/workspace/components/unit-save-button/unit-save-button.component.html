@@ -1,10 +1,18 @@
-<div fxLayout="row" style="margin: 2px">
-  <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
-          [disabled]="!workspaceService.isChanged()" matTooltipPosition="below">
+<div class="fx-row-start-stretch" style="margin: 2px">
+  <button mat-button
+          [disabled]="!workspaceService.isChanged()"
+          matTooltip="Aufgabenänderungen verwerfen"
+          matTooltipPosition="below"
+          (click)="discardChanges()">
     <mat-icon>close</mat-icon>
   </button>
-  <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
-          [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
-    Speichern <mat-icon>save</mat-icon>
+  <button mat-raised-button
+          class="fx-flex"
+          [disabled]="!workspaceService.isChanged()"
+          matTooltip="Aufgabe speichern"
+          matTooltipPosition="above"
+          (click)="saveUnitData()">
+    Speichern
+    <mat-icon>save</mat-icon>
   </button>
 </div>
