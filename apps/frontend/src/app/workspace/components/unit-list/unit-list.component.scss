@@ -24,3 +24,9 @@
   border-radius: 50%;
   background-color: #FF5500;
 }
+
+.mat-nav-list, .mat-button-toggle-group {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+

@@ -6,21 +6,8 @@
   padding: 0;
 }
 
-
 .import-units-log {
   background-color:whitesmoke;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-
-
-.unit-list {
-  overflow: auto;
-}
-
-
-.mat-nav-list, .mat-button-toggle-group {
   overflow-x: hidden;
   overflow-y: auto;
 }

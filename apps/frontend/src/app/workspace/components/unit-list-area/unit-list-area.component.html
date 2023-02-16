@@ -1,25 +1,19 @@
-<div class="navibar" fxLayout="column" fxFlex="200px">
+<div class="fx-column-start-stretch navibar">
   <studio-lite-unit-save-button></studio-lite-unit-save-button>
-  <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-  <studio-lite-unit-list fxFlex
-                         class="unit-list"
+  <studio-lite-unit-list class="unit-list fx-flex"
                          [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
                          [navLinks]="navLinks">
   </studio-lite-unit-list>
-  <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-  <div fxLayout="row">
-    <studio-lite-add-unit-button fxFlex="33"
-                                 [navLinks]="navLinks"
+  <div class="fx-row-start-stretch">
+    <studio-lite-add-unit-button [navLinks]="navLinks"
                                  [selectedRouterLink]="selectedRouterLink">
     </studio-lite-add-unit-button>
 
-    <studio-lite-delete-unit-button fxFlex="33"
-                                    [navLinks]="navLinks"
+    <studio-lite-delete-unit-button [navLinks]="navLinks"
                                     [selectedRouterLink]="selectedRouterLink">
     </studio-lite-delete-unit-button>
 
-    <studio-lite-edit-unit-button fxFlex
-                                  [navLinks]="navLinks"
+    <studio-lite-edit-unit-button [navLinks]="navLinks"
                                   [selectedRouterLink]="selectedRouterLink">
     </studio-lite-edit-unit-button>
   </div>
