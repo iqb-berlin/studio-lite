@@ -1,4 +1,6 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import {
+  Component, Input, OnDestroy, OnInit
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
@@ -10,7 +12,7 @@ import { BackendService } from '../../backend.service';
   templateUrl: './unit-list.component.html',
   styleUrls: ['./unit-list.component.scss']
 })
-export class UnitListComponent extends SelectUnitDirective implements OnDestroy {
+export class UnitListComponent extends SelectUnitDirective implements OnInit, OnDestroy {
   @Input() selectedUnitId!: number;
   private ngUnsubscribe = new Subject<void>();
 
@@ -29,5 +31,9 @@ export class UnitListComponent extends SelectUnitDirective implements OnDestroy 
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+  }
+
+  ngOnInit(): void {
+    this.updateUnitList();
   }
 }
