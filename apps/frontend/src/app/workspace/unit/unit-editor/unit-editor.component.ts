@@ -49,7 +49,8 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
                 msgData.metadata.specVersion.match(/\d+/) :
                 msgData.apiVersion.match(/\d+/);
               if (majorVersion.length > 0) {
-                this.editorApiVersion = Number(majorVersion[0]);
+                const majorVersionNumber = Number(majorVersion[0]);
+                this.editorApiVersion = majorVersionNumber < 3 ? 2 : majorVersionNumber;
               } else {
                 this.editorApiVersion = 2;
               }
