@@ -8,17 +8,21 @@ import { Component, ElementRef, Input } from '@angular/core';
 export class SplitterPaneComponent {
   size: number = 0;
   index: number = 0;
+  isLast: boolean = false;
   @Input() initialSize: number | 'auto' = 'auto';
   @Input() minSize: number = 0;
   @Input() maxSize!: number;
 
   constructor(public elementRef: ElementRef) { }
 
-  init(index: number): void {
+  init(index: number, isLast: boolean): void {
     this.index = index;
+    this.isLast = isLast;
     this.elementRef.nativeElement.style.order = index;
     if (this.initialSize !== 'auto') {
       this.setSize(this.initialSize);
+    }
+    if (this.initialSize !== 'auto' || this.isLast) {
       this.setStyle(this.size);
     }
   }
@@ -37,8 +41,8 @@ export class SplitterPaneComponent {
   }
 
   setStyle(paneSize: number): void {
-    this.elementRef.nativeElement.style.flexShrink = 0;
-    this.elementRef.nativeElement.style.flexGrow = 0;
-    this.elementRef.nativeElement.style.flexBasis = `${paneSize}px`;
+    this.elementRef.nativeElement.style.flexShrink = this.isLast ? 1 : 0;
+    this.elementRef.nativeElement.style.flexGrow = this.isLast ? 1 : 0;
+    this.elementRef.nativeElement.style.flexBasis = this.isLast ? 'auto' : `${paneSize}px`;
   }
 }
