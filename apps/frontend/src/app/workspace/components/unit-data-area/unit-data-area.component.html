@@ -1,0 +1,17 @@
+<div class="fx-column-start-stretch unit-data">
+  <nav mat-tab-nav-bar>
+    <a *ngFor="let link of navLinks"
+       mat-tab-link
+       routerLinkActive="active-link"
+       [disabled]="(workspaceService.selectedUnit$ | async) === 0"
+       [routerLink]="link"
+       #rla="routerLinkActive"
+       [active]="rla.isActive"
+       (isActiveChange)="onActiveRouterLinkChange($event)">
+      {{'workspace.routes.' + link | translate}}
+    </a>
+  </nav>
+  <div class="fx-flex">
+    <router-outlet></router-outlet>
+  </div>
+</div>

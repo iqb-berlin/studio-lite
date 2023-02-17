@@ -24,14 +24,14 @@ export class SplitterGutterComponent {
     }
   }
 
-  @HostListener('document:pointermove', ['$event'])
+  @HostListener('window:pointermove', ['$event'])
   onGlobalPointerMove(event: PointerEvent) {
     if (this.pointerPressed) {
       this.dragging.emit({ index: this.index, position: event.clientX });
     }
   }
 
-  @HostListener('document:pointerup')
+  @HostListener('window:pointerup')
   onGlobalPointerUp(): void {
     this.pointerPressed = false;
   }

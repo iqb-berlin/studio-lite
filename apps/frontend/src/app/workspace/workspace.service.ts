@@ -73,6 +73,7 @@ export class WorkspaceService {
     this.unitLastChangedText = '';
   }
 
+  // TODO: Remove usage fom unit-save-button template!
   isChanged(): boolean {
     return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
       (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||

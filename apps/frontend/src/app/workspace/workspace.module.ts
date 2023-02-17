@@ -53,6 +53,14 @@ import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
 import { ReviewConfigEditComponent } from './dialogs/components/review-config-edit.component';
+import { UnitListComponent } from './components/unit-list/unit-list.component';
+import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
+import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
+import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
+import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
+import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
+import { UnitListAreaComponent } from './components/unit-list-area/unit-list-area.component';
+import { SplitterModule } from '../splitter/splitter.module';
 
 @NgModule({
   imports: [
@@ -86,7 +94,8 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
     MatProgressBarModule,
     TranslateModule,
     CommentsModule,
-    MatBadgeModule
+    MatBadgeModule,
+    SplitterModule
   ],
   declarations: [
     WorkspaceComponent,
@@ -107,12 +116,16 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
     GroupManageComponent,
     HasNewCommentsPipe,
     ReviewsComponent,
-    ReviewConfigEditComponent
+    ReviewConfigEditComponent,
+    UnitListComponent,
+    UnitSaveButtonComponent,
+    UnitDataAreaComponent,
+    AddUnitButtonComponent,
+    DeleteUnitButtonComponent,
+    EditUnitButtonComponent,
+    UnitListAreaComponent
   ],
-  exports: [
-    WorkspaceComponent,
-    UnitCommentsComponent
-  ],
+  exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
     UnitRoutingCanDeactivateGuard,
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }

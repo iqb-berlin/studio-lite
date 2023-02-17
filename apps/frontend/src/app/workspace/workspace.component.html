@@ -1,106 +1,17 @@
-<div class="authoring-body" fxLayout="row" fxLayoutAlign="space-between stretch">
-  <div class="navibar" fxLayout="column" fxFlex="200px">
-    <div fxLayout="row" style="margin: 2px">
-      <button mat-button (click)="discardChanges()" matTooltip="Aufgabenänderungen verwerfen"
-              [disabled]="!workspaceService.isChanged()" matTooltipPosition="below">
-        <mat-icon>close</mat-icon>
-      </button>
-      <button mat-raised-button (click)="saveUnitData()" matTooltip="Aufgabe speichern" fxFlex=""
-              [disabled]="!workspaceService.isChanged()" matTooltipPosition="above">
-        Speichern <mat-icon>save</mat-icon>
-      </button>
-    </div>
-    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <div fxFlex class="unit-list">
-      <mat-nav-list *ngFor="let unitGroup of workspaceService.unitList | keyvalue">
-        <div class="unit-group-header">{{unitGroup.key}}</div>
-        <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-           *ngFor="let unit of unitGroup.value"
-           class="unit-list-entry"
-           [matTooltip]="unit.name ? unit.name : ''"
-           matTooltipPosition="right"
-           (click)="selectUnit(unit.id)"
-           [class]="unit.id === (workspaceService.selectedUnit$ | async) ? 'selected' : 'not-selected'">
-          {{ unit.key }}{{ unit.name ? ' - ' + unit.name : ''}}
-          <div *ngIf="unit | hasNewComments"
-                    class="new-comments"
-                    [matTooltip]="'workspace.new-comments' | translate">
-          </div>
-        </a>
-      </mat-nav-list>
-    </div>
-    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <div fxLayout="row">
-      <button mat-raised-button [matMenuTriggerFor]="menuNew" matTooltip="Aufgabe(n) hinzufügen" matTooltipPosition="above" fxFlex="33">
-        <mat-icon>add</mat-icon>
-      </button>
-      <button mat-raised-button (click)="deleteUnit()" matTooltip="Aufgabe(n) löschen" matTooltipPosition="above" fxFlex="33">
-          <mat-icon>delete</mat-icon>
-      </button>
-      <button mat-button [matMenuTriggerFor]="menuOther" matTooltip="Weitere Funktionen..." matTooltipPosition="above" fxFlex>
-        <mat-icon>menu</mat-icon>
-      </button>
+<studio-lite-splitter class="authoring-body">
 
-      <mat-menu #menuNew="matMenu">
-        <button mat-menu-item (click)="hiddenFileInput.click()">
-          <mat-icon>input</mat-icon>Import von Datei(en)
-        </button>
-        <button mat-menu-item (click)="addUnitFromExisting()">
-          <mat-icon>content_copy</mat-icon>Neu von vorhandener Aufgabe
-        </button>
-        <button mat-menu-item (click)="addUnit()">
-          <mat-icon>add</mat-icon>Neu (leer)
-        </button>
-      </mat-menu>
+  <studio-lite-splitter-pane [initialSize]="220">
+    <studio-lite-unit-list-area
+      [navLinks]="navLinks"
+      [selectedRouterLink]="selectedRouterLink">
+    </studio-lite-unit-list-area>
+  </studio-lite-splitter-pane>
 
-      <mat-menu #menuOther="matMenu">
-        <button mat-menu-item (click)="settings()" *ngIf="workspaceService.isWorkspaceGroupAdmin">
-          <mat-icon>settings</mat-icon>Einstellungen
-        </button>
-        <button mat-menu-item (click)="manageGroups()">
-          <mat-icon>format_align_right</mat-icon>Gruppen verwalten
-        </button>
-        <button mat-menu-item (click)="reviews()">
-          <mat-icon>slideshow</mat-icon>Aufgabenfolgen
-        </button>
-        <button mat-menu-item (click)="userList()">
-          <mat-icon>people_alt</mat-icon>Nutzer:innen
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="exportUnit()"
-                matTooltip="Aufgaben als Datei herunterladen"
-                matTooltipPosition="right">
-          <mat-icon>get_app</mat-icon>Export
-        </button>
-        <button mat-menu-item (click)="moveOrCopyUnit(true)"
-                matTooltip="Aufgaben in anderen Arbeitsbereich verschieben"
-                matTooltipPosition="right">
-          <mat-icon>swap_horiz</mat-icon>Verschieben
-        </button>
-        <button mat-menu-item (click)="moveOrCopyUnit(false)"
-                matTooltip="Aufgaben in anderen Arbeitsbereich kopieren"
-                matTooltipPosition="right">
-          <mat-icon>content_copy</mat-icon>Kopieren nach...
-        </button>
-      </mat-menu>
-    </div>
-    <input #hiddenFileInput type="file" name="files" accept=".xml,.voud,.zip"
-           multiple hidden="true" (change)="onFileSelected($event.currentTarget)"/>
-  </div>
-  <div fxFlex class="unitdatacontainer" fxLayout="column">
-    <nav mat-tab-nav-bar>
-      <a mat-tab-link
-         *ngFor="let link of navLinks"
-         [routerLink]="link"
-         routerLinkActive="active-link"
-         #rla="routerLinkActive"
-         [disabled]="(workspaceService.selectedUnit$ | async) === 0"
-         [active]="rla.isActive">
-        {{'workspace.routes.' + link | translate}}
-      </a>
-    </nav>
-    <div fxFlex>
-      <router-outlet></router-outlet>
-    </div>
-  </div>
-</div>
+  <studio-lite-splitter-pane>
+    <studio-lite-unit-data-area
+     [navLinks]="navLinks"
+     (selectedRouterIndexChange)="selectedRouterLink = $event">
+   </studio-lite-unit-data-area>
+  </studio-lite-splitter-pane>
+
+</studio-lite-splitter>

@@ -6,55 +6,8 @@
   padding: 0;
 }
 
-.unitdatacontainer {
-  background-color:white;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 .import-units-log {
   background-color:whitesmoke;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.navibar {
-  background-color:whitesmoke;
-  margin: 0;
-}
-
-.unit-list-entry {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px;
-}
-
-.unit-list {
-  overflow: auto;
-}
-
-.unit-group-header {
-  color: whitesmoke;
-  background-color: lightslategray;
-  font-size: 16px;
-  padding: 2px;
-}
-
-.new-comments{
-  position: absolute;
-  left: 3px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background-color: #FF5500;
-}
-
-.selected {
-  background-color: #3957f74f;
-}
-
-.mat-nav-list, .mat-button-toggle-group {
   overflow-x: hidden;
   overflow-y: auto;
 }

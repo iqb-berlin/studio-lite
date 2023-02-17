@@ -12,12 +12,12 @@ export class SplitterComponent implements AfterViewInit {
   @ContentChildren(SplitterPaneComponent) panes!: QueryList<SplitterPaneComponent>;
 
   gutterLineSize: number = 2;
-  gutterHotspotSize: number = 16;
+  gutterHotspotSize: number = 20;
   availablePanesSize: number = 0;
 
   ngAfterViewInit() {
     this.panes.forEach((pane, index) => {
-      setTimeout(() => pane.init(index));
+      setTimeout(() => pane.init(index, index === this.panes.length - 1));
     });
   }
 
