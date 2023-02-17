@@ -60,6 +60,7 @@ import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-bu
 import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
 import { UnitListAreaComponent } from './components/unit-list-area/unit-list-area.component';
+import { SplitterModule } from '../splitter/splitter.module';
 
 @NgModule({
   imports: [
@@ -93,7 +94,8 @@ import { UnitListAreaComponent } from './components/unit-list-area/unit-list-are
     MatProgressBarModule,
     TranslateModule,
     CommentsModule,
-    MatBadgeModule
+    MatBadgeModule,
+    SplitterModule
   ],
   declarations: [
     WorkspaceComponent,

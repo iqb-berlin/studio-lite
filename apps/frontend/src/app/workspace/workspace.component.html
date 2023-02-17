@@ -1,11 +1,17 @@
-<div class="authoring-body" fxLayout="row" fxLayoutAlign="space-between stretch">
-  <studio-lite-unit-list-area
-    [navLinks]="navLinks"
-    [selectedRouterLink]="selectedRouterLink">
-  </studio-lite-unit-list-area>
+<studio-lite-splitter class="authoring-body">
 
-  <studio-lite-unit-data-area fxFlex fxLayout="column"
-   [navLinks]="navLinks"
-   (selectedRouterIndexChange)="selectedRouterLink = $event">
- </studio-lite-unit-data-area>
-</div>
+  <studio-lite-splitter-pane [initialSize]="220">
+    <studio-lite-unit-list-area
+      [navLinks]="navLinks"
+      [selectedRouterLink]="selectedRouterLink">
+    </studio-lite-unit-list-area>
+  </studio-lite-splitter-pane>
+
+  <studio-lite-splitter-pane>
+    <studio-lite-unit-data-area
+     [navLinks]="navLinks"
+     (selectedRouterIndexChange)="selectedRouterLink = $event">
+   </studio-lite-unit-data-area>
+  </studio-lite-splitter-pane>
+
+</studio-lite-splitter>
