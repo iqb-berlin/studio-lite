@@ -1,6 +1,7 @@
 <div class="fx-column-start-stretch navibar">
   <studio-lite-unit-save-button></studio-lite-unit-save-button>
   <studio-lite-unit-list class="unit-list fx-flex"
+                         [unitList]="workspaceService.unitList"
                          [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
                          [navLinks]="navLinks">
   </studio-lite-unit-list>

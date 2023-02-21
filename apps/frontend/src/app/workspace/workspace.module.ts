@@ -27,7 +27,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
@@ -61,6 +61,7 @@ import { DeleteUnitButtonComponent } from './components/delete-unit-button/delet
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
 import { UnitListAreaComponent } from './components/unit-list-area/unit-list-area.component';
 import { SplitterModule } from '../splitter/splitter.module';
+import { UnitTableComponent } from './components/unit-table/unit-table.component';
 
 @NgModule({
   imports: [
@@ -95,7 +96,8 @@ import { SplitterModule } from '../splitter/splitter.module';
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    SplitterModule
+    SplitterModule,
+    MatRippleModule
   ],
   declarations: [
     WorkspaceComponent,
@@ -123,7 +125,8 @@ import { SplitterModule } from '../splitter/splitter.module';
     AddUnitButtonComponent,
     DeleteUnitButtonComponent,
     EditUnitButtonComponent,
-    UnitListAreaComponent
+    UnitListAreaComponent,
+    UnitTableComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

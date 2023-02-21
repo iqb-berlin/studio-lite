@@ -102,7 +102,11 @@
       "schemer": "Kodierung",
       "comments": "Kommentare"
     },
-    "new-comments": "Neue Kommentare"
+    "new-comments": "Neue Kommentare",
+    "unit-key": "Kurzname",
+    "unit-name": "Name",
+    "sort-by-key": "Nach Kurzname sortieren",
+    "sort-by-name": "Nach Name sortieren"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben und Gruppen",
