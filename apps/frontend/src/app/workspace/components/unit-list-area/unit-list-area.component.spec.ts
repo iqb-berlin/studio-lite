@@ -6,6 +6,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
+import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../environments/environment';
 import { UnitListAreaComponent } from './unit-list-area.component';
 
@@ -18,6 +19,7 @@ describe('UnitListAreaComponent', () => {
   class MockUnitListComponent {
     @Input() selectedUnitId!: number;
     @Input() navLinks!: string[];
+    @Input() unitList!: UnitInListDto[];
   }
   @Component({ selector: 'studio-lite-add-unit-button', template: '' })
   class MockAddUnitButtonComponent {
