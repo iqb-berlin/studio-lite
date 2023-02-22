@@ -4,7 +4,7 @@
 
 .new-comments{
   position: absolute;
-  left: 3px;
+  left: 6px;
   width: 9px;
   height: 9px;
   border-radius: 50%;
@@ -24,4 +24,12 @@
 
 .unit-cell {
   overflow-wrap: anywhere;
+}
+
+.unit-cell:first-of-type {
+  padding-left: 20px;
+}
+
+.unit-cell:last-of-type {
+  padding-right: 10px;
 }
