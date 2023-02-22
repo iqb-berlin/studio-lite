@@ -1,0 +1,22 @@
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header {
+  color: whitesmoke;
+  background-color: lightslategray;
+  padding-left: 20px;
+  border-bottom: #333333 1px solid;
+  @include flex-row;
+}
+
+.expand-button {
+  @include flex-row;
+}
+
+.title {
+  overflow-wrap: anywhere;
+}
