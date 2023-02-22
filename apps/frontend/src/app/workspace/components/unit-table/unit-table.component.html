@@ -3,7 +3,7 @@
            [dataSource]="dataSource"
            (matSortChange)="onSortChange($event)">
   <ng-container matColumnDef="key">
-    <mat-header-cell *matHeaderCellDef
+    <mat-header-cell class="unit-cell" *matHeaderCellDef
                      mat-sort-header
                      [sortActionDescription]="'workspace.sort-by-key' | translate">
       {{'workspace.unit-key' | translate}}
@@ -18,7 +18,7 @@
   </ng-container>
 
   <ng-container matColumnDef="name">
-    <mat-header-cell *matHeaderCellDef
+    <mat-header-cell class="unit-cell" *matHeaderCellDef
                      mat-sort-header
                      [sortActionDescription]="'workspace.sort-by-name' | translate">
       {{'workspace.unit-name' | translate}}
