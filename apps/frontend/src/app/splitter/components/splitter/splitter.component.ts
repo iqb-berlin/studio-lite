@@ -12,7 +12,7 @@ export class SplitterComponent implements AfterViewInit {
   @ContentChildren(SplitterPaneComponent) panes!: QueryList<SplitterPaneComponent>;
 
   gutterLineSize: number = 2;
-  gutterHotspotSize: number = 20;
+  gutterHotspotSize: number = 10;
   availablePanesSize: number = 0;
 
   ngAfterViewInit() {
