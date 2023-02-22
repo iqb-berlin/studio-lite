@@ -4,14 +4,15 @@
   (sortChange)="sortUnitTables($event)">
 </studio-lite-unit-table>
 
-
-<mat-nav-list *ngFor="let unitGroup of (unitList | keyvalue); let first = first">
-  <div class="unit-group-header">{{unitGroup.key}}</div>
+<studio-lite-unit-group *ngFor="let unitGroup of (unitList | keyvalue)"
+                       class="unit-group"
+                       [expanded]="true"
+                       [count]="unitGroup.value.length"
+                       [title]="unitGroup.key">
   <studio-lite-unit-table
     [hasSortHeader]="false"
     [unitList]="unitGroup.value"
     [selectedUnitId]="selectedUnitId"
     (selectUnit)="selectUnit($event)">
   </studio-lite-unit-table>
-</mat-nav-list>
-
+</studio-lite-unit-group>

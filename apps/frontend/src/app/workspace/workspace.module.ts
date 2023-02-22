@@ -62,6 +62,7 @@ import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit
 import { UnitListAreaComponent } from './components/unit-list-area/unit-list-area.component';
 import { SplitterModule } from '../splitter/splitter.module';
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
+import { UnitGroupComponent } from './components/unit-group/unit-group.component';
 
 @NgModule({
   imports: [
@@ -88,6 +89,7 @@ import { UnitTableComponent } from './components/unit-table/unit-table.component
     MatSnackBarModule,
     MatTableModule,
     MatCheckboxModule,
+    MatRippleModule,
     FormsModule,
     MatTabsModule,
     IqbComponentsModule,
@@ -96,8 +98,7 @@ import { UnitTableComponent } from './components/unit-table/unit-table.component
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    SplitterModule,
-    MatRippleModule
+    SplitterModule
   ],
   declarations: [
     WorkspaceComponent,
@@ -126,7 +127,8 @@ import { UnitTableComponent } from './components/unit-table/unit-table.component
     DeleteUnitButtonComponent,
     EditUnitButtonComponent,
     UnitListAreaComponent,
-    UnitTableComponent
+    UnitTableComponent,
+    UnitGroupComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
