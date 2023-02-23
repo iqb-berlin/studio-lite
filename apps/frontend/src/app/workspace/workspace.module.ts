@@ -59,7 +59,7 @@ import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-are
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
 import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
-import { UnitListAreaComponent } from './components/unit-list-area/unit-list-area.component';
+import { UnitsAreaComponent } from './components/units-area/units-area.component';
 import { SplitterModule } from '../splitter/splitter.module';
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
@@ -128,7 +128,7 @@ import { SearchUnitComponent } from './components/search-unit/search-unit.compon
     AddUnitButtonComponent,
     DeleteUnitButtonComponent,
     EditUnitButtonComponent,
-    UnitListAreaComponent,
+    UnitsAreaComponent,
     UnitTableComponent,
     UnitGroupComponent,
     FilterUnitsPipe,

@@ -8,11 +8,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../environments/environment';
-import { UnitListAreaComponent } from './unit-list-area.component';
+import { UnitsAreaComponent } from './units-area.component';
 
-describe('UnitListAreaComponent', () => {
-  let component: UnitListAreaComponent;
-  let fixture: ComponentFixture<UnitListAreaComponent>;
+describe('UnitsAreaComponent', () => {
+  let component: UnitsAreaComponent;
+  let fixture: ComponentFixture<UnitsAreaComponent>;
   @Component({ selector: 'studio-lite-unit-save-button', template: '' })
   class MockUnitSaveButtonComponent {}
   @Component({ selector: 'studio-lite-unit-list', template: '' })
@@ -40,7 +40,7 @@ describe('UnitListAreaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitListAreaComponent,
+        UnitsAreaComponent,
         MockUnitSaveButtonComponent,
         MockUnitListComponent,
         MockAddUnitButtonComponent,
@@ -60,7 +60,7 @@ describe('UnitListAreaComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitListAreaComponent);
+    fixture = TestBed.createComponent(UnitsAreaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
