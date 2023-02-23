@@ -1,5 +1,8 @@
 .selected {
-  background-color: #3957f74f;
+  background-color: #006064BB;
+  > .mat-cell {
+    color: white;
+  }
 }
 
 .new-comments{
@@ -17,7 +20,7 @@
 
 .unit-row {
   min-height: 28px;
-  &:hover {
+  &:hover:not(.selected) {
     background-color: whitesmoke;
   }
 }
