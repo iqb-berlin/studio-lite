@@ -1,4 +1,6 @@
+<studio-lite-search-unit #filterInput></studio-lite-search-unit>
 <studio-lite-unit-table
+  class="mat-elevation-z8"
   [hasSortHeader]="true"
   [unitList]="[]"
   (sortChange)="sortUnitTables($event)">
@@ -12,6 +14,7 @@
   <studio-lite-unit-table
     [hasSortHeader]="false"
     [unitList]="unitGroup.value"
+    [filter]="filterInput.value"
     [selectedUnitId]="selectedUnitId"
     (selectUnit)="selectUnit($event)">
   </studio-lite-unit-table>

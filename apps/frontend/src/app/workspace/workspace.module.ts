@@ -63,6 +63,8 @@ import { UnitListAreaComponent } from './components/unit-list-area/unit-list-are
 import { SplitterModule } from '../splitter/splitter.module';
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
+import { FilterUnitsPipe } from './pipes/filter-units.pipe';
+import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 
 @NgModule({
   imports: [
@@ -128,7 +130,9 @@ import { UnitGroupComponent } from './components/unit-group/unit-group.component
     EditUnitButtonComponent,
     UnitListAreaComponent,
     UnitTableComponent,
-    UnitGroupComponent
+    UnitGroupComponent,
+    FilterUnitsPipe,
+    SearchUnitComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

@@ -109,7 +109,7 @@
     "sort-by-name": "Nach Name sortieren"
   },
   "select-unit-list": {
-    "filter": "Suche nach Aufgaben und Gruppen",
+    "filter": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
   },

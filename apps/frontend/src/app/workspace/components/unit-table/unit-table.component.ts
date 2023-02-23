@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, ViewChild
+  AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild
 } from '@angular/core';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -15,6 +15,7 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSortHeader) sortHeader!: MatSortHeader;
   @Input() selectedUnitId!: number;
   @Input() unitList!: UnitInListDto[];
+  @Input() filter!: string;
   @Input() hasSortHeader!: boolean;
   @Output() selectUnit: EventEmitter<number> = new EventEmitter<number>();
   @Output() sortChange: EventEmitter<{
@@ -32,14 +33,25 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
     this.dataSource.sort = this.sortTable;
   }
 
-  sort(sortHeader: MatSortHeader) {
+  sort(sortHeader: MatSortHeader): void {
     this.sortTable.sort(sortHeader);
   }
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     if (!this.dataSource) {
-      this.dataSource = new MatTableDataSource(this.unitList);
+      this.initDataSource();
     }
+    const inputKey = 'filter';
+    if (changes[inputKey]) {
+      this.dataSource.filter = this.filter.trim().toLowerCase();
+    }
+  }
+
+  private initDataSource(): void {
+    this.dataSource = new MatTableDataSource(this.unitList);
+    this.dataSource
+      .filterPredicate = (unitList, filter) => this.displayedColumns
+        .some(column => (unitList[column as keyof UnitInListDto] as string).indexOf(filter) > -1);
   }
 
   onSortChange($event: Sort): void {
