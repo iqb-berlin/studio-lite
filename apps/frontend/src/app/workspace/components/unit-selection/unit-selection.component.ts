@@ -11,11 +11,11 @@ import { BackendService } from '../../backend.service';
 import { UnitTableComponent } from '../unit-table/unit-table.component';
 
 @Component({
-  selector: 'studio-lite-unit-list',
-  templateUrl: './unit-list.component.html',
-  styleUrls: ['./unit-list.component.scss']
+  selector: 'studio-lite-unit-selection',
+  templateUrl: './unit-selection.component.html',
+  styleUrls: ['./unit-selection.component.scss']
 })
-export class UnitListComponent extends SelectUnitDirective implements OnInit, OnDestroy {
+export class UnitSelectionComponent extends SelectUnitDirective implements OnInit, OnDestroy {
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
   @Input() selectedUnitId!: number;
   @Input() unitList!: { [key: string]: UnitInListDto[] };

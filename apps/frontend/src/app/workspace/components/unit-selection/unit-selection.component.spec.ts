@@ -6,7 +6,7 @@ import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
-import { UnitListComponent } from './unit-list.component';
+import { UnitSelectionComponent } from './unit-selection.component';
 
 @Component({ selector: 'studio-lite-unit-table', template: '' })
 class MockUnitTableComponent {
@@ -19,14 +19,14 @@ class MockSearchUnitComponent {
   value: string = '';
 }
 
-describe('UnitListComponent', () => {
-  let component: UnitListComponent;
-  let fixture: ComponentFixture<UnitListComponent>;
+describe('UnitSelectionComponent', () => {
+  let component: UnitSelectionComponent;
+  let fixture: ComponentFixture<UnitSelectionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitListComponent,
+        UnitSelectionComponent,
         MockUnitTableComponent,
         MockSearchUnitComponent
       ],
@@ -41,7 +41,7 @@ describe('UnitListComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitListComponent);
+    fixture = TestBed.createComponent(UnitSelectionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

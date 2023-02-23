@@ -15,8 +15,8 @@ describe('UnitsAreaComponent', () => {
   let fixture: ComponentFixture<UnitsAreaComponent>;
   @Component({ selector: 'studio-lite-unit-save-button', template: '' })
   class MockUnitSaveButtonComponent {}
-  @Component({ selector: 'studio-lite-unit-list', template: '' })
-  class MockUnitListComponent {
+  @Component({ selector: 'studio-lite-unit-selection', template: '' })
+  class MockUnitSelectionComponent {
     @Input() selectedUnitId!: number;
     @Input() navLinks!: string[];
     @Input() unitList!: UnitInListDto[];
@@ -42,7 +42,7 @@ describe('UnitsAreaComponent', () => {
       declarations: [
         UnitsAreaComponent,
         MockUnitSaveButtonComponent,
-        MockUnitListComponent,
+        MockUnitSelectionComponent,
         MockAddUnitButtonComponent,
         MockDeleteUnitButtonComponent,
         MockEditUnitButtonComponent

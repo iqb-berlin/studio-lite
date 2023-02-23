@@ -53,7 +53,7 @@ import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
 import { ReviewConfigEditComponent } from './dialogs/components/review-config-edit.component';
-import { UnitListComponent } from './components/unit-list/unit-list.component';
+import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
 import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
@@ -122,7 +122,7 @@ import { SearchUnitComponent } from './components/search-unit/search-unit.compon
     HasNewCommentsPipe,
     ReviewsComponent,
     ReviewConfigEditComponent,
-    UnitListComponent,
+    UnitSelectionComponent,
     UnitSaveButtonComponent,
     UnitDataAreaComponent,
     AddUnitButtonComponent,
