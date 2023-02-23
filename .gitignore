@@ -6,9 +6,10 @@
 /database_dumps
 
 # config files
-config/frontend/tls
 config/frontend/default.conf.template
 config/frontend/default.conf.template.bkp
+
+# secret files
 *.pem
 *.cer
 *.crt

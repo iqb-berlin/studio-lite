@@ -70,9 +70,10 @@ prepare_installation_dir() {
   printf "\n"
 
   mkdir -p "$TARGET_DIR"/backup/release
-  mkdir -p "$TARGET_DIR"/config/frontend/tls
-  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/config/frontend/tls/studio-lite.crt
-  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/config/frontend/tls/studio-lite.key
+  mkdir -p "$TARGET_DIR"/config/frontend
+  mkdir -p "$TARGET_DIR"/secrets/frontend
+  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/secrets/frontend/$APP_NAME.crt
+  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/secrets/frontend/$APP_NAME.key
   mkdir -p "$TARGET_DIR"/database_dumps
 
   cd "$TARGET_DIR"

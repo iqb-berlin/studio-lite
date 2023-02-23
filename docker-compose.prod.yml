@@ -9,5 +9,5 @@ services:
       - "${HTTPS_PORT}:443"
     volumes:
       - ./config/frontend/default.conf.template:/etc/nginx/templates/default.conf.template:ro
-      - ./config/frontend/tls/studio-lite.crt:/etc/nginx/ssl/studio-lite.crt:ro
-      - ./config/frontend/tls/studio-lite.key:/etc/nginx/ssl/studio-lite.key:ro
+      - ./secrets/frontend/studio-lite.crt:/etc/nginx/ssl/studio-lite.crt:ro
+      - ./secrets/frontend/studio-lite.key:/etc/nginx/ssl/studio-lite.key:ro
