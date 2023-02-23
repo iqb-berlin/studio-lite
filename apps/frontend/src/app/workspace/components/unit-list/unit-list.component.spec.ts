@@ -1,8 +1,10 @@
+// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Component, Input } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { UnitListComponent } from './unit-list.component';
 
@@ -10,6 +12,11 @@ import { UnitListComponent } from './unit-list.component';
 class MockUnitTableComponent {
   @Input() hasSortHeader!: boolean;
   @Input() unitList!: UnitInListDto[];
+}
+
+@Component({ selector: 'studio-lite-search-unit', template: '' })
+class MockSearchUnitComponent {
+  value: string = '';
 }
 
 describe('UnitListComponent', () => {
@@ -20,9 +27,11 @@ describe('UnitListComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         UnitListComponent,
-        MockUnitTableComponent
+        MockUnitTableComponent,
+        MockSearchUnitComponent
       ],
       imports: [
+        TranslateModule.forRoot(),
         RouterTestingModule,
         HttpClientModule
       ],
