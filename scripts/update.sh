@@ -9,7 +9,7 @@ HAS_ENV_FILE_UPDATE=false
 HAS_CONFIG_FILE_UPDATE=false
 
 get_new_release_version() {
-  LATEST_RELEASE=$(curl -s "$REPO_API"/releases | grep -o -E '\"tag_name\":"[^"]*' | grep -m 1 -o '[^"]*$')
+  LATEST_RELEASE=$(curl -s "$REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
 
   if [ "$SOURCE_TAG" = "latest" ]; then
     SOURCE_TAG="$LATEST_RELEASE"
