@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SELECTED_VERSION=$1
-REPO_URL='https://scm.cms.hu-berlin.de/iqb/studio-lite/-/raw'
-REPO_API='https://scm.cms.hu-berlin.de/api/v4/projects/6054'
+REPO_URL='https://raw.githubusercontent.com/iqb-berlin/studio-lite'
+REPO_API='https://api.github.com/repos/iqb-berlin/studio-lite'
 HAS_ENV_FILE_UPDATE=false
 HAS_CONFIG_FILE_UPDATE=false
 
