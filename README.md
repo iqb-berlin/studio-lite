@@ -24,7 +24,7 @@ rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash upd
 
 ## Manuelle Installation
 ### Basis-Installation
-Legen Sie im Home-Verzeichnis ein Unterverzeichnis `studio` an.
+Legen Sie im Home-Verzeichnis ein Unterverzeichnis `studio-lite` an.
 Kopieren Sie folgende Dateien aus dem GitHub-Repository, in dem Sie gerade sind, in das Verzeichnis:
 
 1. `docker-compose.yml` (zu finden im Projektwurzelverzeichnis)
@@ -38,7 +38,7 @@ benennen Sie die Datei danach in `.env.prod` um.
 ändern Sie danach den Dateinamen von `prod.mk` zu `Makefile`.
 
 Wenn Sie in der Datei `docker-compose.prod.yml` alle Frontend-Volumes (die letzten vier Zeilen der Datei) löschen, haben Sie nun bereits ein lauffähiges System und
-könnten es im `studio`-Verzeichnis mit dem Befehl `make production-ramp-up` starten.
+könnten es im `studio-lite`-Verzeichnis mit dem Befehl `make production-ramp-up` starten.
 
 Wenn Sie die Frontend-Volumes nicht löschen, haben Sie die Möglichkeit,
 den in einem Docker Container laufenden Nginx-Webserver von außerhalb des Containers zu konfigurieren.
@@ -52,7 +52,7 @@ Wenn Sie nichts an dieser Konfiguration ändern möchten, können Sie einfach di
 wie unter [Basis-Installation](#Basis-Installation) beschrieben.
 
 Wenn Sie jedoch HTTPS oder ihre eigene Konfiguration verwenden möchten, verändern Sie die Datei `docker-compose.prod.yml` bitte **nicht**.
-Kopieren Sie stattdessen in Ihr `studio`-Verzeichnis folgende Dateien:
+Kopieren Sie stattdessen in Ihr `studio-lite`-Verzeichnis folgende Dateien:
 1. `https_on.sh` (zu finden im Projektverzeichnis unter `/scripts/`)
 2. `https_off.sh` (zu finden im Projektverzeichnis unter `/scripts/`)
 
@@ -61,13 +61,13 @@ Legen Sie dann das Unterverzeichnis `config/frontend/tls` an und kopieren Sie in
 1. `default.conf.http-template` (zu finden im Projektverzeichnis unter `/config/frontend/`)
 2. `default.conf.https-template` (zu finden im Projektverzeichnis unter `/config/frontend/`)
 
-Wenn Sie HTTP verwenden möchten, rufen Sie bitte im `studio`-Verzeichnis `bash https_off.sh` auf, um eine funktionsfähige HTTP-Konfiguration zu erzeugen.
+Wenn Sie HTTP verwenden möchten, rufen Sie bitte im `studio-lite`-Verzeichnis `bash https_off.sh` auf, um eine funktionsfähige HTTP-Konfiguration zu erzeugen.
 
 Falls Sie satt dessen HTTPS verwenden möchten, legen Sie Zertifikat und Schlüssel bitte in das Unterverzeichnis `config/frontend/tls`.
-Benennen Sie Ihren Schlüssel in `studio.key` und Ihr Zertifikat in `studio.crt` um.
-Rufen Sie dann im `studio`-Verzeichnis `bash https_on.sh` auf, um eine funktionsfähige HTTPS-Konfiguration für den Nginx-Webserver zu erhalten.
+Benennen Sie Ihren Schlüssel in `studio-lite.key` und Ihr Zertifikat in `studio-lite.crt` um.
+Rufen Sie dann im `studio-lite`-Verzeichnis `bash https_on.sh` auf, um eine funktionsfähige HTTPS-Konfiguration für den Nginx-Webserver zu erhalten.
 
-Die jeweils generierte Konfigurationsdatei finden Sie im `studio`-Verzeichnis unter `config/frontend/default.conf.template`.
+Die jeweils generierte Konfigurationsdatei finden Sie im `studio-lite`-Verzeichnis unter `config/frontend/default.conf.template`.
 Sie können sie nach Belieben weiter anpassen.
 Bitte beachten Sie aber, dass bei einem Aufruf von `bash https_on.sh` oder von `bash https_off.sh` diese Datei überschrieben wird und
 nur von der letzten Version eine Sicherheitskopie unter `config/frontend/default.conf.template.bkp` erzeugt wird.  
