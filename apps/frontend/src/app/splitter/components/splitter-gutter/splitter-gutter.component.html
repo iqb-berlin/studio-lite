@@ -1,11 +1,10 @@
 <div class="line"
      [style.width.px]="lineSize">
   <div class="hotspot"
-       [style.width.px]="hotspotSize"
-       [style.left.px]="-(hotspotSize - lineSize)/2"
+       [style.width.px]="pointerPressed ? hotspotSize * 20 : hotspotSize"
+       [style.left.px]="pointerPressed ? (-(hotspotSize - lineSize)/2) * 20 : -(hotspotSize - lineSize)/2"
        [class.draggable]="!isFixed"
        (pointerleave)="pointerPressed = false"
        (pointerdown)="onPointerDown($event)">
   </div>
 </div>
-
