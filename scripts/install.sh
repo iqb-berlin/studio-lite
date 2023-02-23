@@ -2,14 +2,16 @@
 set -e
 
 APP_NAME='studio-lite'
-REPO_URL=iqb-berlin/studio-lite
+
+REPO_URL="https://raw.githubusercontent.com/iqb-berlin/$APP_NAME"
+REPO_API="https://api.github.com/repos/iqb-berlin/$APP_NAME"
 REQUIRED_PACKAGES=("docker -v" "docker compose version")
 OPTIONAL_PACKAGES=("make -v")
 
 declare -A ENV_VARS
 ENV_VARS[POSTGRES_USER]=root
 ENV_VARS[POSTGRES_PASSWORD]=$(tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w 16 | head -n 1)
-ENV_VARS[POSTGRES_DB]=studio
+ENV_VARS[POSTGRES_DB]=$APP_NAME
 ENV_VARS[HTTP_PORT]=80
 
 ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB HTTP_PORT)
@@ -38,9 +40,10 @@ check_prerequisites() {
 }
 
 get_release_version() {
-  LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO_URL/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+  LATEST_RELEASE=$(curl -s "$REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+
   while read -p '1. Name the desired release tag: ' -er -i "$LATEST_RELEASE" TARGET_TAG; do
-    if ! curl --head --silent --fail --output /dev/null https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/README.md 2>/dev/null; then
+    if ! curl --head --silent --fail --output /dev/null $REPO_URL/"$TARGET_TAG"/README.md 2>/dev/null; then
       echo "This version tag does not exist."
     else
       break
@@ -68,15 +71,15 @@ prepare_installation_dir() {
 
   mkdir -p "$TARGET_DIR"/backup/release
   mkdir -p "$TARGET_DIR"/config/frontend/tls
-  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/config/frontend/tls/studio.crt
-  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/config/frontend/tls/studio.key
+  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/config/frontend/tls/studio-lite.crt
+  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/config/frontend/tls/studio-lite.key
   mkdir -p "$TARGET_DIR"/database_dumps
 
   cd "$TARGET_DIR"
 }
 
 download_file() {
-  if wget -q -O "$1" https://raw.githubusercontent.com/$REPO_URL/"$TARGET_TAG"/"$2"; then
+  if wget -q -O "$1" $REPO_URL/"$TARGET_TAG"/"$2"; then
     printf -- "- File '%s' successfully downloaded.\n" "$1"
   else
     printf -- "- File '%s' download failed.\n\n" "$1"

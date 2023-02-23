@@ -1,8 +1,10 @@
 #!/bin/bash
 
+APP_NAME='studio-lite'
+
 SELECTED_VERSION=$1
-REPO_URL='https://raw.githubusercontent.com/iqb-berlin/studio-lite'
-REPO_API='https://api.github.com/repos/iqb-berlin/studio-lite'
+REPO_URL="https://raw.githubusercontent.com/iqb-berlin/$APP_NAME"
+REPO_API="https://api.github.com/repos/iqb-berlin/$APP_NAME"
 HAS_ENV_FILE_UPDATE=false
 HAS_CONFIG_FILE_UPDATE=false
 
