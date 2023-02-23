@@ -245,22 +245,22 @@ finalize_update() {
 }
 
 application_reload() {
-      if command make -v >/dev/null 2>&1; then
-        read -p "Do you want to reload the application now? [Y/n]:" -er -n 1 RESTART
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to reload the application now? [Y/n]:" -er -n 1 RESTART
 
-        if [[ ! $RESTART =~ [nN] ]]; then
-          make production-ramp-up
+    if [[ ! $RESTART =~ [nN] ]]; then
+      make production-ramp-up
 
-        else
-          echo 'Update script finished.'
-          exit 0
-        fi
+    else
+      echo 'Update script finished.'
+      exit 0
+    fi
 
-      else
-        printf 'You could start the updated docker services now.\n\n'
-        echo 'Update script finished.'
-        exit 0
-      fi
+  else
+    printf 'You could start the updated docker services now.\n\n'
+    echo 'Update script finished.'
+    exit 0
+  fi
 }
 
 application_restart() {
