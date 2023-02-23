@@ -15,6 +15,8 @@ describe('UnitsAreaComponent', () => {
   let fixture: ComponentFixture<UnitsAreaComponent>;
   @Component({ selector: 'studio-lite-unit-save-button', template: '' })
   class MockUnitSaveButtonComponent {}
+  @Component({ selector: 'studio-lite-update-units-button', template: '' })
+  class MockUpdateUnitsButtonComponent {}
   @Component({ selector: 'studio-lite-unit-selection', template: '' })
   class MockUnitSelectionComponent {
     @Input() selectedUnitId!: number;
@@ -45,7 +47,8 @@ describe('UnitsAreaComponent', () => {
         MockUnitSelectionComponent,
         MockAddUnitButtonComponent,
         MockDeleteUnitButtonComponent,
-        MockEditUnitButtonComponent
+        MockEditUnitButtonComponent,
+        MockUpdateUnitsButtonComponent
       ],
       imports: [
         RouterTestingModule,

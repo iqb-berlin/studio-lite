@@ -112,6 +112,12 @@ div.logo img {
   justify-content: space-between;
   align-items: flex-start;
 }
+.fx-row-space-between-stretch {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+}
 .fx-row-space-around-center {
   display: flex;
   flex-direction: row;
