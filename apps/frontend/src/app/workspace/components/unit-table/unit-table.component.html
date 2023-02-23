@@ -1,4 +1,7 @@
 <mat-table matSort
+           matSortDisableClear
+           matSortActive="key"
+           matSortDirection="asc"
            [dataSource]="dataSource"
            (matSortChange)="onSortChange($event)">
   <ng-container matColumnDef="key">
