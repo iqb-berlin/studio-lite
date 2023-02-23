@@ -1,13 +1,13 @@
-<div class="fx-row-start-start button-bar">
+<div class="fx-row-start-start">
   <button mat-button
           [disabled]="!workspaceService.isChanged()"
           matTooltip="Aufgabenänderungen verwerfen"
-          matTooltipPosition="below"
+          matTooltipPosition="above"
           (click)="discardChanges()">
     <mat-icon>close</mat-icon>
   </button>
 
-  <button mat-raised-button
+  <button mat-button
           [disabled]="!workspaceService.isChanged()"
           matTooltip="Aufgabe speichern"
           matTooltipPosition="above"
