@@ -6,10 +6,9 @@
 }
 
 .header {
-  color: whitesmoke;
-  background-color: lightslategray;
+  background-color: #00606415;
   padding-left: 15px;
-  border-bottom: #333333 1px solid;
+  border-bottom: #00606420 1px solid;
   @include flex-row;
 }
 

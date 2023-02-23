@@ -38,8 +38,6 @@
   </ng-container>
   <mat-row class="unit-row"
            [class.selected]="selectedUnitId===row.id"
-           matRipple
-           [matRippleColor]="'#3957f74f'"
            *matRowDef="let row; columns: displayedColumns;"
            (click)="selectUnit.emit(row.id)">
   </mat-row>
