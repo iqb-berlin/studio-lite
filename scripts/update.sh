@@ -1,13 +1,15 @@
 #!/bin/bash
 
+APP_NAME='studio-lite'
+
 SELECTED_VERSION=$1
-REPO_URL='https://scm.cms.hu-berlin.de/iqb/studio-lite/-/raw'
-REPO_API='https://scm.cms.hu-berlin.de/api/v4/projects/6054'
+REPO_URL="https://raw.githubusercontent.com/iqb-berlin/$APP_NAME"
+REPO_API="https://api.github.com/repos/iqb-berlin/$APP_NAME"
 HAS_ENV_FILE_UPDATE=false
 HAS_CONFIG_FILE_UPDATE=false
 
 get_new_release_version() {
-  LATEST_RELEASE=$(curl -s "$REPO_API"/releases | grep -o -E '\"tag_name\":"[^"]*' | grep -m 1 -o '[^"]*$')
+  LATEST_RELEASE=$(curl -s "$REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
 
   if [ "$SOURCE_TAG" = "latest" ]; then
     SOURCE_TAG="$LATEST_RELEASE"
@@ -243,22 +245,22 @@ finalize_update() {
 }
 
 application_reload() {
-      if command make -v >/dev/null 2>&1; then
-        read -p "Do you want to reload the application now? [Y/n]:" -er -n 1 RESTART
+  if command make -v >/dev/null 2>&1; then
+    read -p "Do you want to reload the application now? [Y/n]:" -er -n 1 RESTART
 
-        if [[ ! $RESTART =~ [nN] ]]; then
-          make production-ramp-up
+    if [[ ! $RESTART =~ [nN] ]]; then
+      make production-ramp-up
 
-        else
-          echo 'Update script finished.'
-          exit 0
-        fi
+    else
+      echo 'Update script finished.'
+      exit 0
+    fi
 
-      else
-        printf 'You could start the updated docker services now.\n\n'
-        echo 'Update script finished.'
-        exit 0
-      fi
+  else
+    printf 'You could start the updated docker services now.\n\n'
+    echo 'Update script finished.'
+    exit 0
+  fi
 }
 
 application_restart() {
