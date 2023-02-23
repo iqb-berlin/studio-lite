@@ -106,7 +106,8 @@
     "unit-key": "Kurzname",
     "unit-name": "Name",
     "sort-by-key": "Nach Kurzname sortieren",
-    "sort-by-name": "Nach Name sortieren"
+    "sort-by-name": "Nach Name sortieren",
+    "update-units": "Aufgabenliste aktualisieren"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

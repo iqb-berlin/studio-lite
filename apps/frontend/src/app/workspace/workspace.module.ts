@@ -65,6 +65,7 @@ import { UnitTableComponent } from './components/unit-table/unit-table.component
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
 import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
+import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
 
 @NgModule({
   imports: [
@@ -132,7 +133,8 @@ import { SearchUnitComponent } from './components/search-unit/search-unit.compon
     UnitTableComponent,
     UnitGroupComponent,
     FilterUnitsPipe,
-    SearchUnitComponent
+    SearchUnitComponent,
+    UpdateUnitsButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
