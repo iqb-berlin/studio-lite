@@ -6,11 +6,11 @@ import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
 
 @Component({
-  selector: 'studio-lite-unit-list-area',
-  templateUrl: './unit-list-area.component.html',
-  styleUrls: ['./unit-list-area.component.scss']
+  selector: 'studio-lite-units-area',
+  templateUrl: './units-area.component.html',
+  styleUrls: ['./units-area.component.scss']
 })
-export class UnitListAreaComponent implements OnInit, OnDestroy {
+export class UnitsAreaComponent implements OnInit, OnDestroy {
   @Input() selectedRouterLink!: number;
   @Input() navLinks!: string[];
   private ngUnsubscribe = new Subject<void>();
