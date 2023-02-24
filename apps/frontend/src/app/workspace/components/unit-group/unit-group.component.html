@@ -1,7 +1,7 @@
 <div class="header">
   <div class="title">{{title}}</div>
   <div class="expand-button">
-    <div *ngIf="count !== undefined"
+    <div *ngIf="count !== undefined && !expanded"
          [matBadge]="count"
          class="demo-section"></div>
     <button *ngIf="!expanded"
