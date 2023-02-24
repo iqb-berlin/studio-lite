@@ -1,23 +1,32 @@
-<button mat-raised-button
+<button mat-button
+        [style.width.%]="100"
         [matMenuTriggerFor]="menuNew"
-        matTooltip="Aufgabe(n) hinzufügen"
+        [matTooltip]="'workspace.add-units' | translate"
         matTooltipPosition="above">
   <mat-icon>add</mat-icon>
 </button>
 
 <mat-menu #menuNew>
-  <button mat-menu-item (click)="hiddenFileInput.click()">
-    <mat-icon>input</mat-icon>Import von Datei(en)
+  <button mat-menu-item
+          (click)="hiddenFileInput.click()">
+    <mat-icon>input</mat-icon>
+    {{'workspace.import-files' | translate}}
   </button>
-  <button mat-menu-item (click)="addUnitFromExisting()">
-    <mat-icon>content_copy</mat-icon>Neu von vorhandener Aufgabe
+  <button mat-menu-item
+          (click)="addUnitFromExisting()">
+    <mat-icon>content_copy</mat-icon>
+    {{'workspace.from-existing' | translate}}
   </button>
-  <button mat-menu-item (click)="addUnit()">
-    <mat-icon>add</mat-icon>Neu (leer)
+  <button mat-menu-item
+          (click)="addUnit()">
+    <mat-icon>add</mat-icon>
+    {{'workspace.new-unit' | translate}}
   </button>
 </mat-menu>
 
 <input #hiddenFileInput type="file"
-       name="files" accept=".xml,.voud,.zip"
-       multiple hidden="true"
+       name="files"
+       accept=".xml,.voud,.zip"
+       multiple
+       [hidden]="true"
        (change)="onFileSelected($event.currentTarget)"/>

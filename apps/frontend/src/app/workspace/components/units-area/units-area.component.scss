@@ -1,0 +1,15 @@
+.area-container {
+  background-color:whitesmoke;
+  height: 100%;
+  margin: 0;
+}
+
+.unit-list {
+  overflow: auto;
+}
+
+.unit-crud-button {
+  flex-basis: 33%;
+  max-width: 200px;
+  box-sizing: border-box;
+}

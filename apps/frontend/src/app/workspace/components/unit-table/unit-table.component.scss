@@ -1,0 +1,42 @@
+.selected {
+  background-color: #006064BB;
+  > .mat-cell {
+    color: white;
+  }
+}
+
+.new-comments{
+  position: absolute;
+  left: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #FF5500;
+}
+
+.unit-sort {
+  min-height: 28px;
+}
+
+.unit-row {
+  min-height: 28px;
+  border-bottom-color: #00606420;
+  &:hover:not(.selected) {
+    background-color: #00606408;
+  }
+}
+
+.unit-cell {
+  overflow-wrap: anywhere;
+}
+
+.unit-cell:first-of-type {
+  padding-left: 20px;
+  padding-right: 5px;
+  font-weight: 500;
+}
+
+.unit-cell:last-of-type {
+  padding-left: 5px;
+  padding-right: 10px;
+}

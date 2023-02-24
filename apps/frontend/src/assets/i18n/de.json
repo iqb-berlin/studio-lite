@@ -102,10 +102,19 @@
       "schemer": "Kodierung",
       "comments": "Kommentare"
     },
-    "new-comments": "Neue Kommentare"
+    "new-comments": "Neue Kommentare",
+    "unit-key": "Kurzname",
+    "unit-name": "Name",
+    "sort-by-key": "Nach Kurzname sortieren",
+    "sort-by-name": "Nach Name sortieren",
+    "update-units": "Aufgabenliste aktualisieren",
+    "add-units": "Aufgabe(n) hinzufügen",
+    "import-files": "Import von Datei(en)",
+    "from-existing": "Neu von vorhandener Aufgabe",
+    "new-unit": "Neu (leer)"
   },
   "select-unit-list": {
-    "filter": "Suche nach Aufgaben und Gruppen",
+    "filter": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
   },
