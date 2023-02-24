@@ -1,7 +1,7 @@
 <button mat-button
         [style.width.%]="100"
         (click)="deleteUnit()"
-        matTooltip="Aufgabe(n) löschen"
+        [matTooltip]="'workspace.delete-units' | translate"
         matTooltipPosition="above">
   <mat-icon>delete</mat-icon>
 </button>

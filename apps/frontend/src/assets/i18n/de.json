@@ -109,9 +109,21 @@
     "sort-by-name": "Nach Name sortieren",
     "update-units": "Aufgabenliste aktualisieren",
     "add-units": "Aufgabe(n) hinzufügen",
+    "delete-units": "Aufgabe(n) löschen",
     "import-files": "Import von Datei(en)",
     "from-existing": "Neu von vorhandener Aufgabe",
-    "new-unit": "Neu (leer)"
+    "new-unit": "Neu (leer)",
+    "more-unit-tasks": "Weitere Funktionen...",
+    "download-unit": "Aufgaben als Datei herunterladen",
+    "export": "Export",
+    "move-unit": "Aufgaben in anderen Arbeitsbereich verschieben",
+    "move-to": "Verschieben",
+    "copy-unit": "Aufgaben in anderen Arbeitsbereich kopieren",
+    "copy-to": "Kopieren nach...",
+    "manage-unit-groups": "Gruppen verwalten",
+    "unit-settings": "Einstellungen",
+    "unit-users": "Nutzer:innen",
+    "reviews": "Aufgabenfolgen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

@@ -5,6 +5,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../environments/environment';
 import { AddUnitButtonComponent } from './add-unit-button.component';
 
@@ -16,6 +18,8 @@ describe('AddUnitButtonComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [AddUnitButtonComponent],
       imports: [
+        TranslateModule.forRoot(),
+        MatTooltipModule,
         RouterTestingModule,
         HttpClientModule,
         MatSnackBarModule,

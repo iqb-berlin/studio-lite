@@ -1,7 +1,7 @@
 <button mat-button
         [style.width.%]="100"
         [matMenuTriggerFor]="menuOther"
-        matTooltip="Weitere Funktionen..."
+        [matTooltip]="'workspace.more-unit-tasks' | translate"
         matTooltipPosition="above">
   <mat-icon>menu</mat-icon>
 </button>
@@ -10,31 +10,44 @@
   <button *ngIf="workspaceService.isWorkspaceGroupAdmin"
           mat-menu-item
           (click)="settings()">
-    <mat-icon>settings</mat-icon>Einstellungen
+    <mat-icon>settings</mat-icon>
+    {{'workspace.unit-settings' | translate}}
   </button>
-  <button mat-menu-item (click)="manageGroups()">
-    <mat-icon>format_align_right</mat-icon>Gruppen verwalten
+  <button mat-menu-item
+          (click)="manageGroups()">
+    <mat-icon>format_align_right</mat-icon>
+    {{'workspace.manage-unit-groups' | translate}}
   </button>
-  <button mat-menu-item (click)="reviews()">
-    <mat-icon>slideshow</mat-icon>Aufgabenfolgen
+  <button mat-menu-item
+          (click)="reviews()">
+    <mat-icon>slideshow</mat-icon>
+    {{'workspace.reviews' | translate}}
   </button>
-  <button mat-menu-item (click)="userList()">
-    <mat-icon>people_alt</mat-icon>Nutzer:innen
+  <button mat-menu-item
+          (click)="userList()">
+    <mat-icon>people_alt</mat-icon>
+    {{'workspace.unit-users' | translate}}
   </button>
   <mat-divider></mat-divider>
-  <button mat-menu-item (click)="exportUnit()"
-          matTooltip="Aufgaben als Datei herunterladen"
-          matTooltipPosition="right">
-    <mat-icon>get_app</mat-icon>Export
+  <button mat-menu-item
+          [matTooltip]="'workspace.download-unit' | translate"
+          matTooltipPosition="right"
+          (click)="exportUnit()">
+    <mat-icon>get_app</mat-icon>
+    {{'workspace.export' | translate}}
   </button>
-  <button mat-menu-item (click)="moveOrCopyUnit(true)"
-          matTooltip="Aufgaben in anderen Arbeitsbereich verschieben"
-          matTooltipPosition="right">
-    <mat-icon>swap_horiz</mat-icon>Verschieben
+  <button mat-menu-item
+          [matTooltip]="'workspace.move-unit' | translate"
+          matTooltipPosition="right"
+          (click)="moveOrCopyUnit(true)">
+    <mat-icon>swap_horiz</mat-icon>
+    {{'workspace.move-to' | translate}}
   </button>
-  <button mat-menu-item (click)="moveOrCopyUnit(false)"
-          matTooltip="Aufgaben in anderen Arbeitsbereich kopieren"
-          matTooltipPosition="right">
-    <mat-icon>content_copy</mat-icon>Kopieren nach...
+  <button mat-menu-item
+          [matTooltip]="'workspace.copy-unit' | translate"
+          matTooltipPosition="right"
+          (click)="moveOrCopyUnit(false)">
+    <mat-icon>content_copy</mat-icon>
+    {{'workspace.copy-to' | translate}}
   </button>
 </mat-menu>

@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../environments/environment';
 import { EditUnitButtonComponent } from './edit-unit-button.component';
 
@@ -18,6 +19,7 @@ describe('EditUnitButtonComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [EditUnitButtonComponent],
       imports: [
+        MatTooltipModule,
         RouterTestingModule,
         HttpClientModule,
         MatSnackBarModule,
