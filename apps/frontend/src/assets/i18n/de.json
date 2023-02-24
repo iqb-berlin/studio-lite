@@ -123,7 +123,10 @@
     "manage-unit-groups": "Gruppen verwalten",
     "unit-settings": "Einstellungen",
     "unit-users": "Nutzer:innen",
-    "reviews": "Aufgabenfolgen"
+    "reviews": "Aufgabenfolgen",
+    "cancel-save-unit": "Aufgabenänderungen verwerfen",
+    "save-unit": "Aufgabe speichern",
+    "save": "Speichern"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
