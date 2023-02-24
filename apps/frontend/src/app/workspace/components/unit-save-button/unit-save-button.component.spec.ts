@@ -3,6 +3,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../environments/environment';
 import { UnitSaveButtonComponent } from './unit-save-button.component';
 
@@ -15,9 +17,11 @@ describe('UnitSaveButtonComponent', () => {
       declarations: [UnitSaveButtonComponent],
       imports: [
         MatIconModule,
+        MatTooltipModule,
         MatSnackBarModule,
         MatDialogModule,
-        HttpClientModule
+        HttpClientModule,
+        TranslateModule.forRoot()
       ],
       providers: [{
         provide: 'SERVER_URL',
