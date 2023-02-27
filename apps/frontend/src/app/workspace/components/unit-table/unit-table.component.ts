@@ -51,7 +51,9 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
     this.dataSource = new MatTableDataSource(this.unitList);
     this.dataSource
       .filterPredicate = (unitList, filter) => this.displayedColumns
-        .some(column => (unitList[column as keyof UnitInListDto] as string).indexOf(filter) > -1);
+        .some(column => (unitList[column as keyof UnitInListDto] as string)
+          .toLowerCase()
+          .includes(filter));
   }
 
   onSortChange($event: Sort): void {
