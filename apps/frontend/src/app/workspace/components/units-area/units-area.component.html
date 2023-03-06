@@ -6,9 +6,10 @@
   </div>
 
   <studio-lite-unit-selection class="unit-list fx-flex"
-                         [unitList]="workspaceService.unitList"
-                         [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
-                         [navLinks]="navLinks">
+                              [selectedRouterLink]="selectedRouterLink"
+                              [unitList]="workspaceService.unitList"
+                              [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
+                              [navLinks]="navLinks">
   </studio-lite-unit-selection>
 
   <div class="fx-row-start-stretch">
