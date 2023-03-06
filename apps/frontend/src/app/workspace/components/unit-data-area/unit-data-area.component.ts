@@ -16,9 +16,13 @@ export class UnitDataAreaComponent {
 
   constructor(public workspaceService: WorkspaceService) { }
 
-  onActiveRouterLinkChange(isActive: boolean) {
-    if (this.nav && isActive) {
-      this.selectedRouterIndexChange.emit(this.nav.selectedIndex);
+  onActiveRouterLinkChange(isActive: boolean): void {
+    if (isActive) {
+      setTimeout(() => {
+        if (this.nav) {
+          this.selectedRouterIndexChange.emit(this.nav.selectedIndex);
+        }
+      });
     }
   }
 }
