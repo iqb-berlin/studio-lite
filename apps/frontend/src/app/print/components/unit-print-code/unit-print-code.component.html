@@ -1,0 +1,28 @@
+<table class="mat-table">
+  <tr class="mat-row">
+    <td class="mat-cell left-cell">
+      <p>{{'print.id' | translate}}</p>
+    </td>
+    <td class="mat-cell">
+      <p>{{codeData.id}}</p>
+    </td>
+  </tr>
+  <tr *ngIf="codeData.label" class="mat-row">
+    <td class="mat-cell left-cell">
+      <p>{{'print.label' | translate}}</p>
+    </td>
+    <td class="mat-cell">
+      <p>{{codeData.label}}</p>
+    </td>
+  </tr>
+  <tr *ngIf="codeData.manualInstruction" class="mat-row">
+    <td class="mat-cell left-cell">
+      <p>{{'print.manual-instruction' | translate}}</p>
+    </td>
+    <td class="mat-cell">
+      <div *ngIf="codeData.manualInstruction"
+           [innerHTML]="codeData.manualInstruction">
+      </div>
+    </td>
+  </tr>
+</table>

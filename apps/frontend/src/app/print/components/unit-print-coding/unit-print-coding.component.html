@@ -1,0 +1,41 @@
+<h3 *ngIf="codings && codings.length">{{'print.coding' | translate}}</h3>
+<h3 *ngIf="!codings || codings && !codings.length">{{'print.no-coding' | translate}}</h3>
+<ng-container *ngFor="let coding of codings; let first = first">
+  <hr *ngIf="!first">
+  <table class="mat-table">
+    <tr class="mat-row">
+      <td class="mat-cell left-cell">
+        <h4>{{coding.id}}</h4>
+      </td>
+      <td class="mat-cell">
+        {{coding.sourceType === 'BASE' ? 'B' : 'A'}}
+      </td>
+    </tr>
+    <tr *ngIf="coding.label" class="mat-row">
+      <td class="mat-cell left-cell">
+        <p>{{'print.label' | translate}}</p>
+      </td>
+      <td class="mat-cell">
+        <p>{{coding.label}}</p>
+      </td>
+    </tr>
+    <tr *ngIf="coding.manualInstruction" class="mat-row">
+      <td class="mat-cell left-cell">
+        <p>{{'print.common-manual-instruction' | translate}}</p>
+      </td>
+      <td class="mat-cell">
+        <div *ngIf="coding.manualInstruction"
+             [innerHTML]="coding.manualInstruction"></div>
+      </td>
+    </tr>
+  </table>
+
+  <div *ngFor="let code of coding.codes; let first = first"
+    class="code-list">
+    <h5 *ngIf="first">{{'print.code-list' | translate}}</h5>
+    <hr *ngIf="!first">
+    <studio-lite-unit-print-code [codeData]="code">
+    </studio-lite-unit-print-code>
+  </div>
+</ng-container>
+

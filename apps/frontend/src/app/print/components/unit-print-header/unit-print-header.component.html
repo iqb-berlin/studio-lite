@@ -1,0 +1,33 @@
+<h2>{{key}}</h2>
+<h3 *ngIf="name">{{name}}</h3>
+
+<table class="mat-table">
+  <tr *ngIf="lastChangedDefinition" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.last-changed-definition' | translate}}</td>
+    <td class="mat-cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
+  </tr>
+  <tr *ngIf="lastChangedMetadata" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
+    <td class="mat-cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
+  </tr>
+  <tr *ngIf="lastChangedScheme" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
+    <td class="mat-cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
+  </tr>
+  <tr *ngIf="groupName" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.group-name' | translate}}</td>
+    <td class="mat-cell">{{groupName}}</td>
+  </tr>
+  <tr *ngIf="player" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.player' | translate}}</td>
+    <td class="mat-cell">{{player}}</td>
+  </tr>
+  <tr *ngIf="editor" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.editor' | translate}}</td>
+    <td class="mat-cell">{{editor}}</td>
+  </tr>
+  <tr *ngIf="schemer" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.schemer' | translate}}</td>
+    <td class="mat-cell">{{schemer}}</td>
+  </tr>
+</table>

@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
 import { GroupManageComponent } from '../../dialogs/group-manage.component';
 import { ReviewsComponent } from '../../dialogs/reviews.component';
@@ -19,6 +20,7 @@ import { BackendService as AppBackendService } from '../../../backend.service';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
+import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -154,6 +156,48 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         }
       });
     }
+  }
+
+  printUnits(): void {
+    this.printUnitDialog()
+      .then((unitsToPrint: number[] | boolean) => {
+        if (Array.isArray(unitsToPrint) && unitsToPrint.length) {
+          const url = this.router
+            .serializeUrl(this.router
+              .createUrlTree(['/print'], {
+                queryParams: {
+                  unitIds: unitsToPrint,
+                  workspaceId: this.workspaceService.selectedWorkspaceId
+                }
+              }));
+          window.open(`#${url}`, '_blank');
+        }
+      });
+  }
+
+  private async printUnitDialog(): Promise<number[] | boolean> {
+    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+      width: '500px',
+      height: '700px',
+      data: <SelectUnitData>{
+        title: 'Aufgabe(n) drucken',
+        buttonLabel: 'Drucken',
+        fromOtherWorkspacesToo: false,
+        multiple: true
+      }
+    });
+    return lastValueFrom(dialogRef.afterClosed()
+      .pipe(
+        map(dialogResult => {
+          if (typeof dialogResult !== 'undefined') {
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+              return dialogComponent.selectedUnitIds;
+            }
+          }
+          return false;
+        })
+      ));
   }
 
   userList(): void {

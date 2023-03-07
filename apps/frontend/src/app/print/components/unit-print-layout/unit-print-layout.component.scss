@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.change-player-height-container {
+  margin: 10px;
+}
+
+@media print {
+  .hide-on-print {
+    display: none;
+  }
+}

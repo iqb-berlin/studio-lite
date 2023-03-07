@@ -126,7 +126,8 @@
     "reviews": "Aufgabenfolgen",
     "cancel-save-unit": "Aufgabenänderungen verwerfen",
     "save-unit": "Aufgabe speichern",
-    "save": "Speichern"
+    "save": "Speichern",
+    "print": "Drucken"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
@@ -220,5 +221,24 @@
     "521": "Bitte Anwendung neu laden!",
     "close": "Fehlermeldung ausblenden",
     "login": "Login"
+  },
+  "print": {
+    "change-player-height": "Aufgabenhöhe ändern",
+    "player": "Player",
+    "editor": "Editor",
+    "schemer": "Schemer",
+    "group-name": "Gruppe",
+    "last-changed-definition": "Letzte Änderung der Definition",
+    "last-changed-metadata": "Letzte Änderung der Eigenschaften",
+    "last-changed-scheme": "Letzte Änderung des Kodierschemas",
+    "comments": "Kommentare",
+    "no-comments": "Keine Kommentare",
+    "label": "Beschreibung",
+    "common-manual-instruction": "Allgemeine Instruktionen für manuelles Kodieren",
+    "manual-instruction": "Instruktionen für manuelles Kodieren",
+    "code-list": "Liste der möglichen Codes",
+    "id": "ID",
+    "coding": "Kodierung",
+    "no-coding": "Keine Kodierung"
   }
 }
