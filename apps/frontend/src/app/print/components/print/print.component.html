@@ -1,0 +1,10 @@
+<div #scrollContainer class="padding-container screen-scroll-container">
+  <div *ngFor="let unitId of unitIds"
+       class="page-break-after">
+    <studio-lite-unit-print-layout
+      [unitId]="unitId"
+      [workspaceId]="workspaceId"
+      (heightChange)="addToScrollPosition($event)">
+    </studio-lite-unit-print-layout>
+  </div>
+</div>

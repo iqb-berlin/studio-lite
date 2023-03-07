@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  background-color: white;
+  position: relative;
+}
+
+.padding-container {
+  padding: 10px;
+}
+
+@media screen {
+  .screen-scroll-container {
+    height: calc(100vh - 70px);
+    overflow: auto;
+  }
+}

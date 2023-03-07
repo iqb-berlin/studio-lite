@@ -17,6 +17,24 @@ body {
   /* background-color: rgb(210, 229, 238); */
 }
 
+@page {
+  size: A4 portrait;
+}
+
+.page-break-before {
+  page-break-before: always;
+}
+.page-break-after {
+  page-break-after: always;
+}
+
+@media print {
+  html, body {
+    width: 210mm;
+    height: 297mm;
+  }
+}
+
 .page-body {
   position: absolute;
   width: 100%;
@@ -98,8 +116,6 @@ div.logo img {
   font-size: 14px !important;
 }
 
-
-
 .fx-row-space-between-center {
   display: flex;
   flex-direction: row;
@@ -129,6 +145,12 @@ div.logo img {
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+}
+.fx-row-start-end {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: end;
 }
 .fx-row-start-stretch {
   display: flex;

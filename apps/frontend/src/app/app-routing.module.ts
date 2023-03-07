@@ -8,6 +8,10 @@ const routes: Routes = [
   { path: 'home/:login', component: HomeComponent },
   { path: 'about', component: AboutComponent },
   {
+    path: 'print',
+    loadChildren: () => import('./print/print.module').then(module => module.PrintModule)
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then(module => module.AdminModule)
   },

@@ -37,6 +37,13 @@
     {{'workspace.export' | translate}}
   </button>
   <button mat-menu-item
+          [matTooltip]="'workspace.print' | translate"
+          matTooltipPosition="right"
+          (click)="printUnits()">
+    <mat-icon>print</mat-icon>
+    {{'workspace.print' | translate}}
+  </button>
+  <button mat-menu-item
           [matTooltip]="'workspace.move-unit' | translate"
           matTooltipPosition="right"
           (click)="moveOrCopyUnit(true)">
