@@ -150,7 +150,7 @@ div.logo img {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  align-items: end;
+  align-items: flex-end;
 }
 .fx-row-start-stretch {
   display: flex;
@@ -162,7 +162,7 @@ div.logo img {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .fx-row-start-start {
   display: flex;
@@ -193,8 +193,8 @@ div.logo img {
 .fx-column-start-start {
   display: flex;
   flex-direction: column;
-  justify-content: start;
-  align-items: start;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .fx-column-start-stretch {
