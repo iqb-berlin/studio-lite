@@ -20,7 +20,6 @@ import { PreviewService } from './preview.service';
 export class UnitPreviewComponent implements OnInit, OnDestroy {
   private iFrameElement: HTMLIFrameElement | undefined;
   private ngUnsubscribe = new Subject<void>();
-
   private sessionId = '';
   postMessageTarget: Window | undefined;
   private lastPlayerId = '';
@@ -48,7 +47,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
   ];
 
   message = '';
-
+  unitId: number = 0;
   showPageNav = false;
   pageList: PageData[] = [];
 
@@ -56,7 +55,7 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     private appService: AppService,
     private snackBar: MatSnackBar,
     private backendService: BackendService,
-    private workspaceService: WorkspaceService,
+    public workspaceService: WorkspaceService,
     private moduleService: ModuleService,
     public previewService: PreviewService
   ) {
@@ -173,8 +172,8 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
-    const unitId = this.workspaceService.selectedUnit$.getValue();
-    if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
+    this.unitId = this.workspaceService.selectedUnit$.getValue();
+    if (this.unitId && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
       const playerId = unitMetadata.player ?
@@ -185,11 +184,11 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           if (this.workspaceService.unitDefinitionStore) {
             this.postUnitDef(this.workspaceService.unitDefinitionStore);
           } else {
-            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
+            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, this.unitId)
               .subscribe(
                 ued => {
                   if (ued) {
-                    this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
+                    this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(this.unitId, ued);
                     this.postUnitDef(this.workspaceService.unitDefinitionStore);
                   } else {
                     this.snackBar.open(

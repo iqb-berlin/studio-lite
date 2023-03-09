@@ -127,7 +127,8 @@
     "cancel-save-unit": "Aufgabenänderungen verwerfen",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
-    "print": "Drucken"
+    "print": "Drucken",
+    "print-review": "Aufgabenfolge drucken"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

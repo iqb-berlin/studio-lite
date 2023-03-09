@@ -18,10 +18,19 @@
       class="paging-mode-selection-container">
     </studio-lite-paging-mode-selection>
 
+    <a *ngIf="unitId"
+       mat-icon-button [attr.aria-label]="'workspace.print' | translate"
+       [routerLink]="['/print']"
+       [queryParams]="{workspaceId: workspaceService.selectedWorkspaceId, unitIds: [unitId]}"
+       target="_blank"
+       [matTooltip]="'workspace.print' | translate">
+      <mat-icon>print</mat-icon>
+    </a>
+
     <div fxLayout="row" fxLayoutAlign="space-between center" *ngIf="showPageNav"
          class="pageNav">
       <div id="pageNavPrompt">
-        Wähle hier andere Seiten dieser Aufgabe:
+        Seitenauswahl
       </div>
 
       <div *ngFor="let p of pageList">
