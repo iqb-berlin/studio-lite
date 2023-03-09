@@ -1,16 +1,16 @@
 #############################################################################
-## 'MAIN' TARGETED MERGE REQUESTS, RELEASE TAGS
+## 'MAIN' TARGETED PULL REQUESTS, RELEASE TAGS
 #############################################################################
 
 .main_pr_base_rules:
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
     - if: $CI_COMMIT_TAG
       when: never
 
 .main_pr_manual_rules:
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
@@ -38,14 +38,14 @@ check-main-pr-rules:
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   script:
-    - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
-    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "main" ];
-      then echo "merge request target branch is not 'main'";
-      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' == 'main'"; fi
-    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" == "main" ];
-      then echo "merge request target branch is 'main'";
-      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "main" ];
+      then echo "pull request target branch is not 'main'";
+      else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'main'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "main" ];
+      then echo "pull request target branch is 'main'";
+      else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
     - if [ -n "$CI_COMMIT_TAG" ];
       then echo "commit tag string length is nonzero";
       else echo "commit tag = '$CI_COMMIT_TAG'"; fi
@@ -163,8 +163,8 @@ build-main-pr-backend-test-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker build -f apps/api/Dockerfile --target=dev --build-arg project=api
-      -t ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test .
-    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+      -t ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test .
+    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -183,8 +183,8 @@ build-main-pr-frontend-test-image:
   script:
     - docker build -f apps/frontend/Dockerfile --target=dev
       --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333
-      -t ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test .
-    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+      -t ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test .
+    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -202,7 +202,7 @@ build-main-pr-frontend-e2e-test-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker build -f apps/frontend-e2e/Dockerfile
-      -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+      -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
       -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
     - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
   after_script:
@@ -221,8 +221,8 @@ build-main-pr-db-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push -q ${DB_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${DB_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -239,8 +239,8 @@ build-main-pr-liquibase-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $REGISTRY
 
@@ -258,11 +258,11 @@ build-main-pr-backend-image:
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker build --cache-from ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test -f apps/api/Dockerfile
-      --target=prod --build-arg project=api -t ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+    - docker build --cache-from ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test -f apps/api/Dockerfile
+      --target=prod --build-arg project=api -t ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -280,12 +280,12 @@ build-main-pr-frontend-image:
     FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker build --cache-from ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker build --cache-from ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
       -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
-      -t ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+      -t ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -301,7 +301,7 @@ test-main-pr-db:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d db
@@ -337,9 +337,9 @@ test-main-pr-backend:
   variables:
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test test api
+    - docker run ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test test api
 
 test-main-pr-frontend:
   stage: test-units
@@ -355,9 +355,9 @@ test-main-pr-frontend:
   variables:
     FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test test frontend
+    - docker run ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test test frontend
 
 test-main-pr-e2e:
   stage: test-e2e
@@ -374,7 +374,7 @@ test-main-pr-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -400,7 +400,7 @@ test-main-pr-e2e-api:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -426,7 +426,7 @@ test-main-pr-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -452,7 +452,7 @@ test-main-pr-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -478,7 +478,7 @@ test-main-pr-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -504,7 +504,7 @@ test-main-pr-e2e-ui-firefox-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -530,7 +530,7 @@ test-main-pr-e2e-ui-edge:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -556,7 +556,7 @@ test-main-pr-e2e-ui-edge-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -581,9 +581,9 @@ lint-main-pr-backend:
   variables:
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test lint api
+    - docker run ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test lint api
 
 lint-main-pr-frontend:
   stage: lint
@@ -599,9 +599,9 @@ lint-main-pr-frontend:
   variables:
     FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test lint frontend
+    - docker run ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test lint frontend
 
 lint-main-pr-frontend-e2e:
   stage: lint
@@ -617,9 +617,9 @@ lint-main-pr-frontend-e2e:
   variables:
     FRONTEND_E2E_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend-e2e"
   before_script:
-    - docker pull -q ${FRONTEND_E2E_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+    - docker pull -q ${FRONTEND_E2E_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   script:
-    - docker run ${FRONTEND_E2E_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} lint frontend-e2e
+    - docker run ${FRONTEND_E2E_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} lint frontend-e2e
 
 audit-main-pr-backend:
   stage: audit
@@ -634,9 +634,9 @@ audit-main-pr-backend:
   variables:
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run --entrypoint npm ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
+    - docker run --entrypoint npm ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
 
 audit-main-pr-frontend:
   stage: audit
@@ -651,9 +651,9 @@ audit-main-pr-frontend:
   variables:
     FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run --entrypoint npm ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
+    - docker run --entrypoint npm ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
 
 gemnasium-dependency_scanning:
   stage: scan-dependencies

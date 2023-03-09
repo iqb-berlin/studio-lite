@@ -1,18 +1,18 @@
 #############################################################################
-## FEATURE COMMITS, 'DEVELOP' TARGETED MERGE REQUESTS, PRE-RELEASE TAGS
+## FEATURE COMMITS, 'DEVELOP' TARGETED PULL REQUESTS, PRE-RELEASE TAGS
 #############################################################################
 
 # https://gitlab.com/gitlab-org/gitlab/-/issues/206960
 # https://docs.gitlab.com/ee/ci/jobs/job_control.html#cicd-variable-expressions
 .default_base_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
     - if: $CI_COMMIT_TAG
       when: never
 
 .default_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
@@ -20,27 +20,27 @@
 
 .default_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
 
 .develop_pr_base_rules:
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_TAG
       when: never
 
 .develop_pr_manual_rules:
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
 
 .develop_commit_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "develop") && ($CI_PIPELINE_SOURCE != "merge_request_event")
+    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
     - if: $CI_COMMIT_TAG
       when: never
 
@@ -76,17 +76,17 @@ check-default-rules:
     - if [ "$CI_COMMIT_BRANCH" = "develop" ];
       then echo "commit branch is 'develop'";
       else echo "'$CI_COMMIT_BRANCH' != 'develop'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
-      then echo "pipeline source is not 'merge_request_event'";
-      else echo "'$CI_PIPELINE_SOURCE' == 'merge_request_event'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
-      then echo "pipeline source is 'merge_request_event'" ;
-      else echo "'$CI_PIPELINE_SOURCE' != 'merge_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" != "main" ] && [ "$CI_COMMIT_BRANCH" != "develop" ] && [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
-      then echo "commit branch exists, isn't 'main', isn't 'develop', and it's not a merge request";
+    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+      then echo "pipeline source is not 'external_pull_request_event'";
+      else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+      then echo "pipeline source is 'external_pull_request_event'" ;
+      else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" != "main" ] && [ "$CI_COMMIT_BRANCH" != "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+      then echo "commit branch exists, isn't 'main', isn't 'develop', and it's not an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "develop" ] || [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
-      then echo "commit branch doesn't exist or is 'main' or is 'develop' or it's a merge request";
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+      then echo "commit branch doesn't exist or is 'main' or is 'develop' or it's an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
     - if [ -z "$CI_COMMIT_TAG" ];
       then echo "commit tag string length is zero";
@@ -102,14 +102,14 @@ check-develop-pr-rules:
   rules:
     - !reference [ .develop_pr_base_rules, rules ]
   script:
-    - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
-    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" == "develop" ];
-      then echo "merge request target branch is 'develop'";
-      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
-    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "develop" ];
-      then echo "merge request target branch is not 'develop'";
-      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "develop" ];
+      then echo "external pull request target branch is 'develop'";
+      else echo "external pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "develop" ];
+      then echo "external pull request target branch is not 'develop'";
+      else echo "external pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
     - if [ -z "$CI_COMMIT_TAG" ];
       then echo "commit tag string length is zero";
       else echo "commit tag = '$CI_COMMIT_TAG'"; fi
@@ -139,17 +139,17 @@ check-develop-commit-rules:
     - if [ "$CI_COMMIT_BRANCH" != "develop" ];
       then echo "commit branch is not 'develop'";
       else echo "'$CI_COMMIT_BRANCH' == 'develop'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
-      then echo "pipeline source is not 'merge_request_event'";
-      else echo "'$CI_PIPELINE_SOURCE' == 'merge_request_event'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
-      then echo "pipeline source is 'merge_request_event'";
-      else echo "'$CI_PIPELINE_SOURCE' != 'merge_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "develop" ] && [ "$CI_PIPELINE_SOURCE" != "merge_request_event" ];
-      then echo "commit branch exists, is 'develop', and it's not a merge request";
+    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+      then echo "pipeline source is not 'external_pull_request_event'";
+      else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+      then echo "pipeline source is 'external_pull_request_event'";
+      else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+      then echo "commit branch exists, is 'develop', and it's not an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "develop" ] || [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ];
-      then echo "commit branch doesn't exist or isn't 'develop' or it's a merge request";
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+      then echo "commit branch doesn't exist or isn't 'develop' or it's an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
     - if [ -z "$CI_COMMIT_TAG" ];
       then echo "commit tag string length is zero";
