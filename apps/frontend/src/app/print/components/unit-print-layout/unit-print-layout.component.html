@@ -1,0 +1,48 @@
+<studio-lite-unit-print-header
+  [name] = "unitMetadata ? unitMetadata.name : ''"
+  [key] = "unitMetadata ? unitMetadata.key : ''"
+  [groupName] = "unitMetadata ? unitMetadata.groupName : ''"
+  [player] = "playerId"
+  [editor] = "unitMetadata ? unitMetadata.editor : ''"
+  [schemer] = "unitMetadata ? unitMetadata.schemer : ''"
+  [lastChangedDefinition] = "unitMetadata ? unitMetadata.lastChangedDefinition : null"
+  [lastChangedMetadata] = "unitMetadata ? unitMetadata.lastChangedMetadata : null"
+  [lastChangedScheme] = "unitMetadata ? unitMetadata.lastChangedScheme : null">
+</studio-lite-unit-print-header>
+
+
+<studio-lite-unit-print-comments [unitId]="unitId"
+                                 [workspaceId]="workspaceId">
+</studio-lite-unit-print-comments>
+
+<studio-lite-unit-print-coding  [unitId]="unitId"
+                                [workspaceId]="workspaceId">
+</studio-lite-unit-print-coding>
+
+
+<ng-container *ngIf="playerId">
+  <studio-lite-unit-print-player *ngIf="playerId"
+                           [iFrameHeight]="playerHeight"
+                           [playerId]="playerId"
+                           [unitId]="unitId"
+                           [workspaceId]="workspaceId">
+  </studio-lite-unit-print-player>
+
+  <div class="fx-row-space-around-center change-player-height-container">
+    <mat-form-field
+      class="hide-on-print"
+      appearance="fill">
+      <mat-label>{{ 'print.change-player-height' | translate }}</mat-label>
+      <input matInput
+             type="number"
+             min="0"
+             step="10"
+             [ngModel]="playerHeight"
+             (ngModelChange)="playerHeightChange($event)">
+    </mat-form-field>
+  </div>
+
+</ng-container>
+
+
+

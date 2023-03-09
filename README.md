@@ -24,7 +24,7 @@ rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash upd
 
 ## Manuelle Installation
 ### Basis-Installation
-Legen Sie im Home-Verzeichnis ein Unterverzeichnis `studio` an.
+Legen Sie im Home-Verzeichnis ein Unterverzeichnis `studio-lite` an.
 Kopieren Sie folgende Dateien aus dem GitHub-Repository, in dem Sie gerade sind, in das Verzeichnis:
 
 1. `docker-compose.yml` (zu finden im Projektwurzelverzeichnis)
@@ -38,7 +38,7 @@ benennen Sie die Datei danach in `.env.prod` um.
 ändern Sie danach den Dateinamen von `prod.mk` zu `Makefile`.
 
 Wenn Sie in der Datei `docker-compose.prod.yml` alle Frontend-Volumes (die letzten vier Zeilen der Datei) löschen, haben Sie nun bereits ein lauffähiges System und
-könnten es im `studio`-Verzeichnis mit dem Befehl `make production-ramp-up` starten.
+könnten es im `studio-lite`-Verzeichnis mit dem Befehl `make production-ramp-up` starten.
 
 Wenn Sie die Frontend-Volumes nicht löschen, haben Sie die Möglichkeit,
 den in einem Docker Container laufenden Nginx-Webserver von außerhalb des Containers zu konfigurieren.
@@ -52,25 +52,25 @@ Wenn Sie nichts an dieser Konfiguration ändern möchten, können Sie einfach di
 wie unter [Basis-Installation](#Basis-Installation) beschrieben.
 
 Wenn Sie jedoch HTTPS oder ihre eigene Konfiguration verwenden möchten, verändern Sie die Datei `docker-compose.prod.yml` bitte **nicht**.
-Kopieren Sie stattdessen in Ihr `studio`-Verzeichnis folgende Dateien:
+Kopieren Sie stattdessen in Ihr `studio-lite`-Verzeichnis folgende Dateien:
 1. `https_on.sh` (zu finden im Projektverzeichnis unter `/scripts/`)
 2. `https_off.sh` (zu finden im Projektverzeichnis unter `/scripts/`)
 
-Legen Sie dann das Unterverzeichnis `config/frontend/tls` an und kopieren Sie in das Verzeichnis `config/frontend` die Dateien:
+Legen Sie dann das Unterverzeichnis `config/frontend` an und kopieren Sie in dieses Verzeichnis folgende Dateien:
 
 1. `default.conf.http-template` (zu finden im Projektverzeichnis unter `/config/frontend/`)
 2. `default.conf.https-template` (zu finden im Projektverzeichnis unter `/config/frontend/`)
 
-Wenn Sie HTTP verwenden möchten, rufen Sie bitte im `studio`-Verzeichnis `bash https_off.sh` auf, um eine funktionsfähige HTTP-Konfiguration zu erzeugen.
+Wenn Sie HTTP verwenden möchten, rufen Sie bitte im `studio-lite`-Verzeichnis `bash https_off.sh` auf, um eine funktionsfähige HTTP-Konfiguration zu erzeugen.
 
-Falls Sie satt dessen HTTPS verwenden möchten, legen Sie Zertifikat und Schlüssel bitte in das Unterverzeichnis `config/frontend/tls`.
-Benennen Sie Ihren Schlüssel in `studio.key` und Ihr Zertifikat in `studio.crt` um.
-Rufen Sie dann im `studio`-Verzeichnis `bash https_on.sh` auf, um eine funktionsfähige HTTPS-Konfiguration für den Nginx-Webserver zu erhalten.
+Falls Sie stattdessen HTTPS verwenden möchten, erstellen Sie bitte das Verzeichnis `secrets/frontend` und legen Sie in dieses Ihr Zertifikat und Ihren Schlüssel ab.
+Benennen Sie dann den Schlüssel in `studio-lite.key` und das Zertifikat in `studio-lite.crt` um.
+Um eine funktionsfähige HTTPS-Konfiguration für den Nginx-Webserver zu erhalten, rufen Sie danach im `studio-lite`-Verzeichnis `bash https_on.sh` auf.
 
-Die jeweils generierte Konfigurationsdatei finden Sie im `studio`-Verzeichnis unter `config/frontend/default.conf.template`.
+Die generierte Konfigurationsdatei finden Sie im `studio-lite`-Verzeichnis unter `config/frontend/default.conf.template`.
 Sie können sie nach Belieben weiter anpassen.
 Bitte beachten Sie aber, dass bei einem Aufruf von `bash https_on.sh` oder von `bash https_off.sh` diese Datei überschrieben wird und
-nur von der letzten Version eine Sicherheitskopie unter `config/frontend/default.conf.template.bkp` erzeugt wird.  
+nur von der letzten Version eine Sicherheitskopie unter `config/frontend/default.conf.template.bkp` erzeugt wird.
 
 ## Manuelle Updates
 Wenn Sie Ihre Installation auf weiterentwickelte Softwareversionen aktualisieren möchten,
@@ -112,12 +112,23 @@ Gehen Sie dann zur Startseite zurück (Klick auf das Logo links oben) und rufen 
 Jetzt (zurück zur Startseite) ist man in der Lage, einen Arbeitsbereich aufzurufen und Aufgaben zu definieren.
 
 # Update/Anpassen
-Achtung: Sorgen Sie vor einem Update stets für ein Backup (z. B. Snapshot-Funktion des Servers). Sie sollten das Zurückspielen eines Backups (sog. Restore) zumindest einmal erprobt haben, um auf diese Situation vorbereitet zu sein.
+Achtung: Sorgen Sie vor einem Update stets für ein Backup (z. B. Snapshot-Funktion des Servers).
+Sie sollten das Zurückspielen eines Backups (sog. Restore) zumindest einmal erprobt haben, um auf diese Situation vorbereitet zu sein.
 
-Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.prod`. Hier finden Sie z. B. die Ports, auf denen Frontend antwortet.
+Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.prod`.
+Hier finden Sie z. B. die Ports, auf denen Frontend antwortet.
 
-Für die Festlegung, welche Version installiert werden soll, ist in dieser Datei der Eintrag `TAG` verantwortlich. Bei der Erstinstallation ist hier `latest` eingetragen. Das bedeutet, dass die jeweils letzte stabile Version installiert wird. Man kann aber auch manuell eine andere Version eintragen. Darüber ist es möglich, eine Vorversion im Entwicklungsstadium (sog. Pre-release) festzulegen. Die Liste aller Releases finden Sie [hier](https://github.com/iqb-berlin/studio-lite/releases).
+Für die Festlegung, welche Version installiert werden soll, ist in dieser Datei der Eintrag `TAG` verantwortlich.
+Bei der Erstinstallation ist hier `latest` eingetragen.
+Das bedeutet, dass die jeweils letzte stabile Version installiert wird.
+Man kann aber auch manuell eine andere Version eintragen.
+Darüber ist es möglich, eine Vorversion im Entwicklungsstadium (sog. Pre-release) festzulegen.
+Die Liste aller Releases finden Sie [hier](https://github.com/iqb-berlin/studio-lite/releases).
 
-Für das Update ist dann erneut `make production-ramp-up` aufzurufen. Die vorhandenen Docker-Container werden gestoppt, neue Docker-Images eingespielt und dann wieder gestartet. Dieser Prozess sollte nicht länger als eine Minute dauern. Da die Daten nicht Teil der Container sind, sondern dauerhaft auf dem Server in speziellen Verzeichnissen gespeichert sind (z. B. die Datenbank), wird hierdurch nur die Programmierung ausgetauscht. Die Arbeit kann unmittelbar fortgesetzt werden.  
+Für das Update ist dann erneut `make production-ramp-up` aufzurufen.
+Die vorhandenen Docker-Container werden gestoppt, neue Docker-Images eingespielt und dann wieder gestartet.
+Dieser Prozess sollte nicht länger als eine Minute dauern.
+Da die Daten nicht Teil der Container sind, sondern dauerhaft auf dem Server in speziellen Verzeichnissen gespeichert sind (z. B. die Datenbank), wird hierdurch nur die Programmierung ausgetauscht.
+Die Arbeit kann unmittelbar fortgesetzt werden.
 
 Achtung: Sollten bei einem Update Änderungen an der Datenbankstruktur nötig sein, erfolgt dies automatisch. Allerdings trifft dies nur zu, wenn Sie zu einer neueren Version wechseln. Wenn Sie eine ältere Programmierung als die aktuell installierte abrufen, kann die alte Datenbankstruktur eventuell nicht mehr hergestellt werden.

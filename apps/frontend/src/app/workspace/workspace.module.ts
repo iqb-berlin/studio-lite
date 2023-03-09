@@ -27,7 +27,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
@@ -53,6 +53,19 @@ import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
 import { ReviewConfigEditComponent } from './dialogs/components/review-config-edit.component';
+import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
+import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
+import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
+import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
+import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
+import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
+import { UnitsAreaComponent } from './components/units-area/units-area.component';
+import { SplitterModule } from '../splitter/splitter.module';
+import { UnitTableComponent } from './components/unit-table/unit-table.component';
+import { UnitGroupComponent } from './components/unit-group/unit-group.component';
+import { FilterUnitsPipe } from './pipes/filter-units.pipe';
+import { SearchUnitComponent } from './components/search-unit/search-unit.component';
+import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
 
 @NgModule({
   imports: [
@@ -79,6 +92,7 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
     MatSnackBarModule,
     MatTableModule,
     MatCheckboxModule,
+    MatRippleModule,
     FormsModule,
     MatTabsModule,
     IqbComponentsModule,
@@ -86,7 +100,8 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
     MatProgressBarModule,
     TranslateModule,
     CommentsModule,
-    MatBadgeModule
+    MatBadgeModule,
+    SplitterModule
   ],
   declarations: [
     WorkspaceComponent,
@@ -107,12 +122,21 @@ import { ReviewConfigEditComponent } from './dialogs/components/review-config-ed
     GroupManageComponent,
     HasNewCommentsPipe,
     ReviewsComponent,
-    ReviewConfigEditComponent
+    ReviewConfigEditComponent,
+    UnitSelectionComponent,
+    UnitSaveButtonComponent,
+    UnitDataAreaComponent,
+    AddUnitButtonComponent,
+    DeleteUnitButtonComponent,
+    EditUnitButtonComponent,
+    UnitsAreaComponent,
+    UnitTableComponent,
+    UnitGroupComponent,
+    FilterUnitsPipe,
+    SearchUnitComponent,
+    UpdateUnitsButtonComponent
   ],
-  exports: [
-    WorkspaceComponent,
-    UnitCommentsComponent
-  ],
+  exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
     UnitRoutingCanDeactivateGuard,
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }

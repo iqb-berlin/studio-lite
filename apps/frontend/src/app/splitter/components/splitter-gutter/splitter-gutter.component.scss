@@ -1,0 +1,15 @@
+.hotspot {
+  z-index: 100;
+  height: 100%;
+  position: absolute;
+}
+
+.draggable {
+  cursor: col-resize;
+}
+
+.line {
+  position: relative;
+  height: 100%;
+  background-color: #777;
+}

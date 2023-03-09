@@ -102,10 +102,36 @@
       "schemer": "Kodierung",
       "comments": "Kommentare"
     },
-    "new-comments": "Neue Kommentare"
+    "new-comments": "Neue Kommentare",
+    "unit-key": "Kurzname",
+    "unit-name": "Name",
+    "sort-by-key": "Nach Kurzname sortieren",
+    "sort-by-name": "Nach Name sortieren",
+    "update-units": "Aufgabenliste aktualisieren",
+    "add-units": "Aufgabe(n) hinzufügen",
+    "delete-units": "Aufgabe(n) löschen",
+    "import-files": "Import von Datei(en)",
+    "from-existing": "Neu von vorhandener Aufgabe",
+    "new-unit": "Neu (leer)",
+    "more-unit-tasks": "Weitere Funktionen...",
+    "download-unit": "Aufgaben als Datei herunterladen",
+    "export": "Export",
+    "move-unit": "Aufgaben in anderen Arbeitsbereich verschieben",
+    "move-to": "Verschieben",
+    "copy-unit": "Aufgaben in anderen Arbeitsbereich kopieren",
+    "copy-to": "Kopieren nach...",
+    "manage-unit-groups": "Gruppen verwalten",
+    "unit-settings": "Einstellungen",
+    "unit-users": "Nutzer:innen",
+    "reviews": "Aufgabenfolgen",
+    "cancel-save-unit": "Aufgabenänderungen verwerfen",
+    "save-unit": "Aufgabe speichern",
+    "save": "Speichern",
+    "print": "Drucken",
+    "print-review": "Aufgabenfolge drucken"
   },
   "select-unit-list": {
-    "filter": "Suche nach Aufgaben und Gruppen",
+    "filter": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
   },
@@ -196,5 +222,24 @@
     "521": "Bitte Anwendung neu laden!",
     "close": "Fehlermeldung ausblenden",
     "login": "Login"
+  },
+  "print": {
+    "change-player-height": "Aufgabenhöhe ändern",
+    "player": "Player",
+    "editor": "Editor",
+    "schemer": "Schemer",
+    "group-name": "Gruppe",
+    "last-changed-definition": "Letzte Änderung der Definition",
+    "last-changed-metadata": "Letzte Änderung der Eigenschaften",
+    "last-changed-scheme": "Letzte Änderung des Kodierschemas",
+    "comments": "Kommentare",
+    "no-comments": "Keine Kommentare",
+    "label": "Beschreibung",
+    "common-manual-instruction": "Allgemeine Instruktionen für manuelles Kodieren",
+    "manual-instruction": "Instruktionen für manuelles Kodieren",
+    "code-list": "Liste der möglichen Codes",
+    "id": "ID",
+    "coding": "Kodierung",
+    "no-coding": "Keine Kodierung"
   }
 }

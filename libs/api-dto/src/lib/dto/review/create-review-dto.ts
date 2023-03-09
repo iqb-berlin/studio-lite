@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateReviewDto {
   @ApiProperty()
-  name?: string;
+    name?: string;
 
   @ApiProperty()
-  workspaceId?: number;
+    workspaceId?: number;
 }

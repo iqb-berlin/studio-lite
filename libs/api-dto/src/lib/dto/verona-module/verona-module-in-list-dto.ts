@@ -5,17 +5,17 @@ export class VeronaModuleInListDto {
   [index: string]: unknown;
 
   @ApiProperty()
-  key!: string;
+    key!: string;
 
   @ApiProperty()
-  sortKey!: string;
+    sortKey!: string;
 
   @ApiProperty()
-  metadata!: VeronaModuleMetadataDto;
+    metadata!: VeronaModuleMetadataDto;
 
   @ApiProperty()
-  fileSize?: number;
+    fileSize?: number;
 
   @ApiProperty()
-  fileDateTime?: number;
+    fileDateTime?: number;
 }

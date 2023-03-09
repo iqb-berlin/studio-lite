@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 
-FROM node:16.15-bullseye-slim AS build
+ARG BASE_IMAGE=node:18.14-bullseye-slim
+
+FROM ${BASE_IMAGE} AS build
 ARG project
 
 RUN mkdir /studio-lite
@@ -19,7 +21,7 @@ FROM build AS dev
 ENTRYPOINT ["nx"]
 
 
-FROM node:16-bullseye-slim AS base
+FROM ${BASE_IMAGE} AS base
 RUN apt-get update && \
     apt-get install -y --no-install-recommends tini && \
     rm -rf /var/lib/apt/lists/*

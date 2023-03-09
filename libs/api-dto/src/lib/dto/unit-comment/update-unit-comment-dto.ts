@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUnitCommentDto {
   @ApiProperty()
-  body!: string;
+    body!: string;
 
   @ApiProperty()
-  userId!: number;
+    userId!: number;
 }

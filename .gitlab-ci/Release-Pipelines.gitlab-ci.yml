@@ -1,17 +1,16 @@
-
 #############################################################################
-## 'MAIN' TARGETED PULL REQUESTS, RELEASE TAGS
+## 'MAIN' TARGETED MERGE REQUESTS, RELEASE TAGS
 #############################################################################
 
 .main_pr_base_rules:
   rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
     - if: $CI_COMMIT_TAG
       when: never
 
 .main_pr_manual_rules:
   rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
@@ -39,12 +38,20 @@ check-main-pr-rules:
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   script:
-    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "main" ]; then echo "pull request target branch is not 'main'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'main'"; fi
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "main" ]; then echo "pull request target branch is 'main'" ; else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "main" ];
+      then echo "merge request target branch is not 'main'";
+      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' == 'main'"; fi
+    - if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" == "main" ];
+      then echo "merge request target branch is 'main'";
+      else echo "merge request target branch '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is nonzero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is zero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
 check-main-commit-push-rules:
   stage: .pre
@@ -56,16 +63,36 @@ check-main-commit-push-rules:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
     - echo $CI_COMMIT_TAG
-    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then echo "commit branch is 'main'" ; else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
-    - if [ "$CI_COMMIT_BRANCH" != "main" ]; then echo "commit branch is not 'main'" ; else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "push" ]; then echo "pipeline source is 'push'" ; else echo "'$CI_PIPELINE_SOURCE' != 'push'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "push" ]; then echo "pipeline source is not 'push'" ; else echo "'$CI_PIPELINE_SOURCE' == 'push'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "push" ]; then echo "commit branch exists, is 'main', and it's a push" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "push" ]; then echo "commit branch doesn't exist or isn't 'main' or it isn't a push" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is nonzero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is zero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "main" ];
+      then echo "commit branch is 'main'";
+      else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "main" ];
+      then echo "commit branch is not 'main'";
+      else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "push" ];
+      then echo "pipeline source is 'push'";
+      else echo "'$CI_PIPELINE_SOURCE' != 'push'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "push" ];
+      then echo "pipeline source is not 'push'";
+      else echo "'$CI_PIPELINE_SOURCE' == 'push'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "push" ];
+      then echo "commit branch exists, is 'main', and it's a push";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "push" ];
+      then echo "commit branch doesn't exist or isn't 'main' or it isn't a push";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is zero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is nonzero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
 check-main-commit-web-rules:
   stage: .pre
@@ -77,16 +104,36 @@ check-main-commit-web-rules:
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
     - echo $CI_COMMIT_TAG
-    - if [ -n "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is nonzero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ]; then echo "commit branch string length is zero" ; else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then echo "commit branch is 'main'" ; else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
-    - if [ "$CI_COMMIT_BRANCH" != "main" ]; then echo "commit branch is not 'main'" ; else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "web" ]; then echo "pipeline source is 'web'" ; else echo "'$CI_PIPELINE_SOURCE' != 'web'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "web" ]; then echo "pipeline source is not 'web'" ; else echo "'$CI_PIPELINE_SOURCE' == 'web'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "web" ]; then echo "commit branch exists, is 'main', and it's a web gui call" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "web" ]; then echo "commit branch doesn't exist or isn't 'main' or it isn't a web gui call" ; else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ]; then echo "commit tag string length is zero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then echo "commit tag string length is nonzero" ; else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is nonzero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ];
+      then echo "commit branch string length is zero";
+      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "main" ];
+      then echo "commit branch is 'main'";
+      else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
+    - if [ "$CI_COMMIT_BRANCH" != "main" ];
+      then echo "commit branch is not 'main'";
+      else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" = "web" ];
+      then echo "pipeline source is 'web'";
+      else echo "'$CI_PIPELINE_SOURCE' != 'web'"; fi
+    - if [ "$CI_PIPELINE_SOURCE" != "web" ];
+      then echo "pipeline source is not 'web'";
+      else echo "'$CI_PIPELINE_SOURCE' == 'web'"; fi
+    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "web" ];
+      then echo "commit branch exists, is 'main', and it's a web gui call";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "web" ];
+      then echo "commit branch doesn't exist or isn't 'main' or it isn't a web gui call";
+      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
+    - if [ -z "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is zero" ;
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+    - if [ -n "$CI_COMMIT_TAG" ];
+      then echo "commit tag string length is nonzero";
+      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
 
 check-release-rules:
   stage: .pre
@@ -98,85 +145,108 @@ check-release-rules:
     - RELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
   script:
     - echo $PRERELEASE_REGEX
-    - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]]; then echo "$CI_COMMIT_TAG is a valid release tag."; else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
+    - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]];
+      then echo "$CI_COMMIT_TAG is a valid release tag.";
+      else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
 
 build-main-pr-backend-test-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/api/Dockerfile --build-arg project=api --target=dev -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker build -f apps/api/Dockerfile --target=dev --build-arg project=api
+      -t ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test .
+    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   after_script:
     - docker logout $CI_REGISTRY
 
 build-main-pr-frontend-test-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend/Dockerfile --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333 --target=dev -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker build -f apps/frontend/Dockerfile --target=dev
+      --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333
+      -t ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test .
+    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   after_script:
     - docker logout $CI_REGISTRY
 
 build-main-pr-frontend-e2e-test-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_E2E_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend-e2e"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend-e2e/Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:latest .
-    - docker push -a ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e
+    - docker build -f apps/frontend-e2e/Dockerfile
+      -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+      -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
+    - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
   after_script:
     - docker logout $CI_REGISTRY
 
 build-main-pr-db-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
+    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${DB_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
 build-main-pr-liquibase-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
+    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $REGISTRY
 
 build-main-pr-backend-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
@@ -184,17 +254,21 @@ build-main-pr-backend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
+    - docker build --cache-from ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test -f apps/api/Dockerfile
+      --target=prod --build-arg project=api -t ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
 build-main-pr-frontend-image:
   stage: build
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
@@ -202,17 +276,22 @@ build-main-pr-frontend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker build --cache-from ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
+    - docker build --cache-from ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
+      -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
+      -t ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} .
+    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
 test-main-pr-db:
-  stage: db-test
+  stage: test-db
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
@@ -222,20 +301,31 @@ test-main-pr-db:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d db
     - export $(grep -v '^#' .env.prod.template | xargs)
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
 test-main-pr-backend:
-  stage: unit-test
+  stage: test-units
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
@@ -244,13 +334,16 @@ test-main-pr-backend:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test test api
+    - docker run ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test test api
 
 test-main-pr-frontend:
-  stage: unit-test
+  stage: test-units
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
@@ -259,13 +352,16 @@ test-main-pr-frontend:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test test frontend
+    - docker run ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test test frontend
 
 test-main-pr-e2e:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
@@ -278,17 +374,20 @@ test-main-pr-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e test-e2e
 
 test-main-pr-e2e-api:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -301,17 +400,20 @@ test-main-pr-e2e-api:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
 test-main-pr-e2e-ui-chrome:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -324,17 +426,20 @@ test-main-pr-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
 test-main-pr-e2e-ui-chrome-mobile:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -347,17 +452,20 @@ test-main-pr-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
 test-main-pr-e2e-ui-firefox:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -370,17 +478,20 @@ test-main-pr-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
 test-main-pr-e2e-ui-firefox-mobile:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -393,17 +504,20 @@ test-main-pr-e2e-ui-firefox-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
 
 test-main-pr-e2e-ui-edge:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -416,17 +530,20 @@ test-main-pr-e2e-ui-edge:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
 
 test-main-pr-e2e-ui-edge-mobile:
-  stage: e2e-test
+  stage: test-e2e
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_manual_rules, rules ]
@@ -439,17 +556,20 @@ test-main-pr-e2e-ui-edge-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod
-    - export $(grep -v '^#' .env.prod | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
+    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
     - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
 
 lint-main-pr-backend:
   stage: lint
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
@@ -458,13 +578,16 @@ lint-main-pr-backend:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test lint api
+    - docker run ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test lint api
 
 lint-main-pr-frontend:
   stage: lint
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
@@ -473,13 +596,16 @@ lint-main-pr-frontend:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test lint frontend
+    - docker run ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test lint frontend
 
 lint-main-pr-frontend-e2e:
   stage: lint
+  interruptible: true
   allow_failure: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
@@ -488,13 +614,16 @@ lint-main-pr-frontend-e2e:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_E2E_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend-e2e"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
+    - docker pull -q ${FRONTEND_E2E_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
   script:
-    - docker run ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} lint frontend-e2e
+    - docker run ${FRONTEND_E2E_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} lint frontend-e2e
 
 audit-main-pr-backend:
   stage: audit
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
@@ -502,13 +631,16 @@ audit-main-pr-backend:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
+    - docker run --entrypoint npm ${BACKEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
 
 audit-main-pr-frontend:
   stage: audit
+  interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
@@ -516,10 +648,19 @@ audit-main-pr-frontend:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker run --entrypoint npm ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
+    - docker run --entrypoint npm ${FRONTEND_IMAGE_NAME}:${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}_test audit --audit-level critical
+
+gemnasium-dependency_scanning:
+  stage: scan-dependencies
+  interruptible: true
+  allow_failure: true
+  rules:  # TODO: Rules does not work
+    - !reference [ .main_pr_base_rules, rules ]
 
 build-main-commit-db-image:
   stage: build-images
@@ -528,12 +669,14 @@ build-main-commit-db-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA}
+    - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}
   script:
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker tag ${DB_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -544,12 +687,14 @@ build-main-commit-liquibase-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA}
+    - docker pull -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}
   script:
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -560,30 +705,34 @@ build-main-commit-backend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_BEFORE_SHA}
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}
   script:
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
 build-main-commit-frontend-image:
-    stage: build-images
-    rules:
-      - !reference [ .main_commit_push_rules, rules ]
-    image: $DOCKER_IMAGE
-    services:
-      - $DOCKER_SERVICE
-    before_script:
-      - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-      - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_BEFORE_SHA}
-    script:
-      - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_BEFORE_SHA} ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
-      - docker push -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
-    after_script:
-      - docker logout $CI_REGISTRY
+  stage: build-images
+  rules:
+    - !reference [ .main_commit_push_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}
+  script:
+    - docker tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
 
 build-main-commit-web-db-image:
   stage: build-images
@@ -592,11 +741,13 @@ build-main-commit-web-db-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} .
-    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -607,11 +758,13 @@ build-main-commit-web-liquibase-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} .
-    - docker push -q ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $REGISTRY
 
@@ -622,11 +775,14 @@ build-main-commit-web-backend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/api/Dockerfile --build-arg project=api --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - docker build -f apps/api/Dockerfile --target=prod --build-arg project=api
+      -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -637,11 +793,14 @@ build-main-commit-web-frontend-image:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} .
-    - docker push ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker build -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
+      -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker push ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
 
@@ -652,14 +811,40 @@ scan-main-commit-db-image:
     - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-db-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-main-commit-liquibase-image:
   stage: scan-images
@@ -668,14 +853,40 @@ scan-main-commit-liquibase-image:
     - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-liquibase-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-main-commit-backend-image:
   stage: scan-images
@@ -684,14 +895,40 @@ scan-main-commit-backend-image:
     - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-backend-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-main-commit-frontend-image:
   stage: scan-images
@@ -700,14 +937,41 @@ scan-main-commit-frontend-image:
     - !reference [ .main_commit_push_rules, rules ]
   needs:
     - build-main-commit-frontend-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
+
 
 scan-main-commit-web-db-image:
   stage: scan-images
@@ -716,14 +980,40 @@ scan-main-commit-web-db-image:
     - !reference [ .main_commit_web_rules, rules ]
   needs:
     - build-main-commit-web-db-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-main-commit-web-liquibase-image:
   stage: scan-images
@@ -732,14 +1022,40 @@ scan-main-commit-web-liquibase-image:
     - !reference [ .main_commit_web_rules, rules ]
   needs:
     - build-main-commit-web-liquibase-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-main-commit-web-backend-image:
   stage: scan-images
@@ -748,14 +1064,40 @@ scan-main-commit-web-backend-image:
     - !reference [ .main_commit_web_rules, rules ]
   needs:
     - build-main-commit-web-backend-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 scan-main-commit-web-frontend-image:
   stage: scan-images
@@ -764,14 +1106,40 @@ scan-main-commit-web-frontend-image:
     - !reference [ .main_commit_web_rules, rules ]
   needs:
     - build-main-commit-web-frontend-image
-  image: $DOCKER_IMAGE
-  services:
-    - $DOCKER_SERVICE
-  before_script:
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
-    - docker pull -q aquasec/trivy:0.29.2
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
   script:
-    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --security-checks vuln --ignore-unfixed --severity CRITICAL ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy image --clear-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
 
 build-release:
   stage: build-images
@@ -780,21 +1148,26 @@ build-release:
   image: $DOCKER_IMAGE
   services:
     - $DOCKER_SERVICE
+  variables:
+    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
+    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
+    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}
-    - docker pull -q ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}
+    - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   script:
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:latest
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:latest
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:latest
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
-    - docker tag ${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:latest
+    - docker tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:${CI_COMMIT_TAG}
+    - docker tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-db:latest
+    - docker tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:${CI_COMMIT_TAG}
+    - docker tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-liquibase:latest
+    - docker tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:${CI_COMMIT_TAG}
+    - docker tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-backend:latest
+    - docker tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:${CI_COMMIT_TAG}
+    - docker tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} iqbberlin/studio-lite-frontend:latest
     - docker push -a -q iqbberlin/studio-lite-db
     - docker push -a -q iqbberlin/studio-lite-liquibase
     - docker push -a -q iqbberlin/studio-lite-backend

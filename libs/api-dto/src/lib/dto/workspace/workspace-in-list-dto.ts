@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class WorkspaceInListDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 
   @ApiProperty({ example: 463 })
-  groupId!: number;
+    groupId!: number;
 }

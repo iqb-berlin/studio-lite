@@ -19,7 +19,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
   `
 })
 export class ConfirmDialogComponent implements OnInit {
-  public showCancel = true;
+  showCancel = true;
 
   constructor(@Inject(MAT_DIALOG_DATA) public confirmData: ConfirmDialogData) {}
 

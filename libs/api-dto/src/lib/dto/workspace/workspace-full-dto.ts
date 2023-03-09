@@ -3,17 +3,17 @@ import { WorkspaceSettingsDto } from './workspace-settings-dto';
 
 export class WorkspaceFullDto {
   @ApiProperty()
-  id!: number;
+    id!: number;
 
   @ApiProperty({ example: 'VERA2002' })
-  name?: string;
+    name?: string;
 
   @ApiProperty({ example: 463 })
-  groupId?: number;
+    groupId?: number;
 
   @ApiProperty({ example: 'Hörverstehen' })
-  groupName?: string;
+    groupName?: string;
 
   @ApiProperty()
-  settings?: WorkspaceSettingsDto;
+    settings?: WorkspaceSettingsDto;
 }

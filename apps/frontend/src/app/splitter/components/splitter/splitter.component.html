@@ -1,0 +1,15 @@
+<div class="panes-container">
+  <ng-content></ng-content>
+  <ng-container *ngFor="let pane of panes; let index = index; let last = last;">
+    <studio-lite-splitter-gutter *ngIf="!last"
+                                 [style.order]="index"
+                                 [index]="index"
+                                 [isFixed]="(pane.minSize === pane.maxSize) && (pane.maxSize === pane.initialSize)"
+                                 [lineSize]="gutterLineSize"
+                                 [hotspotSize]="gutterHotspotSize"
+                                 (startDragging)="onGutterStartDragging($event)"
+                                 (dragging)="onGutterDragging($event)">
+    </studio-lite-splitter-gutter>
+  </ng-container>
+</div>
+

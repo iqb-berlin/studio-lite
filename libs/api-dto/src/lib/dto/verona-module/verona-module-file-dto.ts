@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class VeronaModuleFileDto {
   @ApiProperty()
-  key!: string;
+    key!: string;
 
   @ApiProperty()
-  name!: string;
+    name!: string;
 
   @ApiProperty()
-  file!: string;
+    file!: string;
 
   @ApiProperty()
-  fileName?: string;
+    fileName?: string;
 }

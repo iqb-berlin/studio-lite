@@ -1,0 +1,22 @@
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header {
+  background-color: #00606415;
+  padding-left: 15px;
+  border-bottom: #00606420 1px solid;
+  @include flex-row;
+}
+
+.expand-button {
+  @include flex-row;
+  gap: 3px;
+}
+
+.title {
+  overflow-wrap: anywhere;
+}

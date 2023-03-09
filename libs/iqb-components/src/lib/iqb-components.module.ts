@@ -19,34 +19,34 @@ import { IqbFilesUploadQueueComponent } from './iqb-files/iqbFilesUploadQueue/iq
 import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        MatDialogModule,
-        MatIconModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatExpansionModule,
-        FormsModule,
-        MatInputModule,
-        HttpClientModule,
-        MatProgressBarModule,
-        MatCardModule
-    ],
-    declarations: [
-        ConfirmDialogComponent,
-        MessageDialogComponent,
-        BytesPipe,
-        IqbFilesUploadComponent,
-        IqbFilesUploadQueueComponent,
-        IqbFilesUploadInputForDirective
-    ],
-    exports: [
-        ConfirmDialogComponent,
-        MessageDialogComponent,
-        BytesPipe,
-        IqbFilesUploadQueueComponent,
-        IqbFilesUploadInputForDirective
-    ]
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatExpansionModule,
+    FormsModule,
+    MatInputModule,
+    HttpClientModule,
+    MatProgressBarModule,
+    MatCardModule
+  ],
+  declarations: [
+    ConfirmDialogComponent,
+    MessageDialogComponent,
+    BytesPipe,
+    IqbFilesUploadComponent,
+    IqbFilesUploadQueueComponent,
+    IqbFilesUploadInputForDirective
+  ],
+  exports: [
+    ConfirmDialogComponent,
+    MessageDialogComponent,
+    BytesPipe,
+    IqbFilesUploadQueueComponent,
+    IqbFilesUploadInputForDirective
+  ]
 })
 export class IqbComponentsModule {
   // if config is needed: static forRoot(config: IqbComponentsConfig): ModuleWithProviders {

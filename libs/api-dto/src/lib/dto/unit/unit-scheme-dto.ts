@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitSchemeDto {
   @ApiProperty()
-  scheme = '';
+    scheme = '';
 
   @ApiProperty()
-  schemeType = '';
+    schemeType = '';
 
   @ApiProperty()
-  variables?: unknown[] = [];
+    variables?: unknown[] = [];
 }

@@ -1,0 +1,44 @@
+<mat-table matSort
+           matSortDisableClear
+           matSortActive="key"
+           matSortDirection="asc"
+           [dataSource]="dataSource"
+           (matSortChange)="onSortChange($event)">
+  <ng-container matColumnDef="key">
+    <mat-header-cell class="unit-cell" *matHeaderCellDef
+                     mat-sort-header
+                     [sortActionDescription]="'workspace.sort-by-key' | translate">
+      {{'workspace.unit-key' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="unit-cell">
+      <div *ngIf="element | hasNewComments"
+           class="new-comments"
+           [matTooltip]="'workspace.new-comments' | translate">
+      </div>
+      {{element.key}}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell class="unit-cell" *matHeaderCellDef
+                     mat-sort-header
+                     [sortActionDescription]="'workspace.sort-by-name' | translate">
+      {{'workspace.unit-name' | translate}}
+    </mat-header-cell>
+    <mat-cell class="unit-cell"
+              *matCellDef="let element">
+      {{element.name}}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container *ngIf="hasSortHeader">
+    <mat-header-row class="unit-sort"
+                    *matHeaderRowDef="displayedColumns; sticky: true">
+    </mat-header-row>
+  </ng-container>
+  <mat-row class="unit-row"
+           [class.selected]="selectedUnitId===row.id"
+           *matRowDef="let row; columns: displayedColumns;"
+           (click)="selectUnit.emit(row.id)">
+  </mat-row>
+</mat-table>
