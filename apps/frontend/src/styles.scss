@@ -33,6 +33,9 @@ body {
     width: 210mm;
     height: 297mm;
   }
+  .hide-on-print {
+    display: none !important;
+  }
 }
 
 .page-body {
