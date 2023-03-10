@@ -17,7 +17,7 @@
     </button>
   </div>
 </div>
-<div class="logo">
+<div class="logo hide-on-print">
   <a [routerLink]="['/']" aria-label="Gehe zur Startseite">
     <img [src]="appService.appLogo?.data"
          [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'Startseite'"
@@ -25,7 +25,7 @@
   </a>
 </div>
 
-<div class="page-title" fxLayout="row" fxLayoutAlign="space-between center">
+<div class="page-title hide-on-print" fxLayout="row" fxLayoutAlign="space-between center">
   <div *ngIf="!appService.appConfig?.hideTitlesOnPage">{{ appService.appConfig.appTitle }}</div>
   <div *ngIf="appService.appConfig?.pageTitle && !appService.appConfig.hideTitlesOnPage">{{ appService.appConfig.pageTitle }}</div>
 </div>
