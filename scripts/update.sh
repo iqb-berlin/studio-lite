@@ -50,11 +50,11 @@ run_update_script_in_selected_version() {
   CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update.sh
   NEW_UPDATE_SCRIPT=$REPO_URL/"$TARGET_TAG"/scripts/update.sh
 
-  if [ ! -f "$CURRENT_UPDATE_SCRIPT" ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
+  if [ ! -f "$CURRENT_UPDATE_SCRIPT" ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT" &>/dev/null; then
     if [ ! -f "$CURRENT_UPDATE_SCRIPT" ]; then
       echo "Update script 'update.sh' does not exist!"
 
-    elif ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT"; then
+    elif ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT" &>/dev/null; then
       echo 'Update script has been modified in newer version!'
     fi
 
