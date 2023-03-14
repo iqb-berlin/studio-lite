@@ -12,7 +12,7 @@ import { WorkspaceService } from '../../workspace.service';
 import { GroupManageComponent } from '../../dialogs/group-manage.component';
 import { ReviewsComponent } from '../../dialogs/reviews.component';
 import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
-import { ExportUnitComponent } from '../../dialogs/export-unit.component';
+import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
 import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
 import { EditWorkspaceSettingsComponent } from '../../../components/edit-workspace-settings.component';

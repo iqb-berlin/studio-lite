@@ -1,22 +1,25 @@
-<div fxLayout="column" style="height: 100%">
+<div class="fx-column-start-stretch">
   <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
   <div fxLayout="row" fxLayoutGap="20px">
-    <mat-dialog-content fxFlex>
+    <mat-dialog-content class="fx-flex">
       <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
     </mat-dialog-content>
-    <div fxFlex="300px">
+    <div class="fx-flex"
+         [style.max-width.px]="300">
       <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
       <mat-checkbox (change)="updateDisabled()" [disabled]="!enablePlayerOption"
                     [(ngModel)]="unitExportSettings.addPlayers" class="margin-bottom">
         Player hinzufügen
       </mat-checkbox>
-      <div fxLayout="column">
+      <div class="fx-column-start-stretch">
         <div *ngIf="!enablePlayerOption" class="tcMessage margin-bottom">
           Keine Aufgabe hat einen gültigen Player gesetzt.
         </div>
-        <div fxLayout="row">
-          <label fxFlex="50%">Logins hinzufügen</label>
-          <div fxLayout="column">
+        <div class="fx-row-start-stretch">
+          <label class="fx-flex"
+                 [style.max-width.%]="50">Logins hinzufügen
+          </label>
+          <div class="fx-column-start-stretch">
             <mat-form-field>
               <input matInput type="number" min="0"
                      [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
@@ -73,8 +76,8 @@
       </div>
     </div>
   </div>
-  <mat-dialog-actions fxLayout="column">
-    <div fxLayout="row">
+  <mat-dialog-actions class="fx-column-start-stretch">
+    <div class="fx-row-start-stretch">
       <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="getResultData()" [disabled]="unitSelectionTable.selectionCount === 0">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">

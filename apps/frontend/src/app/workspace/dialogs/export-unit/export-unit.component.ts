@@ -2,17 +2,14 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
-import { BackendService } from '../backend.service';
-import { WorkspaceService } from '../workspace.service';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
-import { AppService } from '../../app.service';
+import { BackendService } from '../../backend.service';
+import { WorkspaceService } from '../../workspace.service';
+import { SelectUnitListComponent } from '../components/select-unit-list.component';
+import { AppService } from '../../../app.service';
 
 @Component({
   templateUrl: './export-unit.component.html',
-  styles: [
-    '.margin-bottom {margin-bottom: 10px}',
-    '.tcMessage {font-style: italic; font-size: smaller}'
-  ]
+  styleUrls: ['export-unit.component.scss']
 })
 export class ExportUnitComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;

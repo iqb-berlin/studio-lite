@@ -40,7 +40,7 @@ import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
-import { ExportUnitComponent } from './dialogs/export-unit.component';
+import { ExportUnitComponent } from './dialogs/export-unit/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
 import { UserListComponent } from './dialogs/components/user-list.component';
