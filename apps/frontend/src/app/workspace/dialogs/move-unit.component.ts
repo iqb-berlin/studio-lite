@@ -5,7 +5,7 @@ import {
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { AppService } from '../../app.service';
 import { WorkspaceDataFlat } from '../../app.classes';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { SelectUnitListComponent } from '../components/select-unit-list.component';
 
 export interface MoveUnitData {
   title: string,

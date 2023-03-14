@@ -9,10 +9,10 @@ import { lastValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { BackendService } from '../backend.service';
 import { WorkspaceService } from '../workspace.service';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { SelectUnitListComponent } from '../components/select-unit-list.component';
 import { AppService } from '../../app.service';
 import { InputTextComponent } from '../../components/input-text.component';
-import { ReviewConfigEditComponent } from './components/review-config-edit.component';
+import { ReviewConfigEditComponent } from '../components/review-config-edit.component';
 
 @Component({
   templateUrl: './reviews.component.html',
