@@ -67,26 +67,30 @@ export class UnitImportData {
     if (!this.definition && !this.definitionFileName) throw new Error('definition and definition file empty');
     const baseVariablesElement = xmlDocument('BaseVariables').first();
     if (baseVariablesElement.length > 0) {
-      baseVariablesElement.find('Variable').each((i, varElement) => {
-        const valuesElement = baseVariablesElement.find('Values').first();
-        this.baseVariables.push(new VeronaVariable({
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          id: varElement.attribs['id'],
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          type: varElement.attribs['type'],
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          format: varElement.attribs['format'],
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          nullable: varElement.attribs['nullable'],
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          multiple: varElement.attribs['multiple'],
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          valuesComplete: valuesElement.length > 0 ? valuesElement.attr['complete'] : false,
-          values: valuesElement.length > 0 ?
+      baseVariablesElement.find('Variable')
+        .each((i, varElement) => {
+          const varDocument = cheerio.load(varElement, {
+            xmlMode: true,
+            recognizeSelfClosing: true
+          });
+          const valuesElement = varDocument('Values').first();
+
+          this.baseVariables.push(new VeronaVariable({
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            valuesElement.children['Value'].map(varValueElement => varValueElement.text()) : []
-        }));
-      });
+            id: varElement.attribs['id'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            type: varElement.attribs['type'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            format: varElement.attribs['format'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            nullable: varElement.attribs['nullable'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            multiple: varElement.attribs['multiple'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            valuesComplete: valuesElement.length ? valuesElement.attr('complete') : false,
+            values: UnitImportData.getValuesForVariable(valuesElement)
+          }));
+        });
     }
     this.codingSchemeFileName = '';
     this.schemer = '';
@@ -98,6 +102,24 @@ export class UnitImportData {
       if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
       this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
     }
+  }
+
+  private static getValuesForVariable(
+    valuesElement: cheerio.Cheerio<cheerio.Element>
+  ):{ label: string, value: string }[] {
+    const values: { label: string, value: string }[] = [];
+    valuesElement.find('Value')
+      .each((j, valueElement) => {
+        const valueDocument = cheerio.load(valueElement, {
+          xmlMode: true,
+          recognizeSelfClosing: true
+        });
+        values.push({
+          label: valueDocument('label').first().text(),
+          value: valueDocument('value').first().text()
+        });
+      });
+    return values;
   }
 
   private getFolder(): string {
