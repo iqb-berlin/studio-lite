@@ -26,25 +26,30 @@ export class UnitImportData {
       xmlMode: true,
       recognizeSelfClosing: true
     });
-    const metadataElement = xmlDocument('Metadata').first();
-    if (metadataElement.length === 0) throw new Error('metadata element missing');
-    const unitIdElement = metadataElement.find('Id').first();
-    if (unitIdElement.length === 0) throw new Error('unit id element missing');
-    this.key = unitIdElement.text();
-    if (this.key.length === 0) throw new Error('unit id missing');
-    const unitLabelElement = metadataElement.find('Label').first();
-    this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
-    const unitDescriptionElement = metadataElement.find('Description').first();
-    this.description = unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';
-    const unitLastChangeElement = metadataElement.find('Lastchange').first();
-    if (unitLastChangeElement.length > 0) {
-      this.lastChangedMetadata = new Date(unitLastChangeElement.text());
-      this.lastChangedDefinition = new Date(unitLastChangeElement.text());
-      this.lastChangedScheme = new Date(unitLastChangeElement.text());
+    this.setMetaData(xmlDocument);
+    this.setDefinitionRef(xmlDocument);
+    if (this.definition || this.definitionFileName) {
+      this.setBaseVariables(xmlDocument);
+      this.setCodingSchemeRef(xmlDocument);
+    } else {
+      throw new Error('definition and definition file empty');
     }
-    const lastChangedMetadata = metadataElement.attr('lastchange');
-    if (lastChangedMetadata) this.lastChangedMetadata = new Date(lastChangedMetadata);
+  }
 
+  private setCodingSchemeRef(xmlDocument: cheerio.CheerioAPI) {
+    this.codingSchemeFileName = '';
+    this.schemer = '';
+    const codingSchemeElement = xmlDocument('CodingSchemeRef').first();
+    if (codingSchemeElement.length > 0) {
+      this.schemer = codingSchemeElement.attr('schemer');
+      this.schemeType = codingSchemeElement.attr('schemetype');
+      const lastChangedScheme = codingSchemeElement.attr('lastchange');
+      if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
+      this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
+    }
+  }
+
+  private setDefinitionRef(xmlDocument: cheerio.CheerioAPI): void {
     const definitionRefElement = xmlDocument('DefinitionRef').first();
     this.definition = '';
     this.definitionFileName = '';
@@ -64,7 +69,30 @@ export class UnitImportData {
         this.definition = definitionElement.text();
       }
     }
-    if (!this.definition && !this.definitionFileName) throw new Error('definition and definition file empty');
+  }
+
+  private setMetaData(xmlDocument: cheerio.CheerioAPI): void {
+    const metadataElement = xmlDocument('Metadata').first();
+    if (metadataElement.length === 0) throw new Error('metadata element missing');
+    const unitIdElement = metadataElement.find('Id').first();
+    if (unitIdElement.length === 0) throw new Error('unit id element missing');
+    this.key = unitIdElement.text();
+    if (this.key.length === 0) throw new Error('unit id missing');
+    const unitLabelElement = metadataElement.find('Label').first();
+    this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
+    const unitDescriptionElement = metadataElement.find('Description').first();
+    this.description = unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';
+    const unitLastChangeElement = metadataElement.find('Lastchange').first();
+    if (unitLastChangeElement.length > 0) {
+      this.lastChangedMetadata = new Date(unitLastChangeElement.text());
+      this.lastChangedDefinition = new Date(unitLastChangeElement.text());
+      this.lastChangedScheme = new Date(unitLastChangeElement.text());
+    }
+    const lastChangedMetadata = metadataElement.attr('lastchange');
+    if (lastChangedMetadata) this.lastChangedMetadata = new Date(lastChangedMetadata);
+  }
+
+  private setBaseVariables(xmlDocument: cheerio.CheerioAPI): void {
     const baseVariablesElement = xmlDocument('BaseVariables').first();
     if (baseVariablesElement.length > 0) {
       baseVariablesElement.find('Variable')
@@ -74,7 +102,6 @@ export class UnitImportData {
             recognizeSelfClosing: true
           });
           const valuesElement = varDocument('Values').first();
-
           this.baseVariables.push(new VeronaVariable({
             // eslint-disable-next-line @typescript-eslint/dot-notation
             id: varElement.attribs['id'],
@@ -91,16 +118,6 @@ export class UnitImportData {
             values: UnitImportData.getValuesForVariable(valuesElement)
           }));
         });
-    }
-    this.codingSchemeFileName = '';
-    this.schemer = '';
-    const codingSchemeElement = xmlDocument('CodingSchemeRef').first();
-    if (codingSchemeElement.length > 0) {
-      this.schemer = codingSchemeElement.attr('schemer');
-      this.schemeType = codingSchemeElement.attr('schemetype');
-      const lastChangedScheme = codingSchemeElement.attr('lastchange');
-      if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
-      this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
     }
   }
 
