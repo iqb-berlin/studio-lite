@@ -1,9 +1,9 @@
 <div class="fx-column-start-stretch">
   <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
-  <div fxLayout="row" fxLayoutGap="20px">
-    <mat-dialog-content class="fx-flex">
-      <select-unit-list #unitSelectionTable [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
-    </mat-dialog-content>
+  <mat-dialog-content fxLayout="row" fxLayoutGap="20px">
+      <select-unit-list #unitSelectionTable
+                        class="fx-flex"
+                        [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
     <div class="fx-flex"
          [style.max-width.px]="300">
       <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
@@ -75,7 +75,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </mat-dialog-content>
   <mat-dialog-actions class="fx-column-start-stretch">
     <div class="fx-row-start-stretch">
       <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="getResultData()" [disabled]="unitSelectionTable.selectionCount === 0">
