@@ -66,6 +66,7 @@ import { UnitGroupComponent } from './components/unit-group/unit-group.component
 import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
+import { TestcenterDataComponent } from './components/testcenter-data/testcenter-data.component';
 
 @NgModule({
   imports: [
@@ -134,7 +135,8 @@ import { UpdateUnitsButtonComponent } from './components/update-units-button/upd
     UnitGroupComponent,
     FilterUnitsPipe,
     SearchUnitComponent,
-    UpdateUnitsButtonComponent
+    UpdateUnitsButtonComponent,
+    TestcenterDataComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

@@ -1,14 +1,9 @@
+// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
 import { ExportUnitComponent } from './export-unit.component';
 import { environment } from '../../../../environments/environment';
 
@@ -20,22 +15,21 @@ describe('ExportUnitComponent', () => {
   class MockSelectUnitListComponent {
     @Input() workspace!: unknown;
     @Input() showGroups!: boolean;
+    disabled!: number[];
     selectionCount!: number;
   }
+
+  @Component({ selector: 'studio-lite-testcenter-data', template: '' })
+  class MockTestcenterDataComponent {}
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
         ExportUnitComponent,
-        MockSelectUnitListComponent
+        MockSelectUnitListComponent,
+        MockTestcenterDataComponent
       ],
       imports: [
-        NoopAnimationsModule,
-        MatSelectModule,
-        MatInputModule,
-        FormsModule,
-        MatFormFieldModule,
-        MatCheckboxModule,
         MatDialogModule,
         HttpClientModule,
         TranslateModule.forRoot()

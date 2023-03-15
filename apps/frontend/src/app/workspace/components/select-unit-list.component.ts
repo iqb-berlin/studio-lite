@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild
+  Component, EventEmitter, Input, OnDestroy, Output, ViewChild
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
@@ -79,7 +79,7 @@ import { BackendService } from '../backend.service';
     '.disabled-element {color: gray}'
   ]
 })
-export class SelectUnitListComponent implements OnInit, OnDestroy {
+export class SelectUnitListComponent implements OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'key', 'groupName'];
   tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
@@ -117,10 +117,12 @@ export class SelectUnitListComponent implements OnInit, OnDestroy {
 
   @Output() selectionChanged = new EventEmitter();
 
+  // TODO: Don't use method for binding
   get selectionCount(): number {
     return this.tableSelectionCheckbox.selected.length;
   }
 
+  // TODO: Don't use method for binding
   get selectedUnitIds(): number[] {
     return this.tableSelectionCheckbox.selected.map(ud => ud.id);
   }
@@ -130,9 +132,6 @@ export class SelectUnitListComponent implements OnInit, OnDestroy {
     this.tableSelectionCheckbox.clear();
     this.objectsDatasource.data.forEach(row => {
       if (newUnits.includes(row.id)) this.tableSelectionCheckbox.select(row);
-    });
-    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
-      this.selectionChanged.emit();
     });
   }
 
@@ -150,16 +149,12 @@ export class SelectUnitListComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatSort) sort = new MatSort();
 
-  constructor(
-    private backendService: BackendService
-  ) { }
-
-  ngOnInit() {
-    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
-      this.selectionChanged.emit();
-    });
+  constructor(private backendService: BackendService) {
+    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed
+      .subscribe(() => this.selectionChanged.emit(this.selectedUnitIds));
   }
 
+  // TODO: Don't use method for binding
   isAllSelected(): boolean {
     const numSelected = this.tableSelectionCheckbox.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;

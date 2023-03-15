@@ -3,82 +3,22 @@
   <mat-dialog-content fxLayout="row" fxLayoutGap="20px">
       <select-unit-list #unitSelectionTable
                         class="fx-flex"
-                        [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
+                        [workspace]="workspaceService.selectedWorkspaceId"
+                        (selectionChanged)="updateUnitIdList($event)">
+      </select-unit-list>
     <div class="fx-flex"
          [style.max-width.px]="300">
-      <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
-      <mat-checkbox (change)="updateDisabled()" [disabled]="!enablePlayerOption"
-                    [(ngModel)]="unitExportSettings.addPlayers" class="margin-bottom">
-        Player hinzufügen
-      </mat-checkbox>
-      <div class="fx-column-start-stretch">
-        <div *ngIf="!enablePlayerOption" class="tcMessage margin-bottom">
-          Keine Aufgabe hat einen gültigen Player gesetzt.
-        </div>
-        <div class="fx-row-start-stretch">
-          <label class="fx-flex"
-                 [style.max-width.%]="50">Logins hinzufügen
-          </label>
-          <div class="fx-column-start-stretch">
-            <mat-form-field>
-              <input matInput type="number" min="0"
-                     [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review">
-            </mat-form-field>
-            <mat-form-field>
-              <input matInput type="number" min="0"
-                     [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor">
-            </mat-form-field>
-            <mat-form-field>
-              <input matInput type="number" min="0"
-                     [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test">
-            </mat-form-field>
-          </div>
-        </div>
-        <mat-checkbox [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
-                      [(ngModel)]="unitExportSettings.passwordLess" class="margin-bottom">
-          <div>Ohne Kennwort (nur Login-Name)</div>
-        </mat-checkbox>
-        <mat-form-field>
-          <mat-select [placeholder]="'unit-download.booklet-config.paging-mode.label' | translate"
-                      [(ngModel)]="unitExportSettings.bookletSettings[0].value"
-                      [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0">
-            <mat-option [value]="'separate'">
-              {{'unit-download.booklet-config.paging-mode.separate' | translate}}
-            </mat-option>
-            <mat-option [value]="'concat-scroll'">
-              {{'unit-download.booklet-config.paging-mode.concat-scroll' | translate}}
-            </mat-option>
-            <mat-option [value]="'concat-scroll-snap'">
-              {{'unit-download.booklet-config.paging-mode.concat-scroll-snap' | translate}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-select [placeholder]="'unit-download.booklet-config.unit_navibuttons.label' | translate"
-                      [(ngModel)]="unitExportSettings.bookletSettings[1].value"
-                      [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0">
-            <mat-option [value]="'FULL'">
-              {{'unit-download.booklet-config.unit_navibuttons.FULL' | translate}}
-            </mat-option>
-            <mat-option [value]="'ARROWS_ONLY'">
-              {{'unit-download.booklet-config.unit_navibuttons.ARROWS_ONLY' | translate}}
-            </mat-option>
-            <mat-option [value]="'OFF'">
-              {{'unit-download.booklet-config.unit_navibuttons.OFF' | translate}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div *ngIf="unitExportSettings.addPlayers && unitsWithOutPlayer.length > 0"
-             class="tcMessage">
-          Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
-        </div>
-      </div>
+      <studio-lite-testcenter-data (unitExportSettingsChange)="updateUnitExportSettings($event)"
+                                   (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+      </studio-lite-testcenter-data>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions class="fx-column-start-stretch">
     <div class="fx-row-start-stretch">
-      <button mat-raised-button color="primary" type="submit" [mat-dialog-close]="getResultData()" [disabled]="unitSelectionTable.selectionCount === 0">
+      <button mat-raised-button color="primary"
+              type="submit"
+              [mat-dialog-close]="unitExportSettings"
+              [disabled]="unitSelectionTable.selectionCount === 0">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}
