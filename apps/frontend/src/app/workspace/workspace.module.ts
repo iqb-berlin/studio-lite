@@ -40,10 +40,10 @@ import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
-import { ExportUnitComponent } from './dialogs/export-unit.component';
+import { ExportUnitComponent } from './dialogs/export-unit/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
-import { SelectUnitListComponent } from './dialogs/components/select-unit-list.component';
-import { UserListComponent } from './dialogs/components/user-list.component';
+import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { UserListComponent } from './components/user-list.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 import {
   PagingModeSelectionComponent
@@ -52,7 +52,7 @@ import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.compon
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
-import { ReviewConfigEditComponent } from './dialogs/components/review-config-edit.component';
+import { ReviewConfigEditComponent } from './components/review-config-edit.component';
 import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
 import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
@@ -66,6 +66,7 @@ import { UnitGroupComponent } from './components/unit-group/unit-group.component
 import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
+import { TestcenterDataComponent } from './components/testcenter-data/testcenter-data.component';
 
 @NgModule({
   imports: [
@@ -134,7 +135,8 @@ import { UpdateUnitsButtonComponent } from './components/update-units-button/upd
     UnitGroupComponent,
     FilterUnitsPipe,
     SearchUnitComponent,
-    UpdateUnitsButtonComponent
+    UpdateUnitsButtonComponent,
+    TestcenterDataComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

@@ -1,0 +1,28 @@
+<div class="fx-column-start-stretch">
+  <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
+  <mat-dialog-content fxLayout="row" fxLayoutGap="20px">
+      <select-unit-list #unitSelectionTable
+                        class="fx-flex"
+                        [workspace]="workspaceService.selectedWorkspaceId"
+                        (selectionChanged)="updateUnitIdList($event)">
+      </select-unit-list>
+    <div class="fx-flex"
+         [style.max-width.px]="300">
+      <studio-lite-testcenter-data (unitExportSettingsChange)="updateUnitExportSettings($event)"
+                                   (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+      </studio-lite-testcenter-data>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions class="fx-column-start-stretch">
+    <div class="fx-row-start-stretch">
+      <button mat-raised-button color="primary"
+              type="submit"
+              [mat-dialog-close]="unitExportSettings"
+              [disabled]="unitSelectionTable.selectionCount === 0">
+        {{'unit-download.dialog.ok-button-label' | translate}}</button>
+      <button mat-raised-button [mat-dialog-close]="false">
+        {{'dialogs.cancel' | translate}}
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>
