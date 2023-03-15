@@ -105,6 +105,7 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     SplitterModule
   ],
   declarations: [
+    TestcenterDataComponent,
     WorkspaceComponent,
     NewUnitComponent,
     SelectUnitComponent,
@@ -121,7 +122,6 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     PagingModeSelectionComponent,
     UnitCommentsComponent,
     GroupManageComponent,
-    HasNewCommentsPipe,
     ReviewsComponent,
     ReviewConfigEditComponent,
     UnitSelectionComponent,
@@ -133,10 +133,10 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     UnitsAreaComponent,
     UnitTableComponent,
     UnitGroupComponent,
-    FilterUnitsPipe,
     SearchUnitComponent,
     UpdateUnitsButtonComponent,
-    TestcenterDataComponent
+    FilterUnitsPipe,
+    HasNewCommentsPipe
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
