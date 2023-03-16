@@ -133,6 +133,9 @@ export class SelectUnitListComponent implements OnDestroy {
     this.objectsDatasource.data.forEach(row => {
       if (newUnits.includes(row.id)) this.tableSelectionCheckbox.select(row);
     });
+    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
+      this.selectionChanged.emit();
+    });
   }
 
   get selectedUnitKey(): string {
