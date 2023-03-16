@@ -8,7 +8,13 @@
       </select-unit-list>
     <div class="fx-flex"
          [style.max-width.px]="300">
-      <studio-lite-testcenter-data (unitExportSettingsChange)="updateUnitExportSettings($event)"
+      <studio-lite-testcenter-data [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
+                                   [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
+                                   [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
+                                   [(addPlayers)]="unitExportSettings.addPlayers"
+                                   [(passwordLess)]="unitExportSettings.passwordLess"
+                                   [(pagingMode)]="unitExportSettings.bookletSettings[0].value"
+                                   [(navigationButtons)]="unitExportSettings.bookletSettings[1].value"
                                    (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
       </studio-lite-testcenter-data>
     </div>

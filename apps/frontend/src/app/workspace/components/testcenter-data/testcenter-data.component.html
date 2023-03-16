@@ -1,6 +1,8 @@
- <div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
-<mat-checkbox (change)="updateDisabled()" [disabled]="!enablePlayerOption"
-              [(ngModel)]="unitExportSettings.addPlayers" class="margin-bottom">
+<div class="margin-bottom">Zusätzliche Dateien z. B. für Testcenter:</div>
+<mat-checkbox [disabled]="!enablePlayerOption"
+              [ngModel]="addPlayers" class="margin-bottom"
+              (ngModelChange)="addPlayersChange.emit($event);
+              unitsWithOutPlayerChange.emit($event ? unitsWithOutPlayer : [])">
   Player hinzufügen
 </mat-checkbox>
 <div class="fx-column-start-stretch">
@@ -14,31 +16,32 @@
     <div class="fx-column-start-stretch">
       <mat-form-field>
         <input matInput type="number" min="0"
-               [(ngModel)]="unitExportSettings.addTestTakersReview" placeholder="Anzahl für Review"
-               (ngModelChange)="unitExportSettingsChange.emit(unitExportSettings)">
+               [ngModel]="addTestTakersReview" placeholder="Anzahl für Review"
+               (ngModelChange)="addTestTakersReviewChange.emit($event)">
       </mat-form-field>
       <mat-form-field>
         <input matInput type="number" min="0"
-               [(ngModel)]="unitExportSettings.addTestTakersMonitor" placeholder="Anzahl für Monitor"
-               (ngModelChange)="unitExportSettingsChange.emit(unitExportSettings)">
+               [ngModel]="addTestTakersMonitor" placeholder="Anzahl für Monitor"
+               (ngModelChange)="addTestTakersMonitorChange.emit($event)">
       </mat-form-field>
       <mat-form-field>
         <input matInput type="number" min="0"
-               [(ngModel)]="unitExportSettings.addTestTakersHot" placeholder="Anzahl für Test"
-               (ngModelChange)="unitExportSettingsChange.emit(unitExportSettings)">
+               [ngModel]="addTestTakersHot" placeholder="Anzahl für Test"
+               (ngModelChange)="addTestTakersHotChange.emit($event)">
       </mat-form-field>
     </div>
   </div>
-  <mat-checkbox [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
-                [(ngModel)]="unitExportSettings.passwordLess" class="margin-bottom"
-                (ngModelChange)="unitExportSettingsChange.emit(unitExportSettings)">
+  <mat-checkbox [disabled]="(addTestTakersReview + addTestTakersMonitor + addTestTakersHot) === 0"
+                class="margin-bottom"
+                [ngModel]="passwordLess"
+                (ngModelChange)="passwordLessChange.emit($event)">
     <div>Ohne Kennwort (nur Login-Name)</div>
   </mat-checkbox>
   <mat-form-field>
     <mat-select [placeholder]="'unit-download.booklet-config.paging-mode.label' | translate"
-                [(ngModel)]="unitExportSettings.bookletSettings[0].value"
-                [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
-                (ngModelChange)="unitExportSettingsChange.emit(unitExportSettings)">
+                [disabled]="(addTestTakersReview + addTestTakersMonitor + addTestTakersHot) === 0"
+                [ngModel]="pagingMode"
+                (ngModelChange)="pagingModeChange.emit($event)">
       <mat-option [value]="'separate'">
         {{'unit-download.booklet-config.paging-mode.separate' | translate}}
       </mat-option>
@@ -52,9 +55,9 @@
   </mat-form-field>
   <mat-form-field>
     <mat-select [placeholder]="'unit-download.booklet-config.unit_navibuttons.label' | translate"
-                [(ngModel)]="unitExportSettings.bookletSettings[1].value"
-                [disabled]="(unitExportSettings.addTestTakersReview + unitExportSettings.addTestTakersMonitor + unitExportSettings.addTestTakersHot) === 0"
-                (ngModelChange)="unitExportSettingsChange.emit(unitExportSettings)">
+                [disabled]="(addTestTakersReview + addTestTakersMonitor + addTestTakersHot) === 0"
+                [ngModel]="navigationButtons"
+                (ngModelChange)="navigationButtonsChange.emit($event)">
       <mat-option [value]="'FULL'">
         {{'unit-download.booklet-config.unit_navibuttons.FULL' | translate}}
       </mat-option>
@@ -67,7 +70,7 @@
     </mat-select>
   </mat-form-field>
 
-  <div *ngIf="unitExportSettings.addPlayers && unitsWithOutPlayer.length > 0"
+  <div *ngIf="addPlayers && unitsWithOutPlayer.length > 0"
        class="tcMessage">
     Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben.
   </div>

@@ -7,19 +7,22 @@ import { WorkspaceService } from '../../workspace.service';
   styleUrls: ['export-unit.component.scss']
 })
 export class ExportUnitComponent {
-  unitExportSettings!: UnitDownloadSettingsDto;
+  unitExportSettings = <UnitDownloadSettingsDto>{
+    unitIdList: [],
+    addPlayers: false,
+    addTestTakersReview: 0,
+    addTestTakersMonitor: 0,
+    addTestTakersHot: 0,
+    passwordLess: false,
+    bookletSettings: [
+      { key: 'pagingMode', value: 'separate' },
+      { key: 'unit_navibuttons', value: 'FULL' }
+    ]
+  };
 
   constructor(public workspaceService: WorkspaceService) {}
 
-  updateUnitExportSettings(unitExportSettings: UnitDownloadSettingsDto) {
-    const selectedUnits = this.unitExportSettings ? this.unitExportSettings.unitIdList : [];
-    this.unitExportSettings = unitExportSettings;
-    this.unitExportSettings.unitIdList = selectedUnits;
-  }
-
   updateUnitIdList(selectedUnits: number[]): void {
-    if (this.unitExportSettings) {
-      this.unitExportSettings.unitIdList = selectedUnits;
-    }
+    this.unitExportSettings.unitIdList = selectedUnits;
   }
 }

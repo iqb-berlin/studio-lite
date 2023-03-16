@@ -1,7 +1,6 @@
 import {
-  Component, EventEmitter, OnInit, Output
+  Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
-import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
 import { WorkspaceService } from '../../workspace.service';
@@ -15,20 +14,23 @@ import { BackendService } from '../../backend.service';
 export class TestcenterDataComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
-  unitExportSettings = <UnitDownloadSettingsDto>{
-    unitIdList: [],
-    addPlayers: false,
-    addTestTakersReview: 0,
-    addTestTakersMonitor: 0,
-    addTestTakersHot: 0,
-    passwordLess: false,
-    bookletSettings: [
-      { key: 'pagingMode', value: 'separate' },
-      { key: 'unit_navibuttons', value: 'FULL' }
-    ]
-  };
 
-  @Output() unitExportSettingsChange = new EventEmitter<UnitDownloadSettingsDto>();
+  @Input() addTestTakersReview!: number;
+  @Input() addTestTakersHot!: number;
+  @Input() addTestTakersMonitor!: number;
+  @Input() addPlayers!: boolean;
+  @Input() passwordLess!: boolean;
+  @Input() pagingMode!: string;
+  @Input() navigationButtons!: string;
+
+  @Output() addTestTakersReviewChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() addTestTakersHotChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() addTestTakersMonitorChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() addPlayersChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() passwordLessChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() pagingModeChange: EventEmitter<string> = new EventEmitter<string>();
+  @Output() navigationButtonsChange: EventEmitter<string> = new EventEmitter<string>();
+
   @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
 
   constructor(
@@ -44,17 +46,12 @@ export class TestcenterDataComponent implements OnInit {
       unitsWithMetadata.forEach(umd => {
         if (umd.player) {
           const validPlayerId = VeronaModuleFactory.isValid(umd.player, Object.keys(this.moduleService.players));
-          if (validPlayerId === false) this.unitsWithOutPlayer.push(umd.id);
+          if (!validPlayerId) this.unitsWithOutPlayer.push(umd.id);
         } else {
           this.unitsWithOutPlayer.push(umd.id);
         }
       });
       this.enablePlayerOption = this.unitsWithOutPlayer.length < unitsWithMetadata.length;
-      this.unitExportSettingsChange.emit(this.unitExportSettings);
     });
-  }
-
-  updateDisabled(): void {
-    this.unitsWithOutPlayerChange.emit(this.unitExportSettings.addPlayers ? this.unitsWithOutPlayer : []);
   }
 }
