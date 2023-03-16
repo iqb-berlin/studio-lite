@@ -232,6 +232,10 @@
               "browserTarget": "frontend:build:development"
             }
           },
+          "options": {
+            "proxyConfig": "apps/frontend/proxy.conf.json",
+            "browserTarget": "frontend:build:development"
+          },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
