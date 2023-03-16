@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -14,17 +15,22 @@ async function bootstrap() {
   const host = configService.get('API_HOST') || 'localhost';
   const port = 3333;
   const globalPrefix = 'api';
-  const config = new DocumentBuilder()
-    .setTitle('IQB Studio Lite')
-    .setDescription('The IQB Studio Lite API description and try-out')
-    .setVersion(app.get('APP_VERSION'))
-    .addBearerAuth()
-    .build();
+
   app.setGlobalPrefix(globalPrefix);
   app.use(json({ limit: '50mb' }));
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // Enable Swagger-UI
+  if (!environment.production) {
+    const config = new DocumentBuilder()
+      .setTitle('IQB Studio Lite')
+      .setDescription('The IQB Studio Lite API description and try-out')
+      .setVersion(app.get('APP_VERSION'))
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   await app.listen(port, host);
   Logger.log(
