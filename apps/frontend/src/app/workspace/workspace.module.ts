@@ -50,7 +50,7 @@ import {
 } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
-import { ReviewsComponent } from './dialogs/reviews.component';
+import { ReviewsComponent } from './dialogs/reviews/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
 import { ReviewConfigEditComponent } from './components/review-config-edit.component';
 import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
