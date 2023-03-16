@@ -19,6 +19,15 @@
     "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },
   "unit-download": {
+    "title": "Zusätzliche Dateien z. B. für Testcenter",
+    "add-player": "Player hinzufügen",
+    "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
+    "add-login": "Logins hinzufügen",
+    "add-test-takers-review": "Anzahl für Review",
+    "add-test-takers-monitor": "Anzahl für Monitor",
+    "add-test-takers-hot": "Anzahl für Test",
+    "without-password": "Ohne Kennwort (nur Login-Name)",
+    "units-without-player": " Es sind nur Aufgaben wählbar, die einen gültigen Player gesetzt haben",
     "menu-label": {
       "import": "Export",
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"

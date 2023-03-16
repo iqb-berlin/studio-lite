@@ -20,7 +20,15 @@ describe('ExportUnitComponent', () => {
   }
 
   @Component({ selector: 'studio-lite-testcenter-data', template: '' })
-  class MockTestcenterDataComponent {}
+  class MockTestcenterDataComponent {
+    @Input() addTestTakersReview!: number;
+    @Input() addTestTakersHot!: number;
+    @Input() addTestTakersMonitor!: number;
+    @Input() addPlayers!: boolean;
+    @Input() passwordLess!: boolean;
+    @Input() pagingMode!: string;
+    @Input() navigationButtons!: string;
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
