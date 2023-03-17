@@ -68,6 +68,7 @@ import { SearchUnitComponent } from './components/search-unit/search-unit.compon
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
 import { TestcenterDataComponent } from './components/testcenter-data/testcenter-data.component';
 import { PrintReviewButtonComponent } from './components/print-review-button/print-review-button.component';
+import { DeleteReviewButtonComponent } from './components/delete-review-button/delete-review-button.component';
 
 @NgModule({
   imports: [
@@ -138,7 +139,8 @@ import { PrintReviewButtonComponent } from './components/print-review-button/pri
     UpdateUnitsButtonComponent,
     FilterUnitsPipe,
     HasNewCommentsPipe,
-    PrintReviewButtonComponent
+    PrintReviewButtonComponent,
+    DeleteReviewButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

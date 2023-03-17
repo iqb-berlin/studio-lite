@@ -16,17 +16,20 @@
                 matTooltip="Aufgabenfolge hinzufügen" matTooltipPosition="below">
           <mat-icon>add</mat-icon>
         </button>
-        <button mat-raised-button (click)="deleteReview()" class="small-button"
-                matTooltip="Aufgabenfolge löschen" [disabled]="selectedReviewId === 0"
-                matTooltipPosition="below" fxFlex="20%">
-          <mat-icon>delete</mat-icon>
-        </button>
+
+        <studio-lite-delete-review-button fxFlex="20%"
+                                          [selectedReviewId]="selectedReviewId"
+                                          (selectionChanged)="changed = $event"
+                                          (deleted)="loadReviewList()">
+        </studio-lite-delete-review-button>
+
         <a mat-raised-button [href]="locationOrigin + '/#/review/' + reviewDataOriginal.id"
            target="_blank" class="small-button"
                 matTooltip="Aufgabenfolge starten" [disabled]="unitCount < 1"
                 matTooltipPosition="below" fxFlex="20%">
           <mat-icon>launch</mat-icon>
         </a>
+
         <studio-lite-print-review-button [selectedReviewId]="selectedReviewId"
                                          [units]="reviewDataOriginal.units"
                                          [workspaceId]="reviewDataOriginal.workspaceId"

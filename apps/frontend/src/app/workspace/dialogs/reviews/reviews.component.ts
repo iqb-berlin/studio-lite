@@ -52,8 +52,6 @@ export class ReviewsComponent implements OnInit {
     public appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private messageDialog: MatDialog,
-    private confirmDiscardDialog: MatDialog,
     private inputTextDialog: MatDialog,
     private confirmDiscardChangesDialog: MatDialog,
     private clipboard: Clipboard
@@ -132,39 +130,6 @@ export class ReviewsComponent implements OnInit {
     });
   }
 
-  deleteReview() {
-    const dialogRef = this.confirmDiscardChangesDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: <ConfirmDialogData>{
-        title: 'Aufgabenfolge löschen',
-        content: 'Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?',
-        confirmButtonLabel: 'Löschen',
-        showCancel: true
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
-        this.changed = false;
-        this.appService.dataLoading = true;
-        this.backendService.deleteReviews(
-          this.workspaceService.selectedWorkspaceId,
-          [this.selectedReviewId]
-        ).subscribe(ok => {
-          this.selectedReviewId = 0;
-          this.appService.dataLoading = false;
-          if (ok) {
-            this.loadReviewList();
-          } else {
-            this.snackBar.open(
-              'Konnte Aufgabenfolge nicht löschen', 'Fehler', { duration: 3000 }
-            );
-          }
-        });
-      }
-    });
-  }
-
   private async checkForChangesAndContinue(): Promise<boolean> {
     if (!this.changed) return true;
     const dialogResult = await lastValueFrom(this.confirmDiscardChangesDialog.open(ConfirmDialogComponent, {
@@ -179,7 +144,7 @@ export class ReviewsComponent implements OnInit {
     return dialogResult !== false;
   }
 
-  private loadReviewList(id = 0) {
+  loadReviewList(id = 0): void {
     this.appService.dataLoading = true;
     this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
       .subscribe(reviews => {

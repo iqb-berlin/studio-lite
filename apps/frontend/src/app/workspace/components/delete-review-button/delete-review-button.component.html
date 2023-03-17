@@ -1,0 +1,8 @@
+<button mat-raised-button
+        class="small-button"
+        [disabled]="!selectedReviewId"
+        [matTooltip]="'workspace.delete-review' | translate"
+        matTooltipPosition="below"
+        (click)="deleteReview()" >
+  <mat-icon>delete</mat-icon>
+</button>

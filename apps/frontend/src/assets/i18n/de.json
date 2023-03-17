@@ -137,7 +137,8 @@
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
     "print": "Drucken",
-    "print-review": "Aufgabenfolge drucken"
+    "print-review": "Aufgabenfolge drucken",
+    "delete-review": "Aufgabenfolge löschen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
