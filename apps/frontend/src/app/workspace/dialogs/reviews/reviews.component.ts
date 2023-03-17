@@ -1,24 +1,22 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ReviewFullDto, ReviewInListDto } from '@studio-lite-lib/api-dto';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { BookletConfigEditComponent } from '@studio-lite/studio-components';
-import { lastValueFrom } from 'rxjs';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
 import { SelectUnitListComponent } from '../../components/select-unit-list.component';
 import { AppService } from '../../../app.service';
-import { InputTextComponent } from '../../../components/input-text.component';
 import { ReviewConfigEditComponent } from '../../components/review-config-edit.component';
+import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 
 @Component({
   templateUrl: './reviews.component.html',
   styleUrls: ['./reviews.component.scss']
 })
 
-export class ReviewsComponent implements OnInit {
+export class ReviewsComponent extends CheckForChangesDirective implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
   @ViewChild('bookletConfig') bookletConfigElement: BookletConfigEditComponent | undefined;
   @ViewChild('reviewConfig') reviewConfigElement: ReviewConfigEditComponent | undefined;
@@ -52,10 +50,11 @@ export class ReviewsComponent implements OnInit {
     public appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private inputTextDialog: MatDialog,
-    private confirmDiscardChangesDialog: MatDialog,
+    protected confirmDiscardChangesDialog: MatDialog,
     private clipboard: Clipboard
-  ) {}
+  ) {
+    super();
+  }
 
   ngOnInit(): void {
     setTimeout(() => {
@@ -64,7 +63,7 @@ export class ReviewsComponent implements OnInit {
   }
 
   selectReview(id: number) {
-    this.checkForChangesAndContinue().then(go => {
+    this.checkForChangesAndContinue(this.changed).then(go => {
       if (go) {
         this.changed = false;
         this.selectedReviewId = id;
@@ -89,59 +88,6 @@ export class ReviewsComponent implements OnInit {
         }
       }
     });
-  }
-
-  addReview() {
-    this.checkForChangesAndContinue().then(go => {
-      if (go) {
-        this.changed = false;
-        const dialogRef = this.inputTextDialog.open(InputTextComponent, {
-          width: '500px',
-          data: {
-            title: 'Neue Aufgabenfolge',
-            default: '',
-            okButtonLabel: 'Speichern',
-            prompt: 'Name der Aufgabenfolge'
-          }
-        });
-
-        dialogRef.afterClosed()
-          .subscribe(result => {
-            if (typeof result === 'string') {
-              if (result.length > 1) {
-                this.backendService.addReview(
-                  this.workspaceService.selectedWorkspaceId,
-                  {
-                    workspaceId: this.workspaceService.selectedWorkspaceId,
-                    name: result
-                  }
-                )
-                  .subscribe(isOK => {
-                    if (typeof isOK === 'number') {
-                      this.loadReviewList(isOK);
-                    } else {
-                      this.snackBar.open('Konnte neue Aufgabenfolge nicht anlegen.', '', { duration: 3000 });
-                    }
-                  });
-              }
-            }
-          });
-      }
-    });
-  }
-
-  private async checkForChangesAndContinue(): Promise<boolean> {
-    if (!this.changed) return true;
-    const dialogResult = await lastValueFrom(this.confirmDiscardChangesDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: <ConfirmDialogData>{
-        title: 'Verwerfen der Änderungen',
-        content: 'Die Änderungen an der Aufgabenfolge werden verworfen. Fortsetzen?',
-        confirmButtonLabel: 'Verwerfen',
-        showCancel: true
-      }
-    }).afterClosed());
-    return dialogResult !== false;
   }
 
   loadReviewList(id = 0): void {

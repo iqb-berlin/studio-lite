@@ -12,14 +12,15 @@
         </a>
       </mat-nav-list>
       <div fxLayout="row">
-        <button mat-raised-button (click)="addReview()" class="small-button" fxFlex="20%"
-                matTooltip="Aufgabenfolge hinzufügen" matTooltipPosition="below">
-          <mat-icon>add</mat-icon>
-        </button>
+        <studio-lite-add-review-button fxFlex="20%"
+                                       [selectedReviewId]="selectedReviewId"
+                                       [(changed)]="changed"
+                                       (added)="loadReviewList($event)">
+        </studio-lite-add-review-button>
 
         <studio-lite-delete-review-button fxFlex="20%"
                                           [selectedReviewId]="selectedReviewId"
-                                          (selectionChanged)="changed = $event"
+                                          (changedChange)="changed = $event"
                                           (deleted)="loadReviewList()">
         </studio-lite-delete-review-button>
 

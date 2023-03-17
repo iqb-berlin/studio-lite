@@ -16,7 +16,7 @@ import { WorkspaceService } from '../../workspace.service';
 export class DeleteReviewButtonComponent {
   @Input() selectedReviewId!: number;
   @Output() deleted: EventEmitter<null> = new EventEmitter<null>();
-  @Output() selectionChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() changedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(
     public appService: AppService,
@@ -41,7 +41,7 @@ export class DeleteReviewButtonComponent {
     dialogRef.afterClosed()
       .subscribe(result => {
         if (result !== false) {
-          this.selectionChanged.emit(false);
+          this.changedChange.emit(false);
           this.appService.dataLoading = true;
           this.backendService.deleteReviews(
             this.workspaceService.selectedWorkspaceId,
