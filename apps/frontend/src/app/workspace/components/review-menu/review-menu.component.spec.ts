@@ -6,12 +6,14 @@ import { ReviewMenuComponent } from './review-menu.component';
 @Component({ selector: 'studio-lite-add-review-button', template: '' })
 class MockAddReviewButtonComponent {
   @Input() selectedReviewId!: number;
+  @Input() workspaceId!: number;
   @Input() changed!: boolean;
 }
 
 @Component({ selector: 'studio-lite-delete-review-button', template: '' })
 class MockDeleteReviewButtonComponent {
   @Input() selectedReviewId!: number;
+  @Input() workspaceId!: number;
 }
 
 @Component({ selector: 'studio-lite-start-review-button', template: '' })

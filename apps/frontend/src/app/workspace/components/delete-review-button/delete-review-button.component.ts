@@ -6,7 +6,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
-import { WorkspaceService } from '../../workspace.service';
 
 @Component({
   selector: 'studio-lite-delete-review-button',
@@ -15,6 +14,7 @@ import { WorkspaceService } from '../../workspace.service';
 })
 export class DeleteReviewButtonComponent {
   @Input() selectedReviewId!: number;
+  @Input() workspaceId!: number;
   @Output() deleted: EventEmitter<null> = new EventEmitter<null>();
   @Output() changedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
@@ -22,8 +22,7 @@ export class DeleteReviewButtonComponent {
     public appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private confirmDiscardChangesDialog: MatDialog,
-    public workspaceService: WorkspaceService
+    private confirmDiscardChangesDialog: MatDialog
   ) {}
 
   deleteReview() {
@@ -44,7 +43,7 @@ export class DeleteReviewButtonComponent {
           this.changedChange.emit(false);
           this.appService.dataLoading = true;
           this.backendService.deleteReviews(
-            this.workspaceService.selectedWorkspaceId,
+            this.workspaceId,
             [this.selectedReviewId]
           ).subscribe(ok => {
             this.selectedReviewId = 0;

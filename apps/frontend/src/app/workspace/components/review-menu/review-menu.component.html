@@ -1,12 +1,14 @@
 <div fxLayout="row">
   <studio-lite-add-review-button fxFlex="20%"
                                  [selectedReviewId]="selectedReviewId"
+                                 [workspaceId]="workspaceId"
                                  [(changed)]="changed"
                                  (added)="reviewListChange.emit($event)">
   </studio-lite-add-review-button>
 
   <studio-lite-delete-review-button fxFlex="20%"
                                     [selectedReviewId]="selectedReviewId"
+                                    [workspaceId]="workspaceId"
                                     (changedChange)="changed = $event"
                                     (deleted)="reviewListChange.emit()">
   </studio-lite-delete-review-button>

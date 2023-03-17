@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { InputTextComponent } from '../../../components/input-text.component';
 import { BackendService } from '../../backend.service';
-import { WorkspaceService } from '../../workspace.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 
 @Component({
@@ -16,13 +15,13 @@ import { CheckForChangesDirective } from '../../directives/check-for-changes.dir
 export class AddReviewButtonComponent extends CheckForChangesDirective {
   @Input() selectedReviewId!: number;
   @Input() changed!: boolean;
+  @Input() workspaceId!: number;
   @Output() added: EventEmitter<number> = new EventEmitter<number>();
   @Output() changedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(
     private inputTextDialog: MatDialog,
     private backendService: BackendService,
-    public workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
     protected confirmDiscardChangesDialog: MatDialog
   ) {
@@ -49,9 +48,9 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
             if (typeof result === 'string') {
               if (result.length > 1) {
                 this.backendService.addReview(
-                  this.workspaceService.selectedWorkspaceId,
+                  this.workspaceId,
                   {
-                    workspaceId: this.workspaceService.selectedWorkspaceId,
+                    workspaceId: this.workspaceId,
                     name: result
                   }
                 )
