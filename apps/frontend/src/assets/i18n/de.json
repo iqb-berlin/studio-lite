@@ -140,7 +140,8 @@
     "print-review": "Aufgabenfolge drucken",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
-    "start-review": "Aufgabenfolge starten"
+    "start-review": "Aufgabenfolge starten",
+    "copy-link-to-clipboard": "Kopiere Link in Zwischenablage"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

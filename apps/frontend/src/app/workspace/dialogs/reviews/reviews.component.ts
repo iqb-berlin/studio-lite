@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ReviewFullDto, ReviewInListDto } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Clipboard } from '@angular/cdk/clipboard';
 import { BookletConfigEditComponent } from '@studio-lite/studio-components';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
@@ -26,12 +25,6 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
   // eslint-disable-next-line no-restricted-globals
-  locationOrigin = location.origin;
-  get passwordLength(): number {
-    if (this.selectedReviewId === 0) return -1;
-    if (!this.reviewDataOriginal.password) return 0;
-    return this.reviewDataOriginal.password.length;
-  }
 
   get passwordNewLength(): number {
     if (this.selectedReviewId === 0) return -1;
@@ -39,19 +32,12 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     return this.reviewDataToChange.password.length;
   }
 
-  get unitCount(): number {
-    if (this.selectedReviewId === 0) return -1;
-    if (!this.reviewDataOriginal.units) return 0;
-    return this.reviewDataOriginal.units.length;
-  }
-
   constructor(
     public workspaceService: WorkspaceService,
     public appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    protected confirmDiscardChangesDialog: MatDialog,
-    private clipboard: Clipboard
+    protected confirmDiscardChangesDialog: MatDialog
   ) {
     super();
   }
@@ -171,13 +157,6 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
       } : originalData.settings,
       units: originalData.units ? originalData.units.map(u => u) : []
     };
-  }
-
-  copyLinkToClipboard() {
-    this.clipboard.copy(`${this.locationOrigin}/#/${this.reviewDataToChange.link}`);
-    this.snackBar.open(
-      'Link in die Zwischenablage kopiert.', '', { duration: 1000 }
-    );
   }
 
   configChanged() {

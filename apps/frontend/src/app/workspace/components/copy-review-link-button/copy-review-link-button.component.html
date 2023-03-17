@@ -1,0 +1,8 @@
+<button class="small-button"
+        mat-raised-button
+        [matTooltip]="'workspace.copy-link-to-clipboard' | translate"
+        matTooltipPosition="below"
+        [disabled]="unitCount < 1 || passwordLength < 4"
+        (click)="copyLinkToClipboard()">
+  <mat-icon>link</mat-icon>
+</button>

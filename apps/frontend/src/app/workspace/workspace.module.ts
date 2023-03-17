@@ -71,6 +71,7 @@ import { PrintReviewButtonComponent } from './components/print-review-button/pri
 import { DeleteReviewButtonComponent } from './components/delete-review-button/delete-review-button.component';
 import { AddReviewButtonComponent } from './components/add-review-button/add-review-button.component';
 import { StartReviewButtonComponent } from './components/start-review-button/start-review-button.component';
+import { CopyReviewLinkButtonComponent } from './components/copy-review-link-button/copy-review-link-button.component';
 
 @NgModule({
   imports: [
@@ -144,7 +145,8 @@ import { StartReviewButtonComponent } from './components/start-review-button/sta
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
     AddReviewButtonComponent,
-    StartReviewButtonComponent
+    StartReviewButtonComponent,
+    CopyReviewLinkButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

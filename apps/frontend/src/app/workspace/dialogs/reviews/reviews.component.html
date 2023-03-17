@@ -35,12 +35,14 @@
                                          fxFlex="20%">
         </studio-lite-print-review-button>
 
-        <button mat-raised-button matTooltip="Kopiere Link in Zwischenablage"
-                matTooltipPosition="below"
-                [disabled]="unitCount < 1 || passwordLength < 4" class="small-button"
-                (click)="copyLinkToClipboard()" fxFlex="20%">
-          <mat-icon>link</mat-icon>
-        </button>
+        <studio-lite-copy-review-link-button fxFlex="20%"
+                                             [link]="reviewDataOriginal.link ?
+                                                     reviewDataOriginal.link : ''"
+                                             [unitCount]="reviewDataOriginal.units ?
+                                                          reviewDataOriginal.units.length : 0"
+                                             [passwordLength]="reviewDataOriginal.password ?
+                                                               reviewDataOriginal.password.length : 0">
+        </studio-lite-copy-review-link-button>
       </div>
     </div>
     <div [class]="changed ? 'review-changed' : 'review-not-changed'"
