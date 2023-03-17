@@ -1,0 +1,17 @@
+<div fxLayout="row" fxLayoutAlign="end end" fxLayoutGap="5px"
+     style="padding: 5px">
+  <button mat-raised-button
+          [matTooltip]="'workspace.review-save-cancel' | translate"
+          matTooltipPosition="below"
+          [disabled]="!changed"
+          (click)="discardChanges.emit()" >
+    <mat-icon>close</mat-icon>
+  </button>
+  <button mat-raised-button
+          [matTooltip]="'workspace.review-save' | translate"
+          [disabled]="!changed" matTooltipPosition="below"
+          (click)="saveChanges.emit()">
+    {{'workspace.save' | translate}}
+    <mat-icon>save</mat-icon>
+  </button>
+</div>

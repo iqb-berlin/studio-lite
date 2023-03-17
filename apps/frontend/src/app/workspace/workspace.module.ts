@@ -73,6 +73,7 @@ import { AddReviewButtonComponent } from './components/add-review-button/add-rev
 import { StartReviewButtonComponent } from './components/start-review-button/start-review-button.component';
 import { CopyReviewLinkButtonComponent } from './components/copy-review-link-button/copy-review-link-button.component';
 import { ReviewMenuComponent } from './components/review-menu/review-menu.component';
+import { ReviewSaveChangesComponent } from './components/review-save-changes/review-save-changes.component';
 
 @NgModule({
   imports: [
@@ -148,7 +149,8 @@ import { ReviewMenuComponent } from './components/review-menu/review-menu.compon
     AddReviewButtonComponent,
     StartReviewButtonComponent,
     CopyReviewLinkButtonComponent,
-    ReviewMenuComponent
+    ReviewMenuComponent,
+    ReviewSaveChangesComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

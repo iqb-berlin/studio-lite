@@ -103,7 +103,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     }
   }
 
-  saveChanged() {
+  saveChanges() {
     if (this.reviewDataToChange) {
       this.backendService.setReview(
         this.workspaceService.selectedWorkspaceId,

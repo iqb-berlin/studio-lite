@@ -54,17 +54,10 @@
                             [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
         </mat-dialog-content>
       </div>
-      <div fxLayout="row" fxLayoutAlign="end end" fxLayoutGap="5px"
-           style="padding: 5px">
-        <button mat-raised-button (click)="discardChanges()" matTooltip="Änderungen verwerfen"
-                [disabled]="!changed" matTooltipPosition="below">
-          <mat-icon>close</mat-icon>
-        </button>
-        <button mat-raised-button (click)="saveChanged()" matTooltip="Aufgabenfolge speichern"
-                [disabled]="!changed" matTooltipPosition="below">
-          Speichern <mat-icon>save</mat-icon>
-        </button>
-      </div>
+      <studio-lite-review-save-changes [changed]="changed"
+                                       (discardChanges)="discardChanges()"
+                                       (saveChanges)="saveChanges()">
+      </studio-lite-review-save-changes>
     </div>
   </div>
   <mat-dialog-actions fxLayout="column">

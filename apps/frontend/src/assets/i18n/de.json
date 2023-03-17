@@ -141,7 +141,9 @@
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",
-    "copy-link-to-clipboard": "Kopiere Link in Zwischenablage"
+    "copy-link-to-clipboard": "Kopiere Link in Zwischenablage",
+    "review-save-cancel": "Änderungen verwerfen",
+    "review-save": "Aufgabenfolge speichern"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
