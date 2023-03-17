@@ -51,7 +51,6 @@ export class DeleteReviewButtonComponent {
             this.appService.dataLoading = false;
             if (ok) {
               this.deleted.emit();
-              // this.loadReviewList();
             } else {
               this.snackBar.open(
                 'Konnte Aufgabenfolge nicht löschen', 'Fehler', { duration: 3000 }
