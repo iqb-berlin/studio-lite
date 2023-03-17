@@ -67,6 +67,7 @@ import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
 import { TestcenterDataComponent } from './components/testcenter-data/testcenter-data.component';
+import { PrintReviewButtonComponent } from './components/print-review-button/print-review-button.component';
 
 @NgModule({
   imports: [
@@ -136,7 +137,8 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     SearchUnitComponent,
     UpdateUnitsButtonComponent,
     FilterUnitsPipe,
-    HasNewCommentsPipe
+    HasNewCommentsPipe,
+    PrintReviewButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

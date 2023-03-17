@@ -6,7 +6,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { BookletConfigEditComponent } from '@studio-lite/studio-components';
 import { lastValueFrom } from 'rxjs';
-import { Router } from '@angular/router';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
 import { SelectUnitListComponent } from '../../components/select-unit-list.component';
@@ -57,8 +56,7 @@ export class ReviewsComponent implements OnInit {
     private confirmDiscardDialog: MatDialog,
     private inputTextDialog: MatDialog,
     private confirmDiscardChangesDialog: MatDialog,
-    private clipboard: Clipboard,
-    private router: Router
+    private clipboard: Clipboard
   ) {}
 
   ngOnInit(): void {
@@ -283,20 +281,6 @@ export class ReviewsComponent implements OnInit {
         };
       }
       this.changed = this.detectChanges();
-    }
-  }
-
-  printReview(): void {
-    if (this.reviewDataOriginal.workspaceId && this.reviewDataOriginal.units) {
-      const url = this.router
-        .serializeUrl(this.router
-          .createUrlTree(['/print'], {
-            queryParams: {
-              unitIds: this.reviewDataOriginal.units,
-              workspaceId: this.reviewDataOriginal.workspaceId
-            }
-          }));
-      window.open(`#${url}`, '_blank');
     }
   }
 }

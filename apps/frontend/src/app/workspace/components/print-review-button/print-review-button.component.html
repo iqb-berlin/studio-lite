@@ -1,0 +1,8 @@
+<button mat-raised-button
+        class="small-button"
+        matTooltipPosition="below"
+        [matTooltip]="'workspace.print-review' | translate"
+        [disabled]="!selectedReviewId || !workspaceId || !units || !units.length"
+        (click)="printReview()">
+  <mat-icon>print</mat-icon>
+</button>

@@ -11,7 +11,7 @@
           {{review.name}}
         </a>
       </mat-nav-list>
-      <div fxLayout="row" id="main-buttons">
+      <div fxLayout="row">
         <button mat-raised-button (click)="addReview()" class="small-button" fxFlex="20%"
                 matTooltip="Aufgabenfolge hinzufügen" matTooltipPosition="below">
           <mat-icon>add</mat-icon>
@@ -27,18 +27,12 @@
                 matTooltipPosition="below" fxFlex="20%">
           <mat-icon>launch</mat-icon>
         </a>
-        <button mat-raised-button
-                matTooltip="{{'workspace.print-review' | translate}}"
-                matTooltipPosition="below"
-                class="small-button"
-                [disabled]="selectedReviewId === 0 ||
-                            !reviewDataOriginal ||
-                            !reviewDataOriginal.units ||
-                            !reviewDataOriginal.units.length"
-                (click)="printReview()"
-                fxFlex="20%">
-          <mat-icon>print</mat-icon>
-        </button>
+        <studio-lite-print-review-button [selectedReviewId]="selectedReviewId"
+                                         [units]="reviewDataOriginal.units"
+                                         [workspaceId]="reviewDataOriginal.workspaceId"
+                                         fxFlex="20%">
+        </studio-lite-print-review-button>
+
         <button mat-raised-button matTooltip="Kopiere Link in Zwischenablage"
                 matTooltipPosition="below"
                 [disabled]="unitCount < 1 || passwordLength < 4" class="small-button"
