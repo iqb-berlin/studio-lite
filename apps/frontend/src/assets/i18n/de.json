@@ -139,7 +139,8 @@
     "print": "Drucken",
     "print-review": "Aufgabenfolge drucken",
     "delete-review": "Aufgabenfolge löschen",
-    "add-review": "Aufgabenfolge hinzufügen"
+    "add-review": "Aufgabenfolge hinzufügen",
+    "start-review": "Aufgabenfolge starten"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

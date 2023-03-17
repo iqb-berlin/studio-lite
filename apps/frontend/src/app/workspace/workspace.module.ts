@@ -70,6 +70,7 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
 import { PrintReviewButtonComponent } from './components/print-review-button/print-review-button.component';
 import { DeleteReviewButtonComponent } from './components/delete-review-button/delete-review-button.component';
 import { AddReviewButtonComponent } from './components/add-review-button/add-review-button.component';
+import { StartReviewButtonComponent } from './components/start-review-button/start-review-button.component';
 
 @NgModule({
   imports: [
@@ -142,7 +143,8 @@ import { AddReviewButtonComponent } from './components/add-review-button/add-rev
     HasNewCommentsPipe,
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
-    AddReviewButtonComponent
+    AddReviewButtonComponent,
+    StartReviewButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
