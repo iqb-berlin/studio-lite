@@ -11,39 +11,15 @@
           {{review.name}}
         </a>
       </mat-nav-list>
-      <div fxLayout="row">
-        <studio-lite-add-review-button fxFlex="20%"
-                                       [selectedReviewId]="selectedReviewId"
-                                       [(changed)]="changed"
-                                       (added)="loadReviewList($event)">
-        </studio-lite-add-review-button>
-
-        <studio-lite-delete-review-button fxFlex="20%"
-                                          [selectedReviewId]="selectedReviewId"
-                                          (changedChange)="changed = $event"
-                                          (deleted)="loadReviewList()">
-        </studio-lite-delete-review-button>
-
-        <studio-lite-start-review-button fxFlex="20%"
-                                         [selectedReviewId]="selectedReviewId"
-                                         [unitCount]="reviewDataOriginal.units ? reviewDataOriginal.units.length : 0">
-        </studio-lite-start-review-button>
-
-        <studio-lite-print-review-button [selectedReviewId]="selectedReviewId"
-                                         [units]="reviewDataOriginal.units"
-                                         [workspaceId]="reviewDataOriginal.workspaceId"
-                                         fxFlex="20%">
-        </studio-lite-print-review-button>
-
-        <studio-lite-copy-review-link-button fxFlex="20%"
-                                             [link]="reviewDataOriginal.link ?
-                                                     reviewDataOriginal.link : ''"
-                                             [unitCount]="reviewDataOriginal.units ?
-                                                          reviewDataOriginal.units.length : 0"
-                                             [passwordLength]="reviewDataOriginal.password ?
-                                                               reviewDataOriginal.password.length : 0">
-        </studio-lite-copy-review-link-button>
-      </div>
+      <studio-lite-review-menu
+        [selectedReviewId]="selectedReviewId"
+        [units]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
+        [workspaceId]="workspaceService.selectedWorkspaceId"
+        [link]="reviewDataOriginal.link ? reviewDataOriginal.link : ''"
+        [passwordLength]="reviewDataOriginal.password ? reviewDataOriginal.password.length : 0"
+        [(changed)]="changed"
+        (reviewListChange)="loadReviewList($event)">
+      </studio-lite-review-menu>
     </div>
     <div [class]="changed ? 'review-changed' : 'review-not-changed'"
          fxLayout="column" fxFlex>
