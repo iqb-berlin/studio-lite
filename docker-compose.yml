@@ -16,6 +16,19 @@ services:
       - traefik-network
       - application-network
 
+  prometheus:
+    image: prom/prometheus:v2.43.0
+    restart: on-failure
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_vol:/prometheus
+    networks:
+      - application-network
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   db:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
     restart: always
@@ -37,7 +50,7 @@ services:
         condition: service_healthy
     environment:
       <<: *env-postgres
-    command: ["liquibase", "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update"]
+    command: [ "liquibase", "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update" ]
     networks:
       - application-network
 
@@ -71,6 +84,7 @@ services:
 volumes:
   db_vol:
   backend_vol:
+  prometheus_vol:
 
 networks:
   application-network:

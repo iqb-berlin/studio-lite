@@ -4,16 +4,31 @@ services:
       - "--log.level=DEBUG"
       - "--api.dashboard=true"
       - "--entryPoints.web.address=:80"
-      - "--entryPoints.traefik.address=:8083"
+      - "--entryPoints.traefik.address=:8080"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik-ui.entrypoints=traefik"
-      - "traefik.http.routers.traefik-ui.rule=Host(`traefik.monitoring.localhost`)"
+      - "traefik.http.routers.traefik-ui.entrypoints=web, traefik"
+      - "traefik.http.routers.traefik-ui.rule=Host(`traefik.monitoring.${SERVER_NAME}`)"
       - "traefik.http.routers.traefik-ui.service=api@internal"
     ports:
-      - "${TRAEFIK_PORT}:8083"
+      - "${TRAEFIK_PORT}:8080"  # dashboard
+
+  prometheus:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.entrypoints=web, traefik"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.monitoring.${SERVER_NAME}`)"
+      - "traefik.http.routers.prometheus.service=prometheus"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.docker.network=app-net"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.size=256MB'
 
   db:
     build:
