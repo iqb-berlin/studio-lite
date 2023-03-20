@@ -13,14 +13,14 @@ const bookletConfigDefault = {
 };
 
 @Component({
-  selector: 'booklet-config-edit',
+  selector: 'studio-lite-booklet-config-edit',
   template: `
     <div fxLayout="column">
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.pagingMode.label' | translate"
-                    (selectionChange)="configChanged.emit();"
                     [disabled]="disabled"
-                    [(ngModel)]="bookletConfig.pagingMode">
+                    [(ngModel)]="bookletConfig.pagingMode"
+                    (selectionChange)="configChanged.emit(config)">
           <mat-option *ngFor="let c of pagingModeOptions" [value]="c">
             {{'booklet-config.pagingMode.' + c | translate}}
           </mat-option>
@@ -28,9 +28,9 @@ const bookletConfigDefault = {
       </mat-form-field>
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.pageNaviButtons.label' | translate"
-                    (selectionChange)="configChanged.emit();"
                     [disabled]="disabled"
-                    [(ngModel)]="bookletConfig.pageNaviButtons">
+                    [(ngModel)]="bookletConfig.pageNaviButtons"
+                    (selectionChange)="configChanged.emit(config)">
           <mat-option *ngFor="let c of pageNaviButtonsOptions" [value]="c">
             {{'booklet-config.pageNaviButtons.' + c | translate}}
           </mat-option>
@@ -38,9 +38,9 @@ const bookletConfigDefault = {
       </mat-form-field>
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.unitNaviButtons.label' | translate"
-                    (selectionChange)="configChanged.emit();"
                     [disabled]="disabled"
-                    [(ngModel)]="bookletConfig.unitNaviButtons">
+                    [(ngModel)]="bookletConfig.unitNaviButtons"
+                    (selectionChange)="configChanged.emit(config)">
           <mat-option *ngFor="let c of unitNaviButtonsOptions" [value]="c">
             {{'booklet-config.unitNaviButtons.' + c | translate}}
           </mat-option>
@@ -48,9 +48,9 @@ const bookletConfigDefault = {
       </mat-form-field>
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.controllerDesign.label' | translate"
-                    (selectionChange)="configChanged.emit();"
                     [disabled]="disabled"
-                    [(ngModel)]="bookletConfig.controllerDesign">
+                    [(ngModel)]="bookletConfig.controllerDesign"
+                    (selectionChange)="configChanged.emit(config)">
           <mat-option *ngFor="let c of controllerDesignOptions" [value]="c">
             {{'booklet-config.controllerDesign.' + c | translate}}
           </mat-option>
@@ -58,9 +58,9 @@ const bookletConfigDefault = {
       </mat-form-field>
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.unitScreenHeader.label' | translate"
-                    (selectionChange)="configChanged.emit();"
                     [disabled]="disabled"
-                    [(ngModel)]="bookletConfig.unitScreenHeader">
+                    [(ngModel)]="bookletConfig.unitScreenHeader"
+                    (selectionChange)="configChanged.emit(config)">
           <mat-option *ngFor="let c of unitScreenHeaderOptions" [value]="c">
             {{'booklet-config.unitScreenHeader.' + c | translate}}
           </mat-option>
@@ -68,9 +68,9 @@ const bookletConfigDefault = {
       </mat-form-field>
       <mat-form-field>
         <mat-select [placeholder]="'booklet-config.unitTitle.label' | translate"
-                    (selectionChange)="configChanged.emit();"
                     [disabled]="disabled"
-                    [(ngModel)]="bookletConfig.unitTitle">
+                    [(ngModel)]="bookletConfig.unitTitle"
+                    (selectionChange)="configChanged.emit(config)">
           <mat-option *ngFor="let c of unitTitleOptions" [value]="c">
             {{'booklet-config.unitTitle.' + c | translate}}
           </mat-option>
@@ -87,7 +87,7 @@ export class BookletConfigEditComponent {
   unitScreenHeaderOptions = ['OFF', 'WITH_UNIT_TITLE', 'WITH_BOOKLET_TITLE', 'WITH_BLOCK_TITLE', 'EMPTY'];
   unitTitleOptions = ['OFF', 'ON'];
   bookletConfig: BookletConfigDto = bookletConfigDefault;
-  @Output() configChanged = new EventEmitter();
+  @Output() configChanged = new EventEmitter<BookletConfigDto>();
   @Input('disabled') disabled = false;
   @Input('config')
   set config(value: BookletConfigDto | undefined) {

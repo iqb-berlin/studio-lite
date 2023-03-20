@@ -74,6 +74,9 @@ import { StartReviewButtonComponent } from './components/start-review-button/sta
 import { CopyReviewLinkButtonComponent } from './components/copy-review-link-button/copy-review-link-button.component';
 import { ReviewMenuComponent } from './components/review-menu/review-menu.component';
 import { ReviewSaveChangesComponent } from './components/review-save-changes/review-save-changes.component';
+import { ReviewConfigComponent } from './components/review-config/review-config.component';
+import { BookletConfigEditComponent } from './components/booklet-config/booklet-config-edit.component';
+import { BookletConfigShowComponent } from './components/booklet-config/booklet-config-show.component';
 
 @NgModule({
   imports: [
@@ -81,6 +84,7 @@ import { ReviewSaveChangesComponent } from './components/review-save-changes/rev
     MatIconModule,
     MatTooltipModule,
     FlexLayoutModule,
+    StudioComponentsModule,
     WorkspaceRoutingModule,
     ReactiveFormsModule,
     MatSelectModule,
@@ -104,7 +108,6 @@ import { ReviewSaveChangesComponent } from './components/review-save-changes/rev
     FormsModule,
     MatTabsModule,
     IqbComponentsModule,
-    StudioComponentsModule,
     MatProgressBarModule,
     TranslateModule,
     CommentsModule,
@@ -131,6 +134,8 @@ import { ReviewSaveChangesComponent } from './components/review-save-changes/rev
     GroupManageComponent,
     ReviewsComponent,
     ReviewConfigEditComponent,
+    BookletConfigEditComponent,
+    BookletConfigShowComponent,
     UnitSelectionComponent,
     UnitSaveButtonComponent,
     UnitDataAreaComponent,
@@ -150,7 +155,8 @@ import { ReviewSaveChangesComponent } from './components/review-save-changes/rev
     StartReviewButtonComponent,
     CopyReviewLinkButtonComponent,
     ReviewMenuComponent,
-    ReviewSaveChangesComponent
+    ReviewSaveChangesComponent,
+    ReviewConfigComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

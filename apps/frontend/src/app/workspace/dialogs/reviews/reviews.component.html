@@ -24,29 +24,18 @@
     <div [class]="changed ? 'review-changed' : 'review-not-changed'"
          fxLayout="column" fxFlex>
       <div fxFlex fxLayout="row" style="background: white" fxLayoutGap="30px">
-        <div fxFlex="40%" fxLayout="column">
-          <mat-form-field>
-            <input matInput [(ngModel)]="reviewDataToChange.name" placeholder="Name"
-                   [disabled]="selectedReviewId === 0"
-                   (ngModelChange)="changed = detectChanges()">
-          </mat-form-field>
-          <div fxLayout="row" class="margin-bottom" fxLayoutGap="5px">
-            <mat-form-field fxFlex="50%">
-              <input matInput [(ngModel)]="reviewDataToChange.password"
-                     [disabled]="selectedReviewId === 0"
-                     (ngModelChange)="changed = detectChanges()" placeholder="Kennwort">
-            </mat-form-field>
-            <div [class]="(selectedReviewId > 0 && passwordNewLength < 4) ? 'rev-message' : 'invisible'" fxFlex>
-              Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)
-            </div>
-          </div>
-          <booklet-config-edit #bookletConfig (configChanged)="configChanged()"
-                          [disabled]="selectedReviewId === 0"
-                          [config]="reviewDataToChange.settings?.bookletConfig"></booklet-config-edit>
-          <review-config-edit #reviewConfig (configChanged)="configChanged()"
-                               [disabled]="selectedReviewId === 0"
-                               [config]="reviewDataToChange.settings?.reviewConfig"></review-config-edit>
-        </div>
+
+        <studio-lite-review-config fxFlex="40%"
+                                   [selectedReviewId]="selectedReviewId"
+                                   [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
+                                   [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
+                                   [(name)]="reviewDataToChange.name"
+                                   [(password)]="reviewDataToChange.password"
+                                   (reviewChange)="changed = detectChanges()"
+                                   (bookletConfigSettingsChange)="bookletConfigSettingsChange($event)"
+                                   (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">
+        </studio-lite-review-config>
+
         <mat-dialog-content fxFlex>
           <div [hidden]="selectedReviewId > 0">Bitte links Aufgabenfolge wählen bzw. neu anlegen.</div>
           <select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"

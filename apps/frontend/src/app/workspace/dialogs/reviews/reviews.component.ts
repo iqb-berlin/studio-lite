@@ -1,13 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ReviewFullDto, ReviewInListDto } from '@studio-lite-lib/api-dto';
+import {
+  BookletConfigDto, ReviewConfigDto, ReviewFullDto, ReviewInListDto
+} from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BookletConfigEditComponent } from '@studio-lite/studio-components';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
 import { SelectUnitListComponent } from '../../components/select-unit-list.component';
 import { AppService } from '../../../app.service';
-import { ReviewConfigEditComponent } from '../../components/review-config-edit.component';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 
 @Component({
@@ -17,20 +17,12 @@ import { CheckForChangesDirective } from '../../directives/check-for-changes.dir
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
-  @ViewChild('bookletConfig') bookletConfigElement: BookletConfigEditComponent | undefined;
-  @ViewChild('reviewConfig') reviewConfigElement: ReviewConfigEditComponent | undefined;
+
   changed = false;
   selectedReviewId = 0;
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
-  // eslint-disable-next-line no-restricted-globals
-
-  get passwordNewLength(): number {
-    if (this.selectedReviewId === 0) return -1;
-    if (!this.reviewDataToChange.password) return 0;
-    return this.reviewDataToChange.password.length;
-  }
 
   constructor(
     public workspaceService: WorkspaceService,
@@ -61,7 +53,6 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
               if (data) {
                 this.reviewDataOriginal = data;
                 this.reviewDataToChange = ReviewsComponent.copyFrom(data);
-                // if (this.bookletConfigElement) this.bookletConfigElement.config = this.reviewDataToChange.settings;
                 this.changed = false;
                 if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = data.units ? data.units : [];
               }
@@ -159,18 +150,23 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     };
   }
 
-  configChanged() {
-    if (this.bookletConfigElement && this.reviewConfigElement) {
-      if (this.reviewDataToChange.settings) {
-        this.reviewDataToChange.settings.bookletConfig = this.bookletConfigElement.config;
-        this.reviewDataToChange.settings.reviewConfig = this.reviewConfigElement.config;
-      } else {
-        this.reviewDataToChange.settings = {
-          reviewConfig: this.reviewConfigElement.config,
-          bookletConfig: this.bookletConfigElement.config
-        };
-      }
-      this.changed = this.detectChanges();
+  reviewConfigSettingsChange(reviewConfigSettings: ReviewConfigDto): void {
+    if (this.reviewDataToChange.settings) {
+      this.reviewDataToChange.settings.reviewConfig = reviewConfigSettings;
+    } else {
+      this.reviewDataToChange.settings = {
+        reviewConfig: reviewConfigSettings
+      };
+    }
+  }
+
+  bookletConfigSettingsChange(bookletConfigSettings: BookletConfigDto): void {
+    if (this.reviewDataToChange.settings) {
+      this.reviewDataToChange.settings.bookletConfig = bookletConfigSettings;
+    } else {
+      this.reviewDataToChange.settings = {
+        bookletConfig: bookletConfigSettings
+      };
     }
   }
 }

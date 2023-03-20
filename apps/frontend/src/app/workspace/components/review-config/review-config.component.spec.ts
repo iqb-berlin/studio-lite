@@ -1,0 +1,50 @@
+// eslint-disable-next-line max-classes-per-file
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { Component, Input } from '@angular/core';
+import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
+import { FormsModule } from '@angular/forms';
+import { ReviewConfigComponent } from './review-config.component';
+
+describe('ReviewConfigComponent', () => {
+  let component: ReviewConfigComponent;
+  let fixture: ComponentFixture<ReviewConfigComponent>;
+
+  @Component({ selector: 'studio-lite-booklet-config-edit', template: '' })
+  class MockBookletConfigEditComponent {
+    @Input() disabled!: boolean;
+    @Input() config!: BookletConfigDto | undefined;
+  }
+
+  @Component({ selector: 'studio-lite-review-config-edit', template: '' })
+  class MockReviewConfigEditComponent {
+    @Input() disabled!: boolean;
+    @Input() config!: ReviewConfigDto | undefined;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [
+        ReviewConfigComponent,
+        MockBookletConfigEditComponent,
+        MockReviewConfigEditComponent
+      ],
+      imports: [
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NoopAnimationsModule
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ReviewConfigComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

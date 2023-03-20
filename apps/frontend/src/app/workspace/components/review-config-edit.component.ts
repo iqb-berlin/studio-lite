@@ -10,20 +10,20 @@ const reviewConfigDefault: ReviewConfigDto = {
 };
 
 @Component({
-  selector: 'review-config-edit',
+  selector: 'studio-lite-review-config-edit',
   template: `
     <div fxLayout="column">
-      <mat-checkbox (change)="configChanged.emit();"
+      <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.showCoding">
         Zeige Kodierung
       </mat-checkbox>
-      <mat-checkbox (change)="configChanged.emit();"
+      <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.canComment">
         Kommentare möglich
       </mat-checkbox>
-      <mat-checkbox (change)="configChanged.emit();"
+      <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.showOthersComments">
         Zeige bereits vergebene Kommentare
@@ -33,7 +33,7 @@ const reviewConfigDefault: ReviewConfigDto = {
 })
 export class ReviewConfigEditComponent {
   reviewConfig: ReviewConfigDto = reviewConfigDefault;
-  @Output() configChanged = new EventEmitter();
+  @Output() configChanged = new EventEmitter<ReviewConfigDto>();
   @Input('disabled') disabled = false;
   @Input('config')
   set config(value: ReviewConfigDto | undefined) {
