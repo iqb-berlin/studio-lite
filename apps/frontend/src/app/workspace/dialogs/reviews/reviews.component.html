@@ -39,7 +39,8 @@
         <mat-dialog-content fxFlex>
           <div [hidden]="selectedReviewId > 0">Bitte links Aufgabenfolge wählen bzw. neu anlegen.</div>
           <select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
-                            (selectionChanged)="unitSelectionChanged()"
+                            [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
+                            (selectionChanged)="unitSelectionChanged($event)"
                             [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
         </mat-dialog-content>
       </div>

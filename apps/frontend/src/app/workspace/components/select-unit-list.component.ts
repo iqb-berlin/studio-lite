@@ -127,6 +127,7 @@ export class SelectUnitListComponent implements OnDestroy {
     return this.tableSelectionCheckbox.selected.map(ud => ud.id);
   }
 
+  @Input('selectedUnitIds')
   set selectedUnitIds(newUnits: number[]) {
     if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
     this.tableSelectionCheckbox.clear();
@@ -134,7 +135,7 @@ export class SelectUnitListComponent implements OnDestroy {
       if (newUnits.includes(row.id)) this.tableSelectionCheckbox.select(row);
     });
     this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
-      this.selectionChanged.emit();
+      this.selectionChanged.emit(this.selectedUnitIds);
     });
   }
 

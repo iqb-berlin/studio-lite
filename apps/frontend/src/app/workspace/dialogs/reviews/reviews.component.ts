@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   BookletConfigDto, ReviewConfigDto, ReviewFullDto, ReviewInListDto
 } from '@studio-lite-lib/api-dto';
@@ -6,7 +6,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
-import { SelectUnitListComponent } from '../../components/select-unit-list.component';
 import { AppService } from '../../../app.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 
@@ -16,8 +15,6 @@ import { CheckForChangesDirective } from '../../directives/check-for-changes.dir
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {
-  @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
-
   changed = false;
   selectedReviewId = 0;
   reviews: ReviewInListDto[] = [];
@@ -54,14 +51,12 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
                 this.reviewDataOriginal = data;
                 this.reviewDataToChange = ReviewsComponent.copyFrom(data);
                 this.changed = false;
-                if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = data.units ? data.units : [];
               }
             });
         } else {
           this.reviewDataToChange = { id: 0 };
           this.reviewDataOriginal = { id: 0 };
           this.changed = false;
-          if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = [];
         }
       }
     });
@@ -79,9 +74,9 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
       });
   }
 
-  unitSelectionChanged(): void {
-    if (this.reviewDataToChange && this.unitSelectionTable) {
-      this.reviewDataToChange.units = this.unitSelectionTable.selectedUnitIds;
+  unitSelectionChanged(selectedUnitIds: number[]): void {
+    if (this.reviewDataToChange) {
+      this.reviewDataToChange.units = selectedUnitIds;
       this.changed = this.detectChanges();
     }
   }
@@ -89,9 +84,6 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   discardChanges() {
     this.changed = false;
     this.reviewDataToChange = this.reviewDataOriginal ? ReviewsComponent.copyFrom(this.reviewDataOriginal) : { id: 0 };
-    if (this.reviewDataToChange && this.unitSelectionTable) {
-      this.unitSelectionTable.selectedUnitIds = this.reviewDataToChange.units ? this.reviewDataToChange.units : [];
-    }
   }
 
   saveChanges() {
