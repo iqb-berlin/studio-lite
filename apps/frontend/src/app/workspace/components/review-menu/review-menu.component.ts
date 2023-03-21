@@ -1,6 +1,7 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
+import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 
 @Component({
   selector: 'studio-lite-review-menu',
@@ -14,6 +15,7 @@ export class ReviewMenuComponent {
   @Input() workspaceId!: number;
   @Input() link!: string;
   @Input() passwordLength!: number;
+  @Input() bookletConfigSettings!: BookletConfigDto | undefined;
 
   @Output() changedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() reviewListChange: EventEmitter<number | undefined> = new EventEmitter<number | undefined>();

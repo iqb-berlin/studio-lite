@@ -1,0 +1,8 @@
+<button mat-raised-button
+        class="small-button"
+        [disabled]="!selectedReviewId || !units.length"
+        [matTooltip]="'workspace.export-review' | translate"
+        matTooltipPosition="below"
+        (click)="exportReview()">
+  <mat-icon>get_app</mat-icon>
+</button>

@@ -1,6 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
+import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { ReviewMenuComponent } from './review-menu.component';
 
 @Component({ selector: 'studio-lite-add-review-button', template: '' })
@@ -22,6 +23,13 @@ class MockStartReviewButtonComponent {
   @Input() unitCount!: number;
 }
 
+@Component({ selector: 'studio-lite-export-review-button', template: '' })
+class MockExportReviewButtonComponent {
+  @Input() bookletConfigSettings!: BookletConfigDto | undefined;
+  @Input() workspaceId!: number;
+  @Input() units!: number[];
+  @Input() selectedReviewId!: number;
+}
 @Component({ selector: 'studio-lite-print-review-button', template: '' })
 class MockPrintReviewButtonComponent {
   @Input() workspaceId!: number;
@@ -48,7 +56,8 @@ describe('ReviewMenuComponent', () => {
         MockDeleteReviewButtonComponent,
         MockStartReviewButtonComponent,
         MockPrintReviewButtonComponent,
-        MockCopyReviewLinkButtonComponent
+        MockCopyReviewLinkButtonComponent,
+        MockExportReviewButtonComponent
       ]
     }).compileComponents();
 

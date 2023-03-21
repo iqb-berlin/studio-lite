@@ -1,30 +1,37 @@
 <div fxLayout="row">
-  <studio-lite-add-review-button fxFlex="20%"
+  <studio-lite-add-review-button fxFlex="16.6%"
                                  [selectedReviewId]="selectedReviewId"
                                  [workspaceId]="workspaceId"
                                  [(changed)]="changed"
                                  (added)="reviewListChange.emit($event)">
   </studio-lite-add-review-button>
 
-  <studio-lite-delete-review-button fxFlex="20%"
+  <studio-lite-delete-review-button fxFlex="16.6%"
                                     [selectedReviewId]="selectedReviewId"
                                     [workspaceId]="workspaceId"
                                     (changedChange)="changed = $event"
                                     (deleted)="reviewListChange.emit()">
   </studio-lite-delete-review-button>
 
-  <studio-lite-start-review-button fxFlex="20%"
+  <studio-lite-start-review-button fxFlex="16.6%"
                                    [selectedReviewId]="selectedReviewId"
                                    [unitCount]="units.length">
   </studio-lite-start-review-button>
 
-  <studio-lite-print-review-button fxFlex="20%"
+  <studio-lite-export-review-button fxFlex="16.6%"
+                                    [bookletConfigSettings]="bookletConfigSettings"
+                                    [selectedReviewId]="selectedReviewId"
+                                    [units]="units"
+                                    [workspaceId]="workspaceId">
+  </studio-lite-export-review-button>
+
+  <studio-lite-print-review-button fxFlex="16.6%"
                                    [selectedReviewId]="selectedReviewId"
                                    [units]="units"
                                    [workspaceId]="workspaceId">
   </studio-lite-print-review-button>
 
-  <studio-lite-copy-review-link-button fxFlex="20%"
+  <studio-lite-copy-review-link-button fxFlex="16.6%"
                                        [link]="link"
                                        [unitCount]="units.length"
                                        [passwordLength]="passwordLength">

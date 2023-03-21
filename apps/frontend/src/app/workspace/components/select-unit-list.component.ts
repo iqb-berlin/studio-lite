@@ -86,18 +86,42 @@ export class SelectUnitListComponent implements OnDestroy {
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
 
+  @Input() filter!: number[];
+  @Input() initialSelection!: number[];
+
   @Input('show-groups')
   set showGroups(value: boolean) {
     this.displayedColumns = value ? ['selectCheckbox', 'key', 'groupName'] : ['selectCheckbox', 'key'];
   }
 
+  // TODO: move to ngChanges
   @Input('workspace')
   set workspaceId(value: number) {
     this.tableSelectionCheckbox.clear();
-    this.backendService.getUnitList(value).subscribe(unitData => {
-      this.objectsDatasource = new MatTableDataSource(unitData);
-      this.objectsDatasource.sort = this.sort;
-    });
+    this.backendService.getUnitList(value)
+      .subscribe(units => {
+        this.setObjectsDatasource(units);
+        this.setInitialSelection();
+      });
+  }
+
+  private setObjectsDatasource(units: UnitInListDto[]): void {
+    if (this.filter && this.filter.length) {
+      this.objectsDatasource = new MatTableDataSource(
+        units
+          .filter(unit => this.filter.indexOf(unit.id) > -1)
+      );
+    } else {
+      this.objectsDatasource = new MatTableDataSource(units);
+    }
+    this.objectsDatasource.sort = this.sort;
+  }
+
+  private setInitialSelection(): void {
+    if (this.initialSelection && this.initialSelection.length) {
+      this.selectedUnitIds = this.initialSelection;
+      this.selectionChanged.emit(this.selectedUnitIds);
+    }
   }
 
   multipleSelection = true;
@@ -115,14 +139,12 @@ export class SelectUnitListComponent implements OnDestroy {
     });
   }
 
-  @Output() selectionChanged = new EventEmitter();
+  @Output() selectionChanged = new EventEmitter<number[]>();
 
-  // TODO: Don't use method for binding
   get selectionCount(): number {
     return this.tableSelectionCheckbox.selected.length;
   }
 
-  // TODO: Don't use method for binding
   get selectedUnitIds(): number[] {
     return this.tableSelectionCheckbox.selected.map(ud => ud.id);
   }

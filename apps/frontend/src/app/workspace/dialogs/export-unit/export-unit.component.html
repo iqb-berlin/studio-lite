@@ -3,8 +3,10 @@
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
       <select-unit-list #unitSelectionTable
                         class="fx-flex"
+                        [filter]="data && data.units ? data.units : []"
+                        [initialSelection]="data && data.units ? data.units : []"
                         [workspace]="workspaceService.selectedWorkspaceId"
-                        (selectionChanged)="updateUnitIdList($event)">
+                        (selectionChanged)="unitExportSettings.unitIdList = $event">
       </select-unit-list>
     <div class="fx-flex"
          [style.max-width.px]="300">

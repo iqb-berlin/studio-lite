@@ -17,6 +17,7 @@
         [workspaceId]="workspaceService.selectedWorkspaceId"
         [link]="reviewDataOriginal.link ? reviewDataOriginal.link : ''"
         [passwordLength]="reviewDataOriginal.password ? reviewDataOriginal.password.length : 0"
+        [bookletConfigSettings]="reviewDataOriginal.settings?.bookletConfig"
         [(changed)]="changed"
         (reviewListChange)="loadReviewList($event)">
       </studio-lite-review-menu>

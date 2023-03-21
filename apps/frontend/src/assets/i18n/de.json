@@ -143,7 +143,8 @@
     "start-review": "Aufgabenfolge starten",
     "copy-link-to-clipboard": "Kopiere Link in Zwischenablage",
     "review-save-cancel": "Änderungen verwerfen",
-    "review-save": "Aufgabenfolge speichern"
+    "review-save": "Änderungen speichern",
+    "export-review": "Aufgabenfolge exportieren"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
