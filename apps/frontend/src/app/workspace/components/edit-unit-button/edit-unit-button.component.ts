@@ -124,7 +124,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   exportUnit(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '900px'
+        width: '1000px'
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {

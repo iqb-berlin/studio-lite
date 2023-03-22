@@ -6,21 +6,20 @@
   {{'unit-download.add-player' | translate}}
 </mat-checkbox>
 
-<div *ngIf="!enablePlayerOption" class="tcMessage margin-bottom">
+<div *ngIf="!enablePlayerOption" class="config-message margin-bottom">
   {{'unit-download.no-player' | translate}}
 </div>
 
 <div *ngIf="addPlayers && unitsWithOutPlayer.length > 0"
-     class="tcMessage">
+     class="config-message margin-bottom">
   {{'unit-download.units-without-player' | translate}}
 </div>
 
-<div class="fx-row-start-stretch">
-  <label class="fx-flex"
-         [style.max-width.%]="50">
+<div class="fx-row-space-between-start">
+  <label class="fx-flex-50">
     {{'unit-download.add-login' | translate}}
   </label>
-  <div class="fx-column-start-stretch">
+  <div class="fx-column-start-stretch fx-flex-50">
     <mat-form-field>
       <input matInput type="number" min="0"
              [placeholder]="'unit-download.add-test-takers-review' | translate"

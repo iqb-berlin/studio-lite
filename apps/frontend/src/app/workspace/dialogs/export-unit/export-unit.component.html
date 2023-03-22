@@ -1,27 +1,44 @@
 <div class="fx-column-start-stretch">
   <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
-      <select-unit-list #unitSelectionTable
-                        class="fx-flex"
-                        [filter]="data && data.units ? data.units : []"
-                        [initialSelection]="data && data.units ? data.units : []"
-                        [workspace]="workspaceService.selectedWorkspaceId"
-                        (selectionChanged)="unitExportSettings.unitIdList = $event">
-      </select-unit-list>
-    <div class="fx-flex"
-         [style.max-width.px]="300">
-      <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
-                                   [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
-                                   [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
-                                   [(addPlayers)]="unitExportSettings.addPlayers"
-                                   [(passwordLess)]="unitExportSettings.passwordLess"
-                                   (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
-      </studio-lite-test-config>
-      <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
-                                                     unitExportSettings.addTestTakersHot +
-                                                     unitExportSettings.addTestTakersMonitor)"
-                                       (configChanged)="setBookletConfigSettings($event)">
-      </studio-lite-booklet-config-edit>
+    <select-unit-list #unitSelectionTable
+                      class="fx-flex-50"
+                      [filter]="data && data.units ? data.units : []"
+                      [initialSelection]="data && data.units ? data.units : []"
+                      [workspace]="workspaceService.selectedWorkspaceId"
+                      (selectionChanged)="unitExportSettings.unitIdList = $event">
+    </select-unit-list>
+    <div class="fx-flex-50">
+      <mat-accordion>
+        <mat-expansion-panel expanded="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Test-Taker-Einstellungen
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+            <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
+                                     [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
+                                     [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
+                                     [(addPlayers)]="unitExportSettings.addPlayers"
+                                     [(passwordLess)]="unitExportSettings.passwordLess"
+                                     (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+            </studio-lite-test-config>
+          </mat-expansion-panel>
+          <mat-expansion-panel expanded="false" [disabled]="!(unitExportSettings.addTestTakersReview +
+                                                             unitExportSettings.addTestTakersHot +
+                                                             unitExportSettings.addTestTakersMonitor)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Booklet-Einstellungen
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+              <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
+                                                             unitExportSettings.addTestTakersHot +
+                                                             unitExportSettings.addTestTakersMonitor)"
+                                               (configChanged)="setBookletConfigSettings($event)">
+              </studio-lite-booklet-config-edit>
+          </mat-expansion-panel>
+        </mat-accordion>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions class="fx-column-start-stretch">

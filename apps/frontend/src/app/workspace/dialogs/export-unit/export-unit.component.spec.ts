@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { ExportUnitComponent } from './export-unit.component';
 import { environment } from '../../../../environments/environment';
 
@@ -48,6 +49,7 @@ describe('ExportUnitComponent', () => {
       imports: [
         MatDialogModule,
         HttpClientModule,
+        MatExpansionModule,
         TranslateModule.forRoot()
       ],
       providers: [

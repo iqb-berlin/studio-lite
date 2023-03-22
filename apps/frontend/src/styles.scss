@@ -212,3 +212,21 @@ div.logo img {
   box-sizing: border-box;
 }
 
+.fx-flex-30 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 30%;
+}
+
+.fx-flex-70 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 70%;
+}
+
+.fx-flex-50 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 50%;
+}
+
