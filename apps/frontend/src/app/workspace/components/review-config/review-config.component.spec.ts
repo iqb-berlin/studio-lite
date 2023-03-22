@@ -6,6 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { ReviewConfigComponent } from './review-config.component';
 
 describe('ReviewConfigComponent', () => {
@@ -35,7 +36,8 @@ describe('ReviewConfigComponent', () => {
         FormsModule,
         MatFormFieldModule,
         MatInputModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        MatExpansionModule
       ]
     }).compileComponents();
 

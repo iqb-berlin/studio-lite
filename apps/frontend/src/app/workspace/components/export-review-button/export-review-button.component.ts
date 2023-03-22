@@ -25,14 +25,10 @@ export class ExportReviewButtonComponent {
     private appService: AppService) {}
 
   exportReview(): void {
-    const pagingMode = this.bookletConfigSettings?.pagingMode ?
-      this.bookletConfigSettings.pagingMode : 'separate';
-    const unitNaviButtons = this.bookletConfigSettings?.unitNaviButtons ?
-      this.bookletConfigSettings.unitNaviButtons : 'FULL';
     const dialogRef = this.dialog
       .open(ExportUnitComponent, {
         width: '900px',
-        data: { units: this.units, pagingMode, unitNaviButtons }
+        data: { units: this.units, bookletConfigSettings: this.bookletConfigSettings }
       });
 
     dialogRef.afterClosed()

@@ -1,29 +1,47 @@
 <div fxLayout="column">
-  <mat-form-field>
-    <input matInput
-           placeholder="Name"
-           [(ngModel)]="name"
-           [disabled]="!selectedReviewId"
-           (ngModelChange)="nameChange.emit($event); reviewChange.emit()">
-  </mat-form-field>
-  <div fxLayout="row" class="margin-bottom" fxLayoutGap="5px">
-    <mat-form-field fxFlex="50%">
-      <input matInput
-             placeholder="Kennwort"
-             [(ngModel)]="password"
-             [disabled]="!selectedReviewId"
-             (ngModelChange)="passwordChange.emit($event); reviewChange.emit()">
-    </mat-form-field>
-    <div [class]="(selectedReviewId && password && password.length < 4) ? 'rev-message' : 'invisible'" fxFlex>
-      Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)
-    </div>
-  </div>
-  <studio-lite-booklet-config-edit [disabled]="!selectedReviewId"
-                       [config]="bookletConfigSettings"
-                       (configChanged)="bookletConfigSettingsChange.emit($event); reviewChange.emit()">
-  </studio-lite-booklet-config-edit>
-  <studio-lite-review-config-edit [disabled]="!selectedReviewId"
-                      [config]="reviewConfigSettings"
-                      (configChanged)="reviewConfigSettingsChange.emit($event); reviewChange.emit()">
-  </studio-lite-review-config-edit>
+  <mat-accordion>
+    <mat-expansion-panel expanded="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Review-Einstellungen
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-form-field>
+        <input matInput
+               placeholder="Name"
+               [(ngModel)]="name"
+               [disabled]="!selectedReviewId"
+               (ngModelChange)="nameChange.emit($event); reviewChange.emit()">
+      </mat-form-field>
+      <div fxLayout="row" class="margin-bottom" fxLayoutGap="5px">
+        <mat-form-field fxFlex="50%">
+          <input matInput
+                 placeholder="Kennwort"
+                 [(ngModel)]="password"
+                 [disabled]="!selectedReviewId"
+                 (ngModelChange)="passwordChange.emit($event); reviewChange.emit()">
+        </mat-form-field>
+        <div [class]="(selectedReviewId && password && password.length < 4) ? 'rev-message' : 'invisible'" fxFlex>
+          Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)
+        </div>
+      </div>
+      <studio-lite-review-config-edit [disabled]="!selectedReviewId"
+                                      [config]="reviewConfigSettings"
+                                      (configChanged)="reviewConfigSettingsChange.emit($event); reviewChange.emit()">
+      </studio-lite-review-config-edit>
+    </mat-expansion-panel>
+
+
+    <mat-expansion-panel expanded="false">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+         Booklet-Einstellungen
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <studio-lite-booklet-config-edit [disabled]="!selectedReviewId"
+                                       [config]="bookletConfigSettings"
+                                       (configChanged)="bookletConfigSettingsChange.emit($event); reviewChange.emit()">
+      </studio-lite-booklet-config-edit>
+    </mat-expansion-panel>
+  </mat-accordion>
 </div>

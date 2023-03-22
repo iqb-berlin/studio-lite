@@ -15,10 +15,13 @@
                                    [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
                                    [(addPlayers)]="unitExportSettings.addPlayers"
                                    [(passwordLess)]="unitExportSettings.passwordLess"
-                                   [(pagingMode)]="unitExportSettings.bookletSettings[0].value"
-                                   [(navigationButtons)]="unitExportSettings.bookletSettings[1].value"
                                    (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
       </studio-lite-testcenter-data>
+      <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
+                                                     unitExportSettings.addTestTakersHot +
+                                                     unitExportSettings.addTestTakersMonitor)"
+                                       (configChanged)="setBookletConfigSettings($event)">
+      </studio-lite-booklet-config-edit>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions class="fx-column-start-stretch">

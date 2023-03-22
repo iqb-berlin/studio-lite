@@ -29,6 +29,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
@@ -84,6 +85,7 @@ import { ExportReviewButtonComponent } from './components/export-review-button/e
     CommonModule,
     MatIconModule,
     MatTooltipModule,
+    MatExpansionModule,
     FlexLayoutModule,
     StudioComponentsModule,
     WorkspaceRoutingModule,
