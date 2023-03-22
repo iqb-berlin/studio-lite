@@ -216,8 +216,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
 
   reviews(): void {
     this.reviewsDialog.open(ReviewsComponent, {
-      width: '1000px',
-      height: '820px'
+      width: '1200px'
     });
   }
 
