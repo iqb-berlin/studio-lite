@@ -10,13 +10,13 @@
       </select-unit-list>
     <div class="fx-flex"
          [style.max-width.px]="300">
-      <studio-lite-testcenter-data [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
+      <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
                                    [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
                                    [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
                                    [(addPlayers)]="unitExportSettings.addPlayers"
                                    [(passwordLess)]="unitExportSettings.passwordLess"
                                    (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
-      </studio-lite-testcenter-data>
+      </studio-lite-test-config>
       <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                      unitExportSettings.addTestTakersHot +
                                                      unitExportSettings.addTestTakersMonitor)"

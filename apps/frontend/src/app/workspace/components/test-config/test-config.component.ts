@@ -7,11 +7,11 @@ import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 
 @Component({
-  selector: 'studio-lite-testcenter-data',
-  templateUrl: './testcenter-data.component.html',
-  styleUrls: ['./testcenter-data.component.scss']
+  selector: 'studio-lite-test-config',
+  templateUrl: './test-config.component.html',
+  styleUrls: ['./test-config.component.scss']
 })
-export class TestcenterDataComponent implements OnInit {
+export class TestConfigComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
 

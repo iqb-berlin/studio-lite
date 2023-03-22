@@ -67,7 +67,7 @@ import { UnitGroupComponent } from './components/unit-group/unit-group.component
 import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
-import { TestcenterDataComponent } from './components/testcenter-data/testcenter-data.component';
+import { TestConfigComponent } from './components/test-config/test-config.component';
 import { PrintReviewButtonComponent } from './components/print-review-button/print-review-button.component';
 import { DeleteReviewButtonComponent } from './components/delete-review-button/delete-review-button.component';
 import { AddReviewButtonComponent } from './components/add-review-button/add-review-button.component';
@@ -118,7 +118,7 @@ import { ExportReviewButtonComponent } from './components/export-review-button/e
     SplitterModule
   ],
   declarations: [
-    TestcenterDataComponent,
+    TestConfigComponent,
     WorkspaceComponent,
     NewUnitComponent,
     SelectUnitComponent,

@@ -8,16 +8,16 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
-import { TestcenterDataComponent } from './testcenter-data.component';
+import { TestConfigComponent } from './test-config.component';
 import { environment } from '../../../../environments/environment';
 
-describe('TestcenterDataComponent', () => {
-  let component: TestcenterDataComponent;
-  let fixture: ComponentFixture<TestcenterDataComponent>;
+describe('TestConfigComponent', () => {
+  let component: TestConfigComponent;
+  let fixture: ComponentFixture<TestConfigComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TestcenterDataComponent],
+      declarations: [TestConfigComponent],
       imports: [
         NoopAnimationsModule,
         MatSelectModule,
@@ -35,7 +35,7 @@ describe('TestcenterDataComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TestcenterDataComponent);
+    fixture = TestBed.createComponent(TestConfigComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
