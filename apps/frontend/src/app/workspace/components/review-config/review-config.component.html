@@ -1,5 +1,7 @@
  <mat-accordion>
-  <mat-expansion-panel expanded="true">
+  <mat-expansion-panel
+    [expanded]="!!selectedReviewId"
+    [disabled]="!selectedReviewId">
     <mat-expansion-panel-header>
       <mat-panel-title>
         {{'workspace.review-settings' | translate}}
@@ -30,7 +32,9 @@
     </studio-lite-review-config-edit>
   </mat-expansion-panel>
 
-  <mat-expansion-panel expanded="false">
+  <mat-expansion-panel
+    expanded="false"
+    [disabled]="!selectedReviewId">
     <mat-expansion-panel-header>
       <mat-panel-title>
         {{'workspace.booklet-settings' | translate}}
