@@ -6,16 +6,16 @@
                       [filter]="data && data.units ? data.units : []"
                       [initialSelection]="data && data.units ? data.units : []"
                       [workspace]="workspaceService.selectedWorkspaceId"
-                      (selectionChanged)="unitExportSettings.unitIdList = $event">
+                      (selectionChanged)="unitExportSettings.unitIdList = $event; firstSelectionChanged = true">
     </select-unit-list>
     <div class="fx-flex-50">
       <mat-accordion>
         <mat-expansion-panel
-          [expanded]="!!unitSelectionTable.selectionCount"
-          [disabled]="!unitSelectionTable.selectionCount">
+          [disabled]="!unitExportSettings.unitIdList.length"
+          [expanded]="!firstSelectionChanged || !!unitExportSettings.unitIdList.length">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              {{'workspace.test-taker-settings' | translate}}
+              {{'workspace.test-taker-settings' | translate}} {{!!unitExportSettings.unitIdList.length}}
             </mat-panel-title>
           </mat-expansion-panel-header>
             <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
@@ -30,7 +30,7 @@
                                [disabled]="!(unitExportSettings.addTestTakersReview +
                                              unitExportSettings.addTestTakersHot +
                                              unitExportSettings.addTestTakersMonitor)
-                                             || !unitSelectionTable.selectionCount">
+                                             || !unitExportSettings.unitIdList.length">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 {{'workspace.booklet-settings' | translate}}
@@ -39,7 +39,7 @@
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
                                                              unitExportSettings.addTestTakersMonitor) ||
-                                                             !unitSelectionTable.selectionCount"
+                                                             !unitExportSettings.unitIdList.length"
                                                (configChanged)="setBookletConfigSettings($event)">
               </studio-lite-booklet-config-edit>
           </mat-expansion-panel>
@@ -51,7 +51,7 @@
       <button mat-raised-button color="primary"
               type="submit"
               [mat-dialog-close]="unitExportSettings"
-              [disabled]="!unitSelectionTable.selectionCount">
+              [disabled]="!unitExportSettings.unitIdList.length">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}
