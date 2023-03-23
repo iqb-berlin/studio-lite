@@ -60,7 +60,7 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
                       this.added.emit(isOK);
                     } else {
                       this.snackBar
-                        .open(this.translateService.instant('workspace.no-new-review'),
+                        .open(this.translateService.instant('workspace.review-not-added'),
                           '',
                           { duration: 3000 });
                     }

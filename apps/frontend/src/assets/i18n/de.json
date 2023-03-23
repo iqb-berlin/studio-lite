@@ -154,7 +154,7 @@
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",
     "new-review-name": "Name der Aufgabenfolge",
-    "no-new-review": "Konnte neue Aufgabenfolge nicht anlegen",
+    "review-not-added": "Konnte neue Aufgabenfolge nicht anlegen",
     "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
     "review-not-deleted": "Konnte Aufgabenfolge nicht löschen",
     "error": "Fehler"
