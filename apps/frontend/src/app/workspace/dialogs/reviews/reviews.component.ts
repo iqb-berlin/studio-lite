@@ -94,15 +94,15 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
         this.reviewDataToChange
       ).subscribe(ok => {
         if (ok) {
-          this.snackBar.open(
-            'Aufgabenfolge gespeichert', '', { duration: 1000 }
-          );
           if (this.reviewDataOriginal.name === this.reviewDataToChange.name) {
             this.reviewDataOriginal = ReviewsComponent.copyFrom(this.reviewDataToChange);
-            this.changed = false;
           } else {
             this.loadReviewList(this.selectedReviewId);
           }
+          this.changed = false;
+          this.snackBar.open(
+            'Aufgabenfolge gespeichert', '', { duration: 1000 }
+          );
         } else {
           this.snackBar.open(
             'Konnte Aufgabenfolge nicht speichern', 'Fehler', { duration: 3000 }
