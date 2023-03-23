@@ -43,7 +43,7 @@ import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
 import { ExportUnitComponent } from './dialogs/export-unit/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { SelectUnitListComponent } from './components/select-unit-list/select-unit-list.component';
 import { UserListComponent } from './components/user-list.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 import {
