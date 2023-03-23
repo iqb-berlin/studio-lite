@@ -149,7 +149,8 @@
     "review-name": "Name",
     "review-password-info": "Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)",
     "booklet-settings": "Booklet-Einstellungen",
-    "review-settings": "Review-Einstellungen"
+    "review-settings": "Review-Einstellungen",
+    "test-taker-settings": "Testtaker-Einstellungen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

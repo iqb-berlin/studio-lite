@@ -15,7 +15,7 @@
           [disabled]="!unitSelectionTable.selectionCount">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              Test-Taker-Einstellungen
+              {{'workspace.test-taker-settings' | translate}}
             </mat-panel-title>
           </mat-expansion-panel-header>
             <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
@@ -26,13 +26,14 @@
                                      (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
             </studio-lite-test-config>
           </mat-expansion-panel>
-          <mat-expansion-panel expanded="false" [disabled]="!(unitExportSettings.addTestTakersReview +
-                                                             unitExportSettings.addTestTakersHot +
-                                                             unitExportSettings.addTestTakersMonitor)
-                                                             || !unitSelectionTable.selectionCount">
+          <mat-expansion-panel expanded="false"
+                               [disabled]="!(unitExportSettings.addTestTakersReview +
+                                             unitExportSettings.addTestTakersHot +
+                                             unitExportSettings.addTestTakersMonitor)
+                                             || !unitSelectionTable.selectionCount">
             <mat-expansion-panel-header>
               <mat-panel-title>
-                Booklet-Einstellungen
+                {{'workspace.booklet-settings' | translate}}
               </mat-panel-title>
             </mat-expansion-panel-header>
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
