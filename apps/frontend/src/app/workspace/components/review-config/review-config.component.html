@@ -2,12 +2,12 @@
   <mat-expansion-panel expanded="true">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        Review-Einstellungen
+        {{'workspace.review-settings' | translate}}
       </mat-panel-title>
     </mat-expansion-panel-header>
     <mat-form-field>
       <input matInput
-             placeholder="Name"
+             [placeholder]="'workspace.review-name' | translate"
              [(ngModel)]="name"
              [disabled]="!selectedReviewId"
              (ngModelChange)="nameChange.emit($event); reviewChange.emit()">
@@ -15,13 +15,13 @@
     <div class="fx-row-start-stretch margin-bottom fx-gap-5">
       <mat-form-field class="fx-flex-50">
         <input matInput
-               placeholder="Kennwort"
+               [placeholder]="'workspace.review-password' | translate"
                [(ngModel)]="password"
                [disabled]="!selectedReviewId"
                (ngModelChange)="passwordChange.emit($event); reviewChange.emit()">
       </mat-form-field>
-      <div [class]="(selectedReviewId && password && password.length < 4) ? 'rev-message' : 'invisible'" fxFlex>
-        Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)
+      <div [class]="(selectedReviewId && password && password.length < 4) ? 'rev-message' : 'invisible'">
+        {{'workspace.review-password-info' | translate}}
       </div>
     </div>
     <studio-lite-review-config-edit [disabled]="!selectedReviewId"
@@ -33,7 +33,7 @@
   <mat-expansion-panel expanded="false">
     <mat-expansion-panel-header>
       <mat-panel-title>
-       Booklet-Einstellungen
+        {{'workspace.booklet-settings' | translate}}
       </mat-panel-title>
     </mat-expansion-panel-header>
     <studio-lite-booklet-config-edit [disabled]="!selectedReviewId"

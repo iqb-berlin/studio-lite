@@ -144,7 +144,12 @@
     "copy-link-to-clipboard": "Kopiere Link in Zwischenablage",
     "review-save-cancel": "Änderungen verwerfen",
     "review-save": "Änderungen speichern",
-    "export-review": "Aufgabenfolge exportieren"
+    "export-review": "Aufgabenfolge exportieren",
+    "review-password": "Kennwort",
+    "review-name": "Name",
+    "review-password-info": "Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)",
+    "booklet-settings": "Booklet-Einstellungen",
+    "review-settings": "Review-Einstellungen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
