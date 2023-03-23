@@ -6,6 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ExportUnitComponent } from './export-unit.component';
 import { environment } from '../../../../environments/environment';
 
@@ -23,8 +24,8 @@ describe('ExportUnitComponent', () => {
     selectionCount!: number;
   }
 
-  @Component({ selector: 'studio-lite-testcenter-data', template: '' })
-  class MockTestcenterDataComponent {
+  @Component({ selector: 'studio-lite-test-config', template: '' })
+  class MockTestConfigComponent {
     @Input() addTestTakersReview!: number;
     @Input() addTestTakersHot!: number;
     @Input() addTestTakersMonitor!: number;
@@ -43,13 +44,14 @@ describe('ExportUnitComponent', () => {
       declarations: [
         ExportUnitComponent,
         MockSelectUnitListComponent,
-        MockTestcenterDataComponent,
+        MockTestConfigComponent,
         MockBookletConfigComponent
       ],
       imports: [
         MatDialogModule,
         HttpClientModule,
         MatExpansionModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
