@@ -7,6 +7,7 @@ import { Component, Input } from '@angular/core';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { TranslateModule } from '@ngx-translate/core';
 import { ReviewConfigComponent } from './review-config.component';
 
 describe('ReviewConfigComponent', () => {
@@ -37,7 +38,8 @@ describe('ReviewConfigComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         NoopAnimationsModule,
-        MatExpansionModule
+        MatExpansionModule,
+        TranslateModule.forRoot()
       ]
     }).compileComponents();
 
