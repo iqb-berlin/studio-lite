@@ -160,7 +160,10 @@
     "error": "Fehler",
     "review-show-codes": "Zeige Kodierung",
     "review-show-comments": "Zeige bereits vergebene Kommentare",
-    "review-allow-comments": "Kommentare möglich"
+    "review-allow-comments": "Kommentare möglich",
+    "select-unit": "Bitte Aufgaben auswählen!",
+    "unit-selected": "Eine Aufgabe ausgewählt.",
+    "units-selected": "Aufgaben ausgewählt."
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

@@ -1,8 +1,8 @@
 <div class="fx-column-start-stretch unit-list-wrapper">
   <div *ngIf="multipleSelection">
-    <p *ngIf="selectionCount === 0">Bitte Aufgaben auswählen!</p>
-    <p *ngIf="selectionCount === 1">Eine Aufgabe ausgewählt.</p>
-    <p *ngIf="selectionCount > 1">{{selectionCount}} Aufgaben ausgewählt.</p>
+    <p *ngIf="selectionCount === 0">{{'workspace.select-unit' | translate}}</p>
+    <p *ngIf="selectionCount === 1">{{'workspace.unit-selected' | translate}}</p>
+    <p *ngIf="selectionCount > 1">{{selectionCount}} {{'workspace.units-selected' | translate}}</p>
   </div>
 
   <mat-form-field appearance="outline">
