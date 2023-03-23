@@ -10,7 +10,9 @@
     </select-unit-list>
     <div class="fx-flex-50">
       <mat-accordion>
-        <mat-expansion-panel expanded="true">
+        <mat-expansion-panel
+          [expanded]="!!unitSelectionTable.selectionCount"
+          [disabled]="!unitSelectionTable.selectionCount">
           <mat-expansion-panel-header>
             <mat-panel-title>
               Test-Taker-Einstellungen
@@ -26,7 +28,8 @@
           </mat-expansion-panel>
           <mat-expansion-panel expanded="false" [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
-                                                             unitExportSettings.addTestTakersMonitor)">
+                                                             unitExportSettings.addTestTakersMonitor)
+                                                             || !unitSelectionTable.selectionCount">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 Booklet-Einstellungen
@@ -34,7 +37,8 @@
             </mat-expansion-panel-header>
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
-                                                             unitExportSettings.addTestTakersMonitor)"
+                                                             unitExportSettings.addTestTakersMonitor) ||
+                                                             !unitSelectionTable.selectionCount"
                                                (configChanged)="setBookletConfigSettings($event)">
               </studio-lite-booklet-config-edit>
           </mat-expansion-panel>
@@ -46,7 +50,7 @@
       <button mat-raised-button color="primary"
               type="submit"
               [mat-dialog-close]="unitExportSettings"
-              [disabled]="unitSelectionTable.selectionCount === 0">
+              [disabled]="!unitSelectionTable.selectionCount">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}
