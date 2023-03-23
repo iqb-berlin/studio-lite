@@ -12,7 +12,7 @@ const reviewConfigDefault: ReviewConfigDto = {
 @Component({
   selector: 'studio-lite-review-config-edit',
   template: `
-    <div fxLayout="column">
+    <div class="fx-column-start-stretch">
       <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.showCoding">
