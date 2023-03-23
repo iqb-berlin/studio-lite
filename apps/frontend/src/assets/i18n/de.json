@@ -157,7 +157,10 @@
     "review-not-added": "Konnte neue Aufgabenfolge nicht anlegen",
     "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
     "review-not-deleted": "Konnte Aufgabenfolge nicht löschen",
-    "error": "Fehler"
+    "error": "Fehler",
+    "review-show-codes": "Zeige Kodierung",
+    "review-show-comments": "Zeige bereits vergebene Kommentare",
+    "review-allow-comments": "Kommentare möglich"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

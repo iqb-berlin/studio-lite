@@ -16,17 +16,17 @@ const reviewConfigDefault: ReviewConfigDto = {
       <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.showCoding">
-        Zeige Kodierung
+        {{'workspace.review-show-codes' | translate}}
       </mat-checkbox>
       <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.canComment">
-        Kommentare möglich
+        {{'workspace.review-allow-comments' | translate}}
       </mat-checkbox>
       <mat-checkbox (change)="configChanged.emit(config);"
                     [disabled]="disabled"
                     [(ngModel)]="reviewConfig.showOthersComments">
-        Zeige bereits vergebene Kommentare
+        {{'workspace.review-show-comments' | translate}}
       </mat-checkbox>
     </div>
   `
