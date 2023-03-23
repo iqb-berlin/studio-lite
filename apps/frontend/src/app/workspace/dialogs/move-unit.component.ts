@@ -27,7 +27,10 @@ export interface MoveUnitData {
         </mat-form-field>
       </form>
       <mat-dialog-content fxFlex>
-        <select-unit-list #unitSelectionTable [workspace]="data.currentWorkspaceId"></select-unit-list>
+        <studio-lite-select-unit-list
+          #unitSelectionTable
+          [workspace]="data.currentWorkspaceId">
+        </studio-lite-select-unit-list>
       </mat-dialog-content>
 
       <mat-dialog-actions>

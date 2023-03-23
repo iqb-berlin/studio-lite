@@ -35,10 +35,10 @@
          fxLayout="column" fxFlex  fxLayoutAlign="space-between stretch">
       <div [hidden]="selectedGroup">Bitte links Gruppe wählen bzw. neu anlegen.</div>
       <div fxFlex class="units">
-        <select-unit-list #unitSelectionTable [hidden]="selectedGroup === ''"
+        <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedGroup === ''"
                           (selectionChanged)="unitSelectionChanged()"
                           [show-groups]="false"
-                          [workspace]="workspaceService.selectedWorkspaceId"></select-unit-list>
+                          [workspace]="workspaceService.selectedWorkspaceId"></studio-lite-select-unit-list>
       </div>
       <div fxLayout="row" fxLayoutAlign="end end" fxLayoutGap="5px"
            style="padding: 5px">

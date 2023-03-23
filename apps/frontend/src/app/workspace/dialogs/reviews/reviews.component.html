@@ -30,11 +30,11 @@
         <div class="fx-row-space-between-stretch fx-flex fx-gap-20 review-changes-area">
           <div class="fx-flex-50">
             <div [hidden]="selectedReviewId > 0">Bitte Aufgabenfolge wählen bzw. neu anlegen.</div>
-            <select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
+            <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
                               [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
                               (selectionChanged)="unitSelectionChanged($event)"
                               [workspace]="workspaceService.selectedWorkspaceId">
-            </select-unit-list>
+            </studio-lite-select-unit-list>
           </div>
           <studio-lite-review-config class="fx-flex-50"
                                      [selectedReviewId]="selectedReviewId"

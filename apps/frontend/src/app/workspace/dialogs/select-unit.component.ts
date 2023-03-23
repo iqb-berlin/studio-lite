@@ -31,8 +31,8 @@ export interface SelectUnitData {
               </mat-form-field>
           </form>
           <mat-dialog-content>
-              <select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspaceId"
-                                [multiple]="data.multiple"></select-unit-list>
+              <studio-lite-select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspaceId"
+                                [multiple]="data.multiple"></studio-lite-select-unit-list>
           </mat-dialog-content>
 
           <mat-dialog-actions>

@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
 import { BackendService } from '../../backend.service';
 
 @Component({
-  selector: 'select-unit-list',
+  selector: 'studio-lite-select-unit-list',
   templateUrl: './select-unit-list.component.html',
   styleUrls: ['select-unit-list.component.scss']
 })
