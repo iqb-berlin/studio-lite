@@ -136,6 +136,7 @@
     "cancel-save-unit": "Aufgabenänderungen verwerfen",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
+    "delete": "Löschen",
     "print": "Drucken",
     "print-review": "Aufgabenfolge drucken",
     "delete-review": "Aufgabenfolge löschen",
@@ -153,7 +154,10 @@
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",
     "new-review-name": "Name der Aufgabenfolge",
-    "no-new-review": "Konnte neue Aufgabenfolge nicht anlegen"
+    "no-new-review": "Konnte neue Aufgabenfolge nicht anlegen",
+    "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
+    "review-not-deleted": "Konnte Aufgabenfolge nicht löschen",
+    "error": "Fehler"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

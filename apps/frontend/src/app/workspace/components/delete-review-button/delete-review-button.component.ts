@@ -4,6 +4,7 @@ import {
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../backend.service';
 
@@ -22,6 +23,7 @@ export class DeleteReviewButtonComponent {
     public appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
+    protected translateService: TranslateService,
     private confirmDiscardChangesDialog: MatDialog
   ) {}
 
@@ -30,9 +32,9 @@ export class DeleteReviewButtonComponent {
       .open(ConfirmDialogComponent, {
         width: '400px',
         data: <ConfirmDialogData>{
-          title: 'Aufgabenfolge löschen',
-          content: 'Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?',
-          confirmButtonLabel: 'Löschen',
+          title: this.translateService.instant('workspace.delete-review'),
+          content: this.translateService.instant('workspace.delete-review-continue'),
+          confirmButtonLabel: this.translateService.instant('workspace.delete'),
           showCancel: true
         }
       });
@@ -51,9 +53,10 @@ export class DeleteReviewButtonComponent {
             if (ok) {
               this.deleted.emit();
             } else {
-              this.snackBar.open(
-                'Konnte Aufgabenfolge nicht löschen', 'Fehler', { duration: 3000 }
-              );
+              this.snackBar
+                .open(this.translateService.instant('workspace.review-not-deleted'),
+                  this.translateService.instant('workspace.error'),
+                  { duration: 3000 });
             }
           });
         }
