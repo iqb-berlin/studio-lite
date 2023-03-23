@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { InputTextComponent } from '../../../components/input-text.component';
 import { BackendService } from '../../backend.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
@@ -23,6 +24,7 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
     private inputTextDialog: MatDialog,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
+    protected translateService: TranslateService,
     protected confirmDiscardChangesDialog: MatDialog
   ) {
     super();
@@ -31,22 +33,21 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
   addReview() {
     this.checkForChangesAndContinue(this.changed).then(go => {
       if (go) {
-        // this.changed = false;
         this.changedChange.emit(false);
         const dialogRef = this.inputTextDialog.open(InputTextComponent, {
           width: '500px',
           data: {
-            title: 'Neue Aufgabenfolge',
+            title: this.translateService.instant('workspace.new-review'),
             default: '',
-            okButtonLabel: 'Speichern',
-            prompt: 'Name der Aufgabenfolge'
+            okButtonLabel: this.translateService.instant('workspace.save'),
+            prompt: this.translateService.instant('workspace.new-review-name')
           }
         });
 
         dialogRef.afterClosed()
           .subscribe(result => {
             if (typeof result === 'string') {
-              if (result.length > 1) {
+              if (result.length) {
                 this.backendService.addReview(
                   this.workspaceId,
                   {
@@ -56,10 +57,12 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
                 )
                   .subscribe(isOK => {
                     if (typeof isOK === 'number') {
-                      // this.loadReviewList(isOK);
                       this.added.emit(isOK);
                     } else {
-                      this.snackBar.open('Konnte neue Aufgabenfolge nicht anlegen.', '', { duration: 3000 });
+                      this.snackBar
+                        .open(this.translateService.instant('workspace.no-new-review'),
+                          '',
+                          { duration: 3000 });
                     }
                   });
               }

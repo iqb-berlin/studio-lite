@@ -150,7 +150,10 @@
     "review-password-info": "Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)",
     "booklet-settings": "Booklet-Einstellungen",
     "review-settings": "Review-Einstellungen",
-    "test-taker-settings": "Testtaker-Einstellungen"
+    "test-taker-settings": "Testtaker-Einstellungen",
+    "new-review": "Neue Aufgabenfolge",
+    "new-review-name": "Name der Aufgabenfolge",
+    "no-new-review": "Konnte neue Aufgabenfolge nicht anlegen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
