@@ -161,6 +161,13 @@ div.logo img {
   justify-content: flex-start;
   align-items: flex-end;
 }
+.fx-row-end-end {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
 .fx-row-start-stretch {
   box-sizing: border-box;
   display: flex;
