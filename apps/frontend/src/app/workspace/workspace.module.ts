@@ -77,7 +77,6 @@ import { ReviewMenuComponent } from './components/review-menu/review-menu.compon
 import { ReviewSaveChangesComponent } from './components/review-save-changes/review-save-changes.component';
 import { ReviewConfigComponent } from './components/review-config/review-config.component';
 import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
-import { BookletConfigShowComponent } from './components/booklet-config/booklet-config-show.component';
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
 
 @NgModule({
@@ -138,7 +137,6 @@ import { ExportReviewButtonComponent } from './components/export-review-button/e
     ReviewsComponent,
     ReviewConfigEditComponent,
     BookletConfigEditComponent,
-    BookletConfigShowComponent,
     UnitSelectionComponent,
     UnitSaveButtonComponent,
     UnitDataAreaComponent,
