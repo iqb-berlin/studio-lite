@@ -27,8 +27,6 @@ export class ExportUnitComponent {
     unitTitle: 'unit_title'
   };
 
-  firstSelectionChanged: boolean = false; // Fix for test taker settings panel at first opening
-
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletSettings: BookletConfigDto },
     public workspaceService: WorkspaceService

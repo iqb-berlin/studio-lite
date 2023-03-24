@@ -31,6 +31,7 @@ describe('ReviewsComponent', () => {
     @Input() initialSelection!: number[];
     @Input() selectedUnitIds!: number[];
     @Input() workspace!: number;
+    @Input() disabled!: number[];
   }
 
   @Component({ selector: 'studio-lite-review-config', template: '' })

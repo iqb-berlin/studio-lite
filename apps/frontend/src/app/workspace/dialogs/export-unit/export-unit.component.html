@@ -6,16 +6,15 @@
                       [filter]="data && data.units ? data.units : []"
                       [initialSelection]="data && data.units ? data.units : []"
                       [workspace]="workspaceService.selectedWorkspaceId"
-                      (selectionChanged)="unitExportSettings.unitIdList = $event; firstSelectionChanged = true">
+                      (selectionChanged)="unitExportSettings.unitIdList = $event">
     </studio-lite-select-unit-list>
     <div class="fx-flex-50">
       <mat-accordion>
         <mat-expansion-panel
-          [disabled]="!unitExportSettings.unitIdList.length"
-          [expanded]="!firstSelectionChanged || !!unitExportSettings.unitIdList.length">
+          [expanded]="true">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              {{'workspace.test-taker-settings' | translate}} {{!!unitExportSettings.unitIdList.length}}
+              {{'workspace.test-taker-settings' | translate}}
             </mat-panel-title>
           </mat-expansion-panel-header>
             <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
@@ -29,8 +28,7 @@
           <mat-expansion-panel expanded="false"
                                [disabled]="!(unitExportSettings.addTestTakersReview +
                                              unitExportSettings.addTestTakersHot +
-                                             unitExportSettings.addTestTakersMonitor)
-                                             || !unitExportSettings.unitIdList.length">
+                                             unitExportSettings.addTestTakersMonitor)">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 {{'workspace.booklet-settings' | translate}}
@@ -38,8 +36,7 @@
             </mat-expansion-panel-header>
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
-                                                             unitExportSettings.addTestTakersMonitor) ||
-                                                             !unitExportSettings.unitIdList.length"
+                                                             unitExportSettings.addTestTakersMonitor)"
                                                (configChanged)="setBookletConfigSettings($event)">
               </studio-lite-booklet-config-edit>
           </mat-expansion-panel>

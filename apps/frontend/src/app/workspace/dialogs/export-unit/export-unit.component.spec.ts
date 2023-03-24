@@ -16,12 +16,11 @@ describe('ExportUnitComponent', () => {
 
   @Component({ selector: 'studio-lite-select-unit-list', template: '' })
   class MockSelectUnitListComponent {
+    @Input() disabled!: number[];
     @Input() filter!: number[];
     @Input() initialSelection!: number[];
     @Input() workspace!: unknown;
     @Input() showGroups!: boolean;
-    disabled!: number[];
-    selectionCount!: number;
   }
 
   @Component({ selector: 'studio-lite-test-config', template: '' })
