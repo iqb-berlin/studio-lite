@@ -1,7 +1,7 @@
 <div class="fx-row-start-start">
   <button mat-button
           [disabled]="!workspaceService.isChanged()"
-          [matTooltip]="'workspace.cancel-save-unit' | translate"
+          [matTooltip]="'workspace.reject-unit-changes' | translate"
           matTooltipPosition="above"
           (click)="discardChanges()">
     <mat-icon>close</mat-icon>
