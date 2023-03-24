@@ -166,7 +166,10 @@
     "units-selected": "Aufgaben ausgewählt.",
     "reject-changes": "Verwerfen der Änderungen",
     "reject-review-continue": "Die Änderungen an der Aufgabenfolge werden verworfen. Fortsetzen?",
-    "reject": "Verwerfen"
+    "reject": "Verwerfen",
+    "select-review": "Bitte Aufgabenfolge wählen bzw. neu anlegen",
+    "review-saved": "Aufgabenfolge gespeichert",
+    "review-not-saved": "Konnte Aufgabenfolge nicht speichern"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

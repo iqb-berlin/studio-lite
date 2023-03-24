@@ -1,5 +1,5 @@
 <div class="fx-column-start-stretch">
-  <h1 mat-dialog-title>Aufgabenfolgen</h1>
+  <h1 mat-dialog-title>{{'workspace.reviews' | translate}}</h1>
   <mat-dialog-content>
     <div class="fx-row-start-stretch fx-gap-20">
       <div class="fx-column-space-between-stretch fx-flex-20 review-list-area">
@@ -29,7 +29,7 @@
            [class.review-not-changed]="!changed">
         <div class="fx-row-space-between-stretch fx-flex fx-gap-20 review-changes-area">
           <div class="fx-flex-50">
-            <div [hidden]="selectedReviewId > 0">Bitte Aufgabenfolge wählen bzw. neu anlegen.</div>
+            <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
             <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
                               [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
                               (selectionChanged)="unitSelectionChanged($event)"

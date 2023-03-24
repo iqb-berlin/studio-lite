@@ -103,11 +103,14 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
           }
           this.changed = false;
           this.snackBar.open(
-            'Aufgabenfolge gespeichert', '', { duration: 1000 }
-          );
+            this.translateService.instant('workspace.review-saved'),
+            '',
+            { duration: 1000 });
         } else {
           this.snackBar.open(
-            'Konnte Aufgabenfolge nicht speichern', 'Fehler', { duration: 3000 }
+            this.translateService.instant('workspace.review-saved'),
+            this.translateService.instant('workspace.error'),
+            { duration: 3000 }
           );
         }
       });
