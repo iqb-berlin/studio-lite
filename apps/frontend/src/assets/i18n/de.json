@@ -178,7 +178,9 @@
     "new-unit": "Neue Aufgabe",
     "new-copy-unit": "Neue Aufgabe (Kopie)",
     "group-saved": "Neue Gruppe gespeichert",
-    "group-not-saved": "Konnte neue Gruppe nicht speichern"
+    "group-not-saved": "Konnte neue Gruppe nicht speichern",
+    "unit-deleted": "Aufgabe(n) gelöscht",
+    "unit-not-deleted": "Konnte Aufgabe(n) nicht löschen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
