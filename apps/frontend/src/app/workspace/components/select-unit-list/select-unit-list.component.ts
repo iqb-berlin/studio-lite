@@ -40,14 +40,12 @@ export class SelectUnitListComponent implements OnDestroy {
   }
 
   private setObjectsDatasource(units: UnitInListDto[]): void {
-    if (this.filter && this.filter.length) {
-      this.objectsDatasource = new MatTableDataSource(
-        units
-          .filter(unit => this.filter.indexOf(unit.id) > -1)
-      );
-    } else {
-      this.objectsDatasource = new MatTableDataSource(units);
-    }
+    this.objectsDatasource = new MatTableDataSource(units);
+    this.objectsDatasource
+      .filterPredicate = (unitList: UnitInListDto, filter) => ['key', 'groupName']
+        .some(column => (unitList[column as keyof UnitInListDto] as string || '')
+          .toLowerCase()
+          .includes(filter));
     this.objectsDatasource.sort = this.sort;
   }
 
@@ -83,6 +81,7 @@ export class SelectUnitListComponent implements OnDestroy {
     return this.tableSelectionCheckbox.selected.map(ud => ud.id);
   }
 
+  // TODO move to ngChanges
   @Input('selectedUnitIds')
   set selectedUnitIds(newUnits: number[]) {
     if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
