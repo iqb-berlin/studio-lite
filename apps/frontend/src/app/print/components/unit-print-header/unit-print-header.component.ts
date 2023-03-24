@@ -8,6 +8,7 @@ import { Component, Input } from '@angular/core';
 export class UnitPrintHeaderComponent {
   @Input() name!: string | undefined | null;
   @Input() key!: string | undefined | null;
+  @Input() description!: string | undefined | null;
   @Input() groupName!: string | undefined | null;
   @Input() player!: string;
   @Input() editor!: string | undefined | null;

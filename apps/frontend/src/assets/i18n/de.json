@@ -265,6 +265,7 @@
     "login": "Login"
   },
   "print": {
+    "description": "Beschreibung/Notizen",
     "change-player-height": "Aufgabenhöhe ändern",
     "player": "Player",
     "editor": "Editor",
