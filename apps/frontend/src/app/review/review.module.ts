@@ -27,6 +27,7 @@ import { CommentsModule } from '../comments/comments.module';
 import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.component';
 import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.component';
 import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.component';
+import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.comp
     UnitInfoCodingComponent,
     UnitInfoCommentsComponent,
     UnitInfoLoaderComponent,
-    CommentDialogComponent
+    CommentDialogComponent,
+    BookletConfigShowComponent
   ],
   imports: [
     CommonModule,

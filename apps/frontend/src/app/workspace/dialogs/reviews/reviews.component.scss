@@ -30,16 +30,26 @@
 }
 
 .review-changed {
+  height: 65vh;
   background-color: darkorange;
   padding: 2px
 }
 
 .review-not-changed {
+  height: 65vh;
   background-color: transparent;
   padding: 2px
 }
 
-#main-buttons .mat-raised-button {
-  padding: 0;
-  min-width: 25px
+.review-changes-area {
+  overflow-y: auto;
+  background-color: white;
+}
+
+.review-list-area {
+  height: 65vh;
+}
+
+.reviews {
+  overflow-y: auto;
 }

@@ -1,17 +1,17 @@
 import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
-import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
+import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
 
 @Component({
-  selector: 'studio-lite-testcenter-data',
-  templateUrl: './testcenter-data.component.html',
-  styleUrls: ['./testcenter-data.component.scss']
+  selector: 'studio-lite-test-config',
+  templateUrl: './test-config.component.html',
+  styleUrls: ['./test-config.component.scss']
 })
-export class TestcenterDataComponent implements OnInit {
+export class TestConfigComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
 
@@ -20,16 +20,12 @@ export class TestcenterDataComponent implements OnInit {
   @Input() addTestTakersMonitor!: number;
   @Input() addPlayers!: boolean;
   @Input() passwordLess!: boolean;
-  @Input() pagingMode!: string;
-  @Input() navigationButtons!: string;
 
   @Output() addTestTakersReviewChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() addTestTakersHotChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() addTestTakersMonitorChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() addPlayersChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() passwordLessChange: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Output() pagingModeChange: EventEmitter<string> = new EventEmitter<string>();
-  @Output() navigationButtonsChange: EventEmitter<string> = new EventEmitter<string>();
 
   @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
 

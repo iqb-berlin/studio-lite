@@ -29,6 +29,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
@@ -42,7 +43,7 @@ import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
 import { ExportUnitComponent } from './dialogs/export-unit/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { SelectUnitListComponent } from './components/select-unit-list/select-unit-list.component';
 import { UserListComponent } from './components/user-list.component';
 import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
 import {
@@ -50,9 +51,9 @@ import {
 } from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
-import { ReviewsComponent } from './dialogs/reviews.component';
+import { ReviewsComponent } from './dialogs/reviews/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
-import { ReviewConfigEditComponent } from './components/review-config-edit.component';
+import { ReviewConfigEditComponent } from './components/review-config-edit/review-config-edit.component';
 import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
 import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
@@ -66,14 +67,26 @@ import { UnitGroupComponent } from './components/unit-group/unit-group.component
 import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
-import { TestcenterDataComponent } from './components/testcenter-data/testcenter-data.component';
+import { TestConfigComponent } from './components/test-config/test-config.component';
+import { PrintReviewButtonComponent } from './components/print-review-button/print-review-button.component';
+import { DeleteReviewButtonComponent } from './components/delete-review-button/delete-review-button.component';
+import { AddReviewButtonComponent } from './components/add-review-button/add-review-button.component';
+import { StartReviewButtonComponent } from './components/start-review-button/start-review-button.component';
+import { CopyReviewLinkButtonComponent } from './components/copy-review-link-button/copy-review-link-button.component';
+import { ReviewMenuComponent } from './components/review-menu/review-menu.component';
+import { ReviewSaveChangesComponent } from './components/review-save-changes/review-save-changes.component';
+import { ReviewConfigComponent } from './components/review-config/review-config.component';
+import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
+import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
 
 @NgModule({
   imports: [
     CommonModule,
     MatIconModule,
     MatTooltipModule,
+    MatExpansionModule,
     FlexLayoutModule,
+    StudioComponentsModule,
     WorkspaceRoutingModule,
     ReactiveFormsModule,
     MatSelectModule,
@@ -97,7 +110,6 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     FormsModule,
     MatTabsModule,
     IqbComponentsModule,
-    StudioComponentsModule,
     MatProgressBarModule,
     TranslateModule,
     CommentsModule,
@@ -105,7 +117,7 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     SplitterModule
   ],
   declarations: [
-    TestcenterDataComponent,
+    TestConfigComponent,
     WorkspaceComponent,
     NewUnitComponent,
     SelectUnitComponent,
@@ -124,6 +136,7 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     GroupManageComponent,
     ReviewsComponent,
     ReviewConfigEditComponent,
+    BookletConfigEditComponent,
     UnitSelectionComponent,
     UnitSaveButtonComponent,
     UnitDataAreaComponent,
@@ -136,7 +149,16 @@ import { TestcenterDataComponent } from './components/testcenter-data/testcenter
     SearchUnitComponent,
     UpdateUnitsButtonComponent,
     FilterUnitsPipe,
-    HasNewCommentsPipe
+    HasNewCommentsPipe,
+    PrintReviewButtonComponent,
+    DeleteReviewButtonComponent,
+    AddReviewButtonComponent,
+    StartReviewButtonComponent,
+    CopyReviewLinkButtonComponent,
+    ReviewMenuComponent,
+    ReviewSaveChangesComponent,
+    ReviewConfigComponent,
+    ExportReviewButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

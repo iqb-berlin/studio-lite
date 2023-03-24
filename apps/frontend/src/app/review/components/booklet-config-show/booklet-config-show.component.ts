@@ -13,7 +13,7 @@ const bookletConfigDefault = {
 };
 
 @Component({
-  selector: 'booklet-config-show',
+  selector: 'studio-lite-booklet-config-show',
   template: `
     <div fxLayout="column" class="booklet-config">
       <div fxLayout="row" fxLayoutAlign="start center" *ngIf="bookletConfig.pagingMode">

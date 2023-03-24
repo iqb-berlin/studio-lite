@@ -1,0 +1,48 @@
+<div class="margin-bottom">{{'unit-download.title' | translate}}</div>
+<mat-checkbox [disabled]="!enablePlayerOption"
+              [ngModel]="addPlayers" class="margin-bottom"
+              (ngModelChange)="addPlayersChange.emit($event);
+              unitsWithOutPlayerChange.emit($event ? unitsWithOutPlayer : [])">
+  {{'unit-download.add-player' | translate}}
+</mat-checkbox>
+
+<div *ngIf="!enablePlayerOption" class="config-message margin-bottom">
+  {{'unit-download.no-player' | translate}}
+</div>
+
+<div *ngIf="addPlayers && unitsWithOutPlayer.length > 0"
+     class="config-message margin-bottom">
+  {{'unit-download.units-without-player' | translate}}
+</div>
+
+<div class="fx-row-space-between-start">
+  <label class="fx-flex-50">
+    {{'unit-download.add-login' | translate}}
+  </label>
+  <div class="fx-column-start-stretch fx-flex-50">
+    <mat-form-field>
+      <input matInput type="number" min="0"
+             [placeholder]="'unit-download.add-test-takers-review' | translate"
+             [ngModel]="addTestTakersReview"
+             (ngModelChange)="addTestTakersReviewChange.emit($event)">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="number" min="0"
+             [placeholder]="'unit-download.add-test-takers-monitor' | translate"
+             [ngModel]="addTestTakersMonitor"
+             (ngModelChange)="addTestTakersMonitorChange.emit($event)">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="number" min="0"
+             [placeholder]="'unit-download.add-test-takers-hot' | translate"
+             [ngModel]="addTestTakersHot"
+             (ngModelChange)="addTestTakersHotChange.emit($event)">
+    </mat-form-field>
+  </div>
+</div>
+<mat-checkbox [disabled]="(addTestTakersReview + addTestTakersMonitor + addTestTakersHot) === 0"
+              class="margin-bottom"
+              [ngModel]="passwordLess"
+              (ngModelChange)="passwordLessChange.emit($event)">
+  <div>{{'unit-download.without-password' | translate}}</div>
+</mat-checkbox>

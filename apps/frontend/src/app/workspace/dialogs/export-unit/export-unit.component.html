@@ -1,22 +1,46 @@
 <div class="fx-column-start-stretch">
   <h1 mat-dialog-title>{{ 'unit-download.dialog.title' | translate }}</h1>
-  <mat-dialog-content fxLayout="row" fxLayoutGap="20px">
-      <select-unit-list #unitSelectionTable
-                        class="fx-flex"
-                        [workspace]="workspaceService.selectedWorkspaceId"
-                        (selectionChanged)="updateUnitIdList($event)">
-      </select-unit-list>
-    <div class="fx-flex"
-         [style.max-width.px]="300">
-      <studio-lite-testcenter-data [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
-                                   [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
-                                   [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
-                                   [(addPlayers)]="unitExportSettings.addPlayers"
-                                   [(passwordLess)]="unitExportSettings.passwordLess"
-                                   [(pagingMode)]="unitExportSettings.bookletSettings[0].value"
-                                   [(navigationButtons)]="unitExportSettings.bookletSettings[1].value"
-                                   (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
-      </studio-lite-testcenter-data>
+  <mat-dialog-content class="fx-row-start-stretch dialog-content">
+    <studio-lite-select-unit-list #unitSelectionTable
+                      class="fx-flex-50"
+                      [filter]="data && data.units ? data.units : []"
+                      [initialSelection]="data && data.units ? data.units : []"
+                      [workspace]="workspaceService.selectedWorkspaceId"
+                      (selectionChanged)="unitExportSettings.unitIdList = $event">
+    </studio-lite-select-unit-list>
+    <div class="fx-flex-50">
+      <mat-accordion>
+        <mat-expansion-panel
+          [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{'workspace.test-taker-settings' | translate}}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+            <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
+                                     [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
+                                     [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
+                                     [(addPlayers)]="unitExportSettings.addPlayers"
+                                     [(passwordLess)]="unitExportSettings.passwordLess"
+                                     (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+            </studio-lite-test-config>
+          </mat-expansion-panel>
+          <mat-expansion-panel expanded="false"
+                               [disabled]="!(unitExportSettings.addTestTakersReview +
+                                             unitExportSettings.addTestTakersHot +
+                                             unitExportSettings.addTestTakersMonitor)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{'workspace.booklet-settings' | translate}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+              <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
+                                                             unitExportSettings.addTestTakersHot +
+                                                             unitExportSettings.addTestTakersMonitor)"
+                                               (configChanged)="setBookletConfigSettings($event)">
+              </studio-lite-booklet-config-edit>
+          </mat-expansion-panel>
+        </mat-accordion>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions class="fx-column-start-stretch">
@@ -24,7 +48,7 @@
       <button mat-raised-button color="primary"
               type="submit"
               [mat-dialog-close]="unitExportSettings"
-              [disabled]="unitSelectionTable.selectionCount === 0">
+              [disabled]="!unitExportSettings.unitIdList.length">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}

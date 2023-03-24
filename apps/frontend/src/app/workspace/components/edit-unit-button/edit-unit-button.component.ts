@@ -10,7 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../workspace.service';
 import { GroupManageComponent } from '../../dialogs/group-manage.component';
-import { ReviewsComponent } from '../../dialogs/reviews.component';
+import { ReviewsComponent } from '../../dialogs/reviews/reviews.component';
 import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
 import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
@@ -124,7 +124,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   exportUnit(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '900px'
+        width: '1000px'
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
@@ -216,8 +216,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
 
   reviews(): void {
     this.reviewsDialog.open(ReviewsComponent, {
-      width: '1000px',
-      height: '820px'
+      width: '1200px'
     });
   }
 

@@ -120,66 +120,84 @@ div.logo img {
 }
 
 .fx-row-space-between-center {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
 .fx-row-space-between-start {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
 }
 .fx-row-space-between-stretch {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: stretch;
 }
 .fx-row-space-around-center {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
 }
 .fx-row-start-center {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 }
 .fx-row-start-end {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: flex-end;
 }
+.fx-row-end-end {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
 .fx-row-start-stretch {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: stretch;
 }
 .fx-row-center-start {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
 }
 .fx-row-start-start {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: flex-start;
 }
 .fx-row-center-center {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
 }
 .fx-row-center-stretch {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -187,6 +205,7 @@ div.logo img {
 }
 
 .fx-column-center-center {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -194,6 +213,7 @@ div.logo img {
 }
 
 .fx-column-start-start {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -201,14 +221,119 @@ div.logo img {
 }
 
 .fx-column-start-stretch {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
 }
 
+.fx-column-space-between-stretch {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
 .fx-flex {
+  box-sizing: border-box;
+  flex: 1 1 100%;
+}
+
+.fx-flex-10 {
+  box-sizing: border-box;
+  flex: 1 1 100%;
+  max-width: 10%;
+}
+
+.fx-flex-20 {
   flex: 1 1 100%;
   box-sizing: border-box;
+  max-width: 20%;
 }
+
+.fx-flex-30 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 30%;
+}
+
+.fx-flex-40 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 40%;
+}
+
+.fx-flex-50 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 50%;
+}
+
+.fx-flex-60 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 60%;
+}
+
+.fx-flex-70 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 70%;
+}
+
+.fx-flex-80 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 80%;
+}
+
+.fx-flex-90 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 90%;
+}
+
+.fx-gap-5 {
+  gap: 5px;
+  display: flex;
+}
+
+.fx-gap-10 {
+  gap: 10px;
+  display: flex;
+}
+
+.fx-gap-5 {
+  gap: 5px;
+  display: flex;
+}
+
+.fx-gap-15 {
+  gap: 15px;
+  display: flex;
+}
+
+.fx-gap-5 {
+  gap: 5px;
+  display: flex;
+}
+
+.fx-gap-20 {
+  gap: 20px;
+  display: flex;
+}
+
+.fx-gap-25 {
+  gap: 25px;
+  display: flex;
+}
+
+.fx-gap-30 {
+  gap: 30px;
+  display: flex;
+}
+
+
 

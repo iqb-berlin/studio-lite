@@ -1,0 +1,17 @@
+.unit-list-wrapper {
+  height: 100%;
+}
+
+.unit-list {
+  overflow-x: auto;
+}
+
+.disabled-element {
+  color: gray;
+}
+
+.fx-flex-70-fix {
+    flex: 1 1 70px;
+    box-sizing: border-box;
+    max-width: 70px;
+}
