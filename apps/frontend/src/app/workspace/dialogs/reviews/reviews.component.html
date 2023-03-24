@@ -27,7 +27,7 @@
       <div class="fx-column-start-stretch fx-flex-80"
            [class.review-changed]="changed"
            [class.review-not-changed]="!changed">
-        <div class="fx-row-space-between-stretch fx-flex fx-gap-20 review-changes-area">
+        <div class="fx-row-start-stretch fx-flex fx-gap-20 review-changes-area">
           <div class="fx-flex-50">
             <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
             <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
