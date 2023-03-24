@@ -138,6 +138,7 @@
     "save": "Speichern",
     "delete": "Löschen",
     "print": "Drucken",
+    "print-units": "Aufgabe(n) drucken",
     "print-review": "Aufgabenfolge drucken",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
@@ -180,7 +181,17 @@
     "group-saved": "Neue Gruppe gespeichert",
     "group-not-saved": "Konnte neue Gruppe nicht speichern",
     "unit-deleted": "Aufgabe(n) gelöscht",
-    "unit-not-deleted": "Konnte Aufgabe(n) nicht löschen"
+    "unit-not-deleted": "Konnte Aufgabe(n) nicht löschen",
+    "settings-saved": "Einstellungen gespeichert",
+    "settings-not-saved": "Einstellungen konnten nicht gespeichert werden",
+    "move-units": "Aufgabe(n) verschieben",
+    "copy-units": "Aufgabe(n) kopieren",
+    "move": "Verschieben",
+    "copy": "Kopieren",
+    "unit-moved-or-copied": "Aufgabe(n) {{action}}",
+    "unit-not-moved-or-copied": "Konnte Aufgabe(n) nicht {{action}}",
+    "no-units": "Dieser Arbeitsbereich enthält keine Units!",
+    "user-list": "Liste der Nutzer:innen für {{workspace}}"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
