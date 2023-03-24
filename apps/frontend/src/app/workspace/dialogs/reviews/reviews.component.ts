@@ -4,6 +4,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../backend.service';
 import { WorkspaceService } from '../../workspace.service';
 import { AppService } from '../../../app.service';
@@ -26,6 +27,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     public appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
+    protected translateService: TranslateService,
     protected confirmDiscardChangesDialog: MatDialog
   ) {
     super();

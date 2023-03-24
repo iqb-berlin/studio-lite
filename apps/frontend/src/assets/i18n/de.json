@@ -163,7 +163,10 @@
     "review-allow-comments": "Kommentare möglich",
     "select-unit": "Bitte Aufgaben auswählen!",
     "unit-selected": "Eine Aufgabe ausgewählt.",
-    "units-selected": "Aufgaben ausgewählt."
+    "units-selected": "Aufgaben ausgewählt.",
+    "reject-changes": "Verwerfen der Änderungen",
+    "reject-review-continue": "Die Änderungen an der Aufgabenfolge werden verworfen. Fortsetzen?",
+    "reject": "Verwerfen"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
