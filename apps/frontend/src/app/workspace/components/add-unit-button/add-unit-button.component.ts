@@ -5,6 +5,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 import { WorkspaceService } from '../../workspace.service';
 import { NewUnitComponent, NewUnitData } from '../../dialogs/new-unit.component';
@@ -31,6 +32,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     private appBackendService: AppBackendService,
     private selectUnitDialog: MatDialog,
     private newUnitDialog: MatDialog,
+    private translateService: TranslateService,
     private uploadReportDialog: MatDialog
   ) {
     super();
@@ -40,8 +42,9 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     this.addUnitFromExistingDialog().then((unitSource: UnitInListDto | boolean) => {
       if (typeof unitSource !== 'boolean') {
         this.addUnitDialog({
-          title: 'Neue Aufgabe aus vorhandener',
-          subTitle: `Kopie von ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
+          title: this.translateService.instant('workspace.copy-new-unit'),
+          subTitle: `${this.translateService
+            .instant('workspace.copy-from')} ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
           key: unitSource.key,
           label: unitSource.name || '',
           groups: this.workspaceService.workspaceSettings.unitGroups || []
@@ -54,11 +57,19 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
             ).subscribe(
               respOk => {
                 if (respOk) {
-                  this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+                  this.snackBar.open(
+                    this.translateService.instant('workspace.unit-added'),
+                    '',
+                    { duration: 1000 }
+                  );
                   this.addUnitGroup(createUnitDto.groupName);
                   this.updateUnitList(respOk);
                 } else {
-                  this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
+                  this.snackBar.open(
+                    this.translateService.instant('workspace.unit-added'),
+                    this.translateService.instant('workspace.error'),
+                    { duration: 3000 }
+                  );
                 }
                 this.appService.dataLoading = false;
               }
@@ -71,7 +82,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
 
   addUnit() {
     this.addUnitDialog({
-      title: 'Neue Aufgabe',
+      title: this.translateService.instant('workspace.new-unit'),
       subTitle: '',
       key: '',
       label: '',
@@ -87,11 +98,18 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
         ).subscribe(
           respOk => {
             if (respOk) {
-              this.snackBar.open('Aufgabe hinzugefügt', '', { duration: 1000 });
+              this.snackBar.open(
+                this.translateService.instant('workspace.unit-added'),
+                '',
+                { duration: 1000 });
               this.addUnitGroup(createUnitDto.groupName);
               this.updateUnitList(respOk);
             } else {
-              this.snackBar.open('Konnte Aufgabe nicht hinzufügen', 'Fehler', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService.instant('workspace.unit-added'),
+                this.translateService.instant('workspace.error'),
+                { duration: 3000 }
+              );
             }
             this.appService.dataLoading = false;
           }
@@ -107,9 +125,11 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
       this.appBackendService.setWorkspaceSettings(
         this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
       ).subscribe(isOK => {
-        this.snackBar.open(isOK ? 'Neue Gruppe gespeichert.' : 'Konnte neue Gruppe nicht speichern',
-          isOK ? '' : 'Fehler',
-          { duration: 3000 });
+        this.snackBar.open(isOK ?
+          this.translateService.instant('workspace.group-saved') :
+          this.translateService.instant('workspace.group-not-saved'),
+        isOK ? '' : this.translateService.instant('workspace.error'),
+        { duration: 3000 });
       });
     }
   }
@@ -121,8 +141,8 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
         width: '500px',
         height: '700px',
         data: <SelectUnitData>{
-          title: 'Neue Aufgabe (Kopie)',
-          buttonLabel: 'Weiter',
+          title: this.translateService.instant('workspace.new-copy-unit'),
+          buttonLabel: this.translateService.instant('next'),
           fromOtherWorkspacesToo: true,
           multiple: false
         }

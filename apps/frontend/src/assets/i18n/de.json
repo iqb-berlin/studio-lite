@@ -121,7 +121,7 @@
     "delete-units": "Aufgabe(n) löschen",
     "import-files": "Import von Datei(en)",
     "from-existing": "Neu von vorhandener Aufgabe",
-    "new-unit": "Neu (leer)",
+    "new-empty-unit": "Neu (leer)",
     "more-unit-tasks": "Weitere Funktionen...",
     "download-unit": "Aufgaben als Datei herunterladen",
     "export": "Export",
@@ -169,7 +169,15 @@
     "reject": "Verwerfen",
     "select-review": "Bitte Aufgabenfolge wählen bzw. neu anlegen",
     "review-saved": "Aufgabenfolge gespeichert",
-    "review-not-saved": "Konnte Aufgabenfolge nicht speichern"
+    "review-not-saved": "Konnte Aufgabenfolge nicht speichern",
+    "copy-new-unit": "Neue aus vorhandener Aufgabe",
+    "copy-from": "Kopie von",
+    "unit-added": "Aufgabe hinzugefügt",
+    "unit-not-added": "Konnte Aufgabe nicht hinzufügen",
+    "new-unit": "Neue Aufgabe",
+    "new-copy-unit": "Neue Aufgabe (Kopie)",
+    "group-saved": "Neue Gruppe gespeichert",
+    "group-not-saved": "Konnte neue Gruppe nicht speichern"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
