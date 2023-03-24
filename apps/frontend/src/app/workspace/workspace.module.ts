@@ -53,7 +53,7 @@ import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.compon
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './dialogs/reviews/reviews.component';
 import { GroupManageComponent } from './dialogs/group-manage.component';
-import { ReviewConfigEditComponent } from './components/review-config-edit.component';
+import { ReviewConfigEditComponent } from './components/review-config-edit/review-config-edit.component';
 import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
 import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
