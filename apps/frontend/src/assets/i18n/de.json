@@ -143,6 +143,7 @@
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",
     "copy-link-to-clipboard": "Kopiere Link in Zwischenablage",
+    "link-copied": "Link in die Zwischenablage kopiert",
     "review-save-cancel": "Änderungen verwerfen",
     "review-save": "Änderungen speichern",
     "export-review": "Aufgabenfolge exportieren",
