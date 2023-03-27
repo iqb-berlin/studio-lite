@@ -14,9 +14,7 @@ import { AppService } from '../../../app.service';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
-  styles: [
-    'mat-tab-body {height: 100%;}'
-  ]
+  styleUrls: ['unit-metadata.component.scss']
 })
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
