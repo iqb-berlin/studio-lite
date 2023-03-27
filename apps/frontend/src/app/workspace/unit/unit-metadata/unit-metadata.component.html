@@ -25,11 +25,9 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <button mat-icon-button (click)="newGroup()"
-                [disabled]="unitForm.disabled"
-                matTooltip="Neue Gruppe anlegen">
-          <mat-icon>add_circle</mat-icon>
-        </button>
+        <studio-lite-new-group-button [disabled]="unitForm.disabled"
+                                      (groupNameChange) = "unitForm.get('group')?.setValue($event)">
+        </studio-lite-new-group-button>
       </div>
       <mat-form-field>
         <mat-label>Beschreibung/Notizen</mat-label>
