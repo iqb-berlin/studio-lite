@@ -113,6 +113,7 @@
     },
     "new-comments": "Neue Kommentare",
     "unit-key": "Kurzname",
+    "invalid-unit-key": "Zu kurz oder schon vorhanden",
     "unit-name": "Name",
     "sort-by-key": "Nach Kurzname sortieren",
     "sort-by-name": "Nach Name sortieren",
@@ -179,6 +180,7 @@
     "new-unit": "Neue Aufgabe",
     "new-copy-unit": "Neue Aufgabe (Kopie)",
     "new-group": "Neue Gruppe",
+    "group": "Gruppe",
     "group-name": "Name der Gruppe",
     "add-new-group": "Neue Gruppe anlegen",
     "group-saved": "Neue Gruppe gespeichert",
@@ -196,8 +198,11 @@
     "no-units": "Dieser Arbeitsbereich enthält keine Units!",
     "user-list": "Liste der Nutzer:innen für {{workspace}}",
     "unit-saved": "Änderungen an Aufgabedaten gespeichert",
-    "unit-not-saved": "Konnte Aufgabendaten nicht speichern"
-
+    "unit-not-saved": "Konnte Aufgabendaten nicht speichern",
+    "description": "Beschreibung/Notizen",
+    "transcript": "Transkript",
+    "reference": "Copyright/Quellen",
+    "last-changed": "Letzte Änderung: {{date}}"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

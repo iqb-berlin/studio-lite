@@ -5,21 +5,25 @@
         <mat-card-content>
           <div class="fx-column-start-stretch">
             <mat-form-field>
-              <mat-label>Kurzname</mat-label>
-              <input matInput formControlName="key" placeholder="Kurzname">
+              <mat-label>{{'workspace.unit-key' | translate}}</mat-label>
+              <input matInput
+                     formControlName="key"
+                     [placeholder]="'workspace.unit-key' | translate">
               <mat-error *ngIf="unitForm.get('key')?.invalid">
-                Zu kurz oder schon vorhanden
+                {{'workspace.invalid-unit-key' | translate}}
               </mat-error>
             </mat-form-field>
             <mat-form-field>
-              <mat-label>Name</mat-label>
-              <input matInput formControlName="name" placeholder="Name">
+              <mat-label>{{'workspace.unit-name' | translate}}</mat-label>
+              <input matInput
+                     formControlName="name"
+                     [placeholder]="'workspace.unit-name' | translate">
             </mat-form-field>
             <div class="fx-row-space-around-center fx-gap-10">
               <mat-form-field class="fx-flex">
-                <mat-label>Gruppe</mat-label>
-                <mat-select placeholder="Gruppe"
-                            formControlName="group">
+                <mat-label>{{'workspace.group' | translate}}</mat-label>
+                <mat-select formControlName="group"
+                            [placeholder]="'workspace.group' | translate">
                   <mat-option [value]="''"></mat-option>
                   <mat-option *ngFor="let group of workspaceService.workspaceSettings.unitGroups"
                               [value]="group">
@@ -39,21 +43,21 @@
         <mat-card-content>
           <div class="fx-column-start-stretch">
             <mat-form-field>
-              <mat-label>Beschreibung/Notizen</mat-label>
+              <mat-label>{{'workspace.description' | translate}}</mat-label>
               <textarea matInput
                         formControlName="description"
                         cdkTextareaAutosize
                         cdkAutosizeMinRows="6"></textarea>
             </mat-form-field>
             <mat-form-field>
-              <mat-label>Transkript</mat-label>
+              <mat-label>{{'workspace.transcript' | translate}}</mat-label>
               <textarea matInput
                         formControlName="transcript"
                         cdkTextareaAutosize
                         cdkAutosizeMinRows="6"></textarea>
             </mat-form-field>
             <mat-form-field>
-              <mat-label>Copyright/Quellen</mat-label>
+              <mat-label>{{'workspace.reference' | translate}}</mat-label>
               <textarea matInput
                         formControlName="reference"
                         cdkTextareaAutosize
@@ -114,8 +118,12 @@
                 <div class="fx-column-start-stretch">
             <div *ngIf="workspaceService.unitLastChanged"
                  [matTooltip]="workspaceService.unitLastChangedText"
-                 matTooltipClass="mat-tooltip-linebreaks"
-            >Letzte Änderung: {{workspaceService.unitLastChanged | date : 'dd.MM.yyyy HH:mm' : timeZone}}</div>
+                 matTooltipClass="mat-tooltip-linebreaks">
+              {{'workspace.last-changed' | translate: {
+                  date: workspaceService.unitLastChanged | date : 'dd.MM.yyyy HH:mm' : timeZone
+                }
+              }}
+            </div>
           </div>
         </mat-card-content>
       </mat-card>
