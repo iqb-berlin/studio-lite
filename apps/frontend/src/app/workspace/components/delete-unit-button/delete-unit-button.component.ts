@@ -3,6 +3,7 @@ import { lastValueFrom, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 import { WorkspaceService } from '../../workspace.service';
 import { BackendService } from '../../backend.service';
@@ -22,6 +23,7 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
     private appService: AppService,
     public backendService: BackendService,
     private snackBar: MatSnackBar,
+    private translateService: TranslateService,
     private selectUnitDialog: MatDialog
   ) {
     super();
@@ -37,10 +39,18 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
           ok => {
             // todo db-error?
             if (ok) {
-              this.snackBar.open('Aufgabe(n) gelöscht', '', { duration: 1000 });
+              this.snackBar.open(
+                this.translateService.instant('workspace.unit-deleted'),
+                '',
+                { duration: 1000 }
+              );
               this.updateUnitList();
             } else {
-              this.snackBar.open('Konnte Aufgabe(n) nicht löschen.', 'Fehler', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService.instant('workspace.unit-not-deleted'),
+                this.translateService.instant('workspace.error'),
+                { duration: 3000 }
+              );
               this.appService.dataLoading = false;
             }
           }
@@ -56,8 +66,8 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
         width: '500px',
         height: '700px',
         data: <SelectUnitData>{
-          title: 'Aufgabe(n) löschen',
-          buttonLabel: 'Löschen',
+          title: this.translateService.instant('workspace.delete-units'),
+          buttonLabel: this.translateService.instant('workspace.delete'),
           fromOtherWorkspacesToo: false,
           multiple: true
         }

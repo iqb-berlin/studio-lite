@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../workspace.service';
 
 @Component({
@@ -13,6 +14,7 @@ export class UnitSaveButtonComponent {
   constructor(
     public workspaceService: WorkspaceService,
     private deleteConfirmDialog: MatDialog,
+    private translateService: TranslateService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -20,9 +22,9 @@ export class UnitSaveButtonComponent {
     const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: <ConfirmDialogData>{
-        title: 'Verwerfen der Änderungen',
-        content: 'Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?',
-        confirmButtonLabel: 'Verwerfen',
+        title: this.translateService.instant('workspace.reject-changes'),
+        content: this.translateService.instant('workspace.reject-unit-continue'),
+        confirmButtonLabel: this.translateService.instant('workspace.reject'),
         showCancel: true
       }
     });
@@ -41,9 +43,16 @@ export class UnitSaveButtonComponent {
   saveUnitData(): void {
     this.workspaceService.saveUnitData().then(saveResult => {
       if (saveResult) {
-        this.snackBar.open('Änderungen an Aufgabedaten gespeichert', '', { duration: 1000 });
+        this.snackBar.open(
+          this.translateService.instant('workspace.unit-saved'),
+          '',
+          { duration: 1000 }
+        );
       } else {
-        this.snackBar.open('Problem: Konnte Aufgabendaten nicht speichern', '', { duration: 3000 });
+        this.snackBar.open(
+          this.translateService.instant('workspace.unit-not-saved'),
+          this.translateService.instant('workspace.error'),
+          { duration: 3000 });
       }
     });
   }

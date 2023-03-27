@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'studio-lite-copy-review-link-button',
@@ -12,6 +13,7 @@ export class CopyReviewLinkButtonComponent {
   @Input() unitCount!: number;
   @Input() passwordLength!: number;
   constructor(
+    private translateService: TranslateService,
     private clipboard: Clipboard,
     private snackBar: MatSnackBar
   ) {}
@@ -19,7 +21,9 @@ export class CopyReviewLinkButtonComponent {
   copyLinkToClipboard() {
     this.clipboard.copy(`${window.location.origin}/#/${this.link}`);
     this.snackBar.open(
-      'Link in die Zwischenablage kopiert.', '', { duration: 1000 }
+      this.translateService.instant('workspace.link-copied'),
+      '',
+      { duration: 1000 }
     );
   }
 }
