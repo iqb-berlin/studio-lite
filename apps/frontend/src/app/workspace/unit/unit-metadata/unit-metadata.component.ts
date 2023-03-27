@@ -40,11 +40,10 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
+      .subscribe(() => {
         this.readData();
       });
-    });
   }
 
   private async readData() {
