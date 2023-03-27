@@ -34,6 +34,16 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.size=256MB'
 
+  grafana:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.entrypoints=web, websecure"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.monitoring.${SERVER_NAME}`)"
+      - "traefik.http.routers.grafana.middlewares=traefik-auth"
+      - "traefik.http.routers.grafana.service=grafana"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.docker.network=app-net"
+
   backend:
     labels:
       - "traefik.enable=true"

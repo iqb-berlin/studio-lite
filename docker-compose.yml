@@ -5,6 +5,11 @@ x-env-postgres: &env-postgres
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_DB: ${POSTGRES_DB}
 
+x-env-logging: &env-logging
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   traefik:
     image: traefik:2.9
@@ -25,9 +30,22 @@ services:
     networks:
       - application-network
     logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
+      <<: *env-logging
+
+  grafana:
+    image: grafana/grafana:9.4.7
+    depends_on:
+      - prometheus
+    restart: on-failure
+    env_file:
+      - ./grafana/config.monitoring
+    volumes:
+      - grafana_vol:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    networks:
+      - application-network
+    logging:
+      <<: *env-logging
 
   db:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
@@ -85,6 +103,7 @@ volumes:
   db_vol:
   backend_vol:
   prometheus_vol:
+  grafana_vol:
 
 networks:
   application-network:
