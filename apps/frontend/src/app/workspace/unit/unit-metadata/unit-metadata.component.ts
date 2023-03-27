@@ -44,7 +44,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
-      group: this.fb.control('')
+      group: this.fb.control(''),
+      transcript: this.fb.control(''),
+      reference: this.fb.control('')
     });
   }
 
@@ -77,6 +79,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         key: unitMetadata.key,
         name: unitMetadata.name,
         description: unitMetadata.description,
+        reference: unitMetadata.reference,
+        transcript: unitMetadata.transcript,
         group: unitMetadata.groupName
       }, { emitEvent: false });
       if (this.editorSelector) {
@@ -102,7 +106,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,
           this.unitForm.get('description')?.value,
-          this.unitForm.get('group')?.value
+          this.unitForm.get('group')?.value,
+          this.unitForm.get('transcript')?.value,
+          this.unitForm.get('reference')?.value
         );
       });
       this.unitForm.enable();

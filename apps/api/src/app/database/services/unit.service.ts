@@ -76,10 +76,12 @@ export class UnitService {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
         select: ['id', 'editor', 'schemer', 'metadata', 'schemeType',
-          'player', 'description']
+          'player', 'description', 'reference', 'transcript']
       });
       if (unitSourceData) {
         newUnit.description = unitSourceData.description;
+        newUnit.transcript = unitSourceData.transcript;
+        newUnit.reference = unitSourceData.reference;
         // todo: newUnit.metadata = unitSource.metadata;
         newUnit.player = unitSourceData.player;
         newUnit.editor = unitSourceData.editor;
@@ -110,7 +112,7 @@ export class UnitService {
     return this.unitsRepository.findOne({
       where: { id: unitId },
       select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
+        'player', 'description', 'transcript', 'reference', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
     });
   }
 
@@ -119,7 +121,7 @@ export class UnitService {
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
       select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
+        'player', 'description', 'transcript', 'reference', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
     });
   }
 
@@ -129,6 +131,8 @@ export class UnitService {
     if (dataKeys.indexOf('key') >= 0) unitToUpdate.key = newData.key;
     if (dataKeys.indexOf('name') >= 0) unitToUpdate.name = newData.name;
     if (dataKeys.indexOf('description') >= 0) unitToUpdate.description = newData.description;
+    if (dataKeys.indexOf('transcript') >= 0) unitToUpdate.transcript = newData.transcript;
+    if (dataKeys.indexOf('reference') >= 0) unitToUpdate.reference = newData.reference;
     if (dataKeys.indexOf('editor') >= 0) unitToUpdate.editor = newData.editor;
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
