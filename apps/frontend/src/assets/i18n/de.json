@@ -202,7 +202,10 @@
     "description": "Beschreibung/Notizen",
     "transcript": "Transkript",
     "reference": "Copyright/Quellen",
-    "last-changed": "Letzte Änderung: {{date}}"
+    "last-changed": "Letzte Änderungen",
+    "last-changed-definition": "Definition: {{date}}",
+    "last-changed-metadata": "Eigenschaften: {{date}}",
+    "last-changed-scheme": "Kodierschema: {{date}}"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

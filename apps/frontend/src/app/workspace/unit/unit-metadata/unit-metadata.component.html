@@ -113,17 +113,33 @@
           </div>
         </mat-card-content>
       </mat-card>
-            <mat-card>
-              <mat-card-content>
-                <div class="fx-column-start-stretch">
-            <div *ngIf="workspaceService.unitLastChanged"
-                 [matTooltip]="workspaceService.unitLastChangedText"
-                 matTooltipClass="mat-tooltip-linebreaks">
-              {{'workspace.last-changed' | translate: {
-                  date: workspaceService.unitLastChanged | date : 'dd.MM.yyyy HH:mm' : timeZone
-                }
-              }}
-            </div>
+        <mat-card>
+          <mat-card-content>
+            <div class="fx-column-start-stretch fx-gap-10">
+              <div class="last-changed-header">
+                {{'workspace.last-changed' | translate}}
+              </div>
+              <div *ngIf="workspaceService.lastChangedMetadata">
+                {{'workspace.last-changed-metadata' | translate: {
+                    date: workspaceService.lastChangedMetadata | date : 'dd.MM.yyyy HH:mm' : timeZone
+                  }
+                }}
+              </div>
+
+              <div *ngIf="workspaceService.lastChangedDefinition">
+                {{'workspace.last-changed-definition' | translate: {
+                date: workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone
+              }
+                }}
+              </div>
+
+              <div *ngIf="workspaceService.lastChangedScheme">
+                {{'workspace.last-changed-scheme' | translate: {
+                date: workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone
+              }
+                }}
+              </div>
+
           </div>
         </mat-card-content>
       </mat-card>
