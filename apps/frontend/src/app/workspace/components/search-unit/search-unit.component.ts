@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import {
+  Component, EventEmitter, Output
+} from '@angular/core';
 
 @Component({
   selector: 'studio-lite-search-unit',
@@ -7,4 +9,5 @@ import { Component } from '@angular/core';
 })
 export class SearchUnitComponent {
   value: string = '';
+  @Output() valueChange: EventEmitter<string> = new EventEmitter<string>();
 }

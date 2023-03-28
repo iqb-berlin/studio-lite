@@ -4,14 +4,14 @@
     <input #filterInput
            matInput
            [placeholder]="'select-unit-list.enter-filter' | translate"
-           (keyup)="value=filterInput.value">
+           (keyup)="value=filterInput.value; valueChange.emit(value)">
     <button matSuffix
             mat-icon-button
             [attr.aria-label]="'select-unit-list.delete-filter' | translate"
             [disabled]="!filterInput.value"
             [matTooltip]="'select-unit-list.delete-filter' | translate"
             matTooltipPosition="above"
-            (click)="value=filterInput.value=''">
+            (click)="value=filterInput.value=''; valueChange.emit(value)">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
