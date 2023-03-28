@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { HttpClientModule } from '@angular/common/http';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Component } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { SelectUnitListComponent } from './select-unit-list.component';
 
@@ -15,9 +16,17 @@ describe('SelectUnitListComponent', () => {
   let component: SelectUnitListComponent;
   let fixture: ComponentFixture<SelectUnitListComponent>;
 
+  @Component({ selector: 'studio-lite-search-unit', template: '' })
+  class MockSearchUnitComponent {
+    value: string = '';
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SelectUnitListComponent],
+      declarations: [
+        SelectUnitListComponent,
+        MockSearchUnitComponent
+      ],
       imports: [
         HttpClientModule,
         MatTooltipModule,
