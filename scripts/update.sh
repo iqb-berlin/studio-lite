@@ -52,12 +52,15 @@ prepare_installation_dir() {
   mkdir -p ./config/traefik
   mkdir -p ./secrets/traefik
   if [ ! -f ./secrets/traefik/$APP_NAME.crt ]; then
-    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.crt
+    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > ./secrets/traefik/$APP_NAME.crt
   fi
   if [ ! -f ./secrets/traefik/$APP_NAME.key ]; then
-    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.key
+    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > ./secrets/traefik/$APP_NAME.key
   fi
   mkdir -p ./database_dumps
+  mkdir -p ./prometheus
+  mkdir -p ./grafana/provisioning/dashboards
+  mkdir -p ./grafana/provisioning/datasources
 }
 
 run_update_script_in_selected_version() {
@@ -105,6 +108,12 @@ update_files() {
   download_file docker-compose.prod.yml docker-compose.prod.yml
   download_file config/traefik/tls-config.yml config/traefik/tls-config.yml
   download_file Makefile scripts/make/prod.mk
+  download_file prometheus/alert.rules prometheus/alert.rules
+  download_file prometheus/prometheus.yml prometheus/prometheus.yml
+  download_file grafana/config.monitoring grafana/config.monitoring
+  download_file grafana/provisioning/dashboards/dashboard.yml grafana/provisioning/dashboards/dashboard.yml
+  download_file grafana/provisioning/dashboards/traefik_rev4.json grafana/provisioning/dashboards/traefik_rev4.json
+  download_file grafana/provisioning/datasources/datasource.yml grafana/provisioning/datasources/datasource.yml
   printf "Downloads done!\n\n"
 }
 
@@ -210,8 +219,8 @@ finalize_update() {
     fi
 
     if command make -v >/dev/null 2>&1; then
-      printf "\nWhen your files are checked, you could restart the application with 'make production-ramp-up' at the \
-      command line to put the update into effect.\n\n"
+      printf "\nWhen your files are checked, you could restart the application with 'make production-ramp-up' at the "
+      printf "command line to put the update into effect.\n\n"
 
     else
       printf '\nWhen your files are checked, you could restart the docker services to put the update into effect.\n\n'
@@ -278,8 +287,8 @@ if [ -z "$SELECTED_VERSION" ]; then
 
   get_new_release_version
   create_backup
-  prepare_installation_dir
   run_update_script_in_selected_version
+  prepare_installation_dir
   update_files
   check_template_files_modifications
   customize_settings
@@ -288,6 +297,7 @@ if [ -z "$SELECTED_VERSION" ]; then
 else
   TARGET_TAG="$SELECTED_VERSION"
 
+  prepare_installation_dir
   update_files
   check_template_files_modifications
   customize_settings
