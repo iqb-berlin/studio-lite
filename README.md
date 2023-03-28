@@ -10,91 +10,58 @@ Sie benötigen auf dem Server einen Account mit dem Recht, Docker auszuführen.
 
 ## Automatische Installation
 Falls Sie eine HTTPS-Kommunikation des Webservers wünschen, halten Sie bitte eine Zertifikats- und eine Schlüsseldatei bereit.
-Laden Sie die Skriptdatei `install.sh` in der gewünschten Version herunter (zu finden beim jeweiligen Release bzw. im Projektverzeichnis `scripts/`) und
+
+Laden Sie bitte die Skriptdatei `install.sh` in der gewünschten Version herunter (zu finden beim jeweiligen Release bzw. im Projektverzeichnis `scripts/`) und
 starten Sie sie mit dem Befehl `bash install.sh` auf der Kommandozeile.
 Folgen Sie danach den Anweisungen des Skripts.
 
-Während der Installation wird u.a. eine Basiskonfiguration des Nginx-Webservers erzeugt.
-Die Konfiguration erfolgt über die Konfigurationsdatei `default.conf.template`,
+Während der Installation wird u.a. ein Egde-Router konfiguriert, der alle Anfragen an Anwendung entgegennimmt und an die passenden Stellen weiterleitet.
+Die Kommunikation wird von ihm automatisch von HTTP auf HTTPS umgeleitet.
+Falls Sie eine Zertifikats- und Schlüsseldatei besitzen, legen Sie in diese bitte im Verzeichnis `secrets/traefik` ab.
+Benennen Sie dann den Schlüssel in `studio-lite.key` und das Zertifikat in `studio-lite.crt` um.
+Wenn Sie diese Dateien nicht besitzen sollten oder sie ungültig (geworden) sind,
+verwendet der Edge-Router ein selbst signiertes Zertifikat,
+das zu einer **Sicherheitswarnung** in Ihrem Browser führen könnte.
+
+Des Weiteren wird für Auslieferung der HTTP-Seiten die Basiskonfiguration eines Nginx-Webservers erzeugt.
+Die Konfiguration des Web-Servers erfolgt über die Konfigurationsdatei `default.conf.template`,
 die Sie im Installationsverzeichnis unter dem Pfad `config/frontend` finden und nachträglich anpassen können.
 
 ## Automatische Updates
 Um weiterentwickelte Software-Versionen zu installieren oder um zwischen HTTP- und HTTPS-Betrieb des Webservers zu wechseln,
-rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update.sh` auf.
+rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update.sh` auf. .
 
-## Manuelle Installation
-### Basis-Installation
-Legen Sie im Home-Verzeichnis ein Unterverzeichnis `studio-lite` an.
-Kopieren Sie folgende Dateien aus dem GitHub-Repository, in dem Sie gerade sind, in das Verzeichnis:
+## Starten und Stoppen der Anwendung mit  `make`
+Zur Steuerung der Anwendungslandschaft haben eine Reihe von Make-Befehlen vorbereitet,
+die das Arbeiten mit Docker auf dem Server angenehmer machen.
+Sie befinden sich in der Datei `Makefile`.
+Der Aufruf eines Befehls erfolgt im Installationsverzeichnis der Anwendung mit `make <cmd>`,
+wobei jedes 'cmd' mit dem Präfix 'production-' beginnt.
 
-1. `docker-compose.yml` (zu finden im Projektwurzelverzeichnis)
-2. `docker-compose.prod.yml` (zu finden im Projektwurzelverzeichnis)
-3. `.env.prod.template` (zu finden im Projektwurzelverzeichnis)
-4. `prod.mk` (zu finden im Projektverzeichnis unter `scripts/make/`)
-
-Editieren Sie passgenau für Ihr System und zu Ihrer Sicherheit ggf. einige oder alle Umgebungsvariablen in der `.env.prod.template`-Datei und
-benennen Sie die Datei danach in `.env.prod` um.
-Ändern Sie bitte gleichfalls in der Datei `prod.mk` die Zeile `BASE_DIR := $(shell git rev-parse --show-toplevel)` zu `BASE_DIR := .` und
-ändern Sie danach den Dateinamen von `prod.mk` zu `Makefile`.
-
-Wenn Sie in der Datei `docker-compose.prod.yml` alle Frontend-Volumes (die letzten vier Zeilen der Datei) löschen, haben Sie nun bereits ein lauffähiges System und
-könnten es im `studio-lite`-Verzeichnis mit dem Befehl `make production-ramp-up` starten.
-
-Wenn Sie die Frontend-Volumes nicht löschen, haben Sie die Möglichkeit,
-den in einem Docker Container laufenden Nginx-Webserver von außerhalb des Containers zu konfigurieren.
-Dies ist insbesondere dann notwendig, wenn der Webserver über HTTPS kommunizieren soll.
-
-### Konfiguration des Web-Servers
-Der in einem Docker Container laufende Nginx-Webserver wird bereits mit einer Basiskonfiguration für die Kommunikation mit HTTP ausgeliefert.
-Sie finden die Konfigurationsdatei im Projektverzeichnis unter `/config/frontend/default.conf.http-template`.
-
-Wenn Sie nichts an dieser Konfiguration ändern möchten, können Sie einfach die Frontend-Volumes in der `docker-compose.prod.yml`-Datei löschen,
-wie unter [Basis-Installation](#Basis-Installation) beschrieben.
-
-Wenn Sie jedoch HTTPS oder ihre eigene Konfiguration verwenden möchten, verändern Sie die Datei `docker-compose.prod.yml` bitte **nicht**.
-Kopieren Sie stattdessen in Ihr `studio-lite`-Verzeichnis folgende Dateien:
-1. `https_on.sh` (zu finden im Projektverzeichnis unter `/scripts/`)
-2. `https_off.sh` (zu finden im Projektverzeichnis unter `/scripts/`)
-
-Legen Sie dann das Unterverzeichnis `config/frontend` an und kopieren Sie in dieses Verzeichnis folgende Dateien:
-
-1. `default.conf.http-template` (zu finden im Projektverzeichnis unter `/config/frontend/`)
-2. `default.conf.https-template` (zu finden im Projektverzeichnis unter `/config/frontend/`)
-
-Wenn Sie HTTP verwenden möchten, rufen Sie bitte im `studio-lite`-Verzeichnis `bash https_off.sh` auf, um eine funktionsfähige HTTP-Konfiguration zu erzeugen.
-
-Falls Sie stattdessen HTTPS verwenden möchten, erstellen Sie bitte das Verzeichnis `secrets/frontend` und legen Sie in dieses Ihr Zertifikat und Ihren Schlüssel ab.
-Benennen Sie dann den Schlüssel in `studio-lite.key` und das Zertifikat in `studio-lite.crt` um.
-Um eine funktionsfähige HTTPS-Konfiguration für den Nginx-Webserver zu erhalten, rufen Sie danach im `studio-lite`-Verzeichnis `bash https_on.sh` auf.
-
-Die generierte Konfigurationsdatei finden Sie im `studio-lite`-Verzeichnis unter `config/frontend/default.conf.template`.
-Sie können sie nach Belieben weiter anpassen.
-Bitte beachten Sie aber, dass bei einem Aufruf von `bash https_on.sh` oder von `bash https_off.sh` diese Datei überschrieben wird und
-nur von der letzten Version eine Sicherheitskopie unter `config/frontend/default.conf.template.bkp` erzeugt wird.
-
-## Manuelle Updates
-Wenn Sie Ihre Installation auf weiterentwickelte Softwareversionen aktualisieren möchten,
-können Sie im einfachsten Fall die Umgebungsvariable `TAG` in Ihrer `.env.prod`-Datei auf `latest` setzen und
-durch den Aufruf von `make production-ramp-up` während des laufenden Betriebs aktualisieren.
-Diese Einstellung sollte aber nur unter größter Vorsicht verwendet werden,
-da sie bei unvorhergesehenen Neustarts des Systems zu nicht gewünschten Updates führen kann.
-
-Um Überraschungen zu vermeiden, wird für Umgebungsvariable `TAG` die Verwendung einer expliziten (Pre-)Release-Version empfohlen.
-Wenn Sie ein Update wüschen, tragen Sie dort eine neuere Version ein.
-Durch den Aufruf von `make production-ramp-up` wird das Update wirksam.
-
-Die beiden oben beschrieben Verfahren greifen aber nur, wenn sich keine Änderungen an den Installationsdateien selbst ergeben haben oder
-sich sogar die Struktur des Installationsverzeichnisses geändert hat (bpw. durch das Hinzukommen neuer Dateien oder Verzeichnisse).
-Für diesen Fall bietet die Verwendung des automatischen Update-Skriptes `update.sh` mehr Sicherheit (siehe: [Automatische Updates](#Automatische Updates)),
-dass Sie im Projektverzeichnis unter `scripts/` finden können.
-
-## Aufruf `Make`
-Wir haben eine Reihe von Make-Befehlen vorbereitet, die das Arbeiten mit Docker auf dem Server angenehmer machen. Diese befinden sich in der obigen vierten Datei. Um die Webanwendung zu installieren, geben Sie folgenden Befehl ein:
-
+Um die Webanwendung hochzufahren, geben Sie folgenden Befehl ein:
 ```
 make production-ramp-up
 ```
-Nachdem die Prozesse dieses Befehls beendet sind, ist die Datenbank eingerichtet und die Programmierung installiert. Ein Zugriff auf den Server über einen Browser sollte sofort möglich sein.
+
+Nachdem die Prozesse dieses Befehls beendet sind,
+ist die Datenbank eingerichtet und die Programmierung installiert.
+Ein Zugriff auf den Server über einen Browser sollte dann sofort möglich sein.
+
+Falls Sie die aktuellen Log-Informationen der Anwendungslandschaft einsehen möchten,
+führen Sie folgenden Befehl aus:
+````
+make production-logs
+````
+
+Und wenn die Webanwendung vollständig herunterzufahren und alle alten Docker Container zu löschen möchten,
+verwenden Sie bitte:
+
+````
+make production-shut-down
+````
+
+Nun haben Sie die drei wichtigsten Befehle der Anwendungssteuerung kennengelernt.
+Alle weiteren Befehle, mit kurzen Erläuterungen finden Sie im `Makefile`.
 
 ## Erste Schritte
 Nach der Installation ist kein User-Account angelegt. Sie bekommen beim Aufruf der Webanwendung die Aufforderung, einen solchen Account anzulegen. Bitte notieren Sie sich die Daten, da dieser Account über besondere Rechte verfügt. Bitte nehmen Sie folgende globale Einstellungen vor:
