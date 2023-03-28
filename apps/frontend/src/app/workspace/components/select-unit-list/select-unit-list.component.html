@@ -5,22 +5,8 @@
     <p *ngIf="selectionCount > 1">{{selectionCount}} {{'workspace.units-selected' | translate}}</p>
   </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>{{'select-unit-list.filter' | translate}}</mat-label>
-    <input #filterInput
-           matInput
-           [placeholder]="'select-unit-list.enter-filter' | translate"
-           (keyup)="applyFilter(filterInput)">
-    <button matSuffix
-            mat-icon-button
-            [attr.aria-label]="'select-unit-list.delete-filter' | translate"
-            [disabled]="!filterInput.value"
-            [matTooltip]="'select-unit-list.delete-filter' | translate"
-            matTooltipPosition="above"
-            (click)="filterInput.value=''; applyFilter(filterInput)">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
+  <studio-lite-search-unit (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+  </studio-lite-search-unit>
 
   <mat-table [dataSource]="objectsDatasource" matSort class="unit-list">
     <ng-container matColumnDef="selectCheckbox">

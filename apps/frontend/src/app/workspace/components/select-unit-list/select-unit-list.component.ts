@@ -133,11 +133,6 @@ export class SelectUnitListComponent implements OnDestroy {
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
-  applyFilter(input: HTMLInputElement) {
-    const filterValue = input.value;
-    this.objectsDatasource.filter = filterValue.trim().toLowerCase();
-  }
-
   ngOnDestroy(): void {
     if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
   }
