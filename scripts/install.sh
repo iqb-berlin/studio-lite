@@ -12,9 +12,12 @@ declare -A ENV_VARS
 ENV_VARS[POSTGRES_USER]=root
 ENV_VARS[POSTGRES_PASSWORD]=$(tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w 16 | head -n 1)
 ENV_VARS[POSTGRES_DB]=$APP_NAME
+ENV_VARS[SERVER_NAME]=hostname.de
 ENV_VARS[HTTP_PORT]=80
+ENV_VARS[HTTPS_PORT]=443
+ENV_VARS[TRAEFIK_AUTH]=admin:$$apr1$$gaS8tVEe$$MjqM8IlBvz2PRFEWcwha1/
 
-ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB HTTP_PORT)
+ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB SERVER_NAME HTTP_PORT HTTPS_PORT TRAEFIK_AUTH)
 
 check_prerequisites() {
   for APP in "${REQUIRED_PACKAGES[@]}"; do
@@ -73,9 +76,12 @@ prepare_installation_dir() {
   mkdir -p "$TARGET_DIR"/config/frontend
   mkdir -p "$TARGET_DIR"/config/traefik
   mkdir -p "$TARGET_DIR"/secrets/traefik
-  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/secrets/traefik/$APP_NAME.crt
-  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/secrets/traefik/$APP_NAME.key
+  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/secrets/traefik/$APP_NAME.crt
+  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/secrets/traefik/$APP_NAME.key
   mkdir -p "$TARGET_DIR"/database_dumps
+  mkdir -p "$TARGET_DIR"/prometheus
+  mkdir -p "$TARGET_DIR"/grafana/provisioning/dashboards
+  mkdir -p "$TARGET_DIR"/grafana/provisioning/datasources
 
   cd "$TARGET_DIR"
 }
@@ -100,6 +106,11 @@ download_files() {
   download_file Makefile scripts/make/prod.mk
   download_file update.sh scripts/update.sh
   chmod +x update.sh
+  download_file prometheus/prometheus.yml prometheus/prometheus.yml
+  download_file grafana/config.monitoring grafana/config.monitoring
+  download_file grafana/provisioning/dashboards/dashboard.yml grafana/provisioning/dashboards/dashboard.yml
+  download_file grafana/provisioning/dashboards/traefik_rev4.json grafana/provisioning/dashboards/traefik_rev4.json
+  download_file grafana/provisioning/datasources/datasource.yml grafana/provisioning/datasources/datasource.yml
   printf "Download done!\n\n"
 }
 

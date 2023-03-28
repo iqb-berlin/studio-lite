@@ -58,6 +58,9 @@ prepare_installation_dir() {
     printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.key
   fi
   mkdir -p ./database_dumps
+  mkdir -p ./prometheus
+  mkdir -p ./grafana/provisioning/dashboards
+  mkdir -p ./grafana/provisioning/datasources
 }
 
 run_update_script_in_selected_version() {
@@ -105,6 +108,12 @@ update_files() {
   download_file docker-compose.prod.yml docker-compose.prod.yml
   download_file config/traefik/tls-config.yml config/traefik/tls-config.yml
   download_file Makefile scripts/make/prod.mk
+  download_file prometheus/alert.rules prometheus/alert.rules
+  download_file prometheus/prometheus.yml prometheus/prometheus.yml
+  download_file grafana/config.monitoring grafana/config.monitoring
+  download_file grafana/provisioning/dashboards/dashboard.yml grafana/provisioning/dashboards/dashboard.yml
+  download_file grafana/provisioning/dashboards/traefik_rev4.json grafana/provisioning/dashboards/traefik_rev4.json
+  download_file grafana/provisioning/datasources/datasource.yml grafana/provisioning/datasources/datasource.yml
   printf "Downloads done!\n\n"
 }
 
@@ -278,8 +287,8 @@ if [ -z "$SELECTED_VERSION" ]; then
 
   get_new_release_version
   create_backup
-  prepare_installation_dir
   run_update_script_in_selected_version
+  prepare_installation_dir
   update_files
   check_template_files_modifications
   customize_settings
@@ -288,6 +297,7 @@ if [ -z "$SELECTED_VERSION" ]; then
 else
   TARGET_TAG="$SELECTED_VERSION"
 
+  prepare_installation_dir
   update_files
   check_template_files_modifications
   customize_settings
