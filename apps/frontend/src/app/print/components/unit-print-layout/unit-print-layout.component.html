@@ -4,6 +4,8 @@
     [key] = "unitMetadata ? unitMetadata.key : ''"
     [groupName] = "unitMetadata ? unitMetadata.groupName : ''"
     [description]="unitMetadata ? unitMetadata.description: ''"
+    [reference]="unitMetadata ? unitMetadata.reference: ''"
+    [transcript]="unitMetadata ? unitMetadata.transcript: ''"
     [player] = "playerId"
     [editor] = "unitMetadata ? unitMetadata.editor : ''"
     [schemer] = "unitMetadata ? unitMetadata.schemer : ''"
@@ -17,17 +19,17 @@
                                    [workspaceId]="workspaceId">
   </studio-lite-unit-print-comments>
 
-  <studio-lite-unit-print-coding  [unitId]="unitId"
-                                  [workspaceId]="workspaceId">
+  <studio-lite-unit-print-coding [unitId]="unitId"
+                                 [workspaceId]="workspaceId">
   </studio-lite-unit-print-coding>
 
 
   <div *ngIf="playerId">
     <studio-lite-unit-print-player *ngIf="playerId"
-                             [iFrameHeight]="playerHeight"
-                             [playerId]="playerId"
-                             [unitId]="unitId"
-                             [workspaceId]="workspaceId">
+                                   [iFrameHeight]="playerHeight"
+                                   [playerId]="playerId"
+                                   [unitId]="unitId"
+                                   [workspaceId]="workspaceId">
     </studio-lite-unit-print-player>
 
     <div class="fx-row-space-around-center change-player-height-container">

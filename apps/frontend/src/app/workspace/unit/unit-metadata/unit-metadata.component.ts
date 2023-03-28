@@ -3,20 +3,12 @@ import {
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ModuleService, SelectModuleComponent } from '@studio-lite/studio-components';
 import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../backend.service';
-import { BackendService as AppBackendService } from '../../../backend.service';
-import { InputTextComponent } from '../../../components/input-text.component';
-import { AppService } from '../../../app.service';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
-  styles: [
-    'mat-tab-body {height: 100%;}'
-  ]
+  styleUrls: ['unit-metadata.component.scss']
 })
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
@@ -33,29 +25,25 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: UntypedFormBuilder,
-    private backendService: BackendService,
-    private appBackendService: AppBackendService,
     public workspaceService: WorkspaceService,
-    public appService: AppService,
-    public moduleService: ModuleService,
-    private inputTextDialog: MatDialog,
-    private snackBar: MatSnackBar
+    public moduleService: ModuleService
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
-      group: this.fb.control('')
+      group: this.fb.control(''),
+      transcript: this.fb.control(''),
+      reference: this.fb.control('')
     });
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
+      .subscribe(() => {
         this.readData();
       });
-    });
   }
 
   private async readData() {
@@ -79,6 +67,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         key: unitMetadata.key,
         name: unitMetadata.name,
         description: unitMetadata.description,
+        reference: unitMetadata.reference,
+        transcript: unitMetadata.transcript,
         group: unitMetadata.groupName
       }, { emitEvent: false });
       if (this.editorSelector) {
@@ -104,7 +94,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,
           this.unitForm.get('description')?.value,
-          this.unitForm.get('group')?.value
+          this.unitForm.get('group')?.value,
+          this.unitForm.get('transcript')?.value,
+          this.unitForm.get('reference')?.value
         );
       });
       this.unitForm.enable();
@@ -125,39 +117,5 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
-  }
-
-  newGroup() {
-    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
-      width: '500px',
-      data: {
-        title: 'Neue Gruppe',
-        default: '',
-        okButtonLabel: 'Speichern',
-        prompt: 'Name der Gruppe'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result === 'string') {
-        if (!this.workspaceService.workspaceSettings.unitGroups) {
-          this.workspaceService.workspaceSettings.unitGroups = [];
-        }
-        if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
-          this.workspaceService.workspaceSettings.unitGroups.push(result);
-          this.appBackendService.setWorkspaceSettings(
-            this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-          ).subscribe(isOK => {
-            if (!isOK) {
-              this.snackBar.open('Neue Gruppe konnte nicht gespeichert werden.', '', { duration: 3000 });
-            } else {
-              this.snackBar.open('Neue Gruppe gespeichert', '', { duration: 1000 });
-              const groupControl = this.unitForm.get('group');
-              if (groupControl) groupControl.setValue(result);
-            }
-          });
-        }
-      }
-    });
   }
 }

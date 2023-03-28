@@ -2,13 +2,21 @@
 <h3 *ngIf="name">{{name}}</h3>
 
 <table class="mat-table">
+  <tr *ngIf="groupName" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.group-name' | translate}}</td>
+    <td class="mat-cell">{{groupName}}</td>
+  </tr>
   <tr *ngIf="description" class="mat-row">
     <td class="mat-cell left-cell">{{'print.description' | translate}}</td>
     <td class="mat-cell">{{description}}</td>
   </tr>
-  <tr *ngIf="groupName" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.group-name' | translate}}</td>
-    <td class="mat-cell">{{groupName}}</td>
+  <tr *ngIf="transcript" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.transcript' | translate}}</td>
+    <td class="mat-cell">{{transcript}}</td>
+  </tr>
+  <tr *ngIf="reference" class="mat-row">
+    <td class="mat-cell left-cell">{{'print.reference' | translate}}</td>
+    <td class="mat-cell">{{reference}}</td>
   </tr>
   <tr *ngIf="lastChangedDefinition" class="mat-row">
     <td class="mat-cell left-cell">{{'print.last-changed-definition' | translate}}</td>

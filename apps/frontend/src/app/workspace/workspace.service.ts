@@ -5,7 +5,6 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { DatePipe } from '@angular/common';
 import { BackendService } from './backend.service';
 import { BackendService as AppBackendService } from '../backend.service';
 import {
@@ -29,8 +28,7 @@ export class WorkspaceService {
   lastChangedMetadata?: Date;
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
-  unitLastChanged: Date | undefined;
-  unitLastChangedText = '';
+
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   constructor(
@@ -69,8 +67,6 @@ export class WorkspaceService {
     this.lastChangedDefinition = undefined;
     this.unitSchemeStore = undefined;
     this.lastChangedScheme = undefined;
-    this.unitLastChanged = undefined;
-    this.unitLastChangedText = '';
   }
 
   // TODO: Remove usage fom unit-save-button template!
@@ -120,24 +116,9 @@ export class WorkspaceService {
           } else {
             this.unitMetadataStore = new UnitMetadataStore(<UnitMetadataDto>{ id: selectedUnitId });
           }
-          this.setUnitLastChanged();
           return this.unitMetadataStore;
         })
       ));
-  }
-
-  setUnitLastChanged() {
-    let last: Date | undefined;
-    if (this.lastChangedMetadata) last = this.lastChangedMetadata;
-    if (this.lastChangedDefinition && (!last || this.lastChangedDefinition > last)) last = this.lastChangedDefinition;
-    if (this.lastChangedScheme && (!last || this.lastChangedScheme > last)) last = this.lastChangedScheme;
-    this.unitLastChanged = last;
-    const datePipe = new DatePipe('de-DE');
-    this.unitLastChangedText = `Eigenschaften: ${this.lastChangedMetadata ?
-      datePipe.transform(this.lastChangedMetadata, 'dd.MM.yyyy HH:mm') : '-'}
-Definition:  ${this.lastChangedDefinition ?
-    datePipe.transform(this.lastChangedDefinition, 'dd.MM.yyyy HH:mm') : '-'}
-Kodierschema:  ${this.lastChangedScheme ? datePipe.transform(this.lastChangedScheme, 'dd.MM.yyyy HH:mm') : '-'}`;
   }
 
   async saveUnitData(): Promise<boolean> {
@@ -183,7 +164,6 @@ Kodierschema:  ${this.lastChangedScheme ? datePipe.transform(this.lastChangedSch
         ));
     }
     this.appService.dataLoading = false;
-    this.setUnitLastChanged();
     return saveOk;
   }
 }

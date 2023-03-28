@@ -36,7 +36,14 @@ export class UnitMetadataStore {
     }
   }
 
-  setBasicData(newKey: string, newName: string, newDescription: string, newGroup: string) {
+  setBasicData(
+    newKey: string,
+    newName: string,
+    newDescription: string,
+    newGroup: string,
+    newTranscript: string,
+    newReference: string
+  ) {
     if (newKey === this.originalData.key) {
       if (this.changedData.key) delete this.changedData.key;
     } else {
@@ -56,6 +63,16 @@ export class UnitMetadataStore {
       if (this.changedData.groupName) delete this.changedData.groupName;
     } else {
       this.changedData.groupName = newGroup;
+    }
+    if (newTranscript === this.originalData.transcript) {
+      if (this.changedData.transcript) delete this.changedData.transcript;
+    } else {
+      this.changedData.transcript = newTranscript;
+    }
+    if (newReference === this.originalData.reference) {
+      if (this.changedData.reference) delete this.changedData.reference;
+    } else {
+      this.changedData.reference = newReference;
     }
   }
 

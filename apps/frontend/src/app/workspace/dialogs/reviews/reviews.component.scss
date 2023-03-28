@@ -12,21 +12,12 @@
   height: 0;width: 0
 }
 
+.settings {
+  padding: 2px 2px 2px 0;
+}
+
 .selected {
   background-color: #3957f74f
-}
-
-.group-list {
-  overflow: auto;
-  background-color: whitesmoke;
-  border: 2px solid whitesmoke
-}
-
-.group-list-entry {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px
 }
 
 .review-changed {

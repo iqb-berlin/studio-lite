@@ -78,6 +78,7 @@ import { ReviewSaveChangesComponent } from './components/review-save-changes/rev
 import { ReviewConfigComponent } from './components/review-config/review-config.component';
 import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
+import { NewGroupButtonComponent } from './components/new-group-button/new-group-button.component';
 
 @NgModule({
   imports: [
@@ -158,7 +159,8 @@ import { ExportReviewButtonComponent } from './components/export-review-button/e
     ReviewMenuComponent,
     ReviewSaveChangesComponent,
     ReviewConfigComponent,
-    ExportReviewButtonComponent
+    ExportReviewButtonComponent,
+    NewGroupButtonComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
