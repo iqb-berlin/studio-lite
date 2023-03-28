@@ -54,7 +54,7 @@
                 (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
           <mat-icon>edit</mat-icon>
         </button>
-        <button *ngIf="canDelete"
+        <button *ngIf="ownComment || adminMode"
                 mat-icon-button
                 class="comment-action"
                 matTooltip = "{{'comment.delete' | translate}}"
@@ -73,6 +73,7 @@
         [parentId]="comment.id"
         [replies]="[]"
         [userId]="userId"
+        [adminMode]="adminMode"
         [latestCommentId]="latestCommentId"
         (setActiveComment)="setActiveComment.emit($event)"
         (updateComment)="updateComment.emit($event)"
