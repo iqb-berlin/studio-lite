@@ -12,7 +12,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-api:
     build:
@@ -28,7 +28,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-ui-chrome:
     build:
@@ -44,7 +44,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-ui-chrome-mobile:
     build:
@@ -61,7 +61,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-ui-firefox:
     build:
@@ -77,7 +77,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-ui-firefox-mobile:
     build:
@@ -94,7 +94,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-ui-edge:
     build:
@@ -110,7 +110,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
   test-e2e-ui-edge-mobile:
     build:
@@ -127,7 +127,7 @@ services:
     volumes:
       - ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e
     networks:
-      - backend-network
+      - application-network
 
 networks:
-  backend-network:
+  application-network:
