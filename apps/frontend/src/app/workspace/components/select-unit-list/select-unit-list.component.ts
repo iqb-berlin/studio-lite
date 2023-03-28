@@ -40,7 +40,14 @@ export class SelectUnitListComponent implements OnDestroy {
   }
 
   private setObjectsDatasource(units: UnitInListDto[]): void {
-    this.objectsDatasource = new MatTableDataSource(units);
+    if (this.filter && this.filter.length) {
+      this.objectsDatasource = new MatTableDataSource(
+        units
+          .filter(unit => this.filter.indexOf(unit.id) > -1)
+      );
+    } else {
+      this.objectsDatasource = new MatTableDataSource(units);
+    }
     this.objectsDatasource
       .filterPredicate = (unitList: UnitInListDto, filter) => ['key', 'groupName']
         .some(column => (unitList[column as keyof UnitInListDto] as string || '')
