@@ -8,7 +8,12 @@
   <studio-lite-search-unit (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
   </studio-lite-search-unit>
 
-  <mat-table [dataSource]="objectsDatasource" matSort class="unit-list">
+  <mat-table class="unit-list"
+             matSortDisableClear
+             matSortActive="key"
+             matSortDirection="asc"
+             matSort
+             [dataSource]="objectsDatasource">
     <ng-container matColumnDef="selectCheckbox">
       <mat-header-cell *matHeaderCellDef  class="fx-flex-70-fix">
         <mat-checkbox (change)="$event ? masterToggle() : null"
