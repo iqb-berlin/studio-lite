@@ -1,6 +1,6 @@
 <form [formGroup]="unitForm">
   <div class="fx-row-start-stretch fx-gap-10">
-    <div class="fx-column-start-stretch fx-flex-50 fx-gap-10">
+    <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
       <mat-card>
         <mat-card-content>
           <div class="fx-column-start-stretch">
@@ -20,7 +20,7 @@
                      [placeholder]="'workspace.unit-name' | translate">
             </mat-form-field>
             <div class="fx-row-space-around-center fx-gap-10">
-              <mat-form-field class="fx-flex">
+              <mat-form-field class="fx-flex-fill">
                 <mat-label>{{'workspace.group' | translate}}</mat-label>
                 <mat-select formControlName="group"
                             [placeholder]="'workspace.group' | translate">
@@ -68,29 +68,29 @@
       </mat-card>
     </div>
 
-    <div class="fx-column-start-stretch fx-flex-50 fx-gap-10">
+    <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
       <mat-card>
         <mat-card-content>
           <div class="fx-column-start-stretch">
             <div class="fx-row-space-between-start">
-              <div class="fx-flex-30"
+              <div class="fx-flex-row-30"
                    [hidden]="unitForm.disabled">
                 {{'modules.editor-name' | translate}}
               </div>
               <app-select-module #editor
-                                 class="fx-flex-60"
+                                 class="fx-flex-row-60"
                                  [modules]="this.moduleService.editors"
                                  [hidden]="unitForm.disabled"
                                  [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                                  moduleType="editor"></app-select-module>
             </div>
             <div fxLayout="row" fxLayoutAlign="space-between start">
-              <div class="fx-flex-30"
+              <div class="fx-flex-row-30"
                    [hidden]="unitForm.disabled">
                 {{'modules.player-name' | translate}}
               </div>
               <app-select-module #player
-                                 class="fx-flex-60"
+                                 class="fx-flex-row-60"
                                  [modules]="this.moduleService.players"
                                  [hidden]="unitForm.disabled"
                                  [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
@@ -98,12 +98,12 @@
               </app-select-module>
             </div>
             <div fxLayout="row" fxLayoutAlign="space-between start">
-              <div class="fx-flex-30"
+              <div class="fx-flex-row-30"
                    [hidden]="unitForm.disabled">
                 {{'modules.schemer-name' | translate}}
               </div>
               <app-select-module #schemer
-                                 class="fx-flex-60"
+                                 class="fx-flex-row-60"
                                  [modules]="this.moduleService.schemers"
                                  [hidden]="unitForm.disabled"
                                  [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
