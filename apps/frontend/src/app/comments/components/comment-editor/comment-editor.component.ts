@@ -19,6 +19,7 @@ import { Image } from '@tiptap/extension-image';
 export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
   @Input() initialHTML: string = '';
+  @Input() editorHTML: string = '';
 
   @Output() handleSubmit = new EventEmitter<string>();
   @Output() handleCancel = new EventEmitter<void>();
@@ -45,11 +46,15 @@ export class CommentEditorComponent implements OnInit {
       content: this.initialHTML
     });
     this.editor.commands.focus();
+    this.editor.on('update', ({ editor }) => {
+      this.editorHTML = editor.getHTML();
+    });
   }
 
   onReset(): void {
     this.handleCancel.emit();
-    this.editor.commands.clearContent();
+    this.editor.commands.clearContent(true);
+    this.editor.commands.focus();
   }
 
   onSubmit(): void {
@@ -59,7 +64,8 @@ export class CommentEditorComponent implements OnInit {
     } else {
       this.handleCancel.emit();
     }
-    this.editor.commands.clearContent();
+    this.editor.commands.clearContent(true);
+    this.editor.commands.focus();
   }
 
   async addImage(): Promise<void> {
