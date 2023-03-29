@@ -1,5 +1,5 @@
 <div class="fx-column-start-stretch full-height">
-  <div class="comments fx-flex-0" *ngIf="!newCommentOnly">
+  <div class="comments fx-flex-fill" *ngIf="!newCommentOnly">
     <studio-lite-comment
       *ngFor="let rootComment of comments | rootComments"
       [comment]="rootComment"
