@@ -133,6 +133,13 @@ div.logo img {
   justify-content: space-between;
   align-items: flex-start;
 }
+.fx-row-space-between-end {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+}
 .fx-row-space-between-stretch {
   box-sizing: border-box;
   display: flex;
@@ -168,6 +175,15 @@ div.logo img {
   justify-content: flex-end;
   align-items: flex-end;
 }
+
+.fx-row-end-stretch {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
 .fx-row-start-stretch {
   box-sizing: border-box;
   display: flex;
@@ -236,9 +252,23 @@ div.logo img {
   align-items: stretch;
 }
 
+.fx-column-space-between-end {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+
 .fx-flex {
   box-sizing: border-box;
   flex: 1 1 100%;
+}
+
+.fx-flex-0 {
+  flex: 1 1 0;
+  box-sizing: border-box;
 }
 
 .fx-flex-10 {

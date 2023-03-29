@@ -19,7 +19,7 @@ export class ScrollCommentIntoViewDirective implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((newId: number): void => {
         if (newId === this.id) {
-          this.elementRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          this.elementRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
   }
