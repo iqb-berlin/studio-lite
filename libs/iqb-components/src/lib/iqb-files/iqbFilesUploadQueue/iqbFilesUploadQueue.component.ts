@@ -87,7 +87,6 @@ export class IqbFilesUploadQueueComponent implements OnDestroy {
   analyseStatus() {
     let someoneiscomplete = false;
     let someoneisbusy = false;
-    let someoneisready = false;
     if (this.fileUploads) {
       this.fileUploads.forEach(fileUpload => {
         if ((fileUpload.status === UploadStatus.ok) || (fileUpload.status === UploadStatus.error)) {
@@ -95,8 +94,6 @@ export class IqbFilesUploadQueueComponent implements OnDestroy {
         } else if (fileUpload.status === UploadStatus.busy) {
           someoneisbusy = true;
           // forEach
-        } else if (fileUpload.status === UploadStatus.ready) {
-          someoneisready = true;
         }
       });
     }
