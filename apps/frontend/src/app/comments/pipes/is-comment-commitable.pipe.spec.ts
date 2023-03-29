@@ -1,8 +1,8 @@
-import { IsCommentCommitablePipe } from './is-comment-commitable.pipe';
+import { IsCommentCommittablePipe } from './is-comment-commitable.pipe';
 
-describe('IsCommentCommitablePipe', () => {
+describe('IsCommentCommittablePipe', () => {
   it('create an instance', () => {
-    const pipe = new IsCommentCommitablePipe();
+    const pipe = new IsCommentCommittablePipe();
     expect(pipe).toBeTruthy();
   });
 });

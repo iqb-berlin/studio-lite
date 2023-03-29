@@ -30,7 +30,7 @@ import { CommentBadgeComponent } from './components/comment-badge/comment-badge.
 import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
 import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
 import { Comment } from './types/comment';
-import { IsCommentCommitablePipe } from './pipes/is-comment-commitable.pipe';
+import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 
 @NgModule({
   imports: [
@@ -63,7 +63,7 @@ import { IsCommentCommitablePipe } from './pipes/is-comment-commitable.pipe';
     ScrollEditorIntoViewDirective,
     CommentBadgeComponent,
     MomentFromNowPipe,
-    IsCommentCommitablePipe
+    IsCommentCommittablePipe
   ],
   exports: [
     CommentsComponent
