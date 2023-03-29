@@ -15,13 +15,13 @@
              matSort
              [dataSource]="objectsDatasource">
     <ng-container matColumnDef="selectCheckbox">
-      <mat-header-cell *matHeaderCellDef  class="fx-flex-70-fix">
+      <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
         <mat-checkbox (change)="$event ? masterToggle() : null"
                       [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
                       [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
         </mat-checkbox>
       </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="fx-flex-70-fix">
+      <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
         <mat-checkbox (click)="$event.stopPropagation()"
                       [disabled]="disabledUnits.indexOf(row.id) >= 0"
                       (change)="$event ? tableSelectionCheckbox.toggle(row) : null"

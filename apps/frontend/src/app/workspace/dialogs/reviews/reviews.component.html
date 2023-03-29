@@ -2,7 +2,7 @@
   <h1 mat-dialog-title>{{'workspace.reviews' | translate}}</h1>
   <mat-dialog-content>
     <div class="fx-row-start-stretch fx-gap-20">
-      <div class="fx-column-space-between-stretch fx-flex-20 review-list-area">
+      <div class="fx-column-space-between-stretch fx-flex-row-20 review-list-area">
         <mat-nav-list class="reviews">
           <a mat-list-item style="height: unset;text-overflow: ellipsis"
              *ngFor="let review of reviews"
@@ -24,11 +24,11 @@
         </studio-lite-review-menu>
       </div>
 
-      <div class="fx-column-start-stretch fx-flex-80"
+      <div class="fx-column-start-stretch fx-flex-row-80"
            [class.review-changed]="changed"
            [class.review-not-changed]="!changed">
         <div class="fx-row-start-stretch fx-flex fx-gap-20 review-changes-area">
-          <div class="fx-flex-50">
+          <div class="fx-flex-row-50">
             <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
             <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
                               [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
@@ -36,7 +36,7 @@
                               [workspace]="workspaceService.selectedWorkspaceId">
             </studio-lite-select-unit-list>
           </div>
-          <studio-lite-review-config class="fx-flex-50 settings"
+          <studio-lite-review-config class="fx-flex-row-50 settings"
                                      [selectedReviewId]="selectedReviewId"
                                      [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
                                      [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
