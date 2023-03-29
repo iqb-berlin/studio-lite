@@ -39,7 +39,7 @@
     "@angular/platform-browser-dynamic": "14.2.10",
     "@angular/router": "14.2.10",
     "@golevelup/ts-jest": "^0.3.4",
-    "@nestjs/cli": "^8.2.8",
+    "@nestjs/cli": "^9.3.0",
     "@nestjs/common": "9.1.4",
     "@nestjs/config": "^2.1.0",
     "@nestjs/core": "9.1.4",
@@ -76,6 +76,7 @@
     "class-transformer": "^0.5.1",
     "date-fns": "^2.29.3",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-html": "^7.1.0",
     "express": "^4.18.2",
     "file-saver-es": "^2.0.5",
     "multer": "^1.4.5-lts.1",
@@ -95,7 +96,7 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "14.2.10",
+    "@angular-devkit/build-angular": "^14.2.11",
     "@angular-devkit/schematics": "14.2.10",
     "@angular-devkit/schematics-cli": "14.2.10",
     "@angular-eslint/eslint-plugin": "14.1.2",
@@ -159,7 +160,10 @@
           "newline-per-chained-call": [
             "off"
           ]
-        }
+        },
+        "plugins": [
+          "html"
+        ]
       }
     ]
   }
