@@ -87,7 +87,7 @@ export class WorkspaceController {
   async renameUnitGroup(@WorkspaceId() workspaceId: number,
     @Param('name') oldGroupName: string,
     @Body() newGroupName) {
-    const b = Buffer.from(oldGroupName, 'hex')
+    const b = Buffer.from(oldGroupName, 'hex');
     return this.workspaceService.patchGroupName(workspaceId, b.toString(), newGroupName.body);
   }
 
@@ -103,7 +103,7 @@ export class WorkspaceController {
   async patchUnitsGroup(@WorkspaceId() workspaceId: number,
     @Param('name') groupName: string,
     @Query('units') ids: string) {
-    const b = Buffer.from(groupName, 'hex')
+    const b = Buffer.from(groupName, 'hex');
     const idsAsNumberArray = ids ? ids.split(';').map(s => parseInt(s, 10)) : [];
     return this.workspaceService.patchUnitsGroup(workspaceId, b.toString(), idsAsNumberArray);
   }
@@ -114,7 +114,7 @@ export class WorkspaceController {
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
-    const b = Buffer.from(groupName, 'hex')
+    const b = Buffer.from(groupName, 'hex');
     return this.workspaceService.removeGroup(workspaceId, b.toString());
   }
 
