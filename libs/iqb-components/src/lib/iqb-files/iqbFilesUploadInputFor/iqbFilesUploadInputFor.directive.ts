@@ -1,12 +1,13 @@
 import {
   Directive, ElementRef, HostListener, Input
 } from '@angular/core';
+import { IqbFilesUploadQueueComponent } from '@studio-lite-lib/iqb-components';
 
 @Directive({
   selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]'
 })
 export class IqbFilesUploadInputForDirective {
-  private _queue: any = null;
+  private _queue!: IqbFilesUploadQueueComponent;
   private _element: HTMLElement;
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -15,7 +16,7 @@ export class IqbFilesUploadInputForDirective {
   }
 
   @Input()
-  set iqbFilesUploadInputFor(value: any) {
+  set iqbFilesUploadInputFor(value: IqbFilesUploadQueueComponent) {
     if (value) {
       this._queue = value;
     }
@@ -23,7 +24,7 @@ export class IqbFilesUploadInputForDirective {
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   @HostListener('change')
-  onChange(): any {
+  onChange(): void {
     const files = this.element.nativeElement.files;
     // this.onFileSelected.emit(files);
 
@@ -31,25 +32,5 @@ export class IqbFilesUploadInputForDirective {
       this._queue.add(files[i]);
     }
     this.element.nativeElement.value = '';
-  }
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  @HostListener('drop', ['$event'])
-  onDrop(event: any): any {
-    const files = event.dataTransfer.files;
-    // this.onFileSelected.emit(files);
-
-    for (let i = 0; i < files.length; i++) {
-      this._queue.add(files[i]);
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    this.element.nativeElement.value = '';
-  }
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  @HostListener('dragover', ['$event'])
-  onDropOver(event: any): any {
-    event.preventDefault();
   }
 }

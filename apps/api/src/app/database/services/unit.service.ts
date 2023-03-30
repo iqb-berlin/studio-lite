@@ -111,8 +111,11 @@ export class UnitService {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     return this.unitsRepository.findOne({
       where: { id: unitId },
-      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
+      select: [
+        'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
+        'player', 'description', 'transcript', 'reference',
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme'
+      ]
     });
   }
 
@@ -120,8 +123,11 @@ export class UnitService {
     return this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
-      select: ['id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference', 'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme']
+      select: [
+        'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
+        'player', 'description', 'transcript', 'reference',
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme'
+      ]
     });
   }
 
