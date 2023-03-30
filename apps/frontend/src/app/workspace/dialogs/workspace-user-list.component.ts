@@ -13,7 +13,7 @@ export interface WorkspaceUserListData {
       <h1 mat-dialog-title>{{title}}</h1>
       <mat-dialog-content fxLayout="column">
         <div *ngIf="userList.users.length > 0" fxLayout="column">
-          <user-list [users]="userList.users" class="gray-back"></user-list>
+          <studio-lite-user-list [users]="userList.users" class="gray-back"></studio-lite-user-list>
         </div>
         <div *ngIf="userList.users.length === 0" fxLayout="column" class="data-text">
           Es sind keine Nutzer:innen mit regulären Lese- und Schreibrechten zugewiesen.
@@ -21,12 +21,12 @@ export interface WorkspaceUserListData {
         <div *ngIf="userList.workspaceGroupAdmins.length > 0" fxLayout="column">
           <div class="data-text">Die folgenden Nutzer:innen verfügen über besondere Rechte, um
             Einstellungen des Arbeitsbereiches zu ändern oder anderen Zugriffsrechte zu gewähren:</div>
-          <user-list [users]="userList.workspaceGroupAdmins"></user-list>
+          <studio-lite-user-list [users]="userList.workspaceGroupAdmins"></studio-lite-user-list>
         </div>
         <div *ngIf="userList.admins.length > 0" fxLayout="column">
           <div class="data-text">Die folgenden Nutzer:innen betreuen die allgemeinen
             Servereinstellungen und können bei besonderen Problemen helfen:</div>
-          <user-list [users]="userList.admins"></user-list>
+          <studio-lite-user-list [users]="userList.admins"></studio-lite-user-list>
         </div>
       </mat-dialog-content>
       <mat-dialog-actions>

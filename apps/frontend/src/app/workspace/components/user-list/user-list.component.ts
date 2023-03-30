@@ -6,9 +6,9 @@ import { UserInListDto } from '@studio-lite-lib/api-dto';
 import { MatSort } from '@angular/material/sort';
 
 @Component({
-  selector: 'user-list',
-  templateUrl: 'user-list.component.html',
-  styleUrls: ['user-list.component.scss']
+  selector: 'studio-lite-user-list',
+  templateUrl: './user-list.component.html',
+  styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
