@@ -205,7 +205,10 @@
     "last-changed": "Letzte Änderungen",
     "last-changed-definition": "Definition: {{date}}",
     "last-changed-metadata": "Eigenschaften: {{date}}",
-    "last-changed-scheme": "Kodierschema: {{date}}"
+    "last-changed-scheme": "Kodierschema: {{date}}",
+    "user-name": "Name",
+    "user-email": "E-Mail",
+    "user-description": "Notiz/Beschreibung"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
