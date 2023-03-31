@@ -64,7 +64,6 @@ import { UnitsAreaComponent } from './components/units-area/units-area.component
 import { SplitterModule } from '../splitter/splitter.module';
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
-import { FilterUnitsPipe } from './pipes/filter-units.pipe';
 import { SearchUnitComponent } from './components/search-unit/search-unit.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
 import { TestConfigComponent } from './components/test-config/test-config.component';
@@ -149,7 +148,6 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
     UnitGroupComponent,
     SearchUnitComponent,
     UpdateUnitsButtonComponent,
-    FilterUnitsPipe,
     HasNewCommentsPipe,
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
