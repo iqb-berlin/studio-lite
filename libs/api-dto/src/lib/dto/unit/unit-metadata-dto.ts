@@ -14,6 +14,12 @@ export class UnitMetadataDto {
     description?: string;
 
   @ApiProperty()
+    transcript?: string;
+
+  @ApiProperty()
+    reference?: string;
+
+  @ApiProperty()
     groupName?: string;
 
   @ApiProperty()

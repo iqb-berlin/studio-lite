@@ -5,7 +5,7 @@ import {
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { AppService } from '../../app.service';
 import { WorkspaceDataFlat } from '../../app.classes';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
 
 export interface MoveUnitData {
   title: string,
@@ -27,7 +27,10 @@ export interface MoveUnitData {
         </mat-form-field>
       </form>
       <mat-dialog-content fxFlex>
-        <select-unit-list #unitSelectionTable [workspace]="data.currentWorkspaceId"></select-unit-list>
+        <studio-lite-select-unit-list
+          #unitSelectionTable
+          [workspace]="data.currentWorkspaceId">
+        </studio-lite-select-unit-list>
       </mat-dialog-content>
 
       <mat-dialog-actions>

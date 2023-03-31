@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { VariableCodingData } from '@studio-lite/shared-code';
-import { BackendService } from '../../../workspace/backend.service';
+import { BackendService } from '../../../workspace/services/backend.service';
 
 @Component({
   selector: 'studio-lite-unit-print-coding',

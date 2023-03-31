@@ -8,16 +8,16 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom, map } from 'rxjs';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../../dialogs/group-manage.component';
-import { ReviewsComponent } from '../../dialogs/reviews.component';
+import { ReviewsComponent } from '../../dialogs/reviews/reviews.component';
 import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
-import { ExportUnitComponent } from '../../dialogs/export-unit.component';
+import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
 import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
 import { EditWorkspaceSettingsComponent } from '../../../components/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../backend.service';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
@@ -43,6 +43,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     private messsageDialog: MatDialog,
     private showUsersDialog: MatDialog,
     private groupDialog: MatDialog,
+    private translateService: TranslateService,
     private reviewsDialog: MatDialog
   ) {
     super();
@@ -63,10 +64,18 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {
-          if (!isOK) {
-            this.snackBar.open('Einstellungen konnten nicht gespeichert werden.', '', { duration: 3000 });
+          if (isOK) {
+            this.snackBar.open(
+              this.translate.instant('workspace.settings-saved'),
+              '',
+              { duration: 1000 }
+            );
           } else {
-            this.snackBar.open('Einstellungen gespeichert', '', { duration: 1000 });
+            this.snackBar.open(
+              this.translate.instant('workspace.settings-not-saved'),
+              this.translate.instant('workspace.error'),
+              { duration: 3000 }
+            );
           }
         });
       }
@@ -78,8 +87,12 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       width: '500px',
       height: '700px',
       data: <MoveUnitData> {
-        title: moveOnly ? 'Aufgabe(n) verschieben' : 'Aufgabe(n) kopieren',
-        buttonLabel: moveOnly ? 'Verschieben' : 'Kopieren',
+        title: moveOnly ?
+          this.translate.instant('workspace.move-units') :
+          this.translate.instant('workspace.copy-units'),
+        buttonLabel: moveOnly ?
+          this.translate.instant('workspace.move') :
+          this.translate.instant('workspace.copy'),
         currentWorkspaceId: this.workspaceService.selectedWorkspaceId
       }
     });
@@ -96,9 +109,13 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
               moveOnly
             ).subscribe(uploadStatus => {
               if (typeof uploadStatus === 'boolean') {
-                this.snackBar.open(`Konnte Aufgabe(n) nicht ${moveOnly ? 'verschieben' : 'kopieren'}.`,
-                  'Fehler',
-                  { duration: 3000 });
+                this.snackBar.open(
+                  this.translate
+                    .instant('workspace.unit-not-moved-or-copied',
+                      { action: moveOnly ? 'verschieben' : 'kopieren' }),
+                  this.translate.instant('workspace.error'),
+                  { duration: 3000 }
+                );
               } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
                 const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
                   width: '500px',
@@ -110,7 +127,11 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
                 });
               } else {
                 this.snackBar.open(
-                  `Aufgabe(n) ${moveOnly ? 'verschoben' : 'kopiert'}`, '', { duration: 1000 }
+                  this.translate
+                    .instant('workspace.unit-moved-or-copied',
+                      { action: moveOnly ? 'verschoben' : 'kopiert' }),
+                  '',
+                  { duration: 5000 }
                 );
                 this.updateUnitList();
               }
@@ -124,7 +145,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   exportUnit(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '900px'
+        width: '1000px'
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
@@ -151,7 +172,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         width: '400px',
         data: <MessageDialogData>{
           title: this.translate.instant('unit-download.dialog.title'),
-          content: 'Dieser Arbeitsbereich enthält keine Units!',
+          content: this.translate.instant('workspace.no-units'),
           type: MessageType.error
         }
       });
@@ -180,8 +201,8 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       width: '500px',
       height: '700px',
       data: <SelectUnitData>{
-        title: 'Aufgabe(n) drucken',
-        buttonLabel: 'Drucken',
+        title: this.translate.instant('workspace.print-units'),
+        buttonLabel: this.translate.instant('workspace.print'),
         fromOtherWorkspacesToo: false,
         multiple: true
       }
@@ -206,7 +227,9 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         this.showUsersDialog.open(WorkspaceUserListComponent, {
           width: '800px',
           data: {
-            title: `Liste der Nutzer:innen für "${this.workspaceService.selectedWorkspaceName}"`,
+            title: this.translate
+              .instant('workspace.user-list',
+                { workspace: this.workspaceService.selectedWorkspaceName }),
             users: dataResponse
           }
         });
@@ -216,8 +239,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
 
   reviews(): void {
     this.reviewsDialog.open(ReviewsComponent, {
-      width: '1000px',
-      height: '820px'
+      width: '1200px'
     });
   }
 

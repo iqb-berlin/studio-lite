@@ -1,7 +1,5 @@
 <div class="editor-container">
-  <div fxLayout="row"
-       fxLayoutAlign="end"
-       class="editor-menubar">
+  <div class="editor-menubar fx-row-end-stretch">
     <button type="button" mat-icon-button
             matTooltip="{{'comment-editor.bold' | translate}}"
             [matTooltipPosition]="'above'"
@@ -101,15 +99,13 @@
       <mat-icon>image</mat-icon>
     </button>
   </div>
-  <div fxLayout="row" class="editor-area">
-    <tiptap-editor class="tip-tap-editor" fxFlex
+  <div class="editor-area fx-row-start-stretch">
+    <tiptap-editor class="tip-tap-editor fx-flex-fill"
                    [editor]="editor"
                    mat-dialog-content
                    [style.font-size.px]="16">
     </tiptap-editor>
-    <div class="editor-actions"
-         fxLayout="column"
-         fxLayoutAlign="space-between end">
+    <div class="editor-actions fx-column-space-between-end">
       <button mat-icon-button
               matTooltip="{{'comment-editor.cancel' | translate}}"
               [matTooltipPosition]="'below'"
@@ -118,6 +114,7 @@
         <mat-icon>close</mat-icon>
       </button>
       <button mat-fab
+              [disabled]="!(editorHTML | isCommentCommittable)"
               color="primary"
               matTooltip="{{ submitLabel | translate}}"
               [matTooltipPosition]="'above'"

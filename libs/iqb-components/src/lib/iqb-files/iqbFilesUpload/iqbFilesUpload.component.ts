@@ -5,6 +5,7 @@ import {
   HttpClient, HttpEventType, HttpHeaders, HttpParams,
   HttpErrorResponse, HttpEvent
 } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { UploadStatus } from '../iqb-files-classes';
 
 @Component({
@@ -80,11 +81,11 @@ export class IqbFilesUploadComponent implements OnInit {
     folder: string | undefined = '';
 
   @Input()
-  get file(): any {
+  get file(): File {
     return this._file;
   }
 
-  set file(file: any) {
+  set file(file: File) {
     this._file = file;
     this._filedate = this._file.lastModified;
     this.total = this._file.size;
@@ -105,10 +106,10 @@ export class IqbFilesUploadComponent implements OnInit {
   progressPercentage = 0;
   loaded = 0;
   private total = 0;
-  private _file: any;
-  private _filedate = '';
+  private _file!: File;
+  private _filedate!: number;
   private _id: number | undefined;
-  private fileUploadSubscription: any;
+  private fileUploadSubscription: Subscription | undefined;
 
   ngOnInit() {
     this._status = UploadStatus.ready;
@@ -139,7 +140,7 @@ export class IqbFilesUploadComponent implements OnInit {
           params: this.httpRequestParams,
           reportProgress: true,
           responseType: 'json'
-        }).subscribe((event: HttpEvent<any>) => {
+        }).subscribe((event: HttpEvent<unknown>) => {
           if (event.type === HttpEventType.UploadProgress) {
             // eslint-disable-next-line no-mixed-operators
             this.progressPercentage = event.total ? Math.floor(event.loaded * 100 / event.total) : 0;
@@ -147,7 +148,7 @@ export class IqbFilesUploadComponent implements OnInit {
             this.total = event.total ? event.total : 0;
             this.status = UploadStatus.busy;
           } else if (event.type === HttpEventType.Response) {
-            this.requestResponseText = event.body;
+            this.requestResponseText = event.body as string;
             if (this.requestResponseText && (this.requestResponseText.length > 5) &&
               (this.requestResponseText.substr(0, 2) === 'e:')) {
               this.requestResponseText = this.requestResponseText.substr(2);

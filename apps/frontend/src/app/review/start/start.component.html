@@ -12,9 +12,9 @@
           Einstellungen für Darstellung und Ablauf
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <booklet-config-show [config]="reviewService.bookletConfig">
+      <studio-lite-booklet-config-show [config]="reviewService.bookletConfig">
 
-      </booklet-config-show>
+      </studio-lite-booklet-config-show>
     </mat-expansion-panel>
     <div id="continue-button" fxLayout="row" fxLayoutAlign="end end">
       <a mat-fab [disabled]="reviewService.units.length === 0"

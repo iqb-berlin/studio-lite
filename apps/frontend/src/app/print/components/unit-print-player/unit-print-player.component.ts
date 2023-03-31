@@ -4,9 +4,9 @@ import {
 import { Subject, takeUntil } from 'rxjs';
 import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../../../app.service';
-import { BackendService } from '../../../workspace/backend.service';
-import { WorkspaceService } from '../../../workspace/workspace.service';
-import { UnitDefinitionStore } from '../../../workspace/workspace.classes';
+import { BackendService } from '../../../workspace/services/backend.service';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
+import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-store';
 
 @Component({
   selector: 'studio-lite-unit-print-player',

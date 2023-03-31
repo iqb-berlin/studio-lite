@@ -25,14 +25,11 @@ export class CommentComponent implements OnInit {
   @Output() updateComment = new EventEmitter<{ text: string; commentId: number }>();
 
   ownComment: boolean = false;
-  canDelete: boolean = false;
   activeCommentType = ActiveCommentType;
   replyId: number | null = null;
 
   ngOnInit(): void {
     this.ownComment = this.userId > 0 && this.userId === this.comment.userId;
-    const notOwnReplies = this.replies.filter(r => this.userId === 0 || this.userId !== r.userId);
-    this.canDelete = (this.ownComment && !(notOwnReplies && notOwnReplies.length > 0)) || this.adminMode;
     this.replyId = this.parentId ? this.parentId : this.comment.id;
   }
 }

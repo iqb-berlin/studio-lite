@@ -24,6 +24,12 @@ class Unit {
   @Column()
     description: string;
 
+  @Column()
+    reference: string;
+
+  @Column()
+    transcript: string;
+
   @Column({
     type: 'jsonb',
     array: false,

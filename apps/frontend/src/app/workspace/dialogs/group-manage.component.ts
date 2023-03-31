@@ -6,9 +6,9 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
-import { BackendService } from '../backend.service';
-import { WorkspaceService } from '../workspace.service';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { BackendService } from '../services/backend.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
 import { AppService } from '../../app.service';
 import { InputTextComponent } from '../../components/input-text.component';
 

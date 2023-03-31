@@ -1,19 +1,18 @@
-<div fxLayout="row" class="comment">
+<div class="comment fx-row-start-stretch">
 
   <studio-lite-comment-badge [userName]="comment.userName"
                              [ownComment]="ownComment">
   </studio-lite-comment-badge>
 
-  <div fxLayout="column">
+  <div class="fx-column-start-stretch">
 
-    <div fxLayout="row"
-         class="comment-meta">
+    <div class="comment-meta fx-row-start-stretch">
       <div>{{ comment.userName }}</div>
       <div>{{ comment.createdAt | momentFromNow }}</div>
     </div>
 
-    <div fxLayout="row">
-      <div fxFlex>
+    <div class="fx-row-start-stretch">
+      <div>
         <div *ngIf="!(activeComment | isEditing: comment)"
              class="comment-html"
              [class.own-comment]="ownComment"
@@ -38,7 +37,7 @@
         </studio-lite-comment-editor>
       </div>
 
-      <div fxFlex="120px">
+      <div class="fx-flex-row-fix-120">
         <button mat-icon-button
                 class="comment-action"
                 matTooltip = "{{'comment.reply' | translate}}"
@@ -54,7 +53,7 @@
                 (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
           <mat-icon>edit</mat-icon>
         </button>
-        <button *ngIf="canDelete"
+        <button *ngIf="ownComment || adminMode"
                 mat-icon-button
                 class="comment-action"
                 matTooltip = "{{'comment.delete' | translate}}"
@@ -73,6 +72,7 @@
         [parentId]="comment.id"
         [replies]="[]"
         [userId]="userId"
+        [adminMode]="adminMode"
         [latestCommentId]="latestCommentId"
         (setActiveComment)="setActiveComment.emit($event)"
         (updateComment)="updateComment.emit($event)"

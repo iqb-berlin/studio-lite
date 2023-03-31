@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { AppService } from '../../../app.service';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   templateUrl: './unit-comments.component.html',

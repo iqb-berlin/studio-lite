@@ -1,5 +1,5 @@
 import {
-  UnitDownloadSettingsDto, UnitExportConfigDto, VeronaModuleFileDto, VeronaModuleInListDto
+  UnitDownloadSettingsDto, UnitExportConfigDto, UnitMetadataDto, VeronaModuleFileDto, VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
@@ -10,6 +10,7 @@ import { VeronaModulesService } from '../database/services/verona-modules.servic
 import { SettingService } from '../database/services/setting.service';
 
 export class UnitDownloadClass {
+  // TODO: Devide into submethods
   static async get(
     workspaceService: WorkspaceService,
     unitService: UnitService,
@@ -19,7 +20,7 @@ export class UnitDownloadClass {
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
     const zip = new AdmZip();
-    const unitKeys: string[] = [];
+    const unitsMetadata: UnitMetadataDto[] = [];
     const usedPlayers: string[] = [];
     const unitExportConfig = new UnitExportConfigDto();
     const unitExportConfigFromDB = await settingService.findUnitExportConfig();
@@ -109,7 +110,7 @@ export class UnitDownloadClass {
         });
       }
       zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
-      unitKeys.push(unitMetadata.key);
+      unitsMetadata.push(unitMetadata);
       if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
     }));
     if (unitDownloadSettings.addPlayers) {
@@ -152,11 +153,11 @@ export class UnitDownloadClass {
       });
       let unitCount = 1;
       const unitsElement = bookletXml.root().ele('Units');
-      unitKeys.forEach(u => {
+      unitsMetadata.forEach(u => {
         unitsElement.ele({
           Unit: {
-            '@id': u,
-            '@label': `Aufgabe ${unitCount}`,
+            '@id': u.key,
+            '@label': u.name || `Aufgabe ${unitCount}`,
             '@labelshort': `${unitCount}`
           }
         });

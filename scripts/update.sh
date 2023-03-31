@@ -46,6 +46,23 @@ create_backup() {
   printf "\nBackup created!\nCurrent release files have been saved at: '%s'\n\n" "$PWD/backup/release/$SOURCE_TAG"
 }
 
+prepare_installation_dir() {
+  mkdir -p ./backup/release
+  mkdir -p ./config/frontend
+  mkdir -p ./config/traefik
+  mkdir -p ./secrets/traefik
+  if [ ! -f ./secrets/traefik/$APP_NAME.crt ]; then
+    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > ./secrets/traefik/$APP_NAME.crt
+  fi
+  if [ ! -f ./secrets/traefik/$APP_NAME.key ]; then
+    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > ./secrets/traefik/$APP_NAME.key
+  fi
+  mkdir -p ./database_dumps
+  mkdir -p ./prometheus
+  mkdir -p ./grafana/provisioning/dashboards
+  mkdir -p ./grafana/provisioning/datasources
+}
+
 run_update_script_in_selected_version() {
   CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update.sh
   NEW_UPDATE_SCRIPT=$REPO_URL/"$TARGET_TAG"/scripts/update.sh
@@ -89,11 +106,14 @@ update_files() {
   echo "Downloading files..."
   download_file docker-compose.yml docker-compose.yml
   download_file docker-compose.prod.yml docker-compose.prod.yml
+  download_file config/traefik/tls-config.yml config/traefik/tls-config.yml
   download_file Makefile scripts/make/prod.mk
-  download_file https_on.sh scripts/https_on.sh
-  chmod +x https_on.sh
-  download_file https_off.sh scripts/https_off.sh
-  chmod +x https_off.sh
+  download_file prometheus/alert.rules prometheus/alert.rules
+  download_file prometheus/prometheus.yml prometheus/prometheus.yml
+  download_file grafana/config.monitoring grafana/config.monitoring
+  download_file grafana/provisioning/dashboards/dashboard.yml grafana/provisioning/dashboards/dashboard.yml
+  download_file grafana/provisioning/dashboards/traefik_rev4.json grafana/provisioning/dashboards/traefik_rev4.json
+  download_file grafana/provisioning/datasources/datasource.yml grafana/provisioning/datasources/datasource.yml
   printf "Downloads done!\n\n"
 }
 
@@ -173,7 +193,6 @@ check_template_files_modifications() {
 
   # check nginx configuration files
   get_modified_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
-  get_modified_file config/frontend/default.conf.https-template config/frontend/default.conf.https-template "conf-file"
 
   printf "Template files update check done.\n\n"
 }
@@ -181,33 +200,9 @@ check_template_files_modifications() {
 customize_settings() {
   # Set application BASE_DIR
   sed -i "s#BASE_DIR :=.*#BASE_DIR := \.#" Makefile
-  sed -i "s#BASE_DIR=.*#BASE_DIR=\.#" https_on.sh
-  sed -i "s#BASE_DIR=.*#BASE_DIR=\.#" https_off.sh
 
   # write chosen version tag to env file
   sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
-}
-
-switch_tls() {
-  read -p 'Use HTTPS? [y/N]: ' -er -n 1 TLS
-  printf "\n"
-
-  if [[ $TLS =~ ^[yY]$ ]]; then
-    # Set server name
-    read -p "SERVER_NAME: " -er -i "${SERVER_NAME}" NEW_SERVER_NAME
-    sed -i "s#SERVER_NAME.*#SERVER_NAME=$NEW_SERVER_NAME#" .env.prod
-
-    # Set https port
-    read -p "HTTPS_PORT: " -er -i "${HTTPS_PORT}" NEW_HTTPS_PORT
-    sed -i "s#HTTPS_PORT.*#HTTPS_PORT=$NEW_HTTPS_PORT#" .env.prod
-    printf "\n"
-
-    ./https_on.sh
-
-  else
-    ./https_off.sh
-  fi
-
 }
 
 finalize_update() {
@@ -224,8 +219,8 @@ finalize_update() {
     fi
 
     if command make -v >/dev/null 2>&1; then
-      printf "\nWhen your files are checked, you could restart the application with 'make production-ramp-up' at the \
-      command line to put the update into effect.\n\n"
+      printf "\nWhen your files are checked, you could restart the application with 'make production-ramp-up' at the "
+      printf "command line to put the update into effect.\n\n"
 
     else
       printf '\nWhen your files are checked, you could restart the docker services to put the update into effect.\n\n'
@@ -289,29 +284,20 @@ SOURCE_TAG=$TAG
 
 if [ -z "$SELECTED_VERSION" ]; then
   echo "Update script started ..."
-  echo
-  echo "1. Update application"
-  echo "2. Switch TLS on/off"
-  read -p 'What do you want to do (1/2): ' -er -n 1 CHOICE
-  printf "\n"
 
-  if [ "$CHOICE" = 1 ]; then
-    get_new_release_version
-    create_backup
-    run_update_script_in_selected_version
-    update_files
-    check_template_files_modifications
-    customize_settings
-    finalize_update
-
-  elif [ "$CHOICE" = 2 ]; then
-    switch_tls
-    application_restart
-  fi
+  get_new_release_version
+  create_backup
+  run_update_script_in_selected_version
+  prepare_installation_dir
+  update_files
+  check_template_files_modifications
+  customize_settings
+  finalize_update
 
 else
   TARGET_TAG="$SELECTED_VERSION"
 
+  prepare_installation_dir
   update_files
   check_template_files_modifications
   customize_settings

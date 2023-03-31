@@ -12,9 +12,12 @@ declare -A ENV_VARS
 ENV_VARS[POSTGRES_USER]=root
 ENV_VARS[POSTGRES_PASSWORD]=$(tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w 16 | head -n 1)
 ENV_VARS[POSTGRES_DB]=$APP_NAME
+ENV_VARS[SERVER_NAME]=hostname.de
 ENV_VARS[HTTP_PORT]=80
+ENV_VARS[HTTPS_PORT]=443
+ENV_VARS[TRAEFIK_AUTH]=admin:$$apr1$$gaS8tVEe$$MjqM8IlBvz2PRFEWcwha1/
 
-ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB HTTP_PORT)
+ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB SERVER_NAME HTTP_PORT HTTPS_PORT TRAEFIK_AUTH)
 
 check_prerequisites() {
   for APP in "${REQUIRED_PACKAGES[@]}"; do
@@ -71,10 +74,14 @@ prepare_installation_dir() {
 
   mkdir -p "$TARGET_DIR"/backup/release
   mkdir -p "$TARGET_DIR"/config/frontend
-  mkdir -p "$TARGET_DIR"/secrets/frontend
-  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/secrets/frontend/$APP_NAME.crt
-  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > "$TARGET_DIR"/secrets/frontend/$APP_NAME.key
+  mkdir -p "$TARGET_DIR"/config/traefik
+  mkdir -p "$TARGET_DIR"/secrets/traefik
+  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/secrets/traefik/$APP_NAME.crt
+  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/secrets/traefik/$APP_NAME.key
   mkdir -p "$TARGET_DIR"/database_dumps
+  mkdir -p "$TARGET_DIR"/prometheus
+  mkdir -p "$TARGET_DIR"/grafana/provisioning/dashboards
+  mkdir -p "$TARGET_DIR"/grafana/provisioning/datasources
 
   cd "$TARGET_DIR"
 }
@@ -95,14 +102,15 @@ download_files() {
   download_file docker-compose.prod.yml docker-compose.prod.yml
   download_file .env.prod.template .env.prod.template
   download_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template
-  download_file config/frontend/default.conf.https-template config/frontend/default.conf.https-template
+  download_file config/traefik/tls-config.yml config/traefik/tls-config.yml
   download_file Makefile scripts/make/prod.mk
   download_file update.sh scripts/update.sh
   chmod +x update.sh
-  download_file https_on.sh scripts/https_on.sh
-  chmod +x https_on.sh
-  download_file https_off.sh scripts/https_off.sh
-  chmod +x https_off.sh
+  download_file prometheus/prometheus.yml prometheus/prometheus.yml
+  download_file grafana/config.monitoring grafana/config.monitoring
+  download_file grafana/provisioning/dashboards/dashboard.yml grafana/provisioning/dashboards/dashboard.yml
+  download_file grafana/provisioning/dashboards/traefik_rev4.json grafana/provisioning/dashboards/traefik_rev4.json
+  download_file grafana/provisioning/datasources/datasource.yml grafana/provisioning/datasources/datasource.yml
   printf "Download done!\n\n"
 }
 
@@ -115,8 +123,6 @@ customize_settings() {
 
   # Set application BASE_DIR
   sed -i "s#BASE_DIR :=.*#BASE_DIR := \.#" Makefile
-  sed -i "s#BASE_DIR=.*#BASE_DIR=\.#" https_on.sh
-  sed -i "s#BASE_DIR=.*#BASE_DIR=\.#" https_off.sh
 
   # Write chosen version tag to env file
   sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
@@ -129,31 +135,6 @@ customize_settings() {
   done
 
   printf "\n\n"
-}
-
-set_tls() {
-  read -p '4. Use HTTPS? [y/N]: ' -er -n 1 TLS
-  printf "\n"
-
-  if [[ $TLS =~ ^[yY]$ ]]; then
-    # Load sample values for environment variables in .env.prod
-    . .env.prod
-
-    # Set server name
-    read -p "SERVER_NAME: " -er -i "${SERVER_NAME}" NEW_SERVER_NAME
-    sed -i "s#SERVER_NAME.*#SERVER_NAME=$NEW_SERVER_NAME#" .env.prod
-
-    # Set https port
-    read -p "HTTPS_PORT: " -er -i "${HTTPS_PORT}" NEW_HTTPS_PORT
-    sed -i "s#HTTPS_PORT.*#HTTPS_PORT=$NEW_HTTPS_PORT#" .env.prod
-    printf "\n"
-
-    ./https_on.sh
-  else
-    ./https_off.sh
-  fi
-
-  printf "\n"
 }
 
 application_start() {
@@ -182,7 +163,5 @@ prepare_installation_dir
 download_files
 
 customize_settings
-
-set_tls
 
 application_start

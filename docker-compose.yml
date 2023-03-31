@@ -5,7 +5,48 @@ x-env-postgres: &env-postgres
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_DB: ${POSTGRES_DB}
 
+x-env-logging: &env-logging
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
+  traefik:
+    image: traefik:2.9
+    ports:
+      - "${HTTP_PORT}:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-network
+      - application-network
+
+  prometheus:
+    image: prom/prometheus:v2.43.0
+    restart: on-failure
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_vol:/prometheus
+    networks:
+      - application-network
+    logging:
+      <<: *env-logging
+
+  grafana:
+    image: grafana/grafana:9.4.7
+    depends_on:
+      - prometheus
+    restart: on-failure
+    env_file:
+      - ./grafana/config.monitoring
+    volumes:
+      - grafana_vol:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    networks:
+      - application-network
+    logging:
+      <<: *env-logging
+
   db:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
     restart: always
@@ -18,7 +59,7 @@ services:
       interval: "1s"
       retries: 60
     networks:
-      - backend-network
+      - application-network
 
   liquibase:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
@@ -27,9 +68,17 @@ services:
         condition: service_healthy
     environment:
       <<: *env-postgres
-    command: ["liquibase", "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update"]
+    command: [
+      "liquibase",
+      "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",
+      "--username=$POSTGRES_USER",
+      "--password=$POSTGRES_PASSWORD",
+      "--classpath=changelog",
+      "--changeLogFile=studio-lite.changelog-root.xml",
+      "update"
+    ]
     networks:
-      - backend-network
+      - application-network
 
   backend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
@@ -43,7 +92,7 @@ services:
       API_HOST: backend
       <<: *env-postgres
     networks:
-      - backend-network
+      - application-network
 
   frontend:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
@@ -56,13 +105,16 @@ services:
         condition: service_started
     restart: always
     networks:
-      - backend-network
-      - frontend-network
+      - application-network
 
 volumes:
   db_vol:
   backend_vol:
+  prometheus_vol:
+  grafana_vol:
 
 networks:
-  backend-network:
-  frontend-network:
+  application-network:
+    name: app-net
+  traefik-network:
+    name: traefik-net

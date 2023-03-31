@@ -1,0 +1,65 @@
+<div class="fx-column-start-stretch">
+  <h1 mat-dialog-title>{{'workspace.reviews' | translate}}</h1>
+  <mat-dialog-content>
+    <div class="fx-row-start-stretch fx-gap-20">
+      <div class="fx-column-space-between-stretch fx-flex-row-20 review-list-area">
+        <mat-nav-list class="reviews">
+          <a mat-list-item style="height: unset;text-overflow: ellipsis"
+             *ngFor="let review of reviews"
+             class="review-list-entry"
+             (click)="selectReview(review.id)"
+             [class]="review.id === selectedReviewId ? 'review-list-entry selected' : 'review-list-entry'">
+            {{review.name}}
+          </a>
+        </mat-nav-list>
+        <studio-lite-review-menu
+          [selectedReviewId]="selectedReviewId"
+          [units]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
+          [workspaceId]="workspaceService.selectedWorkspaceId"
+          [link]="reviewDataOriginal.link ? reviewDataOriginal.link : ''"
+          [passwordLength]="reviewDataOriginal.password ? reviewDataOriginal.password.length : 0"
+          [bookletConfigSettings]="reviewDataOriginal.settings?.bookletConfig"
+          [(changed)]="changed"
+          (reviewListChange)="loadReviewList($event)">
+        </studio-lite-review-menu>
+      </div>
+
+      <div class="fx-column-start-stretch fx-flex-row-80"
+           [class.review-changed]="changed"
+           [class.review-not-changed]="!changed">
+        <div class="fx-row-start-stretch fx-flex fx-gap-20 review-changes-area">
+          <div class="fx-flex-row-50">
+            <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
+            <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
+                              [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
+                              (selectionChanged)="unitSelectionChanged($event)"
+                              [workspace]="workspaceService.selectedWorkspaceId">
+            </studio-lite-select-unit-list>
+          </div>
+          <studio-lite-review-config class="fx-flex-row-50 settings"
+                                     [selectedReviewId]="selectedReviewId"
+                                     [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
+                                     [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
+                                     [(name)]="reviewDataToChange.name"
+                                     [(password)]="reviewDataToChange.password"
+                                     (reviewChange)="changed = detectChanges()"
+                                     (bookletConfigSettingsChange)="bookletConfigSettingsChange($event)"
+                                     (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">
+          </studio-lite-review-config>
+        </div>
+        <studio-lite-review-save-changes [changed]="changed"
+                                         (discardChanges)="discardChanges()"
+                                         (saveChanges)="saveChanges()">
+        </studio-lite-review-save-changes>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="fx-column-start-stretch">
+    <div class="fx-row-start-stretch">
+      <button mat-raised-button [mat-dialog-close]="false" [disabled]="changed">
+        {{'dialogs.close' | translate}}
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

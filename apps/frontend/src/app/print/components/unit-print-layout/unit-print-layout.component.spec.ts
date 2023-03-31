@@ -13,6 +13,9 @@ describe('UnitPrintLayoutComponent', () => {
   class MockUnitPrintHeaderComponent {
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
+    @Input() description!: string | undefined | null;
+    @Input() reference!: string | undefined | null;
+    @Input() transcript!: string | undefined | null;
     @Input() groupName!: string | undefined | null;
     @Input() player!: string;
     @Input() editor!: string | undefined | null;

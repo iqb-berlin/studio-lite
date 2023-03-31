@@ -3,11 +3,11 @@ import {
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { WorkspaceService } from '../workspace.service';
+import { WorkspaceService } from '../services/workspace.service';
 import { AppService } from '../../app.service';
-import { BackendService } from '../backend.service';
+import { BackendService } from '../services/backend.service';
 import { WorkspaceDataFlat } from '../../app.classes';
-import { SelectUnitListComponent } from './components/select-unit-list.component';
+import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
 
 export interface SelectUnitData {
   title: string,
@@ -31,8 +31,8 @@ export interface SelectUnitData {
               </mat-form-field>
           </form>
           <mat-dialog-content>
-              <select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspaceId"
-                                [multiple]="data.multiple"></select-unit-list>
+              <studio-lite-select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspaceId"
+                                [multiple]="data.multiple"></studio-lite-select-unit-list>
           </mat-dialog-content>
 
           <mat-dialog-actions>
