@@ -9,8 +9,8 @@ import { PageData, StatusVisual } from './unit-preview.classes';
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { UnitDefinitionStore } from '../../workspace.classes';
 import { PreviewService } from './preview.service';
+import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 
 @Component({
   templateUrl: './unit-preview.component.html',

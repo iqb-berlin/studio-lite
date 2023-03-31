@@ -6,7 +6,7 @@ import { ModuleService } from '@studio-lite/studio-components';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../app.service';
-import { UnitSchemeStore } from '../../workspace.classes';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 @Component({
   template: `

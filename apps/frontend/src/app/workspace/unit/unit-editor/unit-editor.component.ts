@@ -8,7 +8,7 @@ import { ModuleService } from '@studio-lite/studio-components';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../app.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { UnitDefinitionStore } from '../../workspace.classes';
+import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 
 @Component({
   template: `
