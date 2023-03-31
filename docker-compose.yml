@@ -68,7 +68,15 @@ services:
         condition: service_healthy
     environment:
       <<: *env-postgres
-    command: [ "liquibase", "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",  "--username=$POSTGRES_USER", "--password=$POSTGRES_PASSWORD", "--classpath=changelog", "--changeLogFile=studio-lite.changelog-root.xml", "update" ]
+    command: [
+      "liquibase",
+      "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",
+      "--username=$POSTGRES_USER",
+      "--password=$POSTGRES_PASSWORD",
+      "--classpath=changelog",
+      "--changeLogFile=studio-lite.changelog-root.xml",
+      "update"
+    ]
     networks:
       - application-network
 
