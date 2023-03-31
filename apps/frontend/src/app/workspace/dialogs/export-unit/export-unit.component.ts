@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { BookletConfigDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   templateUrl: './export-unit.component.html',

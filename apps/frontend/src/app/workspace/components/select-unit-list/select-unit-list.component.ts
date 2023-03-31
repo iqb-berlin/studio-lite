@@ -6,7 +6,7 @@ import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-select-unit-list',

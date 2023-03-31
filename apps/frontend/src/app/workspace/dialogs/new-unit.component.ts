@@ -3,7 +3,7 @@ import {
   Component, ElementRef, Inject, ViewChild
 } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { WorkspaceService } from '../workspace.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 export interface NewUnitData {
   title: string,

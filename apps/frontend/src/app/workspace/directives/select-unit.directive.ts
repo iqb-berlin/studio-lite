@@ -1,8 +1,8 @@
 import { Directive, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
-import { WorkspaceService } from '../workspace.service';
-import { BackendService } from '../backend.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { BackendService } from '../services/backend.service';
 
 @Directive()
 export abstract class SelectUnitDirective {

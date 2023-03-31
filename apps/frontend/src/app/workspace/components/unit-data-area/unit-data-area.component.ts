@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { MatTabNav } from '@angular/material/tabs';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   selector: 'studio-lite-unit-data-area',

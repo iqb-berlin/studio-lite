@@ -3,8 +3,8 @@ import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
-import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../app.service';
 import { UnitSchemeStore } from '../../workspace.classes';
 

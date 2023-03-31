@@ -8,7 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom, map } from 'rxjs';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../../dialogs/group-manage.component';
 import { ReviewsComponent } from '../../dialogs/reviews/reviews.component';
 import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
@@ -17,7 +17,7 @@ import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.compone
 import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
 import { EditWorkspaceSettingsComponent } from '../../../components/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../backend.service';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';

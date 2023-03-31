@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-update-units-button',

@@ -4,7 +4,7 @@ import {
 import { ModuleService } from '@studio-lite/studio-components';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
-import { BackendService } from '../../../workspace/backend.service';
+import { BackendService } from '../../../workspace/services/backend.service';
 import { AppService } from '../../../app.service';
 
 @Component({

@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogData, SaveOrDiscardComponent } from '../dialogs/save-or-discard.component';
-import { WorkspaceService } from '../workspace.service';
+import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceComponent } from '../workspace.component';
 
 @Injectable()

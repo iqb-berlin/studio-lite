@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { AppService } from '../../../app.service';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-delete-review-button',

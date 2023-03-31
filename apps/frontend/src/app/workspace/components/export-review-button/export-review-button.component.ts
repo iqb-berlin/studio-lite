@@ -5,8 +5,8 @@ import { saveAs } from 'file-saver-es';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { AppService } from '../../../app.service';
-import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-export-review-button',
