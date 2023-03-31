@@ -8,6 +8,7 @@ import { BackendService as AppBackendService } from '../backend.service';
 import { WorkspaceService } from './workspace.service';
 
 @Component({
+  selector: 'studio-lite-workspace',
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.css']
 })
