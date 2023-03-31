@@ -4,7 +4,7 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ModuleService, SelectModuleComponent } from '@studio-lite/studio-components';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   templateUrl: './unit-metadata.component.html',

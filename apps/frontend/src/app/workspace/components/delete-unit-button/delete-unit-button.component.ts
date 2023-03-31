@@ -5,8 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
-import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 

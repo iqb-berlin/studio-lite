@@ -6,11 +6,13 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
-import { BackendService as AppBackendService } from '../backend.service';
+import { BackendService as AppBackendService } from '../../backend.service';
 import {
-  UnitDefinitionStore, UnitMetadataStore, UnitSchemeStore
-} from './workspace.classes';
-import { AppService } from '../app.service';
+  UnitMetadataStore
+} from '../classes/unit-metadata-store';
+import { AppService } from '../../app.service';
+import { UnitSchemeStore } from '../classes/unit-scheme-store';
+import { UnitDefinitionStore } from '../classes/unit-definition-store';
 
 @Injectable({
   providedIn: 'root'

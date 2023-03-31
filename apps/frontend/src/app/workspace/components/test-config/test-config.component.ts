@@ -3,8 +3,8 @@ import {
 } from '@angular/core';
 import { ModuleService } from '@studio-lite/studio-components';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { WorkspaceService } from '../../workspace.service';
-import { BackendService } from '../../backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-test-config',

@@ -5,9 +5,10 @@ import { ModuleService } from '@studio-lite/studio-components';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { AppService } from '../app.service';
 import { BackendService as AppBackendService } from '../backend.service';
-import { WorkspaceService } from './workspace.service';
+import { WorkspaceService } from './services/workspace.service';
 
 @Component({
+  selector: 'studio-lite-workspace',
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.css']
 })

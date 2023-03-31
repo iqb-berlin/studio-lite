@@ -5,9 +5,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Sort } from '@angular/material/sort';
-import { WorkspaceService } from '../../workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { UnitTableComponent } from '../unit-table/unit-table.component';
 
 @Component({

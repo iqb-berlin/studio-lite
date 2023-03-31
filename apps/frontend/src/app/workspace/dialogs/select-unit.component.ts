@@ -3,9 +3,9 @@ import {
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { WorkspaceService } from '../workspace.service';
+import { WorkspaceService } from '../services/workspace.service';
 import { AppService } from '../../app.service';
-import { BackendService } from '../backend.service';
+import { BackendService } from '../services/backend.service';
 import { WorkspaceDataFlat } from '../../app.classes';
 import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
 

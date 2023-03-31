@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { InputTextComponent } from '../../../components/input-text.component';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 
 @Component({

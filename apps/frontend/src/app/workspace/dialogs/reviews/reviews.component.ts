@@ -5,8 +5,8 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
-import { BackendService } from '../../backend.service';
-import { WorkspaceService } from '../../workspace.service';
+import { BackendService } from '../../services/backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../app.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 

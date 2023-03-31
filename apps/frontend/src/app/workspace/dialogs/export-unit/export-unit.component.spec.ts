@@ -21,6 +21,7 @@ describe('ExportUnitComponent', () => {
     @Input() initialSelection!: number[];
     @Input() workspace!: unknown;
     @Input() showGroups!: boolean;
+    @Input() selectionCount!: number;
   }
 
   @Component({ selector: 'studio-lite-test-config', template: '' })
