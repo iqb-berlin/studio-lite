@@ -260,6 +260,14 @@ div.logo img {
   align-items: flex-end;
 }
 
+.fx-column-center-end {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
 .fx-flex-fill {
   flex: 1 1 0;
   box-sizing: border-box;

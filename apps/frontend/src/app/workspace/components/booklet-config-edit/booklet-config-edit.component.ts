@@ -24,6 +24,7 @@ export class BookletConfigEditComponent {
   controllerDesignOptions = ['2018', '2022'];
   unitScreenHeaderOptions = ['OFF', 'WITH_UNIT_TITLE', 'WITH_BOOKLET_TITLE', 'WITH_BLOCK_TITLE', 'EMPTY'];
   unitTitleOptions = ['OFF', 'ON'];
+
   bookletConfig: BookletConfigDto = bookletConfigDefault;
   @Output() configChanged = new EventEmitter<BookletConfigDto>();
   @Input('disabled') disabled = false;
