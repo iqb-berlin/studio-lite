@@ -13,8 +13,9 @@
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.pagingMode"
                 (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of pagingModeOptions" [value]="c">
-        {{xmlParams.checked ? c : 'booklet-config.pagingMode.' + c | translate}}
+      <mat-option *ngFor="let option of pagingModeOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.pagingMode.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -25,8 +26,9 @@
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.pageNaviButtons"
                 (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of pageNaviButtonsOptions" [value]="c">
-        {{xmlParams.checked ? c : 'booklet-config.pageNaviButtons.' + c | translate}}
+      <mat-option *ngFor="let option of pageNaviButtonsOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.pageNaviButtons.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -37,8 +39,9 @@
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.unitNaviButtons"
                 (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of unitNaviButtonsOptions" [value]="c">
-        {{xmlParams.checked ? c : 'booklet-config.unitNaviButtons.' + c | translate}}
+      <mat-option *ngFor="let option of unitNaviButtonsOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.unitNaviButtons.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -49,8 +52,9 @@
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.controllerDesign"
                 (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of controllerDesignOptions" [value]="c">
-        {{xmlParams.checked ? c : 'booklet-config.controllerDesign.' + c | translate}}
+      <mat-option *ngFor="let option of controllerDesignOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.controllerDesign.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -61,8 +65,9 @@
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.unitScreenHeader"
                 (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of unitScreenHeaderOptions" [value]="c">
-        {{xmlParams.checked ? c : 'booklet-config.unitScreenHeader.' + c | translate}}
+      <mat-option *ngFor="let option of unitScreenHeaderOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.unitScreenHeader.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -73,8 +78,9 @@
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.unitTitle"
                 (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of unitTitleOptions" [value]="c">
-        {{xmlParams.checked ? c : 'booklet-config.unitTitle.' + c | translate}}
+      <mat-option *ngFor="let option of unitTitleOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.unitTitle.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
