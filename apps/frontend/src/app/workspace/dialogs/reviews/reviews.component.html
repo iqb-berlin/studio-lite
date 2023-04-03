@@ -30,7 +30,7 @@
         <div class="fx-row-start-stretch fx-flex-fill fx-gap-20 review-changes-area">
           <div class="fx-flex-row-50">
             <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
-            <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
+            <studio-lite-select-unit-list [hidden]="selectedReviewId === 0"
                               [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
                               (selectionChanged)="unitSelectionChanged($event)"
                               [workspace]="workspaceService.selectedWorkspaceId">
