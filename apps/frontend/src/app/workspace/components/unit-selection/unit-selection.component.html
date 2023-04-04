@@ -1,10 +1,11 @@
-<studio-lite-search-unit #filterInput></studio-lite-search-unit>
-<studio-lite-unit-table
-  [hasSortHeader]="true"
-  [unitList]="[]"
-  (sortChange)="sortUnitTables($event)">
-</studio-lite-unit-table>
-
+<div class="selection-header">
+  <studio-lite-search-unit #filterInput></studio-lite-search-unit>
+  <studio-lite-unit-table
+    [hasSortHeader]="true"
+    [unitList]="[]"
+    (sortChange)="sortUnitTables($event)">
+  </studio-lite-unit-table>
+</div>
 <studio-lite-unit-group *ngFor="let unitGroup of (unitList | keyvalue)"
                        class="unit-group"
                        [expanded]="true"
