@@ -37,6 +37,7 @@
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
                                                              unitExportSettings.addTestTakersMonitor)"
+                                               [config]="bookletConfigSettings"
                                                (configChanged)="setBookletConfigSettings($event)">
               </studio-lite-booklet-config-edit>
           </mat-expansion-panel>

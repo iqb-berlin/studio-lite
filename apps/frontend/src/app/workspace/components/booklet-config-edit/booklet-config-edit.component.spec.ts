@@ -24,6 +24,7 @@ describe('ReviewConfigEditComponent', () => {
 
     fixture = TestBed.createComponent(BookletConfigEditComponent);
     component = fixture.componentInstance;
+    component.config = undefined;
     fixture.detectChanges();
   });
 

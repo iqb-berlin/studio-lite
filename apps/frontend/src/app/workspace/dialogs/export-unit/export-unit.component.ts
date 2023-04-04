@@ -27,10 +27,17 @@ export class ExportUnitComponent {
     unitTitle: 'unit_title'
   };
 
+  bookletConfigSettings: BookletConfigDto | undefined;
+
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletSettings: BookletConfigDto },
+    @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletConfigSettings: BookletConfigDto },
     public workspaceService: WorkspaceService
-  ) {}
+  ) {
+    if (this.data && this.data.bookletConfigSettings) {
+      this.bookletConfigSettings = data.bookletConfigSettings;
+      this.setBookletConfigSettings(this.bookletConfigSettings);
+    }
+  }
 
   setBookletConfigSettings(booklet: BookletConfigDto) {
     this.unitExportSettings.bookletSettings = Object.keys(booklet)
