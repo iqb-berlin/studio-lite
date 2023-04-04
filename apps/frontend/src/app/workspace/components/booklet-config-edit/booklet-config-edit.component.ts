@@ -3,15 +3,6 @@ import {
 } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 
-const bookletConfigDefault = {
-  pagingMode: '',
-  pageNaviButtons: '',
-  unitNaviButtons: '',
-  controllerDesign: '',
-  unitScreenHeader: '',
-  unitTitle: ''
-};
-
 @Component({
   selector: 'studio-lite-booklet-config-edit',
   templateUrl: './booklet-config-edit.component.html',
@@ -25,15 +16,19 @@ export class BookletConfigEditComponent {
   unitScreenHeaderOptions = ['OFF', 'WITH_UNIT_TITLE', 'WITH_BOOKLET_TITLE', 'WITH_BLOCK_TITLE', 'EMPTY'];
   unitTitleOptions = ['OFF', 'ON'];
 
-  bookletConfig: BookletConfigDto = bookletConfigDefault;
+  bookletConfig!: BookletConfigDto;
+
   @Output() configChanged = new EventEmitter<BookletConfigDto>();
-  @Input('disabled') disabled = false;
+  @Input() disabled = false;
   @Input('config')
   set config(value: BookletConfigDto | undefined) {
-    this.bookletConfig = value || bookletConfigDefault;
-  }
-
-  get config(): BookletConfigDto {
-    return this.bookletConfig;
+    this.bookletConfig = value || {
+      pagingMode: '',
+      pageNaviButtons: '',
+      unitNaviButtons: '',
+      controllerDesign: '',
+      unitScreenHeader: '',
+      unitTitle: ''
+    };
   }
 }

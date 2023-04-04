@@ -20,6 +20,7 @@ describe('ReviewConfigEditComponent', () => {
 
     fixture = TestBed.createComponent(ReviewConfigEditComponent);
     component = fixture.componentInstance;
+    component.config = undefined;
     fixture.detectChanges();
   });
 
