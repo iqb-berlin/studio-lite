@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ReviewDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
-import { UserIssue } from './user-issue.interface';
+import { UserIssue } from '../components/user-issues/user-issue.interface';
 
 @Pipe({
   name: 'userIssues'
