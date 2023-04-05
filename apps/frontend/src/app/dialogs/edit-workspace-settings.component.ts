@@ -14,7 +14,7 @@ import { AppService } from '../app.service';
           <div fxLayout="row" fxLayoutAlign="space-between start">
                   <mat-label>Voreingestellter Editor</mat-label>
                   <app-select-module [modules]="this.moduleService.editors"
-                                     type="editor" [value]="dialogData.defaultEditor"
+                                     [value]="dialogData.defaultEditor"
                                      (selectionChanged)="selectModul('editor', $event)"
                                      [stableOnly]="false"
                                      fxFlex="55%" moduleType="editor"></app-select-module>
@@ -22,7 +22,7 @@ import { AppService } from '../app.service';
           <div fxLayout="row" fxLayoutAlign="space-between start">
                   <mat-label>Voreingestellter Player</mat-label>
                   <app-select-module [modules]="this.moduleService.players"
-                                     type="player" [value]="dialogData.defaultPlayer"
+                                     [value]="dialogData.defaultPlayer"
                                      [stableOnly]="false"
                                      (selectionChanged)="selectModul('player', $event)"
                                      fxFlex="55%" moduleType="player"></app-select-module>
@@ -30,7 +30,7 @@ import { AppService } from '../app.service';
           <div fxLayout="row" fxLayoutAlign="space-between start">
                   <mat-label>Voreingestellter Schemer</mat-label>
                   <app-select-module [modules]="this.moduleService.schemers"
-                                     type="schemer" [value]="dialogData.defaultSchemer"
+                                     [value]="dialogData.defaultSchemer"
                                      [stableOnly]="false"
                                      (selectionChanged)="selectModul('schemer', $event)"
                                      fxFlex="55%" moduleType="schemer"></app-select-module>
