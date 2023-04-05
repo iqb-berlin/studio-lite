@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({

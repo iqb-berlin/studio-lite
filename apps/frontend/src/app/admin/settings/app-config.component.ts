@@ -3,9 +3,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { BackendService as WriteBackendService } from '../backend.service';
-import { BackendService as ReadBackendService } from '../../backend.service';
+import { BackendService as ReadBackendService } from '../../services/backend.service';
 import { AppConfig } from '../../app.classes';
-import { defaultAppConfig } from '../../app.service';
+import { defaultAppConfig } from '../../services/app.service';
 
 @Component({
   selector: 'app-app-config',

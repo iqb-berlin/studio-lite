@@ -18,8 +18,8 @@ import {
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
-import { BackendService as AppBackendService } from '../../backend.service';
-import { AppService } from '../../app.service';
+import { BackendService as AppBackendService } from '../../services/backend.service';
+import { AppService } from '../../services/app.service';
 import { UserToCheckCollection } from '../users/usersChecked';
 import { WsgAdminService } from '../wsg-admin.service';
 import { InputTextComponent } from '../../dialogs/input-text.component';

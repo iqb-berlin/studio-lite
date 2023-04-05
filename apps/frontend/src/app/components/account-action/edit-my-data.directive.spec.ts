@@ -4,8 +4,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditMyDataDirective } from './edit-my-data.directive';
 import { environment } from '../../../environments/environment';
-import { AppService } from '../../app.service';
-import { BackendService } from '../../backend.service';
+import { AppService } from '../../services/app.service';
+import { BackendService } from '../../services/backend.service';
 
 describe('EditMyDataDirective', () => {
   beforeEach(async () => {

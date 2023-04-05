@@ -11,7 +11,7 @@ import {
 import {
   BackendService
 } from '../backend.service';
-import { AppService } from '../../app.service';
+import { AppService } from '../../services/app.service';
 import { WorkspaceToCheckCollection } from '../workspaces/workspaceChecked';
 import { WsgAdminService } from '../wsg-admin.service';
 

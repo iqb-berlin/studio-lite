@@ -9,9 +9,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { NewUnitComponent, NewUnitData } from '../../dialogs/new-unit.component';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
-import { BackendService as AppBackendService } from '../../../backend.service';
+import { BackendService as AppBackendService } from '../../../services/backend.service';
 import { RequestMessageDialogComponent } from '../../../dialogs/request-message-dialog.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 

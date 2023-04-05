@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { InputTextComponent } from '../../../dialogs/input-text.component';
 import { WorkspaceService } from '../../services/workspace.service';
-import { BackendService as AppBackendService } from '../../../backend.service';
+import { BackendService as AppBackendService } from '../../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-new-group-button',

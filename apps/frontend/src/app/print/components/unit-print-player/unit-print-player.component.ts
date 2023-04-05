@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ModuleService } from '@studio-lite/studio-components';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { BackendService } from '../../../workspace/services/backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-store';

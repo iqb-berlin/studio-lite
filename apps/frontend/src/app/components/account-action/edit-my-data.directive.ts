@@ -4,8 +4,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormGroup } from '@angular/forms';
 import { MyDataDto } from '@studio-lite-lib/api-dto';
 import { EditMyDataComponent } from '../edit-my-data.component';
-import { BackendService } from '../../backend.service';
-import { AppService } from '../../app.service';
+import { BackendService } from '../../services/backend.service';
+import { AppService } from '../../services/app.service';
 
 @Directive({
   selector: '[studioLiteEditMyData]'

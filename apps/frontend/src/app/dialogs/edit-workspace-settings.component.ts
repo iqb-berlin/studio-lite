@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ModuleService } from '@studio-lite/studio-components';
-import { AppService } from '../app.service';
+import { AppService } from '../services/app.service';
 
 @Component({
   template: `

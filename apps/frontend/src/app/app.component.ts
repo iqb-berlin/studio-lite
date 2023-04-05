@@ -6,8 +6,8 @@ import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { de } from 'date-fns/locale';
 import { setDefaultOptions } from 'date-fns';
-import { AppService, standardLogo } from './app.service';
-import { BackendService } from './backend.service';
+import { AppService, standardLogo } from './services/app.service';
+import { BackendService } from './services/backend.service';
 import { AppConfig } from './app.classes';
 
 @Component({

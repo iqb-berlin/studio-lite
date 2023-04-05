@@ -5,8 +5,8 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AppService } from '../../app.service';
-import { BackendService } from '../../backend.service';
+import { AppService } from '../../services/app.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-login',

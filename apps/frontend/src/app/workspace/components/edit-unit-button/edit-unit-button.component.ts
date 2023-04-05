@@ -16,9 +16,9 @@ import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.compo
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
 import { RequestMessageDialogComponent } from '../../../dialogs/request-message-dialog.component';
 import { EditWorkspaceSettingsComponent } from '../../../dialogs/edit-workspace-settings.component';
-import { BackendService as AppBackendService } from '../../../backend.service';
+import { BackendService as AppBackendService } from '../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 

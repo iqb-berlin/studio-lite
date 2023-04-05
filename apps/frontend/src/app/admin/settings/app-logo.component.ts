@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { BackendService as WriteBackendService } from '../backend.service';
-import { BackendService as ReadBackendService } from '../../backend.service';
+import { BackendService as ReadBackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'app-app-logo',

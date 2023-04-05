@@ -7,7 +7,7 @@ import {
 } from '@angular/common/http';
 import { finalize, Observable, tap } from 'rxjs';
 import { AppHttpError } from './app.classes';
-import { AppService } from './app.service';
+import { AppService } from './services/app.service';
 
 @Injectable({
   providedIn: 'root'

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WsgAdminService } from './wsg-admin.service';
 import { BackendService } from './backend.service';
-import { AppService } from '../app.service';
+import { AppService } from '../services/app.service';
 
 @Component({
   template: `

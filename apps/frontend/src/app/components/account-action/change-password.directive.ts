@@ -1,7 +1,7 @@
 import { Directive, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { ChangePasswordComponent } from '../change-password.component';
 
 @Directive({

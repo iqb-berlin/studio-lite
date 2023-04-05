@@ -36,7 +36,7 @@ import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
-import { BackendService } from './backend.service';
+import { BackendService } from './services/backend.service';
 import { AboutComponent } from './components/about.component';
 import { HomeComponent } from './components/home.component';
 import { ChangePasswordComponent } from './components/change-password.component';

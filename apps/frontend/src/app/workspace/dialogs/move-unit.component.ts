@@ -3,7 +3,7 @@ import {
   Component, Inject, OnInit, ViewChild
 } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { AppService } from '../../app.service';
+import { AppService } from '../../services/app.service';
 import { WorkspaceDataFlat } from '../../app.classes';
 import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
 

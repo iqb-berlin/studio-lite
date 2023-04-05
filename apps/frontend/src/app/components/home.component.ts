@@ -2,8 +2,8 @@ import {
   Component, Inject, OnInit
 } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import { BackendService } from '../backend.service';
-import { AppService } from '../app.service';
+import { BackendService } from '../services/backend.service';
+import { AppService } from '../services/app.service';
 import { AppConfig } from '../app.classes';
 
 @Component({

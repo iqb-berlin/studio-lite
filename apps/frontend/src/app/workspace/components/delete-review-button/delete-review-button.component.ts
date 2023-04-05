@@ -5,7 +5,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 
 @Component({

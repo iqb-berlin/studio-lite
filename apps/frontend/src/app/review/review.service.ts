@@ -6,7 +6,7 @@ import { lastValueFrom, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { UnitData } from './classes/unit-data.class';
 import { BackendService } from './backend.service';
-import { AppService } from '../app.service';
+import { AppService } from '../services/app.service';
 
 @Injectable({
   providedIn: 'root'
