@@ -15,7 +15,9 @@ import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.co
 import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
 import { RequestMessageDialogComponent } from '../../../dialogs/request-message-dialog.component';
-import { EditWorkspaceSettingsComponent } from '../../../dialogs/edit-workspace-settings.component';
+import {
+  EditWorkspaceSettingsComponent
+} from '../../../dialogs/edit-workspace-settings/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../services/app.service';

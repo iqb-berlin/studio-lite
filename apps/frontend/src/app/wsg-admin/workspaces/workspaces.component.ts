@@ -23,7 +23,9 @@ import { AppService } from '../../services/app.service';
 import { UserToCheckCollection } from '../users/usersChecked';
 import { WsgAdminService } from '../wsg-admin.service';
 import { InputTextComponent } from '../../dialogs/input-text.component';
-import { EditWorkspaceSettingsComponent } from '../../dialogs/edit-workspace-settings.component';
+import {
+  EditWorkspaceSettingsComponent
+} from '../../dialogs/edit-workspace-settings/edit-workspace-settings.component';
 
 const datePipe = new DatePipe('de-DE');
 

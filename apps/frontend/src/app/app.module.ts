@@ -44,7 +44,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageDialogComponent } from './dialogs/request-message-dialog.component';
 import { InputTextComponent } from './dialogs/input-text.component';
 import { EditMyDataComponent } from './components/edit-my-data.component';
-import { EditWorkspaceSettingsComponent } from './dialogs/edit-workspace-settings.component';
+import { EditWorkspaceSettingsComponent } from './dialogs/edit-workspace-settings/edit-workspace-settings.component';
 import { UserWorkspacesGroupsComponent } from './components/user-workspaces-groups/user-workspaces-groups.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';

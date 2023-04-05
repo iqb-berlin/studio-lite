@@ -99,6 +99,13 @@
       "unit-copy": "Aufgaben kopieren - unvollständig"
     }
   },
+  "workspace-settings": {
+    "title": "Einstellungen für den Arbeitsbereich",
+    "default-player": "Voreingestellter Player",
+    "default-editor": "Voreingestellter Editor",
+    "default-schemer": "Voreingestellter Schemer",
+    "only-stable-modules": "Nur Module zur Auswahl anzeigen, die als \"stabil\" markiert sind (keine Beta-Versionen)."
+  },
   "modules": {
     "editor-name": "Editor",
     "player-name": "Vorschau (Player)",
