@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { UserIssue } from './user-issue.interface';
+import { UserIssue } from '../../interfaces/user-issue.interface';
 
 @Component({
   selector: 'studio-lite-user-issues',
