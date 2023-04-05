@@ -248,6 +248,7 @@
     "delete": "Löschen"
   },
   "booklet-config": {
+    "show-xml-params": "XML Parameter zeigen",
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
       "separate":  "Getrennt - Zugriff über Navigation",

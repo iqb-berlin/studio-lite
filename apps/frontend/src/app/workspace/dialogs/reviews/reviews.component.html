@@ -27,10 +27,10 @@
       <div class="fx-column-start-stretch fx-flex-row-80"
            [class.review-changed]="changed"
            [class.review-not-changed]="!changed">
-        <div class="fx-row-start-stretch fx-flex fx-gap-20 review-changes-area">
+        <div class="fx-row-start-stretch fx-flex-fill fx-gap-20 review-changes-area">
           <div class="fx-flex-row-50">
             <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
-            <studio-lite-select-unit-list #unitSelectionTable [hidden]="selectedReviewId === 0"
+            <studio-lite-select-unit-list [hidden]="selectedReviewId === 0"
                               [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
                               (selectionChanged)="unitSelectionChanged($event)"
                               [workspace]="workspaceService.selectedWorkspaceId">
@@ -39,9 +39,9 @@
           <studio-lite-review-config class="fx-flex-row-50 settings"
                                      [selectedReviewId]="selectedReviewId"
                                      [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
-                                     [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
-                                     [(name)]="reviewDataToChange.name"
-                                     [(password)]="reviewDataToChange.password"
+                                     [reviewConfigSettings]="reviewDataOriginal.settings?.reviewConfig"
+                                     [(name)]="reviewDataOriginal.name"
+                                     [(password)]="reviewDataOriginal.password"
                                      (reviewChange)="changed = detectChanges()"
                                      (bookletConfigSettingsChange)="bookletConfigSettingsChange($event)"
                                      (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">

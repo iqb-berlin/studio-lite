@@ -1,17 +1,17 @@
 <div class="fx-column-start-stretch">
-  <mat-checkbox (change)="configChanged.emit(config);"
-                [disabled]="disabled"
-                [(ngModel)]="reviewConfig.showCoding">
+  <mat-checkbox [disabled]="disabled"
+                [(ngModel)]="reviewConfig.showCoding"
+                (change)="configChanged.emit(reviewConfig)">
     {{'workspace.review-show-codes' | translate}}
   </mat-checkbox>
-  <mat-checkbox (change)="configChanged.emit(config);"
-                [disabled]="disabled"
-                [(ngModel)]="reviewConfig.canComment">
+  <mat-checkbox [disabled]="disabled"
+                [(ngModel)]="reviewConfig.canComment"
+                (change)="configChanged.emit(reviewConfig)">
     {{'workspace.review-allow-comments' | translate}}
   </mat-checkbox>
-  <mat-checkbox (change)="configChanged.emit(config);"
-                [disabled]="disabled"
-                [(ngModel)]="reviewConfig.showOthersComments">
+  <mat-checkbox [disabled]="disabled"
+                [(ngModel)]="reviewConfig.showOthersComments"
+                (change)="configChanged.emit(reviewConfig);">
     {{'workspace.review-show-comments' | translate}}
   </mat-checkbox>
 </div>

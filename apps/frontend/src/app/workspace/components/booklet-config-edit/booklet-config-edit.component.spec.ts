@@ -3,6 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { BookletConfigEditComponent } from './booklet-config-edit.component';
 
 describe('ReviewConfigEditComponent', () => {
@@ -15,6 +16,7 @@ describe('ReviewConfigEditComponent', () => {
       imports: [
         FormsModule,
         MatSelectModule,
+        MatSlideToggleModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ]
@@ -22,6 +24,7 @@ describe('ReviewConfigEditComponent', () => {
 
     fixture = TestBed.createComponent(BookletConfigEditComponent);
     component = fixture.componentInstance;
+    component.config = undefined;
     fixture.detectChanges();
   });
 

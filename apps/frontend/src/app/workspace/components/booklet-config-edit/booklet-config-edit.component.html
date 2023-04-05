@@ -1,61 +1,86 @@
 <div class="fx-column-start-stretch">
+
+  <mat-slide-toggle #xmlParams
+                    class="show-xml-params"
+                    labelPosition = 'before'>
+    {{'booklet-config.show-xml-params' | translate}}
+  </mat-slide-toggle>
+
   <mat-form-field>
-    <mat-select [placeholder]="'booklet-config.pagingMode.label' | translate"
+    <mat-select [placeholder]="xmlParams.checked ?
+                  'pagingMode' :
+                  'booklet-config.pagingMode.label' | translate"
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.pagingMode"
-                (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of pagingModeOptions" [value]="c">
-        {{'booklet-config.pagingMode.' + c | translate}}
+                (selectionChange)="configChanged.emit(bookletConfig)">
+      <mat-option *ngFor="let option of pagingModeOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.pagingMode.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <mat-select [placeholder]="'booklet-config.pageNaviButtons.label' | translate"
+    <mat-select [placeholder]="xmlParams.checked ?
+                  'page_navibuttons' :
+                  'booklet-config.pageNaviButtons.label' | translate"
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.pageNaviButtons"
-                (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of pageNaviButtonsOptions" [value]="c">
-        {{'booklet-config.pageNaviButtons.' + c | translate}}
+                (selectionChange)="configChanged.emit(bookletConfig)">
+      <mat-option *ngFor="let option of pageNaviButtonsOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.pageNaviButtons.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <mat-select [placeholder]="'booklet-config.unitNaviButtons.label' | translate"
+    <mat-select [placeholder]="xmlParams.checked ?
+                  'unit_navibuttons' :
+                  'booklet-config.unitNaviButtons.label' | translate"
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.unitNaviButtons"
-                (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of unitNaviButtonsOptions" [value]="c">
-        {{'booklet-config.unitNaviButtons.' + c | translate}}
+                (selectionChange)="configChanged.emit(bookletConfig)">
+      <mat-option *ngFor="let option of unitNaviButtonsOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.unitNaviButtons.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <mat-select [placeholder]="'booklet-config.controllerDesign.label' | translate"
+    <mat-select [placeholder]="xmlParams.checked ?
+                  'controller_design' :
+                  'booklet-config.controllerDesign.label' | translate"
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.controllerDesign"
-                (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of controllerDesignOptions" [value]="c">
-        {{'booklet-config.controllerDesign.' + c | translate}}
+                (selectionChange)="configChanged.emit(bookletConfig)">
+      <mat-option *ngFor="let option of controllerDesignOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.controllerDesign.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <mat-select [placeholder]="'booklet-config.unitScreenHeader.label' | translate"
+    <mat-select [placeholder]="xmlParams.checked ?
+                  'unit_screenheader' :
+                  'booklet-config.unitScreenHeader.label' | translate"
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.unitScreenHeader"
-                (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of unitScreenHeaderOptions" [value]="c">
-        {{'booklet-config.unitScreenHeader.' + c | translate}}
+                (selectionChange)="configChanged.emit(bookletConfig)">
+      <mat-option *ngFor="let option of unitScreenHeaderOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.unitScreenHeader.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <mat-select [placeholder]="'booklet-config.unitTitle.label' | translate"
+    <mat-select [placeholder]="xmlParams.checked ?
+                  'unit_title' :
+                  'booklet-config.unitTitle.label' | translate"
                 [disabled]="disabled"
                 [(ngModel)]="bookletConfig.unitTitle"
-                (selectionChange)="configChanged.emit(config)">
-      <mat-option *ngFor="let c of unitTitleOptions" [value]="c">
-        {{'booklet-config.unitTitle.' + c | translate}}
+                (selectionChange)="configChanged.emit(bookletConfig)">
+      <mat-option *ngFor="let option of unitTitleOptions"
+                  [value]="option">
+        {{xmlParams.checked ? option : 'booklet-config.unitTitle.' + option | translate}}
       </mat-option>
     </mat-select>
   </mat-form-field>
