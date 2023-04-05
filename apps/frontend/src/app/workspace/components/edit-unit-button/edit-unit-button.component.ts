@@ -58,7 +58,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
+      if (result) {
         this.workspaceService.workspaceSettings.defaultEditor = result.defaultEditor;
         this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
         this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;

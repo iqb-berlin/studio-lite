@@ -141,7 +141,7 @@ export class WorkspacesComponent implements OnInit {
               data: wsSettings
             });
             dialogRef.afterClosed().subscribe(result => {
-              if (result !== false) {
+              if (result) {
                 this.appService.dataLoading = true;
                 wsSettings.defaultEditor = result.defaultEditor;
                 wsSettings.defaultPlayer = result.defaultPlayer;
