@@ -4,8 +4,8 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { BackendService as WriteBackendService } from '../backend.service';
 import { BackendService as ReadBackendService } from '../../services/backend.service';
-import { AppConfig } from '../../app.classes';
 import { defaultAppConfig } from '../../services/app.service';
+import { AppConfig } from '../../classes/app-config.class';
 
 @Component({
   selector: 'app-app-config',

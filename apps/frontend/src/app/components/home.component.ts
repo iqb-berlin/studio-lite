@@ -4,7 +4,7 @@ import {
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { BackendService } from '../services/backend.service';
 import { AppService } from '../services/app.service';
-import { AppConfig } from '../app.classes';
+import { AppConfig } from '../classes/app-config.class';
 
 @Component({
   templateUrl: './home.component.html',

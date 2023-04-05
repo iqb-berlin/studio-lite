@@ -6,8 +6,8 @@ import {
   HttpInterceptor, HttpHeaders
 } from '@angular/common/http';
 import { finalize, Observable, tap } from 'rxjs';
-import { AppHttpError } from './app.classes';
 import { AppService } from './services/app.service';
+import { AppHttpError } from './classes/app-http-error.class';
 
 @Injectable({
   providedIn: 'root'

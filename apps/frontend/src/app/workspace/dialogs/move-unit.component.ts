@@ -4,8 +4,8 @@ import {
 } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { AppService } from '../../services/app.service';
-import { WorkspaceDataFlat } from '../../app.classes';
 import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
+import { WorkspaceDataFlat } from '../../classes/workspace-data-flat.class';
 
 export interface MoveUnitData {
   title: string,

@@ -1,27 +1,5 @@
-// eslint-disable-next-line max-classes-per-file
 import { DomSanitizer, SafeUrl, Title } from '@angular/platform-browser';
 import { ConfigDto } from '@studio-lite-lib/api-dto';
-import { HttpErrorResponse } from '@angular/common/http';
-
-export interface WorkspaceDataFlat {
-  id: number;
-  name: string;
-  groupId: number;
-  groupName: string;
-  selected: boolean;
-}
-
-export class AppHttpError {
-  status: number;
-  message: string;
-  method = '';
-  urlWithParams = '';
-  id = 0;
-  constructor(errorObj: HttpErrorResponse) {
-    this.status = errorObj.error instanceof ErrorEvent ? 999 : errorObj.status;
-    this.message = errorObj.error instanceof ErrorEvent ? (<ErrorEvent>errorObj.error).message : errorObj.message;
-  }
-}
 
 export class AppConfig {
   readonly appTitle: string;
