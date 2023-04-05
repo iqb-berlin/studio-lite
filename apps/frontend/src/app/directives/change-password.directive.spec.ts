@@ -2,8 +2,8 @@ import { inject, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { environment } from '../../../environments/environment';
-import { BackendService } from '../../services/backend.service';
+import { environment } from '../../environments/environment';
+import { BackendService } from '../services/backend.service';
 import { ChangePasswordDirective } from './change-password.directive';
 
 describe('ChangePasswordDirective', () => {

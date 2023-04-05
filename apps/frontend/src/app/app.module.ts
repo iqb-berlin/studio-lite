@@ -49,9 +49,9 @@ import { UserWorkspacesGroupsComponent } from './components/user-workspaces-grou
 import { LoginComponent } from './components/login/login.component';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';
 import { AccountActionComponent } from './components/account-action/account-action.component';
-import { ChangePasswordDirective } from './components/account-action/change-password.directive';
-import { EditMyDataDirective } from './components/account-action/edit-my-data.directive';
-import { LogoutDirective } from './components/account-action/logout.directive';
+import { ChangePasswordDirective } from './directives/change-password.directive';
+import { EditMyDataDirective } from './directives/edit-my-data.directive';
+import { LogoutDirective } from './directives/logout.directive';
 import { UserWorkspacesAreaComponent } from './components/user-workspaces-area/user-workspaces-area.component';
 import { WarningComponent } from './components/warning/warning.component';
 import { AreaTitleComponent } from './components/area-title/area-title.component';

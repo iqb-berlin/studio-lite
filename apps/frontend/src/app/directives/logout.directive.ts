@@ -1,8 +1,8 @@
 import { Directive, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { AppService } from '../../services/app.service';
-import { BackendService } from '../../services/backend.service';
+import { AppService } from '../services/app.service';
+import { BackendService } from '../services/backend.service';
 
 @Directive({
   selector: '[studioLiteLogout]'

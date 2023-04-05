@@ -2,9 +2,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { inject, TestBed } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { LogoutDirective } from './logout.directive';
-import { AppService } from '../../services/app.service';
-import { BackendService } from '../../services/backend.service';
-import { environment } from '../../../environments/environment';
+import { AppService } from '../services/app.service';
+import { BackendService } from '../services/backend.service';
+import { environment } from '../../environments/environment';
 
 describe('LogoutDirective', () => {
   beforeEach(async () => {
