@@ -40,7 +40,7 @@ import { BackendService } from './services/backend.service';
 import { AboutComponent } from './components/about.component';
 import { HomeComponent } from './components/home.component';
 import { ChangePasswordComponent } from './components/change-password.component';
-import { AuthInterceptor } from './auth.interceptor';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageDialogComponent } from './dialogs/request-message-dialog.component';
 import { InputTextComponent } from './dialogs/input-text.component';
 import { EditMyDataComponent } from './components/edit-my-data.component';
