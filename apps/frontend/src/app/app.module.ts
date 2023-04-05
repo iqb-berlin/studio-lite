@@ -37,7 +37,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
 import { BackendService } from './services/backend.service';
-import { AboutComponent } from './components/about.component';
+import { AboutComponent } from './components/about/about.component';
 import { HomeComponent } from './components/home.component';
 import { ChangePasswordComponent } from './components/change-password.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
