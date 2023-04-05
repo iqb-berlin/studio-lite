@@ -22,8 +22,8 @@ import { BackendService as AppBackendService } from '../../backend.service';
 import { AppService } from '../../app.service';
 import { UserToCheckCollection } from '../users/usersChecked';
 import { WsgAdminService } from '../wsg-admin.service';
-import { InputTextComponent } from '../../components/input-text.component';
-import { EditWorkspaceSettingsComponent } from '../../components/edit-workspace-settings.component';
+import { InputTextComponent } from '../../dialogs/input-text.component';
+import { EditWorkspaceSettingsComponent } from '../../dialogs/edit-workspace-settings.component';
 
 const datePipe = new DatePipe('de-DE');
 

@@ -12,7 +12,7 @@ import { NewUnitComponent, NewUnitData } from '../../dialogs/new-unit.component'
 import { AppService } from '../../../app.service';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../backend.service';
-import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
+import { RequestMessageDialogComponent } from '../../../dialogs/request-message-dialog.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
