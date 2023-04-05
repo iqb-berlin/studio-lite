@@ -2,7 +2,7 @@ import { Directive, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../services/backend.service';
-import { ChangePasswordComponent } from '../components/change-password.component';
+import { ChangePasswordComponent } from '../components/change-password/change-password.component';
 
 @Directive({
   selector: '[studioLiteChangePassword]'

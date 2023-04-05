@@ -1,5 +1,7 @@
 {
   "next": "Weiter",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
   },
@@ -68,7 +70,11 @@
     "imprint": "Impressum/Datenschutz",
     "logout": "Abmelden",
     "changePassword": "Kennwort ändern",
+    "password-info": "Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.",
     "password": "Kennwort",
+    "old-password": "Altes Kennwort",
+    "new-password": "Neues Kennwort",
+    "repeat-new-password": "Neues Kennwort (Wiederholung)",
     "user-name": "Anmeldename",
     "editMyData": "Name/E-Mail ändern",
     "login": "Anmelden",
