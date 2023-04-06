@@ -2,21 +2,9 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  template: `
-<h1 mat-dialog-title>{{ confirmData.title }}</h1>
-<mat-dialog-content>
-  <p>
-    {{ confirmData.content }}
-  </p>
-</mat-dialog-content>
-<mat-dialog-actions>
-    <button mat-raised-button color="primary" [mat-dialog-close]="confirmData.confirmButtonReturn">
-    {{ confirmData.confirmButtonLabel }}
-    </button>
-  <button mat-raised-button [mat-dialog-close]="confirmData.confirmButton2Return"
-    *ngIf="confirmData.confirmButton2Label !== undefined">{{ confirmData.confirmButton2Label }}</button>
-  <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
-</mat-dialog-actions>`
+  selector: 'studio-lite-save-or-discard',
+  templateUrl: './save-or-discard.component.html',
+  styleUrls: ['./save-or-discard.component.scss']
 })
 export class SaveOrDiscardComponent implements OnInit {
   constructor(

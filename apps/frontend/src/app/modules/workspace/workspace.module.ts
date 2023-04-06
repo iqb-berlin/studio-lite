@@ -38,7 +38,7 @@ import { SelectUnitComponent } from './components/select-unit/select-unit.compon
 import { MoveUnitComponent } from './components/move-unit/move-unit.component';
 import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
-import { SaveOrDiscardComponent } from './components/save-or-discard.component';
+import { SaveOrDiscardComponent } from './components/save-or-discard/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
 import { UnitPreviewComponent } from './components/unit-preview/unit-preview.component';
 import { ExportUnitComponent } from './components/export-unit/export-unit.component';
