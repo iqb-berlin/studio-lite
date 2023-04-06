@@ -12,7 +12,9 @@ import { NewUnitComponent, NewUnitData } from '../../dialogs/new-unit.component'
 import { AppService } from '../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../services/backend.service';
-import { RequestMessageDialogComponent } from '../../../dialogs/request-message-dialog.component';
+import {
+  RequestMessageDialogComponent
+} from '../../../dialogs/request-message-dialog/request-message-dialog.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
@@ -212,7 +214,6 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
             if (uploadStatus.messages && uploadStatus.messages.length > 0) {
               const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
                 width: '500px',
-                height: '600px',
                 data: uploadStatus
               });
               dialogRef.afterClosed().subscribe(() => {

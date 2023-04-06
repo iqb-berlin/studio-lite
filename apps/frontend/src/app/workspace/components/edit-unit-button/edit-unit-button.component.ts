@@ -14,7 +14,9 @@ import { ReviewsComponent } from '../../dialogs/reviews/reviews.component';
 import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
 import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
-import { RequestMessageDialogComponent } from '../../../dialogs/request-message-dialog.component';
+import {
+  RequestMessageDialogComponent
+} from '../../../dialogs/request-message-dialog/request-message-dialog.component';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../dialogs/edit-workspace-settings/edit-workspace-settings.component';
@@ -121,7 +123,6 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
               } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
                 const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
                   width: '500px',
-                  height: '600px',
                   data: uploadStatus
                 });
                 dialogRef2.afterClosed().subscribe(() => {
