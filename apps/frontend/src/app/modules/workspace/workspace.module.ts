@@ -39,7 +39,7 @@ import { MoveUnitComponent } from './dialogs/move-unit.component';
 import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
-import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
+import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
 import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
 import { ExportUnitComponent } from './dialogs/export-unit/export-unit.component';
 import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
