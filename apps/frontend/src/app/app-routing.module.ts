@@ -9,23 +9,23 @@ const routes: Routes = [
   { path: 'about', component: AboutComponent },
   {
     path: 'print',
-    loadChildren: () => import('./print/print.module').then(module => module.PrintModule)
+    loadChildren: () => import('../modules/print/print.module').then(module => module.PrintModule)
   },
   {
     path: 'admin',
-    loadChildren: () => import('./admin/admin.module').then(module => module.AdminModule)
+    loadChildren: () => import('../modules/admin/admin.module').then(module => module.AdminModule)
   },
   {
     path: 'a/:ws',
-    loadChildren: () => import('./workspace/workspace.module').then(module => module.WorkspaceModule)
+    loadChildren: () => import('../modules/workspace/workspace.module').then(module => module.WorkspaceModule)
   },
   {
     path: 'wsg-admin/:wsg',
-    loadChildren: () => import('./wsg-admin/wsg-admin.module').then(module => module.WsgAdminModule)
+    loadChildren: () => import('../modules/wsg-admin/wsg-admin.module').then(module => module.WsgAdminModule)
   },
   {
     path: 'review/:review',
-    loadChildren: () => import('./review/review.module').then(module => module.ReviewModule)
+    loadChildren: () => import('../modules/review/review.module').then(module => module.ReviewModule)
   },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: ':login', redirectTo: 'home/:login', pathMatch: 'full' }
