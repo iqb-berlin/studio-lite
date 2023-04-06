@@ -13,8 +13,8 @@ import { AppService } from '../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../services/backend.service';
 import {
-  RequestMessageDialogComponent
-} from '../../../dialogs/request-message-dialog/request-message-dialog.component';
+  RequestMessageComponent
+} from '../../../dialogs/request-message/request-message.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({
@@ -212,7 +212,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
           } else {
             this.appService.dataLoading = false;
             if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-              const dialogRef = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+              const dialogRef = this.uploadReportDialog.open(RequestMessageComponent, {
                 width: '500px',
                 data: uploadStatus
               });

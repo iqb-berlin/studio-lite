@@ -2,15 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { RequestMessageDialogComponent } from './request-message-dialog.component';
+import { RequestMessageComponent } from './request-message.component';
 
-describe('RequestMessageDialogComponent', () => {
-  let component: RequestMessageDialogComponent;
-  let fixture: ComponentFixture<RequestMessageDialogComponent>;
+describe('RequestMessageComponent', () => {
+  let component: RequestMessageComponent;
+  let fixture: ComponentFixture<RequestMessageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RequestMessageDialogComponent],
+      declarations: [RequestMessageComponent],
       imports: [
         MatDialogModule,
         MatIconModule,
@@ -24,7 +24,7 @@ describe('RequestMessageDialogComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(RequestMessageDialogComponent);
+    fixture = TestBed.createComponent(RequestMessageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

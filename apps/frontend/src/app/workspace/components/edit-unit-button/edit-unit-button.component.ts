@@ -15,8 +15,8 @@ import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.co
 import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
 import {
-  RequestMessageDialogComponent
-} from '../../../dialogs/request-message-dialog/request-message-dialog.component';
+  RequestMessageComponent
+} from '../../../dialogs/request-message/request-message.component';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../dialogs/edit-workspace-settings/edit-workspace-settings.component';
@@ -121,7 +121,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
                   { duration: 3000 }
                 );
               } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-                const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
                   width: '500px',
                   data: uploadStatus
                 });

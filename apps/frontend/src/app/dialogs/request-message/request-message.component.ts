@@ -4,10 +4,10 @@ import { RequestReportDto } from '@studio-lite-lib/api-dto';
 
 @Component({
   selector: 'studio-lite-request-message',
-  templateUrl: './request-message-dialog.component.html',
-  styleUrls: ['./request-message-dialog.component.scss']
+  templateUrl: './request-message.component.html',
+  styleUrls: ['./request-message.component.scss']
 })
-export class RequestMessageDialogComponent {
+export class RequestMessageComponent {
   messageType: 'error' | 'warning' | 'info' = 'info';
   messageData: RequestReportDto;
   constructor(@Inject(MAT_DIALOG_DATA) public data: unknown) {
