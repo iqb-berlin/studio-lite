@@ -9,7 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
-import { GroupManageComponent } from '../group-manage.component';
+import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
 import { WorkspaceUserListComponent } from '../workspace-user-list.component';
 import { ExportUnitComponent } from '../export-unit/export-unit.component';

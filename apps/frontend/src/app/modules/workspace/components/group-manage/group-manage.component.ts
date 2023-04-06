@@ -6,13 +6,14 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
-import { BackendService } from '../services/backend.service';
-import { WorkspaceService } from '../services/workspace.service';
-import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
-import { AppService } from '../../../services/app.service';
-import { InputTextComponent } from '../../../components/input-text/input-text.component';
+import { BackendService } from '../../services/backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { AppService } from '../../../../services/app.service';
+import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 
 @Component({
+  selector: 'studio-lite-group-manage',
   templateUrl: './group-manage.component.html',
   styleUrls: ['./group-manage.component.scss']
 })
