@@ -45,7 +45,7 @@ import { ExportUnitComponent } from './components/export-unit/export-unit.compon
 import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './components/select-unit-list/select-unit-list.component';
 import { UserListComponent } from './components/user-list/user-list.component';
-import { WorkspaceUserListComponent } from './components/workspace-user-list.component';
+import { WorkspaceUserListComponent } from './components/workspace-user-list/workspace-user-list.component';
 import {
   PagingModeSelectionComponent
 } from './components/paging-mode-selection/paging-mode-selection.component';

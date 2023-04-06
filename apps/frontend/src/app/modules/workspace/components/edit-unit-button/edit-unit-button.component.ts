@@ -11,7 +11,7 @@ import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
-import { WorkspaceUserListComponent } from '../workspace-user-list.component';
+import { WorkspaceUserListComponent } from '../workspace-user-list/workspace-user-list.component';
 import { ExportUnitComponent } from '../export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../move-unit.component';
 import {
