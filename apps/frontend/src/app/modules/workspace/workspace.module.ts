@@ -36,20 +36,20 @@ import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './components/new-unit.component';
 import { SelectUnitComponent } from './components/select-unit.component';
 import { MoveUnitComponent } from './components/move-unit.component';
-import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.component';
-import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
+import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
+import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './components/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
-import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
+import { UnitPreviewComponent } from './components/unit-preview/unit-preview.component';
 import { ExportUnitComponent } from './components/export-unit/export-unit.component';
-import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
+import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './components/select-unit-list/select-unit-list.component';
 import { UserListComponent } from './components/user-list/user-list.component';
 import { WorkspaceUserListComponent } from './components/workspace-user-list.component';
 import {
   PagingModeSelectionComponent
-} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
-import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
+} from './components/paging-mode-selection/paging-mode-selection.component';
+import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './components/reviews/reviews.component';
 import { GroupManageComponent } from './components/group-manage.component';
