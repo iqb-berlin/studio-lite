@@ -33,7 +33,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
-import { NewUnitComponent } from './components/new-unit.component';
+import { NewUnitComponent } from './components/new-unit/new-unit.component';
 import { SelectUnitComponent } from './components/select-unit/select-unit.component';
 import { MoveUnitComponent } from './components/move-unit.component';
 import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
