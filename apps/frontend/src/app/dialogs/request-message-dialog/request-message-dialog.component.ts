@@ -3,25 +3,9 @@ import { Component, Inject } from '@angular/core';
 import { RequestReportDto } from '@studio-lite-lib/api-dto';
 
 @Component({
-  template: `
-    <div fxLayout="column" style="height: 100%">
-      <h1 mat-dialog-title>
-        <mat-icon>{{messageType}}</mat-icon>
-        {{ ('dialogs.request-report-source.' + messageData.source) | translate }}
-      </h1>
-      <mat-dialog-content>
-        <ul>
-          <li *ngFor="let m of messageData.messages">
-            <strong>{{m.objectKey}}</strong>: {{m.messageKey | translate}}
-          </li>
-        </ul>
-      </mat-dialog-content>
-      <mat-dialog-actions>
-        <button mat-raised-button [mat-dialog-close]="false">{{ 'dialogs.close' | translate }}</button>
-      </mat-dialog-actions>
-    </div>
-  `,
-  styles: ['mat-dialog-content { padding-bottom: 30px;}']
+  selector: 'studio-lite-request-message',
+  templateUrl: './request-message-dialog.component.html',
+  styleUrls: ['./request-message-dialog.component.scss']
 })
 export class RequestMessageDialogComponent {
   messageType: 'error' | 'warning' | 'info' = 'info';

@@ -41,7 +41,7 @@ import { AboutComponent } from './components/about/about.component';
 import { HomeComponent } from './components/home.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { RequestMessageDialogComponent } from './dialogs/request-message-dialog.component';
+import { RequestMessageDialogComponent } from './dialogs/request-message-dialog/request-message-dialog.component';
 import { InputTextComponent } from './dialogs/input-text/input-text.component';
 import { EditMyDataComponent } from './components/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './dialogs/edit-workspace-settings/edit-workspace-settings.component';
