@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { PagingMode } from '../interfaces/unit.interfaces';
+import { PagingMode } from '../models/unit-page.model';
 
 @Injectable({
   providedIn: 'root'
