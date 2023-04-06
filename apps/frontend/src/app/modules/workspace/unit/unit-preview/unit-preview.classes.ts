@@ -1,15 +1,5 @@
 export type PagingMode = 'separate' | 'concat-scroll' | 'concat-scroll-snap';
 
-export interface KeyValuePairString {
-  [K: string]: string;
-}
-
-export interface PendingUnitData {
-  playerId: string;
-  unitState: string;
-  unitDefinition: string;
-}
-
 export interface PageData {
   index: number;
   id: string;
@@ -22,10 +12,4 @@ export interface StatusVisual {
   label: string;
   color: string;
   description: string;
-}
-
-export interface StateReportEntry {
-  key: string; // TestStateKey | TestLogEntryKey | UnitStateKey | PlayerLogKey (unknown, up to the player)
-  timeStamp: number;
-  content: string;
 }
