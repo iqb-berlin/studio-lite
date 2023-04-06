@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { PagingMode } from '../unit-preview.classes';
+import { PagingMode } from '../../../interfaces/unit.interfaces';
 import { PreviewService } from '../../../services/preview.service';
 
 @Component({
