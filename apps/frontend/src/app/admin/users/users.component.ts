@@ -19,7 +19,7 @@ import {
 import {
   BackendService
 } from '../backend.service';
-import { AppService } from '../../app.service';
+import { AppService } from '../../services/app.service';
 import { EditUserComponent } from './edituser.component';
 import { WorkspaceGroupToCheckCollection } from '../workspace-groups/workspaceChecked';
 

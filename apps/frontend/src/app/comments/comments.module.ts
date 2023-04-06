@@ -25,7 +25,7 @@ import { RootCommentsPipe } from './pipes/root-comments.pipe';
 import { RepliesPipe } from './pipes/replies.pipe';
 import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into-view.directive';
-import { AuthInterceptor } from '../auth.interceptor';
+import { AuthInterceptor } from '../interceptors/auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
 import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
 import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';

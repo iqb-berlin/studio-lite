@@ -36,29 +36,29 @@ import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
-import { BackendService } from './backend.service';
-import { AboutComponent } from './home/about.component';
-import { HomeComponent } from './home/home.component';
-import { ChangePasswordComponent } from './home/change-password.component';
-import { AuthInterceptor } from './auth.interceptor';
-import { RequestMessageDialogComponent } from './components/request-message-dialog.component';
-import { InputTextComponent } from './components/input-text.component';
-import { EditMyDataComponent } from './home/edit-my-data.component';
-import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings.component';
-import { UserWorkspacesGroupsComponent } from './home/user-workspaces-groups/user-workspaces-groups.component';
-import { LoginComponent } from './home/login/login.component';
-import { UserMenuComponent } from './home/user-menu/user-menu.component';
-import { AccountActionComponent } from './home/account-action/account-action.component';
-import { ChangePasswordDirective } from './home/account-action/change-password.directive';
-import { EditMyDataDirective } from './home/account-action/edit-my-data.directive';
-import { LogoutDirective } from './home/account-action/logout.directive';
-import { UserWorkspacesAreaComponent } from './home/user-workspaces-area/user-workspaces-area.component';
-import { WarningComponent } from './home/warning/warning.component';
-import { AreaTitleComponent } from './home/area-title/area-title.component';
-import { AppInfoComponent } from './home/app-info/app-info.component';
-import { UserReviewsAreaComponent } from './home/user-reviews-area/user-reviews-area.component';
-import { UserIssuesComponent } from './home/user-issues/user-issues.component';
-import { UserIssuesPipe } from './home/user-issues/issues-pipe.pipe';
+import { BackendService } from './services/backend.service';
+import { AboutComponent } from './components/about/about.component';
+import { HomeComponent } from './components/home.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { RequestMessageComponent } from './components/request-message/request-message.component';
+import { InputTextComponent } from './components/input-text/input-text.component';
+import { EditMyDataComponent } from './components/edit-my-data.component';
+import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
+import { UserWorkspacesGroupsComponent } from './components/user-workspaces-groups/user-workspaces-groups.component';
+import { LoginComponent } from './components/login/login.component';
+import { UserMenuComponent } from './components/user-menu/user-menu.component';
+import { AccountActionComponent } from './components/account-action/account-action.component';
+import { ChangePasswordDirective } from './directives/change-password.directive';
+import { EditMyDataDirective } from './directives/edit-my-data.directive';
+import { LogoutDirective } from './directives/logout.directive';
+import { UserWorkspacesAreaComponent } from './components/user-workspaces-area/user-workspaces-area.component';
+import { WarningComponent } from './components/warning/warning.component';
+import { AreaTitleComponent } from './components/area-title/area-title.component';
+import { AppInfoComponent } from './components/app-info/app-info.component';
+import { UserReviewsAreaComponent } from './components/user-reviews-area/user-reviews-area.component';
+import { UserIssuesComponent } from './components/user-issues/user-issues.component';
+import { UserIssuesPipe } from './pipes/issues-pipe.pipe';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -70,7 +70,7 @@ export function createTranslateLoader(http: HttpClient) {
     HomeComponent,
     AboutComponent,
     ChangePasswordComponent,
-    RequestMessageDialogComponent,
+    RequestMessageComponent,
     InputTextComponent,
     EditMyDataComponent,
     EditWorkspaceSettingsComponent,

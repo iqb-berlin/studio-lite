@@ -14,7 +14,7 @@ import {
 import { ModuleService, VeronaModuleClass } from '@studio-lite/studio-components';
 import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../backend.service';
-import { AppService } from '../../app.service';
+import { AppService } from '../../services/app.service';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
 
 @Component({

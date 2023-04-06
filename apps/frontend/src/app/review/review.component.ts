@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ReviewService } from './review.service';
-import { AppService } from '../app.service';
+import { AppService } from '../services/app.service';
 import { CommentDialogComponent } from './comment-dialog.component';
 
 @Component({

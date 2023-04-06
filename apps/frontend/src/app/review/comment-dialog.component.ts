@@ -1,7 +1,7 @@
 import { MatDialogRef } from '@angular/material/dialog';
 import { Component, OnInit } from '@angular/core';
 import { ReviewService } from './review.service';
-import { AppService } from '../app.service';
+import { AppService } from '../services/app.service';
 
 const NAME_LOCAL_STORAGE_KEY = 'iqb-studio-user-name-for-review-comments';
 

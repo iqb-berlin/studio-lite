@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({

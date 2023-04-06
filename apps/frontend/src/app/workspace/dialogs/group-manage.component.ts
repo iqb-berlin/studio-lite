@@ -9,8 +9,8 @@ import { combineLatest } from 'rxjs';
 import { BackendService } from '../services/backend.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
-import { AppService } from '../../app.service';
-import { InputTextComponent } from '../../components/input-text.component';
+import { AppService } from '../../services/app.service';
+import { InputTextComponent } from '../../components/input-text/input-text.component';
 
 @Component({
   templateUrl: './group-manage.component.html',

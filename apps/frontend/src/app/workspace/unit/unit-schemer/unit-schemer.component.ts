@@ -5,7 +5,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 @Component({

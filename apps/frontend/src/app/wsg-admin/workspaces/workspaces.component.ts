@@ -18,12 +18,14 @@ import {
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
-import { BackendService as AppBackendService } from '../../backend.service';
-import { AppService } from '../../app.service';
+import { BackendService as AppBackendService } from '../../services/backend.service';
+import { AppService } from '../../services/app.service';
 import { UserToCheckCollection } from '../users/usersChecked';
 import { WsgAdminService } from '../wsg-admin.service';
-import { InputTextComponent } from '../../components/input-text.component';
-import { EditWorkspaceSettingsComponent } from '../../components/edit-workspace-settings.component';
+import { InputTextComponent } from '../../components/input-text/input-text.component';
+import {
+  EditWorkspaceSettingsComponent
+} from '../../components/edit-workspace-settings/edit-workspace-settings.component';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -139,7 +141,7 @@ export class WorkspacesComponent implements OnInit {
               data: wsSettings
             });
             dialogRef.afterClosed().subscribe(result => {
-              if (result !== false) {
+              if (result) {
                 this.appService.dataLoading = true;
                 wsSettings.defaultEditor = result.defaultEditor;
                 wsSettings.defaultPlayer = result.defaultPlayer;

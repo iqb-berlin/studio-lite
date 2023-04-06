@@ -1,0 +1,26 @@
+<h1 mat-dialog-title>{{typedData.title}}</h1>
+<mat-dialog-content>
+  <form [formGroup]="textInputForm"
+        class="fx-column-start-stretch">
+    <mat-form-field>
+      <input matInput
+             formControlName="text"
+             [placeholder]="typedData.prompt">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="textInputForm.get('text')?.value"
+          [disabled]="textInputForm.invalid">
+    {{typedData.okButtonLabel}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+

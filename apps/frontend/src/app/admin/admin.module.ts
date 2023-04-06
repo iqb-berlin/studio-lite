@@ -35,7 +35,7 @@ import { VeronaModulesTableComponent } from './verona-modules/verona-modules-tab
 import { SettingsComponent } from './settings/settings.component';
 import { EditWorkspaceGroupComponent } from './workspace-groups/edit-workspace-group.component';
 import { AppConfigComponent } from './settings/app-config.component';
-import { AuthInterceptor } from '../auth.interceptor';
+import { AuthInterceptor } from '../interceptors/auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './settings/app-logo.component';
 import { UnitExportConfigComponent } from './settings/unit-export-config.component';

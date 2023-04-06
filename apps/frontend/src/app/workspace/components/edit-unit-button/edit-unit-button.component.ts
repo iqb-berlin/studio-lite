@@ -14,11 +14,15 @@ import { ReviewsComponent } from '../../dialogs/reviews/reviews.component';
 import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
 import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
-import { RequestMessageDialogComponent } from '../../../components/request-message-dialog.component';
-import { EditWorkspaceSettingsComponent } from '../../../components/edit-workspace-settings.component';
-import { BackendService as AppBackendService } from '../../../backend.service';
+import {
+  RequestMessageComponent
+} from '../../../components/request-message/request-message.component';
+import {
+  EditWorkspaceSettingsComponent
+} from '../../../components/edit-workspace-settings/edit-workspace-settings.component';
+import { BackendService as AppBackendService } from '../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
 
@@ -56,7 +60,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
+      if (result) {
         this.workspaceService.workspaceSettings.defaultEditor = result.defaultEditor;
         this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
         this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
@@ -117,9 +121,8 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
                   { duration: 3000 }
                 );
               } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-                const dialogRef2 = this.uploadReportDialog.open(RequestMessageDialogComponent, {
+                const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
                   width: '500px',
-                  height: '600px',
                   data: uploadStatus
                 });
                 dialogRef2.afterClosed().subscribe(() => {

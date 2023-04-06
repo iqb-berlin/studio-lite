@@ -6,11 +6,11 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
-import { BackendService as AppBackendService } from '../../backend.service';
+import { BackendService as AppBackendService } from '../../services/backend.service';
 import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
-import { AppService } from '../../app.service';
+import { AppService } from '../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 
