@@ -1,0 +1,25 @@
+<div fxLayout="column" style="height: 100%">
+  <h1 mat-dialog-title>{{ data.title }}</h1>
+  <form [formGroup]="selectForm" *ngIf="selectForm" fxLayout="column">
+    <mat-form-field>
+      <mat-select placeholder="Arbeitsbereich" formControlName="wsSelector"
+                  (selectionChange)="updateWorkspace($event.value)">
+        <mat-option *ngFor="let ws of workspaceList" [value]="ws.id">
+          {{ws.groupName}}: {{ws.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+  <mat-dialog-content>
+    <studio-lite-select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspaceId"
+                                  [multiple]="data.multiple"></studio-lite-select-unit-list>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-raised-button color="primary" type="submit"
+            [mat-dialog-close]="true"
+            [disabled]="unitSelectionTable.selectionCount === 0">
+      {{data.buttonLabel}}</button>
+    <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+  </mat-dialog-actions>
+</div>

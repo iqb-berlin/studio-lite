@@ -3,11 +3,11 @@ import {
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { WorkspaceService } from '../services/workspace.service';
-import { AppService } from '../../../services/app.service';
-import { BackendService } from '../services/backend.service';
-import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
-import { WorkspaceDataFlat } from '../../../classes/workspace-data-flat.class';
+import { WorkspaceService } from '../../services/workspace.service';
+import { AppService } from '../../../../services/app.service';
+import { BackendService } from '../../services/backend.service';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { WorkspaceDataFlat } from '../../../../classes/workspace-data-flat.class';
 
 export interface SelectUnitData {
   title: string,
@@ -17,33 +17,9 @@ export interface SelectUnitData {
 }
 
 @Component({
-  template: `
-      <div fxLayout="column" style="height: 100%">
-          <h1 mat-dialog-title>{{ data.title }}</h1>
-          <form [formGroup]="selectForm" *ngIf="selectForm" fxLayout="column">
-              <mat-form-field>
-                  <mat-select placeholder="Arbeitsbereich" formControlName="wsSelector"
-                              (selectionChange)="updateWorkspace($event.value)">
-                      <mat-option *ngFor="let ws of workspaceList" [value]="ws.id">
-                          {{ws.groupName}}: {{ws.name}}
-                      </mat-option>
-                  </mat-select>
-              </mat-form-field>
-          </form>
-          <mat-dialog-content>
-              <studio-lite-select-unit-list #unitSelectionTable [workspace]="ds.selectedWorkspaceId"
-                                [multiple]="data.multiple"></studio-lite-select-unit-list>
-          </mat-dialog-content>
-
-          <mat-dialog-actions>
-              <button mat-raised-button color="primary" type="submit"
-                      [mat-dialog-close]="true"
-                      [disabled]="unitSelectionTable.selectionCount === 0">
-                  {{data.buttonLabel}}</button>
-              <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
-          </mat-dialog-actions>
-      </div>
-  `
+  selector: 'studio-lite-select-unit',
+  templateUrl: './select-unit.component.html',
+  styleUrls: ['./select-unit.component.scss']
 })
 export class SelectUnitComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;

@@ -24,7 +24,7 @@ import { BackendService as AppBackendService } from '../../../../services/backen
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { SelectUnitComponent, SelectUnitData } from '../select-unit.component';
+import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
