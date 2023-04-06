@@ -14,7 +14,7 @@ import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../services/backend.service';
 import {
   RequestMessageComponent
-} from '../../../dialogs/request-message/request-message.component';
+} from '../../../components/request-message/request-message.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({

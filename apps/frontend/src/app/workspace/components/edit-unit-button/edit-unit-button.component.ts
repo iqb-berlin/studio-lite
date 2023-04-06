@@ -16,10 +16,10 @@ import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.compo
 import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
 import {
   RequestMessageComponent
-} from '../../../dialogs/request-message/request-message.component';
+} from '../../../components/request-message/request-message.component';
 import {
   EditWorkspaceSettingsComponent
-} from '../../../dialogs/edit-workspace-settings/edit-workspace-settings.component';
+} from '../../../components/edit-workspace-settings/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../services/app.service';
