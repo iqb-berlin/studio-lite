@@ -6,7 +6,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { WorkspaceService } from '../services/workspace.service';
 import { AppService } from '../../../services/app.service';
 import { BackendService } from '../services/backend.service';
-import { SelectUnitListComponent } from '../components/select-unit-list/select-unit-list.component';
+import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
 import { WorkspaceDataFlat } from '../../../classes/workspace-data-flat.class';
 
 export interface SelectUnitData {
