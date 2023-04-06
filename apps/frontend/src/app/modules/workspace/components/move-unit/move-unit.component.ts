@@ -3,9 +3,9 @@ import {
   Component, Inject, OnInit, ViewChild
 } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { AppService } from '../../../services/app.service';
-import { SelectUnitListComponent } from './select-unit-list/select-unit-list.component';
-import { WorkspaceDataFlat } from '../../../classes/workspace-data-flat.class';
+import { AppService } from '../../../../services/app.service';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { WorkspaceDataFlat } from '../../../../classes/workspace-data-flat.class';
 
 export interface MoveUnitData {
   title: string,
@@ -14,34 +14,11 @@ export interface MoveUnitData {
 }
 
 @Component({
-  template: `
-    <div fxLayout="column" style="height: 100%">
-      <h1 mat-dialog-title>{{ data.title }}</h1>
-      <form [formGroup]="selectForm" fxLayout="column">
-        <mat-form-field>
-          <mat-select placeholder="Ziel-Arbeitsbereich" formControlName="wsSelector">
-            <mat-option *ngFor="let ws of workspaceList" [value]="ws.id">
-              {{ws.groupName}}: {{ws.name}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-      <mat-dialog-content fxFlex>
-        <studio-lite-select-unit-list
-          #unitSelectionTable
-          [workspace]="data.currentWorkspaceId">
-        </studio-lite-select-unit-list>
-      </mat-dialog-content>
-
-      <mat-dialog-actions>
-        <button mat-raised-button color="primary" type="submit"
-                [mat-dialog-close]="true" [disabled]="unitSelectionTable.selectionCount === 0 || selectForm.invalid">
-          {{data.buttonLabel}}</button>
-        <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
-      </mat-dialog-actions>
-    </div>
-  `
+  selector: 'studio-lite-move-unit',
+  templateUrl: './move-unit.component.html',
+  styleUrls: ['./move-unit.component.scss']
 })
+
 export class MoveUnitComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
   workspaceList: WorkspaceDataFlat[] = [];

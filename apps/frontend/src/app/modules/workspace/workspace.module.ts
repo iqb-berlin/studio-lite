@@ -35,7 +35,7 @@ import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
 import { NewUnitComponent } from './components/new-unit/new-unit.component';
 import { SelectUnitComponent } from './components/select-unit/select-unit.component';
-import { MoveUnitComponent } from './components/move-unit.component';
+import { MoveUnitComponent } from './components/move-unit/move-unit.component';
 import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './components/save-or-discard.component';
