@@ -232,7 +232,8 @@
     "reject-changes-label": "Änderungen verwerfen",
     "save-unit-data-changes": "Sie haben Daten dieser Aufgabe geändert. Möchten Sie diese Änderungen speichern?",
     "invalid-unit-name": "Zu kurz, ungültige Zeichen oder schon vorhanden",
-    "cancel-back-to-selection": "Abbrechen - zurück zur Auswahl"
+    "cancel-back-to-selection": "Abbrechen - zurück zur Auswahl",
+    "target-workspace": "Ziel-Arbeitsbereich"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

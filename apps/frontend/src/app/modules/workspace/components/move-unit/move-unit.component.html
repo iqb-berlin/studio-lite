@@ -1,25 +1,33 @@
-<div fxLayout="column" style="height: 100%">
+<div class="fx-column-start-stretch full-height">
   <h1 mat-dialog-title>{{ data.title }}</h1>
-  <form [formGroup]="selectForm" fxLayout="column">
+  <form *ngIf="selectForm" [formGroup]="selectForm" fxLayout="column">
     <mat-form-field>
-      <mat-select placeholder="Ziel-Arbeitsbereich" formControlName="wsSelector">
-        <mat-option *ngFor="let ws of workspaceList" [value]="ws.id">
-          {{ws.groupName}}: {{ws.name}}
+      <mat-select formControlName="wsSelector"
+                  [placeholder]="'workspace.target-workspace' | translate">
+        <mat-option *ngFor="let workspace of workspaceList"
+                    [value]="workspace.id">
+          {{workspace.groupName}}: {{workspace.name}}
         </mat-option>
       </mat-select>
     </mat-form-field>
   </form>
-  <mat-dialog-content fxFlex>
-    <studio-lite-select-unit-list
-      #unitSelectionTable
-      [workspace]="data.currentWorkspaceId">
+  <mat-dialog-content>
+    <studio-lite-select-unit-list #unitSelectionTable
+                                  [workspace]="data.currentWorkspaceId">
     </studio-lite-select-unit-list>
   </mat-dialog-content>
 
   <mat-dialog-actions>
-    <button mat-raised-button color="primary" type="submit"
-            [mat-dialog-close]="true" [disabled]="unitSelectionTable.selectionCount === 0 || selectForm.invalid">
-      {{data.buttonLabel}}</button>
-    <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="true"
+            [disabled]="!unitSelectionTable.selectionCount || selectForm.invalid">
+      {{data.buttonLabel}}
+    </button>
+    <button mat-raised-button
+            [mat-dialog-close]="false">
+      {{'cancel' | translate}}
+    </button>
   </mat-dialog-actions>
 </div>

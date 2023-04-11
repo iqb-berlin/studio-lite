@@ -2,16 +2,11 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
   Component, Inject, OnInit, ViewChild
 } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { WorkspaceDataFlat } from '../../../../classes/workspace-data-flat.class';
-
-export interface MoveUnitData {
-  title: string,
-  buttonLabel: string,
-  currentWorkspaceId: number
-}
+import { MoveUnitData } from '../../models/move-unit-data';
 
 @Component({
   selector: 'studio-lite-move-unit',
