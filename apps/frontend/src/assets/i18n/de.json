@@ -2,6 +2,7 @@
   "next": "Weiter",
   "save": "Speichern",
   "cancel": "Abbrechen",
+  "close": "Schließen",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
   },
@@ -221,7 +222,10 @@
     "last-changed-scheme": "Kodierschema: {{date}}",
     "user-name": "Name",
     "user-email": "E-Mail",
-    "user-description": "Notiz/Beschreibung"
+    "user-description": "Notiz/Beschreibung",
+    "no-regular-users": "Es sind keine Nutzer:innen mit regulären Lese- und Schreibrechten zugewiesen.",
+    "workspace-group-admins": " Die folgenden Nutzer:innen verfügen über besondere Rechte, um Einstellungen des Arbeitsbereiches zu ändern oder anderen Zugriffsrechte zu gewähren:",
+    "workspace-admins": "Die folgenden Nutzer:innen betreuen die allgemeinen Servereinstellungen und können bei besonderen Problemen helfen:"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
