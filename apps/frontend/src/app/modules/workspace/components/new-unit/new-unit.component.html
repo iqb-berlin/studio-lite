@@ -1,44 +1,70 @@
-<div fxLayout="column" style="height: 100%">
-  <h1 mat-dialog-title>{{data.title}}</h1>
-  <p *ngIf="data.subTitle">{{data.subTitle}}</p>
-  <mat-dialog-content>
-    <form [formGroup]="newUnitForm" fxLayout="column">
-      <mat-form-field>
-        <input matInput formControlName="key" placeholder="Kurzname" [value]="data.key" >
-        <mat-error *ngIf="newUnitForm.get('key')?.invalid">
-          Zu kurz, ungültige Zeichen oder schon vorhanden
-        </mat-error>
+<h1 mat-dialog-title>{{data.title}}</h1>
+<p *ngIf="data.subTitle">{{data.subTitle}}</p>
+<mat-dialog-content>
+  <form [formGroup]="newUnitForm"
+        class="fx-column-start-stretch">
+    <mat-form-field>
+      <input matInput
+             formControlName="key"
+             placeholder="Kurzname"
+             [value]="data.key" >
+      <mat-error *ngIf="newUnitForm.controls['key']?.invalid">
+        {{'workspace.invalid-unit-name' | translate}}
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput
+             formControlName="label"
+             [placeholder]="'workspace.unit-name' | translate"
+             [value]="data.label">
+    </mat-form-field>
+    <div *ngIf="!groupDirectMode"
+         class="fx-row-space-around-center fx-gap-10">
+      <mat-form-field class="fx-flex-fill">
+        <mat-select
+          [placeholder]="'workspace.group' | translate"
+          formControlName="groupSelect">
+          <mat-option *ngFor="let group of data.groups"
+                      [value]="group">
+            {{group}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
-      <mat-form-field>
-        <input matInput formControlName="label" placeholder="Name" [value]="data.label">
+      <button mat-icon-button
+              [matTooltip]="'workspace.add-new-group' | translate"
+              (click)="setGroupDirectMode(true)">
+        <mat-icon>add_circle</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="groupDirectMode"
+         class="fx-row-space-around-center fx-gap-10">
+      <mat-form-field class="fx-flex-fill">
+        <input matInput
+               #newGroupInput
+               formControlName="groupDirect"
+               [placeholder]="'workspace.new-group' | translate">
       </mat-form-field>
-      <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px" *ngIf="!groupDirectMode">
-        <mat-form-field fxFlex>
-          <mat-select placeholder="Gruppe" formControlName="groupSelect">
-            <mat-option *ngFor="let g of data.groups" [value]="g">
-              {{g}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button mat-icon-button (click)="setGroupDirectMode(true)" matTooltip="Neue Gruppe anlegen">
-          <mat-icon>add_circle</mat-icon>
-        </button>
-      </div>
-      <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px" *ngIf="groupDirectMode">
-        <mat-form-field fxFlex>
-          <input matInput #newGroupInput formControlName="groupDirect" placeholder="Gruppe (neu)">
-        </mat-form-field>
-        <button mat-icon-button *ngIf="data.groups.length > 0"
-                (click)="setGroupDirectMode(false)" matTooltip="Abbrechen - zurück zur Auswahl">
-          <mat-icon>cancel</mat-icon>
-        </button>
-      </div>
-    </form>
-  </mat-dialog-content>
+      <button mat-icon-button *ngIf="data.groups.length > 0"
+              [matTooltip]="'workspace.cancel-back-to-selection' | translate"
+              (click)="setGroupDirectMode(false)">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </div>
 
-  <mat-dialog-actions>
-    <button mat-raised-button color="primary" type="submit"
-            [mat-dialog-close]="newUnitForm" [disabled]="newUnitForm.invalid">Speichern</button>
-    <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
-  </mat-dialog-actions>
-</div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="newUnitForm"
+          [disabled]="newUnitForm.invalid">
+    {{'save' | translate}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+
