@@ -1,14 +1,20 @@
 <h1 mat-dialog-title>{{ confirmData.title }}</h1>
 <mat-dialog-content>
-  <p>
-    {{ confirmData.content }}
-  </p>
+  <p> {{ confirmData.content }} </p>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-raised-button color="primary" [mat-dialog-close]="confirmData.confirmButtonReturn">
+  <button mat-raised-button
+          color="primary"
+          [mat-dialog-close]="confirmData.confirmButtonReturn">
     {{ confirmData.confirmButtonLabel }}
   </button>
-  <button mat-raised-button [mat-dialog-close]="confirmData.confirmButton2Return"
-          *ngIf="confirmData.confirmButton2Label !== undefined">{{ confirmData.confirmButton2Label }}</button>
-  <button mat-raised-button [mat-dialog-close]="false">Abbrechen</button>
+  <button *ngIf="confirmData.confirmButton2Label"
+          mat-raised-button
+          [mat-dialog-close]="confirmData.confirmButton2Return">
+    {{ confirmData.confirmButton2Label }}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
 </mat-dialog-actions>

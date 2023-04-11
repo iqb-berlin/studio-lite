@@ -226,7 +226,11 @@
     "user-description": "Notiz/Beschreibung",
     "no-regular-users": "Es sind keine Nutzer:innen mit regulären Lese- und Schreibrechten zugewiesen.",
     "workspace-group-admins": " Die folgenden Nutzer:innen verfügen über besondere Rechte, um Einstellungen des Arbeitsbereiches zu ändern oder anderen Zugriffsrechte zu gewähren:",
-    "workspace-admins": "Die folgenden Nutzer:innen betreuen die allgemeinen Servereinstellungen und können bei besonderen Problemen helfen:"
+    "workspace-admins": "Die folgenden Nutzer:innen betreuen die allgemeinen Servereinstellungen und können bei besonderen Problemen helfen:",
+    "confirm": "Bestätigen",
+    "please-confirm": "Bitte bestätigen",
+    "reject-changes-label": "Änderungen verwerfen",
+    "save-unit-data-changes": "Sie haben Daten dieser Aufgabe geändert. Möchten Sie diese Änderungen speichern?"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

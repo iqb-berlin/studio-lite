@@ -4,29 +4,31 @@ import { Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConfirmDialogData, SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
+import { TranslateService } from '@ngx-translate/core';
+import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceComponent } from '../workspace.component';
+import { ConfirmDialogData } from '../models/confirm-dialog.data';
 
 @Injectable()
 export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceComponent> {
   constructor(
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,
-    public workspaceService: WorkspaceService
+    public workspaceService: WorkspaceService,
+    private translateService: TranslateService
   ) { }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.workspaceService.isChanged()) {
       const dialogRef = this.confirmDialog.open(SaveOrDiscardComponent, {
         width: '500px',
-        height: '300px',
         data: <ConfirmDialogData> {
-          title: 'Speichern',
-          content: 'Sie haben Daten dieser Aufgabe geändert. Möchten Sie diese Änderungen speichern?',
-          confirmButtonLabel: 'Speichern',
+          title: this.translateService.instant('workspace.save'),
+          content: this.translateService.instant('workspace.save-unit-data-changes'),
+          confirmButtonLabel: this.translateService.instant('workspace.save'),
           confirmButtonReturn: 'YES',
-          confirmButton2Label: 'Änderungen verwerfen',
+          confirmButton2Label: this.translateService.instant('workspace.reject-changes-label'),
           confirmButton2Return: 'NO'
         }
       });
