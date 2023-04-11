@@ -125,6 +125,7 @@
       "schemer": "Kodierung",
       "comments": "Kommentare"
     },
+    "title": "Arbeitsbereich",
     "new-comments": "Neue Kommentare",
     "unit-key": "Kurzname",
     "invalid-unit-key": "Zu kurz oder schon vorhanden",
