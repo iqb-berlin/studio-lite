@@ -251,8 +251,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       this.groupDialog.open(GroupManageComponent, {
-        width: '1000px',
-        height: '800px'
+        width: '1000px'
       }).afterClosed().subscribe(() => {
         this.updateUnitList();
       });

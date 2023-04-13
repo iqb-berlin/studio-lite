@@ -46,9 +46,7 @@ import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.com
 import { SelectUnitListComponent } from './components/select-unit-list/select-unit-list.component';
 import { UserListComponent } from './components/user-list/user-list.component';
 import { WorkspaceUserListComponent } from './components/workspace-user-list/workspace-user-list.component';
-import {
-  PagingModeSelectionComponent
-} from './components/paging-mode-selection/paging-mode-selection.component';
+import { PagingModeSelectionComponent } from './components/paging-mode-selection/paging-mode-selection.component';
 import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
 import { ReviewsComponent } from './components/reviews/reviews.component';
@@ -78,6 +76,7 @@ import { ReviewConfigComponent } from './components/review-config/review-config.
 import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
 import { NewGroupButtonComponent } from './components/new-group-button/new-group-button.component';
+import { GroupMenuComponent } from './components/group-menu/group-menu.component';
 
 @NgModule({
   imports: [
@@ -158,7 +157,8 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
     ReviewSaveChangesComponent,
     ReviewConfigComponent,
     ExportReviewButtonComponent,
-    NewGroupButtonComponent
+    NewGroupButtonComponent,
+    GroupMenuComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

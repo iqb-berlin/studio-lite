@@ -1,34 +1,16 @@
-.margin-bottom {
-  margin-bottom: 10px
-}
-
-.group-message {
-  font-style: italic; font-size: smaller
-}
-
-.invisible {
-  display: block;
-  visibility: hidden;
-  height: 0;width: 0
-}
-
 .selected {
   background-color: #3957f74f
 }
 
 .units {
   overflow: auto;
+  background-color: white;
 }
 
 .group-list {
   overflow: auto;
   background-color: whitesmoke;
   border: 2px solid whitesmoke
-}
-
-.group-list-buttons {
-  margin-top: 6px;
-  background-color: whitesmoke;
 }
 
 .group-list-entry {
@@ -44,24 +26,33 @@
 }
 
 .group-changed {
-  border: 2px solid darkorange;
+  background-color: darkorange;
   padding: 2px
 }
 
 .group-not-changed {
-  border: 2px solid transparent;
+  background-color: transparent;
   padding: 2px
 }
 
-#main-buttons .mat-raised-button {
-  padding: 0;
-  min-width: 25px
+.group-key {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.mat-list-base {
-  padding-top: 12px;
+.dialog-content{
+  gap: 5px;
+  display: flex;
+  height: 65vh
 }
 
-.mat-dialog-content {
-  max-height: 100vH
+.units-wrapper {
+  height: 64vh;
 }
+
+.changes-container {
+  padding: 5px;
+}
+
+
+

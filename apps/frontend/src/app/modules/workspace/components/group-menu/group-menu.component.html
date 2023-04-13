@@ -1,0 +1,26 @@
+<div class="group-list-buttons fx-row-start-stretch">
+  <button mat-button
+          class="fx-flex-row-33"
+          fxFlex="33%"
+          [matTooltip]="'workspace.add-group' | translate"
+          matTooltipPosition="above"
+          (click)="addGroup()">
+    <mat-icon>add</mat-icon>
+  </button>
+  <button mat-button
+          class="fx-flex-row-33"
+          [matTooltip]="'workspace.rename-group' | translate"
+          [disabled]="!selectedGroup"
+          matTooltipPosition="above"
+          (click)="renameGroup()">
+    <mat-icon>edit</mat-icon>
+  </button>
+  <button mat-button
+          class="fx-flex-row-33"
+          [matTooltip]="'workspace.delete-group' | translate"
+          [disabled]="!selectedGroup"
+          matTooltipPosition="above"
+          (click)="deleteGroup()">
+    <mat-icon>delete</mat-icon>
+  </button>
+</div>

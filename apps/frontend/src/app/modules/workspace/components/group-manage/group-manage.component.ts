@@ -2,15 +2,12 @@ import {
   Component, OnInit, ViewChild
 } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
-import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 
 @Component({
   selector: 'studio-lite-group-manage',
@@ -31,10 +28,7 @@ export class GroupManageComponent implements OnInit {
     public workspaceService: WorkspaceService,
     public appService: AppService,
     private backendService: BackendService,
-    private snackBar: MatSnackBar,
-    private messageDialog: MatDialog,
-    private inputTextDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -56,104 +50,6 @@ export class GroupManageComponent implements OnInit {
       this.changed = false;
       if (this.unitSelectionTable) this.unitSelectionTable.selectedUnitIds = [];
     }
-  }
-
-  addGroup() {
-    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
-      width: '500px',
-      data: {
-        title: 'Neue Aufgabengruppe',
-        default: '',
-        okButtonLabel: 'Speichern',
-        prompt: 'Name der Gruppe'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result === 'string') {
-        if (result.length > 1) {
-          this.appService.dataLoading = true;
-          this.backendService.addUnitGroup(
-            this.workspaceService.selectedWorkspaceId,
-            result
-          ).subscribe(isOK => {
-            this.appService.dataLoading = false;
-            if (isOK) {
-              this.loadGroups(result);
-            } else {
-              this.snackBar.open('Konnte neue Gruppe nicht anlegen.', '', { duration: 3000 });
-            }
-          });
-        }
-      }
-    });
-  }
-
-  renameGroup() {
-    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
-      width: '500px',
-      data: {
-        title: 'Aufgabengruppe umbenennen',
-        default: this.selectedGroup,
-        okButtonLabel: 'Speichern',
-        prompt: 'Name der Gruppe'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result === 'string') {
-        if (result.length > 1) {
-          this.appService.dataLoading = true;
-          this.backendService.renameUnitGroup(
-            this.workspaceService.selectedWorkspaceId,
-            this.selectedGroup,
-            result
-          ).subscribe(isOK => {
-            this.appService.dataLoading = false;
-            if (isOK) {
-              this.loadGroups(result);
-            } else {
-              this.snackBar.open('Konnte Gruppe nicht umbenennen.', '', { duration: 3000 });
-            }
-          });
-        }
-      }
-    });
-  }
-
-  deleteGroup() {
-    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: <ConfirmDialogData>{
-        title: 'Aufgabengruppe löschen',
-        content:
-          `Die aktuell ausgewählte Gruppe '${
-            this.selectedGroup
-          }' wird gelöscht. Alle Aufgaben bleiben erhalten. Fortsetzen?`,
-        confirmButtonLabel: 'Löschen',
-        showCancel: true
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
-        this.appService.dataLoading = true;
-        this.backendService.deleteUnitGroup(
-          this.workspaceService.selectedWorkspaceId,
-          this.selectedGroup
-        ).subscribe(ok => {
-          this.selectedGroup = '';
-          this.appService.dataLoading = false;
-          if (ok) {
-            this.loadGroups();
-          } else {
-            this.snackBar.open(
-              'Konnte Gruppe nicht löschen', 'Fehler', { duration: 3000 }
-            );
-          }
-        });
-      }
-    });
   }
 
   private loadGroups(selectGroup = '') {
@@ -225,5 +121,54 @@ export class GroupManageComponent implements OnInit {
   detectChanges(): boolean {
     return this.groupUnitsOriginal.reduce((a, b) => a + b, 0) !==
       this.groupUnitsToChange.reduce((a, b) => a + b, 0);
+  }
+
+  addGroup(group: string) {
+    this.appService.dataLoading = true;
+    this.backendService.addUnitGroup(
+      this.workspaceService.selectedWorkspaceId,
+      group
+    ).subscribe(isOK => {
+      this.appService.dataLoading = false;
+      if (isOK) {
+        this.loadGroups(group);
+      } else {
+        this.snackBar.open('Konnte neue Gruppe nicht anlegen.', '', { duration: 3000 });
+      }
+    });
+  }
+
+  renameGroup(group: string) {
+    this.appService.dataLoading = true;
+    this.backendService.renameUnitGroup(
+      this.workspaceService.selectedWorkspaceId,
+      this.selectedGroup,
+      group
+    ).subscribe(isOK => {
+      this.appService.dataLoading = false;
+      if (isOK) {
+        this.loadGroups(group);
+      } else {
+        this.snackBar.open('Konnte Gruppe nicht umbenennen.', '', { duration: 3000 });
+      }
+    });
+  }
+
+  deleteGroup() {
+    this.appService.dataLoading = true;
+    this.backendService.deleteUnitGroup(
+      this.workspaceService.selectedWorkspaceId,
+      this.selectedGroup
+    ).subscribe(ok => {
+      this.selectedGroup = '';
+      this.appService.dataLoading = false;
+      if (ok) {
+        this.loadGroups();
+      } else {
+        this.snackBar.open(
+          'Konnte Gruppe nicht löschen', 'Fehler', { duration: 3000 }
+        );
+      }
+    });
   }
 }
