@@ -1,6 +1,8 @@
 <div class="fx-column-start-stretch full-height">
   <h1 mat-dialog-title>{{ data.title }}</h1>
-  <form *ngIf="selectForm" [formGroup]="selectForm" fxLayout="column">
+  <form *ngIf="selectForm"
+        [formGroup]="selectForm"
+        class="fx-column-start-stretch">
     <mat-form-field>
       <mat-select formControlName="wsSelector"
                   [placeholder]="'workspace.target-workspace' | translate">
