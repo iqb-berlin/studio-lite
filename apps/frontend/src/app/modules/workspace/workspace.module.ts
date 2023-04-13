@@ -77,6 +77,9 @@ import { BookletConfigEditComponent } from './components/booklet-config-edit/boo
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
 import { NewGroupButtonComponent } from './components/new-group-button/new-group-button.component';
 import { GroupMenuComponent } from './components/group-menu/group-menu.component';
+import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
+import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
+import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 
 @NgModule({
   imports: [
@@ -158,7 +161,10 @@ import { GroupMenuComponent } from './components/group-menu/group-menu.component
     ReviewConfigComponent,
     ExportReviewButtonComponent,
     NewGroupButtonComponent,
-    GroupMenuComponent
+    GroupMenuComponent,
+    PreviewBarComponent,
+    StatusIndicationComponent,
+    PageNavigationComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

@@ -247,7 +247,22 @@
     "editor-not-loaded": "Der Editor {{id}} konnte nicht geladen werden.",
     "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
     "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
-    "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\"."
+    "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
+    "page-selection": "Seitenauswahl",
+    "validate": "Validieren",
+    "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\""
+  },
+  "presentation-progress": {
+    "label": "P",
+    "description": "Status: Vollständigkeit der Präsentation"
+  },
+  "response-progress": {
+    "label": "R",
+    "description": "Status: Vollständigkeit der Antworten"
+  },
+  "player-has-focus": {
+    "label": "F",
+    "description": "Status: Player hat Fenster-Fokus"
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",

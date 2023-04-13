@@ -1,23 +1,26 @@
 import {
-  Component, HostListener, OnDestroy, OnInit
+  AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
-import { PageData, StatusVisual } from '../../models/unit-page.model';
+import { PageData } from '../../models/page-data';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
+import { Progress } from '../../models/types';
 
 @Component({
   templateUrl: './unit-preview.component.html',
-  styleUrls: ['./unit-preview.component.css'],
+  styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' }
 })
-export class UnitPreviewComponent implements OnInit, OnDestroy {
+export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('hostingIframe') hostingIframe!: ElementRef;
+
   private iFrameElement: HTMLIFrameElement | undefined;
   private ngUnsubscribe = new Subject<void>();
   private sessionId = '';
@@ -25,31 +28,14 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
   private lastPlayerId = '';
   playerName = '';
   playerApiVersion = 3;
-  statusVisual: StatusVisual[] = [
-    {
-      id: 'presentation',
-      label: 'P',
-      color: 'DarkGray',
-      description: 'Status: Vollständigkeit der Präsentation'
-    },
-    {
-      id: 'responses',
-      label: 'R',
-      color: 'DarkGray',
-      description: 'Status: Vollständigkeit der Antworten'
-    },
-    {
-      id: 'focus',
-      label: 'F',
-      color: 'DarkGray',
-      description: 'Status: Player hat Fenster-Fokus'
-    }
-  ];
 
   message = '';
   unitId: number = 0;
-  showPageNav = false;
   pageList: PageData[] = [];
+
+  presentationProgress: Progress = 'none';
+  responseProgress: Progress = 'none';
+  hasFocus: boolean = false;
 
   constructor(
     private appService: AppService,
@@ -117,13 +103,13 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
             case 'vo.FromPlayer.PageNavigationRequest':
               this.snackBar.open(`Player sendet PageNavigationRequest: "${
                 msgData.newPage}"`, '', { duration: 3000 });
-              this.gotoPage(msgData.newPage);
+              this.gotoPage({ action: msgData.newPage });
               break;
 
             case 'vopPageNavigationCommand':
               this.snackBar.open(`Player sendet PageNavigationRequest: "${
                 msgData.target}"`, '', { duration: 3000 });
-              this.gotoPage(msgData.target);
+              this.gotoPage({ action: msgData.target });
               break;
 
             case 'vo.FromPlayer.UnitNavigationRequest':
@@ -147,25 +133,22 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
           }
         }
       });
+  }
+
+  ngAfterViewInit(): void {
     this.previewService.pagingMode
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => this.initPlayer());
   }
 
-  ngOnInit(): void {
-    this.initPlayer();
-  }
-
   private initPlayer(): void {
-    setTimeout(() => {
-      this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
-      this.workspaceService.selectedUnit$
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => {
-          this.message = '';
-          this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToPlayer());
-        });
-    });
+    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.workspaceService.selectedUnit$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.message = '';
+        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToPlayer());
+      });
   }
 
   async sendUnitDataToPlayer() {
@@ -343,10 +326,11 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
         this.pageList[this.pageList.length - 1].disabled = currentPageIndex === this.pageList.length - 2;
       }
     }
-    this.showPageNav = this.pageList.length > 0;
   }
 
-  gotoPage(action: string, index = 0): void {
+  gotoPage(target: { action: string, index?: number }): void {
+    const action = target.action;
+    const index = target.index || 0;
     let nextPageId = '';
     // currentpage is detected by disabled-attribute of page
     if (action === '#next') {
@@ -397,45 +381,28 @@ export class UnitPreviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ++++++++++++ Status ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  setPresentationStatus(status: string): void { // 'yes' | 'no' | '' | undefined;
+  setPresentationStatus(status: string): void {
     if (status === 'yes' || status === 'complete') {
-      this.changeStatusColor('presentation', 'LimeGreen');
+      this.presentationProgress = 'complete';
     } else if (status === 'no' || status === 'some') {
-      this.changeStatusColor('presentation', 'LightCoral');
-    } else if (status === '' || status === 'none') {
-      this.changeStatusColor('presentation', 'DarkGray');
+      this.presentationProgress = 'some';
+    } else {
+      this.presentationProgress = 'none';
     }
-    // if undefined: no change
   }
 
-  setResponsesStatus(status: string): void { // 'yes' | 'no' | 'all' | '' | undefined
-    if (status === 'yes' || status === 'some') {
-      this.changeStatusColor('responses', 'Gold');
-    } else if (status === 'no') {
-      this.changeStatusColor('responses', 'LightCoral');
-    } else if (status === 'all' || status === 'complete') {
-      this.changeStatusColor('responses', 'LimeGreen');
-    } else if (status === '' || status === 'none') {
-      this.changeStatusColor('responses', 'DarkGray');
+  setResponsesStatus(status: string): void {
+    if (status === 'all' || status === 'complete') {
+      this.responseProgress = 'complete';
+    } else if (status === 'yes' || status === 'some') {
+      this.responseProgress = 'some';
+    } else {
+      this.responseProgress = 'none';
     }
-    // if undefined: no change
   }
 
-  setFocusStatus(status: boolean): void { // 'yes' | 'no' | '' | undefined;
-    this.changeStatusColor('focus', status ? 'LimeGreen' : 'LightCoral');
-  }
-
-  changeStatusColor(id: string, newcolor: string): void {
-    for (let i = 0; i < this.statusVisual.length; i++) {
-      if (this.statusVisual[i].id === id) {
-        if (this.statusVisual[i].color !== newcolor) {
-          this.statusVisual[i].color = newcolor;
-          break;
-        }
-      }
-    }
+  setFocusStatus(status: boolean): void {
+    this.hasFocus = status;
   }
 
   ngOnDestroy(): void {

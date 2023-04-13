@@ -9,7 +9,7 @@ import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../../../services/app.service';
 import { ReviewService } from '../review.service';
 import { UnitPage } from '../classes/unit-page.class';
-import { PageData } from '../../workspace/models/unit-page.model';
+import { PageData } from '../../workspace/models/page-data';
 import { UnitData } from '../classes/unit-data.class';
 import { BackendService } from '../backend.service';
 

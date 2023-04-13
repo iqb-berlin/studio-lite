@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { PagingMode } from '../../models/unit-page.model';
 import { PreviewService } from '../../services/preview.service';
+import { PagingMode } from '../../models/types';
 
 @Component({
   selector: 'studio-lite-paging-mode-selection',

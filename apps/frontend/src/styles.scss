@@ -147,6 +147,15 @@ div.logo img {
   justify-content: space-between;
   align-items: stretch;
 }
+
+.fx-row-space-between-center {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .fx-row-space-around-center {
   box-sizing: border-box;
   display: flex;
@@ -331,6 +340,12 @@ div.logo img {
   flex: 1 1 100%;
   box-sizing: border-box;
   max-width: 90%;
+}
+
+.fx-flex-row-100 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .fx-gap-5 {
