@@ -41,6 +41,11 @@
   height: 65vh;
 }
 
+.review-list-entry {
+  height: unset !important;
+  text-overflow: ellipsis;
+}
+
 .reviews {
   overflow-y: auto;
 }

@@ -4,11 +4,11 @@
     <div class="fx-row-start-stretch fx-gap-20">
       <div class="fx-column-space-between-stretch fx-flex-row-20 review-list-area">
         <mat-nav-list class="reviews">
-          <a mat-list-item style="height: unset;text-overflow: ellipsis"
-             *ngFor="let review of reviews"
+          <a *ngFor="let review of reviews"
+             mat-list-item
              class="review-list-entry"
-             (click)="selectReview(review.id)"
-             [class]="review.id === selectedReviewId ? 'review-list-entry selected' : 'review-list-entry'">
+             [class.selected]="review.id === selectedReviewId"
+             (click)="selectReview(review.id)">
             {{review.name}}
           </a>
         </mat-nav-list>
@@ -29,11 +29,11 @@
            [class.review-not-changed]="!changed">
         <div class="fx-row-start-stretch fx-flex-fill fx-gap-20 review-changes-area">
           <div class="fx-flex-row-50">
-            <div [hidden]="selectedReviewId > 0">{{'workspace.select-review' | translate}}</div>
-            <studio-lite-select-unit-list [hidden]="selectedReviewId === 0"
-                              [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
-                              (selectionChanged)="unitSelectionChanged($event)"
-                              [workspace]="workspaceService.selectedWorkspaceId">
+            <div [hidden]="selectedReviewId">{{'workspace.select-review' | translate}}</div>
+            <studio-lite-select-unit-list [hidden]="!selectedReviewId"
+                                          [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
+                                          [workspace]="workspaceService.selectedWorkspaceId"
+                                          (selectionChanged)="unitSelectionChanged($event)">
             </studio-lite-select-unit-list>
           </div>
           <studio-lite-review-config class="fx-flex-row-50 settings"
@@ -57,7 +57,9 @@
 
   <mat-dialog-actions class="fx-column-start-stretch">
     <div class="fx-row-start-stretch">
-      <button mat-raised-button [mat-dialog-close]="false" [disabled]="changed">
+      <button mat-raised-button
+              [mat-dialog-close]="false"
+              [disabled]="changed">
         {{'dialogs.close' | translate}}
       </button>
     </div>
