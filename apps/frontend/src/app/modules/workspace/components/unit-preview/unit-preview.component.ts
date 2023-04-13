@@ -50,7 +50,7 @@ export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
       .subscribe((m: MessageEvent) => {
         const msgData = m.data;
         const msgType = msgData.type;
-        if ((msgType !== undefined) && (msgType !== null)) {
+        if ((msgType !== undefined) && (msgType !== null) && (m.source === this.iFrameElement?.contentWindow)) {
           switch (msgType) {
             case 'vopReadyNotification':
             case 'player':
