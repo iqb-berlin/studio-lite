@@ -1,24 +1,25 @@
 import {
-  Component, HostListener, OnDestroy, OnInit
+  AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 
 @Component({
-  template: `
-    <div *ngIf="message" style="margin: 30px">{{message}}</div>
-    <div id="iFrameHostEditor">
-      <iframe id="hosting-iframe" class="unitHost"></iframe>
-    </div>`,
-  styles: ['#iFrameHostEditor {height: 100%;}']
+  selector: 'studio-lite-unit-editor',
+  templateUrl: './unit-editor.component.html',
+  styleUrls: ['./unit-editor.component.scss']
 })
-export class UnitEditorComponent implements OnInit, OnDestroy {
+
+export class UnitEditorComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('hostingIframe') hostingIframe!: ElementRef;
+
   private readonly postMessageSubscription: Subscription;
   private unitIdChangedSubscription: Subscription | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -33,13 +34,14 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
     private moduleService: ModuleService,
-    private appService: AppService
+    private appService: AppService,
+    private translateService: TranslateService
   ) {
     this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;
       const msgType = msgData.type;
 
-      if ((msgType !== undefined) && (msgType !== null)) {
+      if ((msgType !== undefined) && (msgType !== null) && (m.source === this.iFrameElement?.contentWindow)) {
         this.postMessageTarget = m.source as Window;
         switch (msgType) {
           case 'voeReadyNotification':
@@ -98,14 +100,13 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
-      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+  ngAfterViewInit(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
+      .subscribe(() => {
         this.message = '';
         this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToEditor());
       });
-    });
   }
 
   async sendUnitDataToEditor() {
@@ -126,7 +127,10 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
                   this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
                   this.postUnitDef(this.workspaceService.unitDefinitionStore);
                 } else {
-                  this.snackBar.open('Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 });
+                  this.snackBar.open(
+                    this.translateService.instant('workspace.unit-definition-not-loaded'),
+                    this.translateService.instant('workspace.error'),
+                    { duration: 3000 });
                 }
               }
             );
@@ -136,11 +140,11 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
           // editor gets unit data via ReadyNotification
         }
       } else {
-        this.message = 'Kein gültiger Editor zugewiesen. Bitte gehen Sie zu "Eigenschaften".';
+        this.message = this.translateService.instant('workspace.no-editor');
         this.buildEditor();
       }
     } else {
-      this.message = 'Aufgabe nicht gefunden oder Daten fehlerhaft.';
+      this.message = this.translateService.instant('workspace.unit-not-found');
       this.buildEditor();
     }
   }
@@ -178,7 +182,8 @@ export class UnitEditorComponent implements OnInit, OnDestroy {
             this.setupEditorIFrame(editorData);
             this.lastEditorId = editorId;
           } else {
-            this.message = `Der Editor "${editorId}" konnte nicht geladen werden.`;
+            this.message = this.translateService
+              .instant('workspace.editor-not-loaded', { id: editorId });
             this.lastEditorId = '';
           }
         });

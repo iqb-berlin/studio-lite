@@ -243,7 +243,11 @@
     "save-unit-data-changes": "Sie haben Daten dieser Aufgabe geändert. Möchten Sie diese Änderungen speichern?",
     "invalid-unit-name": "Zu kurz, ungültige Zeichen oder schon vorhanden",
     "cancel-back-to-selection": "Abbrechen - zurück zur Auswahl",
-    "target-workspace": "Ziel-Arbeitsbereich"
+    "target-workspace": "Ziel-Arbeitsbereich",
+    "editor-not-loaded": "Der Editor {{id}} konnte nicht geladen werden.",
+    "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
+    "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
+    "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\"."
   },
   "select-unit-list": {
     "filter": "Suche nach Aufgaben",
