@@ -1,22 +1,23 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import {
+  AfterViewInit, Component, ElementRef, HostListener, ViewChild
+} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
+import { TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 @Component({
-  template: `
-    <div *ngIf="message" style="margin: 30px">{{message}}</div>
-    <div id="iFrameHostSchemer">
-      <iframe id="hosting-iframe" class="unitHost"></iframe>
-    </div>`,
-  styles: ['#iFrameHostSchemer {height: 100%;}']
+  selector: 'studio-lite-unit-schemer',
+  templateUrl: './unit-schemer.component.html',
+  styleUrls: ['./unit-schemer.component.scss']
 })
-export class UnitSchemerComponent implements OnInit {
+export class UnitSchemerComponent implements AfterViewInit {
+  @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   private readonly postMessageSubscription: Subscription;
   private unitIdChangedSubscription: Subscription | undefined;
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -30,13 +31,14 @@ export class UnitSchemerComponent implements OnInit {
     private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
     private moduleService: ModuleService,
-    private appService: AppService
+    private appService: AppService,
+    private translateService: TranslateService
   ) {
     this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;
       const msgType = msgData.type;
 
-      if ((msgType !== undefined) && (msgType !== null)) {
+      if ((msgType !== undefined) && (msgType !== null) && (m.source === this.iFrameElement?.contentWindow)) {
         this.postMessageTarget = m.source as Window;
         switch (msgType) {
           case 'vosReadyNotification':
@@ -67,13 +69,11 @@ export class UnitSchemerComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
-      this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
-        this.message = '';
-        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToSchemer());
-      });
+  ngAfterViewInit(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
+      this.message = '';
+      this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToSchemer());
     });
   }
 
@@ -95,7 +95,10 @@ export class UnitSchemerComponent implements OnInit {
                   this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);
                   this.postUnitScheme(this.workspaceService.unitSchemeStore);
                 } else {
-                  this.snackBar.open('Konnte Antwortschema nicht laden', 'Fehler', { duration: 3000 });
+                  this.snackBar.open(
+                    this.translateService.instant('workspace.coding-scheme-not-loaded'),
+                    this.translateService.instant('workspace.error'),
+                    { duration: 3000 });
                 }
               }
             );
@@ -105,11 +108,11 @@ export class UnitSchemerComponent implements OnInit {
           // schemer gets unit data via ReadyNotification
         }
       } else {
-        this.message = 'Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu "Eigenschaften".';
+        this.message = this.translateService.instant('workspace.no-schemer');
         this.buildSchemer();
       }
     } else {
-      this.message = 'Aufgabe nicht gefunden oder Daten fehlerhaft.';
+      this.message = this.translateService.instant('workspace.unit-not-found');
       this.buildSchemer();
     }
   }
@@ -141,7 +144,8 @@ export class UnitSchemerComponent implements OnInit {
             this.setupSchemerIFrame(schemerData);
             this.lastSchemerId = schemerId;
           } else {
-            this.message = `Der Editor für das Antwortschema "${schemerId}" konnte nicht geladen werden.`;
+            this.message = this.translateService
+              .instant('workspace.schemer-not-loaded', { id: schemerId });
             this.lastSchemerId = '';
           }
         });
