@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { WorkspaceService } from '../../services/workspace.service';
-import { NewUnitData } from '../../models/new-unit.data';
+import { NewUnitData } from '../../models/new-unit.interface';
 
 @Component({
   selector: 'studio-lite-new-unit',

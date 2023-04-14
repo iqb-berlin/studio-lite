@@ -8,9 +8,9 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
 import { AppService } from '../../../services/app.service';
 import { ReviewService } from '../review.service';
-import { UnitPage } from '../classes/unit-page.class';
-import { PageData } from '../../workspace/models/page-data';
-import { UnitData } from '../classes/unit-data.class';
+import { UnitPage } from '../models/unit-page.interface';
+import { PageData } from '../../workspace/models/page-data.interface';
+import { UnitData } from '../models/unit-data.class';
 import { BackendService } from '../backend.service';
 
 @Component({

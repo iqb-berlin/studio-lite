@@ -10,8 +10,8 @@ import { Subject } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { CommentsComponent } from './comments.component';
 import { BackendService } from '../../services/backend.service';
-import { Comment } from '../../models/comment';
-import { ActiveComment } from '../../models/active-comment';
+import { Comment } from '../../models/comment.interface';
+import { ActiveComment } from '../../models/active-comment.interface';
 
 describe('UnitCommentsComponent', () => {
   let component: CommentsComponent;

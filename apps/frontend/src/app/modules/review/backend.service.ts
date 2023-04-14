@@ -7,7 +7,7 @@ import {
   UnitDefinitionDto,
   UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import { Comment } from '../comments/models/comment';
+import { Comment } from '../comments/models/comment.interface';
 
 @Injectable({
   providedIn: 'root'

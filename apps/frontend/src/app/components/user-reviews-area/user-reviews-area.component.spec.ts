@@ -5,7 +5,7 @@ import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { UserReviewsAreaComponent } from './user-reviews-area.component';
-import { UserIssue } from '../../models/user-issue';
+import { UserIssue } from '../../models/user-issue.interface';
 
 describe('UserReviewsAreaComponent', () => {
   let component: UserReviewsAreaComponent;

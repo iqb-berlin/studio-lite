@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
-import { PageData } from '../../models/page-data';
+import { PageData } from '../../models/page-data.interface';
 import { Progress } from '../../models/types';
 import { PreviewBarComponent } from './preview-bar.component';
 

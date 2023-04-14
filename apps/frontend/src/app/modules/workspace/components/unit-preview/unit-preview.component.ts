@@ -5,7 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '@studio-lite/studio-components';
-import { PageData } from '../../models/page-data';
+import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';

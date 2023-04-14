@@ -1,7 +1,7 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { PageData } from '../../models/page-data';
+import { PageData } from '../../models/page-data.interface';
 
 @Component({
   selector: 'studio-lite-page-navigation',
