@@ -1,14 +1,7 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
-
-export type MyData = {
-  description?: string,
-  firstName?: string,
-  lastName?: string,
-  email?: string,
-  emailPublishApproved?: boolean
-};
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { MyData } from '../models/my-data';
 
 @Component({
   template: `
