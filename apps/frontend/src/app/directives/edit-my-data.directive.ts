@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormGroup } from '@angular/forms';
 import { MyDataDto } from '@studio-lite-lib/api-dto';
-import { EditMyDataComponent } from '../components/edit-my-data.component';
+import { EditMyDataComponent } from '../components/edit-my-data/edit-my-data.component';
 import { BackendService } from '../services/backend.service';
 import { AppService } from '../services/app.service';
 

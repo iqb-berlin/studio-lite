@@ -64,7 +64,9 @@
     }
   },
   "home": {
+    "welcome": "Willkommen!",
     "home-page": "Startseite",
+    "go-home": "Gehe zur Startseite",
     "select-workspace": "Arbeitsbereich wählen",
     "select-review": "Aufgabenfolge/Review starten",
     "goto-admin": "Allgemeine Systemverwaltung",
@@ -79,7 +81,13 @@
     "repeat-new-password": "Neues Kennwort (Wiederholung)",
     "user-name": "Anmeldename",
     "editMyData": "Name/E-Mail ändern",
+    "edit-my-data-title": "Meine Daten ändern",
     "login": "Anmelden",
+    "lastName": "Nachname",
+    "firstName": "Vorname",
+    "email": "E-Mail",
+    "emailPublishApproved": "Ich stimme zu, dass die E-Mail-Adresse für andere in meinen Arbeitsbereichen sichtbar ist.",
+    "note": "Notiz",
     "first-login": "Anlegen eines ersten User-Accounts",
     "no-user": " Dieses System hat aktuell keine User angelegt. Mit den Anmeldedaten unten legen Sie einen ersten Account mit Administrationsrechten an. Bitte notieren Sie sich die Daten!",
     "login-with-preset": "Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist noch die Eingabe eines Kennwortes erforderlich.",

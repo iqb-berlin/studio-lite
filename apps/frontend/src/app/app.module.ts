@@ -38,12 +38,12 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { BackendService } from './services/backend.service';
 import { AboutComponent } from './components/about/about.component';
-import { HomeComponent } from './components/home.component';
+import { HomeComponent } from './components/home/home.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageComponent } from './components/request-message/request-message.component';
 import { InputTextComponent } from './components/input-text/input-text.component';
-import { EditMyDataComponent } from './components/edit-my-data.component';
+import { EditMyDataComponent } from './components/edit-my-data/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
 import { UserWorkspacesGroupsComponent } from './components/user-workspaces-groups/user-workspaces-groups.component';
 import { LoginComponent } from './components/login/login.component';
@@ -59,6 +59,9 @@ import { AppInfoComponent } from './components/app-info/app-info.component';
 import { UserReviewsAreaComponent } from './components/user-reviews-area/user-reviews-area.component';
 import { UserIssuesComponent } from './components/user-issues/user-issues.component';
 import { UserIssuesPipe } from './pipes/issues-pipe.pipe';
+import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
+import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
+import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -87,7 +90,10 @@ export function createTranslateLoader(http: HttpClient) {
     AppInfoComponent,
     UserReviewsAreaComponent,
     UserIssuesComponent,
-    UserIssuesPipe
+    UserIssuesPipe,
+    DataLoadingIsNumberPipe,
+    DataLoadingAsTextPipe,
+    IsInArrayPipe
   ],
   imports: [
     ApplicationModule,
