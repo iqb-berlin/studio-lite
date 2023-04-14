@@ -48,7 +48,7 @@
             (click)="toggleStrike()">
       <mat-icon>strikethrough_s</mat-icon>
     </button>
-    <div fxLayout="row"
+    <div class="fx-row-start-stretch"
          matTooltip="{{'comment-editor.text-color' | translate}}"
          [matTooltipPosition]="'above'">
       <button type="button"
@@ -66,7 +66,7 @@
              #textColorInput hidden
              (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
     </div>
-    <div fxLayout="row"
+    <div class="fx-row-start-stretch"
          matTooltip="{{'comment-editor.text-background' | translate}}"
          [matTooltipPosition]="'above'">
       <button type="button"
