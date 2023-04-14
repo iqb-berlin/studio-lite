@@ -38,7 +38,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { BackendService } from './services/backend.service';
 import { AboutComponent } from './components/about/about.component';
-import { HomeComponent } from './components/home.component';
+import { HomeComponent } from './components/home/home.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageComponent } from './components/request-message/request-message.component';

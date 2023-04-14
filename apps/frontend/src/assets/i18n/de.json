@@ -64,6 +64,7 @@
     }
   },
   "home": {
+    "welcome": "Willkommen!",
     "home-page": "Startseite",
     "select-workspace": "Arbeitsbereich wählen",
     "select-review": "Aufgabenfolge/Review starten",

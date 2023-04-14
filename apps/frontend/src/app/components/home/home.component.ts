@@ -2,22 +2,26 @@ import {
   Component, Inject, OnInit
 } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import { BackendService } from '../services/backend.service';
-import { AppService } from '../services/app.service';
-import { AppConfig } from '../classes/app-config.class';
+import { TranslateService } from '@ngx-translate/core';
+import { BackendService } from '../../services/backend.service';
+import { AppService } from '../../services/app.service';
+import { AppConfig } from '../../classes/app-config.class';
 
 @Component({
+  selector: 'studio-lite-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  constructor(@Inject('APP_VERSION') readonly appVersion: string,
-              @Inject('APP_NAME') readonly appName: string,
-              public appService: AppService,
-              private backendService: BackendService,
-              private titleService: Title,
-              private sanitizer: DomSanitizer) {
-  }
+  constructor(
+    @Inject('APP_VERSION') readonly appVersion: string,
+    @Inject('APP_NAME') readonly appName: string,
+    public appService: AppService,
+    private backendService: BackendService,
+    private titleService: Title,
+    private sanitizer: DomSanitizer,
+    private translateService: TranslateService
+  ) {}
 
   ngOnInit(): void {
     setTimeout(() => {
@@ -28,7 +32,7 @@ export class HomeComponent implements OnInit {
           this.appService.globalWarning = this.appService.appConfig.globalWarningText();
         }
       });
-      this.appService.appConfig.setPageTitle('Willkommen!');
+      this.appService.appConfig.setPageTitle(this.translateService.instant('home.welcome'));
       this.appService.dataLoading = false;
       const token = localStorage.getItem('id_token');
       if (token) {
