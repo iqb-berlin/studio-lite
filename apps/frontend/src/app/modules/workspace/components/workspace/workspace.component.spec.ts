@@ -5,7 +5,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Component, Input } from '@angular/core';
 import { WorkspaceComponent } from './workspace.component';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 
 describe('WorkspaceComponent', () => {
   let component: WorkspaceComponent;

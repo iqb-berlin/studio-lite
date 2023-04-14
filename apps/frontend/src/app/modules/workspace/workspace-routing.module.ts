@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { WorkspaceComponent } from './workspace.component';
+import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
 import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';

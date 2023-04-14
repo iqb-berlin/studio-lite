@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
 import { WorkspaceService } from '../services/workspace.service';
-import { WorkspaceComponent } from '../workspace.component';
+import { WorkspaceComponent } from '../components/workspace/workspace.component';
 import { ConfirmDialogData } from '../models/confirm-dialog.data';
 
 @Injectable()

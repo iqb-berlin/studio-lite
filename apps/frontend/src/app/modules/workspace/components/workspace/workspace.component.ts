@@ -3,9 +3,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnInit } from '@angular/core';
 import { ModuleService } from '@studio-lite/studio-components';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
-import { AppService } from '../../services/app.service';
-import { BackendService as AppBackendService } from '../../services/backend.service';
-import { WorkspaceService } from './services/workspace.service';
+import { AppService } from '../../../../services/app.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   selector: 'studio-lite-workspace',
