@@ -61,6 +61,7 @@ import { UserIssuesComponent } from './components/user-issues/user-issues.compon
 import { UserIssuesPipe } from './pipes/issues-pipe.pipe';
 import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
+import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -91,7 +92,8 @@ export function createTranslateLoader(http: HttpClient) {
     UserIssuesComponent,
     UserIssuesPipe,
     DataLoadingIsNumberPipe,
-    DataLoadingAsTextPipe
+    DataLoadingAsTextPipe,
+    IsInArrayPipe
   ],
   imports: [
     ApplicationModule,
