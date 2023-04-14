@@ -17,8 +17,14 @@
 }
 
 .selected {
-  background-color: #3957f74f
+  color: white;
+  background-color: #006064BB;
+  &:hover {
+    background-color: #006064BB;
+    color: white;
+  }
 }
+
 
 .review-changed {
   height: 65vh;
@@ -42,7 +48,6 @@
 }
 
 .review-list-entry {
-  height: unset !important;
   text-overflow: ellipsis;
 }
 
