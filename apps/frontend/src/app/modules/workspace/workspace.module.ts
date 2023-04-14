@@ -32,7 +32,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
-import { WorkspaceComponent } from './workspace.component';
+import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { NewUnitComponent } from './components/new-unit/new-unit.component';
 import { SelectUnitComponent } from './components/select-unit/select-unit.component';
 import { MoveUnitComponent } from './components/move-unit/move-unit.component';
