@@ -1,0 +1,74 @@
+<div class="fx-column-start-stretch">
+  <h1 mat-dialog-title>{{'workspace.manage-unit-groups' | translate}}</h1>
+  <mat-dialog-content class="fx-row-start-stretch dialog-content">
+    <div class="fx-flex-row-20 fx-column-start-stretch">
+      <mat-nav-list class="group-list fx-flex-fill">
+        <div *ngFor="let group of groups | keyvalue"
+          class="group-list-entry fx-row-start-stretch"
+           [class.selected]="group.key === selectedGroup"
+           (click)="selectGroup(group.key)">
+           <a mat-list-item class="fx-row-space-between-center">
+              <span class="group-key fx-flex-row-90">
+                {{group.key}}
+              </span>
+              <div *ngIf="group.value > 0"
+                   class="badge-holder fx-flex-row-10"
+                   [matBadge]="group.value">
+              </div>
+           </a>
+          </div>
+      </mat-nav-list>
+
+      <studio-lite-group-menu
+          [selectedGroup]="selectedGroup"
+          (groupAdded)="addGroup($event)"
+          (groupRenamed)="renameGroup($event)"
+          (groupDeleted)="deleteGroup()">
+      </studio-lite-group-menu>
+    </div>
+
+    <div class="fx-flex-row-80">
+        <div [class]="changed ? 'group-changed' : 'group-not-changed'">
+          <div class="fx-column-start-stretch units-wrapper">
+            <div class="fx-flex-fill"
+                 [hidden]="selectedGroup">{{'workspace.select-group' | translate}}</div>
+            <div class="units fx-flex-fill">
+              <studio-lite-select-unit-list #unitSelectionTable
+                                            [hidden]="!selectedGroup"
+                                            [show-groups]="false"
+                                            [workspace]="workspaceService.selectedWorkspaceId"
+                                            (selectionChanged)="unitSelectionChanged()">
+              </studio-lite-select-unit-list>
+            </div>
+            <div class="fx-row-end-end fx-gap-5 changes-container">
+              <button mat-raised-button
+                      [matTooltip]="'workspace.reject-unit-changes' | translate"
+                      [disabled]="!changed"
+                      matTooltipPosition="below"
+                      (click)="discardChanges()">
+                <mat-icon>close</mat-icon>
+              </button>
+              <button mat-raised-button
+                      [matTooltip]="'workspace.save-changes' | translate"
+                      [disabled]="!changed"
+                      matTooltipPosition="below"
+                      (click)="saveChanged()">
+                {{'save' | translate}}
+                <mat-icon>save</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </mat-dialog-content>
+
+
+  <mat-dialog-actions class="fx-column-start-stretch">
+    <div class="fx-row-start-stretch">
+      <button mat-raised-button
+              [mat-dialog-close]="false">
+        {{'dialogs.close' | translate}}
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

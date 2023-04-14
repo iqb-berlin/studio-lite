@@ -33,26 +33,24 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './workspace.component';
-import { NewUnitComponent } from './dialogs/new-unit.component';
-import { SelectUnitComponent } from './dialogs/select-unit.component';
-import { MoveUnitComponent } from './dialogs/move-unit.component';
-import { UnitMetadataComponent } from './unit/unit-metadata/unit-metadata.component';
-import { UnitEditorComponent } from './unit/unit-editor/unit-editor.component';
-import { SaveOrDiscardComponent } from './dialogs/save-or-discard.component';
-import { UnitRoutingCanDeactivateGuard } from './unit/unit-routing.guard';
-import { UnitPreviewComponent } from './unit/unit-preview/unit-preview.component';
-import { ExportUnitComponent } from './dialogs/export-unit/export-unit.component';
-import { UnitSchemerComponent } from './unit/unit-schemer/unit-schemer.component';
+import { NewUnitComponent } from './components/new-unit/new-unit.component';
+import { SelectUnitComponent } from './components/select-unit/select-unit.component';
+import { MoveUnitComponent } from './components/move-unit/move-unit.component';
+import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
+import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
+import { SaveOrDiscardComponent } from './components/save-or-discard/save-or-discard.component';
+import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
+import { UnitPreviewComponent } from './components/unit-preview/unit-preview.component';
+import { ExportUnitComponent } from './components/export-unit/export-unit.component';
+import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.component';
 import { SelectUnitListComponent } from './components/select-unit-list/select-unit-list.component';
 import { UserListComponent } from './components/user-list/user-list.component';
-import { WorkspaceUserListComponent } from './dialogs/workspace-user-list.component';
-import {
-  PagingModeSelectionComponent
-} from './unit/unit-preview/paging-mode-selection/paging-mode-selection.component';
-import { UnitCommentsComponent } from './unit/unit-comments/unit-comments.component';
+import { WorkspaceUserListComponent } from './components/workspace-user-list/workspace-user-list.component';
+import { PagingModeSelectionComponent } from './components/paging-mode-selection/paging-mode-selection.component';
+import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
 import { HasNewCommentsPipe } from './pipes/has-new-comments.pipe';
-import { ReviewsComponent } from './dialogs/reviews/reviews.component';
-import { GroupManageComponent } from './dialogs/group-manage.component';
+import { ReviewsComponent } from './components/reviews/reviews.component';
+import { GroupManageComponent } from './components/group-manage/group-manage.component';
 import { ReviewConfigEditComponent } from './components/review-config-edit/review-config-edit.component';
 import { UnitSelectionComponent } from './components/unit-selection/unit-selection.component';
 import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save-button.component';
@@ -78,6 +76,10 @@ import { ReviewConfigComponent } from './components/review-config/review-config.
 import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
 import { NewGroupButtonComponent } from './components/new-group-button/new-group-button.component';
+import { GroupMenuComponent } from './components/group-menu/group-menu.component';
+import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
+import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
+import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 
 @NgModule({
   imports: [
@@ -158,7 +160,11 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
     ReviewSaveChangesComponent,
     ReviewConfigComponent,
     ExportReviewButtonComponent,
-    NewGroupButtonComponent
+    NewGroupButtonComponent,
+    GroupMenuComponent,
+    PreviewBarComponent,
+    StatusIndicationComponent,
+    PageNavigationComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

@@ -9,11 +9,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
-import { GroupManageComponent } from '../../dialogs/group-manage.component';
-import { ReviewsComponent } from '../../dialogs/reviews/reviews.component';
-import { WorkspaceUserListComponent } from '../../dialogs/workspace-user-list.component';
-import { ExportUnitComponent } from '../../dialogs/export-unit/export-unit.component';
-import { MoveUnitComponent, MoveUnitData } from '../../dialogs/move-unit.component';
+import { GroupManageComponent } from '../group-manage/group-manage.component';
+import { ReviewsComponent } from '../reviews/reviews.component';
+import { WorkspaceUserListComponent } from '../workspace-user-list/workspace-user-list.component';
+import { ExportUnitComponent } from '../export-unit/export-unit.component';
+import { MoveUnitComponent } from '../move-unit/move-unit.component';
 import {
   RequestMessageComponent
 } from '../../../../components/request-message/request-message.component';
@@ -24,7 +24,8 @@ import { BackendService as AppBackendService } from '../../../../services/backen
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
+import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
+import { MoveUnitData } from '../../models/move-unit-data';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -250,8 +251,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       this.groupDialog.open(GroupManageComponent, {
-        width: '1000px',
-        height: '800px'
+        width: '1000px'
       }).afterClosed().subscribe(() => {
         this.updateUnitList();
       });

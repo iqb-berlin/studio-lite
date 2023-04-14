@@ -1,0 +1,58 @@
+.selected {
+  background-color: #006064BB;
+  .group-key {
+    color: white;
+  }
+}
+
+.units {
+  overflow: auto;
+  background-color: white;
+}
+
+.group-list {
+  padding-top: 0;
+  overflow: auto;
+  background-color: whitesmoke;
+}
+
+.group-list-entry {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.badge-holder {
+  pointer-events: none;
+}
+
+.group-changed {
+  background-color: darkorange;
+  padding: 2px
+}
+
+.group-not-changed {
+  background-color: transparent;
+  padding: 2px
+}
+
+.group-key {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dialog-content{
+  gap: 5px;
+  display: flex;
+  height: 65vh
+}
+
+.units-wrapper {
+  height: 64vh;
+}
+
+.changes-container {
+  padding: 5px;
+}
+
+
+

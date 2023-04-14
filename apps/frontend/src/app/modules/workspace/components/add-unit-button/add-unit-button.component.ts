@@ -6,9 +6,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { SelectUnitComponent, SelectUnitData } from '../../dialogs/select-unit.component';
+import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { WorkspaceService } from '../../services/workspace.service';
-import { NewUnitComponent, NewUnitData } from '../../dialogs/new-unit.component';
+import { NewUnitComponent } from '../new-unit/new-unit.component';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -16,6 +16,7 @@ import {
   RequestMessageComponent
 } from '../../../../components/request-message/request-message.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
+import { NewUnitData } from '../../models/new-unit.data';
 
 @Component({
   selector: 'studio-lite-add-unit-button',

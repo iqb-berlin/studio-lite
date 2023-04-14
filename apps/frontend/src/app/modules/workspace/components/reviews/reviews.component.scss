@@ -1,0 +1,56 @@
+.margin-bottom {
+  margin-bottom: 10px
+}
+
+.group-message {
+  font-style: italic; font-size: smaller
+}
+
+.invisible {
+  display: block;
+  visibility: hidden;
+  height: 0;width: 0
+}
+
+.settings {
+  padding: 2px 2px 2px 0;
+}
+
+.selected {
+  color: white;
+  background-color: #006064BB;
+  &:hover {
+    background-color: #006064BB;
+    color: white;
+  }
+}
+
+
+.review-changed {
+  height: 65vh;
+  background-color: darkorange;
+  padding: 2px
+}
+
+.review-not-changed {
+  height: 65vh;
+  background-color: transparent;
+  padding: 2px
+}
+
+.review-changes-area {
+  overflow-y: auto;
+  background-color: white;
+}
+
+.review-list-area {
+  height: 65vh;
+}
+
+.review-list-entry {
+  text-overflow: ellipsis;
+}
+
+.reviews {
+  overflow-y: auto;
+}

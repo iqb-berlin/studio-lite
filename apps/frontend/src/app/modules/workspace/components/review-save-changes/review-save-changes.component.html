@@ -7,7 +7,7 @@
     <mat-icon>close</mat-icon>
   </button>
   <button mat-raised-button
-          [matTooltip]="'workspace.review-save' | translate"
+          [matTooltip]="'workspace.save-changes' | translate"
           [disabled]="!changed" matTooltipPosition="below"
           (click)="saveChanges.emit()">
     {{'workspace.save' | translate}}
