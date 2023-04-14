@@ -72,20 +72,6 @@ export class AppComponent implements OnInit {
     });
   }
 
-  dataLoadingIsNumber() {
-    return typeof this.appService.dataLoading === 'number';
-  }
-
-  dataLoadingAsText() {
-    if (typeof this.appService.dataLoading === 'number') {
-      const progressValue = this.appService.dataLoading as number;
-      if (progressValue <= 100) return `${progressValue} %`;
-      if (progressValue < 8000) return `${(progressValue / 1024).toFixed(1)} kB`;
-      return `${(progressValue / 1048576).toFixed(1)} MB`;
-    }
-    return this.translateService.instant('application.wait-message');
-  }
-
   logout_from_error() {
     const state: RouterState = this.router.routerState;
     const { snapshot } = state;

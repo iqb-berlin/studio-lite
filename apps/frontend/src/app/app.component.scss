@@ -9,3 +9,12 @@
 .mat-button {
   text-align: right;
 }
+
+.fx-flex-fix-100 {
+  flex: 1 1 100px;
+  box-sizing: border-box;
+  max-height: 100px;
+  min-height: 100px;
+  width: 100px;
+  height: 100px;
+}

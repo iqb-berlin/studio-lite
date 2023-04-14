@@ -1,33 +1,46 @@
-<div class="spinner-container" *ngIf="appService.dataLoading"
-     fxLayout="column" fxLayoutAlign="start center">
-  <mat-spinner fxFlex="100px"></mat-spinner>
-  <button mat-button *ngIf="dataLoadingIsNumber()" fxFlex>{{dataLoadingAsText()}}</button>
+<div *ngIf="appService.dataLoading"
+     class="spinner-container fx-column-start-center">
+  <mat-spinner class="fx-flex-fix-100"></mat-spinner>
+  <button *ngIf="appService.dataLoading | dataLoadingIsNumber"
+          mat-button
+          class="fx-flex-fill">
+    {{appService.dataLoading | dataLoadingAsText}}
+  </button>
 </div>
-<div class="error-container" *ngIf="appService.errorMessages.length > 0"
-     fxLayout="column" fxLayoutAlign="start center">
-  <div *ngFor="let e of appService.errorMessages" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
-    <div [matTooltip]="e.message" fxFlex>{{('app-http-error.' + e.status) | translate}}</div>
+<div *ngIf="appService.errorMessages.length"
+     class="error-container fx-column-start-center">
+  <div *ngFor="let e of appService.errorMessages"
+       class="fx-row-space-between-center fx-gap-10">
+    <div [matTooltip]="e.message"
+         fxFlex>{{('app-http-error.' + e.status) | translate}}
+    </div>
     <button mat-raised-button
             *ngIf="[401, 403, 410].indexOf(e.status) >= 0"
             (click)="logout_from_error()">
       {{'app-http-error.login' | translate}}
     </button>
-    <button mat-button (click)="appService.removeErrorMessage(e)" [matTooltip]="'app-http-error.close' | translate">
+    <button mat-button
+            [matTooltip]="'app-http-error.close' | translate"
+            (click)="appService.removeErrorMessage(e)" >
       <mat-icon>close</mat-icon>
     </button>
   </div>
 </div>
 <div class="logo hide-on-print">
-  <a [routerLink]="['/']" aria-label="Gehe zur Startseite">
+  <a [routerLink]="['/']" [attr.aria-label]="'home.go-home' | translate">
     <img [src]="appService.appLogo?.data"
-         [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'Startseite'"
-         [alt]="appService.appLogo ? appService.appLogo.alt : 'Startseite'"/>
+         [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"
+         [alt]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"/>
   </a>
 </div>
 
-<div class="page-title hide-on-print" fxLayout="row" fxLayoutAlign="space-between center">
-  <div *ngIf="!appService.appConfig?.hideTitlesOnPage">{{ appService.appConfig.appTitle }}</div>
-  <div *ngIf="appService.appConfig?.pageTitle && !appService.appConfig.hideTitlesOnPage">{{ appService.appConfig.pageTitle }}</div>
+<div class="page-title hide-on-print fx-row-space-between-center">
+  <div *ngIf="!appService.appConfig?.hideTitlesOnPage">
+    {{ appService.appConfig.appTitle }}
+  </div>
+  <div *ngIf="appService.appConfig?.pageTitle && !appService.appConfig.hideTitlesOnPage">
+    {{ appService.appConfig.pageTitle }}
+  </div>
 </div>
 
 <router-outlet></router-outlet>

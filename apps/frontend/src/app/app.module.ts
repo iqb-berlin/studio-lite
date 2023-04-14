@@ -59,6 +59,8 @@ import { AppInfoComponent } from './components/app-info/app-info.component';
 import { UserReviewsAreaComponent } from './components/user-reviews-area/user-reviews-area.component';
 import { UserIssuesComponent } from './components/user-issues/user-issues.component';
 import { UserIssuesPipe } from './pipes/issues-pipe.pipe';
+import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
+import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -87,7 +89,9 @@ export function createTranslateLoader(http: HttpClient) {
     AppInfoComponent,
     UserReviewsAreaComponent,
     UserIssuesComponent,
-    UserIssuesPipe
+    UserIssuesPipe,
+    DataLoadingIsNumberPipe,
+    DataLoadingAsTextPipe
   ],
   imports: [
     ApplicationModule,

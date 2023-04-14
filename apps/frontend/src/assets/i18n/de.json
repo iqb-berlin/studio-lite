@@ -66,6 +66,7 @@
   "home": {
     "welcome": "Willkommen!",
     "home-page": "Startseite",
+    "go-home": "Gehe zur Startseite",
     "select-workspace": "Arbeitsbereich wählen",
     "select-review": "Aufgabenfolge/Review starten",
     "goto-admin": "Allgemeine Systemverwaltung",
