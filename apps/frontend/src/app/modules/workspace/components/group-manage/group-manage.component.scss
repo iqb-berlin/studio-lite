@@ -1,5 +1,8 @@
 .selected {
-  background-color: #3957f74f
+  background-color: #006064BB;
+  .group-key {
+    color: white;
+  }
 }
 
 .units {
@@ -8,21 +11,18 @@
 }
 
 .group-list {
+  padding-top: 0;
   overflow: auto;
   background-color: whitesmoke;
-  border: 2px solid whitesmoke
 }
 
 .group-list-entry {
   white-space: nowrap;
   font-size: 14px;
-  margin-right: 12px;
 }
 
 .badge-holder {
-  width: 2px;
-  margin-right: 6px;
-  background-color: transparent;
+  pointer-events: none;
 }
 
 .group-changed {

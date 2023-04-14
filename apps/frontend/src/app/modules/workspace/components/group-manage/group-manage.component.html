@@ -3,20 +3,20 @@
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <div class="fx-flex-row-20 fx-column-start-stretch">
       <mat-nav-list class="group-list fx-flex-fill">
-        <div
-          *ngFor="let group of groups | keyvalue"
+        <div *ngFor="let group of groups | keyvalue"
           class="group-list-entry fx-row-start-stretch"
-          (click)="selectGroup(group.key)"
-          [class]="group.key === selectedGroup ? 'group-list-entry selected' : 'group-list-entry'">
-          <a mat-list-item
-             class="group-key">
-            {{group.key}}
-          </a>
-          <div *ngIf="group.value > 0"
-               class="badge-holder"
-               [matBadge]="group.value">
+           [class.selected]="group.key === selectedGroup"
+           (click)="selectGroup(group.key)">
+           <a mat-list-item class="fx-row-space-between-center">
+              <span class="group-key fx-flex-row-90">
+                {{group.key}}
+              </span>
+              <div *ngIf="group.value > 0"
+                   class="badge-holder fx-flex-row-10"
+                   [matBadge]="group.value">
+              </div>
+           </a>
           </div>
-        </div>
       </mat-nav-list>
 
       <studio-lite-group-menu
