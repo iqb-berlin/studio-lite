@@ -2,7 +2,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
 
-export type EditMyDataComponentData = {
+export type MyData = {
   description?: string,
   firstName?: string,
   lastName?: string,
@@ -52,7 +52,7 @@ export class EditMyDataComponent {
   editUserForm: UntypedFormGroup;
 
   constructor(private fb: UntypedFormBuilder,
-              @Inject(MAT_DIALOG_DATA) public data: EditMyDataComponentData) {
+              @Inject(MAT_DIALOG_DATA) public data: MyData) {
     this.editUserForm = this.fb.group({
       lastName: this.fb.control(this.data.lastName),
       firstName: this.fb.control(this.data.firstName),
