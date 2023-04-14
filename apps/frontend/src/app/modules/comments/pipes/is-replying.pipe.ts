@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ActiveComment, ActiveCommentType } from '../types/active.comment';
-import { Comment } from '../types/comment';
+import { ActiveComment, ActiveCommentType } from '../models/active-comment';
+import { Comment } from '../models/comment';
 
 @Pipe({
   name: 'isReplying'

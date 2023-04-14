@@ -7,9 +7,9 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
-import { Comment } from '../../types/comment';
+import { Comment } from '../../models/comment';
 import { CommentComponent } from './comment.component';
-import { ActiveComment } from '../../types/active.comment';
+import { ActiveComment } from '../../models/active-comment';
 
 describe('CommentBadgeComponent', () => {
   let component: CommentComponent;

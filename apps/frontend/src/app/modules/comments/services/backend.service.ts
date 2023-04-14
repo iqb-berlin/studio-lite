@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
-import { Comment } from '../types/comment';
+import { Comment } from '../models/comment';
 
 @Injectable()
 export class BackendService {
