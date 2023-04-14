@@ -7,7 +7,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
-import { WorkspaceDataFlat } from '../../../../classes/workspace-data-flat.class';
+import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
 
 export interface SelectUnitData {
   title: string,

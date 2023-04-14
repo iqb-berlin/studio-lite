@@ -1,7 +1,7 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { MyData } from '../../models/my-data';
+import { MyData } from '../../models/my-data.interface';
 
 @Component({
   selector: 'studio-lite-edit-my-data',

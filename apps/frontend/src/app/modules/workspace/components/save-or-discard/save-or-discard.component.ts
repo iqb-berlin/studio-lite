@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ConfirmDialogData } from '../../models/confirm-dialog.data';
+import { ConfirmDialogData } from '../../models/confirm-dialog.interface';
 
 @Component({
   selector: 'studio-lite-save-or-discard',

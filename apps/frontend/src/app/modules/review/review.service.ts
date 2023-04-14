@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ModuleService } from '@studio-lite/studio-components';
 import { lastValueFrom, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UnitData } from './classes/unit-data.class';
+import { UnitData } from './models/unit-data.class';
 import { BackendService } from './backend.service';
 import { AppService } from '../../services/app.service';
 

@@ -8,7 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceComponent } from '../components/workspace/workspace.component';
-import { ConfirmDialogData } from '../models/confirm-dialog.data';
+import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
 @Injectable()
 export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceComponent> {

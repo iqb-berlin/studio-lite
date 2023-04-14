@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { BackendService as WriteBackendService } from '../backend.service';
 import { BackendService as ReadBackendService } from '../../../services/backend.service';
 import { defaultAppConfig } from '../../../services/app.service';
-import { AppConfig } from '../../../classes/app-config.class';
+import { AppConfig } from '../../../models/app-config.class';
 
 @Component({
   selector: 'app-app-config',

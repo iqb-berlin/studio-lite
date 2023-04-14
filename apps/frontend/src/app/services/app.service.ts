@@ -2,8 +2,8 @@ import { Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
-import { AppHttpError } from '../classes/app-http-error.class';
-import { AppConfig } from '../classes/app-config.class';
+import { AppHttpError } from '../models/app-http-error.class';
+import { AppConfig } from '../models/app-config.class';
 
 export const standardLogo: AppLogoDto = {
   data: 'assets/IQB-LogoA.png',

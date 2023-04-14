@@ -5,7 +5,7 @@ import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../services/app.service';
-import { AppConfig } from '../../classes/app-config.class';
+import { AppConfig } from '../../models/app-config.class';
 
 @Component({
   selector: 'studio-lite-home',

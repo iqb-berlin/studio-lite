@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BackendService } from '../../../comments/services/backend.service';
-import { Comment } from '../../../comments/models/comment';
+import { Comment } from '../../../comments/models/comment.interface';
 
 @Component({
   selector: 'studio-lite-unit-print-comments',

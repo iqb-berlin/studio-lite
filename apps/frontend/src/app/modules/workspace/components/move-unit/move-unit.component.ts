@@ -5,8 +5,8 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
-import { WorkspaceDataFlat } from '../../../../classes/workspace-data-flat.class';
-import { MoveUnitData } from '../../models/move-unit-data';
+import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
+import { MoveUnitData } from '../../models/move-unit-data.interface';
 
 @Component({
   selector: 'studio-lite-move-unit',
