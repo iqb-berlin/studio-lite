@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { BackendService } from '../../backend.service';
 import { ReviewService } from '../../review.service';
-import { Comment } from '../../../comments/types/comment';
+import { Comment } from '../../../comments/models/comment';
 import { UnitInfoLoaderComponent } from './unit-info-loader.component';
 
 @Component({

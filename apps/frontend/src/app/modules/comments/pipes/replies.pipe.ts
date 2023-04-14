@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Comment } from '../types/comment';
+import { Comment } from '../models/comment';
 
 @Pipe({
   name: 'replies',

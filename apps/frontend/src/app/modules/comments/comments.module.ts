@@ -29,7 +29,7 @@ import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
 import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
 import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
-import { Comment } from './types/comment';
+import { Comment } from './models/comment';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 
 @NgModule({

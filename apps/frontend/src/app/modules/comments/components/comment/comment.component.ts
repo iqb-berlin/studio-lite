@@ -2,8 +2,8 @@ import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { ActiveComment, ActiveCommentType } from '../../types/active.comment';
-import { Comment } from '../../types/comment';
+import { ActiveComment, ActiveCommentType } from '../../models/active-comment';
+import { Comment } from '../../models/comment';
 
 @Component({
   selector: 'studio-lite-comment',

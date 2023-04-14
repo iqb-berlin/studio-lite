@@ -7,9 +7,9 @@ import {
   switchMap, Subject, takeUntil, of, Observable
 } from 'rxjs';
 import { BackendService } from '../../services/backend.service';
-import { ActiveComment } from '../../types/active.comment';
+import { ActiveComment } from '../../models/active-comment';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
-import { Comment } from '../../types/comment';
+import { Comment } from '../../models/comment';
 
 @Component({
   selector: 'studio-lite-comments',
