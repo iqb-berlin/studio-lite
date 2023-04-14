@@ -43,7 +43,7 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageComponent } from './components/request-message/request-message.component';
 import { InputTextComponent } from './components/input-text/input-text.component';
-import { EditMyDataComponent } from './components/edit-my-data.component';
+import { EditMyDataComponent } from './components/edit-my-data/edit-my-data.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
 import { UserWorkspacesGroupsComponent } from './components/user-workspaces-groups/user-workspaces-groups.component';
 import { LoginComponent } from './components/login/login.component';
