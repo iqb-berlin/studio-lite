@@ -15,7 +15,6 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { WsgAdminComponent } from './wsg-admin.component';
-import { SettingsComponent } from './settings/settings.component';
 import { UsersComponent } from './users/users.component';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { AuthInterceptor } from './auth.interceptor';
@@ -26,7 +25,6 @@ import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
   declarations: [
     WorkspacesComponent,
     UsersComponent,
-    SettingsComponent,
     WsgAdminComponent
   ],
   imports: [
