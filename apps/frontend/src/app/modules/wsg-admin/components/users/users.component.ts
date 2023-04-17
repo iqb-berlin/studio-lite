@@ -10,7 +10,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../backend.service';
 import { AppService } from '../../../../services/app.service';
-import { WorkspaceToCheckCollection } from '../../workspaces/workspaceChecked';
+import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
 import { WsgAdminService } from '../../wsg-admin.service';
 
 @Component({
