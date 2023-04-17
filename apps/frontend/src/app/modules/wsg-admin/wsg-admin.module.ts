@@ -14,6 +14,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { TranslateModule } from '@ngx-translate/core';
 import { WsgAdminComponent } from './wsg-admin.component';
 import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
@@ -44,7 +45,8 @@ import { SharedModule } from '../shared/shared.module';
     ReactiveFormsModule,
     RouterModule,
     MatTabsModule,
-    WsgAdminRoutingModule
+    WsgAdminRoutingModule,
+    TranslateModule
   ],
   providers: [
     BackendService,

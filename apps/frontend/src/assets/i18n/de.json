@@ -4,6 +4,8 @@
   "delete": "Löschen",
   "cancel": "Abbrechen",
   "close": "Schließen",
+  "warning": "Warnung",
+  "error": "Fehler",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
   },
@@ -109,6 +111,22 @@
       "unit-copy": "Aufgaben kopieren - unvollständig"
     }
   },
+  "user": {
+    "full-name": "Name",
+    "note": "Notiz",
+    "login-name": "Login-Name",
+    "email": "E-Mail",
+    "no-email": "keine"
+  },
+  "access-rights": {
+    "hint": "Zugriffsrechte: Bitte links Nutzer:in wählen",
+    "for-user": "Zugriffsrechte für {{user}}",
+    "not-saved": "Zugriffsrechte nicht gespeichert.",
+    "changed": "Zugriffsrechte geändert",
+    "not-changed": "Zugriffsrechte geändert"
+  },
+
+
   "workspace-settings": {
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",

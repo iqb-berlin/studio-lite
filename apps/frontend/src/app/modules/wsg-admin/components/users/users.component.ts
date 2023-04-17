@@ -1,6 +1,5 @@
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
-
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -8,23 +7,20 @@ import { SelectionModel } from '@angular/cdk/collections';
 import {
   UserFullDto, UserInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
-import {
-  BackendService
-} from '../../backend.service';
+import { TranslateService } from '@ngx-translate/core';
+import { BackendService } from '../../backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../workspaces/workspaceChecked';
 import { WsgAdminService } from '../../wsg-admin.service';
 
 @Component({
+  selector: 'studio-lite-users',
   templateUrl: './users.component.html',
-  styles: [
-    '.scroll-area {height: calc(100% - 35px); overflow-y: auto;}',
-    '.object-list {height: calc(100% - 5px);}'
-  ]
+  styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'displayName', 'email', 'description'];
+  displayedColumns = ['name', 'displayName', 'email', 'description'];
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
@@ -44,18 +40,20 @@ export class UsersComponent implements OnInit {
     private confirmDialog: MatDialog,
     private superadminPasswordDialog: MatDialog,
     private messsageDialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
   ) {
-    this.tableSelectionRow.changed.subscribe(
-      r => {
-        if (r.added.length > 0) {
-          this.selectedUser = r.added[0].id;
-        } else {
-          this.selectedUser = 0;
+    this.tableSelectionRow.changed
+      .subscribe(
+        r => {
+          if (r.added.length) {
+            this.selectedUser = r.added[0].id;
+          } else {
+            this.selectedUser = 0;
+          }
+          this.updateWorkspaceList();
         }
-        this.updateWorkspaceList();
-      }
-    );
+      );
   }
 
   ngOnInit(): void {
@@ -66,16 +64,20 @@ export class UsersComponent implements OnInit {
 
   updateWorkspaceList(): void {
     if (this.userWorkspaces.hasChanged) {
-      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
+      this.snackBar.open(
+        this.translateService.instant('access-rights.not-saved'),
+        this.translateService.instant('warning'),
+        { duration: 3000 });
     }
-    if (this.selectedUser > 0) {
+    if (this.selectedUser) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspacesByUser(this.selectedUser).subscribe(
-        (dataResponse: WorkspaceInListDto[]) => {
-          this.userWorkspaces.setChecks(dataResponse);
-          this.appService.dataLoading = false;
-        }
-      );
+      this.backendService.getWorkspacesByUser(this.selectedUser)
+        .subscribe(
+          (dataResponse: WorkspaceInListDto[]) => {
+            this.userWorkspaces.setChecks(dataResponse);
+            this.appService.dataLoading = false;
+          }
+        );
     } else {
       this.userWorkspaces.setChecks();
     }
@@ -90,10 +92,16 @@ export class UsersComponent implements OnInit {
         ).subscribe(
           respOk => {
             if (respOk) {
-              this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
+              this.snackBar.open(
+                this.translateService.instant('access-rights.changed'),
+                '',
+                { duration: 1000 });
               this.userWorkspaces.setHasChangedFalse();
             } else {
-              this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService.instant('access-rights.not-changed'),
+                this.translateService.instant('error'),
+                { duration: 3000 });
             }
             this.appService.dataLoading = false;
           }
@@ -105,41 +113,31 @@ export class UsersComponent implements OnInit {
   updateUserList(): void {
     this.selectedUser = 0;
     this.appService.dataLoading = true;
-    this.backendService.getUsersFull().subscribe(
-      (dataResponse: UserFullDto[]) => {
-        if (dataResponse.length > 0) {
-          this.objectsDatasource = new MatTableDataSource(dataResponse);
-          this.objectsDatasource.sort = this.sort;
-          this.tableSelectionCheckbox.clear();
-          this.tableSelectionRow.clear();
-          this.appService.dataLoading = false;
-        } else {
-          this.tableSelectionCheckbox.clear();
-          this.tableSelectionRow.clear();
-          this.appService.dataLoading = false;
+    this.backendService.getUsersFull()
+      .subscribe(
+        (dataResponse: UserFullDto[]) => {
+          if (dataResponse.length > 0) {
+            this.objectsDatasource = new MatTableDataSource(dataResponse);
+            this.objectsDatasource.sort = this.sort;
+            this.tableSelectionCheckbox.clear();
+            this.tableSelectionRow.clear();
+            this.appService.dataLoading = false;
+          } else {
+            this.tableSelectionCheckbox.clear();
+            this.tableSelectionRow.clear();
+            this.appService.dataLoading = false;
+          }
         }
-      }
-    );
+      );
   }
 
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceToCheckCollection([]);
-    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(workspaces => {
-      this.userWorkspaces = new WorkspaceToCheckCollection(workspaces);
-      this.updateUserList();
-    });
-  }
-
-  isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckbox.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
-  }
-
-  masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckbox.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
+    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
+      .subscribe(workspaces => {
+        this.userWorkspaces = new WorkspaceToCheckCollection(workspaces);
+        this.updateUserList();
+      });
   }
 
   selectRow(row: UserInListDto): void {
