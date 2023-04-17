@@ -20,12 +20,12 @@ import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
 import { BackendService as AppBackendService } from '../../../services/backend.service';
 import { AppService } from '../../../services/app.service';
-import { UserToCheckCollection } from '../users/usersChecked';
 import { WsgAdminService } from '../wsg-admin.service';
 import { InputTextComponent } from '../../../components/input-text/input-text.component';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../components/edit-workspace-settings/edit-workspace-settings.component';
+import { UserToCheckCollection } from '../../shared/models/users-to-check-collection.class';
 
 const datePipe = new DatePipe('de-DE');
 

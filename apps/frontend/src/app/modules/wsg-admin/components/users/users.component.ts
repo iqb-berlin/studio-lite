@@ -10,10 +10,10 @@ import {
 } from '@studio-lite-lib/api-dto';
 import {
   BackendService
-} from '../backend.service';
-import { AppService } from '../../../services/app.service';
-import { WorkspaceToCheckCollection } from '../workspaces/workspaceChecked';
-import { WsgAdminService } from '../wsg-admin.service';
+} from '../../backend.service';
+import { AppService } from '../../../../services/app.service';
+import { WorkspaceToCheckCollection } from '../../workspaces/workspaceChecked';
+import { WsgAdminService } from '../../wsg-admin.service';
 
 @Component({
   templateUrl: './users.component.html',

@@ -15,11 +15,12 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { WsgAdminComponent } from './wsg-admin.component';
-import { UsersComponent } from './users/users.component';
+import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './workspaces/workspaces.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { BackendService } from './backend.service';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
   ],
   imports: [
     CommonModule,
+    SharedModule,
     MatIconModule,
     MatTableModule,
     MatCheckboxModule,
