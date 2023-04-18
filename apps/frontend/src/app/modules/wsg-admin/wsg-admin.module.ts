@@ -18,7 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { WsgAdminComponent } from './wsg-admin.component';
 import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
-import { AuthInterceptor } from './auth.interceptor';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { BackendService } from './services/backend.service';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
