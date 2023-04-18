@@ -4,12 +4,13 @@ import {
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { ModuleService } from '@studio-lite/studio-components';
+
 import { TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
+import { ModuleService } from '../../../shared/services/module.service';
 
 @Component({
   selector: 'studio-lite-unit-schemer',

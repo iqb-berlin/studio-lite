@@ -4,7 +4,7 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { VeronaModuleClass } from './verona-module.class';
+import { VeronaModuleClass } from '../models/verona-module.class';
 
 @Component({
   selector: 'app-select-module',

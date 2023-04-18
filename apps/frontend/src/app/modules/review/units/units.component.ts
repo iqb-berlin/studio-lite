@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { ModuleService } from '@studio-lite/studio-components';
+import { ModuleService } from '../../shared/services/module.service';
 import { AppService } from '../../../services/app.service';
 import { ReviewService } from '../review.service';
 import { UnitPage } from '../models/unit-page.interface';

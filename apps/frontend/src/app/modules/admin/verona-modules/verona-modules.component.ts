@@ -11,11 +11,12 @@ import {
   MessageDialogData,
   MessageType
 } from '@studio-lite-lib/iqb-components';
-import { ModuleService, VeronaModuleClass } from '@studio-lite/studio-components';
 import { TranslateService } from '@ngx-translate/core';
+import { ModuleService } from '../../shared/services/module.service';
 import { BackendService } from '../backend.service';
 import { AppService } from '../../../services/app.service';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
+import { VeronaModuleClass } from '../../shared/models/verona-module.class';
 
 @Component({
   templateUrl: './verona-modules.component.html',

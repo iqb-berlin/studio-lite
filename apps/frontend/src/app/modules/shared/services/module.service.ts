@@ -1,7 +1,7 @@
 import { lastValueFrom } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { VeronaModuleClass } from './verona-module.class';
-import { BackendService } from '../backend.service';
+import { VeronaModuleClass } from '../models/verona-module.class';
+import { BackendService } from './backend.service';
 
 @Injectable({
   providedIn: 'root'
