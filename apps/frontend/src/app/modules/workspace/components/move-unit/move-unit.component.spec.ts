@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -31,8 +31,8 @@ describe('MoveUnitComponent', () => {
     @Input() selectionCount!: number;
   }
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         MoveUnitComponent,
         MockSelectUnitListComponent,
@@ -64,7 +64,7 @@ describe('MoveUnitComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MoveUnitComponent);

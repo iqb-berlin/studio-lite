@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -30,8 +30,8 @@ describe('GroupManageComponent', () => {
     @Input() selectedGroup!: string;
   }
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         GroupManageComponent,
         MockGroupMenuComponent,
@@ -58,7 +58,7 @@ describe('GroupManageComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(GroupManageComponent);
