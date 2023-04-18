@@ -14,23 +14,26 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
-import { WsgAdminComponent } from './wsg-admin.component';
-import { SettingsComponent } from './settings/settings.component';
-import { UsersComponent } from './users/users.component';
-import { WorkspacesComponent } from './workspaces/workspaces.component';
-import { AuthInterceptor } from './auth.interceptor';
-import { BackendService } from './backend.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
+import { UsersComponent } from './components/users/users.component';
+import { WorkspacesComponent } from './components/workspaces/workspaces.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { BackendService } from './services/backend.service';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
+import { SharedModule } from '../shared/shared.module';
+import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-menu.component';
 
 @NgModule({
   declarations: [
     WorkspacesComponent,
     UsersComponent,
-    SettingsComponent,
-    WsgAdminComponent
+    WsgAdminComponent,
+    WorkspaceMenuComponent
   ],
   imports: [
     CommonModule,
+    SharedModule,
     MatIconModule,
     MatTableModule,
     MatCheckboxModule,
@@ -44,7 +47,8 @@ import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
     ReactiveFormsModule,
     RouterModule,
     MatTabsModule,
-    WsgAdminRoutingModule
+    WsgAdminRoutingModule,
+    TranslateModule
   ],
   providers: [
     BackendService,
@@ -58,4 +62,4 @@ import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
     ]
   ]
 })
-export class WsgAdminModule { }
+export class WsgAdminModule {}

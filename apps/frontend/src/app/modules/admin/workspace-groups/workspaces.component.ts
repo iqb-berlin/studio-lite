@@ -20,8 +20,9 @@ import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../backend.service';
 import { AppService } from '../../../services/app.service';
-import { UserToCheckCollection } from '../users/usersChecked';
+
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
+import { UserToCheckCollection } from '../../shared/models/users-to-check-collection.class';
 
 const datePipe = new DatePipe('de-DE');
 

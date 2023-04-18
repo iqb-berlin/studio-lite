@@ -1,16 +1,5 @@
-// eslint-disable-next-line max-classes-per-file
-import { WorkspaceDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
-
-export class WorkspaceChecked {
-  id: number;
-  name: string;
-  isChecked: boolean;
-  constructor(workspaceDto: WorkspaceDto) {
-    this.id = workspaceDto.id;
-    this.name = workspaceDto.name;
-    this.isChecked = false;
-  }
-}
+import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceChecked } from './workspace-checked.class';
 
 export class WorkspaceToCheckCollection {
   entries: WorkspaceChecked[];

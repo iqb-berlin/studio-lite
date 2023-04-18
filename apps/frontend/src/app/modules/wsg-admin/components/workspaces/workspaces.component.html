@@ -1,0 +1,85 @@
+<div class="fx-row-space-between-start admin-tab-content">
+  <div class="fx-flex-row-50 fx-column-start-stretch object-list">
+    <studio-lite-workspace-menu
+      [selectedWorkspaceId]="selectedWorkspaceId"
+      [selectedRows]="tableSelectionRow.selected"
+      [checkedRows]="tableSelectionCheckbox.selected"
+      (workspaceAdded)="addWorkspace($event)"
+      (workspaceRenamed)="renameWorkspace($event)"
+      (workspaceChanged)="changeWorkspace($event)"
+      (workspaceNotLoaded)="onWorkspaceNotLoaded()"
+      (workspaceDeleted)="deleteWorkspace($event)"
+      (download)="xlsxDownloadWorkspaceReport()">
+    </studio-lite-workspace-menu>
+
+    <mat-table [dataSource]="objectsDatasource"
+               matSort
+               matSortDisableClear
+               class="scroll-area">
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-header-cell *matHeaderCellDef
+                         class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                        [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()"
+                        (change)="$event ? masterToggle() : null">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row"
+                  class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckbox.isSelected(row)"
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? tableSelectionCheckbox.toggle(row) : null">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="name">{{'wsg-admin.name' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          {{element.name}}
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+               [class.selected]="tableSelectionRow.isSelected(row)"
+               (click)="selectRow(row)">
+        </mat-row>
+    </mat-table>
+  </div>
+
+  <div class="object-list fx-column-start-stretch fx-flex-row-40">
+    <div class="fx-row-space-between-center">
+      <div *ngIf="!selectedWorkspaceId">
+        {{'wsg-admin.hint' | translate}}
+      </div>
+      <div *ngIf="selectedWorkspaceId">
+        {{'wsg-admin.access-for-workspace' | translate: { workspace: tableSelectionRow.selected[0].name } }}
+      </div>
+      <button mat-raised-button
+              [matTooltip]="'save' | translate"
+              matTooltipPosition="above"
+              [disabled]="!workspaceUsers.hasChanged"
+              (click)="saveUsers()">
+        <mat-icon>save</mat-icon>
+      </button>
+    </div>
+
+    <div class="scroll-area fx-column-start-stretch">
+      <div *ngFor="let u of workspaceUsers.entries"
+           class="fx-row-start-stretch">
+        <mat-checkbox class="fx-flex-fill"
+                      [disabled]="!selectedWorkspaceId"
+                      (change)="workspaceUsers.updateHasChanged()"
+                      [(ngModel)]="u.isChecked">
+          {{u.displayName}} ({{u.name}})
+        </mat-checkbox>
+          <div class="fx-flex-fill secondary-text">
+            {{u.description}}
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
