@@ -123,10 +123,36 @@
     "for-user": "Zugriffsrechte für {{user}}",
     "not-saved": "Zugriffsrechte nicht gespeichert.",
     "changed": "Zugriffsrechte geändert",
-    "not-changed": "Zugriffsrechte geändert"
+    "not-changed": "Konnte Zugriffsrechte nicht ändern"
   },
+  "wsg-admin": {
+    "name": "Name",
+    "hint": "Zugriffsrechte: Bitte links Arbeitsbereich wählen",
+    "access-for-workspace": "Zugriffsrechte für {{workspace}}",
+    "new-workspace": "Neuer Arbeitsbereich",
+    "enter-name": "Bitte Namen eingeben",
+    "create": "Anlegen",
+    "rename-workspace": "Arbeitsbereich umbenennen",
+    "deleting-of-workspaces": "Löschen von Arbeitsbereichen",
+    "delete-workspace": "Soll der Arbeitsbereich \"{{name}}\" gelöscht werden?",
+    "workspaces-deleted": "Arbeitsbereich/e gelöscht",
+    "workspaces-not-deleted": "Konnte Arbeitsbereich/e nicht löschen",
+    "workspace-added": "Arbeitsbereich hinzugefügt",
+    "workspace-not-added": "Konnte Arbeitsbereich nicht hinzufügen",
+    "workspace-renamed": "Arbeitsbereich umbenennen",
+    "workspace-not-renamed": "Konnte Arbeitsbereich nicht umbenennen",
+    "workspace-settings-changed": "Einstellungen gespeichert",
+    "workspace-settings-not-changed": "Einstellungen konnten nicht gespeichert werden",
+    "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
+    "delete-workspaces": "Sollen {{count}} Arbeitsbereiche gelöscht werden?",
+    "add-workspace": "Arbeitsbereich hinzufügen",
+    "delete-selected-workspaces": "Markierte/n Arbeitsbereich/e löschen",
+    "change-workspace-settings": "Einstellungen des Arbeitsbereiches ändern",
+    "download-workspaces-excel": "Xlsx Bericht Arbeitsbereiche: Module",
+    "workspaces-excel-name": "{{date}} Arbeitsbereiche.xlsx"
 
 
+  },
   "workspace-settings": {
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",
