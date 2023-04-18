@@ -149,10 +149,13 @@
     "delete-selected-workspaces": "Markierte/n Arbeitsbereich/e löschen",
     "change-workspace-settings": "Einstellungen des Arbeitsbereiches ändern",
     "download-workspaces-excel": "Xlsx Bericht Arbeitsbereiche: Module",
-    "workspaces-excel-name": "{{date}} Arbeitsbereiche.xlsx"
-
-
-  },
+    "workspaces-excel-name": "{{date}} Arbeitsbereiche.xlsx",
+    "unknown": "unbekannt",
+    "error": "*Fehler*",
+    "title": "Verwaltung \"{{name}}\"",
+    "users": "Nutzer:innen",
+    "workspaces": "Arbeitsbereiche"
+},
   "workspace-settings": {
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",

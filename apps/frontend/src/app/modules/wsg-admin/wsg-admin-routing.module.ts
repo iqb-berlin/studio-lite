@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
 import { UsersComponent } from './components/users/users.component';
-import { WsgAdminComponent } from './wsg-admin.component';
+import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
 
 const routes: Routes = [
   {

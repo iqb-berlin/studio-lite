@@ -15,7 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TranslateModule } from '@ngx-translate/core';
-import { WsgAdminComponent } from './wsg-admin.component';
+import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
 import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
