@@ -17,14 +17,11 @@
 }
 
 .selected {
-  color: white;
-  background-color: #006064BB;
+  background-color: #00606415;
   &:hover {
-    background-color: #006064BB;
-    color: white;
+    background-color: #00606415;
   }
 }
-
 
 .review-changed {
   height: 65vh;
