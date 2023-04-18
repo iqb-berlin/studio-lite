@@ -19,7 +19,7 @@ import { WsgAdminComponent } from './wsg-admin.component';
 import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
 import { AuthInterceptor } from './auth.interceptor';
-import { BackendService } from './backend.service';
+import { BackendService } from './services/backend.service';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-menu.component';

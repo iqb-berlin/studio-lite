@@ -8,10 +8,10 @@ import {
   UserFullDto, UserInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
-import { WsgAdminService } from '../../wsg-admin.service';
+import { WsgAdminService } from '../../services/wsg-admin.service';
 
 @Component({
   selector: 'studio-lite-users',

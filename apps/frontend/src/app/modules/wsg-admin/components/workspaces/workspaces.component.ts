@@ -9,10 +9,10 @@ import {
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { TranslateService } from '@ngx-translate/core';
-import { BackendService } from '../../backend.service';
+import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { WsgAdminService } from '../../wsg-admin.service';
+import { WsgAdminService } from '../../services/wsg-admin.service';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 
