@@ -23,33 +23,31 @@ export class WsgAdminComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      const routeKey = 'wsg';
-      this.wsgAdminService.selectedWorkspaceGroupId = Number(this.route.snapshot.params[routeKey]);
-      this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId)
-        .subscribe(wsgData => {
-          if (wsgData) {
-            this.wsgAdminService.selectedWorkspaceGroupName = wsgData.name ||
-            this.translateService.instant('wsg-admin.unknown');
-            this.appService.appConfig.setPageTitle(
-              this.translateService.instant('wsg-admin.title', {
-                name: this.wsgAdminService.selectedWorkspaceGroupName
-              })
-            );
-            this.wsgAdminService.selectedWorkspaceGroupSettings = wsgData.settings || {
-              defaultSchemer: '',
-              defaultPlayer: '',
-              defaultEditor: ''
-            };
-          } else {
-            this.wsgAdminService.selectedWorkspaceGroupName = this.translateService.instant('wsg-admin.error');
-            this.wsgAdminService.selectedWorkspaceGroupSettings = {
-              defaultSchemer: '',
-              defaultPlayer: '',
-              defaultEditor: ''
-            };
-          }
-        });
-    });
+    const routeKey = 'wsg';
+    this.wsgAdminService.selectedWorkspaceGroupId = Number(this.route.snapshot.params[routeKey]);
+    this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId)
+      .subscribe(wsgData => {
+        if (wsgData) {
+          this.wsgAdminService.selectedWorkspaceGroupName = wsgData.name ||
+          this.translateService.instant('wsg-admin.unknown');
+          this.appService.appConfig.setPageTitle(
+            this.translateService.instant('wsg-admin.title', {
+              name: this.wsgAdminService.selectedWorkspaceGroupName
+            })
+          );
+          this.wsgAdminService.selectedWorkspaceGroupSettings = wsgData.settings || {
+            defaultSchemer: '',
+            defaultPlayer: '',
+            defaultEditor: ''
+          };
+        } else {
+          this.wsgAdminService.selectedWorkspaceGroupName = this.translateService.instant('wsg-admin.error');
+          this.wsgAdminService.selectedWorkspaceGroupSettings = {
+            defaultSchemer: '',
+            defaultPlayer: '',
+            defaultEditor: ''
+          };
+        }
+      });
   }
 }
