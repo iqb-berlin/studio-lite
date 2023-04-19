@@ -4,12 +4,12 @@ import {
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { VeronaModuleClass } from './verona-module.class';
+import { VeronaModuleClass } from '../../models/verona-module.class';
 
 @Component({
-  selector: 'app-select-module',
+  selector: 'studio-lite-select-module',
   templateUrl: './select-module.component.html',
-  styles: ['p { font-size: smaller }']
+  styleUrls: ['./select-module.component.scss']
 })
 export class SelectModuleComponent implements OnDestroy {
   private allModules: VeronaModuleClass[] = [];

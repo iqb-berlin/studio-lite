@@ -1,0 +1,29 @@
+<div [hidden]="hasListEntries">
+  <p class="smaller-font">
+    {{'modules.no-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
+  </p>
+</div>
+<form *ngIf="hasListEntries"
+      [formGroup]="moduleForm">
+  <p class="smaller-font" *ngIf="isEmpty">
+    {{'modules.not-defined-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
+  </p>
+  <p class="smaller-font" *ngIf="!isValid">
+    {{'modules.not-valid-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
+  </p>
+  <p class="smaller-font" *ngIf="moduleSubstitute">
+    {{'modules.replaced' | translate: { selectedModuleId, moduleSubstitute } }}
+  </p>
+  <div class="fx-column-start-stretch">
+    <mat-form-field>
+      <mat-select
+        [placeholder]="'modules.'+moduleType+'-name' | translate"
+        formControlName="moduleSelector">
+        <mat-option *ngFor="let m of moduleList"
+                    [value]="m.key">
+          {{m.metadata.name}} {{m.metadata.version}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</form>

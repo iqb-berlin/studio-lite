@@ -2,8 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import { ModuleService } from '@studio-lite/studio-components';
-import { AppService } from '../../services/app.service';
+import { ModuleService } from '../../services/module.service';
+import { AppService } from '../../../../services/app.service';
 
 @Component({
   selector: 'studio-lite-edit-workspace-settings',

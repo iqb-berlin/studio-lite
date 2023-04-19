@@ -4,7 +4,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
-import { InputTextComponent } from '../../../../components/input-text/input-text.component';
+import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 

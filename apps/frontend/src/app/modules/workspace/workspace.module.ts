@@ -26,7 +26,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
-import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -80,15 +79,16 @@ import { GroupMenuComponent } from './components/group-menu/group-menu.component
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
 import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
     CommonModule,
+    SharedModule,
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,
     FlexLayoutModule,
-    StudioComponentsModule,
     WorkspaceRoutingModule,
     ReactiveFormsModule,
     MatSelectModule,

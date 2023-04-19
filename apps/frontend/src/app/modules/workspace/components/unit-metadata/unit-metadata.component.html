@@ -77,38 +77,38 @@
                    [hidden]="unitForm.disabled">
                 {{'modules.editor-name' | translate}}
               </div>
-              <app-select-module #editor
+              <studio-lite-select-module #editor
                                  class="fx-flex-row-60"
                                  [modules]="this.moduleService.editors"
                                  [hidden]="unitForm.disabled"
                                  [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
-                                 moduleType="editor"></app-select-module>
+                                 moduleType="editor"></studio-lite-select-module>
             </div>
             <div class="fx-row-space-between-start">
               <div class="fx-flex-row-30"
                    [hidden]="unitForm.disabled">
                 {{'modules.player-name' | translate}}
               </div>
-              <app-select-module #player
+              <studio-lite-select-module #player
                                  class="fx-flex-row-60"
                                  [modules]="this.moduleService.players"
                                  [hidden]="unitForm.disabled"
                                  [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                                  moduleType="player">
-              </app-select-module>
+              </studio-lite-select-module>
             </div>
             <div class="fx-row-space-between-start">
               <div class="fx-flex-row-30"
                    [hidden]="unitForm.disabled">
                 {{'modules.schemer-name' | translate}}
               </div>
-              <app-select-module #schemer
+              <studio-lite-select-module #schemer
                                  class="fx-flex-row-60"
                                  [modules]="this.moduleService.schemers"
                                  [hidden]="unitForm.disabled"
                                  [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
                                  moduleType="schemer">
-              </app-select-module>
+              </studio-lite-select-module>
             </div>
           </div>
         </mat-card-content>

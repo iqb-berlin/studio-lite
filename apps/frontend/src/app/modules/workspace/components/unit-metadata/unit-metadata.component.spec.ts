@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
-import { VeronaModuleClass } from '@studio-lite/studio-components';
+import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { environment } from '../../../../../environments/environment';
 import { UnitMetadataComponent } from './unit-metadata.component';
 
@@ -22,7 +22,7 @@ describe('StartReviewButtonComponent', () => {
     @Input() disabled!: boolean;
   }
 
-  @Component({ selector: 'app-select-module', template: '' })
+  @Component({ selector: 'studio-lite-select-module', template: '' })
   class MockSelectModuleComponent {
     @Input() modules!: { [key: string]: VeronaModuleClass };
     @Input() hidden!: boolean;

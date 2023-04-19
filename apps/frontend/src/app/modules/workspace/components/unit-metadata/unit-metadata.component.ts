@@ -3,8 +3,9 @@ import {
 } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ModuleService, SelectModuleComponent } from '@studio-lite/studio-components';
+import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
+import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 
 @Component({
   templateUrl: './unit-metadata.component.html',

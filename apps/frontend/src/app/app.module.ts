@@ -20,7 +20,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { RouterModule } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -32,19 +31,15 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
-import { StudioComponentsModule } from '@studio-lite/studio-components';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-
 import { BackendService } from './services/backend.service';
 import { AboutComponent } from './components/about/about.component';
 import { HomeComponent } from './components/home/home.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageComponent } from './components/request-message/request-message.component';
-import { InputTextComponent } from './components/input-text/input-text.component';
 import { EditMyDataComponent } from './components/edit-my-data/edit-my-data.component';
-import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
 import { UserWorkspacesGroupsComponent } from './components/user-workspaces-groups/user-workspaces-groups.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';
@@ -74,9 +69,7 @@ export function createTranslateLoader(http: HttpClient) {
     AboutComponent,
     ChangePasswordComponent,
     RequestMessageComponent,
-    InputTextComponent,
     EditMyDataComponent,
-    EditWorkspaceSettingsComponent,
     UserWorkspacesGroupsComponent,
     LoginComponent,
     UserMenuComponent,
@@ -130,8 +123,7 @@ export function createTranslateLoader(http: HttpClient) {
     }),
     MatCheckboxModule,
     MatSelectModule,
-    FormsModule,
-    StudioComponentsModule
+    FormsModule
   ],
   providers: [
     BackendService,

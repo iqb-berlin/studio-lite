@@ -2,11 +2,12 @@ import {
   AfterViewInit, Component, ElementRef, Input, ViewChild
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { ModuleService } from '@studio-lite/studio-components';
+import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../../workspace/services/backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-store';
+
 
 @Component({
   selector: 'studio-lite-unit-print-player',

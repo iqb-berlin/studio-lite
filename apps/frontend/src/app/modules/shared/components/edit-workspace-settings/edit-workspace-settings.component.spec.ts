@@ -5,16 +5,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
-import { VeronaModuleClass } from '@studio-lite/studio-components';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { environment } from '../../../environments/environment';
+import { VeronaModuleClass } from '../../models/verona-module.class';
+import { environment } from '../../../../../environments/environment';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
 
 describe('EditWorkspaceSettingsComponent', () => {
   let component: EditWorkspaceSettingsComponent;
   let fixture: ComponentFixture<EditWorkspaceSettingsComponent>;
 
-  @Component({ selector: 'app-select-module', template: '' })
+  @Component({ selector: 'studio-lite-select-module', template: '' })
   class MockSelectModuleComponent {
     @Input() modules!: { [key: string]: VeronaModuleClass };
     @Input() hidden!: boolean;

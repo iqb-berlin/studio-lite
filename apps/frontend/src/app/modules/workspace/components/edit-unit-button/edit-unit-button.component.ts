@@ -19,7 +19,7 @@ import {
 } from '../../../../components/request-message/request-message.component';
 import {
   EditWorkspaceSettingsComponent
-} from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
+} from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';

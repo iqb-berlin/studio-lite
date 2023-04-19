@@ -5,12 +5,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { InputTextComponent } from '../../../../components/input-text/input-text.component';
+import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import {
   EditWorkspaceSettingsComponent
-} from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
+} from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
 
 @Component({
   selector: 'studio-lite-workspace-menu',
