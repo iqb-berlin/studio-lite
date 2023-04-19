@@ -168,7 +168,11 @@
     "player-name": "Vorschau (Player)",
     "schemer-name": "Kodierung (Schemer)",
     "delete": "{{count}} Verona Modul(e) gelöscht",
-    "delete-error": "Konnte Verona Modul(e) nicht löschen"
+    "delete-error": "Konnte Verona Modul(e) nicht löschen",
+    "no-module-type": "Kein {{ module }} in diesem System verfügbar.",
+    "not-defined-module-type":"{{ module }} ist nicht definiert.",
+    "not-valid-module-type":"{{ module }} ist nicht gültig.",
+    "replaced": "Das Modul mit der Kennung \"{{selectedModuleId}}\" ist nicht in diesem System verfügbar.\nEs wird statt dessen \"{{moduleSubstitute}}\" benutzt."
   },
   "application": {
     "wait-message": "Bitte warten"

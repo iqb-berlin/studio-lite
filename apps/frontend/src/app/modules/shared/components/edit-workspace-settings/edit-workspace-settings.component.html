@@ -4,41 +4,41 @@
   </h1>
   <mat-dialog-content>
     <div>
-      <div class="fx-row-space-between-start">
+      <div class="fx-row-space-between-start fx-gap-10">
         <mat-label>
           {{'workspace-settings.default-editor' | translate}}
         </mat-label>
-        <app-select-module class="fx-flex-row-60"
+        <studio-lite-select-module class="fx-flex-row-60"
                            moduleType="editor"
                            [modules]="this.moduleService.editors"
                            [value]="dialogData.defaultEditor"
                            (selectionChanged)="selectModul('editor', $event)"
                            [stableOnly]="false">
-        </app-select-module>
+        </studio-lite-select-module>
       </div>
-      <div class="fx-row-space-between-start">
+      <div class="fx-row-space-between-start fx-gap-10">
         <mat-label>
           {{'workspace-settings.default-player' | translate}}
         </mat-label>
-        <app-select-module class="fx-flex-row-60"
+        <studio-lite-select-module class="fx-flex-row-60"
                            moduleType="player"
                            [modules]="this.moduleService.players"
                            [value]="dialogData.defaultPlayer"
                            [stableOnly]="false"
                            (selectionChanged)="selectModul('player', $event)">
-        </app-select-module>
+        </studio-lite-select-module>
       </div>
-      <div class="fx-row-space-between-start">
+      <div class="fx-row-space-between-start fx-gap-10">
         <mat-label>
           {{'workspace-settings.default-schemer' | translate}}
         </mat-label>
-        <app-select-module class="fx-flex-row-60"
+        <studio-lite-select-module class="fx-flex-row-60"
                            moduleType="schemer"
                            [modules]="this.moduleService.schemers"
                            [value]="dialogData.defaultSchemer"
                            [stableOnly]="false"
                            (selectionChanged)="selectModul('schemer', $event)">
-        </app-select-module>
+        </studio-lite-select-module>
       </div>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
         <mat-checkbox (click)="$event.stopPropagation()"

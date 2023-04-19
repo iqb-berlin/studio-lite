@@ -5,7 +5,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Subscription } from 'rxjs';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { SelectModuleComponent } from '../../../shared/components/select-module.component';
+import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 
 @Component({
   templateUrl: './unit-metadata.component.html',

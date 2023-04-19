@@ -14,7 +14,7 @@ describe('EditWorkspaceSettingsComponent', () => {
   let component: EditWorkspaceSettingsComponent;
   let fixture: ComponentFixture<EditWorkspaceSettingsComponent>;
 
-  @Component({ selector: 'app-select-module', template: '' })
+  @Component({ selector: 'studio-lite-select-module', template: '' })
   class MockSelectModuleComponent {
     @Input() modules!: { [key: string]: VeronaModuleClass };
     @Input() hidden!: boolean;

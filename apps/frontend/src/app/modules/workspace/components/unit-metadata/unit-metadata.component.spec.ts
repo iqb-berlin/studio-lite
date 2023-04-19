@@ -22,7 +22,7 @@ describe('StartReviewButtonComponent', () => {
     @Input() disabled!: boolean;
   }
 
-  @Component({ selector: 'app-select-module', template: '' })
+  @Component({ selector: 'studio-lite-select-module', template: '' })
   class MockSelectModuleComponent {
     @Input() modules!: { [key: string]: VeronaModuleClass };
     @Input() hidden!: boolean;
