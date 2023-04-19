@@ -20,7 +20,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { RouterModule } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -40,7 +39,6 @@ import { HomeComponent } from './components/home/home.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { RequestMessageComponent } from './components/request-message/request-message.component';
-import { InputTextComponent } from './components/input-text/input-text.component';
 import { EditMyDataComponent } from './components/edit-my-data/edit-my-data.component';
 import { UserWorkspacesGroupsComponent } from './components/user-workspaces-groups/user-workspaces-groups.component';
 import { LoginComponent } from './components/login/login.component';
@@ -71,7 +69,6 @@ export function createTranslateLoader(http: HttpClient) {
     AboutComponent,
     ChangePasswordComponent,
     RequestMessageComponent,
-    InputTextComponent,
     EditMyDataComponent,
     UserWorkspacesGroupsComponent,
     LoginComponent,

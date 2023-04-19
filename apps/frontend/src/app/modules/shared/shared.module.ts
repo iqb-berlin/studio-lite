@@ -11,11 +11,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SelectModuleComponent } from './components/select-module/select-module.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
+import { InputTextComponent } from './components/input-text/input-text.component';
 
 @NgModule({
   declarations: [
     EditWorkspaceSettingsComponent,
-    SelectModuleComponent
+    SelectModuleComponent,
+    InputTextComponent
   ],
   imports: [
     CommonModule,
@@ -32,7 +34,8 @@ import { EditWorkspaceSettingsComponent } from './components/edit-workspace-sett
   ],
   exports: [
     EditWorkspaceSettingsComponent,
-    SelectModuleComponent
+    SelectModuleComponent,
+    InputTextComponent
   ]
 })
 export class SharedModule {}
