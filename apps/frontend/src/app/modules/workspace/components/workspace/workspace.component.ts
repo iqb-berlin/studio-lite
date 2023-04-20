@@ -1,8 +1,8 @@
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnInit } from '@angular/core';
-import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';

@@ -1,9 +1,9 @@
 import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
-import { ModuleService } from '../../../shared/services/module.service';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../../workspace/services/backend.service';
 import { AppService } from '../../../../services/app.service';
 
