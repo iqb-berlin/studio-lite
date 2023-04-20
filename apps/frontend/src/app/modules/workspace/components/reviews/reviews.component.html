@@ -39,9 +39,9 @@
           <studio-lite-review-config class="fx-flex-row-50 settings"
                                      [selectedReviewId]="selectedReviewId"
                                      [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
-                                     [reviewConfigSettings]="reviewDataOriginal.settings?.reviewConfig"
-                                     [(name)]="reviewDataOriginal.name"
-                                     [(password)]="reviewDataOriginal.password"
+                                     [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
+                                     [(name)]="reviewDataToChange.name"
+                                     [(password)]="reviewDataToChange.password"
                                      (reviewChange)="changed = detectChanges()"
                                      (bookletConfigSettingsChange)="bookletConfigSettingsChange($event)"
                                      (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">

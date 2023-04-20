@@ -1,9 +1,9 @@
 <a mat-button
-   [disabled]="!unitCount"
    class="small-button"
    [href]="locationOrigin + '/#/review/' + selectedReviewId"
    target="_blank"
-   [matTooltip]="'start-review' | translate"
-   matTooltipPosition="below">
+   [matTooltip]="unitCount ? ('workspace.start-review' | translate) : ''"
+   matTooltipPosition="below"
+   [disabled]="!unitCount">
   <mat-icon>launch</mat-icon>
 </a>
