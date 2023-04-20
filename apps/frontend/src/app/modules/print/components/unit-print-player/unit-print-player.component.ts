@@ -8,7 +8,6 @@ import { BackendService } from '../../../workspace/services/backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-store';
 
-
 @Component({
   selector: 'studio-lite-unit-print-player',
   templateUrl: './unit-print-player.component.html',

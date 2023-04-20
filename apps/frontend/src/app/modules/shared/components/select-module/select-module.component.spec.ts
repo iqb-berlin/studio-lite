@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import {SelectModuleComponent} from "./select-module.component";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {MatSelectModule} from "@angular/material/select";
-import {NoopAnimationsModule} from "@angular/platform-browser/animations";
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { SelectModuleComponent } from './select-module.component';
 
 describe('SelectModuleComponent', () => {
   let component: SelectModuleComponent;
