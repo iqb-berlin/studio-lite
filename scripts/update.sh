@@ -20,7 +20,7 @@ get_new_release_version() {
 
   if [ "$SOURCE_TAG" = "$LATEST_RELEASE" ]; then
     echo "Latest release is already installed!"
-    read -p "Continue anyway? (Y/n) " -er -n 1 CONTINUE
+    read -p "Continue anyway [Y/n]? " -er -n 1 CONTINUE
 
     if [[ $CONTINUE =~ ^[nN]$ ]]; then
       exit 0
@@ -51,12 +51,6 @@ prepare_installation_dir() {
   mkdir -p ./config/frontend
   mkdir -p ./config/traefik
   mkdir -p ./secrets/traefik
-  if [ ! -f ./secrets/traefik/$APP_NAME.crt ]; then
-    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" > ./secrets/traefik/$APP_NAME.crt
-  fi
-  if [ ! -f ./secrets/traefik/$APP_NAME.key ]; then
-    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" > ./secrets/traefik/$APP_NAME.key
-  fi
   mkdir -p ./database_dumps
   mkdir -p ./prometheus
   mkdir -p ./grafana/provisioning/dashboards
@@ -103,7 +97,7 @@ download_file() {
 }
 
 update_files() {
-  echo "Downloading files..."
+  echo "Downloading files ..."
   download_file docker-compose.yml docker-compose.yml
   download_file docker-compose.prod.yml docker-compose.prod.yml
   download_file config/traefik/tls-config.yml config/traefik/tls-config.yml
@@ -123,7 +117,7 @@ get_modified_file() {
   CURRENT_ENV_FILE=.env.prod
   CURRENT_CONFIG_FILE=config/frontend/default.conf.template
 
-  if [ ! -f "$SOURCE_FILE" ] || ! curl --stderr /dev/null "$TARGET_FILE" | diff -q - "$SOURCE_FILE" &>/dev/null; then
+  if [ ! -f "$SOURCE_FILE" ] || ! (curl --stderr /dev/null "$TARGET_FILE" | diff -q - "$SOURCE_FILE" &>/dev/null); then
 
     # no source file exists anymore
     if [ ! -f "$SOURCE_FILE" ]; then
@@ -203,6 +197,14 @@ customize_settings() {
 
   # write chosen version tag to env file
   sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
+
+  # Generate TLS dummies
+  if [ ! -f ./secrets/traefik/$APP_NAME.crt ]; then
+    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.crt
+  fi
+  if [ ! -f ./secrets/traefik/$APP_NAME.key ]; then
+    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.key
+  fi
 }
 
 finalize_update() {
@@ -239,11 +241,19 @@ finalize_update() {
   fi
 }
 
+generate_tls_certificate() {
+  printf "\nAn unsecure self-signed TLS certificate valid for 30 days will be generated ...\n"
+  openssl req \
+    -newkey rsa:2048 -nodes -subj "/CN=$SERVER_NAME" -keyout secrets/traefik/$APP_NAME.key \
+    -x509 -days 30 -out secrets/traefik/$APP_NAME.crt
+  printf "A self-signed certificate file and a private key file have been generated.\n\n"
+}
+
 application_reload() {
   if command make -v >/dev/null 2>&1; then
-    read -p "Do you want to reload the application now? [Y/n]:" -er -n 1 RESTART
+    read -p "Do you want to reload the application now [Y/n]? " -er -n 1 RELOAD
 
-    if [[ ! $RESTART =~ [nN] ]]; then
+    if [[ ! $RELOAD =~ [nN] ]]; then
       make production-ramp-up
 
     else
@@ -260,7 +270,7 @@ application_reload() {
 
 application_restart() {
   if command make -v >/dev/null 2>&1; then
-    read -p "Do you want to restart the application now? [Y/n]:" -er -n 1 RESTART
+    read -p "Do you want to restart the application now [Y/n]? " -er -n 1 RESTART
 
     if [[ ! $RESTART =~ [nN] ]]; then
       make production-shut-down
@@ -283,16 +293,35 @@ application_restart() {
 SOURCE_TAG=$TAG
 
 if [ -z "$SELECTED_VERSION" ]; then
-  echo "Update script started ..."
+  printf "Update script started ...\n\n"
+  printf "1. Update application\n"
+  printf "2. Generate a self-signed TLS certificate valid for 30 days\n\n"
 
-  get_new_release_version
-  create_backup
-  run_update_script_in_selected_version
-  prepare_installation_dir
-  update_files
-  check_template_files_modifications
-  customize_settings
-  finalize_update
+  while read -p 'What do you want to do [1/2]: ' -er -n 1 CHOICE; do
+    if [ "$CHOICE" = 1 ]; then
+      printf "\nUpdate application:\n"
+
+      get_new_release_version
+      create_backup
+      run_update_script_in_selected_version
+      prepare_installation_dir
+      update_files
+      check_template_files_modifications
+      customize_settings
+      finalize_update
+
+      break
+
+    elif [ "$CHOICE" = 2 ]; then
+      printf "\nGenerate self-signed TLS certificate:\n"
+
+      generate_tls_certificate
+      application_restart
+
+      break
+    fi
+
+  done
 
 else
   TARGET_TAG="$SELECTED_VERSION"
