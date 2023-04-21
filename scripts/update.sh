@@ -23,6 +23,7 @@ get_new_release_version() {
     read -p "Continue anyway [Y/n]? " -er -n 1 CONTINUE
 
     if [[ $CONTINUE =~ ^[nN]$ ]]; then
+      echo 'Update script finished.'
       exit 0
     fi
 
@@ -242,11 +243,33 @@ finalize_update() {
 }
 
 generate_tls_certificate() {
-  printf "\nAn unsecure self-signed TLS certificate valid for 30 days will be generated ...\n"
+  if command openssl x509 -in secrets/traefik/studio-lite.crt -text -noout >/dev/null 2>&1 &&
+    command openssl rsa -in secrets/traefik/studio-lite.key -check >/dev/null 2>&1; then
+    printf "A TLS certificate and private key are already present!\n"
+    read -p "Do you really want to replace them [y/N]? " -er -n 1 REPLACE
+
+    if [[ ! $REPLACE =~ ^[yY]$ ]]; then
+      printf "\nThe existing self-signed certificate and private key have not been replaced.\n\n"
+      return
+    fi
+  fi
+
+  printf "An unsecure self-signed TLS certificate valid for 30 days will be generated ...\n"
   openssl req \
     -newkey rsa:2048 -nodes -subj "/CN=$SERVER_NAME" -keyout secrets/traefik/$APP_NAME.key \
     -x509 -days 30 -out secrets/traefik/$APP_NAME.crt
   printf "A self-signed certificate file and a private key file have been generated.\n\n"
+}
+
+generate_admin_credentials() {
+  read -p "Traefik administrator name: " -er TRAEFIK_ADMIN_NAME
+  read -p "Traefik administrator password: " -er TRAEFIK_ADMIN_PASSWORD
+
+  BASIC_AUTH_CRED=$TRAEFIK_ADMIN_NAME:$(openssl passwd -apr1 "$TRAEFIK_ADMIN_PASSWORD" | sed -e s/\\$/\\$\\$/g)
+  printf "TRAEFIK_AUTH: $BASIC_AUTH_CRED\n\n"
+  sed -i "s#TRAEFIK_AUTH.*#TRAEFIK_AUTH=$BASIC_AUTH_CRED#" .env.prod
+
+  printf "The traefik administrator credentials have been updated.\n\n"
 }
 
 application_reload() {
@@ -295,15 +318,16 @@ SOURCE_TAG=$TAG
 if [ -z "$SELECTED_VERSION" ]; then
   printf "Update script started ...\n\n"
   printf "1. Update application\n"
-  printf "2. Generate a self-signed TLS certificate valid for 30 days\n\n"
+  printf "2. Update the self-signed TLS certificate valid for 30 days\n"
+  printf "3. Update the traefik administrator credentials\n\n"
 
-  while read -p 'What do you want to do [1/2]: ' -er -n 1 CHOICE; do
+  while read -p 'What do you want to do [1-3]? ' -er -n 1 CHOICE; do
     if [ "$CHOICE" = 1 ]; then
-      printf "\nUpdate application:\n"
+      printf "\n=== UPDATE APPLICATION ===\n\n"
 
       get_new_release_version
       create_backup
-      run_update_script_in_selected_version
+      #run_update_script_in_selected_version
       prepare_installation_dir
       update_files
       check_template_files_modifications
@@ -313,9 +337,16 @@ if [ -z "$SELECTED_VERSION" ]; then
       break
 
     elif [ "$CHOICE" = 2 ]; then
-      printf "\nGenerate self-signed TLS certificate:\n"
+      printf "\n=== UPDATE SELF-SIGNED TLS CERTIFICATE ===\n\n"
 
       generate_tls_certificate
+      application_restart
+
+      break
+
+    elif [ "$CHOICE" = 3 ]; then
+      printf "\n=== UPDATE TRAEFIK CREDENTIALS ===\n\n"
+      generate_admin_credentials
       application_restart
 
       break
