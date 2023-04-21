@@ -28,8 +28,10 @@ Die Konfiguration des Web-Servers erfolgt über die Konfigurationsdatei `default
 die Sie im Installationsverzeichnis unter dem Pfad `config/frontend` finden und nachträglich anpassen können.
 
 ## Automatische Updates
-Um weiterentwickelte Software-Versionen zu installieren oder um zwischen HTTP- und HTTPS-Betrieb des Webservers zu wechseln,
-rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update.sh` auf. .
+Um weiterentwickelte Software-Versionen zu installieren,
+ein abgelaufenes selbst-signiertes TLS-Zertifikat zu erneuern
+oder die Login-Daten des Edge-Routers zu ändern,
+rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update.sh` auf.
 
 ## Starten und Stoppen der Anwendung mit  `make`
 Zur Steuerung der Anwendungslandschaft haben eine Reihe von Make-Befehlen vorbereitet,
@@ -63,7 +65,7 @@ make production-shut-down
 Nun haben Sie die drei wichtigsten Befehle der Anwendungssteuerung kennengelernt.
 Alle weiteren Befehle, mit kurzen Erläuterungen finden Sie im `Makefile`.
 
-## Erste Schritte
+# Erste Schritte
 Nach der Installation ist kein User-Account angelegt. Sie bekommen beim Aufruf der Webanwendung die Aufforderung, einen solchen Account anzulegen. Bitte notieren Sie sich die Daten, da dieser Account über besondere Rechte verfügt. Bitte nehmen Sie folgende globale Einstellungen vor:
 
 1. Anlegen von Nutzern: Jede Person, die mit dem System Aufgaben entwickeln soll, benötigt einen Account.
@@ -83,7 +85,7 @@ Achtung: Sorgen Sie vor einem Update stets für ein Backup (z. B. Snapshot-Funkt
 Sie sollten das Zurückspielen eines Backups (sog. Restore) zumindest einmal erprobt haben, um auf diese Situation vorbereitet zu sein.
 
 Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.prod`.
-Hier finden Sie z. B. die Ports, auf denen Frontend antwortet.
+Hier finden Sie z.B. den Servernamen oder die Ports, mit denen das Frontend arbeitet.
 
 Für die Festlegung, welche Version installiert werden soll, ist in dieser Datei der Eintrag `TAG` verantwortlich.
 Bei der Erstinstallation ist hier `latest` eingetragen.
@@ -93,9 +95,16 @@ Darüber ist es möglich, eine Vorversion im Entwicklungsstadium (sog. Pre-relea
 Die Liste aller Releases finden Sie [hier](https://github.com/iqb-berlin/studio-lite/releases).
 
 Für das Update ist dann erneut `make production-ramp-up` aufzurufen.
-Die vorhandenen Docker-Container werden gestoppt, neue Docker-Images eingespielt und dann wieder gestartet.
+Die vorhandenen Docker-Container werden gestoppt,
+neue Docker-Images eingespielt und dann wieder gestartet.
 Dieser Prozess sollte nicht länger als eine Minute dauern.
-Da die Daten nicht Teil der Container sind, sondern dauerhaft auf dem Server in speziellen Verzeichnissen gespeichert sind (z. B. die Datenbank), wird hierdurch nur die Programmierung ausgetauscht.
+Da die Daten nicht Teil der Container sind,
+sondern dauerhaft auf dem Server in speziellen Verzeichnissen gespeichert sind (z.B. die Datenbank),
+wird hierdurch nur die Programmierung ausgetauscht.
 Die Arbeit kann unmittelbar fortgesetzt werden.
 
-Achtung: Sollten bei einem Update Änderungen an der Datenbankstruktur nötig sein, erfolgt dies automatisch. Allerdings trifft dies nur zu, wenn Sie zu einer neueren Version wechseln. Wenn Sie eine ältere Programmierung als die aktuell installierte abrufen, kann die alte Datenbankstruktur eventuell nicht mehr hergestellt werden.
+**Achtung:** Sollten bei einem Update Änderungen an der Datenbankstruktur nötig sein,
+erfolgt dies automatisch.
+Allerdings trifft dies nur zu, wenn Sie zu einer neueren Version wechseln.
+Wenn Sie eine ältere Programmierung als die aktuell installierte abrufen,
+kann die alte Datenbankstruktur eventuell nicht mehr hergestellt werden.
