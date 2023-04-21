@@ -15,9 +15,8 @@ ENV_VARS[POSTGRES_DB]=$APP_NAME
 ENV_VARS[SERVER_NAME]=hostname.de
 ENV_VARS[HTTP_PORT]=80
 ENV_VARS[HTTPS_PORT]=443
-ENV_VARS[TRAEFIK_AUTH]=admin:$$apr1$$gaS8tVEe$$MjqM8IlBvz2PRFEWcwha1/
 
-ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB SERVER_NAME HTTP_PORT HTTPS_PORT TRAEFIK_AUTH)
+ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB SERVER_NAME HTTP_PORT HTTPS_PORT)
 
 check_prerequisites() {
   for APP in "${REQUIRED_PACKAGES[@]}"; do
@@ -131,6 +130,12 @@ customize_settings() {
     read -p "$var: " -er -i ${ENV_VARS[$var]} NEW_ENV_VAR_VALUE
     sed -i "s#$var.*#$var=$NEW_ENV_VAR_VALUE#" .env.prod
   done
+
+  read -p "Traefik administrator name: " -er TRAEFIK_ADMIN_NAME
+  read -p "Traefik administrator password: " -er TRAEFIK_ADMIN_PASSWORD
+  BASIC_AUTH_CRED=$TRAEFIK_ADMIN_NAME:$(openssl passwd -apr1 "$TRAEFIK_ADMIN_PASSWORD" | sed -e s/\\$/\\$\\$/g)
+  printf "TRAEFIK_AUTH: $BASIC_AUTH_CRED\n"
+  sed -i "s#TRAEFIK_AUTH.*#TRAEFIK_AUTH=$BASIC_AUTH_CRED#" .env.prod
 
   # Generate TLS files
   printf "\n"
