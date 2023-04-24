@@ -31,7 +31,7 @@
     </ng-container>
 
     <ng-container matColumnDef="key">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="key"> Aufgabe</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header="key">{{'workspace.unit' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
                 [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
         {{element.key}}{{element.name ? ' - ' + element.name : ''}}
@@ -39,7 +39,7 @@
     </ng-container>
 
     <ng-container matColumnDef="groupName">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="groupName"> Gruppe</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header="groupName">{{'workspace.group' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
                 [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
         {{element.groupName}}
