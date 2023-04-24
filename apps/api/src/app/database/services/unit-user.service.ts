@@ -64,4 +64,8 @@ export class UnitUserService {
       }
     }));
   }
+
+  async findByUnitId(unitId: number): Promise<UnitUser[]> {
+    return this.unitUserRepository.find({ where: { unitId: unitId } });
+  }
 }
