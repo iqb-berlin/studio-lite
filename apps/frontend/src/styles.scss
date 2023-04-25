@@ -261,6 +261,14 @@ div.logo img {
   align-items: stretch;
 }
 
+.fx-column-end-stretch {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
 .fx-column-space-between-stretch {
   box-sizing: border-box;
   display: flex;

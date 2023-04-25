@@ -1,25 +1,11 @@
-.margin-bottom {
-  margin-bottom: 10px
-}
-
-.group-message {
-  font-style: italic; font-size: smaller
-}
-
-.invisible {
-  display: block;
-  visibility: hidden;
-  height: 0;width: 0
-}
-
 .settings {
   padding: 2px 2px 2px 0;
 }
 
 .selected {
-  background-color: #00606415;
-  &:hover {
-    background-color: #00606415;
+  background-color: #006064BB;
+  > .mat-cell {
+    color: white;
   }
 }
 
@@ -44,10 +30,20 @@
   height: 65vh;
 }
 
-.review-list-entry {
-  text-overflow: ellipsis;
+.reviews {
+  background-color: #00606405;
+  overflow-y: auto;
 }
 
-.reviews {
-  overflow-y: auto;
+.review-sort {
+  min-height: 28px;
+  background-color: white;
+}
+
+.review-row {
+  min-height: 28px;
+  border-bottom-color: #00606420;
+  &:hover:not(.selected) {
+    background-color: #00606420;
+  }
 }

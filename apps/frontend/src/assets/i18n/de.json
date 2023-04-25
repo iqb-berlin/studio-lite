@@ -233,6 +233,7 @@
     "review-settings": "Review-Einstellungen",
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",
+    "review": "Aufgabenfolge",
     "new-review-name": "Name der Aufgabenfolge",
     "review-not-added": "Konnte neue Aufgabenfolge nicht anlegen",
     "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
@@ -328,6 +329,7 @@
     "description": "Status: Player hat Fenster-Fokus"
   },
   "search-filter": {
+    "filter-reviews": "Suche nach Aufgabenfolgen",
     "filter-units": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
