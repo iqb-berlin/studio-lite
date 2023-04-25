@@ -1,5 +1,8 @@
 .selected {
-  background-color: #00606415;
+  background-color: #006064BB;
+  > .mat-cell {
+    color: white;
+  }
 }
 
 .units {
@@ -7,13 +10,8 @@
   background-color: white;
 }
 
-.group-list {
-  overflow: auto;
-}
-
-.group-list-entry {
-  white-space: nowrap;
-  font-size: 14px;
+.group-name {
+  min-width: 100%;
 }
 
 .badge-holder {
@@ -30,12 +28,7 @@
   padding: 2px
 }
 
-.group-key {
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.dialog-content{
+.dialog-content {
   gap: 5px;
   display: flex;
   height: 65vh
@@ -47,6 +40,24 @@
 
 .changes-container {
   padding: 5px;
+}
+
+.groups {
+  background-color: #00606405;
+  overflow-y: auto;
+}
+
+.group-sort {
+  min-height: 28px;
+  background-color: white;
+}
+
+.group-row {
+  min-height: 28px;
+  border-bottom-color: #00606420;
+  &:hover:not(.selected) {
+    background-color: #00606420;
+  }
 }
 
 

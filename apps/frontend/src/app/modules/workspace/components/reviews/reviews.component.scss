@@ -30,17 +30,17 @@
   height: 65vh;
 }
 
-.reviews {
+.groups {
   background-color: #00606405;
   overflow-y: auto;
 }
 
-.review-sort {
+.group-sort {
   min-height: 28px;
   background-color: white;
 }
 
-.review-row {
+.group-row {
   min-height: 28px;
   border-bottom-color: #00606420;
   &:hover:not(.selected) {
