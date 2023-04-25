@@ -5,8 +5,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatListModule } from '@angular/material/list';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 import { ReviewsComponent } from './reviews.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -44,6 +45,11 @@ describe('ReviewsComponent', () => {
     @Input() reviewConfigSettings!: ReviewConfigDto | undefined;
   }
 
+  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  class MockSearchFilterComponent {
+    @Input() title!: string;
+  }
+
   @Component({ selector: 'studio-lite-review-save-changes', template: '' })
   class MockReviewSaveChangesComponent {
     @Input() changed!: boolean;
@@ -56,10 +62,12 @@ describe('ReviewsComponent', () => {
         MockReviewMenuComponent,
         MockSelectUnitListComponent,
         MockReviewConfigComponent,
-        MockReviewSaveChangesComponent
+        MockReviewSaveChangesComponent,
+        MockSearchFilterComponent
       ],
       imports: [
-        MatListModule,
+        MatTableModule,
+        MatSortModule,
         MatDialogModule,
         MatSnackBarModule,
         HttpClientModule,

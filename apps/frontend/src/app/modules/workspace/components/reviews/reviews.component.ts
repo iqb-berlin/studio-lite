@@ -1,26 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component, OnInit, ViewChild
+} from '@angular/core';
 import {
   BookletConfigDto, ReviewConfigDto, ReviewFullDto, ReviewInListDto
 } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../../services/app.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 
 @Component({
+  selector: 'studio-lite-reviews',
   templateUrl: './reviews.component.html',
   styleUrls: ['./reviews.component.scss']
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {
+  @ViewChild(MatSort) sort = new MatSort();
+
   changed = false;
   selectedReviewId = 0;
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
+
+  objectsDatasource = new MatTableDataSource<ReviewInListDto>();
+  displayedColumns = ['name'];
 
   constructor(
     public workspaceService: WorkspaceService,
@@ -34,9 +44,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.loadReviewList();
-    });
+    setTimeout(() => this.loadReviewList());
   }
 
   selectReview(id: number) {
@@ -73,7 +81,19 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
         this.reviewDataToChange = { id: 0 };
         this.appService.dataLoading = false;
         this.selectReview(id);
+        // be sure that mat sort is initialized
+        setTimeout(() => this.setObjectsDatasource(this.reviews));
       });
+  }
+
+  private setObjectsDatasource(reviews: ReviewInListDto[]): void {
+    this.objectsDatasource = new MatTableDataSource(reviews);
+    this.objectsDatasource
+      .filterPredicate = (reviewList: ReviewInListDto, filter) => ['name']
+        .some(column => (reviewList[column as keyof ReviewInListDto] as string || '')
+          .toLowerCase()
+          .includes(filter));
+    this.objectsDatasource.sort = this.sort;
   }
 
   unitSelectionChanged(selectedUnitIds: number[]): void {

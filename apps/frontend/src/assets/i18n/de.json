@@ -233,6 +233,7 @@
     "review-settings": "Review-Einstellungen",
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",
+    "review": "Aufgabenfolge",
     "new-review-name": "Name der Aufgabenfolge",
     "review-not-added": "Konnte neue Aufgabenfolge nicht anlegen",
     "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
@@ -251,6 +252,7 @@
     "review-saved": "Aufgabenfolge gespeichert",
     "review-not-saved": "Konnte Aufgabenfolge nicht speichern",
     "copy-new-unit": "Neue aus vorhandener Aufgabe",
+    "unit": "Aufgabe",
     "copy-from": "Kopie von",
     "unit-added": "Aufgabe hinzugefügt",
     "unit-not-added": "Konnte Aufgabe nicht hinzufügen",
@@ -326,8 +328,10 @@
     "label": "F",
     "description": "Status: Player hat Fenster-Fokus"
   },
-  "select-unit-list": {
-    "filter": "Suche nach Aufgaben",
+  "search-filter": {
+    "filter-groups": "Suche nach Gruppen",
+    "filter-reviews": "Suche nach Aufgabenfolgen",
+    "filter-units": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
   },

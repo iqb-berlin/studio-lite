@@ -4,10 +4,13 @@ import {
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
+import { Group } from '../../models/group.interface';
 
 @Component({
   selector: 'studio-lite-group-manage',
@@ -17,12 +20,16 @@ import { AppService } from '../../../../services/app.service';
 
 export class GroupManageComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
+  @ViewChild(MatSort) sort = new MatSort();
   changed = false;
   selectedGroup = '';
   units: UnitInListDto[] = [];
-  groups: { [key: string]: number } = {};
+  groups: Group[] = [];
   groupUnitsOriginal: number[] = [];
   groupUnitsToChange: number[] = [];
+
+  objectsDatasource = new MatTableDataSource<Group>();
+  displayedColumns = ['name'];
 
   constructor(
     public workspaceService: WorkspaceService,
@@ -61,25 +68,38 @@ export class GroupManageComponent implements OnInit {
       const units = result[0];
       const settingGroups = result[1];
       this.units = units;
-      this.groups = {};
+      const groups:{ [key: string]: number } = {};
       this.units.forEach(u => {
         if (u.groupName) {
-          if (this.groups[u.groupName]) {
-            this.groups[u.groupName] += 1;
+          if (groups[u.groupName]) {
+            groups[u.groupName] += 1;
           } else {
-            this.groups[u.groupName] = 1;
+            groups[u.groupName] = 1;
           }
         }
       });
       settingGroups.forEach(g => {
-        if (!this.groups[g]) this.groups[g] = 0;
+        if (!groups[g]) groups[g] = 0;
       });
+      this.groups = Object.keys(groups).map(key => ({ name: key, count: groups[key] }));
       this.groupUnitsOriginal = [];
       this.groupUnitsToChange = [];
       this.appService.dataLoading = false;
       this.changed = false;
       this.selectGroup(selectGroup);
+      // be sure that mat sort is initialized
+      setTimeout(() => this.setObjectsDatasource(this.groups));
     });
+  }
+
+  private setObjectsDatasource(groups: Group[]): void {
+    this.objectsDatasource = new MatTableDataSource(groups);
+    this.objectsDatasource
+      .filterPredicate = (group: Group, filter) => ['name']
+        .some(column => (group[column as keyof Group] as string || '')
+          .toLowerCase()
+          .includes(filter));
+    this.objectsDatasource.sort = this.sort;
   }
 
   unitSelectionChanged(): void {

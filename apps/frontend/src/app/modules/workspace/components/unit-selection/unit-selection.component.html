@@ -1,5 +1,7 @@
 <div class="selection-header">
-  <studio-lite-search-unit #filterInput></studio-lite-search-unit>
+  <studio-lite-search-filter #filterInput
+                             [title]="'search-filter.filter-units' | translate">
+  </studio-lite-search-filter>
   <studio-lite-unit-table
     [hasSortHeader]="true"
     [unitList]="[]"

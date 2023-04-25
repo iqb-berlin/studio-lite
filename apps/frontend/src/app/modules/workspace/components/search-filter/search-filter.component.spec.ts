@@ -5,15 +5,15 @@ import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SearchUnitComponent } from './search-unit.component';
+import { SearchFilterComponent } from './search-filter.component';
 
-describe('SearchUnitComponent', () => {
-  let component: SearchUnitComponent;
-  let fixture: ComponentFixture<SearchUnitComponent>;
+describe('SearchFilterComponent', () => {
+  let component: SearchFilterComponent;
+  let fixture: ComponentFixture<SearchFilterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SearchUnitComponent],
+      declarations: [SearchFilterComponent],
       imports: [
         MatTooltipModule,
         MatIconModule,
@@ -24,7 +24,7 @@ describe('SearchUnitComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SearchUnitComponent);
+    fixture = TestBed.createComponent(SearchFilterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -16,8 +16,8 @@ describe('MoveUnitComponent', () => {
   let component: MoveUnitComponent;
   let fixture: ComponentFixture<MoveUnitComponent>;
 
-  @Component({ selector: 'studio-lite-search-unit', template: '' })
-  class MockSearchUnitComponent {
+  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  class MockSearchFilterComponent {
     value: string = '';
   }
 
@@ -36,7 +36,7 @@ describe('MoveUnitComponent', () => {
       declarations: [
         MoveUnitComponent,
         MockSelectUnitListComponent,
-        MockSearchUnitComponent
+        MockSearchFilterComponent
       ],
       imports: [
         MatSelectModule,
