@@ -5,7 +5,8 @@
     <p *ngIf="selectionCount > 1">{{selectionCount}} {{'workspace.units-selected' | translate}}</p>
   </div>
 
-  <studio-lite-search-filter (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+  <studio-lite-search-filter [title]="'search-filter.filter-units' | translate"
+                             (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
   </studio-lite-search-filter>
 
   <mat-table class="unit-list"

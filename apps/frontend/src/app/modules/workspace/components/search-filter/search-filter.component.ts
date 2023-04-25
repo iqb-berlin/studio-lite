@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Output
+  Component, EventEmitter, Input, Output
 } from '@angular/core';
 
 @Component({
@@ -9,5 +9,6 @@ import {
 })
 export class SearchFilterComponent {
   value: string = '';
+  @Input() title!: string;
   @Output() valueChange: EventEmitter<string> = new EventEmitter<string>();
 }
