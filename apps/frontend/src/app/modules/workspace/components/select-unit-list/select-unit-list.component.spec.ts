@@ -16,8 +16,8 @@ describe('SelectUnitListComponent', () => {
   let component: SelectUnitListComponent;
   let fixture: ComponentFixture<SelectUnitListComponent>;
 
-  @Component({ selector: 'studio-lite-search-unit', template: '' })
-  class MockSearchUnitComponent {
+  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  class MockSearchFilterComponent {
     value: string = '';
   }
 
@@ -25,7 +25,7 @@ describe('SelectUnitListComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         SelectUnitListComponent,
-        MockSearchUnitComponent
+        MockSearchFilterComponent
       ],
       imports: [
         HttpClientModule,

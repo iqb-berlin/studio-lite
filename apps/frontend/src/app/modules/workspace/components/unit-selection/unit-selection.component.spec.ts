@@ -14,8 +14,8 @@ class MockUnitTableComponent {
   @Input() unitList!: UnitInListDto[];
 }
 
-@Component({ selector: 'studio-lite-search-unit', template: '' })
-class MockSearchUnitComponent {
+@Component({ selector: 'studio-lite-search-filter', template: '' })
+class MockSearchFilterComponent {
   value: string = '';
 }
 
@@ -28,7 +28,7 @@ describe('UnitSelectionComponent', () => {
       declarations: [
         UnitSelectionComponent,
         MockUnitTableComponent,
-        MockSearchUnitComponent
+        MockSearchFilterComponent
       ],
       imports: [
         TranslateModule.forRoot(),

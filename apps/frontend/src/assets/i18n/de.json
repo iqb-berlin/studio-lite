@@ -327,8 +327,8 @@
     "label": "F",
     "description": "Status: Player hat Fenster-Fokus"
   },
-  "select-unit-list": {
-    "filter": "Suche nach Aufgaben",
+  "search-filter": {
+    "filter-units": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
   },
