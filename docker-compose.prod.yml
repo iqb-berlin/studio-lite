@@ -60,7 +60,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
-      - "traefik.http.routers.backend.rule=HostRegexp(`{[a-z]*}.${SERVER_NAME}`) || Host(`${SERVER_NAME}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=(HostRegexp(`{[a-z]*}.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.service=backend"
       - "traefik.http.services.backend.loadbalancer.server.port=3333"
       - "traefik.docker.network=app-net"
