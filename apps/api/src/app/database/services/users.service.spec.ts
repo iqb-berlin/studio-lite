@@ -8,6 +8,8 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import User from '../entities/user.entity';
 import Review from '../entities/review.entity';
+import { UnitService } from './unit.service';
+import { UnitUserService } from './unit-user.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -35,6 +37,14 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(Review),
           useValue: createMock<Repository<Review>>()
+        },
+        {
+          provide: UnitService,
+          useValue: createMock<UnitService>()
+        },
+        {
+          provide: UnitUserService,
+          useValue: createMock<UnitUserService>()
         }
       ]
     }).compile();
