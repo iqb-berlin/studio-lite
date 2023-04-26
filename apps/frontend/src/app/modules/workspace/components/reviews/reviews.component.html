@@ -55,7 +55,7 @@
           <div class="fx-flex-row-50">
             <div [hidden]="selectedReviewId">{{'workspace.select-review' | translate}}</div>
             <studio-lite-select-unit-list [hidden]="!selectedReviewId"
-                                          [selectedUnitIds]="reviewDataOriginal.units ? reviewDataOriginal.units : []"
+                                          [selectedUnitIds]="reviewDataToChange.units ? reviewDataToChange.units : []"
                                           [workspace]="workspaceService.selectedWorkspaceId"
                                           (selectionChanged)="unitSelectionChanged($event)">
             </studio-lite-select-unit-list>
