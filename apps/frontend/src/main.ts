@@ -23,7 +23,7 @@ platformBrowserDynamic([
   },
   {
     provide: 'APP_VERSION',
-    useValue: '3.2.0'
+    useValue: '3.3.0'
   }
 ])
   .bootstrapModule(AppModule)

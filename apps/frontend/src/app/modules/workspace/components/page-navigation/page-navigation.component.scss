@@ -1,0 +1,18 @@
+.page-nav {
+  font-size: 1.2em;
+}
+
+.page-nav-prompt {
+  padding: 2px 8px;
+  color: white;
+}
+
+.page-nav-disabled {
+  height: 5px;
+  background-color: orangered;
+}
+
+.page-nav-enabled {
+  height: 5px;
+  background-color: darkgrey;
+}

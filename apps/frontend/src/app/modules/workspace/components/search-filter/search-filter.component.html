@@ -1,0 +1,19 @@
+<div class="search-field-container">
+  <mat-form-field class="search-field">
+    <mat-label>{{ title }}</mat-label>
+    <input #filterInput
+           matInput
+           [placeholder]="'search-filter.enter-filter' | translate"
+           (keyup)="value=filterInput.value; valueChange.emit(value)">
+    <button matSuffix
+            mat-icon-button
+            [attr.aria-label]="'search-filter.delete-filter' | translate"
+            [disabled]="!filterInput.value"
+            [matTooltip]="'search-filter.delete-filter' | translate"
+            matTooltipPosition="above"
+            (click)="value=filterInput.value=''; valueChange.emit(value)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+</div>
+

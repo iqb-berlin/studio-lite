@@ -15,9 +15,8 @@ ENV_VARS[POSTGRES_DB]=$APP_NAME
 ENV_VARS[SERVER_NAME]=hostname.de
 ENV_VARS[HTTP_PORT]=80
 ENV_VARS[HTTPS_PORT]=443
-ENV_VARS[TRAEFIK_AUTH]=admin:$$apr1$$gaS8tVEe$$MjqM8IlBvz2PRFEWcwha1/
 
-ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB SERVER_NAME HTTP_PORT HTTPS_PORT TRAEFIK_AUTH)
+ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB SERVER_NAME HTTP_PORT HTTPS_PORT)
 
 check_prerequisites() {
   for APP in "${REQUIRED_PACKAGES[@]}"; do
@@ -33,7 +32,7 @@ check_prerequisites() {
       $APP >/dev/null 2>&1
     } || {
       echo "$APP not found! It is recommended to have it installed."
-      read -p 'Continue anyway? (y/N): ' -er -n 1 CONTINUE
+      read -p 'Continue anyway [y/N]? ' -er -n 1 CONTINUE
 
       if [[ ! $CONTINUE =~ ^[yY]$ ]]; then
         exit 1
@@ -59,7 +58,7 @@ prepare_installation_dir() {
     if [ ! -e "$TARGET_DIR" ]; then
       break
     elif [ -d "$TARGET_DIR" ] && [ -z "$(find "$TARGET_DIR" -maxdepth 0 -type d -empty 2>/dev/null)" ]; then
-      read -p "You have selected a non empty directory. Continue anyway? (y/N)" -er -n 1 CONTINUE
+      read -p "You have selected a non empty directory. Continue anyway [y/N]? " -er -n 1 CONTINUE
       if [[ ! $CONTINUE =~ ^[yY]$ ]]; then
         echo 'Installation script finished.'
         exit 0
@@ -76,8 +75,6 @@ prepare_installation_dir() {
   mkdir -p "$TARGET_DIR"/config/frontend
   mkdir -p "$TARGET_DIR"/config/traefik
   mkdir -p "$TARGET_DIR"/secrets/traefik
-  printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/secrets/traefik/$APP_NAME.crt
-  printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >"$TARGET_DIR"/secrets/traefik/$APP_NAME.key
   mkdir -p "$TARGET_DIR"/database_dumps
   mkdir -p "$TARGET_DIR"/prometheus
   mkdir -p "$TARGET_DIR"/grafana/provisioning/dashboards
@@ -134,13 +131,40 @@ customize_settings() {
     sed -i "s#$var.*#$var=$NEW_ENV_VAR_VALUE#" .env.prod
   done
 
-  printf "\n\n"
+  read -p "Traefik administrator name: " -er TRAEFIK_ADMIN_NAME
+  read -p "Traefik administrator password: " -er TRAEFIK_ADMIN_PASSWORD
+  BASIC_AUTH_CRED=$TRAEFIK_ADMIN_NAME:$(openssl passwd -apr1 "$TRAEFIK_ADMIN_PASSWORD" | sed -e s/\\$/\\$\\$/g)
+  printf "TRAEFIK_AUTH: $BASIC_AUTH_CRED\n"
+  sed -i "s#TRAEFIK_AUTH.*#TRAEFIK_AUTH=$BASIC_AUTH_CRED#" .env.prod
+
+  # Generate TLS files
+  printf "\n"
+  read -p "4. Do you have a TLS certificate and private key [y/N]? " -er -n 1 IS_TLS
+  if [[ ! $IS_TLS =~ ^[yY]$ ]]; then
+    printf "\nAn unsecure self-signed TLS certificate valid for 30 days will be generated ...\n"
+    source .env.prod
+    openssl req \
+      -newkey rsa:2048 -nodes -subj "/CN=$SERVER_NAME" -keyout "$TARGET_DIR"/secrets/traefik/$APP_NAME.key \
+      -x509 -days 30 -out "$TARGET_DIR"/secrets/traefik/$APP_NAME.crt
+    printf "A self-signed certificate file and a private key file have been generated.\n"
+
+  else
+    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" \
+      >"$TARGET_DIR"/secrets/traefik/$APP_NAME.crt
+    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" \
+      >"$TARGET_DIR"/secrets/traefik/$APP_NAME.key
+    printf "\nA certificate placeholder file and a private key placeholder file have been generated.\n"
+    printf "Please replace the content of the placeholder files 'secrets/traefik/%s.crt' " $APP_NAME
+    printf "and 'secrets/traefik/%s.key' with your existing certificate and private key!\n" $APP_NAME
+  fi
+
+  printf "\n"
 }
 
 application_start() {
-  printf "\nInstallation done!\n"
+  printf "Installation done.\n\n"
   if command make -v >/dev/null 2>&1; then
-    read -p "Do you want to start the application now? [Y/n]:" -er -n 1 START_NOW
+    read -p "Do you want to start the application now [Y/n]? " -er -n 1 START_NOW
     if [[ ! $START_NOW =~ [nN] ]]; then
       make production-ramp-up
     else

@@ -6,9 +6,9 @@ import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { de } from 'date-fns/locale';
 import { setDefaultOptions } from 'date-fns';
-import { AppService, standardLogo } from './app.service';
-import { BackendService } from './backend.service';
-import { AppConfig } from './app.classes';
+import { AppService, standardLogo } from './services/app.service';
+import { BackendService } from './services/backend.service';
+import { AppConfig } from './models/app-config.class';
 
 @Component({
   selector: 'app-root',
@@ -70,20 +70,6 @@ export class AppComponent implements OnInit {
         this.appService.processMessagePost(event);
       }, false);
     });
-  }
-
-  dataLoadingIsNumber() {
-    return typeof this.appService.dataLoading === 'number';
-  }
-
-  dataLoadingAsText() {
-    if (typeof this.appService.dataLoading === 'number') {
-      const progressValue = this.appService.dataLoading as number;
-      if (progressValue <= 100) return `${progressValue} %`;
-      if (progressValue < 8000) return `${(progressValue / 1024).toFixed(1)} kB`;
-      return `${(progressValue / 1048576).toFixed(1)} MB`;
-    }
-    return this.translateService.instant('application.wait-message');
   }
 
   logout_from_error() {

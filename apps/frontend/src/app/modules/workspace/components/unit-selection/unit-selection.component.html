@@ -1,0 +1,23 @@
+<div class="selection-header">
+  <studio-lite-search-filter #filterInput
+                             [title]="'search-filter.filter-units' | translate">
+  </studio-lite-search-filter>
+  <studio-lite-unit-table
+    [hasSortHeader]="true"
+    [unitList]="[]"
+    (sortChange)="sortUnitTables($event)">
+  </studio-lite-unit-table>
+</div>
+<studio-lite-unit-group *ngFor="let unitGroup of (unitList | keyvalue)"
+                       class="unit-group"
+                       [expanded]="true"
+                       [count]="unitGroup.value.length"
+                       [title]="unitGroup.key">
+  <studio-lite-unit-table
+    [hasSortHeader]="false"
+    [unitList]="unitGroup.value"
+    [filter]="filterInput.value"
+    [selectedUnitId]="selectedUnitId"
+    (selectUnit)="selectUnit($event)">
+  </studio-lite-unit-table>
+</studio-lite-unit-group>

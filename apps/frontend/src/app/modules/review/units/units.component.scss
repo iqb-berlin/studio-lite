@@ -1,0 +1,40 @@
+:host#unit-host {
+  height: 100%;
+}
+
+#unit-host {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  padding: 0;
+}
+
+#page-navigation {
+  position: absolute;
+  width: 100%;
+  height: 45px;
+  bottom: 0;
+  padding: 0 16px;
+  font-size: 1.2em;
+  background: #07465e;
+  color: #f2f2f2;
+}
+
+#pageNavPrompt {
+  margin-right: 16px;
+  color: white;
+}
+
+#page-navigation .page-nav-disabled {
+  height: 5px;
+  background-color: orangered;
+}
+
+#page-navigation .page-nav-enabled {
+  height: 5px;
+  background-color: darkgrey;
+}
+
+.with-footer, .with-footer unit-info, .with-footer #hosting-iframe {
+  height: calc(100% - 45px);
+}

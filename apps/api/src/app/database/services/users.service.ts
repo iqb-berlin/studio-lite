@@ -12,6 +12,8 @@ import { AdminUserNotFoundException } from '../../exceptions/admin-user-not-foun
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 import Review from '../entities/review.entity';
+import { UnitService } from './unit.service';
+import { UnitUserService } from './unit-user.service';
 
 @Injectable()
 export class UsersService {
@@ -27,7 +29,9 @@ export class UsersService {
     @InjectRepository(Workspace)
     private workspaceRepository: Repository<Workspace>,
     @InjectRepository(Review)
-    private reviewRepository: Repository<Review>
+    private reviewRepository: Repository<Review>,
+    private unitService: UnitService,
+    private unitUserService: UnitUserService
   ) {}
 
   async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
@@ -360,6 +364,22 @@ export class UsersService {
           workspaceId: workspaceId
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
+        const units = await this.unitService.findAll(workspaceId);
+
+        await Promise.all(units.map(async unit => {
+          this.unitUserService.findByUnitId(unit.id).then(async unitUsers => {
+            const unitUsersIds = unitUsers.map(unitUser => unitUser.userId);
+            if (!unitUsersIds.includes(userId)) {
+              await this.unitUserService.createUnitUser(userId, unit.id);
+            } else {
+              unitUsersIds.map(async unitUserId => {
+                if (!users.includes(unitUserId)) {
+                  await this.unitUserService.deleteUnitUsers(workspaceId, unitUserId);
+                }
+              });
+            }
+          });
+        }));
       }));
     });
   }

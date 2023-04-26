@@ -1,0 +1,99 @@
+<div class="fx-column-start-stretch">
+  <h1 mat-dialog-title>{{'workspace.manage-unit-groups' | translate}}</h1>
+  <mat-dialog-content class="fx-row-start-stretch dialog-content">
+    <div class="fx-flex-row-20 fx-column-end-stretch">
+
+      <studio-lite-search-filter *ngIf="groups.length"
+                                 [title]="'search-filter.filter-groups' | translate"
+                                 (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+      </studio-lite-search-filter>
+
+      <mat-table *ngIf="groups.length"
+                 class="groups fx-flex-fill"
+                 matSortDisableClear
+                 matSortActive="name"
+                 matSortDirection="asc"
+                 matSort
+                 [dataSource]="objectsDatasource">
+
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef
+                           mat-sort-header="name">
+            {{'workspace.group' | translate}}
+          </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <div class="group-name fx-row-space-between-center">
+              <div class="fx-flex-row-90">
+                {{element.name}}
+              </div>
+              <div *ngIf="element.count > 0"
+                   class="badge-holder fx-flex-row-10"
+                   [matBadge]="element.count">
+              </div>
+           </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row class='group-sort'
+                        *matHeaderRowDef="displayedColumns; sticky: true">
+        </mat-header-row>
+        <mat-row class='group-row'
+                 *matRowDef="let row; columns: displayedColumns;"
+                 [class.selected]="selectedGroup===row.name"
+                 (click)="selectGroup(row.name)">
+        </mat-row>
+      </mat-table>
+
+      <studio-lite-group-menu
+          [selectedGroup]="selectedGroup"
+          (groupAdded)="addGroup($event)"
+          (groupRenamed)="renameGroup($event)"
+          (groupDeleted)="deleteGroup()">
+      </studio-lite-group-menu>
+    </div>
+
+    <div class="fx-flex-row-80">
+        <div [class]="changed ? 'group-changed' : 'group-not-changed'">
+          <div class="fx-column-start-stretch units-wrapper">
+            <div class="fx-flex-fill"
+                 [hidden]="selectedGroup">{{'workspace.select-group' | translate}}</div>
+            <div class="units fx-flex-fill">
+              <studio-lite-select-unit-list #unitSelectionTable
+                                            [hidden]="!selectedGroup"
+                                            [show-groups]="false"
+                                            [workspace]="workspaceService.selectedWorkspaceId"
+                                            (selectionChanged)="unitSelectionChanged()">
+              </studio-lite-select-unit-list>
+            </div>
+            <div class="fx-row-end-end fx-gap-5 changes-container">
+              <button mat-raised-button
+                      [matTooltip]="'workspace.reject-unit-changes' | translate"
+                      [disabled]="!changed"
+                      matTooltipPosition="below"
+                      (click)="discardChanges()">
+                <mat-icon>close</mat-icon>
+              </button>
+              <button mat-raised-button
+                      [matTooltip]="'workspace.save-changes' | translate"
+                      [disabled]="!changed"
+                      matTooltipPosition="below"
+                      (click)="saveChanged()">
+                {{'save' | translate}}
+                <mat-icon>save</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </mat-dialog-content>
+
+
+  <mat-dialog-actions class="fx-column-start-stretch">
+    <div class="fx-row-start-stretch">
+      <button mat-raised-button
+              [mat-dialog-close]="false">
+        {{'dialogs.close' | translate}}
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,64 @@
+.selected {
+  background-color: #006064BB;
+  > .mat-cell {
+    color: white;
+  }
+}
+
+.units {
+  overflow: auto;
+  background-color: white;
+}
+
+.group-name {
+  min-width: 100%;
+}
+
+.badge-holder {
+  pointer-events: none;
+}
+
+.group-changed {
+  background-color: darkorange;
+  padding: 2px
+}
+
+.group-not-changed {
+  background-color: transparent;
+  padding: 2px
+}
+
+.dialog-content {
+  gap: 5px;
+  display: flex;
+  height: 65vh
+}
+
+.units-wrapper {
+  height: 64vh;
+}
+
+.changes-container {
+  padding: 5px;
+}
+
+.groups {
+  background-color: #00606405;
+  overflow-y: auto;
+}
+
+.group-sort {
+  min-height: 28px;
+  background-color: white;
+}
+
+.group-row {
+  min-height: 28px;
+  border-bottom-color: #00606420;
+  &:hover:not(.selected) {
+    background-color: #00606420;
+  }
+}
+
+
+

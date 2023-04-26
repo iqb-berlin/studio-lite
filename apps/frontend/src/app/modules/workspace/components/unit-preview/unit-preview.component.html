@@ -1,0 +1,22 @@
+<div class="fx-column-start-stretch fx-flex-row-100">
+  <div *ngIf="message"
+       class="message">
+    {{message}}
+  </div>
+  <div class="preview-body fx-flex-fill">
+    <iframe #hostingIframe
+            class="unitHost">
+    </iframe>
+</div>
+  <studio-lite-preview-bar [pageList]="pageList"
+                           [unitId]="unitId"
+                           [playerApiVersion]="playerApiVersion"
+                           [postMessageTarget]="postMessageTarget"
+                           [playerName]="playerName"
+                           [presentationProgress]="presentationProgress"
+                           [responseProgress]="responseProgress"
+                           [hasFocus]="hasFocus"
+                           (gotoPage)="gotoPage($event)"
+                           (navigationDenied)="postNavigationDenied()">
+  </studio-lite-preview-bar>
+</div>

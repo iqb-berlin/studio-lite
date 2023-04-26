@@ -1,0 +1,49 @@
+.settings {
+  padding: 2px 2px 2px 0;
+}
+
+.selected {
+  background-color: #006064BB;
+  > .mat-cell {
+    color: white;
+  }
+}
+
+.review-changed {
+  height: 65vh;
+  background-color: darkorange;
+  padding: 2px
+}
+
+.review-not-changed {
+  height: 65vh;
+  background-color: transparent;
+  padding: 2px
+}
+
+.review-changes-area {
+  overflow-y: auto;
+  background-color: white;
+}
+
+.review-list-area {
+  height: 65vh;
+}
+
+.reviews {
+  background-color: #00606405;
+  overflow-y: auto;
+}
+
+.review-sort {
+  min-height: 28px;
+  background-color: white;
+}
+
+.review-row {
+  min-height: 28px;
+  border-bottom-color: #00606420;
+  &:hover:not(.selected) {
+    background-color: #00606420;
+  }
+}

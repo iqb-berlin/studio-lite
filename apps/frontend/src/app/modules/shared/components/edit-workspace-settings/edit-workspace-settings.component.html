@@ -1,0 +1,64 @@
+<div>
+  <h1 mat-dialog-title>
+    {{'workspace-settings.title' | translate}}
+  </h1>
+  <mat-dialog-content>
+    <div>
+      <div class="fx-row-space-between-start fx-gap-10">
+        <mat-label>
+          {{'workspace-settings.default-editor' | translate}}
+        </mat-label>
+        <studio-lite-select-module class="fx-flex-row-60"
+                           moduleType="editor"
+                           [modules]="this.moduleService.editors"
+                           [value]="dialogData.defaultEditor"
+                           (selectionChanged)="selectModul('editor', $event)"
+                           [stableOnly]="false">
+        </studio-lite-select-module>
+      </div>
+      <div class="fx-row-space-between-start fx-gap-10">
+        <mat-label>
+          {{'workspace-settings.default-player' | translate}}
+        </mat-label>
+        <studio-lite-select-module class="fx-flex-row-60"
+                           moduleType="player"
+                           [modules]="this.moduleService.players"
+                           [value]="dialogData.defaultPlayer"
+                           [stableOnly]="false"
+                           (selectionChanged)="selectModul('player', $event)">
+        </studio-lite-select-module>
+      </div>
+      <div class="fx-row-space-between-start fx-gap-10">
+        <mat-label>
+          {{'workspace-settings.default-schemer' | translate}}
+        </mat-label>
+        <studio-lite-select-module class="fx-flex-row-60"
+                           moduleType="schemer"
+                           [modules]="this.moduleService.schemers"
+                           [value]="dialogData.defaultSchemer"
+                           [stableOnly]="false"
+                           (selectionChanged)="selectModul('schemer', $event)">
+        </studio-lite-select-module>
+      </div>
+      <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? setStableChecked($event) : null"
+                      [checked]="dialogData.stableModulesOnly">
+        </mat-checkbox>
+        <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="dialogData">
+      {{'save' | translate}}
+    </button>
+    <button mat-raised-button
+            [mat-dialog-close]="false">
+      {{'cancel' | translate}}
+    </button>
+  </mat-dialog-actions>
+</div>

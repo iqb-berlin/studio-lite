@@ -1,0 +1,15 @@
+.admin-background {
+  box-shadow: 5px 10px 20px black;
+  background-color: white;
+  padding: 25px;
+  margin: 0 15px 15px 15px;
+  height: calc(100% - 65px);
+}
+
+.communication-error-message {
+  color: red;
+  padding: 10px 50px;
+}
+.active-link {
+  color: black;
+}

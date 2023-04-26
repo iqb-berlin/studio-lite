@@ -1,0 +1,32 @@
+<div *ngIf="pageList.length"
+     class="page-nav fx-row-space-between-center">
+  <div class="page-nav-prompt">
+    {{'workspace.page-selection' | translate}}
+  </div>
+
+  <div *ngFor="let p of pageList">
+    <button *ngIf="p.type === '#previous'"
+            class="fx-row-center-center"
+            [disabled]="p.disabled"
+            (click)="gotoPage.emit({ action: p.type })">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button *ngIf="p.type === '#next'"
+            class="fx-row-center-center"
+            [disabled]="p.disabled"
+            (click)="gotoPage.emit({ action: p.type })">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <div *ngIf="p.type === '#goto'"
+         class="fx-column-start-stretch">
+      <div *ngIf="!p.disabled" class="page-nav-enabled"></div>
+      <div *ngIf="p.disabled" class="page-nav-disabled"></div>
+      <button [disabled]="p.disabled"
+              (click)="gotoPage.emit({ action: p.type, index: p.index })">
+        {{ p.index }}
+      </button>
+      <div *ngIf="!p.disabled" class="page-nav-enabled"></div>
+      <div *ngIf="p.disabled" class="page-nav-disabled"></div>
+    </div>
+  </div>
+</div>

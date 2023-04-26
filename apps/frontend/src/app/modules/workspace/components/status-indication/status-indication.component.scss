@@ -1,0 +1,26 @@
+.label {
+  padding: 2px 10px;
+}
+
+.complete {
+  @extend .label;
+  background-color: LimeGreen;
+}
+
+.some {
+  @extend .label;
+  background-color: LightCoral;
+}
+
+.none {
+  @extend .label;
+  background-color: DarkGray;
+}
+
+.yes {
+  @extend .complete;
+}
+
+.no {
+  @extend .some;
+}

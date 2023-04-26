@@ -1,0 +1,53 @@
+<div class="fx-column-start-stretch unit-list-wrapper">
+  <div *ngIf="multipleSelection">
+    <p *ngIf="selectionCount === 0">{{'workspace.select-unit' | translate}}</p>
+    <p *ngIf="selectionCount === 1">{{'workspace.unit-selected' | translate}}</p>
+    <p *ngIf="selectionCount > 1">{{selectionCount}} {{'workspace.units-selected' | translate}}</p>
+  </div>
+
+  <studio-lite-search-filter [title]="'search-filter.filter-units' | translate"
+                             (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+  </studio-lite-search-filter>
+
+  <mat-table class="unit-list"
+             matSortDisableClear
+             matSortActive="key"
+             matSortDirection="asc"
+             matSort
+             [dataSource]="objectsDatasource">
+    <ng-container matColumnDef="selectCheckbox">
+      <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
+        <mat-checkbox (change)="$event ? masterToggle() : null"
+                      [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                      [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
+        </mat-checkbox>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      [disabled]="disabledUnits.indexOf(row.id) >= 0"
+                      (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
+                      [checked]="tableSelectionCheckbox.isSelected(row)">
+        </mat-checkbox>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="key">
+      <mat-header-cell *matHeaderCellDef mat-sort-header="key">{{'workspace.unit' | translate}}</mat-header-cell>
+      <mat-cell *matCellDef="let element"
+                [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
+        {{element.key}}{{element.name ? ' - ' + element.name : ''}}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="groupName">
+      <mat-header-cell *matHeaderCellDef mat-sort-header="groupName">{{'workspace.group' | translate}}</mat-header-cell>
+      <mat-cell *matCellDef="let element"
+                [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
+        {{element.groupName}}
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

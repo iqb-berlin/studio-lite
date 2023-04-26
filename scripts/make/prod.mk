@@ -11,6 +11,22 @@ include $(BASE_DIR)/.env.prod
 
 ## Pull newest images, create and start docker containers
 production-ramp-up:
+	if \
+		! test -f $(BASE_DIR)/secrets/traefik/studio-lite.crt || \
+		! test -f $(BASE_DIR)/secrets/traefik/studio-lite.key || \
+		! command openssl x509 -in $(BASE_DIR)/secrets/traefik/studio-lite.crt -text -noout >/dev/null 2>&1 || \
+		! command openssl rsa -in $(BASE_DIR)/secrets/traefik/studio-lite.key -check >/dev/null 2>&1; \
+				then \
+					echo "==============================================="; \
+					echo "No SSL certificate and/or key available!"; \
+					echo "Generating a 1-day self-signed certificate ..."; \
+					openssl req \
+							 -newkey rsa:2048 -nodes -subj "/CN=$(SERVER_NAME)" \
+							 -keyout $(BASE_DIR)/secrets/traefik/studio-lite.key \
+							 -x509 -days 1 -out $(BASE_DIR)/secrets/traefik/studio-lite.crt; \
+					echo "Self-signed 1-day certificate created."; \
+					echo "==============================================="; \
+	fi
 	if [ ! -f $(BASE_DIR)/config/frontend/default.conf.template ]; \
 		then cp $(BASE_DIR)/config/frontend/default.conf.http-template $(BASE_DIR)/config/frontend/default.conf.template; fi
 	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
@@ -60,9 +76,9 @@ production-clean:
 # (https://docs.liquibase.com/commands/status/status.html)
 production-liquibase-status: .EXPORT_ALL_VARIABLES
 	cd $(BASE_DIR) && docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
-		--env-file $(BASE_DIR)/.env.prod run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml \
-    --url=jdbc:postgresql://db:5432/$(POSTGRES_DB) --username=$(POSTGRES_USER) --password=$(POSTGRES_PASSWORD) \
-    --classpath=changelog --logLevel=info $(CMD)
+		--env-file $(BASE_DIR)/.env.prod run --rm liquibase \
+			liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/$(POSTGRES_DB) \
+				--username=$(POSTGRES_USER) --password=$(POSTGRES_PASSWORD) --classpath=changelog --logLevel=info $(CMD)
 
 ## Open DB console
 production-connect-db: .EXPORT_ALL_VARIABLES
