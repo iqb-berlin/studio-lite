@@ -1,5 +1,7 @@
-.PHONY: audit-app audit-backend audit-frontend
 BASE_DIR := $(shell git rev-parse --show-toplevel)
+
+## prevents collisions of make target names with possible file names
+.PHONY: audit-app audit-backend audit-frontend
 
 ## Run all audits (only in combination with 'make dev-up')
 audit-app: audit-backend audit-frontend

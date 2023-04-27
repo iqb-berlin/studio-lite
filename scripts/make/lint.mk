@@ -1,5 +1,7 @@
-.PHONY: lint-app lint-backend lint-frontend lint-frontend-e2e
 BASE_DIR := $(shell git rev-parse --show-toplevel)
+
+## prevents collisions of make target names with possible file names
+.PHONY: lint-app lint-backend lint-frontend lint-frontend-e2e
 
 ## Run all linters (only in combination with 'make dev-up')
 lint-app: lint-backend lint-frontend lint-frontend-e2e

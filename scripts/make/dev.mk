@@ -1,6 +1,8 @@
+BASE_DIR := $(shell git rev-parse --show-toplevel)
+
+## prevents collisions of make target names with possible file names
 .PHONY: dev-up dev-down dev-start dev-stop dev-status dev-logs dev-config dev-build dev-clean-system dev-clean-volumes \
 dev-clean-all
-BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 ## Create and start all docker containers
 dev-up:
