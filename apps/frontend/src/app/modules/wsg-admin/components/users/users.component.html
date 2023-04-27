@@ -1,5 +1,11 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="fx-flex-row-50 fx-column-start-stretch object-list">
+
+    <studio-lite-search-filter *ngIf="objectsDatasource.data.length"
+                               [title]="'search-filter.filter-users' | translate"
+                               (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+    </studio-lite-search-filter>
+
     <mat-table class="scroll-area"
                [dataSource]="objectsDatasource"
                matSortDisableClear

@@ -19,7 +19,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<UserFullDto>();
+  objectsDatasource = new MatTableDataSource<UserFullDto>([]);
   displayedColumns = ['name', 'displayName', 'email', 'description'];
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
@@ -81,6 +81,17 @@ export class UsersComponent implements OnInit {
     }
   }
 
+  private setObjectsDatasource(users: UserFullDto[]): void {
+    this.objectsDatasource = new MatTableDataSource(users);
+    this.objectsDatasource
+      .filterPredicate = (userList: UserFullDto, filter) => [
+        'name', 'firstName', 'lastName', 'email', 'description'
+      ].some(column => (userList[column as keyof UserFullDto] as string || '')
+        .toLowerCase()
+        .includes(filter));
+    this.objectsDatasource.sort = this.sort;
+  }
+
   saveWorkspaces(): void {
     if (this.selectedUser > 0) {
       if (this.userWorkspaces.hasChanged) {
@@ -115,8 +126,7 @@ export class UsersComponent implements OnInit {
       .subscribe(
         (dataResponse: UserFullDto[]) => {
           if (dataResponse.length > 0) {
-            this.objectsDatasource = new MatTableDataSource(dataResponse);
-            this.objectsDatasource.sort = this.sort;
+            this.setObjectsDatasource(dataResponse);
             this.tableSelectionCheckbox.clear();
             this.tableSelectionRow.clear();
             this.appService.dataLoading = false;

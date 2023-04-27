@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -6,9 +6,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
 
@@ -16,10 +16,16 @@ describe('UsersComponent', () => {
   let component: UsersComponent;
   let fixture: ComponentFixture<UsersComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
+  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  class MockSearchFilterComponent {
+    @Input() title!: string;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
-        UsersComponent
+        UsersComponent,
+        MockSearchFilterComponent
       ],
       imports: [
         MatDialogModule,
@@ -40,7 +46,7 @@ describe('UsersComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersComponent);
