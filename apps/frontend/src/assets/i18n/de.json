@@ -135,6 +135,7 @@
     "rename-workspace": "Arbeitsbereich umbenennen",
     "deleting-of-workspaces": "Löschen von Arbeitsbereichen",
     "delete-workspace": "Soll der Arbeitsbereich \"{{name}}\" gelöscht werden?",
+    "delete-workspace-with-units": "Soll der Arbeitsbereich \"{{name}}\" mit allen enthaltenen Aufgaben gelöscht werden?",
     "workspaces-deleted": "Arbeitsbereich/e gelöscht",
     "workspaces-not-deleted": "Konnte Arbeitsbereich/e nicht löschen",
     "workspace-added": "Arbeitsbereich hinzugefügt",
@@ -144,7 +145,7 @@
     "workspace-settings-changed": "Einstellungen gespeichert",
     "workspace-settings-not-changed": "Einstellungen konnten nicht gespeichert werden",
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
-    "delete-workspaces": "Sollen {{count}} Arbeitsbereiche gelöscht werden?",
+    "delete-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben gelöscht werden?",
     "add-workspace": "Arbeitsbereich hinzufügen",
     "delete-selected-workspaces": "Markierte/n Arbeitsbereich/e löschen",
     "change-workspace-settings": "Einstellungen des Arbeitsbereiches ändern",
@@ -154,7 +155,8 @@
     "error": "*Fehler*",
     "title": "Verwaltung \"{{name}}\"",
     "users": "Nutzer:innen",
-    "workspaces": "Arbeitsbereiche"
+    "workspaces": "Arbeitsbereiche",
+    "units-count": "Anzahl der Aufgaben"
 },
   "workspace-settings": {
     "title": "Einstellungen für den Arbeitsbereich",
