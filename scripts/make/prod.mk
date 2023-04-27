@@ -1,17 +1,23 @@
-.PHONY: production-ramp-up production-shut-down production-start production-stop production-status production-logs \
-production-config production-clean production-liquibase-status production-connect-db production-dump-all \
-production-restore-all production-dump-db production-restore-db production-dump-db-data-only \
-production-restore-db-data-only
 BASE_DIR := $(shell git rev-parse --show-toplevel)
 CMD ?= status
+
 include $(BASE_DIR)/.env.prod
 
 ## exports all variables (especially those of the included .env.prod file!)
 .EXPORT_ALL_VARIABLES:
 
+## prevents collisions of make target names with possible file names
+.PHONY: production-ramp-up production-shut-down production-start production-stop production-status production-logs \
+production-config production-clean production-liquibase-status production-connect-db production-dump-all \
+production-restore-all production-dump-db production-restore-db production-dump-db-data-only \
+production-restore-db-data-only
+
+## disables printing the recipe of a make target before executing it
+#.SILENT: production-ramp-up
+
 ## Pull newest images, create and start docker containers
 production-ramp-up:
-	if \
+	@if \
 		! test -f $(BASE_DIR)/secrets/traefik/studio-lite.crt || \
 		! test -f $(BASE_DIR)/secrets/traefik/studio-lite.key || \
 		! command openssl x509 -in $(BASE_DIR)/secrets/traefik/studio-lite.crt -text -noout >/dev/null 2>&1 || \
@@ -27,7 +33,7 @@ production-ramp-up:
 					echo "Self-signed 1-day certificate created."; \
 					echo "==============================================="; \
 	fi
-	if [ ! -f $(BASE_DIR)/config/frontend/default.conf.template ]; \
+	@if [ ! -f $(BASE_DIR)/config/frontend/default.conf.template ]; \
 		then cp $(BASE_DIR)/config/frontend/default.conf.http-template $(BASE_DIR)/config/frontend/default.conf.template; fi
 	docker compose -f $(BASE_DIR)/docker-compose.yml -f $(BASE_DIR)/docker-compose.prod.yml \
 		--env-file $(BASE_DIR)/.env.prod pull
