@@ -25,7 +25,7 @@ const datePipe = new DatePipe('de-DE');
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
-  displayedColumns = ['selectCheckbox', 'name'];
+  displayedColumns = ['selectCheckbox', 'name', 'unitsCount'];
   tableSelectionCheckbox = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
@@ -153,8 +153,8 @@ export class WorkspacesComponent implements OnInit {
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
-  selectRow(row: WorkspaceInListDto): void {
-    this.tableSelectionRow.select(row);
+  toggleRowSelection(row: WorkspaceInListDto): void {
+    this.tableSelectionRow.toggle(row);
   }
 
   xlsxDownloadWorkspaceReport() {

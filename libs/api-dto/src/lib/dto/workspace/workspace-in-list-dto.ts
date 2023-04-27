@@ -9,4 +9,7 @@ export class WorkspaceInListDto {
 
   @ApiProperty({ example: 463 })
     groupId!: number;
+
+  @ApiProperty()
+    unitsCount!: number;
 }

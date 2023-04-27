@@ -124,9 +124,17 @@ export class WorkspaceMenuComponent {
       selectedRows = this.checkedRows;
     }
     if (selectedRows.length) {
-      const prompt = selectedRows.length === 1 ?
-        this.translateService.instant('wsg-admin.delete-workspace', { name: selectedRows[0].name }) :
-        this.translateService.instant('wsg-admin.delete-workspaces', { count: selectedRows.length });
+      let prompt;
+      if (selectedRows.length === 1) {
+        prompt = (selectedRows[0].unitsCount) ?
+          this.translateService
+            .instant('wsg-admin.delete-workspace-with-units', { name: selectedRows[0].name }) :
+          this.translateService
+            .instant('wsg-admin.delete-workspace', { name: selectedRows[0].name });
+      } else {
+        prompt = this.translateService
+          .instant('wsg-admin.delete-workspaces', { count: selectedRows.length });
+      }
       const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: <ConfirmDialogData>{

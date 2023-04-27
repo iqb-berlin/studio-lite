@@ -12,48 +12,58 @@
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
-    <studio-lite-search-filter *ngIf="objectsDatasource.data.length"
-                               [title]="'search-filter.filter-workspaces' | translate"
-                               (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
-    </studio-lite-search-filter>
+    <ng-container *ngIf="objectsDatasource.data.length">
+      <studio-lite-search-filter
+                                 [title]="'search-filter.filter-workspaces' | translate"
+                                 (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+      </studio-lite-search-filter>
 
-    <mat-table *ngIf="objectsDatasource.data.length"
-               [dataSource]="objectsDatasource"
-               matSort
-               matSortDisableClear
-               class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-header-cell *matHeaderCellDef
-                         class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
-                        [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()"
-                        (change)="$event ? masterToggle() : null">
-          </mat-checkbox>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let row"
-                  class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="tableSelectionCheckbox.isSelected(row)"
-                        (click)="$event.stopPropagation()"
-                        (change)="$event ? tableSelectionCheckbox.toggle(row) : null">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
+      <mat-table [dataSource]="objectsDatasource"
+                 matSort
+                 matSortDisableClear
+                 class="scroll-area">
+        <ng-container matColumnDef="selectCheckbox">
+          <mat-header-cell *matHeaderCellDef
+                           class="fx-flex-row-fix-70">
+            <mat-checkbox [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                          [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()"
+                          (change)="$event ? masterToggle() : null">
+            </mat-checkbox>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row"
+                    class="fx-flex-row-fix-70">
+            <mat-checkbox [checked]="tableSelectionCheckbox.isSelected(row)"
+                          (click)="$event.stopPropagation()"
+                          (change)="$event ? tableSelectionCheckbox.toggle(row) : null">
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
 
-      <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef
-                         mat-sort-header="name">{{'wsg-admin.name' | translate}}
-        </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          {{element.name}}
-        </mat-cell>
-      </ng-container>
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef
+                           mat-sort-header="name">{{'wsg-admin.name' | translate}}
+          </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            {{element.name}}
+          </mat-cell>
+        </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"
-               [class.selected]="tableSelectionRow.isSelected(row)"
-               (click)="selectRow(row)">
-        </mat-row>
-    </mat-table>
+        <ng-container matColumnDef="unitsCount">
+          <mat-header-cell *matHeaderCellDef
+                           mat-sort-header="unitsCount">{{'wsg-admin.units-count' | translate}}
+          </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            {{element.unitsCount}}
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                 [class.selected]="tableSelectionRow.isSelected(row)"
+                 (click)="toggleRowSelection(row)">
+          </mat-row>
+      </mat-table>
+    </ng-container>
   </div>
 
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
