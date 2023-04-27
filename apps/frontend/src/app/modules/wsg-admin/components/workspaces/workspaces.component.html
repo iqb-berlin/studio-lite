@@ -12,7 +12,13 @@
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
-    <mat-table [dataSource]="objectsDatasource"
+    <studio-lite-search-filter *ngIf="objectsDatasource.data.length"
+                               [title]="'search-filter.filter-workspaces' | translate"
+                               (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+    </studio-lite-search-filter>
+
+    <mat-table *ngIf="objectsDatasource.data.length"
+               [dataSource]="objectsDatasource"
                matSort
                matSortDisableClear
                class="scroll-area">

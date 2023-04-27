@@ -1,4 +1,5 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+// eslint-disable-next-line max-classes-per-file
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -24,11 +25,17 @@ describe('WorkspacesComponent', () => {
     @Input() checkedRows!: WorkspaceInListDto[];
   }
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
+  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  class MockSearchFilterComponent {
+    @Input() title!: string;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         WorkspacesComponent,
-        MockWorkspaceMenuComponent
+        MockWorkspaceMenuComponent,
+        MockSearchFilterComponent
       ],
       imports: [
         MatDialogModule,
@@ -49,7 +56,7 @@ describe('WorkspacesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WorkspacesComponent);
