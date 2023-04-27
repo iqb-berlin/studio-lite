@@ -54,12 +54,15 @@ export class WorkspaceService {
     }
     const workspaces: Workspace[] = await this.workspacesRepository.find({ order: { name: 'ASC' } });
     const returnWorkspaces: WorkspaceInListDto[] = [];
-    workspaces.forEach(workspace => {
+    workspaces.map(async workspace => {
       if (!userId || (validWorkspaces.indexOf(workspace.id) > -1)) {
         returnWorkspaces.push(<WorkspaceInListDto>{
           id: workspace.id,
           name: workspace.name,
-          groupId: workspace.groupId
+          groupId: workspace.groupId,
+          unitsCount: (await this.unitsRepository.find({
+            where: { workspaceId: workspace.id }
+          })).length
         });
       }
     });
@@ -122,15 +125,14 @@ export class WorkspaceService {
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
     });
-    const workspacesReturn: WorkspaceInListDto[] = [];
-    workspaces.forEach(workspace => {
-      workspacesReturn.push(<WorkspaceInListDto>{
-        id: workspace.id,
-        name: workspace.name,
-        groupId: workspaceGroupId
-      });
-    });
-    return workspacesReturn;
+    return Promise.all(workspaces.map(async workspace => ({
+      id: workspace.id,
+      name: workspace.name,
+      groupId: workspaceGroupId,
+      unitsCount: (await this.unitsRepository.find({
+        where: { workspaceId: workspace.id }
+      })).length
+    } as WorkspaceInListDto)));
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
