@@ -1,9 +1,12 @@
+SHELL:=/bin/bash -O extglob
+BASE_DIR := $(shell git rev-parse --show-toplevel)
+
+include $(BASE_DIR)/.env.dev
+
+## prevents collisions of make target names with possible file names
 .PHONY: dev-db-up dev-db-down dev-db-update-status dev-db-update-history dev-db-validate-changelog \
 dev-db-update-display-sql dev-db-update-testing-rollback dev-db-update dev-db-rollback-lastchangeset \
 dev-db-generate-docs
-SHELL:=/bin/bash -O extglob
-BASE_DIR := $(shell git rev-parse --show-toplevel)
-include $(BASE_DIR)/.env.dev
 
 ## exports all variables (especially those of the included .env.dev file!)
 .EXPORT_ALL_VARIABLES:

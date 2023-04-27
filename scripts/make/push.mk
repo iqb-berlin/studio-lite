@@ -1,6 +1,8 @@
-.PHONY: push-dockerhub push-iqb-registry
 BASE_DIR := $(shell git rev-parse --show-toplevel)
 TAG := dev
+
+## prevents collisions of make target names with possible file names
+.PHONY: push-dockerhub push-iqb-registry
 
 ## Build and tag all docker images
 .build:

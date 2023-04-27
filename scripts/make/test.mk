@@ -1,9 +1,11 @@
+BASE_DIR := $(shell git rev-parse --show-toplevel)
+
+## prevents collisions of make target names with possible file names
 .PHONY: test-app test-backend test-frontend \
 test-e2e-build test-e2e-dev test-e2e-api-dev  test-e2e-ui-chrome-dev test-e2e-ui-chrome-mobile-dev \
 test-e2e-ui-firefox-dev test-e2e-ui-firefox-mobile-dev test-e2e-ui-edge-dev test-e2e-ui-edge-mobile-dev \
 test-e2e-prod test-e2e-api-prod test-e2e-ui-chrome-prod test-e2e-ui-chrome-mobile-prod test-e2e-ui-firefox-prod \
 test-e2e-ui-firefox-mobile-prod test-e2e-ui-edge-prod test-e2e-ui-edge-mobile-prod
-BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 ## Run all tests (only in combination with 'make dev-up')
 test-app: test-backend test-frontend

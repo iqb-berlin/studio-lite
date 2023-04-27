@@ -1,6 +1,8 @@
-.PHONY: scan-app scan-db scan-liquibase scan-backend scan-frontend
 BASE_DIR := $(shell git rev-parse --show-toplevel)
 TRIVY_VERSION := aquasec/trivy:0.34.0
+
+## prevents collisions of make target names with possible file names
+.PHONY: scan-app scan-db scan-liquibase scan-backend scan-frontend
 
 ## scans application images for security vulnerabilities
 scan-app: scan-db scan-liquibase scan-backend scan-frontend
