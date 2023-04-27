@@ -148,7 +148,7 @@ export class UsersComponent implements OnInit {
       });
   }
 
-  selectRow(row: UserInListDto): void {
-    this.tableSelectionRow.select(row);
+  toggleRowSelection(row: UserInListDto): void {
+    this.tableSelectionRow.toggle(row);
   }
 }
