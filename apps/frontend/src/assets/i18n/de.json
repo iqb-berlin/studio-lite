@@ -329,6 +329,7 @@
     "description": "Status: Player hat Fenster-Fokus"
   },
   "search-filter": {
+    "filter-workspaces": "Suche nach Arbeitsbereichen",
     "filter-groups": "Suche nach Gruppen",
     "filter-reviews": "Suche nach Aufgabenfolgen",
     "filter-units": "Suche nach Aufgaben",
