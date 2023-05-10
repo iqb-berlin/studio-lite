@@ -20,7 +20,7 @@ get_new_release_version() {
 
   if [ "$SOURCE_TAG" = "$LATEST_RELEASE" ]; then
     echo "Latest release is already installed!"
-    read -p "Continue anyway [Y/n]? " -er -n 1 CONTINUE
+    read -p "Continue anyway? [Y/n] " -er -n 1 CONTINUE
 
     if [[ $CONTINUE =~ ^[nN]$ ]]; then
       echo 'Update script finished.'
@@ -43,28 +43,17 @@ get_new_release_version() {
 
 create_backup() {
   mkdir -p ./backup/release/"$SOURCE_TAG"
-  tar -cf - --exclude='./backup' --exclude='./database_dumps' . | tar -xf - -C ./backup/release/"$SOURCE_TAG"
+  tar -cf - --exclude='./backup' . | tar -xf - -C ./backup/release/"$SOURCE_TAG"
   printf "\nBackup created!\nCurrent release files have been saved at: '%s'\n\n" "$PWD/backup/release/$SOURCE_TAG"
 }
 
-prepare_installation_dir() {
-  mkdir -p ./backup/release
-  mkdir -p ./config/frontend
-  mkdir -p ./config/traefik
-  mkdir -p ./secrets/traefik
-  mkdir -p ./database_dumps
-  mkdir -p ./prometheus
-  mkdir -p ./grafana/provisioning/dashboards
-  mkdir -p ./grafana/provisioning/datasources
-}
-
 run_update_script_in_selected_version() {
-  CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update.sh
+  CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update_$APP_NAME.sh
   NEW_UPDATE_SCRIPT=$REPO_URL/"$TARGET_TAG"/scripts/update.sh
 
   if [ ! -f "$CURRENT_UPDATE_SCRIPT" ] || ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT" &>/dev/null; then
     if [ ! -f "$CURRENT_UPDATE_SCRIPT" ]; then
-      echo "Update script 'update.sh' does not exist!"
+      echo "Update script 'update_$APP_NAME.sh' does not exist!"
 
     elif ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT" &>/dev/null; then
       echo 'Update script has been modified in newer version!'
@@ -72,8 +61,8 @@ run_update_script_in_selected_version() {
 
     printf "The running update script will download the desired update script, terminate itself, and start the new one!\n\n"
     echo 'Downloading the desired update script ...'
-    if wget -q -O update.sh $REPO_URL/"$TARGET_TAG"/scripts/update.sh; then
-      chmod +x update.sh
+    if wget -q -O update_$APP_NAME.sh "$NEW_UPDATE_SCRIPT"; then
+      chmod +x update_$APP_NAME.sh
       echo 'Download successful!'
     else
       echo 'Download failed!'
@@ -82,9 +71,19 @@ run_update_script_in_selected_version() {
     fi
 
     printf "\nDownloaded update script version %s will be started now.\n\n" "$TARGET_TAG"
-    ./update.sh "$TARGET_TAG"
+    ./update_$APP_NAME.sh "$TARGET_TAG"
     exit $?
   fi
+}
+
+prepare_installation_dir() {
+  mkdir -p ./backup/release
+  if [ -d ./database_dump ]; then
+    mv ./database_dump ./backup/database_dump
+  else
+    mkdir -p ./backup/database_dump
+  fi
+  mkdir -p ./config/frontend
 }
 
 download_file() {
@@ -99,16 +98,11 @@ download_file() {
 
 update_files() {
   echo "Downloading files ..."
+
   download_file docker-compose.yml docker-compose.yml
   download_file docker-compose.prod.yml docker-compose.prod.yml
-  download_file config/traefik/tls-config.yml config/traefik/tls-config.yml
-  download_file Makefile scripts/make/prod.mk
-  download_file prometheus/alert.rules prometheus/alert.rules
-  download_file prometheus/prometheus.yml prometheus/prometheus.yml
-  download_file grafana/config.monitoring grafana/config.monitoring
-  download_file grafana/provisioning/dashboards/dashboard.yml grafana/provisioning/dashboards/dashboard.yml
-  download_file grafana/provisioning/dashboards/traefik_rev4.json grafana/provisioning/dashboards/traefik_rev4.json
-  download_file grafana/provisioning/datasources/datasource.yml grafana/provisioning/datasources/datasource.yml
+  download_file scripts/prod.mk scripts/make/prod.mk
+
   printf "Downloads done!\n\n"
 }
 
@@ -193,19 +187,11 @@ check_template_files_modifications() {
 }
 
 customize_settings() {
-  # Set application BASE_DIR
-  sed -i "s#BASE_DIR :=.*#BASE_DIR := \.#" Makefile
-
   # write chosen version tag to env file
   sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
 
-  # Generate TLS dummies
-  if [ ! -f ./secrets/traefik/$APP_NAME.crt ]; then
-    printf "Generated certificate placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.crt
-  fi
-  if [ ! -f ./secrets/traefik/$APP_NAME.key ]; then
-    printf "Generated key placeholder file.\nReplace this text with real content if necessary.\n" >./secrets/traefik/$APP_NAME.key
-  fi
+  # Set makefile BASE_DIR
+  sed -i "s#BASE_DIR :=.*#BASE_DIR := \.#" scripts/studio-lite.mk
 }
 
 finalize_update() {
@@ -222,7 +208,7 @@ finalize_update() {
     fi
 
     if command make -v >/dev/null 2>&1; then
-      printf "\nWhen your files are checked, you could restart the application with 'make production-ramp-up' at the "
+      printf "\nWhen your files are checked, you could restart the application with 'make %s-up' at the " $APP_NAME
       printf "command line to put the update into effect.\n\n"
 
     else
@@ -230,7 +216,7 @@ finalize_update() {
     fi
 
     echo 'The application will now shut down ...'
-    make production-shut-down
+    make studio-lite-down
 
     echo 'Update script finished.'
     exit 0
@@ -242,42 +228,12 @@ finalize_update() {
   fi
 }
 
-generate_tls_certificate() {
-  if command openssl x509 -in secrets/traefik/studio-lite.crt -text -noout >/dev/null 2>&1 &&
-    command openssl rsa -in secrets/traefik/studio-lite.key -check >/dev/null 2>&1; then
-    printf "A TLS certificate and private key are already present!\n"
-    read -p "Do you really want to replace them [y/N]? " -er -n 1 REPLACE
-
-    if [[ ! $REPLACE =~ ^[yY]$ ]]; then
-      printf "\nThe existing self-signed certificate and private key have not been replaced.\n\n"
-      return
-    fi
-  fi
-
-  printf "An unsecure self-signed TLS certificate valid for 30 days will be generated ...\n"
-  openssl req \
-    -newkey rsa:2048 -nodes -subj "/CN=$SERVER_NAME" -keyout secrets/traefik/$APP_NAME.key \
-    -x509 -days 30 -out secrets/traefik/$APP_NAME.crt
-  printf "A self-signed certificate file and a private key file have been generated.\n\n"
-}
-
-generate_admin_credentials() {
-  read -p "Traefik administrator name: " -er TRAEFIK_ADMIN_NAME
-  read -p "Traefik administrator password: " -er TRAEFIK_ADMIN_PASSWORD
-
-  BASIC_AUTH_CRED=$TRAEFIK_ADMIN_NAME:$(openssl passwd -apr1 "$TRAEFIK_ADMIN_PASSWORD" | sed -e s/\\$/\\$\\$/g)
-  printf "TRAEFIK_AUTH: $BASIC_AUTH_CRED\n\n"
-  sed -i "s#TRAEFIK_AUTH.*#TRAEFIK_AUTH=$BASIC_AUTH_CRED#" .env.prod
-
-  printf "The traefik administrator credentials have been updated.\n\n"
-}
-
 application_reload() {
   if command make -v >/dev/null 2>&1; then
-    read -p "Do you want to reload the application now [Y/n]? " -er -n 1 RELOAD
+    read -p "Do you want to reload $APP_NAME now? [Y/n] " -er -n 1 RELOAD
 
     if [[ ! $RELOAD =~ [nN] ]]; then
-      make production-ramp-up
+      make studio-lite-up
 
     else
       echo 'Update script finished.'
@@ -293,11 +249,11 @@ application_reload() {
 
 application_restart() {
   if command make -v >/dev/null 2>&1; then
-    read -p "Do you want to restart the application now [Y/n]? " -er -n 1 RESTART
+    read -p "Do you want to restart $APP_NAME now? [Y/n] " -er -n 1 RESTART
 
     if [[ ! $RESTART =~ [nN] ]]; then
-      make production-shut-down
-      make production-ramp-up
+      make studio-lite-down
+      make studio-lite-up
 
     else
       echo 'Update script finished.'
@@ -311,55 +267,49 @@ application_restart() {
   fi
 }
 
-# Load current environment variables in .env.prod
-. .env.prod
-SOURCE_TAG=$TAG
+main() {
+  # Load current environment variables in .env.prod
+  source .env.prod
+  SOURCE_TAG=$TAG
 
-if [ -z "$SELECTED_VERSION" ]; then
-  printf "Update script started ...\n\n"
-  printf "1. Update application\n"
-  printf "2. Update the self-signed TLS certificate valid for 30 days\n"
-  printf "3. Update the traefik administrator credentials\n\n"
+  if [ -z "$SELECTED_VERSION" ]; then
+    printf "Update script started ...\n\n"
+    printf "1. Update %s\n" $APP_NAME
+    printf "2. Exit update script\n\n"
 
-  while read -p 'What do you want to do [1-3]? ' -er -n 1 CHOICE; do
-    if [ "$CHOICE" = 1 ]; then
-      printf "\n=== UPDATE APPLICATION ===\n\n"
+    while read -p 'What do you want to do? [1/2] ' -er -n 1 CHOICE; do
+      if [ "$CHOICE" = 1 ]; then
+        printf "\n=== UPDATE %s ===\n\n" $APP_NAME
 
-      get_new_release_version
-      create_backup
-      run_update_script_in_selected_version
-      prepare_installation_dir
-      update_files
-      check_template_files_modifications
-      customize_settings
-      finalize_update
+        get_new_release_version
+        create_backup
+        run_update_script_in_selected_version
+        prepare_installation_dir
+        update_files
+        check_template_files_modifications
+        customize_settings
+        finalize_update
 
-      break
+        break
 
-    elif [ "$CHOICE" = 2 ]; then
-      printf "\n=== UPDATE SELF-SIGNED TLS CERTIFICATE ===\n\n"
+      elif [ "$CHOICE" = 2 ]; then
+        echo 'Installation script finished.'
 
-      generate_tls_certificate
-      application_restart
+        exit 0
 
-      break
+      fi
 
-    elif [ "$CHOICE" = 3 ]; then
-      printf "\n=== UPDATE TRAEFIK CREDENTIALS ===\n\n"
-      generate_admin_credentials
-      application_restart
+    done
 
-      break
-    fi
+  else
+    TARGET_TAG="$SELECTED_VERSION"
 
-  done
+    prepare_installation_dir
+    update_files
+    check_template_files_modifications
+    customize_settings
+    finalize_update
+  fi
+}
 
-else
-  TARGET_TAG="$SELECTED_VERSION"
-
-  prepare_installation_dir
-  update_files
-  check_template_files_modifications
-  customize_settings
-  finalize_update
-fi
+main

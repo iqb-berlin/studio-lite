@@ -303,6 +303,7 @@ test-main-pr-db:
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d db
     - export $(grep -v '^#' .env.prod.template | xargs)
@@ -379,6 +380,7 @@ test-main-pr-e2e:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -405,6 +407,7 @@ test-main-pr-e2e-api:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -431,6 +434,7 @@ test-main-pr-e2e-ui-chrome:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -457,6 +461,7 @@ test-main-pr-e2e-ui-chrome-mobile:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -483,6 +488,7 @@ test-main-pr-e2e-ui-firefox:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -509,6 +515,7 @@ test-main-pr-e2e-ui-firefox-mobile:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -535,6 +542,7 @@ test-main-pr-e2e-ui-edge:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -561,6 +569,7 @@ test-main-pr-e2e-ui-edge-mobile:
     - export $(grep -v '^#' .env.prod.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
+    - docker network create app-net
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
     - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
