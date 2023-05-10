@@ -4,9 +4,9 @@
 .vscode
 *Dockerfile*
 *docker-compose*
+backup
 cache
 changelogDocs
-database_dumps
 dist
 node_modules
 secrets

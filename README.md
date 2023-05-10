@@ -31,18 +31,18 @@ die Sie im Installationsverzeichnis unter dem Pfad `config/frontend` finden und 
 Um weiterentwickelte Software-Versionen zu installieren,
 ein abgelaufenes selbst-signiertes TLS-Zertifikat zu erneuern
 oder die Login-Daten des Edge-Routers zu ändern,
-rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update.sh` auf.
+rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update_studio-lite.sh` auf.
 
 ## Starten und Stoppen der Anwendung mit  `make`
 Zur Steuerung der Anwendungslandschaft haben eine Reihe von Make-Befehlen vorbereitet,
 die das Arbeiten mit Docker auf dem Server angenehmer machen.
 Sie befinden sich in der Datei `Makefile`.
 Der Aufruf eines Befehls erfolgt im Installationsverzeichnis der Anwendung mit `make <cmd>`,
-wobei jedes 'cmd' mit dem Präfix 'production-' beginnt.
+wobei jedes 'cmd' mit dem Präfix 'studio-lite-' beginnt.
 
 Um die Webanwendung hochzufahren, geben Sie folgenden Befehl ein:
 ```
-make production-ramp-up
+make studio-lite-up
 ```
 
 Nachdem die Prozesse dieses Befehls beendet sind,
@@ -52,14 +52,14 @@ Ein Zugriff auf den Server über einen Browser sollte dann sofort möglich sein.
 Falls Sie die aktuellen Log-Informationen der Anwendungslandschaft einsehen möchten,
 führen Sie folgenden Befehl aus:
 ````
-make production-logs
+make studio-lite-logs
 ````
 
 Und wenn die Webanwendung vollständig herunterzufahren und alle alten Docker Container zu löschen möchten,
 verwenden Sie bitte:
 
 ````
-make production-shut-down
+make studio-lite-down
 ````
 
 Nun haben Sie die drei wichtigsten Befehle der Anwendungssteuerung kennengelernt.
@@ -94,7 +94,7 @@ Man kann aber auch manuell eine andere Version eintragen.
 Darüber ist es möglich, eine Vorversion im Entwicklungsstadium (sog. Pre-release) festzulegen.
 Die Liste aller Releases finden Sie [hier](https://github.com/iqb-berlin/studio-lite/releases).
 
-Für das Update ist dann erneut `make production-ramp-up` aufzurufen.
+Für das Update ist dann erneut `make studio-lite-up` aufzurufen.
 Die vorhandenen Docker-Container werden gestoppt,
 neue Docker-Images eingespielt und dann wieder gestartet.
 Dieser Prozess sollte nicht länger als eine Minute dauern.

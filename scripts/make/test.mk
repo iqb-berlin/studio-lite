@@ -56,34 +56,34 @@ test-e2e-ui-edge-dev:
 test-e2e-ui-edge-mobile-dev:
 	docker compose --env-file $(BASE_DIR)/.env.dev -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-edge-mobile
 
-## Run all e2e tests in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e tests in production environment (only in combination with 'make studio-lite-up')
 test-e2e-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e
 
-## Run all e2e api tests in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e api tests in production environment (only in combination with 'make studio-lite-up')
 test-e2e-api-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-api
 
-## Run all e2e ui tests with chrome browser in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e ui tests with chrome browser in production environment (only in combination with 'make studio-lite-up')
 test-e2e-ui-chrome-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-chrome
 
-## Run all e2e ui tests with chrome browser for mobiles in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e ui tests with chrome browser for mobiles in production environment (only in combination with 'make studio-lite-up')
 test-e2e-ui-chrome-mobile-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-chrome-mobile
 
-## Run all e2e ui tests with firefox browser in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e ui tests with firefox browser in production environment (only in combination with 'make studio-lite-up')
 test-e2e-ui-firefox-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-firefox
 
-## Run all e2e ui tests with firefox browser for mobiles in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e ui tests with firefox browser for mobiles in production environment (only in combination with 'make studio-lite-up')
 test-e2e-ui-firefox-mobile-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-firefox-mobile
 
-## Run all e2e ui tests with edge browser in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e ui tests with edge browser in production environment (only in combination with 'make studio-lite-up')
 test-e2e-ui-edge-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-edge
 
-## Run all e2e ui tests with edge browser for mobiles in production environment (only in combination with 'make production-ramp-up')
+## Run all e2e ui tests with edge browser for mobiles in production environment (only in combination with 'make studio-lite-up')
 test-e2e-ui-edge-mobile-prod:
 	docker compose --env-file $(BASE_DIR)/.env.prod -f $(BASE_DIR)/docker-compose.e2e.yml run --rm test-e2e-ui-edge-mobile

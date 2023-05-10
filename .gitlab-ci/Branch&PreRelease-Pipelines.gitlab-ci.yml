@@ -271,6 +271,7 @@ test-db:
     - $DOCKER_SERVICE
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev pull -q db liquibase
     - docker compose --env-file .env.dev up -d db
     - export $(grep -v '^#' .env.dev | xargs)
@@ -320,6 +321,7 @@ test-app-e2e:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -347,6 +349,7 @@ test-app-e2e-api:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -374,6 +377,7 @@ test-app-e2e-ui-chrome:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -401,6 +405,7 @@ test-app-e2e-ui-chrome-mobile:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -429,6 +434,7 @@ test-app-e2e-ui-firefox:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -456,6 +462,7 @@ test-app-e2e-ui-firefox-mobile:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -484,6 +491,7 @@ test-app-e2e-ui-edge:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
@@ -511,6 +519,7 @@ test-app-e2e-ui-edge-mobile:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
     - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached

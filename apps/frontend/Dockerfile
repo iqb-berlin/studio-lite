@@ -19,6 +19,8 @@ ARG project
 
 RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${project}/proxy.conf.json
 
+EXPOSE 80
+
 ENTRYPOINT ["nx"]
 
 
