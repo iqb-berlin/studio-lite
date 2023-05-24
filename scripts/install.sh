@@ -103,9 +103,9 @@ download_file() {
 download_files() {
   echo "4. Downloading files:"
 
-  download_file docker-compose.yml docker-compose.yml
-  download_file docker-compose.prod.yml docker-compose.prod.yml
-  download_file .env.prod.template .env.prod.template
+  download_file docker-compose.studio-lite.yaml docker-compose.yaml
+  download_file docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml
+  download_file .env.studio-lite.template .env.studio-lite.template
   download_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template
   download_file scripts/studio-lite.mk scripts/make/prod.mk
   download_file update_$APP_NAME.sh scripts/update.sh
@@ -116,20 +116,20 @@ download_files() {
 
 customize_settings() {
   # Activate environment file
-  cp .env.prod.template .env.prod
-  source .env.prod
+  cp .env.studio-lite.template .env.studio-lite
+  source .env.studio-lite
 
   # Setup environment variables
   printf "5. Set Environment variables (default postgres password is generated randomly):\n\n"
 
   read -p "SERVER_NAME: " -er -i "$SERVER_NAME" SERVER_NAME
-  sed -i "s#SERVER_NAME.*#SERVER_NAME=$SERVER_NAME#" .env.prod
+  sed -i "s#SERVER_NAME.*#SERVER_NAME=$SERVER_NAME#" .env.studio-lite
 
-  sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
+  sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.studio-lite
 
   for VAR in "${ENV_VAR_ORDER[@]}"; do
     read -p "$VAR: " -er -i ${ENV_VARS[$VAR]} NEW_ENV_VAR_VALUE
-    sed -i "s#$VAR.*#$VAR=$NEW_ENV_VAR_VALUE#" .env.prod
+    sed -i "s#$VAR.*#$VAR=$NEW_ENV_VAR_VALUE#" .env.studio-lite
   done
 
   # Setup makefiles

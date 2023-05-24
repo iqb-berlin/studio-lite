@@ -99,8 +99,8 @@ download_file() {
 update_files() {
   echo "Downloading files ..."
 
-  download_file docker-compose.yml docker-compose.yml
-  download_file docker-compose.prod.yml docker-compose.prod.yml
+  download_file docker-compose.studio-lite.yaml docker-compose.yaml
+  download_file docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml
   download_file scripts/prod.mk scripts/make/prod.mk
 
   printf "Downloads done!\n\n"
@@ -109,7 +109,7 @@ update_files() {
 get_modified_file() {
   SOURCE_FILE=./backup/release/"$SOURCE_TAG"/"$1"
   TARGET_FILE=$REPO_URL/"$TARGET_TAG"/"$2"
-  CURRENT_ENV_FILE=.env.prod
+  CURRENT_ENV_FILE=.env.studio-lite
   CURRENT_CONFIG_FILE=config/frontend/default.conf.template
 
   if [ ! -f "$SOURCE_FILE" ] || ! (curl --stderr /dev/null "$TARGET_FILE" | diff -q - "$SOURCE_FILE" &>/dev/null); then
@@ -178,7 +178,7 @@ check_template_files_modifications() {
   echo "Check template files for updates ..."
 
   # check environment file
-  get_modified_file .env.prod.template .env.prod.template "env-file"
+  get_modified_file .env.studio-lite.template .env.studio-lite.template "env-file"
 
   # check nginx configuration files
   get_modified_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
@@ -188,7 +188,7 @@ check_template_files_modifications() {
 
 customize_settings() {
   # write chosen version tag to env file
-  sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.prod
+  sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.studio-lite
 
   # Set makefile BASE_DIR
   sed -i "s#BASE_DIR :=.*#BASE_DIR := \.#" scripts/studio-lite.mk
@@ -268,8 +268,8 @@ application_restart() {
 }
 
 main() {
-  # Load current environment variables in .env.prod
-  source .env.prod
+  # Load current environment variables in .env.studio-lite
+  source .env.studio-lite
   SOURCE_TAG=$TAG
 
   if [ -z "$SELECTED_VERSION" ]; then

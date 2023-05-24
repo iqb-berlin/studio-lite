@@ -1,7 +1,7 @@
 SHELL:=/bin/bash -O extglob
-BASE_DIR := $(shell git rev-parse --show-toplevel)
+STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-include $(BASE_DIR)/.env.dev
+include $(STUDIO_LITE_BASE_DIR)/.env.dev
 
 ## prevents collisions of make target names with possible file names
 .PHONY: dev-db-up dev-db-down dev-db-update-status dev-db-update-history dev-db-validate-changelog\
@@ -16,11 +16,11 @@ dev-db-up:
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
 	fi
-	docker compose --env-file $(BASE_DIR)/.env.dev up --build -d db liquibase
+	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev up --build -d db liquibase
 
 ## Stop db container
 dev-db-down:
-	docker compose --env-file $(BASE_DIR)/.env.dev down
+	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev down
 	@if test $(shell docker network ls -q --filter name=app-net);\
 		then docker network rm $(shell docker network ls -q -f name=app-net);\
 	fi
@@ -28,7 +28,7 @@ dev-db-down:
 ## Outputs the count of changesets that have not been deployed
 # (https://docs.liquibase.com/commands/status/status.html)
 dev-db-update-status: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -42,7 +42,7 @@ dev-db-update-status: .EXPORT_ALL_VARIABLES
 ## Lists all deployed changesets and their deploymentIds
 # (https://docs.liquibase.com/commands/status/history.html)
 dev-db-update-history: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -56,7 +56,7 @@ dev-db-update-history: .EXPORT_ALL_VARIABLES
 ## Checks and identifies any possible errors in a changelog that may cause the update command to fail
 # (https://docs.liquibase.com/commands/maintenance/validate.html)
 dev-db-validate-changelog: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -70,7 +70,7 @@ dev-db-validate-changelog: .EXPORT_ALL_VARIABLES
 ## Displays the SQL Liquibase will run while using the update command
 # (https://docs.liquibase.com/commands/update/update-sql.html)
 dev-db-update-display-sql: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -84,7 +84,7 @@ dev-db-update-display-sql: .EXPORT_ALL_VARIABLES
 ## Updates the database, then rolls back changes before updating again
 # (https://docs.liquibase.com/commands/update/update-testing-rollback.html)
 dev-db-update-testing-rollback: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -98,7 +98,7 @@ dev-db-update-testing-rollback: .EXPORT_ALL_VARIABLES
 ## Updates database to current version
 # (https://docs.liquibase.com/commands/update/update.html)
 dev-db-update: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -112,7 +112,7 @@ dev-db-update: .EXPORT_ALL_VARIABLES
 ## Rolls back the last changeset
 # (https://docs.liquibase.com/commands/rollback/rollback-count.html)
 dev-db-rollback-lastchangeset: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\
@@ -126,7 +126,7 @@ dev-db-rollback-lastchangeset: .EXPORT_ALL_VARIABLES
 ## Generates Javadoc-like documentation based on current database and changelog
 # (https://docs.liquibase.com/commands/docs/db-doc.html)
 dev-db-generate-docs: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR)/database/changelogDocs && rm -vrf !(".gitignore") && cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR)/database/changelogDocs && rm -vrf !(".gitignore") && cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--changelogFile=studio-lite.changelog-root.xml\

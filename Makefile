@@ -1,5 +1,5 @@
-BASE_DIR := $(shell git rev-parse --show-toplevel)
-MK_FILE_DIR := $(BASE_DIR)/scripts/make
+STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+MK_FILE_DIR := $(STUDIO_LITE_BASE_DIR)/scripts/make
 
 audit-app:
 	$(MAKE) -f $(MK_FILE_DIR)/audit.mk -C $(MK_FILE_DIR) $@
