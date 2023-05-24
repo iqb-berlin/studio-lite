@@ -16,7 +16,7 @@ config/frontend/default.conf.template.bkp
 *.key
 
 # environment files
-.env.prod
+.env.studio-lite
 
 # compiled output
 /dist

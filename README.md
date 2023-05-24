@@ -84,7 +84,7 @@ Jetzt (zurück zur Startseite) ist man in der Lage, einen Arbeitsbereich aufzuru
 Achtung: Sorgen Sie vor einem Update stets für ein Backup (z. B. Snapshot-Funktion des Servers).
 Sie sollten das Zurückspielen eines Backups (sog. Restore) zumindest einmal erprobt haben, um auf diese Situation vorbereitet zu sein.
 
-Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.prod`.
+Die Steuerung der Installation erfolgt vor allem durch die Einstellungen der Datei `.env.studio-lite`.
 Hier finden Sie z.B. den Servernamen oder die Ports, mit denen das Frontend arbeitet.
 
 Für die Festlegung, welche Version installiert werden soll, ist in dieser Datei der Eintrag `TAG` verantwortlich.
