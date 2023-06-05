@@ -8,7 +8,9 @@ import {
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { environment } from '../../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { environment } from '../../../../../environments/environment';
 import { ResourcePackagesComponent } from './resource-packages.component';
 
 describe('ResourcePackageComponent', () => {
@@ -37,7 +39,9 @@ describe('ResourcePackageComponent', () => {
         MockIqbFilesUploadInputForDirective
       ],
       imports: [
+        TranslateModule.forRoot(),
         HttpClientModule,
+        MatTooltipModule,
         MatSnackBarModule,
         MatIconModule
       ],

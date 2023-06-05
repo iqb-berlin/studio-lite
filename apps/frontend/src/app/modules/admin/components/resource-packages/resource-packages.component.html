@@ -1,18 +1,18 @@
-<div fxLayout="row">
+<div>
   <input #hiddenInput
          type="file"
          [iqbFilesUploadInputFor]="fileUploadQueue"
          [hidden]="true"/>
-  <button fxFlex="88px"
-          mat-raised-button
+  <button mat-button
           (click)="hiddenInput.click()"
-          matTooltip="Resource Package hochladen/aktualisieren" matTooltipPosition="above">
+          [matTooltip]="'admin.upload-resource-package' | translate"
+          matTooltipPosition="above">
     <mat-icon>cloud_upload</mat-icon>
   </button>
-  <button fxFlex="88px"
-          mat-raised-button
-          [disabled]="(selectedResourcePackages.value.length) === 0"
-          matTooltip="Markierte löschen"
+  <button
+          mat-button
+          [disabled]="!selectedResourcePackages.value.length"
+          [matTooltip]="'admin.delete-selected' | translate"
           matTooltipPosition="above"
           (click)="deleteSelected()">
     <mat-icon>delete</mat-icon>

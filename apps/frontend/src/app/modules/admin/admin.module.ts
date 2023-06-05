@@ -39,7 +39,7 @@ import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './settings/app-logo.component';
 import { UnitExportConfigComponent } from './settings/unit-export-config.component';
-import { ResourcePackagesComponent } from './resource-packages/resource-packages.component';
+import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';
 import {
   ResourcePackagesTableComponent
 } from './components/resource-packages-table/resource-packages-table.component';

@@ -130,7 +130,9 @@
     "workspaces":"Bereichsgruppen",
     "v-modules":"Module",
     "settings":"Einstellungen",
-    "packages":"Pakete"
+    "packages":"Pakete",
+    "upload-resource-package": "Resource-Package hochladen/aktualisieren",
+    "delete-selected": "Markierte löschen"
   },
   "wsg-admin": {
     "name": "Name",
