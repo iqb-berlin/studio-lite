@@ -125,6 +125,13 @@
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern"
   },
+  "admin": {
+    "users":"Nutzer:innen",
+    "workspaces":"Bereichsgruppen",
+    "v-modules":"Module",
+    "settings":"Einstellungen",
+    "packages":"Pakete"
+  },
   "wsg-admin": {
     "name": "Name",
     "hint": "Zugriffsrechte: Bitte links Arbeitsbereich wählen",

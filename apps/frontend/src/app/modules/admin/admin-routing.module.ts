@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { WorkspacesComponent } from './workspace-groups/workspaces.component';
 import { UsersComponent } from './users/users.component';
-import { AdminComponent } from './admin.component';
+import { AdminComponent } from './components/admin/admin.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { SettingsComponent } from './settings/settings.component';
 import { ResourcePackagesComponent } from './resource-packages/resource-packages.component';

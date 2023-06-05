@@ -28,7 +28,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AdminRoutingModule } from './admin-routing.module';
 import { WorkspacesComponent } from './workspace-groups/workspaces.component';
 import { UsersComponent } from './users/users.component';
-import { AdminComponent } from './admin.component';
+import { AdminComponent } from './components/admin/admin.component';
 import { BackendService } from './services/backend.service';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { VeronaModulesTableComponent } from './verona-modules/verona-modules-table.component';
