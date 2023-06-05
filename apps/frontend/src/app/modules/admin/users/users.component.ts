@@ -18,7 +18,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import {
   BackendService
-} from '../backend.service';
+} from '../services/backend.service';
 import { AppService } from '../../../services/app.service';
 import { EditUserComponent } from './edituser.component';
 import { WorkspaceGroupToCheckCollection } from '../workspace-groups/workspaceChecked';

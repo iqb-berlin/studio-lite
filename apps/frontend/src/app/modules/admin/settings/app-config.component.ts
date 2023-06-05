@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { BackendService as WriteBackendService } from '../backend.service';
+import { BackendService as WriteBackendService } from '../services/backend.service';
 import { BackendService as ReadBackendService } from '../../../services/backend.service';
 import { defaultAppConfig } from '../../../services/app.service';
 import { AppConfig } from '../../../models/app-config.class';

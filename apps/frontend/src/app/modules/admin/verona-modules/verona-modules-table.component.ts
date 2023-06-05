@@ -6,7 +6,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { saveAs } from 'file-saver-es';
-import { BackendService } from '../backend.service';
+import { BackendService } from '../services/backend.service';
 import { VeronaModuleClass } from '../../shared/models/verona-module.class';
 
 @Component({

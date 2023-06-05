@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { BackendService } from '../backend.service';
+import { BackendService } from '../services/backend.service';
 
 @Component({
   selector: 'app-unit-export-config',

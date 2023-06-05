@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { BackendService as ReadBackendService } from '../../../services/backend.service';
-import { BackendService as WriteBackendService } from '../backend.service';
+import { BackendService as WriteBackendService } from '../services/backend.service';
 
 @Component({
   selector: 'studio-lite-resource-packages',

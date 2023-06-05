@@ -18,7 +18,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
-import { BackendService } from '../backend.service';
+import { BackendService } from '../services/backend.service';
 import { AppService } from '../../../services/app.service';
 
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
