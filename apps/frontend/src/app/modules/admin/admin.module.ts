@@ -42,7 +42,7 @@ import { UnitExportConfigComponent } from './settings/unit-export-config.compone
 import { ResourcePackagesComponent } from './resource-packages/resource-packages.component';
 import {
   ResourcePackagesTableComponent
-} from './resource-packages/resource-packages-table/resource-packages-table.component';
+} from './components/resource-packages-table/resource-packages-table.component';
 import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
 
