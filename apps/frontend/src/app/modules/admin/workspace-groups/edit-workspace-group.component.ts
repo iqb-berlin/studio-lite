@@ -1,12 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-
-export type EditWorkspaceGroupComponentData = {
-  title: string,
-  name: string,
-  saveButtonLabel: string
-};
+import { EditWorkspaceGroupComponentData } from '../models/edit-workspace-group-component-data.type';
 
 @Component({
   template: `

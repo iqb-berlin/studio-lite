@@ -1,18 +1,7 @@
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-
-export type EditUserComponentData = {
-  newUser: boolean,
-  name?: string,
-  password?: string,
-  description?: string,
-  firstName?: string,
-  lastName?: string,
-  email?: string,
-  isAdmin: boolean,
-  emailApproved: boolean
-};
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { EditUserComponentData } from '../models/edit-user-component-data.type';
 
 @Component({
   template: `

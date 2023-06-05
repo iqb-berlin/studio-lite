@@ -1,21 +1,11 @@
-// eslint-disable-next-line max-classes-per-file
 import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
-
-export class WorkspaceGroupToCheck {
-  id: number;
-  name: string;
-  isChecked: boolean;
-  constructor(workspaceGroup: WorkspaceGroupInListDto) {
-    this.id = workspaceGroup.id;
-    this.name = workspaceGroup.name;
-    this.isChecked = false;
-  }
-}
+import { WorkspaceGroupToCheck } from './workspace-group-to-check.class';
 
 export class WorkspaceGroupToCheckCollection {
   entries: WorkspaceGroupToCheck[];
   hasChanged = false;
   private userWorkspacesIds: number[] = [];
+
   constructor(workspaceGroups: WorkspaceGroupInListDto[]) {
     this.entries = workspaceGroups.map(wsg => new WorkspaceGroupToCheck(wsg));
   }
@@ -54,10 +44,4 @@ export class WorkspaceGroupToCheckCollection {
     });
     this.hasChanged = false;
   }
-}
-
-export interface WorkspaceGroupData {
-  id: number;
-  name: string;
-  workspaceCount: number;
 }

@@ -21,7 +21,7 @@ import {
 } from '../services/backend.service';
 import { AppService } from '../../../services/app.service';
 import { EditUserComponent } from './edituser.component';
-import { WorkspaceGroupToCheckCollection } from '../workspace-groups/workspaceChecked';
+import { WorkspaceGroupToCheckCollection } from '../models/workspace-group-to-check-collection.class';
 
 @Component({
   templateUrl: './users.component.html',
