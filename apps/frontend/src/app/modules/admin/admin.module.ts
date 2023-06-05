@@ -43,8 +43,8 @@ import { ResourcePackagesComponent } from './resource-packages/resource-packages
 import {
   ResourcePackagesTableComponent
 } from './resource-packages/resource-packages-table/resource-packages-table.component';
-import { TableDataSourcePipe } from './resource-packages/resource-packages-table/table-data-source.pipe';
-import { SafeUrlPipe } from './resource-packages/resource-packages-table/safe-resource-html.pipe';
+import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
+import { SafeUrlPipe } from './pipes/safe-url.pipe';
 
 @NgModule({
   imports: [
