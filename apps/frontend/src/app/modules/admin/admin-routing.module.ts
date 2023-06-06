@@ -5,7 +5,7 @@ import { WorkspacesComponent } from './workspace-groups/workspaces.component';
 import { UsersComponent } from './users/users.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
-import { SettingsComponent } from './settings/settings.component';
+import { SettingsComponent } from './components/settings/settings.component';
 import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';
 
 const routes: Routes = [

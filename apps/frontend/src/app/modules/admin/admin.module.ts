@@ -32,7 +32,7 @@ import { AdminComponent } from './components/admin/admin.component';
 import { BackendService } from './services/backend.service';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { VeronaModulesTableComponent } from './verona-modules/verona-modules-table.component';
-import { SettingsComponent } from './settings/settings.component';
+import { SettingsComponent } from './components/settings/settings.component';
 import { EditWorkspaceGroupComponent } from './workspace-groups/edit-workspace-group.component';
 import { AppConfigComponent } from './settings/app-config.component';
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';

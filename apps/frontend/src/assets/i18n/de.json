@@ -134,6 +134,11 @@
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
     "delete-selected": "Markierte löschen"
   },
+  "settings": {
+    "texts": "Texte",
+    "logo-and-colors": "Logo und Farben",
+    "unit-export-params": "Parameter für den Unit-Export"
+  },
   "logo": {
     "upload-info": "Klick rechts auf den Schalter zum Hochladen",
     "upload": "Logo hochladen/aktualisieren",
