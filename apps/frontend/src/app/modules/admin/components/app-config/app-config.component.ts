@@ -2,20 +2,15 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { BackendService as WriteBackendService } from '../services/backend.service';
-import { BackendService as ReadBackendService } from '../../../services/backend.service';
-import { defaultAppConfig } from '../../../services/app.service';
-import { AppConfig } from '../../../models/app-config.class';
+import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { BackendService as ReadBackendService } from '../../../../services/backend.service';
+import { defaultAppConfig } from '../../../../services/app.service';
+import { AppConfig } from '../../../../models/app-config.class';
 
 @Component({
-  selector: 'app-app-config',
+  selector: 'studio-lite-app-config',
   templateUrl: 'app-config.component.html',
-  styles: [
-    '.example-chip-list {width: 100%;}',
-    '.block-ident {margin-left: 40px}',
-    '.warning-warning { color: darkgoldenrod }',
-    '.save-button {margin-bottom: 20px}'
-  ]
+  styleUrls: ['app-config.component.scss']
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {

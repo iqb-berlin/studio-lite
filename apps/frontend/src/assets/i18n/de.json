@@ -132,12 +132,25 @@
     "settings":"Einstellungen",
     "packages":"Pakete",
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
-    "delete-selected": "Markierte löschen"
+    "delete-selected": "Markierte löschen",
+    "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!"
   },
   "settings": {
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
     "unit-export-params": "Parameter für den Unit-Export"
+  },
+  "config": {
+    "start-page-warning": "Warnung auf der Startseite",
+    "warning-placeholder": "Warnung",
+    "show-warning-until": "Warnung anzeigen bis",
+    "date": "Datum",
+    "hour": "Stunde",
+    "time-in-past": "Zeitpunkt ist in der Vergangenheit",
+    "app-name": "Name der Anwendung",
+    "app-name-placeholder": "Name",
+    "start-page-content-right": "Html-Inhalt für die Startseite rechts",
+    "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite"
   },
   "logo": {
     "upload-info": "Klick rechts auf den Schalter zum Hochladen",
@@ -148,8 +161,7 @@
     "app-background-color": "Hintergrundfarbe der Anwendung",
     "app-background-color-placeholder": "Farbe",
     "boxes-background-color": "Hintergrundfarbe sekundäre Boxen",
-    "boxes-background-color-placeholder": "Farbe",
-    "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!"
+    "boxes-background-color-placeholder": "Farbe"
   },
   "wsg-admin": {
     "name": "Name",

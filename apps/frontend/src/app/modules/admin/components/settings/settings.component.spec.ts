@@ -10,7 +10,7 @@ describe('SettingsComponent', () => {
   let component: SettingsComponent;
   let fixture: ComponentFixture<SettingsComponent>;
 
-  @Component({ selector: 'app-app-config', template: '' })
+  @Component({ selector: 'studio-lite-app-config', template: '' })
   class MockAppConfigComponent {}
 
   @Component({ selector: 'studio-lite-app-logo', template: '' })
