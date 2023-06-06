@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { defaultAppConfig } from '../../../../services/app.service';
@@ -9,8 +10,8 @@ import { AppConfig } from '../../../../models/app-config.class';
 
 @Component({
   selector: 'studio-lite-app-config',
-  templateUrl: 'app-config.component.html',
-  styleUrls: ['app-config.component.scss']
+  templateUrl: './app-config.component.html',
+  styleUrls: ['./app-config.component.scss']
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {
@@ -20,38 +21,14 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   dataChanged = false;
   private configDataChangedSubscription: Subscription | null = null;
   warningIsExpired = false;
-  expiredHours = {
-    '': '',
-    '01': '01:00 Uhr',
-    '02': '02:00 Uhr',
-    '03': '03:00 Uhr',
-    '04': '04:00 Uhr',
-    '05': '05:00 Uhr',
-    '06': '06:00 Uhr',
-    '07': '07:00 Uhr',
-    '08': '08:00 Uhr',
-    '09': '09:00 Uhr',
-    10: '10:00 Uhr',
-    11: '11:00 Uhr',
-    12: '12:00 Uhr',
-    13: '13:00 Uhr',
-    14: '14:00 Uhr',
-    15: '15:00 Uhr',
-    16: '16:00 Uhr',
-    17: '17:00 Uhr',
-    18: '18:00 Uhr',
-    19: '19:00 Uhr',
-    20: '20:00 Uhr',
-    21: '21:00 Uhr',
-    22: '22:00 Uhr',
-    23: '23:00 Uhr'
-  };
+  expiredHours: number[] = [];
 
   constructor(
     private fb: UntypedFormBuilder,
     private snackBar: MatSnackBar,
     private writeBackendService: WriteBackendService,
-    private readBackendService: ReadBackendService
+    private readBackendService: ReadBackendService,
+    private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
       appTitle: this.fb.control(''),
@@ -61,6 +38,13 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       globalWarningExpiredDay: this.fb.control(new Date()),
       globalWarningExpiredHour: this.fb.control('')
     });
+    this.createExpiredHours();
+  }
+
+  private createExpiredHours(): void {
+    for (let i = 0; i < 24; i++) {
+      this.expiredHours.push(i);
+    }
   }
 
   ngOnInit(): void {
@@ -128,11 +112,17 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.writeBackendService.setAppConfig(this.appConfig).subscribe(isOk => {
         if (isOk) {
           this.snackBar.open(
-            'Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!', 'Info', { duration: 3000 }
+            this.translateService.instant('config.config-data-saved'),
+            '',
+            { duration: 3000 }
           );
           this.dataChanged = false;
         } else {
-          this.snackBar.open('Konnte Konfigurationsdaten der Anwendung nicht speichern', 'Fehler', { duration: 3000 });
+          this.snackBar.open(
+            this.translateService.instant('config.config-data-not-saved'),
+            this.translateService.instant('error'),
+            { duration: 3000 }
+          );
         }
       });
     }

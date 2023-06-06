@@ -45,6 +45,7 @@ import {
 } from './components/resource-packages-table/resource-packages-table.component';
 import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
+import { ToTimePipe } from './pipes/to-time.pipe';
 
 @NgModule({
   imports: [
@@ -93,7 +94,8 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     ResourcePackagesComponent,
     ResourcePackagesTableComponent,
     TableDataSourcePipe,
-    SafeUrlPipe
+    SafeUrlPipe,
+    ToTimePipe
   ],
   providers: [
     BackendService,

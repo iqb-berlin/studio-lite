@@ -25,9 +25,9 @@
       <mat-form-field>
         <mat-select [placeholder]="'config.hour' | translate"
                     formControlName="globalWarningExpiredHour">
-          <mat-option *ngFor="let m of expiredHours | keyvalue"
-                      [value]="m.key">
-            {{m.value}}
+          <mat-option *ngFor="let m of expiredHours"
+                      [value]="m">
+            {{m | toTime}}
           </mat-option>
         </mat-select>
       </mat-form-field>

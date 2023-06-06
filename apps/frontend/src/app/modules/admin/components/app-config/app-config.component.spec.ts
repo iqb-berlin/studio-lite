@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
+import { Pipe, PipeTransform } from '@angular/core';
 import { AppConfigComponent } from './app-config.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -18,9 +19,21 @@ describe('AppConfigComponent', () => {
   let component: AppConfigComponent;
   let fixture: ComponentFixture<AppConfigComponent>;
 
+  @Pipe({
+    name: 'toTime'
+  })
+  class MockToTimePipe implements PipeTransform {
+    // eslint-disable-next-line class-methods-use-this
+    transform(): string {
+      return '';
+    }
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AppConfigComponent],
+      declarations: [
+        AppConfigComponent,
+        MockToTimePipe],
       imports: [
         TranslateModule.forRoot(),
         ReactiveFormsModule,

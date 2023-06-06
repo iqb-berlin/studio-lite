@@ -6,6 +6,7 @@
   "close": "Schließen",
   "warning": "Warnung",
   "error": "Fehler",
+  "hour": "Uhr",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
   },
@@ -150,7 +151,9 @@
     "app-name": "Name der Anwendung",
     "app-name-placeholder": "Name",
     "start-page-content-right": "Html-Inhalt für die Startseite rechts",
-    "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite"
+    "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
+    "config-data-saved" : "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
+    "config-data-not-saved" : "Konnte Konfigurationsdaten der Anwendung nicht speichern"
   },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",
