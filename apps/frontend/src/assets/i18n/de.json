@@ -166,7 +166,12 @@
     "app-background-color": "Hintergrundfarbe der Anwendung",
     "app-background-color-placeholder": "Farbe",
     "boxes-background-color": "Hintergrundfarbe sekundäre Boxen",
-    "boxes-background-color-placeholder": "Farbe"
+    "boxes-background-color-placeholder": "Farbe",
+    "logo-and-colors-saved": "Logo und Farben gespeichert - bitte neu laden!",
+    "logo-and-colors-not-saved" : "Konnte Logo und Farben nicht speichern",
+    "image-too-large": "Datei zu groß ( > {{maxSize}} Mb)",
+    "allowed-image-types": "Zulässige Datei-Typen: {{types}}",
+    "not-allowed-image-size": "Unzulässige Größe (maximal erlaubt: {{maxHeight}}*{{maxWidth}}px)"
   },
   "wsg-admin": {
     "name": "Name",

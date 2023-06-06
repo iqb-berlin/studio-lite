@@ -2,13 +2,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-app-logo',
-  templateUrl: 'app-logo.component.html',
-  styleUrls: ['app-logo.component.scss']
+  templateUrl: './app-logo.component.html',
+  styleUrls: ['./app-logo.component.scss']
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {
@@ -22,7 +23,8 @@ export class AppLogoComponent implements OnInit, OnDestroy {
     private fb: UntypedFormBuilder,
     private snackBar: MatSnackBar,
     private writeBackendService: WriteBackendService,
-    private readBackendService: ReadBackendService
+    private readBackendService: ReadBackendService,
+    private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
       alt: this.fb.control(''),
@@ -72,11 +74,17 @@ export class AppLogoComponent implements OnInit, OnDestroy {
       }).subscribe(isOk => {
         if (isOk) {
           this.snackBar.open(
-            'Logo und Farben gespeichert - bitte neu laden!', 'Info', { duration: 3000 }
+            this.translateService.instant('logo.logo-and-colors-saved'),
+            '',
+            { duration: 3000 }
           );
           this.dataChanged = false;
         } else {
-          this.snackBar.open('Konnte Logo und Farben nicht speichern', 'Fehler', { duration: 3000 });
+          this.snackBar.open(
+            this.translateService.instant('logo.logo-and-colors-not-saved'),
+            this.translateService.instant('error'),
+            { duration: 3000 }
+          );
         }
       });
     }
@@ -93,7 +101,10 @@ export class AppLogoComponent implements OnInit, OnDestroy {
       const maxWidth = 25600;
 
       if (fileInputEventTarget.files[0].size > maxSize) {
-        this.imageError = `Datei zu groß ( > ${maxSize / 1000} Mb)`;
+        this.imageError = this.translateService.instant(
+          'logo.image-too-large',
+          { maxSize: maxSize / 1000 }
+        );
         return;
       }
 
@@ -102,7 +113,10 @@ export class AppLogoComponent implements OnInit, OnDestroy {
         allowedTypes.forEach(imgType => {
           allowedImageTypesTruncated.push(imgType.substr(5));
         });
-        this.imageError = `Zulässige Datei-Typen: (${allowedImageTypesTruncated.join(', ')})`;
+        this.imageError = this.translateService.instant(
+          'logo.allowed-image-types',
+          { types: allowedImageTypesTruncated.join(', ') }
+        );
         return;
       }
       const reader = new FileReader();
@@ -115,7 +129,10 @@ export class AppLogoComponent implements OnInit, OnDestroy {
             const imgHeight = imgTargetElement.height;
             const imgWidth = imgTargetElement.width;
             if (imgHeight > maxHeight && imgWidth > maxWidth) {
-              this.imageError = `Unzulässige Größe (maximal erlaubt: ${maxHeight}*${maxWidth}px)`;
+              this.imageError = this.translateService.instant(
+                'logo.not-allowed-image-size',
+                { maxHeight: maxHeight, maxWidth: maxWidth }
+              );
               return false;
             }
             if (e.target && typeof e.target.result === 'string') {
