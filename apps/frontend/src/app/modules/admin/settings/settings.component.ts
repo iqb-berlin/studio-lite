@@ -16,7 +16,7 @@ import { Component } from '@angular/core';
           <mat-label>Logo und Farben</mat-label>
         </div>
         <div fxFlex="70">
-          <app-app-logo></app-app-logo>
+          <studio-lite-app-logo></studio-lite-app-logo>
         </div>
       </div>
       <div fxLayout="row" class="div-row">

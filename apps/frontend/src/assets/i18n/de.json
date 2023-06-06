@@ -134,6 +134,18 @@
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
     "delete-selected": "Markierte löschen"
   },
+  "logo": {
+    "upload-info": "Klick rechts auf den Schalter zum Hochladen",
+    "upload": "Logo hochladen/aktualisieren",
+    "reset": "Logo auf Standard setzen",
+    "alt-text": "Alternativtext des Logos",
+    "alt-text-placeholder": "Alternativ",
+    "app-background-color": "Hintergrundfarbe der Anwendung",
+    "app-background-color-placeholder": "Farbe",
+    "boxes-background-color": "Hintergrundfarbe sekundäre Boxen",
+    "boxes-background-color-placeholder": "Farbe",
+    "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!"
+  },
   "wsg-admin": {
     "name": "Name",
     "hint": "Zugriffsrechte: Bitte links Arbeitsbereich wählen",

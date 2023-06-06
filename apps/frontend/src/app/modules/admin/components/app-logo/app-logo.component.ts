@@ -2,19 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { BackendService as WriteBackendService } from '../services/backend.service';
-import { BackendService as ReadBackendService } from '../../../services/backend.service';
+import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 
 @Component({
-  selector: 'app-app-logo',
+  selector: 'studio-lite-app-logo',
   templateUrl: 'app-logo.component.html',
-  styles: [
-    '.example-chip-list {width: 100%;}',
-    '.block-ident {margin-left: 40px}',
-    '.warning-warning { color: darkgoldenrod }',
-    '.logo-img {width: 100px; margin: 20px}',
-    '.save-button {margin-bottom: 20px}'
-  ]
+  styleUrls: ['app-logo.component.scss']
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {
