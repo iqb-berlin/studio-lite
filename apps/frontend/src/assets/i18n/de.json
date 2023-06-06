@@ -155,7 +155,9 @@
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",
     "booklet-xml-path": "Xsd-Pfad für Booklet.Xml",
-    "unit-xml-path": "Xsd-Pfad für Unit.Xml"
+    "unit-xml-path": "Xsd-Pfad für Unit.Xml",
+    "params-saved": "Parameter für Unitexport gespeichert",
+    "params-not-saved": "Konnte Parameter für Unitexport nicht speichern"
   },
   "logo": {
     "upload-info": "Klick rechts auf den Schalter zum Hochladen",

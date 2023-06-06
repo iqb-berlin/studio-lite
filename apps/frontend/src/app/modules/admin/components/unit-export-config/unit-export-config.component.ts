@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
@@ -18,7 +19,8 @@ export class UnitExportConfigComponent implements OnInit, OnDestroy {
   constructor(
     private fb: UntypedFormBuilder,
     private snackBar: MatSnackBar,
-    private backendService: BackendService
+    private backendService: BackendService,
+    private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
       unitXsdUrl: this.fb.control(''),
@@ -61,11 +63,17 @@ export class UnitExportConfigComponent implements OnInit, OnDestroy {
       }).subscribe(isOk => {
         if (isOk) {
           this.snackBar.open(
-            'Parameter für Unitexport gespeichert.', 'Info', { duration: 3000 }
+            this.translateService.instant('unit-export-config.params-saved'),
+            '',
+            { duration: 3000 }
           );
           this.dataChanged = false;
         } else {
-          this.snackBar.open('Konnte Parameter für Unitexport nicht speichern', 'Fehler', { duration: 3000 });
+          this.snackBar.open(
+            this.translateService.instant('unit-export-config.params-not-saved'),
+            this.translateService.instant('error'),
+            { duration: 3000 }
+          );
         }
       });
     }
