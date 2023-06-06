@@ -38,7 +38,7 @@ import { AppConfigComponent } from './components/app-config/app-config.component
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './components/app-logo/app-logo.component';
-import { UnitExportConfigComponent } from './settings/unit-export-config.component';
+import { UnitExportConfigComponent } from './components/unit-export-config/unit-export-config.component';
 import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';
 import {
   ResourcePackagesTableComponent

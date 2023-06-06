@@ -2,16 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { BackendService } from '../services/backend.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
-  selector: 'app-unit-export-config',
-  templateUrl: 'unit-export-config.component.html',
-  styles: [
-    '.block-ident {margin-left: 40px}',
-    '.warning-warning { color: darkgoldenrod }',
-    '.save-button {margin-bottom: 20px}'
-  ]
+  selector: 'studio-lite-unit-export-config',
+  templateUrl: './unit-export-config.component.html',
+  styleUrls: ['./unit-export-config.component.scss']
 })
 
 export class UnitExportConfigComponent implements OnInit, OnDestroy {

@@ -16,7 +16,7 @@ describe('SettingsComponent', () => {
   @Component({ selector: 'studio-lite-app-logo', template: '' })
   class MockAppLogoComponent {}
 
-  @Component({ selector: 'app-unit-export-config', template: '' })
+  @Component({ selector: 'studio-lite-unit-export-config', template: '' })
   class MockUnitExportComponent {}
 
   beforeEach(async () => {
