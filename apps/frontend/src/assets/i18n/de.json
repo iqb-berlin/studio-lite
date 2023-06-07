@@ -134,7 +134,10 @@
     "packages":"Pakete",
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
     "delete-selected": "Markierte löschen",
-    "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!"
+    "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!",
+    "add-user": "Nutzer:in hinzufügen",
+    "delete-selected-users": "Markierte Nutzer:innen löschen",
+    "edit-user-data": "Nutzerdaten ändern"
   },
   "settings": {
     "texts": "Texte",

@@ -1,0 +1,117 @@
+<div class="fx-row-space-between-start admin-tab-content">
+  <div class="object-list fx-column-start-stretch fx-flex-row-50">
+    <div class="fx-row-start-stretch">
+        <button mat-button
+                [matTooltip]="'admin.add-user' | translate"
+                (click)="addObject()">
+            <mat-icon>add</mat-icon>
+          </button>
+        <button mat-button
+                [disabled]="selectedUser === 0 && !this.tableSelectionCheckbox.selected.length"
+                [matTooltip]="'admin.delete-selected-users' | translate"
+                (click)="deleteObject()">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-button
+                [disabled]="selectedUser === 0 && this.tableSelectionCheckbox.selected.length !== 1"
+                [matTooltip]="'admin.edit-user-data' | translate"
+                (click)="changeData()">
+          <mat-icon>edit</mat-icon>
+        </button>
+    </div>
+
+    <mat-table [dataSource]="objectsDatasource"
+               matSortDisableClear
+               matSort
+               class="scroll-area">
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                        [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()"
+                        (change)="$event ? masterToggle() : null">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckbox.isSelected(row)"
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? tableSelectionCheckbox.toggle(row) : null">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="name">
+          {{'user.login-name' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          {{element.name}} {{element.isAdmin ? '*' : ''}}
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="displayName">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="lastName">
+          {{'user.full-name' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row"
+                  class="secondary-cell">
+          {{row.lastName ? row.lastName : row.name}}{{row.firstName ? (', ' + row.firstName) : ''}}
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="email">
+          {{'user.email' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row"
+                  class="secondary-cell">
+          {{row.email ? row.email : 'user.no-email' | translate}}
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="description">
+          {{'user.note' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row"
+                  class="secondary-cell">
+          {{row.description}}
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+               [class.selected] = "tableSelectionRow.isSelected(row)"
+               (click)="toggleRowSelection(row)"></mat-row>
+    </mat-table>
+  </div>
+
+  <div class="object-list fx-column-start-stretch fx-flex-row-40">
+    <div class="fx-row-space-between-center">
+      <div *ngIf="!selectedUser">
+        {{'access-rights.hint' | translate}}
+      </div>
+      <div *ngIf="selectedUser">
+        {{'access-rights.for-user' | translate: {user:  tableSelectionRow.selected[0].name } }}
+      </div>
+      <button mat-raised-button
+              [matTooltip]="'save' | translate"
+              matTooltipPosition="above"
+              [disabled]="!userWorkspaceGroups.hasChanged"
+              (click)="saveWorkspaces()">
+        <mat-icon>save</mat-icon>
+      </button>
+    </div>
+
+    <div class="scroll-area fx-column-start-stretch">
+      <mat-checkbox *ngFor="let wsg of userWorkspaceGroups.entries"
+                    [(ngModel)]="wsg.isChecked" [disabled]="!selectedUser"
+                    (change)="userWorkspaceGroups.updateHasChanged()">
+      {{wsg.name}}
+      </mat-checkbox>
+    </div>
+  </div>
+</div>

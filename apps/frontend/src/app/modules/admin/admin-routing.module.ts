@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { WorkspacesComponent } from './workspace-groups/workspaces.component';
-import { UsersComponent } from './users/users.component';
+import { UsersComponent } from './components/users/users.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
 import { SettingsComponent } from './components/settings/settings.component';

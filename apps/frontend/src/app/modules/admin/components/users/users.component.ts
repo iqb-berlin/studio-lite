@@ -18,17 +18,15 @@ import {
 } from '@studio-lite-lib/api-dto';
 import {
   BackendService
-} from '../services/backend.service';
-import { AppService } from '../../../services/app.service';
-import { EditUserComponent } from './edituser.component';
-import { WorkspaceGroupToCheckCollection } from '../models/workspace-group-to-check-collection.class';
+} from '../../services/backend.service';
+import { AppService } from '../../../../services/app.service';
+import { EditUserComponent } from '../../users/edituser.component';
+import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 
 @Component({
+  selector: 'studio-lite-users',
   templateUrl: './users.component.html',
-  styles: [
-    '.scroll-area {height: calc(100% - 35px); overflow-y: auto;}',
-    '.object-list {height: calc(100% - 5px);}'
-  ]
+  styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
@@ -306,7 +304,7 @@ export class UsersComponent implements OnInit {
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
-  selectRow(row: UserInListDto): void {
-    this.tableSelectionRow.select(row);
+  toggleRowSelection(row: UserInListDto): void {
+    this.tableSelectionRow.toggle(row);
   }
 }
