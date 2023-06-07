@@ -20,7 +20,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatBadgeModule } from '@angular/material/badge';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -45,6 +44,7 @@ import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
 import { ToTimePipe } from './pipes/to-time.pipe';
 import { UsersMenuComponent } from './components/users-menu/users-menu.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
@@ -74,7 +74,8 @@ import { UsersMenuComponent } from './components/users-menu/users-menu.component
     MatChipsModule,
     FormsModule,
     TranslateModule,
-    HttpClientModule
+    HttpClientModule,
+    SharedModule
   ],
   exports: [AdminComponent],
   declarations: [

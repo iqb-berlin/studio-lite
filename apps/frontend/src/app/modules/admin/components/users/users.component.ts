@@ -188,8 +188,7 @@ export class UsersComponent implements OnInit {
     this.backendService.getUsersFull().subscribe(
       (users: UserFullDto[]) => {
         if (users.length > 0) {
-          this.objectsDatasource = new MatTableDataSource(users);
-          this.objectsDatasource.sort = this.sort;
+          this.setObjectsDatasource(users);
           this.tableSelectionCheckbox.clear();
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
@@ -200,6 +199,17 @@ export class UsersComponent implements OnInit {
         }
       }
     );
+  }
+
+  private setObjectsDatasource(users: UserFullDto[]): void {
+    this.objectsDatasource = new MatTableDataSource(users);
+    this.objectsDatasource
+      .filterPredicate = (userList: UserFullDto, filter) => [
+        'name', 'firstName', 'lastName', 'email', 'description'
+      ].some(column => (userList[column as keyof UserFullDto] as string || '')
+        .toLowerCase()
+        .includes(filter));
+    this.objectsDatasource.sort = this.sort;
   }
 
   createWorkspaceList(): void {
