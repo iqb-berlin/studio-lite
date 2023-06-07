@@ -6,12 +6,13 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { saveAs } from 'file-saver-es';
-import { BackendService } from '../services/backend.service';
-import { VeronaModuleClass } from '../../shared/models/verona-module.class';
+import { BackendService } from '../../services/backend.service';
+import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 
 @Component({
-  selector: 'app-verona-modules-table',
-  templateUrl: './verona-modules-table.component.html'
+  selector: 'studio-lite-verona-modules-table',
+  templateUrl: './verona-modules-table.component.html',
+  styleUrls: ['./verona-modules-table.component.scss']
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: 'editor' | 'player' | 'schemer';

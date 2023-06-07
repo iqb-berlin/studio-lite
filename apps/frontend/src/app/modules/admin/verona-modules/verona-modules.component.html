@@ -23,21 +23,21 @@
       </iqb-files-upload-queue>
       <div fxLayout="column">
         <h1>{{'modules.player-name' | translate}}</h1>
-        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
+        <studio-lite-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   type="player"
-                                  [modules]="moduleService.players"></app-verona-modules-table>
+                                  [modules]="moduleService.players"></studio-lite-verona-modules-table>
       </div>
       <div fxLayout="column">
         <h1>{{'modules.editor-name' | translate}}</h1>
-        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
+        <studio-lite-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   type="editor"
-                                  [modules]="moduleService.editors"></app-verona-modules-table>
+                                  [modules]="moduleService.editors"></studio-lite-verona-modules-table>
       </div>
       <div fxLayout="column">
         <h1>{{'modules.schemer-name' | translate}}</h1>
-        <app-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
+        <studio-lite-verona-modules-table (selectionChanged)="changeSelectedModules($event)"
                                   type="schemer"
-                                  [modules]="moduleService.schemers"></app-verona-modules-table>
+                                  [modules]="moduleService.schemers"></studio-lite-verona-modules-table>
       </div>
     </div>
   </div>

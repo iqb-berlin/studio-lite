@@ -1,0 +1,95 @@
+<p *ngIf="!objectsDatasource.data.length">
+  {{'admin.no-modules' | translate}}
+</p>
+
+<mat-table [dataSource]="objectsDatasource" *ngIf="objectsDatasource.data.length > 0"
+           matSort
+           matSortDisableClear
+           class="admin-tab-content">
+  <ng-container matColumnDef="selectCheckbox">
+    <mat-header-cell *matHeaderCellDef
+                     class="fx-flex-row-fix-70">
+      <mat-checkbox (change)="$event ? masterToggleSelection() : null"
+                    [checked]="tableSelectionCheckboxes.hasValue() && isAllSelected()"
+                    [indeterminate]="tableSelectionCheckboxes.hasValue() && !isAllSelected()">
+      </mat-checkbox>
+    </mat-header-cell>
+    <mat-cell *matCellDef="let row"
+              class="fx-flex-row-fix-70">
+      <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
+                    [checked]="tableSelectionCheckboxes.isSelected(row)">
+      </mat-checkbox>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef
+                     class="cell-name"
+                     mat-sort-header="metadata.name">
+      {{'admin.module-name' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" >
+      <a mat-button
+         (click)="downloadModule(element.key, element.metadata.id, element.metadata.version)"
+         [matTooltip]="element.metadata.description">
+        {{element.metadata.name}}
+      </a>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef
+                     mat-sort-header="sortKey">
+      {{'admin.module-id' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" >{{element.key}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="version">
+    <mat-header-cell *matHeaderCellDef
+                     class="fx-flex-row-fix-80">
+      {{'admin.module-version' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element"
+              class="fx-flex-row-fix-80">
+      {{element.metadata.version}}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="fileDateTime">
+    <mat-header-cell *matHeaderCellDef
+                     mat-sort-header="fileDateTime"
+                     class="fx-flex-row-fix-160">
+      {{'admin.module-date' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="fx-flex-row-fix-160">
+      {{element.fileDateTime | date : 'dd.MM.yyyy HH:mm' : timeZone}}
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="filesize">
+    <mat-header-cell *matHeaderCellDef
+                     mat-sort-header="fileSize"
+                     class="fx-flex-row-fix-80">
+      {{'admin.module-size' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element"
+              class="fx-flex-row-fix-80">
+      {{element.fileSize | bytes}}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="veronaVersion">
+    <mat-header-cell *matHeaderCellDef
+                     class="fx-flex-row-fix-100">
+      {{'admin.module-api-version' | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element"
+              class="fx-flex-row-fix-100">
+      {{element.metadata.specVersion}}
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
