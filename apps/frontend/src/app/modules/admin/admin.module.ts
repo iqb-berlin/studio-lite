@@ -36,7 +36,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { EditWorkspaceGroupComponent } from './workspace-groups/edit-workspace-group.component';
 import { AppConfigComponent } from './components/app-config/app-config.component';
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
-import { EditUserComponent } from './users/edituser.component';
+import { EditUserComponent } from './components/edit-user/edit-user.component';
 import { AppLogoComponent } from './components/app-logo/app-logo.component';
 import { UnitExportConfigComponent } from './components/unit-export-config/unit-export-config.component';
 import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';

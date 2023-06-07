@@ -11,7 +11,7 @@ import {
 } from '@studio-lite-lib/iqb-components';
 import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
-import { EditUserComponent } from '../../users/edituser.component';
+import { EditUserComponent } from '../edit-user/edit-user.component';
 
 @Component({
   selector: 'studio-lite-users-menu',

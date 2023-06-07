@@ -1,6 +1,7 @@
 {
   "next": "Weiter",
   "save": "Speichern",
+  "create": "Anlegen",
   "delete": "Löschen",
   "cancel": "Abbrechen",
   "close": "Schließen",
@@ -117,7 +118,10 @@
     "note": "Notiz",
     "login-name": "Login-Name",
     "email": "E-Mail",
-    "no-email": "keine"
+    "no-email": "keine",
+    "last-name": "Nachname",
+    "first-name": "Vorname",
+    "admin": "System-Administrator:in"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Bitte links Nutzer:in wählen",
@@ -148,7 +152,15 @@
     "select-user": "Bitte markieren Sie erst eine/n Nutzer:in!",
     "delete-users-title": "Löschen von Nutzer:innen",
     "delete-user": "Soll Nutzer:in {{name}} gelöscht werden?",
-    "delete-users": "Sollen {{count}} Nutzer:innen gelöscht werden?"
+    "delete-users": "Sollen {{count}} Nutzer:innen gelöscht werden?",
+    "new-user": "Neue/r Nutzer:in",
+    "edit-user": "Nutzer:innen-Daten bearbeiten",
+    "password": "Kennwort",
+    "new-password": "Neues Kennwort",
+    "password-hint": "Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.",
+    "user-name-hint": "Der Name muss mindestens drei Zeichen lang sein. Es sind nur Kleinbuchstaben erlaubt.",
+    "email-approved": "Zustimmung zur Anzeige der E-Mail-Adresse wurde erteilt.",
+    "email-not-approved": "Zustimmung zur Anzeige der E-Mail-Adresse wurde nicht erteilt."
   },
   "settings": {
     "texts": "Texte",
