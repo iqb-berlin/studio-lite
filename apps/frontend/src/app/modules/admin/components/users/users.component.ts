@@ -1,26 +1,17 @@
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
-
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  ConfirmDialogComponent,
-  ConfirmDialogData,
-  MessageDialogComponent,
-  MessageDialogData,
-  MessageType
-} from '@studio-lite-lib/iqb-components';
-import {
   CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
+import { TranslateService } from '@ngx-translate/core';
 import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { EditUserComponent } from '../../users/edituser.component';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 
 @Component({
@@ -41,14 +32,8 @@ export class UsersComponent implements OnInit {
   constructor(
     private appService: AppService,
     private backendService: BackendService,
-    private newUserDialog: MatDialog,
-    private newPasswordDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog,
-    private editUserDialog: MatDialog,
-    private confirmDialog: MatDialog,
-    private superadminPasswordDialog: MatDialog,
-    private messsageDialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
   ) {
     this.tableSelectionRow.changed.subscribe(
       r => {
@@ -65,166 +50,100 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createWorkspaceList();
-      this.appService.appConfig.setPageTitle('Admin: Nutzer:innen');
+      this.appService.appConfig
+        .setPageTitle(this.translateService.instant('admin.users-title'));
     });
   }
 
-  // ***********************************************************************************
-  addObject(): void {
-    const dialogRef = this.editUserDialog.open(EditUserComponent, {
-      width: '600px',
-      data: {
-        newUser: true,
-        isAdmin: false
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result !== 'undefined') {
-        if (result !== false) {
-          this.appService.dataLoading = true;
-          const userData: CreateUserDto = {
-            name: (<UntypedFormGroup>result).get('name')?.value,
-            password: (<UntypedFormGroup>result).get('password')?.value,
-            isAdmin: (<UntypedFormGroup>result).get('isAdmin')?.value,
-            description: (<UntypedFormGroup>result).get('description')?.value,
-            firstName: (<UntypedFormGroup>result).get('firstName')?.value,
-            lastName: (<UntypedFormGroup>result).get('lastName')?.value,
-            email: (<UntypedFormGroup>result).get('email')?.value
-          };
-          this.backendService.addUser(userData).subscribe(
-            respOk => {
-              this.updateUserList();
-              if (respOk) {
-                this.snackBar.open('Nutzer:in angelegt', '', { duration: 1000 });
-              } else {
-                this.snackBar.open('Konnte Nutzer:in nicht anlegen', 'Fehler', { duration: 3000 });
-              }
-            }
+  addUser(userData: UntypedFormGroup): void {
+    this.appService.dataLoading = true;
+    const user: CreateUserDto = {
+      name: userData.get('name')?.value,
+      password: userData.get('password')?.value,
+      isAdmin: userData.get('isAdmin')?.value,
+      description: userData.get('description')?.value,
+      firstName: userData.get('firstName')?.value,
+      lastName: userData.get('lastName')?.value,
+      email: userData.get('email')?.value
+    };
+    this.backendService.addUser(user).subscribe(
+      respOk => {
+        this.updateUserList();
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('admin.user-created'),
+            '',
+            { duration: 1000 }
           );
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('admin.user-not-created'),
+            this.translateService.instant('error'),
+            { duration: 3000 });
         }
       }
-    });
+    );
   }
 
-  changeData(): void {
-    let selectedRows = this.tableSelectionRow.selected;
-    if (selectedRows.length === 0) {
-      selectedRows = this.tableSelectionCheckbox.selected;
-    }
-    if (selectedRows.length === 0) {
-      this.messsageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: 'Nutzerdaten ändern',
-          content: 'Bitte markieren Sie erst eine/n Nutzer:in!',
-          type: MessageType.error
-        }
-      });
-    } else {
-      const dialogRef = this.editUserDialog.open(EditUserComponent, {
-        width: '600px',
-        data: {
-          newUser: false,
-          name: selectedRows[0].name,
-          description: selectedRows[0].description,
-          isAdmin: selectedRows[0].isAdmin,
-          firstName: selectedRows[0].firstName,
-          lastName: selectedRows[0].lastName,
-          email: selectedRows[0].email,
-          emailApproved: selectedRows[0].emailPublishApproved
-        }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (typeof result !== 'undefined') {
-          if (result !== false) {
-            this.appService.dataLoading = true;
-            const newPassword: string = (<UntypedFormGroup>result).get('password')?.value;
-            const newName: string = (<UntypedFormGroup>result).get('name')?.value;
-            const newFirstName: string = (<UntypedFormGroup>result).get('firstName')?.value;
-            const newLastName: string = (<UntypedFormGroup>result).get('lastName')?.value;
-            const newEmail: string = (<UntypedFormGroup>result).get('email')?.value;
-            const newDescription: string = (<UntypedFormGroup>result).get('description')?.value;
-            const newIsAdmin: boolean = (<UntypedFormGroup>result).get('isAdmin')?.value;
-            const changedData: UserFullDto = { id: selectedRows[0].id };
-            if (newName !== selectedRows[0].name) changedData.name = newName;
-            if (newDescription !== selectedRows[0].description) changedData.description = newDescription;
-            if (newFirstName !== selectedRows[0].firstName) changedData.firstName = newFirstName;
-            if (newLastName !== selectedRows[0].lastName) changedData.lastName = newLastName;
-            if (newEmail !== selectedRows[0].email) changedData.email = newEmail;
-            if (newPassword) changedData.password = newPassword;
-            if (newIsAdmin !== selectedRows[0].isAdmin) changedData.isAdmin = newIsAdmin;
-            this.backendService.changeUserData(changedData).subscribe(
-              respOk => {
-                this.updateUserList();
-                if (respOk) {
-                  this.snackBar.open('Nutzerdaten geändert', '', { duration: 1000 });
-                } else {
-                  this.snackBar.open('Konnte Nutzerdaten nicht ändern', 'Fehler', { duration: 3000 });
-                }
-              }
-            );
-          }
-        }
-      });
-    }
-  }
-
-  deleteObject(): void {
-    let selectedRows = this.tableSelectionCheckbox.selected;
-    if (selectedRows.length === 0) {
-      selectedRows = this.tableSelectionRow.selected;
-    }
-    if (selectedRows.length === 0) {
-      this.messsageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: 'Löschen von Nutzer:innen',
-          content: 'Bitte markieren Sie erst Nutzer:innen!',
-          type: MessageType.error
-        }
-      });
-    } else {
-      let prompt = 'Soll';
-      if (selectedRows.length > 1) {
-        prompt = `${prompt}en ${selectedRows.length} Nutzer:innen `;
-      } else {
-        prompt = `${prompt} Nutzer:in "${selectedRows[0].name}" `;
-      }
-      const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: <ConfirmDialogData>{
-          title: 'Löschen von Nutzer:innen',
-          content: `${prompt}gelöscht werden?`,
-          confirmButtonLabel: 'Löschen',
-          showCancel: true
-        }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result === true) {
-          // =========================================================
-          this.appService.dataLoading = true;
-          const usersToDelete: number[] = [];
-          selectedRows.forEach((r: UserFullDto) => usersToDelete.push(r.id));
-          this.backendService.deleteUsers(usersToDelete).subscribe(
-            respOk => {
-              if (respOk) {
-                this.snackBar.open('Nutzer:in gelöscht', '', { duration: 1000 });
-                this.updateUserList();
-              } else {
-                this.snackBar.open('Konnte Nutzer:in nicht löschen', 'Fehler', { duration: 3000 });
-                this.appService.dataLoading = false;
-              }
-            }
+  editUser(value: { selection: UserFullDto[], user: UntypedFormGroup }): void {
+    this.appService.dataLoading = true;
+    const newPassword: string = value.user.get('password')?.value;
+    const newName: string = value.user.get('name')?.value;
+    const newFirstName: string = value.user.get('firstName')?.value;
+    const newLastName: string = value.user.get('lastName')?.value;
+    const newEmail: string = value.user.get('email')?.value;
+    const newDescription: string = value.user.get('description')?.value;
+    const newIsAdmin: boolean = value.user.get('isAdmin')?.value;
+    const changedData: UserFullDto = { id: value.selection[0].id };
+    if (newName !== value.selection[0].name) changedData.name = newName;
+    if (newDescription !== value.selection[0].description) changedData.description = newDescription;
+    if (newFirstName !== value.selection[0].firstName) changedData.firstName = newFirstName;
+    if (newLastName !== value.selection[0].lastName) changedData.lastName = newLastName;
+    if (newEmail !== value.selection[0].email) changedData.email = newEmail;
+    if (newPassword) changedData.password = newPassword;
+    if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
+    this.backendService.changeUserData(changedData).subscribe(
+      respOk => {
+        this.updateUserList();
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('admin.user-edited'),
+            '',
+            { duration: 1000 }
           );
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('admin.user-not-edited'),
+            this.translateService.instant('error'),
+            { duration: 3000 });
         }
-      });
-    }
+      }
+    );
   }
 
-  // ***********************************************************************************
+  deleteUsers(users: UserFullDto[]): void {
+    this.appService.dataLoading = true;
+    const usersToDelete: number[] = [];
+    users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
+    this.backendService.deleteUsers(usersToDelete).subscribe(
+      respOk => {
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('admin.users-deleted'),
+            '',
+            { duration: 1000 });
+          this.updateUserList();
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('admin.users-not-deleted'),
+            this.translateService.instant('error'),
+            { duration: 3000 });
+          this.appService.dataLoading = false;
+        }
+      }
+    );
+  }
+
   updateWorkspaceGroupList(): void {
     if (this.userWorkspaceGroups.hasChanged) {
       this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
@@ -232,8 +151,8 @@ export class UsersComponent implements OnInit {
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
       this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).subscribe(
-        (dataresponse: WorkspaceGroupInListDto[]) => {
-          this.userWorkspaceGroups.setChecks(dataresponse);
+        (workspaceGroups: WorkspaceGroupInListDto[]) => {
+          this.userWorkspaceGroups.setChecks(workspaceGroups);
           this.appService.dataLoading = false;
         }
       );
@@ -263,14 +182,13 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  // ***********************************************************************************
   updateUserList(): void {
     this.selectedUser = 0;
     this.appService.dataLoading = true;
     this.backendService.getUsersFull().subscribe(
-      (dataresponse: UserFullDto[]) => {
-        if (dataresponse.length > 0) {
-          this.objectsDatasource = new MatTableDataSource(dataresponse);
+      (users: UserFullDto[]) => {
+        if (users.length > 0) {
+          this.objectsDatasource = new MatTableDataSource(users);
           this.objectsDatasource.sort = this.sort;
           this.tableSelectionCheckbox.clear();
           this.tableSelectionRow.clear();

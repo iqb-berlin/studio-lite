@@ -1,24 +1,12 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="object-list fx-column-start-stretch fx-flex-row-50">
-    <div class="fx-row-start-stretch">
-        <button mat-button
-                [matTooltip]="'admin.add-user' | translate"
-                (click)="addObject()">
-            <mat-icon>add</mat-icon>
-          </button>
-        <button mat-button
-                [disabled]="selectedUser === 0 && !this.tableSelectionCheckbox.selected.length"
-                [matTooltip]="'admin.delete-selected-users' | translate"
-                (click)="deleteObject()">
-          <mat-icon>delete</mat-icon>
-        </button>
-        <button mat-button
-                [disabled]="selectedUser === 0 && this.tableSelectionCheckbox.selected.length !== 1"
-                [matTooltip]="'admin.edit-user-data' | translate"
-                (click)="changeData()">
-          <mat-icon>edit</mat-icon>
-        </button>
-    </div>
+    <studio-lite-users-menu [selectedUser]="selectedUser"
+                            [selectedRows]="tableSelectionRow.selected"
+                            [checkedRows]="tableSelectionCheckbox.selected"
+                            (userAdded)="addUser($event)"
+                            (userEdited)="editUser($event)"
+                            (usersDeleted)="deleteUsers($event)">
+    </studio-lite-users-menu>
 
     <mat-table [dataSource]="objectsDatasource"
                matSortDisableClear

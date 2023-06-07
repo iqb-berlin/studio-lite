@@ -1,0 +1,19 @@
+<div class="fx-row-start-stretch">
+  <button mat-button
+          [matTooltip]="'admin.add-user' | translate"
+          (click)="addUser()">
+    <mat-icon>add</mat-icon>
+  </button>
+  <button mat-button
+          [disabled]="!selectedUser && (!checkedRows || !checkedRows.length)"
+          [matTooltip]="'admin.delete-selected-users' | translate"
+          (click)="deleteUsers()">
+    <mat-icon>delete</mat-icon>
+  </button>
+  <button mat-button
+          [disabled]="!selectedUser && checkedRows && checkedRows.length !== 1"
+          [matTooltip]="'admin.edit-user-data' | translate"
+          (click)="editUser()">
+    <mat-icon>edit</mat-icon>
+  </button>
+</div>

@@ -128,6 +128,13 @@
   },
   "admin": {
     "users":"Nutzer:innen",
+    "users-title": "Admin: Nutzer:innen",
+    "user-created": "Nutzer:in angelegt",
+    "user-not-created": "Nutzer:in konnte nicht angelegt werden",
+    "user-edited": "Daten für Nutzer:in geändert",
+    "user-not-edited": "Daten für Nutzer:in konnte nicht geändert werden",
+    "users-deleted": "Nutzer:in(en) gelöscht",
+    "users-not-deleted": "Nutzer:in(en) konnten nicht gelöscht werden",
     "workspaces":"Bereichsgruppen",
     "v-modules":"Module",
     "settings":"Einstellungen",
@@ -137,7 +144,11 @@
     "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!",
     "add-user": "Nutzer:in hinzufügen",
     "delete-selected-users": "Markierte Nutzer:innen löschen",
-    "edit-user-data": "Nutzerdaten ändern"
+    "edit-user-data": "Nutzerdaten ändern",
+    "select-user": "Bitte markieren Sie erst eine/n Nutzer:in!",
+    "delete-users-title": "Löschen von Nutzer:innen",
+    "delete-user": "Soll Nutzer:in {{name}} gelöscht werden?",
+    "delete-users": "Sollen {{count}} Nutzer:innen gelöscht werden?"
   },
   "settings": {
     "texts": "Texte",

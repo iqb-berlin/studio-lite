@@ -40,12 +40,11 @@ import { EditUserComponent } from './users/edituser.component';
 import { AppLogoComponent } from './components/app-logo/app-logo.component';
 import { UnitExportConfigComponent } from './components/unit-export-config/unit-export-config.component';
 import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';
-import {
-  ResourcePackagesTableComponent
-} from './components/resource-packages-table/resource-packages-table.component';
+import { ResourcePackagesTableComponent } from './components/resource-packages-table/resource-packages-table.component';
 import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
 import { ToTimePipe } from './pipes/to-time.pipe';
+import { UsersMenuComponent } from './components/users-menu/users-menu.component';
 
 @NgModule({
   imports: [
@@ -95,7 +94,8 @@ import { ToTimePipe } from './pipes/to-time.pipe';
     ResourcePackagesTableComponent,
     TableDataSourcePipe,
     SafeUrlPipe,
-    ToTimePipe
+    ToTimePipe,
+    UsersMenuComponent
   ],
   providers: [
     BackendService,
