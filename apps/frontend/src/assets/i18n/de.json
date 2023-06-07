@@ -252,11 +252,16 @@
     "only-stable-modules": "Nur Module zur Auswahl anzeigen, die als \"stabil\" markiert sind (keine Beta-Versionen)."
   },
   "modules": {
+    "title": "Admin: Verona-Module",
+    "upload": "Modul(e) hochladen/aktualisieren",
     "editor-name": "Editor",
     "player-name": "Vorschau (Player)",
     "schemer-name": "Kodierung (Schemer)",
-    "delete": "{{count}} Verona Modul(e) gelöscht",
-    "delete-error": "Konnte Verona Modul(e) nicht löschen",
+    "delete-title": "Löschen von Dateien",
+    "delete-module": "Sie haben eine Datei ausgewählt. Soll die Datei gelöscht werden?",
+    "delete-modules": "Sie haben {{count}} Dateien ausgewählt. Sollen die Dateien gelöscht werden?",
+    "deleted": "{{count}} Verona Modul(e) gelöscht",
+    "not-deleted": "Konnte Verona Modul(e) nicht löschen",
     "no-module-type": "Kein {{ module }} in diesem System verfügbar.",
     "not-defined-module-type":"{{ module }} ist nicht definiert.",
     "not-valid-module-type":"{{ module }} ist nicht gültig.",

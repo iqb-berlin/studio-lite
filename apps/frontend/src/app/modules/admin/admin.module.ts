@@ -29,7 +29,7 @@ import { WorkspacesComponent } from './workspace-groups/workspaces.component';
 import { UsersComponent } from './components/users/users.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { BackendService } from './services/backend.service';
-import { VeronaModulesComponent } from './verona-modules/verona-modules.component';
+import { VeronaModulesComponent } from './components/verona-modules/verona-modules.component';
 import { VeronaModulesTableComponent } from './components/verona-modules-table/verona-modules-table.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { EditWorkspaceGroupComponent } from './workspace-groups/edit-workspace-group.component';
