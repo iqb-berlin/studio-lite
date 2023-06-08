@@ -1,0 +1,93 @@
+<div class="fx-row-space-between-start admin-tab-content">
+  <div class="object-list fx-column-start-stretch fx-flex-row-50">
+    <div class="fx-row-start-stretch">
+      <button mat-button
+              [matTooltip]="'admin.add-group' | translate"
+              (click)="addObject()">
+          <mat-icon>add</mat-icon>
+        </button>
+      <button mat-button
+              [disabled]="!selectedWorkspaceGroupId && !this.tableSelectionCheckbox.selected.length"
+              [matTooltip]="'admin.delete-selected-groups' | translate"
+              (click)="deleteObject()">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-button
+              [disabled]="!selectedWorkspaceGroupId && this.tableSelectionCheckbox.selected.length !== 1"
+              [matTooltip]="'admin.edit-selected-group' | translate"
+              (click)="changeObject()">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-button
+              [matTooltip]="'admin.download-xlsx' | translate"
+              (click)="xlsxDownloadWorkspaceReport()">
+        <mat-icon>save_alt</mat-icon>
+      </button>
+    </div>
+
+    <mat-table [dataSource]="objectsDatasource"
+               matSort
+               matSortDisableClear
+               class="scroll-area">
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
+                        [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()"
+                        (change)="$event ? masterToggle() : null">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckbox.isSelected(row)"
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? tableSelectionCheckbox.toggle(row) : null">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="name">
+          {{'admin.group-name' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+               [class.selected]="tableSelectionRow.isSelected(row)"
+               (click)="toggleRowSelection(row)">
+      </mat-row>
+    </mat-table>
+  </div>
+
+  <div class="object-list fx-column-start-stretch fx-flex-row-40">
+    <div class="fx-row-space-between-center">
+      <div *ngIf="!selectedWorkspaceGroupId">
+        {{'admin.select-group' | translate}}
+      </div>
+      <div *ngIf="selectedWorkspaceGroupId">
+        {{'admin.selected-group' | translate: { group: tableSelectionRow.selected[0].name } }}
+      </div>
+      <button mat-raised-button
+              [matTooltip]="'save' | translate"
+              matTooltipPosition="above"
+              [disabled]="!workspaceUsers.hasChanged"
+              (click)="saveUsers()">
+        <mat-icon>save</mat-icon>
+      </button>
+    </div>
+
+    <div class="scroll-area fx-column-start-stretch">
+      <div *ngFor="let entry of workspaceUsers.entries"
+           class="fx-row-start-start" >
+        <mat-checkbox class="fx-flex-fill"
+                      [(ngModel)]="entry.isChecked"
+                      [disabled]="!selectedWorkspaceGroupId"
+                      (change)="workspaceUsers.updateHasChanged()">
+          {{entry.displayName}} ({{entry.name}})
+        </mat-checkbox>
+          <div class="secondary-text fx-flex-fill">{{entry.description}}</div>
+      </div>
+    </div>
+  </div>
+</div>
