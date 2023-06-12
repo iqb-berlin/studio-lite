@@ -1,2 +1,2 @@
-export { AdminComponent } from './admin.component';
+export { AdminComponent } from './components/admin/admin.component';
 export { AdminModule } from './admin.module';

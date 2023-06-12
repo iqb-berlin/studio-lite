@@ -1,0 +1,15 @@
+<div class="page-body">
+  <div class="admin-background">
+    <nav mat-tab-nav-bar>
+      <a *ngFor="let link of navLinks"
+         mat-tab-link
+         [routerLink]="link"
+         routerLinkActive="active-link"
+         #rla="routerLinkActive"
+         [active]="rla.isActive">
+        {{'admin.'+link | translate}}
+      </a>
+    </nav>
+    <router-outlet></router-outlet>
+  </div>
+</div>

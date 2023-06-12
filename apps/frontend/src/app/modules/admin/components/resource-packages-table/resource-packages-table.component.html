@@ -1,0 +1,47 @@
+<p *ngIf="!dataSource.filteredData.length">
+  {{'resource-packages.no-packages' | translate}}
+</p>
+<mat-table matSort
+           matSortDisableClear
+           [dataSource]="dataSource">
+  <mat-header-row
+    [class.hide]="!dataSource.filteredData.length"
+    *matHeaderRowDef="displayedColumns">
+  </mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <ng-container matColumnDef="selectCheckbox">
+    <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-60">
+      <mat-checkbox
+        [checked]="selectedResourcePackages.value.length === dataSource.filteredData.length &&
+                   selectedResourcePackages.value.length > 0"
+        [indeterminate]="selectedResourcePackages.value.length > 0 &&
+                         selectedResourcePackages.value.length < dataSource.filteredData.length"
+        (change)="toggleCheckBoxes($event)">
+      </mat-checkbox>
+    </mat-header-cell>
+    <mat-cell *matCellDef="let row" class="fx-flex-row-fix-60">
+      <mat-checkbox
+        (change)="updateSelectedResourcePackages()">
+      </mat-checkbox>
+    </mat-cell>
+  </ng-container>
+  <ng-container *ngFor="let column of resourcePackageProperties"
+                [matColumnDef]="column">
+    <mat-header-cell *matHeaderCellDef
+                     [mat-sort-header]="column"
+                     [sortActionDescription]="column">
+      {{'resource-packages.' + column | translate}}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <a *ngIf="column === 'name'"
+         [download]="element[column] + '.itcr.zip'"
+         [href]="resourcePackagesPath + element[column] + '/' + element[column] + '.itcr.zip' | safeUrl">
+        {{element[column]}}
+      </a>
+      <span *ngIf="column === 'createdAt'">
+        {{element[column] | date : 'dd.MM.yyyy HH:mm' : timeZone}}
+      </span>
+    </mat-cell>
+  </ng-container>
+</mat-table>
+

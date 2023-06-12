@@ -1,0 +1,59 @@
+<form [formGroup]="configForm"
+      class="fx-column-start-stretch">
+  <div class="fx-row-start-center fx-gap-10">
+    <img class="logo-img"
+         [src]="logoImageBase64"
+         [alt]="'logo.upload-info' | translate"/>
+    <input #hiddenimgfileinput
+           type="file"
+           [hidden]="true"
+           (change)="imgFileChange($event)"/>
+    <button mat-raised-button
+            [matTooltip]="'logo.upload' | translate"
+            matTooltipPosition="above"
+            (click)="hiddenimgfileinput.click()" >
+      <mat-icon>cloud_upload</mat-icon>
+    </button>
+    <button mat-raised-button
+            [matTooltip]="'logo.reset' | translate"
+            matTooltipPosition="above"
+            (click)="removeLogoImg()">
+      <mat-icon>delete</mat-icon>
+    </button>
+    <p  *ngIf="imageError"
+        class="warning-warning">
+      {{imageError}}
+    </p>
+  </div>
+  <mat-form-field
+    class="fx-column-start-stretch">
+    <mat-label>{{'logo.alt-text' | translate}}</mat-label>
+    <input matInput
+           formControlName="alt"
+           [placeholder]="'logo.alt-text-placeholder' | translate">
+  </mat-form-field>
+  <mat-form-field class="fx-column-start-stretch">
+    <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
+    <input matInput
+           formControlName="bodyBackground"
+           [placeholder]="'logo.app-background-color-placeholder' | translate">
+  </mat-form-field>
+  <mat-form-field class="fx-column-start-stretch">
+    <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
+    <input matInput
+           formControlName="boxBackground"
+           [placeholder]="'logo.boxes-background-color-placeholder' | translate">
+  </mat-form-field>
+  <div class="fx-row-start-start fx-gap-30 save-button">
+    <button mat-raised-button
+            color="primary"
+            [disabled]="!dataChanged"
+            (click)="saveData()">
+      {{'save' | translate}}
+    </button>
+    <div *ngIf="dataChanged"
+         class="fx-flex-fill">
+      {{'admin.reload-page' | translate}}
+    </div>
+  </div>
+</form>

@@ -1,0 +1,58 @@
+<div class="admin-tab-content fx-row-space-between-start">
+  <div class="object-list fx-column-start-stretch">
+    <div class="fx-row-start-stretch">
+      <button mat-button
+              [matTooltip]="'modules.upload' | translate"
+              matTooltipPosition="above"
+              (click)="hiddenFileInput.click()">
+        <mat-icon>cloud_upload</mat-icon>
+      </button>
+      <button mat-button
+              [disabled]="!selectedModules.length"
+              matTooltip="Markierte löschen"
+              matTooltipPosition="above"
+              (click)="deleteFiles()">
+        <mat-icon>delete</mat-icon>
+      </button>
+
+      <input #hiddenFileInput
+             type="file"
+             name="verona-module"
+             multiple
+             [iqbFilesUploadInputFor]="fileUploadQueue"
+             hidden="hidden"/>
+    </div>
+    <div class="scroll-area">
+      <iqb-files-upload-queue #fileUploadQueue
+                              [httpUrl]="uploadUrl"
+                              [fileAlias]="'file'"
+                              [tokenName]="'file'"
+                              [token]="token"
+                              [folderName]="'i'"
+                              [folder]="'y'"
+                              (uploadCompleteEvent)="loadModuleList()">
+      </iqb-files-upload-queue>
+      <div class="fx-column-start-stretch">
+        <h1>{{'modules.player-name' | translate}}</h1>
+        <studio-lite-verona-modules-table type="player"
+                                          [modules]="moduleService.players"
+                                          (selectionChanged)="changeSelectedModules($event)">
+        </studio-lite-verona-modules-table>
+      </div>
+      <div class="fx-column-start-stretch">
+        <h1>{{'modules.editor-name' | translate}}</h1>
+        <studio-lite-verona-modules-table type="editor"
+                                          [modules]="moduleService.editors"
+                                          (selectionChanged)="changeSelectedModules($event)">
+        </studio-lite-verona-modules-table>
+      </div>
+      <div class="fx-column-start-stretch">
+        <h1>{{'modules.schemer-name' | translate}}</h1>
+        <studio-lite-verona-modules-table type="schemer"
+                                          [modules]="moduleService.schemers"
+                                          (selectionChanged)="changeSelectedModules($event)">
+        </studio-lite-verona-modules-table>
+      </div>
+    </div>
+  </div>
+</div>

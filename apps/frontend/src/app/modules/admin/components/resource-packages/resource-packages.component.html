@@ -1,0 +1,29 @@
+<div>
+  <input #hiddenInput
+         type="file"
+         [iqbFilesUploadInputFor]="fileUploadQueue"
+         [hidden]="true"/>
+  <button mat-button
+          (click)="hiddenInput.click()"
+          [matTooltip]="'admin.upload-resource-package' | translate"
+          matTooltipPosition="above">
+    <mat-icon>cloud_upload</mat-icon>
+  </button>
+  <button
+          mat-button
+          [disabled]="!selectedResourcePackages.value.length"
+          [matTooltip]="'admin.delete-selected' | translate"
+          matTooltipPosition="above"
+          (click)="deleteSelected()">
+    <mat-icon>delete</mat-icon>
+  </button>
+</div>
+<iqb-files-upload-queue #fileUploadQueue
+                        [httpUrl]="serverUrl + 'admin/resource-packages'"
+                        [fileAlias]="'resourcePackage'"
+                        (uploadCompleteEvent)="updateFormFields()">
+</iqb-files-upload-queue>
+<studio-lite-resource-packages-table [dataSource]="(resourcePackages | async) | tableDataSource"
+                                     [selectedResourcePackages]="selectedResourcePackages">
+</studio-lite-resource-packages-table>
+

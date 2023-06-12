@@ -1,0 +1,23 @@
+.scroll-area {
+  height: calc(100% - 35px);
+  overflow-y: auto;
+}
+
+.object-list {
+  height: calc(100% - 5px);
+}
+
+.fx-flex-row-fix-70 {
+  flex: 1 1 70px;
+  box-sizing: border-box;
+  max-width: 70px;
+  min-width: 70px;
+}
+
+.selected {
+  background-color: #00606415;
+}
+
+.secondary-text {
+  color: gray;
+}
