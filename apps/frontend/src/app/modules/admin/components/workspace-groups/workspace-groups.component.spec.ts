@@ -8,16 +8,16 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { environment } from '../../../../../environments/environment';
-import { WorkspacesComponent } from './workspaces.component';
+import { WorkspaceGroupsComponent } from './workspace-groups.component';
 
-describe('WorkspacesComponent', () => {
-  let component: WorkspacesComponent;
-  let fixture: ComponentFixture<WorkspacesComponent>;
+describe('WorkspaceGroupsComponent', () => {
+  let component: WorkspaceGroupsComponent;
+  let fixture: ComponentFixture<WorkspaceGroupsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        WorkspacesComponent
+        WorkspaceGroupsComponent
       ],
       imports: [
         MatDialogModule,
@@ -37,7 +37,7 @@ describe('WorkspacesComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(WorkspacesComponent);
+    fixture = TestBed.createComponent(WorkspaceGroupsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

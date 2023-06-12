@@ -25,7 +25,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { AdminRoutingModule } from './admin-routing.module';
-import { WorkspacesComponent } from './components/workspaces/workspaces.component';
+import { WorkspaceGroupsComponent } from './components/workspace-groups/workspace-groups.component';
 import { UsersComponent } from './components/users/users.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { BackendService } from './services/backend.service';
@@ -79,7 +79,7 @@ import { SharedModule } from '../shared/shared.module';
   ],
   exports: [AdminComponent],
   declarations: [
-    WorkspacesComponent,
+    WorkspaceGroupsComponent,
     UsersComponent,
     AdminComponent,
     EditWorkspaceGroupComponent,

@@ -18,11 +18,11 @@ import { UserToCheckCollection } from '../../../shared/models/users-to-check-col
 const datePipe = new DatePipe('de-DE');
 
 @Component({
-  selector: 'studio-lite-workspaces',
-  templateUrl: './workspaces.component.html',
-  styleUrls: ['./workspaces.component.scss']
+  selector: 'studio-lite-workspace-groups',
+  templateUrl: './workspace-groups.component.html',
+  styleUrls: ['./workspace-groups.component.scss']
 })
-export class WorkspacesComponent implements OnInit {
+export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
   tableSelectionCheckbox = new SelectionModel <WorkspaceGroupInListDto>(true, []);

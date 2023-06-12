@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { WorkspacesComponent } from './components/workspaces/workspaces.component';
+import { WorkspaceGroupsComponent } from './components/workspace-groups/workspace-groups.component';
 import { UsersComponent } from './components/users/users.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { VeronaModulesComponent } from './components/verona-modules/verona-modules.component';
@@ -15,7 +15,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'users', component: UsersComponent },
-      { path: 'workspaces', component: WorkspacesComponent },
+      { path: 'workspaces', component: WorkspaceGroupsComponent },
       { path: 'v-modules', component: VeronaModulesComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'packages', component: ResourcePackagesComponent },
