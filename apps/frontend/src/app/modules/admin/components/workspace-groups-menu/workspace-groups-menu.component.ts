@@ -6,7 +6,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { EditWorkspaceGroupComponent } from '../../workspace-groups/edit-workspace-group.component';
+import { EditWorkspaceGroupComponent } from '../edit-workspace-group/edit-workspace-group.component';
 
 @Component({
   selector: 'studio-lite-workspace-groups-menu',
