@@ -144,12 +144,13 @@ export class WorkspaceGroupsComponent implements OnInit {
     }
     if (this.selectedWorkspaceGroupId > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspaceGroupAdmins(this.selectedWorkspaceGroupId).subscribe(
-        (dataResponse: UserInListDto[]) => {
-          this.workspaceUsers.setChecks(dataResponse);
-          this.appService.dataLoading = false;
-        }
-      );
+      this.backendService.getWorkspaceGroupAdmins(this.selectedWorkspaceGroupId)
+        .subscribe(
+          (dataResponse: UserInListDto[]) => {
+            this.workspaceUsers.setChecks(dataResponse);
+            this.appService.dataLoading = false;
+          }
+        );
     } else {
       this.workspaceUsers.setChecks();
     }
@@ -187,13 +188,23 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.updateUserList();
 
     this.appService.dataLoading = true;
-    this.backendService.getWorkspaceGroupList().subscribe(dataresponse => {
-      this.objectsDatasource = new MatTableDataSource(dataresponse);
-      this.objectsDatasource.sort = this.sort;
+    this.backendService.getWorkspaceGroupList().subscribe(groups => {
+      this.setObjectsDatasource(groups);
       this.tableSelectionCheckbox.clear();
       this.tableSelectionRow.clear();
       this.appService.dataLoading = false;
     });
+  }
+
+  private setObjectsDatasource(groups: WorkspaceGroupInListDto[]): void {
+    this.objectsDatasource = new MatTableDataSource(groups);
+    this.objectsDatasource
+      .filterPredicate = (groupList: WorkspaceGroupInListDto, filter) => [
+        'name'
+      ].some(column => (groupList[column as keyof WorkspaceGroupInListDto] as string || '')
+        .toLowerCase()
+        .includes(filter));
+    this.objectsDatasource.sort = this.sort;
   }
 
   createUserList(): void {

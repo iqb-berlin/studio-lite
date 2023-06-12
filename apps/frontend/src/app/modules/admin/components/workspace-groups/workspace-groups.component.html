@@ -10,6 +10,11 @@
                                        (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-groups-menu>
 
+    <studio-lite-search-filter *ngIf="objectsDatasource.data.length"
+                               [title]="'search-filter.filter-groups' | translate"
+                               (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+    </studio-lite-search-filter>
+
 
     <mat-table [dataSource]="objectsDatasource"
                matSort

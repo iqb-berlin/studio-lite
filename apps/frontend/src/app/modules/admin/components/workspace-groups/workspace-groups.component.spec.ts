@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +20,11 @@ describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;
   let fixture: ComponentFixture<WorkspaceGroupsComponent>;
 
+  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  class MockSearchFilterComponent {
+    @Input() title!: string;
+  }
+
   @Component({ selector: 'studio-lite-workspace-groups-menu', template: '' })
   class MockWorkspaceGroupsMenuComponent {
     @Input() selectedWorkspaceGroupId!: number;
@@ -35,7 +41,8 @@ describe('WorkspaceGroupsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         WorkspaceGroupsComponent,
-        MockWorkspaceGroupsMenuComponent
+        MockWorkspaceGroupsMenuComponent,
+        MockSearchFilterComponent
       ],
       imports: [
         MatDialogModule,
