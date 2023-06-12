@@ -1,29 +1,15 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="object-list fx-column-start-stretch fx-flex-row-50">
-    <div class="fx-row-start-stretch">
-      <button mat-button
-              [matTooltip]="'admin.add-group' | translate"
-              (click)="addObject()">
-          <mat-icon>add</mat-icon>
-        </button>
-      <button mat-button
-              [disabled]="!selectedWorkspaceGroupId && !this.tableSelectionCheckbox.selected.length"
-              [matTooltip]="'admin.delete-selected-groups' | translate"
-              (click)="deleteObject()">
-        <mat-icon>delete</mat-icon>
-      </button>
-      <button mat-button
-              [disabled]="!selectedWorkspaceGroupId && this.tableSelectionCheckbox.selected.length !== 1"
-              [matTooltip]="'admin.edit-selected-group' | translate"
-              (click)="changeObject()">
-        <mat-icon>edit</mat-icon>
-      </button>
-      <button mat-button
-              [matTooltip]="'admin.download-xlsx' | translate"
-              (click)="xlsxDownloadWorkspaceReport()">
-        <mat-icon>save_alt</mat-icon>
-      </button>
-    </div>
+
+    <studio-lite-workspace-groups-menu [selectedWorkspaceGroupId]="selectedWorkspaceGroupId"
+                                       [selectedRows]="tableSelectionRow.selected"
+                                       [checkedRows]="tableSelectionCheckbox.selected"
+                                       (groupAdded)="addGroup($event)"
+                                       (groupEdited)="editGroup($event)"
+                                       (groupsDeleted)="deleteGroups($event)"
+                                       (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
+    </studio-lite-workspace-groups-menu>
+
 
     <mat-table [dataSource]="objectsDatasource"
                matSort

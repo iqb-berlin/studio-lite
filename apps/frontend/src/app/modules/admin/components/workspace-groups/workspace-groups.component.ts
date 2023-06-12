@@ -5,14 +5,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { UserInListDto, CreateWorkspaceGroupDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { EditWorkspaceGroupComponent } from '../../workspace-groups/edit-workspace-group.component';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
 
 const datePipe = new DatePipe('de-DE');
@@ -35,8 +33,6 @@ export class WorkspaceGroupsComponent implements OnInit {
   constructor(
     private appService: AppService,
     private backendService: BackendService,
-    private editWorkspaceDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog,
     private workspaceGroupsDialog: MatDialog,
     private messsageDialog: MatDialog,
     private snackBar: MatSnackBar,
@@ -61,145 +57,85 @@ export class WorkspaceGroupsComponent implements OnInit {
     });
   }
 
-  // ***********************************************************************************
-  addObject(): void {
-    const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
-      width: '600px',
-      data: {
-        name: '',
-        title: this.translateService.instant('admin.new-group'),
-        saveButtonLabel: this.translateService.instant('create')
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result !== 'undefined') {
-        if (result !== false) {
-          this.appService.dataLoading = true;
-          this.backendService.addWorkspaceGroup(<CreateWorkspaceGroupDto>{
-            name: (<UntypedFormGroup>result).get('name')?.value,
-            settings: {}
-          }).subscribe(
-            respOk => {
-              if (respOk) {
-                this.snackBar.open(
-                  this.translateService.instant('admin.group-created'),
-                  '',
-                  { duration: 1000 });
-                this.updateWorkspaceList();
-              } else {
-                this.snackBar.open(
-                  this.translateService.instant('admin.group-not-created'),
-                  this.translateService.instant('error'),
-                  { duration: 3000 });
-              }
-              this.appService.dataLoading = false;
-            }
-          );
+  addGroup(result: UntypedFormGroup): void {
+    this.appService.dataLoading = true;
+    this.backendService.addWorkspaceGroup(<CreateWorkspaceGroupDto>{
+      name: (<UntypedFormGroup>result).get('name')?.value,
+      settings: {}
+    }).subscribe(
+      respOk => {
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('admin.group-created'),
+            '',
+            { duration: 1000 });
+          this.updateWorkspaceList();
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('admin.group-not-created'),
+            this.translateService.instant('error'),
+            { duration: 3000 });
         }
+        this.appService.dataLoading = false;
       }
-    });
+    );
   }
 
-  changeObject(): void {
-    let selectedRows = this.tableSelectionRow.selected;
-    if (selectedRows.length === 0) {
-      selectedRows = this.tableSelectionCheckbox.selected;
-    }
-    if (selectedRows.length) {
-      const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
-        width: '600px',
-        data: {
-          name: selectedRows[0].name,
-          title: this.translateService.instant('admin.edit-group'),
-          saveButtonLabel: this.translateService.instant('save')
-        }
-      });
-      dialogRef.afterClosed().subscribe(result => {
-        if (typeof result !== 'undefined') {
-          if (result !== false) {
-            this.appService.dataLoading = true;
-            this.backendService.changeWorkspaceGroup({
-              id: selectedRows[0].id,
-              name: (<UntypedFormGroup>result).get('name')?.value,
-              settings: {
-                defaultSchemer: '',
-                defaultPlayer: '',
-                defaultEditor: ''
-              }
-            }).subscribe(
-              respOk => {
-                if (respOk) {
-                  this.snackBar.open(
-                    this.translateService.instant('admin.group-edited'),
-                    '',
-                    { duration: 1000 });
-                  this.updateWorkspaceList();
-                } else {
-                  this.snackBar.open(
-                    this.translateService.instant('admin.group-not-edited'),
-                    this.translateService.instant('error'),
-                    { duration: 3000 }
-                  );
-                }
-                this.appService.dataLoading = false;
-              }
+  editGroup(value: { selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }): void {
+    this.appService.dataLoading = true;
+    this.backendService.changeWorkspaceGroup({
+      id: value.selection[0].id,
+      name: value.group.get('name')?.value,
+      settings: {
+        defaultSchemer: '',
+        defaultPlayer: '',
+        defaultEditor: ''
+      }
+    })
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('admin.group-edited'),
+              '',
+              { duration: 1000 });
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('admin.group-not-edited'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
             );
           }
+          this.appService.dataLoading = false;
         }
-      });
-    }
+      );
   }
 
-  deleteObject(): void {
-    let selectedRows = this.tableSelectionCheckbox.selected;
-    if (selectedRows.length === 0) {
-      selectedRows = this.tableSelectionRow.selected;
-    }
-    if (selectedRows.length) {
-      const content = (selectedRows.length === 1) ?
-        this.translateService.instant('admin.delete-group', { name: selectedRows[0].name }) :
-        this.translateService.instant('admin.delete-groups', { count: selectedRows.length });
-      const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: <ConfirmDialogData>{
-          title: this.translateService.instant('admin.delete-groups-title'),
-          content: content,
-          confirmButtonLabel: this.translateService.instant('delete'),
-          showCancel: true
+  deleteGroups(groups: WorkspaceGroupInListDto[]): void {
+    this.appService.dataLoading = true;
+    const workspaceGroupsToDelete: number[] = [];
+    groups.forEach(r => workspaceGroupsToDelete.push(r.id));
+    this.backendService.deleteWorkspaceGroups(workspaceGroupsToDelete).subscribe(
+      respOk => {
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('admin.groups-deleted'),
+            '',
+            { duration: 1000 });
+          this.updateWorkspaceList();
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('admin.groups-not-deleted'),
+            this.translateService.instant('error'),
+            { duration: 1000 });
+          this.appService.dataLoading = false;
         }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result === true) {
-          // =========================================================
-          this.appService.dataLoading = true;
-          const workspaceGroupsToDelete: number[] = [];
-          selectedRows.forEach(r => workspaceGroupsToDelete.push(r.id));
-          this.backendService.deleteWorkspaceGroups(workspaceGroupsToDelete).subscribe(
-            respOk => {
-              if (respOk) {
-                this.snackBar.open(
-                  this.translateService.instant('admin.groups-deleted'),
-                  '',
-                  { duration: 1000 });
-                this.updateWorkspaceList();
-              } else {
-                this.snackBar.open(
-                  this.translateService.instant('admin.groups-not-deleted'),
-                  this.translateService.instant('error'),
-                  { duration: 1000 });
-                this.appService.dataLoading = false;
-              }
-            }
-          );
-        }
-      });
-    }
+      }
+    );
   }
 
-  // ***********************************************************************************
-  updateUserList(): void {
+  private updateUserList(): void {
     if (this.workspaceUsers.hasChanged) {
       this.snackBar.open(
         this.translateService.instant('access-rights.not-saved'),
@@ -246,8 +182,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     }
   }
 
-  // ***********************************************************************************
-  updateWorkspaceList(): void {
+  private updateWorkspaceList(): void {
     this.selectedWorkspaceGroupId = 0;
     this.updateUserList();
 

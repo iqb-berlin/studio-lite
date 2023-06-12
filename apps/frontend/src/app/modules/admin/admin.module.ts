@@ -45,6 +45,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
 import { ToTimePipe } from './pipes/to-time.pipe';
 import { UsersMenuComponent } from './components/users-menu/users-menu.component';
 import { SharedModule } from '../shared/shared.module';
+import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu/workspace-groups-menu.component';
 
 @NgModule({
   imports: [
@@ -96,7 +97,8 @@ import { SharedModule } from '../shared/shared.module';
     TableDataSourcePipe,
     SafeUrlPipe,
     ToTimePipe,
-    UsersMenuComponent
+    UsersMenuComponent,
+    WorkspaceGroupsMenuComponent
   ],
   providers: [
     BackendService,
