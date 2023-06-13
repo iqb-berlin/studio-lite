@@ -3,10 +3,10 @@ import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { Router } from '@angular/router';
 import { lastValueFrom, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ModuleService } from '../shared/services/module.service';
-import { UnitData } from './models/unit-data.class';
+import { ModuleService } from '../../shared/services/module.service';
+import { UnitData } from '../models/unit-data.class';
 import { BackendService } from './backend.service';
-import { AppService } from '../../services/app.service';
+import { AppService } from '../../../services/app.service';
 
 @Injectable({
   providedIn: 'root'

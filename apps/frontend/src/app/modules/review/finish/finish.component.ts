@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ReviewService } from '../review.service';
+import { ReviewService } from '../services/review.service';
 
 @Component({
   selector: 'studio-lite-finish',

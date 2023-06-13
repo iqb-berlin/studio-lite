@@ -4,8 +4,8 @@ import {
 } from '@angular/core';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { DatePipe } from '@angular/common';
-import { BackendService } from '../../backend.service';
-import { ReviewService } from '../../review.service';
+import { BackendService } from '../../services/backend.service';
+import { ReviewService } from '../../services/review.service';
 
 const PanelWidthOffset = 40;
 const datePipe = new DatePipe('de-DE');

@@ -1,8 +1,8 @@
 import {
   Component, Input, ViewChild
 } from '@angular/core';
-import { BackendService } from '../../backend.service';
-import { ReviewService } from '../../review.service';
+import { BackendService } from '../../services/backend.service';
+import { ReviewService } from '../../services/review.service';
 import { Comment } from '../../../comments/models/comment.interface';
 import { UnitInfoLoaderComponent } from './unit-info-loader.component';
 
