@@ -2,8 +2,8 @@ import {
   Component, Input, ViewChild
 } from '@angular/core';
 import { CodingSchemeDto, VariableCodingData } from '@studio-lite/shared-code';
-import { BackendService } from '../../backend.service';
-import { ReviewService } from '../../review.service';
+import { BackendService } from '../../services/backend.service';
+import { ReviewService } from '../../services/review.service';
 import { UnitInfoLoaderComponent } from './unit-info-loader.component';
 
 @Component({

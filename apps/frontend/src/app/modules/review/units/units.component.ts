@@ -7,11 +7,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { ModuleService } from '../../shared/services/module.service';
 import { AppService } from '../../../services/app.service';
-import { ReviewService } from '../review.service';
+import { ReviewService } from '../services/review.service';
 import { UnitPage } from '../models/unit-page.interface';
 import { PageData } from '../../workspace/models/page-data.interface';
 import { UnitData } from '../models/unit-data.class';
-import { BackendService } from '../backend.service';
+import { BackendService } from '../services/backend.service';
 
 @Component({
   selector: 'studio-lite-units',
