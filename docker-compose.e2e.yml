@@ -131,3 +131,4 @@ services:
 
 networks:
   application-network:
+    name: app-net
