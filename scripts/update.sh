@@ -327,7 +327,7 @@ if [ -z "$SELECTED_VERSION" ]; then
 
       get_new_release_version
       create_backup
-      #run_update_script_in_selected_version
+      run_update_script_in_selected_version
       prepare_installation_dir
       update_files
       check_template_files_modifications
