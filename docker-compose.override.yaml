@@ -17,7 +17,7 @@ services:
 
   backend:
     labels:
-      - "traefik.enable=true"
+      - "traefik.enable=false"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.rule=HostRegexp(`{[a-z]*}.${SERVER_NAME}`) || Host(`${SERVER_NAME}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.service=backend"
@@ -42,7 +42,7 @@ services:
 
   frontend:
     labels:
-      - "traefik.enable=true"
+      - "traefik.enable=false"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend.rule=HostRegexp(`{[a-z]*}.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
       - "traefik.http.routers.frontend.service=frontend"
@@ -54,6 +54,8 @@ services:
       target: dev
       args:
         project: frontend
+    ports:
+      - "${HTTP_PORT}:80"
     volumes:
       - ./apps/frontend/src:/studio-lite/apps/frontend/src
     command:
