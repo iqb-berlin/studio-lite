@@ -318,15 +318,16 @@ test-app-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
@@ -346,15 +347,16 @@ test-app-e2e-api:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
@@ -374,15 +376,16 @@ test-app-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -402,15 +405,16 @@ test-app-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -431,15 +435,16 @@ test-app-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -459,15 +464,16 @@ test-app-e2e-ui-firefox-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -488,15 +494,16 @@ test-app-e2e-ui-edge:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -516,15 +523,16 @@ test-app-e2e-ui-edge-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
