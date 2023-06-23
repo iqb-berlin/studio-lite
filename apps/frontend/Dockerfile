@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:18.14-bullseye-slim AS build
+FROM node:20.3-bookworm-slim AS build
 ARG project
 
 RUN mkdir /studio-lite
