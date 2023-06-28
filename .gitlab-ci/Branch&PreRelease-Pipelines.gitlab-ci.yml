@@ -219,7 +219,8 @@ build-db-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
+    - docker build --network host -q -f database/Postgres.Dockerfile
+      -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
     - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
     - docker logout $REGISTRY
@@ -238,7 +239,8 @@ build-liquibase-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
+    - docker build --network host -q -f database/Liquibase.Dockerfile
+      -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
     - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
     - docker logout $REGISTRY
@@ -580,7 +582,7 @@ build-develop-commit-db-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build --network host -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -597,7 +599,7 @@ build-develop-commit-liquibase-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build --network host -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -614,7 +616,7 @@ build-develop-commit-backend-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod
+    - docker build --network host -q -f apps/api/Dockerfile --build-arg project=api --target=prod
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -632,7 +634,7 @@ build-develop-commit-frontend-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
+    - docker build --network host -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
