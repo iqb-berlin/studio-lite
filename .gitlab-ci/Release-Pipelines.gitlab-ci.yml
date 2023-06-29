@@ -843,12 +843,12 @@ scan-main-commit-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -885,12 +885,12 @@ scan-main-commit-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -927,12 +927,12 @@ scan-main-commit-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -969,12 +969,12 @@ scan-main-commit-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1012,12 +1012,12 @@ scan-main-commit-web-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -1054,12 +1054,12 @@ scan-main-commit-web-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1096,12 +1096,12 @@ scan-main-commit-web-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1138,12 +1138,12 @@ scan-main-commit-web-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
