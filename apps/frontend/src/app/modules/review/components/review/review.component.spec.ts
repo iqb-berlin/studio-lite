@@ -4,7 +4,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { ReviewComponent } from './review.component';
 
 describe('ReviewComponent', () => {
