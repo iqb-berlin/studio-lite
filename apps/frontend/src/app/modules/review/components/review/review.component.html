@@ -1,36 +1,23 @@
-<div
-  [class]="{
-    'with-header': reviewService.bookletConfig.unitScreenHeader !== 'OFF',
-    'with-title': reviewService.bookletConfig.unitTitle === 'ON'
-  }"
->
-  <div
-    *ngIf="reviewService.bookletConfig?.unitTitle === 'ON'"
-    id="unit-title"
-    fxLayout="column"
-    fxLayoutAlign="center center"
-  >
+<div [class]="{
+     'with-header': reviewService.bookletConfig.unitScreenHeader !== 'OFF',
+     'with-title': reviewService.bookletConfig.unitTitle === 'ON'
+  }">
+  <div *ngIf="reviewService.bookletConfig?.unitTitle === 'ON'"
+       class="unit-title fx-column-center-center">
     <p>{{reviewService.pageHeaderText}}</p>
   </div>
-  <div id="header" fxLayout="row" fxLayoutAlign="space-between center"
-       *ngIf="reviewService.bookletConfig?.unitScreenHeader !== 'OFF'">
-    <div fxFlex="0 1 auto">
+  <div *ngIf="reviewService.bookletConfig?.unitScreenHeader !== 'OFF'"
+       class="header fx-row-space-between-center">
+    <div>
       <h1>{{reviewService.screenHeaderText}}</h1>
     </div>
-    <div
-      *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'OFF'"
-      id="unitNav"
-      fxFlex="0 1 auto"
-      fxLayout="row"
-      fxLayoutAlign="end center"
-    >
+    <div *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'OFF'"
+         class="unit-nav fx-row-end-center">
       <a mat-fab
          *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
          [disabled]="reviewService.currentUnitSequenceId < 0"
          (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)"
-         matTooltip="Zurück"
-         fxFlex="none"
-      >
+         matTooltip="Zurück">
         <i class="material-icons">chevron_left</i>
       </a>
       <a mat-flat-button
@@ -38,8 +25,7 @@
          [disabled]="reviewService.currentUnitSequenceId < 0"
          (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)"
          matTooltip="Zurück"
-         fxFlex="none"
-      >
+         fxFlex="none">
         <i class="material-icons">chevron_left</i>
       </a>
       <mat-selection-list #unitList [multiple]="false"

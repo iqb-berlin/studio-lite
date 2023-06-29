@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { ReviewService } from './services/review.service';
-import { AppService } from '../../services/app.service';
-import { CommentDialogComponent } from './comment-dialog.component';
+import { ReviewService } from '../../services/review.service';
+import { AppService } from '../../../../services/app.service';
+import { CommentDialogComponent } from '../../comment-dialog.component';
 
 @Component({
   selector: 'studio-lite-review',

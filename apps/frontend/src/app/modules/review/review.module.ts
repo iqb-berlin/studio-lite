@@ -19,7 +19,7 @@ import { UnitsComponent } from './units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
-import { ReviewComponent } from './review.component';
+import { ReviewComponent } from './components/review/review.component';
 import { UnitInfoComponent } from './units/unit-info/unit-info.component';
 import { CommentDialogComponent } from './comment-dialog.component';
 import { CommentsModule } from '../comments/comments.module';

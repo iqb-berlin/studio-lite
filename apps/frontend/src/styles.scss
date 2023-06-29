@@ -193,6 +193,14 @@ div.logo img {
   align-items: stretch;
 }
 
+.fx-row-end-center {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
 .fx-row-start-stretch {
   box-sizing: border-box;
   display: flex;
