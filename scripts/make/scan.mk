@@ -23,7 +23,7 @@ scan-db:
 				-v ${HOME}/Library/Caches:/root/.cache/\
 			$(TRIVY_VERSION)\
 				image\
-						--security-checks vuln\
+						--scanners vuln\
 						--ignore-unfixed\
 						--severity CRITICAL\
 					iqbberlin/studio-lite-db:scan
@@ -44,7 +44,7 @@ scan-liquibase:
 				-v ${HOME}/Library/Caches:/root/.cache/\
 			$(TRIVY_VERSION)\
 				image\
-						--security-checks vuln\
+						--scanners vuln\
 						--ignore-unfixed\
 						--severity CRITICAL\
 					iqbberlin/studio-lite-liquibase:scan
@@ -67,7 +67,7 @@ scan-backend:
 				-v ${HOME}/Library/Caches:/root/.cache/\
 			$(TRIVY_VERSION)\
 				image\
-						--security-checks vuln\
+						--scanners vuln\
 						--ignore-unfixed\
 						--severity CRITICAL\
 					iqbberlin/studio-lite-backend:scan
@@ -90,7 +90,7 @@ scan-frontend:
  				-v ${HOME}/Library/Caches:/root/.cache/\
  			$(TRIVY_VERSION)\
  				image\
- 						--security-checks vuln\
+ 						--scanners vuln\
  						--ignore-unfixed\
  						--severity CRITICAL\
  					iqbberlin/studio-lite-frontend:scan
