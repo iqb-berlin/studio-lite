@@ -115,11 +115,11 @@ studio-lite-images-clean: .EXPORT_ALL_VARIABLES
 ## Outputs the count of changesets that have not been deployed
 # (https://docs.liquibase.com/commands/status/status.html)
 studio-lite-liquibase-status: .EXPORT_ALL_VARIABLES
-	cd $(BASE_DIR) &&\
+	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		run --rm liquibase\
 			liquibase\
 					--changelogFile=studio-lite.changelog-root.xml\
@@ -133,9 +133,9 @@ studio-lite-liquibase-status: .EXPORT_ALL_VARIABLES
 ## Open DB console
 studio-lite-connect-db: .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
 			psql --username=$(POSTGRES_USER) --dbname=$(POSTGRES_DB)
 
@@ -143,92 +143,92 @@ studio-lite-connect-db: .EXPORT_ALL_VARIABLES
 # (https://www.postgresql.org/docs/current/app-pg-dumpall.html)
 studio-lite-dump-all: studio-lite-down .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up -d db
 	sleep 5 ## wait until db startup is completed
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
-			pg_dumpall --verbose --username=$(POSTGRES_USER) > $(BASE_DIR)/backup/database_dump/all.sql
+			pg_dumpall --verbose --username=$(POSTGRES_USER) > $(STUDIO_LITE_BASE_DIR)/backup/database_dump/all.sql
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
 
 ## PostgreSQL interactive terminal reads commands from the dump file all.sql
 # (https://www.postgresql.org/docs/14/app-psql.html)
 studio-lite-restore-all: studio-lite-down .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up -d db
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
-		cp $(BASE_DIR)/backup/database_dump/all.sql db:/tmp/
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
+		cp $(STUDIO_LITE_BASE_DIR)/backup/database_dump/all.sql db:/tmp/
 	sleep 10	## wait until file upload is completed
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
 			psql --username=$(POSTGRES_USER) --file=/tmp/all.sql postgres
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
 
 ## Extract a database into a script file or other archive file
 # (https://www.postgresql.org/docs/current/app-pgdump.html)
 studio-lite-dump-db: studio-lite-down .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up -d db
 	sleep 5 ## wait until db startup is completed
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
 			pg_dump\
 					--verbose\
 					--username=$(POSTGRES_USER)\
 					--format=t\
-				$(POSTGRES_DB) > $(BASE_DIR)/backup/database_dump/$(POSTGRES_DB).tar
+				$(POSTGRES_DB) > $(STUDIO_LITE_BASE_DIR)/backup/database_dump/$(POSTGRES_DB).tar
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
 
 ## Restore a database from an archive file created by pg_dump
 # (https://www.postgresql.org/docs/current/app-pgrestore.html)
 studio-lite-restore-db: studio-lite-down .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up -d db
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
-		cp $(BASE_DIR)/backup/database_dump/$(POSTGRES_DB).tar db:/tmp/
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
+		cp $(STUDIO_LITE_BASE_DIR)/backup/database_dump/$(POSTGRES_DB).tar db:/tmp/
 	sleep 10	## wait until file upload is completed
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
 			pg_restore\
 					--verbose\
@@ -237,23 +237,23 @@ studio-lite-restore-db: studio-lite-down .EXPORT_ALL_VARIABLES
 					--dbname=$(POSTGRES_DB)\
 				/tmp/$(POSTGRES_DB).tar
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
 
 ## Extract a database data into a script file or other archive file
 # (https://www.postgresql.org/docs/current/app-pgdump.html)
 studio-lite-dump-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up -d db liquibase
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
 			pg_dump\
 					--verbose\
@@ -262,31 +262,31 @@ studio-lite-dump-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 					--exclude-table=public.databasechangeloglock\
 					--username=$(POSTGRES_USER)\
 					--format=t\
-			$(POSTGRES_DB) > $(BASE_DIR)/backup/database_dump/$(POSTGRES_DB)_data.tar
+			$(POSTGRES_DB) > $(STUDIO_LITE_BASE_DIR)/backup/database_dump/$(POSTGRES_DB)_data.tar
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
 
 ## Restore a database data from an archive file created by pg_dump
 # (https://www.postgresql.org/docs/current/app-pgrestore.html)
 studio-lite-restore-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up -d db liquibase
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
-		cp $(BASE_DIR)/backup/database_dump/$(POSTGRES_DB)_data.tar db:/tmp/
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
+		cp $(STUDIO_LITE_BASE_DIR)/backup/database_dump/$(POSTGRES_DB)_data.tar db:/tmp/
 	sleep 10	## wait until file upload is completed
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		exec -it db\
 			pg_restore\
 					--verbose\
@@ -297,7 +297,7 @@ studio-lite-restore-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 					--dbname=$(POSTGRES_DB)\
 				/tmp/$(POSTGRES_DB)_data.tar
 	docker compose\
-			--file $(BASE_DIR)/docker-compose.studio-lite.yaml\
-			--file $(BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-			--env-file $(BASE_DIR)/.env.studio-lite\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down

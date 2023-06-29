@@ -1,16 +1,17 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20.3-bookworm-slim AS build
+FROM node:18.16-bookworm-slim AS build
 ARG project
 
 RUN mkdir /studio-lite
 WORKDIR /studio-lite
 
-COPY package*.json decorate-angular-cli.js ./
-RUN npm ci --silent && npm cache clean --force
-
 COPY . .
-RUN npm install -g --silent nx
+
+RUN npm install -g --no-fund npm@9.7.2 nx && \
+    npm ci --no-fund && \
+    npm cache clean --force
+
 RUN nx build $project --prod
 
 

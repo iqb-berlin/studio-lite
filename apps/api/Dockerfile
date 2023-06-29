@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=node:20.3-bookworm-slim
+ARG BASE_IMAGE=node:18.16-bookworm-slim
 
 FROM ${BASE_IMAGE} AS build
 ARG project
@@ -8,11 +8,12 @@ ARG project
 RUN mkdir /studio-lite
 WORKDIR /studio-lite
 
-COPY package*.json decorate-angular-cli.js ./
-RUN npm ci --silent && npm cache clean --force
-
 COPY . .
-RUN npm install -g --silent nx
+
+RUN npm install -g --no-fund npm@9.7.2 nx && \
+    npm ci --no-fund && \
+    npm cache clean --force
+
 RUN nx build $project --prod
 
 
@@ -36,8 +37,7 @@ USER node
 EXPOSE 3333
 
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project/package.json .
-RUN npm install --only=production --silent && npm cache clean --force
-RUN npm install install pg --save --silent && npm cache clean --force ## workaround nx bug
+RUN npm install --only=production --no-fund && npm cache clean --force
 
 
 FROM base AS source
