@@ -2,6 +2,7 @@
 
 ARG BASE_IMAGE=node:18.16-bookworm-slim
 
+
 FROM ${BASE_IMAGE} AS build
 ARG project
 
@@ -10,16 +11,22 @@ WORKDIR /studio-lite
 
 COPY . .
 
-RUN npm install -g --no-fund npm@9.7.2 nx && \
-    npm ci --no-fund && \
-    npm cache clean --force
+# Update npm to latest version
+RUN npm --version && \
+    npm install -g --no-fund npm && \
+    npm cache clean --force && \
+    npm --version
 
-RUN nx build $project --prod
+# Install dependencies
+RUN npm ci --no-fund && npm cache clean --force
+
+# Build project
+RUN npx nx --version && npx nx build $project --prod
 
 
 FROM build AS dev
 
-ENTRYPOINT ["nx"]
+ENTRYPOINT ["npx", "nx"]
 
 
 FROM ${BASE_IMAGE} AS base
@@ -46,6 +53,7 @@ ARG project
 # Copy the build artifacts from the previous stage
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project .
 RUN mkdir packages && chown -R node:node packages
+
 
 FROM source AS prod
 ENTRYPOINT ["/usr/bin/tini", "--"]
