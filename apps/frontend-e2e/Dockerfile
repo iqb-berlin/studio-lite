@@ -4,14 +4,22 @@ FROM cypress/browsers:node-18.16.0-chrome-114.0.5735.133-1-ff-114.0.2-edge-114.0
 RUN mkdir studio-lite
 WORKDIR studio-lite
 
-COPY package*.json decorate-angular-cli.js ./
-RUN npm ci --silent && npm cache clean --force
-
-RUN npx cypress install
-
 COPY . .
 
-RUN npm install -g --silent nx
+# Update npm to latest version
+RUN npm --version && \
+    npm install -g --no-fund npm && \
+    npm cache clean --force && \
+    npm --version
 
-ENTRYPOINT ["nx"]
+# Install dependencies
+RUN npm ci --no-fund && npm cache clean --force
+
+# Check nx workspace version
+RUN npx nx --version
+
+# Install cypress
+RUN npx cypress install && npx cypress version
+
+ENTRYPOINT ["npx", "nx"]
 CMD ["e2e", "frontend-e2e"]

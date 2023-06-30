@@ -8,11 +8,17 @@ WORKDIR /studio-lite
 
 COPY . .
 
-RUN npm install -g --no-fund npm@9.7.2 nx && \
-    npm ci --no-fund && \
-    npm cache clean --force
+# Update npm to latest version
+RUN npm --version && \
+    npm install -g --no-fund npm && \
+    npm cache clean --force && \
+    npm --version
 
-RUN nx build $project --prod
+# Install dependencies
+RUN npm ci --no-fund && npm cache clean --force
+
+# Build project
+RUN npx nx --version && npx nx build $project --prod
 
 
 FROM build AS dev
@@ -22,7 +28,7 @@ RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${project}/proxy.conf.json
 
 EXPOSE 80
 
-ENTRYPOINT ["nx"]
+ENTRYPOINT ["npx", "nx"]
 
 
 FROM nginx:stable AS base
