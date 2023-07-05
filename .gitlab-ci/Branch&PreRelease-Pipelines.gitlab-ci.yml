@@ -219,7 +219,8 @@ build-db-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
+    - docker build --network host -q -f database/Postgres.Dockerfile
+      -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
     - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
     - docker logout $REGISTRY
@@ -238,7 +239,8 @@ build-liquibase-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
+    - docker build --network host -q -f database/Liquibase.Dockerfile
+      -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
     - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
     - docker logout $REGISTRY
@@ -271,6 +273,7 @@ test-db:
     - $DOCKER_SERVICE
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev pull -q db liquibase
     - docker compose --env-file .env.dev up -d db
     - export $(grep -v '^#' .env.dev | xargs)
@@ -317,14 +320,16 @@ test-app-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
@@ -344,14 +349,16 @@ test-app-e2e-api:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
@@ -371,14 +378,16 @@ test-app-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -398,14 +407,16 @@ test-app-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -426,14 +437,16 @@ test-app-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -453,14 +466,16 @@ test-app-e2e-ui-firefox-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -481,14 +496,16 @@ test-app-e2e-ui-edge:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -508,14 +525,16 @@ test-app-e2e-ui-edge-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
     - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
+    - docker network create app-net
     - docker compose --env-file .env.dev up -d --quiet-pull db
     - docker compose --env-file .env.dev up --quiet-pull liquibase
-    - $(npm bin)/cypress cache path # show where the Cypress test runner binaries are cached
-    - $(npm bin)/cypress cache list # show all installed versions of Cypress binary
-    - $(npm bin)/cypress verify
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
@@ -563,7 +582,7 @@ build-develop-commit-db-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build --network host -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -580,7 +599,7 @@ build-develop-commit-liquibase-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build --network host -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -597,7 +616,7 @@ build-develop-commit-backend-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod
+    - docker build --network host -q -f apps/api/Dockerfile --build-arg project=api --target=prod
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -615,7 +634,7 @@ build-develop-commit-frontend-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
+    - docker build --network host -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -648,12 +667,12 @@ scan-develop-commit-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -690,12 +709,12 @@ scan-develop-commit-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -732,12 +751,12 @@ scan-develop-commit-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -774,12 +793,12 @@ scan-develop-commit-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/

@@ -3,7 +3,7 @@
 # custom folders
 /packages
 /database/changelogDocs
-/database_dumps
+/backup
 
 # config files
 config/frontend/default.conf.template
@@ -16,7 +16,7 @@ config/frontend/default.conf.template.bkp
 *.key
 
 # environment files
-.env.prod
+.env.studio-lite
 
 # compiled output
 /dist

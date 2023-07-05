@@ -1,17 +1,24 @@
 # syntax=docker/dockerfile:1
 
-FROM node:18.14-bullseye-slim AS build
+FROM node:18.16-bookworm-slim AS build
 ARG project
 
 RUN mkdir /studio-lite
 WORKDIR /studio-lite
 
-COPY package*.json decorate-angular-cli.js ./
-RUN npm ci --silent && npm cache clean --force
-
 COPY . .
-RUN npm install -g --silent nx
-RUN nx build $project --prod
+
+# Update npm to latest version
+RUN npm --version && \
+    npm install -g --no-fund npm && \
+    npm cache clean --force && \
+    npm --version
+
+# Install dependencies
+RUN npm ci --no-fund && npm cache clean --force
+
+# Build project
+RUN npx nx --version && npx nx build $project --prod
 
 
 FROM build AS dev
@@ -19,7 +26,9 @@ ARG project
 
 RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${project}/proxy.conf.json
 
-ENTRYPOINT ["nx"]
+EXPOSE 80
+
+ENTRYPOINT ["npx", "nx"]
 
 
 FROM nginx:stable AS base

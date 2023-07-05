@@ -1,0 +1,10 @@
+.hide{
+  display: none !important;
+}
+
+.fx-flex-row-fix-60 {
+  flex: 1 1 60px;
+  box-sizing: border-box;
+  max-width: 60px;
+  min-width: 60px;
+}

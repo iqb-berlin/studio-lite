@@ -1,0 +1,76 @@
+x-env-postgres: &env-postgres
+  POSTGRES_HOST: db
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: ${POSTGRES_DB}
+
+services:
+  db:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
+    restart: always
+    environment:
+      <<: *env-postgres
+    volumes:
+      - db_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"
+      interval: "1s"
+      retries: 60
+    networks:
+      - application-network
+
+  liquibase:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      <<: *env-postgres
+    command: [
+      "liquibase",
+      "--url=jdbc:postgresql://db:5432/$POSTGRES_DB",
+      "--username=$POSTGRES_USER",
+      "--password=$POSTGRES_PASSWORD",
+      "--classpath=changelog",
+      "--changeLogFile=studio-lite.changelog-root.xml",
+      "update"
+    ]
+    networks:
+      - application-network
+
+  backend:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
+    depends_on:
+      db:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
+    restart: always
+    environment:
+      API_HOST: backend
+      <<: *env-postgres
+    networks:
+      - application-network
+
+  frontend:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
+    depends_on:
+      db:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
+    restart: always
+    networks:
+      - application-network
+
+volumes:
+  db_vol:
+  backend_vol:
+
+networks:
+  application-network:
+    name: app-net
+    external: true

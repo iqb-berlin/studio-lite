@@ -24,8 +24,8 @@ const datePipe = new DatePipe('de-DE');
   styleUrls: ['./workspaces.component.scss']
 })
 export class WorkspacesComponent implements OnInit {
-  objectsDatasource = new MatTableDataSource<WorkspaceInListDto>();
-  displayedColumns = ['selectCheckbox', 'name'];
+  objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
+  displayedColumns = ['selectCheckbox', 'name', 'unitsCount'];
   tableSelectionCheckbox = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
@@ -114,13 +114,22 @@ export class WorkspacesComponent implements OnInit {
     this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
       .subscribe(
         (dataResponse: WorkspaceInListDto[]) => {
-          this.objectsDatasource = new MatTableDataSource(dataResponse);
-          this.objectsDatasource.sort = this.sort;
+          this.setObjectsDatasource(dataResponse);
           this.tableSelectionCheckbox.clear();
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
         }
       );
+  }
+
+  private setObjectsDatasource(workspaces: WorkspaceInListDto[]): void {
+    this.objectsDatasource = new MatTableDataSource(workspaces);
+    this.objectsDatasource
+      .filterPredicate = (workspaceList: WorkspaceInListDto, filter) => ['name']
+        .some(column => (workspaceList[column as keyof WorkspaceInListDto] as string || '')
+          .toLowerCase()
+          .includes(filter));
+    this.objectsDatasource.sort = this.sort;
   }
 
   createUserList(): void {
@@ -144,8 +153,8 @@ export class WorkspacesComponent implements OnInit {
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
   }
 
-  selectRow(row: WorkspaceInListDto): void {
-    this.tableSelectionRow.select(row);
+  toggleRowSelection(row: WorkspaceInListDto): void {
+    this.tableSelectionRow.toggle(row);
   }
 
   xlsxDownloadWorkspaceReport() {

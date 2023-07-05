@@ -53,20 +53,22 @@ export class WorkspaceService {
       workspaceUsers.forEach(wsU => validWorkspaces.push(wsU.workspaceId));
     }
     const workspaces: Workspace[] = await this.workspacesRepository.find({ order: { name: 'ASC' } });
-    const returnWorkspaces: WorkspaceInListDto[] = [];
-    workspaces.forEach(workspace => {
-      if (!userId || (validWorkspaces.indexOf(workspace.id) > -1)) {
-        returnWorkspaces.push(<WorkspaceInListDto>{
-          id: workspace.id,
-          name: workspace.name,
-          groupId: workspace.groupId
-        });
-      }
-    });
-    return returnWorkspaces;
+
+    return Promise.all(
+      workspaces
+        .filter(w => !userId || validWorkspaces.indexOf(w.id) > -1)
+        .map(async workspace => (
+          {
+            id: workspace.id,
+            name: workspace.name,
+            groupId: workspace.groupId,
+            unitsCount: (await this.unitsRepository.find({
+              where: { workspaceId: workspace.id }
+            })).length
+          } as WorkspaceInListDto)
+        ));
   }
 
-  // TODO: setWorkspacesForUser? //was ändert sich hier?
   async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: number[]) {
     this.logger.log(`Set workspace for userId: ${userId}.`);
     return this.workspaceUserService.deleteAllByWorkspaceGroup(workspaceGroupId, userId).then(async () => {
@@ -122,15 +124,14 @@ export class WorkspaceService {
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
     });
-    const workspacesReturn: WorkspaceInListDto[] = [];
-    workspaces.forEach(workspace => {
-      workspacesReturn.push(<WorkspaceInListDto>{
-        id: workspace.id,
-        name: workspace.name,
-        groupId: workspaceGroupId
-      });
-    });
-    return workspacesReturn;
+    return Promise.all(workspaces.map(async workspace => ({
+      id: workspace.id,
+      name: workspace.name,
+      groupId: workspaceGroupId,
+      unitsCount: (await this.unitsRepository.find({
+        where: { workspaceId: workspace.id }
+      })).length
+    } as WorkspaceInListDto)));
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {

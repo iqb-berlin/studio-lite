@@ -162,7 +162,7 @@ build-main-pr-backend-test-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/api/Dockerfile --target=dev --build-arg project=api
+    - docker build --network host -q -f apps/api/Dockerfile --target=dev --build-arg project=api
       -t ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   after_script:
@@ -181,7 +181,7 @@ build-main-pr-frontend-test-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend/Dockerfile --target=dev
+    - docker build --network host -q -f apps/frontend/Dockerfile --target=dev
       --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333
       -t ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
@@ -201,7 +201,7 @@ build-main-pr-frontend-e2e-test-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend-e2e/Dockerfile
+    - docker build --network host -q -f apps/frontend-e2e/Dockerfile
       -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
       -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
     - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
@@ -221,7 +221,8 @@ build-main-pr-db-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker build --network host -q -f database/Postgres.Dockerfile
+      -t ${DB_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
     - docker push -q ${DB_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -239,7 +240,8 @@ build-main-pr-liquibase-image:
   before_script:
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker build --network host -q -f database/Liquibase.Dockerfile
+      -t ${LIQUIBASE_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $REGISTRY
@@ -260,8 +262,9 @@ build-main-pr-backend-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker build --cache-from ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test -f apps/api/Dockerfile
-      --target=prod --build-arg project=api -t ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
+    - docker build --network host --cache-from ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+      -q -f apps/api/Dockerfile --target=prod --build-arg project=api
+      -t ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -282,8 +285,8 @@ build-main-pr-frontend-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
   script:
-    - docker build --cache-from ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
-      -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
+    - docker build --network host --cache-from ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}_test
+      -q -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
       -t ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA} .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}
   after_script:
@@ -301,25 +304,26 @@ test-main-pr-db:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml pull -q db liquibase
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d db
-    - export $(grep -v '^#' .env.prod.template | xargs)
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml pull -q db liquibase
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d db
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
 
@@ -374,16 +378,17 @@ test-main-pr-e2e:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e test-e2e
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
 
 test-main-pr-e2e-api:
   stage: test-e2e
@@ -400,16 +405,17 @@ test-main-pr-e2e-api:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
 test-main-pr-e2e-ui-chrome:
   stage: test-e2e
@@ -426,16 +432,17 @@ test-main-pr-e2e-ui-chrome:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
 test-main-pr-e2e-ui-chrome-mobile:
   stage: test-e2e
@@ -452,16 +459,17 @@ test-main-pr-e2e-ui-chrome-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
 test-main-pr-e2e-ui-firefox:
   stage: test-e2e
@@ -478,16 +486,17 @@ test-main-pr-e2e-ui-firefox:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
 test-main-pr-e2e-ui-firefox-mobile:
   stage: test-e2e
@@ -504,16 +513,17 @@ test-main-pr-e2e-ui-firefox-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
 
 test-main-pr-e2e-ui-edge:
   stage: test-e2e
@@ -530,16 +540,17 @@ test-main-pr-e2e-ui-edge:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
 
 test-main-pr-e2e-ui-edge-mobile:
   stage: test-e2e
@@ -556,16 +567,17 @@ test-main-pr-e2e-ui-edge-mobile:
   services:
     - $DOCKER_SERVICE
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.prod.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.prod.template
-    - export $(grep -v '^#' .env.prod.template | xargs)
+    - sed -i "s/TAG=.*$/TAG=${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA}/" .env.studio-lite.template
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml up -d --quiet-pull
-    - docker compose --env-file .env.prod.template -f docker-compose.yml -f docker-compose.prod.yml run --rm liquibase
+    - docker network create app-net
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
+    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
       liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
       --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
 
 lint-main-pr-backend:
   stage: lint
@@ -746,7 +758,7 @@ build-main-commit-web-db-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build --network host -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -763,7 +775,7 @@ build-main-commit-web-liquibase-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build --network host -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $REGISTRY
@@ -780,7 +792,7 @@ build-main-commit-web-backend-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/api/Dockerfile --target=prod --build-arg project=api
+    - docker build --network host -q -f apps/api/Dockerfile --target=prod --build-arg project=api
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -798,7 +810,7 @@ build-main-commit-web-frontend-image:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
+    - docker build --network host -q -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -831,12 +843,12 @@ scan-main-commit-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -873,12 +885,12 @@ scan-main-commit-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -915,12 +927,12 @@ scan-main-commit-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -957,12 +969,12 @@ scan-main-commit-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1000,12 +1012,12 @@ scan-main-commit-web-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -1042,12 +1054,12 @@ scan-main-commit-web-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1084,12 +1096,12 @@ scan-main-commit-web-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1126,12 +1138,12 @@ scan-main-commit-web-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln --format template --template "@/contrib/gitlab.tpl"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
       --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --security-checks vuln "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --security-checks vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/

@@ -1,41 +1,96 @@
+STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+TRIVY_VERSION := aquasec/trivy:0.42.1
+
+## prevents collisions of make target names with possible file names
 .PHONY: scan-app scan-db scan-liquibase scan-backend scan-frontend
-BASE_DIR := $(shell git rev-parse --show-toplevel)
-TRIVY_VERSION := aquasec/trivy:0.34.0
 
 ## scans application images for security vulnerabilities
 scan-app: scan-db scan-liquibase scan-backend scan-frontend
 
 ## scans db image for security vulnerabilities
 scan-db:
-	cd $(BASE_DIR) && \
-		docker build --pull -f $(BASE_DIR)/database/Postgres.Dockerfile --no-cache --rm -t iqbberlin/studio-lite-db:scan .
-	docker run --rm \
-		-v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/Library/Caches:/root/.cache/ $(TRIVY_VERSION) \
-		image --security-checks vuln --ignore-unfixed --severity CRITICAL iqbberlin/studio-lite-db:scan
+	cd $(STUDIO_LITE_BASE_DIR) &&\
+		docker build\
+				--pull\
+				-f $(STUDIO_LITE_BASE_DIR)/database/Postgres.Dockerfile\
+				--no-cache\
+				--rm\
+				-t iqbberlin/studio-lite-db:scan\
+			.
+		docker run\
+				--rm\
+				-v /var/run/docker.sock:/var/run/docker.sock\
+				-v ${HOME}/Library/Caches:/root/.cache/\
+			$(TRIVY_VERSION)\
+				image\
+						--scanners vuln\
+						--ignore-unfixed\
+						--severity CRITICAL\
+					iqbberlin/studio-lite-db:scan
 
 ## scans liquibase image for security vulnerabilities
 scan-liquibase:
-	cd $(BASE_DIR) && \
-		docker build --pull -f $(BASE_DIR)/database/Liquibase.Dockerfile --no-cache --rm \
-			-t iqbberlin/studio-lite-liquibase:scan .
-	docker run --rm \
-		-v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/Library/Caches:/root/.cache/ $(TRIVY_VERSION) \
-		image --security-checks vuln --ignore-unfixed --severity CRITICAL iqbberlin/studio-lite-liquibase:scan
+	cd $(STUDIO_LITE_BASE_DIR) &&\
+		docker build\
+				--pull\
+				-f $(STUDIO_LITE_BASE_DIR)/database/Liquibase.Dockerfile\
+				--no-cache\
+				--rm\
+				-t iqbberlin/studio-lite-liquibase:scan\
+			.
+		docker run\
+				--rm\
+				-v /var/run/docker.sock:/var/run/docker.sock\
+				-v ${HOME}/Library/Caches:/root/.cache/\
+			$(TRIVY_VERSION)\
+				image\
+						--scanners vuln\
+						--ignore-unfixed\
+						--severity CRITICAL\
+					iqbberlin/studio-lite-liquibase:scan
 
 ## scans backend image for security vulnerabilities
 scan-backend:
-	cd $(BASE_DIR) && \
-		docker build --pull -f $(BASE_DIR)/apps/api/Dockerfile --build-arg project=api --target=prod --no-cache --rm \
-			-t iqbberlin/studio-lite-backend:scan .
-	docker run --rm \
-		-v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/Library/Caches:/root/.cache/ $(TRIVY_VERSION) \
-		image --security-checks vuln --ignore-unfixed --severity CRITICAL iqbberlin/studio-lite-backend:scan
+	cd $(STUDIO_LITE_BASE_DIR) &&\
+		docker build\
+				--pull\
+				-f $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
+				--build-arg project=api\
+				--target=prod\
+				--no-cache\
+				--rm\
+				-t iqbberlin/studio-lite-backend:scan\
+			.
+		docker run\
+				--rm\
+				-v /var/run/docker.sock:/var/run/docker.sock\
+				-v ${HOME}/Library/Caches:/root/.cache/\
+			$(TRIVY_VERSION)\
+				image\
+						--scanners vuln\
+						--ignore-unfixed\
+						--severity CRITICAL\
+					iqbberlin/studio-lite-backend:scan
 
 ## scans frontend image for security vulnerabilities
 scan-frontend:
-	cd $(BASE_DIR) && \
-		docker build --pull -f $(BASE_DIR)/apps/frontend/Dockerfile --build-arg project=frontend --target=prod --no-cache \
-			--rm -t iqbberlin/studio-lite-frontend:scan .
-	docker run --rm \
-		-v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/Library/Caches:/root/.cache/ $(TRIVY_VERSION) \
-		image --security-checks vuln --ignore-unfixed --severity CRITICAL iqbberlin/studio-lite-frontend:scan
+	cd $(STUDIO_LITE_BASE_DIR) &&\
+		docker build\
+				--pull\
+				-f $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
+				--build-arg project=frontend\
+				--target=prod\
+				--no-cache\
+				--rm\
+				-t iqbberlin/studio-lite-frontend:scan\
+			.
+		docker run\
+ 				--rm\
+ 				-v /var/run/docker.sock:/var/run/docker.sock\
+ 				-v ${HOME}/Library/Caches:/root/.cache/\
+ 			$(TRIVY_VERSION)\
+ 				image\
+ 						--scanners vuln\
+ 						--ignore-unfixed\
+ 						--severity CRITICAL\
+ 					iqbberlin/studio-lite-frontend:scan

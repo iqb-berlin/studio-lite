@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=node:18.14-bullseye-slim
+ARG BASE_IMAGE=node:18.16-bookworm-slim
+
 
 FROM ${BASE_IMAGE} AS build
 ARG project
@@ -8,17 +9,24 @@ ARG project
 RUN mkdir /studio-lite
 WORKDIR /studio-lite
 
-COPY package*.json decorate-angular-cli.js ./
-RUN npm ci --silent && npm cache clean --force
-
 COPY . .
-RUN npm install -g --silent nx
-RUN nx build $project --prod
+
+# Update npm to latest version
+RUN npm --version && \
+    npm install -g --no-fund npm && \
+    npm cache clean --force && \
+    npm --version
+
+# Install dependencies
+RUN npm ci --no-fund && npm cache clean --force
+
+# Build project
+RUN npx nx --version && npx nx build $project --prod
 
 
 FROM build AS dev
 
-ENTRYPOINT ["nx"]
+ENTRYPOINT ["npx", "nx"]
 
 
 FROM ${BASE_IMAGE} AS base
@@ -36,8 +44,7 @@ USER node
 EXPOSE 3333
 
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project/package.json .
-RUN npm install --only=production --silent && npm cache clean --force
-RUN npm install install pg --save --silent && npm cache clean --force ## workaround nx bug
+RUN npm install --only=production --no-fund && npm cache clean --force
 
 
 FROM base AS source
@@ -46,6 +53,7 @@ ARG project
 # Copy the build artifacts from the previous stage
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project .
 RUN mkdir packages && chown -R node:node packages
+
 
 FROM source AS prod
 ENTRYPOINT ["/usr/bin/tini", "--"]
