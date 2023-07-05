@@ -45,6 +45,7 @@ EXPOSE 3333
 
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project/package.json .
 RUN npm install --only=production --no-fund && npm cache clean --force
+RUN npm install pg --save --no-fund && npm cache clean --force ## workaround nx bug
 
 
 FROM base AS source
