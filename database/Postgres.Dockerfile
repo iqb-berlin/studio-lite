@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM postgres:15.3-bookworm
+FROM postgres:14.8-bookworm
 
 # Localization
 RUN localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
