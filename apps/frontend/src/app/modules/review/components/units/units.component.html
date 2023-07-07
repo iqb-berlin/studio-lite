@@ -1,0 +1,24 @@
+<div class="unit-host"
+     [class.with-footer]="reviewService.bookletConfig.pageNaviButtons === 'SEPARATE_BOTTOM'">
+  <div *ngIf="message"
+       class="message">
+    {{message}}
+  </div>
+  <div class="fx-row-start-stretch full-height">
+    <iframe #hostingIframe
+            class="unitHost fx-flex-fill"></iframe>
+    <unit-info *ngIf="reviewService.reviewConfig.showMetadata ||
+                  reviewService.reviewConfig.showCoding ||
+                  reviewService.reviewConfig.showOthersComments"
+               [unitId]="reviewService.currentUnitSequenceId"
+               [unitMetadata]="unitData.dbMetadata">
+    </unit-info>
+  </div>
+
+  <div *ngIf="reviewService.bookletConfig?.pageNaviButtons === 'SEPARATE_BOTTOM'"
+       class="page-navigation fx-row-end-center">
+    <studio-lite-page-navigation [pageList]="pageList"
+                                 (gotoPage)="gotoPage($event)">
+    </studio-lite-page-navigation>
+  </div>
+</div>
