@@ -561,5 +561,9 @@
     "id": "ID",
     "coding": "Kodierung",
     "no-coding": "Keine Kodierung"
+  },
+  "review": {
+    "end": "Ende der Aufgabenfolge",
+    "end-page": "Endseite"
   }
 }

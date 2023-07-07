@@ -1,17 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { ReviewService } from '../services/review.service';
+import { TranslateService } from '@ngx-translate/core';
+import { ReviewService } from '../../services/review.service';
 
 @Component({
   selector: 'studio-lite-finish',
   templateUrl: './finish.component.html',
-  styles: [
-    '#finish-page { height: 100%; background-color: whitesmoke; overflow: auto }',
-    '.finish-data { min-width: 400px; max-width: 600px }',
-    '#backwards-button { margin-top: 10px }'
-  ]
+  styleUrls: ['./finish.component.scss']
 })
 export class FinishComponent implements OnInit {
   constructor(
+    private translateService: TranslateService,
     public reviewService: ReviewService
   ) {}
 
@@ -25,7 +23,8 @@ export class FinishComponent implements OnInit {
       } else {
         this.reviewService.currentUnitSequenceId = this.reviewService.units.length;
       }
-      this.reviewService.setHeaderText('Endseite');
+      this.reviewService
+        .setHeaderText(this.translateService.instant('review.end-page'));
     });
   }
 }
