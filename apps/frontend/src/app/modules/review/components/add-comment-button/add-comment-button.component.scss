@@ -1,0 +1,13 @@
+.send-comment-button-container {
+  pointer-events: auto;
+  position: absolute;
+  right: 5px;
+  top: 0;
+  height: 65px;
+  z-index: 999;
+}
+
+.send-comment-button {
+  min-width: 0;
+  padding: 0 6px;
+}

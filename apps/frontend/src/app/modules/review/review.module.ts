@@ -27,6 +27,8 @@ import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.comp
 import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.component';
 import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.component';
 import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';
+import { UnitNavComponent } from './components/unit-nav/unit-nav.component';
+import { AddCommentButtonComponent } from './components/add-comment-button/add-comment-button.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { BookletConfigShowComponent } from './components/booklet-config-show/boo
     UnitInfoCommentsComponent,
     UnitInfoLoaderComponent,
     CommentDialogComponent,
-    BookletConfigShowComponent
+    BookletConfigShowComponent,
+    UnitNavComponent,
+    AddCommentButtonComponent
   ],
   imports: [
     CommonModule,
@@ -60,9 +64,7 @@ import { BookletConfigShowComponent } from './components/booklet-config-show/boo
     FormsModule,
     MatInputModule
   ],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
-  ],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'de-DE' }],
   exports: [ReviewComponent]
 })
 export class ReviewModule {}

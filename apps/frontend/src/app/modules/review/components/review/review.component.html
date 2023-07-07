@@ -1,7 +1,5 @@
-<div [class]="{
-     'with-header': reviewService.bookletConfig.unitScreenHeader !== 'OFF',
-     'with-title': reviewService.bookletConfig.unitTitle === 'ON'
-  }">
+<div [class.with-header]="reviewService.bookletConfig.unitScreenHeader !== 'OFF'"
+     [class.with-title]="reviewService.bookletConfig.unitTitle === 'ON'">
   <div *ngIf="reviewService.bookletConfig?.unitTitle === 'ON'"
        class="unit-title fx-column-center-center">
     <p>{{reviewService.pageHeaderText}}</p>
@@ -11,106 +9,14 @@
     <div>
       <h1>{{reviewService.screenHeaderText}}</h1>
     </div>
-    <div *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'OFF'"
-         class="unit-nav fx-row-end-center">
-      <a mat-fab
-         *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
-         [disabled]="reviewService.currentUnitSequenceId < 0"
-         (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)"
-         matTooltip="Zurück">
-        <i class="material-icons">chevron_left</i>
-      </a>
-      <a mat-flat-button
-         *ngIf="reviewService.bookletConfig?.controllerDesign !== '2018'"
-         [disabled]="reviewService.currentUnitSequenceId < 0"
-         (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)"
-         matTooltip="Zurück"
-         fxFlex="none">
-        <i class="material-icons">chevron_left</i>
-      </a>
-      <mat-selection-list #unitList [multiple]="false"
-                          *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'ARROWS_ONLY'"
-                          (selectionChange)="reviewService.setUnitNavigationRequest(unitList.selectedOptions.selected[0].value)"
-                          fxLayout="row wrap"
-                          fxLayoutAlign="start center"
-                          fxFlex="0 1 auto"
-                          role="menubar"
-      >
-        <div [class]="reviewService.currentUnitSequenceId < 0 ? 'unit-nav-item-selected' : 'unit-nav-item'"
-             (click)="reviewService.setUnitNavigationRequest(-1)"
-             fxLayout="row"
-             fxLayoutAlign="start center"
-             fxFlex>
-          <mat-list-option
-            value="-1"
-            [selected]="reviewService.currentUnitSequenceId === -1"
-            fxFlex
-            role="menuitem"
-          >
-          </mat-list-option>
-        </div>
-        <div [class]="u.sequenceId === reviewService.currentUnitSequenceId ? 'unit-nav-item-selected' : 'unit-nav-item'"
-             *ngFor="let u of reviewService.units"
-             (click)="reviewService.setUnitNavigationRequest(u.sequenceId)"
-             fxLayout="row"
-             fxLayoutAlign="start center"
-             fxFlex>
-          <mat-list-option
-            [value]="u.sequenceId.toString()"
-            [selected]="u.sequenceId === reviewService.currentUnitSequenceId"
-            fxFlex
-            role="menuitem"
-            [attr.aria-label]="u.name"
-          >
-            {{u.sequenceId + 1}}
-          </mat-list-option>
-        </div>
-        <div [class]="(reviewService.currentUnitSequenceId >= reviewService.units.length) ? 'unit-nav-item-selected' : 'unit-nav-item'"
-             (click)="reviewService.setUnitNavigationRequest(reviewService.units.length)"
-             fxLayout="row"
-             fxLayoutAlign="start center"
-             fxFlex>
-          <mat-list-option
-            [value]="reviewService.units.length"
-            [selected]="reviewService.currentUnitSequenceId >= reviewService.units.length"
-            fxFlex
-            role="menuitem"
-          >
-          </mat-list-option>
-        </div>
-      </mat-selection-list>
-
-      <a mat-fab
-         *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
-         [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
-         (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
-         matTooltip="Weiter"
-         fxFlex="none"
-      >
-        <i class="material-icons">chevron_right</i>
-      </a>
-      <a mat-flat-button
-         *ngIf="reviewService.bookletConfig?.controllerDesign !== '2018'"
-         [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
-         (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
-         matTooltip="Weiter"
-         fxFlex="none"
-      >
-        <i class="material-icons">chevron_right</i>
-      </a>
-    </div>
+    <studio-lite-unit-nav *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'OFF'">
+    </studio-lite-unit-nav>
   </div>
-  <div class="plus-buttons" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="4px">
-    <button *ngIf="reviewService.reviewConfig.canComment"
-      mat-raised-button
-            [disabled]="reviewService.unitDbId <= 0"
-      (click)="showReviewDialog()"
-      matTooltip="Kommentar senden"
-    >
-      <mat-icon>rate_review</mat-icon>
-    </button>
-  </div>
-  <div id="page-host">
+  <studio-lite-add-comment-button *ngIf="reviewService.reviewConfig.canComment"
+                                  [showOthersComments]="reviewService.reviewConfig.showOthersComments || false"
+                                  [unitDbId]="reviewService.unitDbId">
+  </studio-lite-add-comment-button>
+  <div class="page-host">
     <router-outlet></router-outlet>
   </div>
 </div>
