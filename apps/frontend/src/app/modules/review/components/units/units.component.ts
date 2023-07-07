@@ -1,17 +1,17 @@
 import {
-  Component, HostListener, OnDestroy, OnInit
+  Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { ModuleService } from '../../shared/services/module.service';
-import { AppService } from '../../../services/app.service';
-import { ReviewService } from '../services/review.service';
-import { UnitPage } from '../models/unit-page.interface';
-import { PageData } from '../../workspace/models/page-data.interface';
-import { UnitData } from '../models/unit-data.class';
-import { BackendService } from '../services/backend.service';
+import { ModuleService } from '../../../shared/services/module.service';
+import { AppService } from '../../../../services/app.service';
+import { ReviewService } from '../../services/review.service';
+import { UnitPage } from '../../models/unit-page.interface';
+import { PageData } from '../../../workspace/models/page-data.interface';
+import { UnitData } from '../../models/unit-data.class';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-units',
@@ -19,6 +19,8 @@ import { BackendService } from '../services/backend.service';
   styleUrls: ['./units.component.scss']
 })
 export class UnitsComponent implements OnInit, OnDestroy {
+  @ViewChild('hostingIframe') hostingIframe!: ElementRef;
+
   routingSubscription: Subscription | null = null;
   postMessageSubscription: Subscription | null = null;
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -37,10 +39,6 @@ export class UnitsComponent implements OnInit, OnDestroy {
     name: ''
   };
 
-  get iFrameElementWidth(): number {
-    return this.iFrameElement ? parseInt(this.iFrameElement.style.width, 10) : window.innerWidth;
-  }
-
   constructor(
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
@@ -52,15 +50,13 @@ export class UnitsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.iFrameElement = <HTMLIFrameElement>document.querySelector('#hosting-iframe');
-      // eslint-disable-next-line @typescript-eslint/dot-notation
+      this.iFrameElement = this.hostingIframe.nativeElement;
       this.postMessageSubscription = this.appService.postMessage$
         .subscribe(messageEvent => this.handleIncomingMessage(messageEvent));
       this.routingSubscription = this.route.params.subscribe(params => {
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.reviewService.currentUnitSequenceId = parseInt(params['u'], 10);
+        const unitKey = 'u';
+        this.reviewService.currentUnitSequenceId = parseInt(params[unitKey], 10);
         if (this.reviewService.units.length === 0) {
-          // eslint-disable-next-line @typescript-eslint/dot-notation
           this.reviewService.loadReviewData().then(() => {
             const unitData = this.reviewService.units.filter(
               u => u.sequenceId === this.reviewService.currentUnitSequenceId
@@ -79,7 +75,9 @@ export class UnitsComponent implements OnInit, OnDestroy {
     });
   }
 
-  gotoPage(action: string, index = 0): void {
+  gotoPage(target: { action: string, index?: number }): void {
+    const action = target.action;
+    const index = target.index || 0;
     let nextPageId = '';
     // currentpage is detected by disabled-attribute of page
     if (action === '#next') {
@@ -130,6 +128,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
     }
   }
 
+  // TODO: remove duplicate code (units-preview.component.ts)
   private handleIncomingMessage(m: MessageEvent) {
     const msgData = m.data;
     const msgType = msgData.type;
@@ -138,12 +137,16 @@ export class UnitsComponent implements OnInit, OnDestroy {
         case 'vopReadyNotification':
         case 'player':
         case 'vo.FromPlayer.ReadyNotification':
-          if (msgType === 'vopReadyNotification' || msgType === 'player') {
-            const majorVersion = msgData.apiVersion ?
-              msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+          if ((msgType !== undefined) && (msgType !== null) && (m.source === this.iFrameElement?.contentWindow)) {
+            let majorVersion;
+            if (msgData.metadata) {
+              majorVersion = msgData.metadata.specVersion.match(/\d+/);
+            } else {
+              majorVersion = msgData.apiVersion ?
+                msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+            }
             if (majorVersion.length > 0) {
-              const majorVersionNumber = Number(majorVersion[0]);
-              this.playerApiVersion = majorVersionNumber > 2 ? 3 : 2;
+              this.playerApiVersion = Number(majorVersion[0]);
             } else {
               this.playerApiVersion = 2;
             }
@@ -280,6 +283,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
             responseProgress: 'none'
           },
           playerConfig: {
+            stateReportPolicy: 'eager',
             pagingMode: this.reviewService.bookletConfig?.pagingMode,
             enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end'],
             directDownloadUrl: this.backendService.getDirectDownloadLink()

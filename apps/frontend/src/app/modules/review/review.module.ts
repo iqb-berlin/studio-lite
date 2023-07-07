@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { UnitsComponent } from './units/units.component';
+import { UnitsComponent } from './components/units/units.component';
 import { FinishComponent } from './finish/finish.component';
 import { StartComponent } from './start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
@@ -29,6 +29,7 @@ import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.comp
 import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';
 import { UnitNavComponent } from './components/unit-nav/unit-nav.component';
 import { AddCommentButtonComponent } from './components/add-comment-button/add-comment-button.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { AddCommentButtonComponent } from './components/add-comment-button/add-c
   imports: [
     CommonModule,
     ReviewRoutingModule,
+    SharedModule,
     CommentsModule,
     FlexModule,
     MatButtonModule,
