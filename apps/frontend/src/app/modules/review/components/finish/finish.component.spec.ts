@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FinishComponent } from './finish.component';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 
 describe('FinishComponent', () => {
   let component: FinishComponent;
@@ -12,7 +14,9 @@ describe('FinishComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [FinishComponent],
       imports: [
+        TranslateModule.forRoot(),
         HttpClientModule,
+        MatTooltipModule,
         MatButtonModule
       ],
       providers: [{
