@@ -4,7 +4,7 @@ import {
 import { CodingSchemeDto, VariableCodingData } from '@studio-lite/shared-code';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
-import { UnitInfoLoaderComponent } from './unit-info-loader.component';
+import { UnitInfoLoaderComponent } from '../../components/unit-info-loader/unit-info-loader.component';
 
 @Component({
   selector: 'unit-info-coding',

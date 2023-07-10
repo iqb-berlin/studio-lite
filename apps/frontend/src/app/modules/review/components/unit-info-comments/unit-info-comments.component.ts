@@ -4,7 +4,7 @@ import {
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
 import { Comment } from '../../../comments/models/comment.interface';
-import { UnitInfoLoaderComponent } from '../../units/unit-info/unit-info-loader.component';
+import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
 
 @Component({
   selector: 'studio-lite-unit-info-comments',
