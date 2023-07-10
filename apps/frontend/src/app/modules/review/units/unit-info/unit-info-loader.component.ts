@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'unit-info-loader',
+  selector: 'studio-lite-unit-info-loader',
   template: `
     <div id="unit_info_loader_div" [style.height]="spinnerOn ? '30px' : '0'">
       <mat-spinner *ngIf="spinnerOn" [diameter]="20"></mat-spinner>

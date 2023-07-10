@@ -11,7 +11,7 @@ import { UnitInfoLoaderComponent } from './unit-info-loader.component';
   template: `
     <div fxLayout="column" [style.minHeight.px]="minHeight">
       <div class="unit-info-coding-header">Kodierung</div>
-      <unit-info-loader #loader (onEnter)="updateContent()"></unit-info-loader>
+      <studio-lite-unit-info-loader #loader (onEnter)="updateContent()"></studio-lite-unit-info-loader>
       <div *ngIf="allVariables.length === 0">
       {{ loader?.spinnerOn ? 'lade...' : 'Keine Kodierinformationen verfügbar.'}}
       </div>

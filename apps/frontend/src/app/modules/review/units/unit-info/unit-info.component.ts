@@ -37,8 +37,8 @@ const datePipe = new DatePipe('de-DE');
         <p *ngIf="_unitDescription" [innerHTML]="_unitDescription"></p>
         <unit-info-coding *ngIf="reviewService.reviewConfig.showCoding && _unitMetadata"
                           [unitId]="_unitId"></unit-info-coding>
-        <unit-info-comments *ngIf="reviewService.reviewConfig.showOthersComments && _unitMetadata"
-                          [unitId]="_unitId"></unit-info-comments>
+        <studio-lite-unit-info-comments *ngIf="reviewService.reviewConfig.showOthersComments && _unitMetadata"
+                                        [unitId]="_unitId"></studio-lite-unit-info-comments>
       </div>
     </div>
   `,

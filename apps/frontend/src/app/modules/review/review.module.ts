@@ -24,7 +24,7 @@ import { UnitInfoComponent } from './units/unit-info/unit-info.component';
 import { CommentDialogComponent } from './components/comment-dialog/comment-dialog.component';
 import { CommentsModule } from '../comments/comments.module';
 import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.component';
-import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.component';
+import { UnitInfoCommentsComponent } from './components/unit-info-comments/unit-info-comments.component';
 import { UnitInfoLoaderComponent } from './units/unit-info/unit-info-loader.component';
 import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';
 import { UnitNavComponent } from './components/unit-nav/unit-nav.component';
