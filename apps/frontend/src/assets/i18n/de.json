@@ -567,6 +567,9 @@
     "end-page": "Endseite",
     "pages-count-info": "Anzahl der Aufgaben bzw. Seiten: {{count}}",
     "title": "Review einer Aufgabenfolge",
-    "booklet-config": "Einstellungen für Darstellung und Ablauf"
+    "booklet-config": "Einstellungen für Darstellung und Ablauf",
+    "enter-comment-name": "Bitte Namen eingeben",
+    "comment-name": "Namen",
+    "comment": "Kommentieren"
   }
 }
