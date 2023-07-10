@@ -17,7 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { UnitsComponent } from './components/units/units.component';
 import { FinishComponent } from './components/finish/finish.component';
-import { StartComponent } from './start/start.component';
+import { StartComponent } from './components/start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
 import { ReviewComponent } from './components/review/review.component';
 import { UnitInfoComponent } from './units/unit-info/unit-info.component';

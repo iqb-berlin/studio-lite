@@ -5,7 +5,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { environment } from '../../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { environment } from '../../../../../environments/environment';
 import { StartComponent } from './start.component';
 
 describe('StartComponent', () => {
@@ -16,6 +18,8 @@ describe('StartComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [StartComponent],
       imports: [
+        TranslateModule.forRoot(),
+        MatTooltipModule,
         RouterTestingModule,
         HttpClientModule,
         MatExpansionModule,
