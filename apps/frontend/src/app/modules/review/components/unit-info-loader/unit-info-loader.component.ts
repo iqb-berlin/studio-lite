@@ -5,21 +5,8 @@ import {
 
 @Component({
   selector: 'studio-lite-unit-info-loader',
-  template: `
-    <div id="unit_info_loader_div" [style.height]="spinnerOn ? '30px' : '0'">
-      <mat-spinner *ngIf="spinnerOn" [diameter]="20"></mat-spinner>
-    </div>
-  `,
-  styles: [
-    `#unit_info_loader_div {
-      background-color: transparent;
-      width: 30px;
-      margin: 6px;
-    }`,
-    `.mat-spinner, .mat-progress-spinner {
-      opacity: 70%;
-    }`
-  ]
+  templateUrl: './unit-info-loader.component.html',
+  styleUrls: ['./unit-info-loader.component.scss']
 })
 export class UnitInfoLoaderComponent implements AfterViewInit, OnDestroy {
   @Output() onEnter = new EventEmitter();

@@ -10,8 +10,7 @@ describe('UnitInfoCommentsComponent', () => {
   let fixture: ComponentFixture<UnitInfoCommentsComponent>;
 
   @Component({ selector: 'studio-lite-unit-info-loader', template: '' })
-  class MockUnitInfoLoader {
-  }
+  class MockUnitInfoLoader {}
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
