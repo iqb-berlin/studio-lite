@@ -570,6 +570,9 @@
     "booklet-config": "Einstellungen für Darstellung und Ablauf",
     "enter-comment-name": "Bitte Namen eingeben",
     "comment-name": "Namen",
-    "comment": "Kommentieren"
+    "comment": "Kommentieren",
+    "comments": "Kommentare",
+    "no-comments": "Keine Kommentare verfügbar",
+    "loading-comments": "Kommentare werden geladen..."
   }
 }
