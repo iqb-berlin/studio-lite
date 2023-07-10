@@ -1,15 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ReviewService } from '../services/review.service';
+import { ReviewService } from '../../services/review.service';
 
 @Component({
   selector: 'studio-lite-start',
   templateUrl: './start.component.html',
-  styles: [
-    '#start-page { height: 100%; background-color: whitesmoke; overflow: auto }',
-    '.start-data { min-width: 400px; max-width: 600px }',
-    '#continue-button { margin-top: 10px }'
-  ]
+  styleUrls: ['./start.component.scss']
 })
+
 export class StartComponent implements OnInit {
   constructor(
     public reviewService: ReviewService
