@@ -21,7 +21,7 @@ import { StartComponent } from './components/start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
 import { ReviewComponent } from './components/review/review.component';
 import { UnitInfoComponent } from './units/unit-info/unit-info.component';
-import { CommentDialogComponent } from './comment-dialog.component';
+import { CommentDialogComponent } from './components/comment-dialog/comment-dialog.component';
 import { CommentsModule } from '../comments/comments.module';
 import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.component';
 import { UnitInfoCommentsComponent } from './units/unit-info/unit-info-comments.component';
