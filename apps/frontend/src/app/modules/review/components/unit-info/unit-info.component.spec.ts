@@ -1,13 +1,16 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { UnitPrintLayoutComponent } from './unit-print-layout.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
+import { UnitInfoComponent } from './unit-info.component';
 
-describe('UnitPrintLayoutComponent', () => {
-  let component: UnitPrintLayoutComponent;
-  let fixture: ComponentFixture<UnitPrintLayoutComponent>;
+describe('UnitInfoComponent', () => {
+  let component: UnitInfoComponent;
+  let fixture: ComponentFixture<UnitInfoComponent>;
 
   @Component({ selector: 'studio-lite-unit-metadata', template: '' })
   class MockUnitMetaDataComponent {
@@ -25,27 +28,28 @@ describe('UnitPrintLayoutComponent', () => {
     @Input() lastChangedScheme!: Date | undefined | null;
   }
 
-  @Component({ selector: 'studio-lite-unit-print-comments', template: '' })
-  class MockUnitPrintCommentsComponent {
+  @Component({ selector: 'studio-lite-unit-info-comments', template: '' })
+  class MockUnitInfoComments {
     @Input() unitId!: number;
-    @Input() workspaceId!: number;
   }
 
-  @Component({ selector: 'studio-lite-unit-print-coding', template: '' })
-  class MockUnitPrintCodingComponent {
+  @Component({ selector: 'studio-lite-unit-info-coding', template: '' })
+  class MockUnitInfoCoding {
     @Input() unitId!: number;
-    @Input() workspaceId!: number;
   }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitPrintLayoutComponent,
+        UnitInfoComponent,
         MockUnitMetaDataComponent,
-        MockUnitPrintCommentsComponent,
-        MockUnitPrintCodingComponent
+        MockUnitInfoComments,
+        MockUnitInfoCoding
       ],
       imports: [
+        TranslateModule.forRoot(),
+        MatIconModule,
+        MatTooltipModule,
         HttpClientModule
       ],
       providers: [{
@@ -54,7 +58,7 @@ describe('UnitPrintLayoutComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitPrintLayoutComponent);
+    fixture = TestBed.createComponent(UnitInfoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

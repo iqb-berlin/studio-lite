@@ -77,7 +77,6 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
 import { GroupMenuComponent } from './components/group-menu/group-menu.component';
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
-import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
@@ -161,8 +160,7 @@ import { SharedModule } from '../shared/shared.module';
     NewGroupButtonComponent,
     GroupMenuComponent,
     PreviewBarComponent,
-    StatusIndicationComponent,
-    PageNavigationComponent
+    StatusIndicationComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [

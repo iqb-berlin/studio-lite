@@ -1,0 +1,57 @@
+.unit-nav {
+  pointer-events: auto;
+
+  .mat-flat-button {
+    min-width: 0;
+    padding: 0 12px;
+  }
+
+  .mat-list-base,
+  .mat-list-item {
+    padding: 0;
+    font-size: 12px;
+  }
+
+  .mat-list-option {
+    height: auto;
+  }
+
+  .mat-list-single-selected-option,
+  .unit-nav-item-selected {
+    background-color: var(--accent);
+  }
+
+  .unit-nav-item {
+    background-color: white;
+  }
+
+  .unit-nav-item,
+  .unit-nav-item-selected {
+    border-left: lightgray 1px solid;
+    min-height: 36px;
+  }
+
+  .unit-nav-item:last-child {
+    border-right: lightgray 1px solid;
+  }
+
+  .unit-list {
+    border-bottom: lightgray 1px solid;
+    border-top: lightgray 1px solid;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+}
+
+:host ::ng-deep .mat-list-text {
+  text-align: center;
+  padding: 0!important;
+}
+
+:host ::ng-deep .mat-list-item-content {
+  padding: 0 8px!important;
+}
+

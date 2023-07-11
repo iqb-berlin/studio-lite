@@ -1,0 +1,32 @@
+<div class="booklet-config fx-column-start-stretch">
+  <div *ngIf="bookletConfig.pagingMode"
+       class="fx-row-center-center">
+    <div class="fx-flex-row-50">{{'booklet-config.pagingMode.label' | translate}}</div>
+    <div class="fx-flex-fill">{{'booklet-config.pagingMode.' + bookletConfig.pagingMode | translate}}</div>
+  </div>
+  <div *ngIf="bookletConfig.pageNaviButtons"
+       class="fx-row-center-center">
+    <div class="fx-flex-row-50">{{'booklet-config.pageNaviButtons.label' | translate}}</div>
+    <div class="fx-flex-fill">{{'booklet-config.pageNaviButtons.' + bookletConfig.pageNaviButtons | translate}}</div>
+  </div>
+  <div *ngIf="bookletConfig.unitNaviButtons"
+       class="fx-row-center-center">
+    <div class="fx-flex-row-50">{{'booklet-config.unitNaviButtons.label' | translate}}</div>
+    <div class="fx-flex-fill">{{'booklet-config.unitNaviButtons.' + bookletConfig.unitNaviButtons | translate}}</div>
+  </div>
+  <div *ngIf="bookletConfig.controllerDesign"
+       class="fx-row-center-center">
+    <div class="fx-flex-row-50">{{'booklet-config.controllerDesign.label' | translate}}</div>
+    <div class="fx-flex-fill">{{'booklet-config.controllerDesign.' + bookletConfig.controllerDesign | translate}}</div>
+  </div>
+  <div *ngIf="bookletConfig.unitScreenHeader"
+       class="fx-row-center-center">
+    <div class="fx-flex-row-50">{{'booklet-config.unitScreenHeader.label' | translate}}</div>
+    <div class="fx-flex-fill">{{'booklet-config.unitScreenHeader.' + bookletConfig.unitScreenHeader | translate}}</div>
+  </div>
+  <div *ngIf="bookletConfig.unitTitle"
+       class="fx-row-center-center">
+    <div class="fx-flex-row-50">{{'booklet-config.unitTitle.label' | translate}}</div>
+    <div class="fx-flex-fill">{{'booklet-config.unitTitle.' + bookletConfig.unitTitle | translate}}</div>
+  </div>
+</div>
