@@ -23,7 +23,7 @@ import { ReviewComponent } from './components/review/review.component';
 import { UnitInfoComponent } from './components/unit-info/unit-info.component';
 import { CommentDialogComponent } from './components/comment-dialog/comment-dialog.component';
 import { CommentsModule } from '../comments/comments.module';
-import { UnitInfoCodingComponent } from './units/unit-info/unit-info-coding.component';
+import { UnitInfoCodingComponent } from './components/unit-info-coding/unit-info-coding.component';
 import { UnitInfoCommentsComponent } from './components/unit-info-comments/unit-info-comments.component';
 import { UnitInfoLoaderComponent } from './components/unit-info-loader/unit-info-loader.component';
 import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';

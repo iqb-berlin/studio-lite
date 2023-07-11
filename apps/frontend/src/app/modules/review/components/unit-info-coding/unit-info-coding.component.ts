@@ -4,51 +4,19 @@ import {
 import { CodingSchemeDto, VariableCodingData } from '@studio-lite/shared-code';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
-import { UnitInfoLoaderComponent } from '../../components/unit-info-loader/unit-info-loader.component';
+import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
 
 @Component({
-  selector: 'unit-info-coding',
-  template: `
-    <div fxLayout="column" [style.minHeight.px]="minHeight">
-      <div class="unit-info-coding-header">Kodierung</div>
-      <studio-lite-unit-info-loader #loader (onEnter)="updateContent()"></studio-lite-unit-info-loader>
-      <div *ngIf="allVariables.length === 0">
-      {{ loader?.spinnerOn ? 'lade...' : 'Keine Kodierinformationen verfügbar.'}}
-      </div>
-      <div class="unit-info-coding-content" *ngFor="let c of allVariables">
-        <div fxLayout="row" fxLayoutAlign="space-between">
-            <h4>{{c.id}}</h4>
-            <h4>{{c.sourceType === 'BASE' ? 'B' : 'A'}}</h4>
-        </div>
-        <div *ngIf="c.label">{{c.label}}</div>
-        <div *ngIf="c.manualInstruction" [innerHTML]="c.manualInstruction"></div>
-      </div>
-    </div>
-  `,
-  styles: [
-    `.unit-info-coding-header {
-      align-content: stretch;
-      background-color: rgba(65,208,247,0.32);
-      font-size: large;
-      padding: 2px 6px;
-    }`,
-    `.unit-info-coding-content {
-      border-top: 1px solid darkgray;
-      margin: 4px 0;
-    }`,
-    `.unit-info-coding-content h4 {
-      margin: 4px 0;
-    }`
-  ]
+  selector: 'studio-lite-unit-info-coding',
+  templateUrl: './unit-info-coding.component.html',
+  styleUrls: ['./unit-info-coding.component.scss']
 })
 export class UnitInfoCodingComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;
-  minHeight = 1000;
   _unitId = 0;
   @Input('unitId')
   set unitId(value: number) {
     this._unitId = value;
-    this.minHeight = 1000;
     this.updateContent();
   }
 
@@ -65,14 +33,12 @@ export class UnitInfoCodingComponent {
       const unitData = this.reviewService.units[this._unitId];
       if (unitData.codingSchemeVariables) {
         this.allVariables = unitData.codingSchemeVariables || [];
-        this.minHeight = 0;
       } else {
         this.loader.spinnerOn = true;
         this.backendService.getUnitCoding(
           this.reviewService.reviewId, unitData.databaseId
         ).subscribe(unitScheme => {
           if (this.loader) this.loader.spinnerOn = false;
-          this.minHeight = 0;
           if (unitScheme) {
             try {
               const codingScheme: CodingSchemeDto = JSON.parse(unitScheme.scheme);
