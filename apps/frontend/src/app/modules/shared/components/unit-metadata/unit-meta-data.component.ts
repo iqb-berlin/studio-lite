@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'studio-lite-unit-print-header',
-  templateUrl: './unit-print-header.component.html',
-  styleUrls: ['./unit-print-header.component.scss']
+  selector: 'studio-lite-unit-metadata',
+  templateUrl: './unit-meta-data.component.html',
+  styleUrls: ['./unit-meta-data.component.scss']
 })
-export class UnitPrintHeaderComponent {
+export class UnitMetaDataComponent {
   @Input() name!: string | undefined | null;
   @Input() key!: string | undefined | null;
   @Input() description!: string | undefined | null;

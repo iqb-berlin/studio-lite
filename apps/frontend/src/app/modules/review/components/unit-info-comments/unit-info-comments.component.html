@@ -1,5 +1,5 @@
 <div class="fx-column-start-stretch">
-  <div class="unit-info-comment-header">{{'review.comments'}}</div>
+  <div class="unit-info-comment-header">{{'review.comments' | translate}}</div>
   <studio-lite-unit-info-loader (onEnter)="updateContent()"></studio-lite-unit-info-loader>
   <div *ngIf="!allComments.length">
     {{ (loader?.spinnerOn ? 'review.loading-comments' : 'review.no-comments') | translate }}
