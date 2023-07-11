@@ -575,6 +575,9 @@
     "no-comments": "Keine Kommentare verfügbar",
     "loading-comments": "Kommentare werden geladen...",
     "more-information": "Weitere Informationen",
-    "less-information": "Weniger Informationen"
+    "less-information": "Weniger Informationen",
+    "coding": "Kodierung",
+    "no-coding-information": "Keine Kodierinformationen verfügbar",
+    "loading-coding-information": "Kodierinformationen werden geladen..."
   }
 }

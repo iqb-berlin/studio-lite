@@ -20,9 +20,9 @@
       [lastChangedMetadata] = "_unitMetadata ? _unitMetadata.lastChangedMetadata : null"
       [lastChangedScheme] = "_unitMetadata ? _unitMetadata.lastChangedScheme : null">
     </studio-lite-unit-metadata>
-    <unit-info-coding *ngIf="reviewService.reviewConfig.showCoding && _unitMetadata"
-                      [unitId]="_unitId">
-    </unit-info-coding>
+    <studio-lite-unit-info-coding *ngIf="reviewService.reviewConfig.showCoding && _unitMetadata"
+                                  [unitId]="_unitId">
+    </studio-lite-unit-info-coding>
     <studio-lite-unit-info-comments *ngIf="reviewService.reviewConfig.showOthersComments && _unitMetadata"
                                     [unitId]="_unitId">
     </studio-lite-unit-info-comments>

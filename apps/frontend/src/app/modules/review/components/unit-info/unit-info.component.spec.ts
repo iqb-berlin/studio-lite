@@ -33,7 +33,7 @@ describe('UnitInfoComponent', () => {
     @Input() unitId!: number;
   }
 
-  @Component({ selector: 'unit-info-coding', template: '' })
+  @Component({ selector: 'studio-lite-unit-info-coding', template: '' })
   class MockUnitInfoCoding {
     @Input() unitId!: number;
   }
