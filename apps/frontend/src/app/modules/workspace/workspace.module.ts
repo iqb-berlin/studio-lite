@@ -17,7 +17,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -86,7 +85,6 @@ import { SharedModule } from '../shared/shared.module';
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,
-    FlexLayoutModule,
     WorkspaceRoutingModule,
     ReactiveFormsModule,
     MatSelectModule,

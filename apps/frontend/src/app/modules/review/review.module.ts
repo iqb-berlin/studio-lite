@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
@@ -51,7 +50,6 @@ import { SharedModule } from '../shared/shared.module';
     ReviewRoutingModule,
     SharedModule,
     CommentsModule,
-    FlexModule,
     MatButtonModule,
     MatTooltipModule,
     MatListModule,
