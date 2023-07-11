@@ -8,7 +8,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
@@ -40,7 +39,6 @@ import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-me
     MatSortModule,
     MatTooltipModule,
     MatButtonModule,
-    FlexLayoutModule,
     FormsModule,
     MatDialogModule,
     MatInputModule,

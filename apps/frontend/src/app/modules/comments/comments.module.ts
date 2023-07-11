@@ -11,7 +11,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxTiptapModule } from 'ngx-tiptap';
 import { MatInputModule } from '@angular/material/input';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CommentComponent } from './components/comment/comment.component';
@@ -46,8 +45,7 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
     MatTooltipModule,
     NgxTiptapModule,
     FormsModule,
-    MatInputModule,
-    FlexLayoutModule
+    MatInputModule
   ],
   declarations: [
     CommentsComponent,

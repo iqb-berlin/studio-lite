@@ -18,7 +18,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatBadgeModule } from '@angular/material/badge';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
@@ -71,7 +70,6 @@ import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu
     MatNativeDateModule,
     MatDatepickerModule,
     MatBadgeModule,
-    FlexLayoutModule,
     MatChipsModule,
     FormsModule,
     TranslateModule,
