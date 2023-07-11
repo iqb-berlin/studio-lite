@@ -1,0 +1,43 @@
+.unit-info-content {
+  height: 100%;
+  background-color: whitesmoke;
+}
+
+.infoPanelExpandButton {
+   height: 100%;
+   padding-top: 6px;
+}
+
+.infoPanelExpandButton button {
+   min-width: 0;
+   padding: 0 6px;
+}
+
+.infoPanel {
+   padding: 10px;
+   overflow-x: auto;
+}
+
+.infoPanelSplitter {
+   background-color: lightgray;
+   cursor: col-resize;
+}
+
+.infoPanel p {
+   text-indent: -1em;
+   margin-left: 1em;
+}
+
+.fx-flex-row-fix-40 {
+  flex: 1 1 40px;
+  box-sizing: border-box;
+  max-width: 40px;
+  min-width: 40px;
+}
+
+.fx-flex-row-fix-6 {
+  flex: 1 1 6px;
+  box-sizing: border-box;
+  max-width: 6px;
+  min-width: 6px;
+}

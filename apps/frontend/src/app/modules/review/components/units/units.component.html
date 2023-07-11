@@ -7,12 +7,12 @@
   <div class="fx-row-start-stretch full-height">
     <iframe #hostingIframe
             class="unitHost fx-flex-fill"></iframe>
-    <unit-info *ngIf="reviewService.reviewConfig.showMetadata ||
-                  reviewService.reviewConfig.showCoding ||
-                  reviewService.reviewConfig.showOthersComments"
-               [unitId]="reviewService.currentUnitSequenceId"
-               [unitMetadata]="unitData.dbMetadata">
-    </unit-info>
+    <studio-lite-unit-info *ngIf="reviewService.reviewConfig.showMetadata ||
+                           reviewService.reviewConfig.showCoding ||
+                           reviewService.reviewConfig.showOthersComments"
+                           [unitId]="reviewService.currentUnitSequenceId"
+                           [unitMetadata]="unitData.dbMetadata">
+    </studio-lite-unit-info>
   </div>
 
   <div *ngIf="reviewService.bookletConfig?.pageNaviButtons === 'SEPARATE_BOTTOM'"

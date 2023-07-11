@@ -573,6 +573,8 @@
     "comment": "Kommentieren",
     "comments": "Kommentare",
     "no-comments": "Keine Kommentare verfügbar",
-    "loading-comments": "Kommentare werden geladen..."
+    "loading-comments": "Kommentare werden geladen...",
+    "more-information": "Weitere Informationen",
+    "less-information": "Weniger Informationen"
   }
 }

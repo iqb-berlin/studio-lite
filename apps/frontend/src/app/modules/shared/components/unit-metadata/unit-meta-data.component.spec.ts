@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { UnitPrintHeaderComponent } from './unit-print-header.component';
+import { UnitMetaDataComponent } from './unit-meta-data.component';
 
 describe('UnitPrintHeaderComponent', () => {
-  let component: UnitPrintHeaderComponent;
-  let fixture: ComponentFixture<UnitPrintHeaderComponent>;
+  let component: UnitMetaDataComponent;
+  let fixture: ComponentFixture<UnitMetaDataComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitPrintHeaderComponent]
+      declarations: [UnitMetaDataComponent]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitPrintHeaderComponent);
+    fixture = TestBed.createComponent(UnitMetaDataComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

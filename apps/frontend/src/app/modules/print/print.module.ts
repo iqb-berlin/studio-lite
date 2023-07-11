@@ -9,18 +9,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { PrintComponent } from './components/print/print.component';
 import { PrintRoutingModule } from './print-routing.module';
 import { UnitPrintLayoutComponent } from './components/unit-print-layout/unit-print-layout.component';
-import { UnitPrintHeaderComponent } from './components/unit-print-header/unit-print-header.component';
 import { UnitPrintPlayerComponent } from './components/unit-print-player/unit-print-player.component';
 import { UnitPrintCommentsComponent } from './components/unit-print-comments/unit-print-comments.component';
 import { CommentsModule } from '../comments/comments.module';
 import { UnitPrintCodingComponent } from './components/unit-print-coding/unit-print-coding.component';
 import { UnitPrintCodeComponent } from './components/unit-print-code/unit-print-code.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [
     PrintComponent,
     UnitPrintLayoutComponent,
-    UnitPrintHeaderComponent,
     UnitPrintPlayerComponent,
     UnitPrintCommentsComponent,
     UnitPrintCodingComponent,
@@ -28,6 +27,7 @@ import { UnitPrintCodeComponent } from './components/unit-print-code/unit-print-
   ],
   imports: [
     CommonModule,
+    SharedModule,
     PrintRoutingModule,
     TranslateModule,
     FormsModule,
