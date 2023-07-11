@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
 import { UnitsComponent } from './units.component';
 import { PageData } from '../../../workspace/models/page-data.interface';
@@ -26,6 +27,7 @@ describe('UnitsComponent', () => {
         MockPageNavigationComponent
       ],
       imports: [
+        TranslateModule.forRoot(),
         RouterTestingModule,
         MatSnackBarModule,
         HttpClientModule

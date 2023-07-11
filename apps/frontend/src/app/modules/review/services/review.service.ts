@@ -3,6 +3,7 @@ import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { Router } from '@angular/router';
 import { lastValueFrom, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 import { ModuleService } from '../../shared/services/module.service';
 import { UnitData } from '../models/unit-data.class';
 import { BackendService } from './backend.service';
@@ -19,8 +20,8 @@ export class ReviewService {
   units: UnitData[] = [];
   reviewConfig: ReviewConfigDto = {};
   bookletConfig: BookletConfigDto = {};
-  screenHeaderText = 'Startseite';
-  pageHeaderText = 'Startseite';
+  screenHeaderText = '';
+  pageHeaderText = '';
   currentUnitSequenceId = -1;
   unitInfoPanelWidth = 300;
   unitInfoPanelOn = false;
@@ -31,6 +32,7 @@ export class ReviewService {
   }
 
   constructor(
+    private translateService: TranslateService,
     private moduleService: ModuleService,
     private backendService: BackendService,
     public appService: AppService,
@@ -53,9 +55,11 @@ export class ReviewService {
       if (this.bookletConfig.unitScreenHeader === 'WITH_UNIT_TITLE') {
         this.screenHeaderText = pageName;
       } else if (this.bookletConfig.unitScreenHeader === 'WITH_BOOKLET_TITLE') {
-        this.screenHeaderText = `Review '${this.reviewName}' (Testheft)`;
+        this.screenHeaderText = this.translateService
+          .instant('review.booklet', { name: this.reviewName });
       } else if (this.bookletConfig.unitScreenHeader === 'WITH_BLOCK_TITLE') {
-        this.screenHeaderText = `Review '${this.reviewName}' (Block)`;
+        this.screenHeaderText = this.translateService
+          .instant('review.block', { name: this.reviewName });
       } else {
         this.screenHeaderText = '';
       }
@@ -67,7 +71,9 @@ export class ReviewService {
   async loadReviewData(): Promise<void> {
     return lastValueFrom(this.backendService.getReview(this.reviewId).pipe(
       tap(reviewData => {
-        this.appService.appConfig.setPageTitle('Review', true);
+        this.appService.appConfig.setPageTitle(
+          this.translateService.instant('review.header'),
+          true);
         if (reviewData) {
           this.reviewName = reviewData.name ? reviewData.name : '?';
           this.workspaceName = reviewData.workspaceName ? reviewData.workspaceName : '?';
@@ -79,7 +85,7 @@ export class ReviewService {
               this.units.push({
                 databaseId: u,
                 sequenceId: counter,
-                name: `Aufgabe ${(counter + 1).toString()}`,
+                name: this.translateService.instant('review.unit', { index: counter + 1 }),
                 definition: '',
                 playerId: '',
                 responses: ''

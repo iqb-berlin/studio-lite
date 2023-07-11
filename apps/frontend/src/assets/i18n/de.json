@@ -563,6 +563,7 @@
     "no-coding": "Keine Kodierung"
   },
   "review": {
+    "header": "Review",
     "end": "Ende der Aufgabenfolge",
     "end-page": "Endseite",
     "pages-count-info": "Anzahl der Aufgaben bzw. Seiten: {{count}}",
@@ -578,6 +579,9 @@
     "less-information": "Weniger Informationen",
     "coding": "Kodierung",
     "no-coding-information": "Keine Kodierinformationen verfügbar",
-    "loading-coding-information": "Kodierinformationen werden geladen..."
+    "loading-coding-information": "Kodierinformationen werden geladen...",
+    "unit": "Aufgabe {{index}}",
+    "block": "Review \"{{name}}\" (Block)",
+    "booklet": "Review \"{{name}}\" (Testheft)"
   }
 }

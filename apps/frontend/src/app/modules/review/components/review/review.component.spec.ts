@@ -5,6 +5,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, Input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
 import { ReviewComponent } from './review.component';
 
@@ -29,6 +30,7 @@ describe('ReviewComponent', () => {
         MockAddCommentButton
       ],
       imports: [
+        TranslateModule.forRoot(),
         RouterTestingModule,
         HttpClientModule,
         MatButtonModule,
