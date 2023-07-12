@@ -1,0 +1,91 @@
+{
+  "name": "api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/api/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/api",
+        "main": "apps/api/src/main.ts",
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "assets": ["apps/api/src/assets"],
+        "generatePackageJson": true,
+        "target": "node",
+        "compiler": "tsc"
+      },
+      "configurations": {
+        "production": {
+          "optimization": false,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/api/src/environments/environment.ts",
+              "with": "apps/api/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "api:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/api/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["coverage/apps/api"],
+      "options": {
+        "jestConfig": "apps/api/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "outputPath": "dist/compodoc/api"
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "docker login {args.registry}",
+            "forwardAllArgs": false
+          },
+          "docker build -f apps/api/Dockerfile --build-arg project=api --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag} -t {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:latest .",
+          "docker push -q -a {args.registry}{args.registryProject}iqbberlin/studio-lite-backend"
+        ],
+        "parallel": false
+      }
+    },
+    "docker-scan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}",
+          "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --scanners vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}"
+        ]
+      }
+    }
+  },
+  "tags": []
+}
