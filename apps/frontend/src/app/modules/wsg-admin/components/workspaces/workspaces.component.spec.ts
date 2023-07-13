@@ -13,6 +13,7 @@ import { Component, Input } from '@angular/core';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../../environments/environment';
 import { WorkspacesComponent } from './workspaces.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('WorkspacesComponent', () => {
   let component: WorkspacesComponent;
@@ -35,7 +36,8 @@ describe('WorkspacesComponent', () => {
       declarations: [
         WorkspacesComponent,
         MockWorkspaceMenuComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        WrappedIconComponent
       ],
       imports: [
         MatDialogModule,
