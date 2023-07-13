@@ -1,6 +1,7 @@
 <div class="page-body">
   <div class="admin-background">
-    <nav mat-tab-nav-bar>
+    <nav mat-tab-nav-bar
+         [tabPanel]="tabPanel">
       <a mat-tab-link
          *ngFor="let link of navLinks"
          [routerLink]="link"
@@ -10,6 +11,8 @@
         {{'wsg-admin.' + link | translate}}
       </a>
     </nav>
-    <router-outlet></router-outlet>
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet></router-outlet>
+    </mat-tab-nav-panel>
   </div>
 </div>
