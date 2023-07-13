@@ -17,6 +17,7 @@ import { InputTextComponent } from './components/input-text/input-text.component
 import { SearchFilterComponent } from './components/search-filter/search-filter.component';
 import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
+import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data
     InputTextComponent,
     SearchFilterComponent,
     PageNavigationComponent,
-    UnitMetaDataComponent
+    UnitMetaDataComponent,
+    WrappedIconComponent
   ],
   imports: [
     CommonModule,
@@ -48,7 +50,8 @@ import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data
     InputTextComponent,
     SearchFilterComponent,
     PageNavigationComponent,
-    UnitMetaDataComponent
+    UnitMetaDataComponent,
+    WrappedIconComponent
   ]
 })
 export class SharedModule {}

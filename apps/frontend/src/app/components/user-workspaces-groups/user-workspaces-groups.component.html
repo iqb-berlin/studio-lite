@@ -12,7 +12,7 @@
               mat-button
               [routerLink]="['/wsg-admin/' + wsg.id]"
               [matTooltip]="'home.goto-wsg-admin' | translate">
-        <mat-icon>settings</mat-icon>
+        <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
       </a>
     </div>
     <div *ngIf="wsg.workspaces.length > 0"

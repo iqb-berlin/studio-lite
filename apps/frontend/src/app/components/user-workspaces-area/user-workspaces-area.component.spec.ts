@@ -4,6 +4,7 @@ import { Component, Input } from '@angular/core';
 import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { UserWorkspacesAreaComponent } from './user-workspaces-area.component';
+import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UserWorkspacesAreaComponent', () => {
   let component: UserWorkspacesAreaComponent;
@@ -34,7 +35,8 @@ describe('UserWorkspacesAreaComponent', () => {
         MockUserMenuComponent,
         MockUserWorkspacesGroupsComponent,
         MockAreaTitleComponent,
-        MockWarningComponent
+        MockWarningComponent,
+        WrappedIconComponent
       ],
       imports: [
         TranslateModule.forRoot()
