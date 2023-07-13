@@ -12,6 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { ResourcePackagesComponent } from './resource-packages.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('ResourcePackageComponent', () => {
   let component: ResourcePackagesComponent;
@@ -36,7 +37,8 @@ describe('ResourcePackageComponent', () => {
       declarations: [
         ResourcePackagesComponent,
         MockTableDataSourcePipe,
-        MockIqbFilesUploadInputForDirective
+        MockIqbFilesUploadInputForDirective,
+        WrappedIconComponent
       ],
       imports: [
         TranslateModule.forRoot(),

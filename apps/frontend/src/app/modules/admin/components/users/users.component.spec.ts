@@ -14,6 +14,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -41,7 +42,8 @@ describe('UsersComponent', () => {
       declarations: [
         UsersComponent,
         MockUsersMenuComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        WrappedIconComponent
       ],
       imports: [
         MatSnackBarModule,
