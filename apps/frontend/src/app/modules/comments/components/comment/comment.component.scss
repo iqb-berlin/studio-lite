@@ -27,19 +27,15 @@
 }
 
 .comment-action{
-  width: 30px;
-  line-height: 30px;
-  height: 30px;
   color: #bbbbbb;
-  margin-right: 10px;
   &:hover{
     color: #666666;
   }
 }
 
-.fx-flex-row-fix-120 {
-  flex: 1 1 120px;
+.fx-flex-row-fix-150 {
+  flex: 1 1 150px;
   box-sizing: border-box;
-  max-width: 120px;
-  min-width: 120px;
+  max-width: 150px;
+  min-width: 150px;
 }
