@@ -9,6 +9,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { AddUnitButtonComponent } from './add-unit-button.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('AddUnitButtonComponent', () => {
   let component: AddUnitButtonComponent;
@@ -16,7 +17,10 @@ describe('AddUnitButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AddUnitButtonComponent],
+      declarations: [
+        AddUnitButtonComponent,
+        WrappedIconComponent
+      ],
       imports: [
         TranslateModule.forRoot(),
         MatTooltipModule,

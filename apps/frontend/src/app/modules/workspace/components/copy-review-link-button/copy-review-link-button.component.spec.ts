@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CopyReviewLinkButtonComponent } from './copy-review-link-button.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('CopyReviewLinkButtonComponent', () => {
   let component: CopyReviewLinkButtonComponent;
@@ -12,7 +13,10 @@ describe('CopyReviewLinkButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CopyReviewLinkButtonComponent],
+      declarations: [
+        CopyReviewLinkButtonComponent,
+        WrappedIconComponent
+      ],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,
