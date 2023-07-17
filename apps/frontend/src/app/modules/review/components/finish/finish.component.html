@@ -1,0 +1,17 @@
+<div class="finish-page fx-column-center-center">
+  <div class="finish-data fx-column-start-stretch">
+    <div>
+      <h4>{{'review.end' | translate}}</h4>
+      <h1>{{reviewService.reviewName}}</h1>
+      <h2>{{reviewService.workspaceName}}</h2>
+    </div>
+    <div class="backwards-button fx-row-start-start">
+      <a mat-fab
+         [disabled]="!reviewService.units.length"
+         [matTooltip]="'back' | translate"
+         (click)="reviewService.setUnitNavigationRequest(reviewService.units.length -1)">
+        <i class="material-icons">chevron_left</i>
+      </a>
+    </div>
+  </div>
+</div>

@@ -15,13 +15,17 @@ import { SelectModuleComponent } from './components/select-module/select-module.
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
 import { InputTextComponent } from './components/input-text/input-text.component';
 import { SearchFilterComponent } from './components/search-filter/search-filter.component';
+import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
+import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
 
 @NgModule({
   declarations: [
     EditWorkspaceSettingsComponent,
     SelectModuleComponent,
     InputTextComponent,
-    SearchFilterComponent
+    SearchFilterComponent,
+    PageNavigationComponent,
+    UnitMetaDataComponent
   ],
   imports: [
     CommonModule,
@@ -42,7 +46,9 @@ import { SearchFilterComponent } from './components/search-filter/search-filter.
     EditWorkspaceSettingsComponent,
     SelectModuleComponent,
     InputTextComponent,
-    SearchFilterComponent
+    SearchFilterComponent,
+    PageNavigationComponent,
+    UnitMetaDataComponent
   ]
 })
 export class SharedModule {}

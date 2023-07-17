@@ -1,5 +1,6 @@
 {
   "next": "Weiter",
+  "back": "Zurück",
   "save": "Speichern",
   "create": "Anlegen",
   "delete": "Löschen",
@@ -475,7 +476,8 @@
     "comment-delete-question": "Soll der Kommentar gelöscht werden?",
     "comments-delete-title": "Kommentare löschen",
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
-    "write-comment": "Neuen Kommentar verfassen:"
+    "write-comment": "Neuen Kommentar verfassen:",
+    "send-comment": "Kommentar senden"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
@@ -559,5 +561,27 @@
     "id": "ID",
     "coding": "Kodierung",
     "no-coding": "Keine Kodierung"
+  },
+  "review": {
+    "header": "Review",
+    "end": "Ende der Aufgabenfolge",
+    "end-page": "Endseite",
+    "pages-count-info": "Anzahl der Aufgaben bzw. Seiten: {{count}}",
+    "title": "Review einer Aufgabenfolge",
+    "booklet-config": "Einstellungen für Darstellung und Ablauf",
+    "enter-comment-name": "Bitte Namen eingeben",
+    "comment-name": "Namen",
+    "comment": "Kommentieren",
+    "comments": "Kommentare",
+    "no-comments": "Keine Kommentare verfügbar",
+    "loading-comments": "Kommentare werden geladen...",
+    "more-information": "Weitere Informationen",
+    "less-information": "Weniger Informationen",
+    "coding": "Kodierung",
+    "no-coding-information": "Keine Kodierinformationen verfügbar",
+    "loading-coding-information": "Kodierinformationen werden geladen...",
+    "unit": "Aufgabe {{index}}",
+    "block": "Review \"{{name}}\" (Block)",
+    "booklet": "Review \"{{name}}\" (Testheft)"
   }
 }

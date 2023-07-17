@@ -1,0 +1,62 @@
+:host {
+  width: 100%
+}
+
+.page-host {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+  padding: 0;
+}
+
+.with-header .page-host {
+  top: 65px;
+}
+
+.with-title .page-host {
+  top: 40px;
+}
+
+.with-header.with-title .page-host {
+  top: 105px;
+}
+
+.unit-title {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  height: 39px;
+  font-size: 1.5em;
+  background-color: white;
+  border-bottom: solid 1px black;
+  white-space: nowrap;
+  text-overflow: clip;
+  overflow: hidden;
+}
+.with-header .unit-title {
+  top: 65px;
+}
+
+h1 {
+  font-size: 1.5em;
+  color: white;
+  margin-right: 1em;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 30px;
+  max-height: 60px;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 444;
+  color: white;
+  height: 65px;
+  padding-left: 130px;
+  padding-right: 60px;
+  pointer-events: none;
+}

@@ -1,0 +1,30 @@
+<div class="unit-info-content fx-row-space-between-stretch">
+  <div class="infoPanelExpandButton fx-column-start-center fx-flex-row-fix-40">
+    <mat-icon>info</mat-icon>
+    <button mat-button *ngIf="reviewService.unitInfoPanelOn"
+            [matTooltip]="'review.less-information' | translate"
+            (click)="elementWidth = 0">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button mat-button *ngIf="!reviewService.unitInfoPanelOn"
+            [matTooltip]="'review.more-information' | translate"
+            (click)="elementWidth = reviewService.unitInfoPanelWidth">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+  </div>
+  <div #infoPanelSplitter class="infoPanelSplitter fx-flex-row-fix-6"></div>
+  <div #infoPanel class="infoPanel fx-flex-fill">
+    <studio-lite-unit-metadata
+      [key]= "_unitMetadata ? _unitMetadata.key : null"
+      [lastChangedDefinition] = "_unitMetadata ? _unitMetadata.lastChangedDefinition : null"
+      [lastChangedMetadata] = "_unitMetadata ? _unitMetadata.lastChangedMetadata : null"
+      [lastChangedScheme] = "_unitMetadata ? _unitMetadata.lastChangedScheme : null">
+    </studio-lite-unit-metadata>
+    <studio-lite-unit-info-coding *ngIf="reviewService.reviewConfig.showCoding && _unitMetadata"
+                                  [unitId]="_unitId">
+    </studio-lite-unit-info-coding>
+    <studio-lite-unit-info-comments *ngIf="reviewService.reviewConfig.showOthersComments && _unitMetadata"
+                                    [unitId]="_unitId">
+    </studio-lite-unit-info-comments>
+  </div>
+</div>

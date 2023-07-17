@@ -11,8 +11,8 @@
      class="error-container fx-column-start-center">
   <div *ngFor="let e of appService.errorMessages"
        class="fx-row-space-between-center fx-gap-10">
-    <div [matTooltip]="e.message"
-         fxFlex>{{('app-http-error.' + e.status) | translate}}
+    <div class="fx-flex-fill"
+         [matTooltip]="e.message">{{('app-http-error.' + e.status) | translate}}
     </div>
     <button mat-raised-button
             *ngIf="e.status | isInArray: [401, 403, 410]"

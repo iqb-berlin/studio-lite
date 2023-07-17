@@ -9,8 +9,8 @@ describe('UnitPrintLayoutComponent', () => {
   let component: UnitPrintLayoutComponent;
   let fixture: ComponentFixture<UnitPrintLayoutComponent>;
 
-  @Component({ selector: 'studio-lite-unit-print-header', template: '' })
-  class MockUnitPrintHeaderComponent {
+  @Component({ selector: 'studio-lite-unit-metadata', template: '' })
+  class MockUnitMetaDataComponent {
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
     @Input() description!: string | undefined | null;
@@ -41,7 +41,7 @@ describe('UnitPrintLayoutComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         UnitPrintLayoutComponent,
-        MockUnitPrintHeaderComponent,
+        MockUnitMetaDataComponent,
         MockUnitPrintCommentsComponent,
         MockUnitPrintCodingComponent
       ],

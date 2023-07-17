@@ -1,0 +1,19 @@
+<div class="fx-column-start-stretch">
+  <div class="unit-info-coding-header">{{'review.coding' | translate}}</div>
+  <studio-lite-unit-info-loader #loader
+                                (onEnter)="updateContent()">
+  </studio-lite-unit-info-loader>
+  <div *ngIf="allVariables.length === 0">
+    {{ (loader?.spinnerOn ? 'review.loading-coding-information' : 'review.no-coding-information') | translate }}
+  </div>
+  <div class="unit-info-coding-content" *ngFor="let c of allVariables">
+    <div class="fx-row-space-between-stretch">
+      <h4>{{c.id}}</h4>
+      <h4>{{c.sourceType === 'BASE' ? 'B' : 'A'}}</h4>
+    </div>
+    <div *ngIf="c.label">{{c.label}}</div>
+    <div *ngIf="c.manualInstruction"
+         [innerHTML]="c.manualInstruction">
+    </div>
+  </div>
+</div>

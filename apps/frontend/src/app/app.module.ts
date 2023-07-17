@@ -20,7 +20,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { RouterModule } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -107,7 +106,6 @@ export function createTranslateLoader(http: HttpClient) {
     ReactiveFormsModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    FlexLayoutModule,
     RouterModule,
     ReactiveFormsModule,
     HttpClientModule,

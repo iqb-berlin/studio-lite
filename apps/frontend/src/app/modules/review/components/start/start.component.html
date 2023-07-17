@@ -1,0 +1,28 @@
+<div class="start-page fx-column-center-center">
+  <div class="start-data fx-column-start-stretch">
+    <div>
+      <h4>{{'review.title' | translate}}</h4>
+      <h1>{{reviewService.reviewName}}</h1>
+      <h2>{{reviewService.workspaceName}}</h2>
+      <p>{{'review.pages-count-info' | translate: {count: reviewService.units.length} }}</p>
+    </div>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{'review.booklet-config' | translate}}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <studio-lite-booklet-config-show
+        [config]="reviewService.bookletConfig">
+      </studio-lite-booklet-config-show>
+    </mat-expansion-panel>
+    <div class="continue-button fx-row-end-end">
+      <a mat-fab
+         [disabled]="!reviewService.units.length"
+         [matTooltip]="'next' | translate"
+         (click)="reviewService.setUnitNavigationRequest(0)">
+        <i class="material-icons">chevron_right</i>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+<div class="send-comment-button-container fx-row-center-center">
+  <button mat-raised-button
+          class="send-comment-button"
+          [disabled]="unitDbId <= 0"
+          [matTooltip]="'comments.send-comment' | translate"
+          (click)="showReviewDialog()">
+    <mat-icon>rate_review</mat-icon>
+  </button>
+</div>

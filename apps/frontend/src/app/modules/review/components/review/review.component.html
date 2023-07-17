@@ -1,0 +1,22 @@
+<div [class.with-header]="reviewService.bookletConfig.unitScreenHeader !== 'OFF'"
+     [class.with-title]="reviewService.bookletConfig.unitTitle === 'ON'">
+  <div *ngIf="reviewService.bookletConfig?.unitTitle === 'ON'"
+       class="unit-title fx-column-center-center">
+    <p>{{reviewService.pageHeaderText}}</p>
+  </div>
+  <div *ngIf="reviewService.bookletConfig?.unitScreenHeader !== 'OFF'"
+       class="header fx-row-space-between-center">
+    <div>
+      <h1>{{reviewService.screenHeaderText}}</h1>
+    </div>
+    <studio-lite-unit-nav *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'OFF'">
+    </studio-lite-unit-nav>
+  </div>
+  <studio-lite-add-comment-button *ngIf="reviewService.reviewConfig.canComment"
+                                  [showOthersComments]="reviewService.reviewConfig.showOthersComments || false"
+                                  [unitDbId]="reviewService.unitDbId">
+  </studio-lite-add-comment-button>
+  <div class="page-host">
+    <router-outlet></router-outlet>
+  </div>
+</div>

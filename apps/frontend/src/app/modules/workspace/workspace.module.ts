@@ -17,7 +17,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -77,7 +76,6 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
 import { GroupMenuComponent } from './components/group-menu/group-menu.component';
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
-import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
@@ -87,7 +85,6 @@ import { SharedModule } from '../shared/shared.module';
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,
-    FlexLayoutModule,
     WorkspaceRoutingModule,
     ReactiveFormsModule,
     MatSelectModule,
@@ -161,8 +158,7 @@ import { SharedModule } from '../shared/shared.module';
     NewGroupButtonComponent,
     GroupMenuComponent,
     PreviewBarComponent,
-    StatusIndicationComponent,
-    PageNavigationComponent
+    StatusIndicationComponent
   ],
   exports: [WorkspaceComponent, UnitCommentsComponent],
   providers: [
