@@ -50,8 +50,8 @@ describe('ReviewsComponent', () => {
     @Input() title!: string;
   }
 
-  @Component({ selector: 'studio-lite-review-save-changes', template: '' })
-  class MockReviewSaveChangesComponent {
+  @Component({ selector: 'studio-lite-save-changes', template: '' })
+  class MockSaveChangesComponent {
     @Input() changed!: boolean;
   }
 
@@ -62,7 +62,7 @@ describe('ReviewsComponent', () => {
         MockReviewMenuComponent,
         MockSelectUnitListComponent,
         MockReviewConfigComponent,
-        MockReviewSaveChangesComponent,
+        MockSaveChangesComponent,
         MockSearchFilterComponent
       ],
       imports: [

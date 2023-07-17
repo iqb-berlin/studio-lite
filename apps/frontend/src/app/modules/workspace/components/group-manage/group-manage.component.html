@@ -65,23 +65,12 @@
                                             (selectionChanged)="unitSelectionChanged()">
               </studio-lite-select-unit-list>
             </div>
-            <div class="fx-row-end-end fx-gap-5 changes-container">
-              <button mat-raised-button
-                      [matTooltip]="'workspace.reject-unit-changes' | translate"
-                      [disabled]="!changed"
-                      matTooltipPosition="below"
-                      (click)="discardChanges()">
-                <mat-icon>close</mat-icon>
-              </button>
-              <button mat-raised-button
-                      [matTooltip]="'workspace.save-changes' | translate"
-                      [disabled]="!changed"
-                      matTooltipPosition="below"
-                      (click)="saveChanged()">
-                {{'save' | translate}}
-                <mat-icon>save</mat-icon>
-              </button>
-            </div>
+
+            <studio-lite-save-changes [changed]="changed"
+                                      (discardChanges)="discardChanges()"
+                                      (saveChanges)="saveChanged()">
+            </studio-lite-save-changes>
+
           </div>
         </div>
       </div>

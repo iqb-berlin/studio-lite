@@ -71,10 +71,10 @@
                                      (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">
           </studio-lite-review-config>
         </div>
-        <studio-lite-review-save-changes [changed]="changed"
-                                         (discardChanges)="discardChanges()"
-                                         (saveChanges)="saveChanges()">
-        </studio-lite-review-save-changes>
+        <studio-lite-save-changes [changed]="changed"
+                                  (discardChanges)="discardChanges()"
+                                  (saveChanges)="saveChanges()">
+        </studio-lite-save-changes>
       </div>
     </div>
   </mat-dialog-content>

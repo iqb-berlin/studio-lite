@@ -68,7 +68,7 @@ import { AddReviewButtonComponent } from './components/add-review-button/add-rev
 import { StartReviewButtonComponent } from './components/start-review-button/start-review-button.component';
 import { CopyReviewLinkButtonComponent } from './components/copy-review-link-button/copy-review-link-button.component';
 import { ReviewMenuComponent } from './components/review-menu/review-menu.component';
-import { ReviewSaveChangesComponent } from './components/review-save-changes/review-save-changes.component';
+import { SaveChangesComponent } from './components/save-changes/save-changes.component';
 import { ReviewConfigComponent } from './components/review-config/review-config.component';
 import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
@@ -153,7 +153,7 @@ import { UnitGroupsComponent } from './components/unit-groups/unit-groups.compon
     StartReviewButtonComponent,
     CopyReviewLinkButtonComponent,
     ReviewMenuComponent,
-    ReviewSaveChangesComponent,
+    SaveChangesComponent,
     ReviewConfigComponent,
     ExportReviewButtonComponent,
     NewGroupButtonComponent,
