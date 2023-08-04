@@ -15,6 +15,7 @@
   </a>
   <mat-selection-list *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'ARROWS_ONLY'"
                       #unitList
+                      hideSingleSelectionIndicator
                       [multiple]="false"
                       class="unit-list fx-wrap"
                       role="menubar"
@@ -35,6 +36,7 @@
          [class.unit-nav-item]="u.sequenceId !== reviewService.currentUnitSequenceId"
          (click)="reviewService.setUnitNavigationRequest(u.sequenceId)">
       <mat-list-option
+
         [value]="u.sequenceId.toString()"
         [selected]="u.sequenceId === reviewService.currentUnitSequenceId"
         role="menuitem"
