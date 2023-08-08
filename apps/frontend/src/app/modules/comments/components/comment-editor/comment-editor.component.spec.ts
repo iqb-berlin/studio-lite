@@ -6,6 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { NgxTiptapModule } from 'ngx-tiptap';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommentEditorComponent } from './comment-editor.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('CommentEditorComponent', () => {
   let component: CommentEditorComponent;
@@ -25,7 +26,8 @@ describe('CommentEditorComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         CommentEditorComponent,
-        MockIsCommentCommittablePipe
+        MockIsCommentCommittablePipe,
+        WrappedIconComponent
       ],
       imports: [
         TranslateModule.forRoot(),

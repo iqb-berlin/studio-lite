@@ -43,7 +43,7 @@
                 matTooltip = "{{'comment.reply' | translate}}"
                 [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
                 (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
-          <mat-icon>reply</mat-icon>
+          <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
         </button>
         <button *ngIf="ownComment"
                 mat-icon-button
@@ -51,7 +51,7 @@
                 matTooltip = "{{'comment.edit' | translate}}"
                 [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
                 (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
-          <mat-icon>edit</mat-icon>
+          <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
         </button>
         <button *ngIf="ownComment || adminMode"
                 mat-icon-button
@@ -59,7 +59,7 @@
                 matTooltip = "{{'comment.delete' | translate}}"
                 [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
                 (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
-          <mat-icon>delete</mat-icon>
+          <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
         </button>
       </div>
     </div>
