@@ -9,13 +9,13 @@
             class="fx-row-center-center"
             [disabled]="p.disabled"
             (click)="gotoPage.emit({ action: p.type })">
-      <mat-icon>chevron_left</mat-icon>
+      <studio-lite-wrapped-icon icon="chevron_left"></studio-lite-wrapped-icon>
     </button>
     <button *ngIf="p.type === '#next'"
             class="fx-row-center-center"
             [disabled]="p.disabled"
             (click)="gotoPage.emit({ action: p.type })">
-      <mat-icon>chevron_right</mat-icon>
+      <studio-lite-wrapped-icon icon="chevron_right"></studio-lite-wrapped-icon>
     </button>
     <div *ngIf="p.type === '#goto'"
          class="fx-column-start-stretch">
