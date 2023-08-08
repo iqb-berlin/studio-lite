@@ -3,7 +3,7 @@
   <mat-dialog-content>
     <div class="fx-row-start-stretch fx-gap-20">
 
-      <div class="fx-column-end-stretch fx-flex-row-20 review-list-area">
+      <div class="fx-column-end-stretch fx-flex-row-30 review-list-area">
         <studio-lite-search-filter *ngIf="reviews.length"
                                    [title]="'search-filter.filter-reviews' | translate"
           (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
@@ -48,7 +48,7 @@
         </studio-lite-review-menu>
       </div>
 
-      <div class="fx-column-start-stretch fx-flex-row-80"
+      <div class="fx-column-start-stretch fx-flex-row-70"
            [class.review-changed]="changed"
            [class.review-not-changed]="!changed">
         <div class="fx-row-start-stretch fx-flex-fill fx-gap-20 review-changes-area">

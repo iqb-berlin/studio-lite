@@ -243,7 +243,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
 
   reviews(): void {
     this.reviewsDialog.open(ReviewsComponent, {
-      width: '1200px'
+      width: '1400px'
     });
   }
 
@@ -251,7 +251,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       this.groupDialog.open(GroupManageComponent, {
-        width: '1000px'
+        width: '1400px'
       }).afterClosed().subscribe(() => {
         this.updateUnitList();
       });
