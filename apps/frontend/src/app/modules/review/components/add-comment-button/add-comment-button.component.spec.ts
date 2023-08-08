@@ -4,6 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddCommentButtonComponent } from './add-comment-button.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('AddCommentButtonComponent', () => {
   let component: AddCommentButtonComponent;
@@ -11,7 +12,7 @@ describe('AddCommentButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AddCommentButtonComponent],
+      declarations: [AddCommentButtonComponent, WrappedIconComponent],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,
