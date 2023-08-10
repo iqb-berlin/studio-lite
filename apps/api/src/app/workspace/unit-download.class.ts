@@ -41,7 +41,9 @@ export class UnitDownloadClass {
             '@lastChange': unitMetadata.lastChangedMetadata ? unitMetadata.lastChangedMetadata.toISOString() : '',
             Id: unitMetadata.key,
             Label: unitMetadata.name,
-            Description: unitMetadata.description
+            Description: unitMetadata.description,
+            Transcript: unitMetadata.transcript,
+            Reference: unitMetadata.reference
           }
         }
       });

@@ -379,6 +379,8 @@ export class WorkspaceService {
           player: u.player,
           schemer: u.schemer,
           description: u.description,
+          transcript: u.transcript,
+          reference: u.reference,
           lastChangedMetadata: u.lastChangedMetadata,
           lastChangedDefinition: u.lastChangedDefinition,
           lastChangedScheme: u.lastChangedScheme
