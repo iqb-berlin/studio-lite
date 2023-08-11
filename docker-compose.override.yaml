@@ -19,7 +19,7 @@ services:
     labels:
       - "traefik.enable=false"
       - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.rule=HostRegexp(`{[a-z]*}.${SERVER_NAME}`) || Host(`${SERVER_NAME}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.service=backend"
       - "traefik.http.services.backend.loadbalancer.server.port=3333"
       - "traefik.docker.network=app-net"
@@ -44,7 +44,7 @@ services:
     labels:
       - "traefik.enable=false"
       - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend.rule=HostRegexp(`{[a-z]*}.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
       - "traefik.http.routers.frontend.service=frontend"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.docker.network=app-net"
