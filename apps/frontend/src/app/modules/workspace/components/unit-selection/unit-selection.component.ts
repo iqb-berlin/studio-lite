@@ -1,5 +1,9 @@
 import {
-  Component, Input, OnDestroy, OnInit, ViewChildren
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChildren
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -15,11 +19,15 @@ import { UnitTableComponent } from '../unit-table/unit-table.component';
   templateUrl: './unit-selection.component.html',
   styleUrls: ['./unit-selection.component.scss']
 })
-export class UnitSelectionComponent extends SelectUnitDirective implements OnInit, OnDestroy {
+export class UnitSelectionComponent
+  extends SelectUnitDirective
+  implements OnInit, OnDestroy
+{
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
   @Input() selectedUnitId!: number;
   @Input() unitList!: { [key: string]: UnitInListDto[] };
   private ngUnsubscribe = new Subject<void>();
+  filterInput: string = '';
 
   constructor(
     public workspaceService: WorkspaceService,
@@ -42,8 +50,8 @@ export class UnitSelectionComponent extends SelectUnitDirective implements OnIni
     this.updateUnitList();
   }
 
-  sortUnitTables(sortEvent: { sortState: Sort, table: UnitTableComponent }) {
-    this.unitTables.forEach(unitTable => {
+  sortUnitTables(sortEvent: { sortState: Sort; table: UnitTableComponent }) {
+    this.unitTables.forEach((unitTable) => {
       if (unitTable !== sortEvent.table) {
         unitTable.sort(sortEvent.table.sortHeader);
       }

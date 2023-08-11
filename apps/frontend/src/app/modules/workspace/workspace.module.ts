@@ -77,6 +77,7 @@ import { GroupMenuComponent } from './components/group-menu/group-menu.component
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
 import { SharedModule } from '../shared/shared.module';
+import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 
 @NgModule({
   imports: [
@@ -158,9 +159,15 @@ import { SharedModule } from '../shared/shared.module';
     NewGroupButtonComponent,
     GroupMenuComponent,
     PreviewBarComponent,
-    StatusIndicationComponent
+    StatusIndicationComponent,
+    UnitGroupsComponent
   ],
-  exports: [WorkspaceComponent, UnitCommentsComponent],
+  exports: [
+    WorkspaceComponent,
+    UnitCommentsComponent,
+    UnitGroupComponent,
+    UnitTableComponent
+  ],
   providers: [
     UnitRoutingCanDeactivateGuard,
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
