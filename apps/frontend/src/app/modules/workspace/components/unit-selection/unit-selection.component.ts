@@ -26,8 +26,18 @@ export class UnitSelectionComponent
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
   @Input() selectedUnitId!: number;
   @Input() unitList!: { [key: string]: UnitInListDto[] };
+  expanded: boolean = true;
   private ngUnsubscribe = new Subject<void>();
   filterInput: string = '';
+  numberOfGroups: number = 0;
+  numberOfUnits: number = 0;
+  @Input('unitGroupList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
+    this.unitList = unitList;
+    this.numberOfGroups = Object.keys(unitList).length;
+    Object.values(unitList).forEach((arr) => {
+      this.numberOfUnits += arr.length;
+    });
+  }
 
   constructor(
     public workspaceService: WorkspaceService,

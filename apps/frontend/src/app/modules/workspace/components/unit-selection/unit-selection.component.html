@@ -1,8 +1,23 @@
 <div class="selection-header">
+  <div class="fx-row-end-end expand-button">
+    <span>{{numberOfGroups}} Gruppen mit {{numberOfUnits}} Aufgaben</span>
+    <button *ngIf="!expanded"
+            mat-icon-button
+            [attr.aria-label]="'accordion.expand' | translate"
+            (click)="this.expanded = !this.expanded">
+      <mat-icon>expand_more</mat-icon>
+    </button>
+    <button *ngIf="expanded"
+            mat-icon-button
+            [attr.aria-label]="'accordion.expand' | translate"
+            (click)="this.expanded = !this.expanded">
+      <mat-icon>expand_less</mat-icon>
+    </button>
+  </div>
   <studio-lite-search-filter #filterInput
                              [title]="'search-filter.filter-units' | translate">
   </studio-lite-search-filter>
-  <div class="fx-row-space-between-stretch">
+  <div>
     <studio-lite-unit-table
       [hasSortHeader]="true"
       [unitList]="[]"
@@ -11,5 +26,17 @@
   </div>
 </div>
 
-<studio-lite-unit-groups [unitList]=unitList [filter]="filterInput.value"></studio-lite-unit-groups>
+
+<studio-lite-unit-groups [unitGroupList]="unitList" [filter]="filterInput.value" [expanded]=expanded>
+  <studio-lite-unit-group *ngFor="let unitGroup of (unitList | keyvalue)"  class="unit-group"
+                          [count]="unitGroup.value.length" [title]="unitGroup.key" [expanded]=expanded>
+  <studio-lite-unit-table
+    [hasSortHeader]="false"
+    [unitList]="unitGroup.value"
+    [filter]="filterInput.value"
+    [selectedUnitId]="selectedUnitId"
+    (selectUnit)="selectUnit($event)">
+  </studio-lite-unit-table>
+</studio-lite-unit-group>
+</studio-lite-unit-groups>
 
