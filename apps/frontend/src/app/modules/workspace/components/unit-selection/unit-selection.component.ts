@@ -29,10 +29,11 @@ export class UnitSelectionComponent
   expanded: boolean = true;
   private ngUnsubscribe = new Subject<void>();
   filterInput: string = '';
-  numberOfGroups: number = 0;
-  numberOfUnits: number = 0;
+  numberOfGroups!: number;
+  numberOfUnits!: number;
   @Input('unitGroupList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
     this.numberOfGroups = Object.keys(unitList).length;
+    this.numberOfUnits = 0;
     Object.values(unitList).forEach((units) => {
       this.numberOfUnits += units.length;
     });
