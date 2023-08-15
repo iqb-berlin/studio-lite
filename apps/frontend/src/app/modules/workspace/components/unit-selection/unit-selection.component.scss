@@ -1,8 +1,14 @@
-.selection-header{
+.selection-header {
   position: sticky;
   top: 0;
   z-index: 1;
 }
 
+.quantity-groups-units {
+  margin: 10px 0px;
+  flex: 1 auto;
+}
 
-
+.minify-groups-button {
+  margin-left: auto;
+}

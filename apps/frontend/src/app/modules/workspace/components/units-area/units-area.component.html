@@ -1,31 +1,39 @@
 <div class="fx-column-start-stretch area-container">
-
   <div class="fx-row-space-between-stretch">
     <studio-lite-unit-save-button></studio-lite-unit-save-button>
     <studio-lite-update-units-button></studio-lite-update-units-button>
   </div>
 
-  <studio-lite-unit-selection class="unit-list fx-flex-fill"
-                              [selectedRouterLink]="selectedRouterLink"
-                              [unitList]="workspaceService.unitList"
-                              [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
-                              [navLinks]="navLinks">
+  <studio-lite-unit-selection
+    class="unit-list fx-flex-fill"
+    [selectedRouterLink]="selectedRouterLink"
+    [unitGroupList]="workspaceService.unitList"
+    [unitList]="workspaceService.unitList"
+    [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0"
+    [navLinks]="navLinks"
+  >
   </studio-lite-unit-selection>
 
   <div class="fx-row-start-stretch">
-    <studio-lite-add-unit-button class="unit-crud-button"
-                                 [navLinks]="navLinks"
-                                 [selectedRouterLink]="selectedRouterLink">
+    <studio-lite-add-unit-button
+      class="unit-crud-button"
+      [navLinks]="navLinks"
+      [selectedRouterLink]="selectedRouterLink"
+    >
     </studio-lite-add-unit-button>
 
-    <studio-lite-delete-unit-button class="unit-crud-button"
-                                    [navLinks]="navLinks"
-                                    [selectedRouterLink]="selectedRouterLink">
+    <studio-lite-delete-unit-button
+      class="unit-crud-button"
+      [navLinks]="navLinks"
+      [selectedRouterLink]="selectedRouterLink"
+    >
     </studio-lite-delete-unit-button>
 
-    <studio-lite-edit-unit-button class="unit-crud-button"
-                                  [navLinks]="navLinks"
-                                  [selectedRouterLink]="selectedRouterLink">
+    <studio-lite-edit-unit-button
+      class="unit-crud-button"
+      [navLinks]="navLinks"
+      [selectedRouterLink]="selectedRouterLink"
+    >
     </studio-lite-edit-unit-button>
   </div>
 </div>

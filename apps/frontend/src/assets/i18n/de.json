@@ -132,7 +132,7 @@
     "not-changed": "Konnte Zugriffsrechte nicht ändern"
   },
   "admin": {
-    "users":"Nutzer:innen",
+    "users": "Nutzer:innen",
     "users-title": "Admin: Nutzer:innen",
     "user-created": "Nutzer:in angelegt",
     "user-not-created": "Nutzer:in konnte nicht angelegt werden",
@@ -140,10 +140,10 @@
     "user-not-edited": "Daten für Nutzer:in konnte nicht geändert werden",
     "users-deleted": "Nutzer:in(en) gelöscht",
     "users-not-deleted": "Nutzer:in(en) konnten nicht gelöscht werden",
-    "workspaces":"Bereichsgruppen",
-    "v-modules":"Module",
-    "settings":"Einstellungen",
-    "packages":"Pakete",
+    "workspaces": "Bereichsgruppen",
+    "v-modules": "Module",
+    "settings": "Einstellungen",
+    "packages": "Pakete",
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
     "delete-selected": "Markierte löschen",
     "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!",
@@ -205,8 +205,8 @@
     "app-name-placeholder": "Name",
     "start-page-content-right": "Html-Inhalt für die Startseite rechts",
     "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
-    "config-data-saved" : "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
-    "config-data-not-saved" : "Konnte Konfigurationsdaten der Anwendung nicht speichern"
+    "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
+    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
   },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",
@@ -226,7 +226,7 @@
     "boxes-background-color": "Hintergrundfarbe sekundäre Boxen",
     "boxes-background-color-placeholder": "Farbe",
     "logo-and-colors-saved": "Logo und Farben gespeichert - bitte neu laden!",
-    "logo-and-colors-not-saved" : "Konnte Logo und Farben nicht speichern",
+    "logo-and-colors-not-saved": "Konnte Logo und Farben nicht speichern",
     "image-too-large": "Datei zu groß ( > {{maxSize}} Mb)",
     "allowed-image-types": "Zulässige Datei-Typen: {{types}}",
     "not-allowed-image-size": "Unzulässige Größe (maximal erlaubt: {{maxHeight}}*{{maxWidth}}px)"
@@ -263,7 +263,7 @@
     "users": "Nutzer:innen",
     "workspaces": "Arbeitsbereiche",
     "units-count": "Anzahl der Aufgaben"
-},
+  },
   "workspace-settings": {
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",
@@ -283,8 +283,8 @@
     "deleted": "{{count}} Verona Modul(e) gelöscht",
     "not-deleted": "Konnte Verona Modul(e) nicht löschen",
     "no-module-type": "Kein {{ module }} in diesem System verfügbar.",
-    "not-defined-module-type":"{{ module }} ist nicht definiert.",
-    "not-valid-module-type":"{{ module }} ist nicht gültig.",
+    "not-defined-module-type": "{{ module }} ist nicht definiert.",
+    "not-valid-module-type": "{{ module }} ist nicht gültig.",
     "replaced": "Das Modul mit der Kennung \"{{selectedModuleId}}\" ist nicht in diesem System verfügbar.\nEs wird statt dessen \"{{moduleSubstitute}}\" benutzt."
   },
   "application": {
@@ -325,7 +325,7 @@
     "unit-users": "Nutzer:innen",
     "reviews": "Aufgabenfolgen",
     "reject-unit-changes": "Aufgabenänderungen verwerfen",
-    "reject-unit-continue":"Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?",
+    "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
     "delete": "Löschen",
@@ -366,6 +366,7 @@
     "review-not-saved": "Konnte Aufgabenfolge nicht speichern",
     "copy-new-unit": "Neue aus vorhandener Aufgabe",
     "unit": "Aufgabe",
+    "units": "Aufgaben",
     "copy-from": "Kopie von",
     "unit-added": "Aufgabe hinzugefügt",
     "unit-not-added": "Konnte Aufgabe nicht hinzufügen",
@@ -380,6 +381,8 @@
     "rename-group": "Gruppe umbenennen",
     "rename-unit-group": "Aufgabengruppe umbenennen",
     "group": "Gruppe",
+    "groups": "Gruppen",
+    "unit-group": "Aufgabengruppe",
     "group-name": "Name der Gruppe",
     "add-new-group": "Neue Gruppe anlegen",
     "group-saved": "Neue Gruppe gespeichert",
@@ -487,7 +490,7 @@
     "show-xml-params": "XML Parameter zeigen",
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
-      "separate":  "Getrennt - Zugriff über Navigation",
+      "separate": "Getrennt - Zugriff über Navigation",
       "concat-scroll": "Aneinandergehängt - untereinander ohne Zwischenraum",
       "concat-scroll-snap": "Aneinandergehängt - schnappen/magnetisch"
     },

@@ -32,10 +32,9 @@ export class UnitSelectionComponent
   numberOfGroups: number = 0;
   numberOfUnits: number = 0;
   @Input('unitGroupList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
-    this.unitList = unitList;
     this.numberOfGroups = Object.keys(unitList).length;
-    Object.values(unitList).forEach((arr) => {
-      this.numberOfUnits += arr.length;
+    Object.values(unitList).forEach((units) => {
+      this.numberOfUnits += units.length;
     });
   }
 
