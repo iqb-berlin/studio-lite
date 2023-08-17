@@ -38,11 +38,12 @@ get_new_release_version() {
     printf "\n"
   fi
 
-  while read -p 'Name the desired version: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
+  while read -p '1. Name the desired version: ' -er -i "${LATEST_RELEASE}" TARGET_TAG; do
     if ! curl --head --silent --fail --output /dev/null $REPO_URL/"$TARGET_TAG"/README.md 2>/dev/null; then
       printf "This version tag does not exist.\n"
 
     else
+      printf "\n"
       break
     fi
 
@@ -50,38 +51,46 @@ get_new_release_version() {
 }
 
 create_backup() {
+  printf "2. Backup creation\n"
   mkdir -p ./backup/release/"$SOURCE_TAG"
   tar -cf - --exclude='./backup' . | tar -xf - -C ./backup/release/"$SOURCE_TAG"
-  printf "\nBackup created!\nCurrent release files have been saved at: '%s'\n\n" "$PWD/backup/release/$SOURCE_TAG"
+  printf -- "- Current release files have been saved at: '%s'\n" "$PWD/backup/release/$SOURCE_TAG"
+  printf "Backup created.\n\n"
 }
 
 run_update_script_in_selected_version() {
   CURRENT_UPDATE_SCRIPT=./backup/release/"$SOURCE_TAG"/update_$APP_NAME.sh
   NEW_UPDATE_SCRIPT=$REPO_URL/"$TARGET_TAG"/scripts/update.sh
 
+  printf "3. Update script modification check\n"
   if [ ! -f "$CURRENT_UPDATE_SCRIPT" ] ||
     ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT" &>/dev/null; then
     if [ ! -f "$CURRENT_UPDATE_SCRIPT" ]; then
-      printf "Update script 'update_%s.sh' does not exist!\n" $APP_NAME
+      printf -- "- Current update script 'update_%s.sh' does not exist (anymore)!\n" $APP_NAME
 
     elif ! curl --stderr /dev/null "$NEW_UPDATE_SCRIPT" | diff -q - "$CURRENT_UPDATE_SCRIPT" &>/dev/null; then
-      printf 'Update script has been modified in newer version!\n'
+      printf -- '- Current update script is outdated!\n'
     fi
 
-    printf "The running update script will download the desired update script, terminate itself, and start the new one!\n\n"
-    printf 'Downloading the desired update script ...\n'
+    printf '  Downloading a new update script in the selected version ...\n'
     if wget -q -O update_$APP_NAME.sh "$NEW_UPDATE_SCRIPT"; then
       chmod +x update_$APP_NAME.sh
-      printf 'Download successful!\n'
+      printf '  Download successful!\n'
     else
-      printf 'Download failed!\n'
-      printf "'%s' update script finished with error.\n" $APP_NAME
+      printf '  Download failed!\n'
+      printf "  '%s' update script finished with error.\n" $APP_NAME
       exit 1
     fi
 
-    printf "\nDownloaded update script version %s will be started now.\n\n" "$TARGET_TAG"
+    printf "  Current update script will now call the downloaded update script and terminate itself.\n"
+    printf "Update script modification check done.\n\n"
+
     ./update_$APP_NAME.sh "$TARGET_TAG"
     exit $?
+
+  else
+    printf -- "- Update script has not been changed in the selected version\n"
+    printf "Update script modification check done.\n\n"
   fi
 }
 
@@ -132,18 +141,19 @@ download_file() {
 }
 
 update_files() {
-  printf "Downloading files ...\n"
+  printf "4. File download\n"
 
   download_file docker-compose.studio-lite.yaml docker-compose.yaml
   download_file docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml
   download_file scripts/studio-lite.mk scripts/make/prod.mk
 
-  printf "Downloads done!\n\n"
+  printf "File download done.\n\n"
 }
 
 get_modified_file() {
   SOURCE_FILE="$1"
   TARGET_FILE=$REPO_URL/"$TARGET_TAG"/"$2"
+  FILE_TYPE="$3"
   CURRENT_ENV_FILE=.env.studio-lite
   CURRENT_CONFIG_FILE=config/frontend/default.conf.template
 
@@ -151,80 +161,83 @@ get_modified_file() {
 
     # no source file exists anymore
     if [ ! -f "$SOURCE_FILE" ]; then
-      if [ "$3" == "env-file" ]; then
-        printf -- "- Environment template file '%s' does not exist anymore!\n" "$1"
-        printf "  A version %s environment template file will be downloaded now.\n" "$TARGET_TAG"
-        printf "  Please compare your current '%s' file with the new template file and update it " $CURRENT_ENV_FILE
+      if [ "$FILE_TYPE" == "env-file" ]; then
+        printf -- "- Environment template file '%s' does not exist anymore.\n" "$SOURCE_FILE"
+        printf "  A version %s environment template file will be downloaded now ...\n" "$TARGET_TAG"
+        printf "  Please compare your current environment file with the new template file and update it "
         printf "with new environment variables, or delete obsolete variables, if necessary.\n"
+        printf "  For comparison use e.g. 'diff %s %s'.\n" $CURRENT_ENV_FILE "$SOURCE_FILE"
       fi
 
-      if [ "$3" == "conf-file" ]; then
-        printf -- "- Configuration template file '%s' does not exist anymore!\n" "$1"
-        printf "  A version %s configuration template file will be downloaded now.\n" "$TARGET_TAG"
+      if [ "$FILE_TYPE" == "conf-file" ]; then
+        printf -- "- Configuration template file '%s' does not exist (anymore).\n" "$SOURCE_FILE"
+        printf "  A version %s configuration template file will be downloaded now ...\n" "$TARGET_TAG"
         printf "  Please compare your current '%s' file with the new template file and update it, " $CURRENT_CONFIG_FILE
         printf "if necessary!\n"
       fi
 
     # source file and target file differ
     elif ! curl --stderr /dev/null "$TARGET_FILE" | diff -q - "$SOURCE_FILE" &>/dev/null; then
-      if [ "$3" == "env-file" ]; then
-        printf -- "- A new version of the current environment template file '%s' is available and will be " "$1"
-        printf "downloaded now!\n"
-        printf "  Please compare your current '%s' file with the new template file and update it " $CURRENT_ENV_FILE
+      if [ "$FILE_TYPE" == "env-file" ]; then
+        printf -- "- The current environment template file '%s' is outdated.\n" "$SOURCE_FILE"
+        printf "  A version %s environment template file will be downloaded now ...\n" "$TARGET_TAG"
+        printf "  Please compare your current environment file with the new template file and update it "
         printf "with new environment variables, or delete obsolete variables, if necessary.\n"
+        printf "  For comparison use e.g. 'diff %s %s'.\n" $CURRENT_ENV_FILE "$SOURCE_FILE"
       fi
 
-      if [ "$3" == "conf-file" ]; then
-        mv "$1" "$1".old 2>/dev/null
-        cp $CURRENT_CONFIG_FILE ${CURRENT_CONFIG_FILE}.old
-        printf -- "- A new version of the current configuration template file '%s' is available and will be " "$1"
-        printf "downloaded now!\n"
-        printf "  Please compare your current '%s' file with the new template file and update it, " $CURRENT_CONFIG_FILE
+      if [ "$FILE_TYPE" == "conf-file" ]; then
+        mv "$SOURCE_FILE" "$SOURCE_FILE".old 2>/dev/null
+        cp $CURRENT_CONFIG_FILE $CURRENT_CONFIG_FILE.old
+        printf -- "- The current configuration template file '%s' is outdated.\n" "$SOURCE_FILE"
+        printf "  A version %s configuration template file will be downloaded now ...\n" "$TARGET_TAG"
+        printf "  Please compare your current configuration file with the new template file and update it, "
         printf "if necessary!\n"
+        printf "  For comparison use e.g. 'diff %s %s'.\n" "$CURRENT_CONFIG_FILE" "$SOURCE_FILE"
       fi
 
     fi
 
-    if wget -q -O "$1" "$TARGET_FILE"; then
-      printf "  File '%s' was downloaded successfully.\n" "$1"
+    if wget -q -O "$SOURCE_FILE" "$TARGET_FILE"; then
+      printf "  File '%s' was downloaded successfully.\n" "$SOURCE_FILE"
 
-      if [ "$3" == "env-file" ]; then
+      if [ "$FILE_TYPE" == "env-file" ]; then
         HAS_ENV_FILE_UPDATE=true
       fi
 
-      if [ "$3" == "conf-file" ]; then
+      if [ "$FILE_TYPE" == "conf-file" ]; then
         HAS_CONFIG_FILE_UPDATE=true
       fi
 
     else
-      printf "  File '%s' download failed.\n\n" "$1"
+      printf "  File '%s' download failed.\n\n" "$SOURCE_FILE"
       printf "'%s' update script finished with error.\n" $APP_NAME
       exit 1
 
     fi
 
   else
-    if [ "$3" == "env-file" ]; then
-      printf -- "- No update of environment template file '%s' available.\n" "$1"
+    if [ "$FILE_TYPE" == "env-file" ]; then
+      printf -- "- The current environment template file '%s' is still up to date.\n" "$SOURCE_FILE"
     fi
 
-    if [ "$3" == "conf-file" ]; then
-      printf -- "- No update of configuration template file '%s' available.\n" "$1"
+    if [ "$FILE_TYPE" == "conf-file" ]; then
+      printf -- "- The current configuration template file '%s' is still up to date.\n" "$SOURCE_FILE"
     fi
 
   fi
 }
 
 check_template_files_modifications() {
-  printf "Check template files for updates ...\n"
-
   # check environment file
+  printf "5. Environment template file modification check\n"
   get_modified_file .env.studio-lite.template .env.studio-lite.template "env-file"
+  printf "Environment template file modification check done.\n\n"
 
   # check nginx configuration files
+  printf "6. Configuration template files modification check\n"
   get_modified_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
-
-  printf "Template files update check done.\n\n"
+  printf "Configuration template files modification check done.\n\n"
 }
 
 customize_settings() {
@@ -244,31 +257,36 @@ customize_settings() {
 }
 
 finalize_update() {
+  printf "7. Summary\n"
   if [ $HAS_ENV_FILE_UPDATE == "true" ] || [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
     if [ $HAS_ENV_FILE_UPDATE == "true" ] && [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
-      printf 'Version, environment, and configuration update applied!\n\n'
-      printf "Please check your environment and configuration file for modifications!\n\n"
+      printf -- '- Version, environment, and configuration update applied!\n\n'
+      printf "  PLEASE CHECK YOUR ENVIRONMENT AND CONFIGURATION FILES FOR MODIFICATIONS ! ! !\n\n"
     elif [ $HAS_ENV_FILE_UPDATE == "true" ]; then
-      printf 'Version and environment update applied!\n\n'
-      printf "Please check your environment file for modifications!\n\n"
+      printf -- '- Version and environment update applied!\n\n'
+      printf "  PLEASE CHECK YOUR ENVIRONMENT FILE FOR MODIFICATIONS ! ! !\n\n"
     elif [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
-      printf 'Version and configuration update applied!\n\n'
-      printf "Please check your configuration file for modifications!\n\n"
+      printf -- '- Version and configuration update applied!\n\n'
+      printf "  PLEASE CHECK YOUR CONFIGURATION FILES FOR MODIFICATIONS ! ! !\n\n"
     fi
+    printf "Summary done.\n\n\n"
 
-    if docker compose --project-name "${PWD##*/}" ps -q >/dev/null; then
-      printf "'%s' will now shut down ...\n" $APP_NAME
+    if [[ $(docker compose --project-name "${PWD##*/}" ps -q) ]]; then
+      printf "'%s' application will now shut down ...\n" $APP_NAME
       docker compose --project-name "${PWD##*/}" down
     fi
 
-    printf "\nWhen your files are checked, you could restart the application with 'make %s-up' at the " $APP_NAME
-    printf "command line to put the update into effect.\n\n"
+    printf "When your files are checked for modification, you could restart the application with "
+    printf "'make %s-up' at the command line to put the update into effect.\n\n" $APP_NAME
 
     printf "'%s' update script finished.\n" $APP_NAME
     exit 0
 
   else
-    printf "Version update applied.\n\n"
+    printf -- "- Version update applied.\n"
+    printf "  No further action needed.\n"
+    printf "Summary done.\n\n\n"
+
     # application_reload --> Seems not to work with liquibase containers!
     application_restart
   fi
