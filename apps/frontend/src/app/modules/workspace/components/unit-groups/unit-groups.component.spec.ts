@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TranslateModule } from '@ngx-translate/core';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 import { UnitGroupsComponent } from './unit-groups.component';
 
 describe('UnitGroupsComponent', () => {
@@ -8,7 +12,15 @@ describe('UnitGroupsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitGroupsComponent]
+      declarations: [UnitGroupsComponent],
+      imports: [
+        RouterTestingModule,
+        HttpClientModule
+      ],
+      providers: [{
+        provide: 'SERVER_URL',
+        useValue: environment.backendUrl
+      }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitGroupsComponent);
