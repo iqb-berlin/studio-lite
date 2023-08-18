@@ -213,13 +213,17 @@ build-db-image:
     - !reference [ .develop_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build --network host -q -f database/Postgres.Dockerfile
+    - docker build -q -f database/Postgres.Dockerfile
       -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
     - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
@@ -233,13 +237,17 @@ build-liquibase-image:
     - !reference [ .develop_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build --network host -q -f database/Liquibase.Dockerfile
+    - docker build -q -f database/Liquibase.Dockerfile
       -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
     - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
@@ -567,7 +575,7 @@ gemnasium-dependency_scanning:
   stage: scan-dependencies
   interruptible: true
   allow_failure: true
-  rules:  # TODO: Overwriting of rules does not work
+  rules: # TODO: Overwriting of rules does not work
     - !reference [ .develop_pr_base_rules, rules ]
 
 build-develop-commit-db-image:
@@ -576,13 +584,17 @@ build-develop-commit-db-image:
     - !reference [ .develop_commit_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
   before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --network host -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -593,13 +605,17 @@ build-develop-commit-liquibase-image:
     - !reference [ .develop_commit_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
   before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --network host -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -610,13 +626,17 @@ build-develop-commit-backend-image:
     - !reference [ .develop_commit_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
   before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --network host -q -f apps/api/Dockerfile --build-arg project=api --target=prod
+    - docker build -q -f apps/api/Dockerfile --build-arg project=api --target=prod
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -628,13 +648,17 @@ build-develop-commit-frontend-image:
     - !reference [ .develop_commit_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
   before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --network host -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
+    - docker build -q -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:

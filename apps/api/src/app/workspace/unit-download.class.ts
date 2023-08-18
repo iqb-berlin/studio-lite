@@ -42,6 +42,8 @@ export class UnitDownloadClass {
             Id: unitMetadata.key,
             Label: unitMetadata.name,
             Description: unitMetadata.description
+            // Transcript: unitMetadata.transcript, // TODO: after transcript is in testcenter xsd
+            // Reference: unitMetadata.reference // TODO: after reference is in testcenter xsd
           }
         }
       });

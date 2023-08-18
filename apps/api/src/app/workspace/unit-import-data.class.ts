@@ -7,6 +7,8 @@ export class UnitImportData {
   name: string;
   fileName: string;
   description: string;
+  transcript: string;
+  reference: string;
   definition: string;
   definitionFileName: string;
   player: string;
@@ -81,7 +83,14 @@ export class UnitImportData {
     const unitLabelElement = metadataElement.find('Label').first();
     this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
     const unitDescriptionElement = metadataElement.find('Description').first();
-    this.description = unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';
+    this.description =
+      unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';
+    const unitTranscriptElement = metadataElement.find('Transcript').first();
+    this.transcript =
+      unitTranscriptElement.length > 0 ? unitTranscriptElement.text() : '';
+    const unitReferenceElement = metadataElement.find('Reference').first();
+    this.reference =
+      unitReferenceElement.length > 0 ? unitReferenceElement.text() : '';
     const unitLastChangeElement = metadataElement.find('Lastchange').first();
     if (unitLastChangeElement.length > 0) {
       this.lastChangedMetadata = new Date(unitLastChangeElement.text());
