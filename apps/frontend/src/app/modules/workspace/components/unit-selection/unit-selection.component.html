@@ -13,19 +13,20 @@
           : numberOfUnits + ' ' + ('workspace.unit' | translate)
       }}
     </div>
+    {{expanded}} {{expandedGroups}}
     <button
-      *ngIf="!expanded"
+      *ngIf="!expandedGroups"
       mat-icon-button
       [attr.aria-label]="'accordion.expand' | translate"
-      (click)="this.expanded = !this.expanded"
+      (click)="expanded = true;expandedGroups= numberOfGroups"
     >
       <mat-icon>expand_more</mat-icon>
     </button>
     <button
-      *ngIf="expanded"
+      *ngIf="expandedGroups>0"
       mat-icon-button
       [attr.aria-label]="'accordion.expand' | translate"
-      (click)="this.expanded = !this.expanded"
+      (click)="expanded = false; expandedGroups= 0"
     >
       <mat-icon>expand_less</mat-icon>
     </button>
@@ -45,13 +46,14 @@
   </div>
 </div>
 
-<studio-lite-unit-groups [filter]="filterInput.value" [expanded]="expanded">
+<studio-lite-unit-groups>
   <studio-lite-unit-group
-    *ngFor="let unitGroup of unitList | keyvalue"
+    *ngFor="let unitGroup of unitList | keyvalue; let i = index"
     class="unit-group"
     [count]="unitGroup.value.length"
     [title]="unitGroup.key"
     [expanded]="expanded"
+    (expandedChange) = onExpandedChange($event)
   >
     <studio-lite-unit-table
       [hasSortHeader]="false"

@@ -1,4 +1,6 @@
-import { Component, Input } from '@angular/core';
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
 
 @Component({
   selector: 'studio-lite-unit-group',
@@ -9,4 +11,5 @@ export class UnitGroupComponent {
   @Input() title!: string;
   @Input() expanded!: boolean;
   @Input() count!: number;
+  @Output() expandedChange = new EventEmitter<boolean>();
 }

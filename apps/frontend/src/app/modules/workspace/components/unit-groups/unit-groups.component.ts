@@ -8,6 +8,5 @@ import {
   styleUrls: ['./unit-groups.component.scss']
 })
 export class UnitGroupsComponent {
-  @Input() filter!: string;
-  @Input() expanded!: boolean;
+
 }

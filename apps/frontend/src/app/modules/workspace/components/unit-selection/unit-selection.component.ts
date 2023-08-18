@@ -21,8 +21,7 @@ import { UnitTableComponent } from '../unit-table/unit-table.component';
 })
 export class UnitSelectionComponent
   extends SelectUnitDirective
-  implements OnInit, OnDestroy
-{
+  implements OnInit, OnDestroy {
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
   @Input() selectedUnitId!: number;
   @Input() unitList!: { [key: string]: UnitInListDto[] };
@@ -31,10 +30,12 @@ export class UnitSelectionComponent
   filterInput: string = '';
   numberOfGroups!: number;
   numberOfUnits!: number;
+  expandedGroups!: number;
   @Input('unitGroupList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
     this.numberOfGroups = Object.keys(unitList).length;
     this.numberOfUnits = 0;
-    Object.values(unitList).forEach((units) => {
+    this.expandedGroups = this.numberOfGroups;
+    Object.values(unitList).forEach(units => {
       this.numberOfUnits += units.length;
     });
   }
@@ -60,8 +61,23 @@ export class UnitSelectionComponent
     this.updateUnitList();
   }
 
+  onExpandedChange(expanded:boolean) {
+    if (expanded) {
+      this.expandedGroups += 1;
+    } else {
+      this.expandedGroups -= 1;
+    }
+    if (this.expandedGroups === 0) {
+      this.expanded = false;
+    }
+    if (this.expandedGroups === this.numberOfGroups) {
+      this.expanded = true;
+    }
+    console.log('expandedGroups', this.expandedGroups, this.expanded);
+  }
+
   sortUnitTables(sortEvent: { sortState: Sort; table: UnitTableComponent }) {
-    this.unitTables.forEach((unitTable) => {
+    this.unitTables.forEach(unitTable => {
       if (unitTable !== sortEvent.table) {
         unitTable.sort(sortEvent.table.sortHeader);
       }
