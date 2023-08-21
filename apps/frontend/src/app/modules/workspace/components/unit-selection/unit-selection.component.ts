@@ -6,7 +6,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Sort } from '@angular/material/sort';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -26,8 +26,8 @@ export class UnitSelectionComponent
   @Input() selectedUnitId!: number;
   @Input() unitList!: { [key: string]: UnitInListDto[] };
   expanded: boolean = true;
+  expandAll = new BehaviorSubject<boolean>(true);
   private ngUnsubscribe = new Subject<void>();
-  filterInput: string = '';
   numberOfGroups!: number;
   numberOfUnits!: number;
   expandedGroups!: number;
@@ -67,13 +67,6 @@ export class UnitSelectionComponent
     } else {
       this.expandedGroups -= 1;
     }
-    if (this.expandedGroups === 0) {
-      this.expanded = false;
-    }
-    if (this.expandedGroups === this.numberOfGroups) {
-      this.expanded = true;
-    }
-    console.log('expandedGroups', this.expandedGroups, this.expanded);
   }
 
   sortUnitTables(sortEvent: { sortState: Sort; table: UnitTableComponent }) {
