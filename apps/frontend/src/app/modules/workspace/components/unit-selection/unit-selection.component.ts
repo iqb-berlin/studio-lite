@@ -6,7 +6,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Sort } from '@angular/material/sort';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -19,27 +19,12 @@ import { UnitTableComponent } from '../unit-table/unit-table.component';
   templateUrl: './unit-selection.component.html',
   styleUrls: ['./unit-selection.component.scss']
 })
-export class UnitSelectionComponent
-  extends SelectUnitDirective
+export class UnitSelectionComponent extends SelectUnitDirective
   implements OnInit, OnDestroy {
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
-  @Input() selectedUnitId!: number;
   @Input() unitList!: { [key: string]: UnitInListDto[] };
-  expanded: boolean = true;
-  expandAll = new BehaviorSubject<boolean>(true);
+  @Input() selectedUnitId!: number;
   private ngUnsubscribe = new Subject<void>();
-  numberOfGroups!: number;
-  numberOfUnits!: number;
-  expandedGroups!: number;
-  @Input('unitGroupList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
-    this.numberOfGroups = Object.keys(unitList).length;
-    this.numberOfUnits = 0;
-    this.expandedGroups = this.numberOfGroups;
-    Object.values(unitList).forEach(units => {
-      this.numberOfUnits += units.length;
-    });
-  }
-
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -59,14 +44,6 @@ export class UnitSelectionComponent
 
   ngOnInit(): void {
     this.updateUnitList();
-  }
-
-  onExpandedChange(expanded:boolean) {
-    if (expanded) {
-      this.expandedGroups += 1;
-    } else {
-      this.expandedGroups -= 1;
-    }
   }
 
   sortUnitTables(sortEvent: { sortState: Sort; table: UnitTableComponent }) {

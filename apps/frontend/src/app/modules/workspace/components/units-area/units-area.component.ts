@@ -17,8 +17,7 @@ export class UnitsAreaComponent implements OnInit, OnDestroy {
   constructor(
     public workspaceService: WorkspaceService,
     private route: ActivatedRoute
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.route.params

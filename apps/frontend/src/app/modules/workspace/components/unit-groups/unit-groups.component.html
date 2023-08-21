@@ -1,3 +1,34 @@
+<div class="fx-row-space-between-center quantity-groups-units" *ngIf="numberOfGroups > 0">
+  <div class="number-groups-units">
+    {{
+    numberOfGroups > 1
+      ? numberOfGroups + ' ' + ('workspace.groups' | translate)
+      : numberOfGroups + ' ' + ('workspace.group' | translate)
+    }}
+    |
+    {{
+    numberOfUnits > 1
+      ? numberOfUnits + ' ' + ('workspace.units' | translate)
+      : numberOfUnits + ' ' + ('workspace.unit' | translate)
+    }}
+  </div>
+  <button
+    *ngIf="!expandedGroups"
+    mat-icon-button
+    [attr.aria-label]="'accordion.expand' | translate"
+    (click)="expandedGroups= numberOfGroups; expandAll.next(true)"
+  >
+    <mat-icon>expand_more</mat-icon>
+  </button>
+  <button
+    *ngIf="expandedGroups>0"
+    mat-icon-button
+    [attr.aria-label]="'accordion.expand' | translate"
+    (click)="expandedGroups= 0; expandAll.next(false)"
+  >
+    <mat-icon>expand_less</mat-icon>
+  </button>
+</div>
 
 <ng-content></ng-content>
 
