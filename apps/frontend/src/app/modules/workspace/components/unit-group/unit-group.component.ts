@@ -22,6 +22,6 @@ export class UnitGroupComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    if (this.expandAll !== null) this.expandAll.unsubscribe();
+    if (this.expandAll) this.expandAll.unsubscribe();
   }
 }
