@@ -1,9 +1,11 @@
   <div class="selection-header">
-    <studio-lite-unit-groups #unitGroups [unitGroupList]="unitList" [title]="">
+    <studio-lite-unit-groups #unitGroups
+                             [groupsInfo]=groupsInfo
+                             [expandedGroups]=expandedGroups
+                             [numberOfGroups]=numberOfGroups>
         <studio-lite-search-filter
           #filterInput
-          [title]="'search-filter.filter-units' | translate"
-        >
+          [title]="'search-filter.filter-units' | translate">
         </studio-lite-search-filter>
         <div>
           <studio-lite-unit-table
@@ -20,7 +22,7 @@
         [count]="unitGroup.value.length"
         [title]="unitGroup.key"
         [expandAll]="unitGroups.expandAll"
-        (expandedChange) = unitGroups.onExpandedChange($event)>
+        (expandedChange) = onExpandedChange($event)>
 
         <studio-lite-unit-table
           [hasSortHeader]="false"

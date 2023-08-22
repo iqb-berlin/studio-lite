@@ -16,6 +16,12 @@ export class UnitGroupComponent implements OnInit {
   @Output() expandedChange = new EventEmitter<boolean>();
 
   ngOnInit(): void {
-    this.expandAll.subscribe(expanded => { this.expanded = expanded; });
+    this.expandAll.subscribe(expanded => {
+      this.expanded = expanded;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.expandAll !== null) this.expandAll.unsubscribe();
   }
 }
