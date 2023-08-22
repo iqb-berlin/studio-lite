@@ -23,6 +23,7 @@ describe('UnitsAreaComponent', () => {
     @Input() navLinks!: string[];
     @Input() unitList!: UnitInListDto[];
     @Input() selectedRouterLink!: number;
+    @Input() unitGroupList!: number;
   }
   @Component({ selector: 'studio-lite-add-unit-button', template: '' })
   class MockAddUnitButtonComponent {

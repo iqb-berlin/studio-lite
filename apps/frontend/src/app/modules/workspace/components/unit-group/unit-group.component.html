@@ -1,19 +1,25 @@
 <div class="header">
-  <div class="title">{{title}}</div>
+  <div class="title">{{ title }}</div>
   <div class="expand-button">
-    <div *ngIf="count !== undefined && !expanded"
-         [matBadge]="count"
-         class="demo-section"></div>
-    <button *ngIf="!expanded"
-            mat-icon-button
-            [attr.aria-label]="'accordion.expand' | translate"
-            (click)="expanded = !expanded">
+    <div
+      *ngIf="count !== undefined && !expanded"
+      [matBadge]="count"
+      class="demo-section"
+    ></div>
+    <button
+      *ngIf="!expanded"
+      mat-icon-button
+      [attr.aria-label]="'accordion.expand' | translate"
+      (click)="expandedChange.emit(!expanded);expanded = !expanded;"
+    >
       <mat-icon>expand_more</mat-icon>
     </button>
-    <button *ngIf="expanded"
-            mat-icon-button
-            [attr.aria-label]="'accordion.expand' | translate"
-            (click)="expanded = !expanded">
+    <button
+      *ngIf="expanded"
+      mat-icon-button
+      [attr.aria-label]="'accordion.expand' | translate"
+      (click)="expandedChange.emit(!expanded);expanded = !expanded; "
+    >
       <mat-icon>expand_less</mat-icon>
     </button>
   </div>
@@ -21,4 +27,3 @@
 <div class="content" *ngIf="expanded">
   <ng-content></ng-content>
 </div>
-
