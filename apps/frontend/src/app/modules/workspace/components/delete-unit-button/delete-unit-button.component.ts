@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { lastValueFrom, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import { SelectUnitDirective } from '../../directives/select-unit.directive';
   styleUrls: ['./delete-unit-button.component.scss']
 })
 export class DeleteUnitButtonComponent extends SelectUnitDirective {
+  @Input() selectedUnitId!: number;
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -69,7 +70,8 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
           title: this.translateService.instant('workspace.delete-units'),
           buttonLabel: this.translateService.instant('workspace.delete'),
           fromOtherWorkspacesToo: false,
-          multiple: true
+          multiple: true,
+          selectedUnitId: this.selectedUnitId
         }
       });
       return lastValueFrom(dialogRef.afterClosed()
