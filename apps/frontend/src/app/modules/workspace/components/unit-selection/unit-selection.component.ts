@@ -26,11 +26,12 @@ export class UnitSelectionComponent extends SelectUnitDirective
   numberOfUnits!: number;
   expandedGroups!: number;
   groupsInfo: string = '';
+  unitList!:{ [p: string]: UnitInListDto[] };
   private ngUnsubscribe = new Subject<void>();
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
-  @Input() unitList!: { [key: string]: UnitInListDto[] };
   @Input() selectedUnitId!: number;
-  @Input('unitGroupList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
+  @Input('unitList') set setU(unitList: { [p: string]: UnitInListDto[] }) {
+    this.unitList = unitList;
     this.numberOfGroups = Object.keys(unitList).length;
     this.numberOfUnits = 0;
     this.expandedGroups = this.numberOfGroups;
