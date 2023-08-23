@@ -15,6 +15,7 @@ import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup } from '@angular/forms';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;
@@ -42,7 +43,8 @@ describe('WorkspaceGroupsComponent', () => {
       declarations: [
         WorkspaceGroupsComponent,
         MockWorkspaceGroupsMenuComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        WrappedIconComponent
       ],
       imports: [
         MatDialogModule,

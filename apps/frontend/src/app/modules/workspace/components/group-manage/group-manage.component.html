@@ -1,7 +1,7 @@
 <div class="fx-column-start-stretch">
   <h1 mat-dialog-title>{{'workspace.manage-unit-groups' | translate}}</h1>
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
-    <div class="fx-flex-row-20 fx-column-end-stretch">
+    <div class="fx-flex-row-30 fx-column-end-stretch">
 
       <studio-lite-search-filter *ngIf="groups.length"
                                  [title]="'search-filter.filter-groups' | translate"
@@ -52,7 +52,7 @@
       </studio-lite-group-menu>
     </div>
 
-    <div class="fx-flex-row-80">
+    <div class="fx-flex-row-70">
         <div [class]="changed ? 'group-changed' : 'group-not-changed'">
           <div class="fx-column-start-stretch units-wrapper">
             <div class="fx-flex-fill"
@@ -65,23 +65,12 @@
                                             (selectionChanged)="unitSelectionChanged()">
               </studio-lite-select-unit-list>
             </div>
-            <div class="fx-row-end-end fx-gap-5 changes-container">
-              <button mat-raised-button
-                      [matTooltip]="'workspace.reject-unit-changes' | translate"
-                      [disabled]="!changed"
-                      matTooltipPosition="below"
-                      (click)="discardChanges()">
-                <mat-icon>close</mat-icon>
-              </button>
-              <button mat-raised-button
-                      [matTooltip]="'workspace.save-changes' | translate"
-                      [disabled]="!changed"
-                      matTooltipPosition="below"
-                      (click)="saveChanged()">
-                {{'save' | translate}}
-                <mat-icon>save</mat-icon>
-              </button>
-            </div>
+
+            <studio-lite-save-changes [changed]="changed"
+                                      (discardChanges)="discardChanges()"
+                                      (saveChanges)="saveChanged()">
+            </studio-lite-save-changes>
+
           </div>
         </div>
       </div>

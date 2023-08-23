@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Comment } from '../../models/comment.interface';
 import { CommentComponent } from './comment.component';
 import { ActiveComment } from '../../models/active-comment.interface';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('CommentBadgeComponent', () => {
   let component: CommentComponent;
@@ -68,7 +69,8 @@ describe('CommentBadgeComponent', () => {
         MockMomentFromNowPipe,
         MockIsEditingPipe,
         MockIsReplyingPipe,
-        MockSafeResourceHTMLPipe
+        MockSafeResourceHTMLPipe,
+        WrappedIconComponent
       ],
       imports: [
         TranslateModule.forRoot(),

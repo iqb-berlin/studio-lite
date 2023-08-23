@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceGroupsMenuComponent } from './workspace-groups-menu.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('WorkspaceGroupsMenuComponent', () => {
   let component: WorkspaceGroupsMenuComponent;
@@ -11,7 +12,10 @@ describe('WorkspaceGroupsMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [WorkspaceGroupsMenuComponent],
+      declarations: [
+        WorkspaceGroupsMenuComponent,
+        WrappedIconComponent
+      ],
       imports: [
         MatDialogModule,
         MatIconModule,

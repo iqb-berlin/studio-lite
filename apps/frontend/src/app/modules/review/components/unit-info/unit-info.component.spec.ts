@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { UnitInfoComponent } from './unit-info.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UnitInfoComponent', () => {
   let component: UnitInfoComponent;
@@ -44,7 +45,8 @@ describe('UnitInfoComponent', () => {
         UnitInfoComponent,
         MockUnitMetaDataComponent,
         MockUnitInfoComments,
-        MockUnitInfoCoding
+        MockUnitInfoCoding,
+        WrappedIconComponent
       ],
       imports: [
         TranslateModule.forRoot(),
@@ -52,10 +54,12 @@ describe('UnitInfoComponent', () => {
         MatTooltipModule,
         HttpClientModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitInfoComponent);

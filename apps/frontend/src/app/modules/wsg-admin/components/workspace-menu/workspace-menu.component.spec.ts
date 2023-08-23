@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceMenuComponent } from './workspace-menu.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('WorkspaceMenuComponent', () => {
   let component: WorkspaceMenuComponent;
@@ -13,7 +14,10 @@ describe('WorkspaceMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [WorkspaceMenuComponent],
+      declarations: [
+        WorkspaceMenuComponent,
+        WrappedIconComponent
+      ],
       imports: [
         MatDialogModule,
         MatTooltipModule,

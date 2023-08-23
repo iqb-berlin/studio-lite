@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { environment } from '../../../../../environments/environment';
 import { UpdateUnitsButtonComponent } from './update-units-button.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UpdateUnitsButtonComponent', () => {
   let component: UpdateUnitsButtonComponent;
@@ -14,7 +15,10 @@ describe('UpdateUnitsButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UpdateUnitsButtonComponent],
+      declarations: [
+        UpdateUnitsButtonComponent,
+        WrappedIconComponent
+      ],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,

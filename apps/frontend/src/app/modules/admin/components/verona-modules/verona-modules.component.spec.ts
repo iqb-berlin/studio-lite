@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { environment } from '../../../../../environments/environment';
 import { VeronaModulesComponent } from './verona-modules.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('VeronaModulesComponent', () => {
   let component: VeronaModulesComponent;
@@ -44,7 +45,8 @@ describe('VeronaModulesComponent', () => {
         VeronaModulesComponent,
         MockIqbFilesUploadInputForDirective,
         MockIqbFilesUploadQueueComponent,
-        MockVeronaModulesTableComponent
+        MockVeronaModulesTableComponent,
+        WrappedIconComponent
       ],
       imports: [
         TranslateModule.forRoot(),

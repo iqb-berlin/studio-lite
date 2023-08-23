@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { PageNavigationComponent } from './page-navigation.component';
+import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 describe('PageNavigationComponent', () => {
   let component: PageNavigationComponent;
@@ -8,10 +9,8 @@ describe('PageNavigationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PageNavigationComponent],
-      imports: [
-        TranslateModule.forRoot()
-      ]
+      declarations: [PageNavigationComponent, WrappedIconComponent],
+      imports: [TranslateModule.forRoot()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PageNavigationComponent);

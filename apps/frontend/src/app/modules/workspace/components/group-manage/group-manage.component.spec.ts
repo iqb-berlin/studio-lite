@@ -26,6 +26,11 @@ describe('GroupManageComponent', () => {
     @Input() selectionCount!: number;
   }
 
+  @Component({ selector: 'studio-lite-save-changes', template: '' })
+  class MockSaveChangesComponent {
+    @Input() changed!: boolean;
+  }
+
   @Component({ selector: 'studio-lite-group-menu', template: '' })
   class MockGroupMenuComponent {
     @Input() selectedGroup!: string;
@@ -42,7 +47,8 @@ describe('GroupManageComponent', () => {
         GroupManageComponent,
         MockGroupMenuComponent,
         MockSelectUnitListComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        MockSaveChangesComponent
       ],
       imports: [
         HttpClientModule,

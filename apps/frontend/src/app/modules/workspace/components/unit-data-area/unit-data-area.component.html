@@ -1,5 +1,6 @@
 <div class="fx-column-start-stretch unit-data">
-  <nav mat-tab-nav-bar>
+  <nav mat-tab-nav-bar
+       [tabPanel]="tabPanel">
     <a *ngFor="let link of navLinks"
        mat-tab-link
        routerLinkActive="active-link"
@@ -12,6 +13,8 @@
     </a>
   </nav>
   <div class="fx-flex-fill">
-    <router-outlet></router-outlet>
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet></router-outlet>
+    </mat-tab-nav-panel>
   </div>
 </div>

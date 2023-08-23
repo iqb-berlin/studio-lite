@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { CanDeactivate } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
@@ -7,11 +6,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
 import { WorkspaceService } from '../services/workspace.service';
-import { WorkspaceComponent } from '../components/workspace/workspace.component';
 import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
 @Injectable()
-export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceComponent> {
+export class UnitRoutingCanDeactivateGuard {
   constructor(
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,

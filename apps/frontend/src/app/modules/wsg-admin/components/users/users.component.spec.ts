@@ -11,6 +11,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -25,7 +26,8 @@ describe('UsersComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         UsersComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        WrappedIconComponent
       ],
       imports: [
         MatDialogModule,

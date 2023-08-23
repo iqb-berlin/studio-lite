@@ -10,6 +10,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { AppLogoComponent } from './app-logo.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('AppLogoComponent', () => {
   let component: AppLogoComponent;
@@ -17,7 +18,10 @@ describe('AppLogoComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AppLogoComponent],
+      declarations: [
+        AppLogoComponent,
+        WrappedIconComponent
+      ],
       imports: [
         TranslateModule.forRoot(),
         ReactiveFormsModule,

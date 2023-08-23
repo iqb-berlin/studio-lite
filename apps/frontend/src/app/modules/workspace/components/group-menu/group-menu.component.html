@@ -4,7 +4,7 @@
           [matTooltip]="'workspace.add-group' | translate"
           matTooltipPosition="above"
           (click)="addGroup()">
-    <mat-icon>add</mat-icon>
+    <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           class="fx-flex-row-33"
@@ -12,7 +12,7 @@
           [disabled]="!selectedGroup"
           matTooltipPosition="above"
           (click)="renameGroup()">
-    <mat-icon>edit</mat-icon>
+    <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           class="fx-flex-row-33"
@@ -20,6 +20,6 @@
           [disabled]="!selectedGroup"
           matTooltipPosition="above"
           (click)="deleteGroup()">
-    <mat-icon>delete</mat-icon>
+    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
 </div>
