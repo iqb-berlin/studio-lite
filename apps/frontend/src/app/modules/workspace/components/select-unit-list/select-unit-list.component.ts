@@ -58,9 +58,7 @@ export class SelectUnitListComponent implements OnDestroy {
 
     this.objectsDatasource.sort = this.sort;
     this.objectsDatasource.data.forEach(row => {
-      row.id === this.selectedUnitId ?
-        this.tableSelectionCheckbox.select(row) :
-        null;
+      if (row.id === this.selectedUnitId) this.tableSelectionCheckbox.select(row);
     });
   }
 
