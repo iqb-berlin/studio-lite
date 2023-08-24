@@ -1,26 +1,27 @@
-<form [formGroup]="editWorkspaceGroupForm">
-  <h1 mat-dialog-title>{{data.title}}</h1>
+<h1 mat-dialog-title>{{data.title}}</h1>
+<mat-dialog-content >
+  <form [formGroup]="editWorkspaceGroupForm"
+        class="fx-column-start-stretch">
+      <mat-form-field>
+        <input matInput
+               formControlName="name"
+               [placeholder]="'admin.group-name' | translate"
+               [value]="data.name">
+      </mat-form-field>
+  </form>
+</mat-dialog-content>
 
-  <mat-dialog-content class="fx-column-start-stretch">
-    <mat-form-field>
-      <input matInput
-             formControlName="name"
-             [placeholder]="'admin.group-name' | translate"
-             [value]="data.name">
-    </mat-form-field>
-  </mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="editWorkspaceGroupForm"
+          [disabled]="editWorkspaceGroupForm.invalid">
+    {{data.saveButtonLabel}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
 
-  <mat-dialog-actions>
-    <button mat-raised-button
-            color="primary"
-            type="submit"
-            [mat-dialog-close]="editWorkspaceGroupForm"
-            [disabled]="editWorkspaceGroupForm.invalid">
-      {{data.saveButtonLabel}}
-    </button>
-    <button mat-raised-button
-            [mat-dialog-close]="false">
-      {{'cancel' | translate}}
-    </button>
-  </mat-dialog-actions>
-</form>
