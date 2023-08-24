@@ -20,4 +20,7 @@
 
 .selected {
   background-color: #00606415;
+  &:hover {
+    background-color: #00606415 !important;
+  }
 }
