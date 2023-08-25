@@ -2,28 +2,28 @@
 <h3 *ngIf="!codings || codings && !codings.length">{{'print.no-coding' | translate}}</h3>
 <ng-container *ngFor="let coding of codings; let first = first">
   <hr *ngIf="!first">
-  <table class="mat-table">
-    <tr class="mat-row">
-      <td class="mat-cell left-cell">
+  <table class="codings">
+    <tr>
+      <td class="left-cell">
         <h4>{{coding.id}}</h4>
       </td>
-      <td class="mat-cell">
+      <td>
         {{coding.sourceType === 'BASE' ? 'B' : 'A'}}
       </td>
     </tr>
-    <tr *ngIf="coding.label" class="mat-row">
-      <td class="mat-cell left-cell">
+    <tr *ngIf="coding.label">
+      <td class="left-cell">
         <p>{{'print.label' | translate}}</p>
       </td>
-      <td class="mat-cell">
+      <td>
         <p>{{coding.label}}</p>
       </td>
     </tr>
-    <tr *ngIf="coding.manualInstruction" class="mat-row">
-      <td class="mat-cell left-cell">
+    <tr *ngIf="coding.manualInstruction">
+      <td class="left-cell">
         <p>{{'print.common-manual-instruction' | translate}}</p>
       </td>
-      <td class="mat-cell">
+      <td>
         <div *ngIf="coding.manualInstruction"
              [innerHTML]="coding.manualInstruction"></div>
       </td>
