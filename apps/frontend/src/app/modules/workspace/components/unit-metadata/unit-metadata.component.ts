@@ -96,7 +96,6 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         // eslint-disable-next-line @typescript-eslint/dot-notation
         const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
         // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.unitForm.controls['key'].updateValueAndValidity();
         this.workspaceService.isValidFormKey.next(isValidFormKey);
         this.workspaceService.unitMetadataStore?.setBasicData(
           this.unitForm.get('key')?.value,
