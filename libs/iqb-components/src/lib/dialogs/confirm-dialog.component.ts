@@ -14,8 +14,12 @@ import { TranslateService } from '@ngx-translate/core';
     </mat-dialog-content>
 
     <mat-dialog-actions>
-      <button mat-raised-button color="primary" [mat-dialog-close]="true">{{ confirmData.confirmButtonLabel }}</button>
-      <button mat-raised-button *ngIf="showCancel" [mat-dialog-close]="false">{{'workspace.cancel' | translate}} </button>
+      <button mat-raised-button color="primary" [mat-dialog-close]="true">
+        {{ confirmData.confirmButtonLabel }}
+      </button>
+      <button mat-raised-button *ngIf="showCancel" [mat-dialog-close]="false">
+        {{'workspace.cancel' | translate}}
+      </button>
     </mat-dialog-actions>
   `
 })
