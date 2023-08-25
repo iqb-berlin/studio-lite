@@ -19,15 +19,26 @@ export class UnitRoutingCanDeactivateGuard {
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.workspaceService.isChanged()) {
+      let content = '';
+      let isWarning = true;
+      this.workspaceService.isValidFormKey.subscribe(isValid => {
+        isWarning = !isValid;
+        if (isValid) {
+          content = this.translateService.instant('workspace.save-unit-data-changes');
+        } else {
+          content = this.translateService.instant('workspace.save-unit-data-changes-warning');
+        }
+      });
       const dialogRef = this.confirmDialog.open(SaveOrDiscardComponent, {
         width: '500px',
         data: <ConfirmDialogData> {
           title: this.translateService.instant('workspace.save'),
-          content: this.translateService.instant('workspace.save-unit-data-changes'),
+          content: content,
           confirmButtonLabel: this.translateService.instant('workspace.save'),
           confirmButtonReturn: 'YES',
           confirmButton2Label: this.translateService.instant('workspace.reject-changes-label'),
-          confirmButton2Return: 'NO'
+          confirmButton2Return: 'NO',
+          warning: isWarning
         }
       });
       return dialogRef.afterClosed().pipe(
