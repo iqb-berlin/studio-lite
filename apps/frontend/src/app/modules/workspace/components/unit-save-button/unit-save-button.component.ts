@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
@@ -17,6 +18,14 @@ export class UnitSaveButtonComponent {
     private translateService: TranslateService,
     private snackBar: MatSnackBar
   ) {}
+
+  private ngUnsubscribe = new Subject<void>();
+  isValidFormKey = true;
+
+  ngOnInit() {
+    // eslint-disable-next-line no-return-assign
+    this.workspaceService.isValidFormKey.asObservable().subscribe(isValid => this.isValidFormKey = isValid);
+  }
 
   discardChanges(): void {
     const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
@@ -55,5 +64,10 @@ export class UnitSaveButtonComponent {
           { duration: 3000 });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

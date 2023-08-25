@@ -63,6 +63,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
+        Validators.maxLength(19),
+        Validators.pattern('[a-zA-Z-0-9_]+'),
         WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList)]);
       this.unitForm.setValue({
         key: unitMetadata.key,
@@ -91,6 +93,10 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         });
       }
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        this.workspaceService.isValidFormKey.next(isValidFormKey);
         this.workspaceService.unitMetadataStore?.setBasicData(
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,

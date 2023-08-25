@@ -301,7 +301,7 @@
     "title": "Arbeitsbereich",
     "new-comments": "Neue Kommentare",
     "unit-key": "Kurzname",
-    "invalid-unit-key": "Zu kurz oder schon vorhanden",
+    "invalid-unit-key": "Ungültige Länge, ungültige Zeichen oder schon vorhanden",
     "unit-name": "Name",
     "sort-by-key": "Nach Kurzname sortieren",
     "sort-by-name": "Nach Name sortieren",
@@ -328,6 +328,7 @@
     "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
+    "cancel": "Abbrechen",
     "delete": "Löschen",
     "print": "Drucken",
     "print-units": "Aufgabe(n) drucken",
@@ -418,7 +419,6 @@
     "please-confirm": "Bitte bestätigen",
     "reject-changes-label": "Änderungen verwerfen",
     "save-unit-data-changes": "Sie haben Daten dieser Aufgabe geändert. Möchten Sie diese Änderungen speichern?",
-    "invalid-unit-name": "Zu kurz, ungültige Zeichen oder schon vorhanden",
     "cancel-back-to-selection": "Abbrechen - zurück zur Auswahl",
     "target-workspace": "Ziel-Arbeitsbereich",
     "editor-not-loaded": "Der Editor \"{{id}}\" konnte nicht geladen werden.",
@@ -430,7 +430,8 @@
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "page-selection": "Seitenauswahl",
     "validate": "Validieren",
-    "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\""
+    "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
+    "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher."
   },
   "presentation-progress": {
     "label": "P",

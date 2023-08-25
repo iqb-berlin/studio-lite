@@ -30,6 +30,7 @@ export class WorkspaceService {
   lastChangedMetadata?: Date;
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
+  isValidFormKey = new BehaviorSubject<boolean>(true);
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
