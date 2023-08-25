@@ -328,6 +328,7 @@
     "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
+    "cancel": "Abbrechen",
     "delete": "Löschen",
     "print": "Drucken",
     "print-units": "Aufgabe(n) drucken",
