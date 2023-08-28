@@ -14,7 +14,7 @@ export class AddCommentButtonComponent {
 
   showReviewDialog() {
     this.commentDialog.open(CommentDialogComponent, {
-      width: '800px',
+      width: '1000px',
       height: this.showOthersComments ? '800px' : '350px'
     });
   }
