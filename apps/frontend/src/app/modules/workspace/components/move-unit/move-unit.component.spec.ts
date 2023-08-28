@@ -29,6 +29,7 @@ describe('MoveUnitComponent', () => {
     @Input() workspace!: unknown;
     @Input() showGroups!: boolean;
     @Input() selectionCount!: number;
+    @Input() selectedUnitId!: number;
   }
 
   beforeEach(async () => {
