@@ -29,11 +29,13 @@ describe('UnitsAreaComponent', () => {
   class MockAddUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;
+    @Input() selectedUnitId!: number;
   }
   @Component({ selector: 'studio-lite-delete-unit-button', template: '' })
   class MockDeleteUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;
+    @Input() selectedUnitId!: number;
   }
   @Component({ selector: 'studio-lite-edit-unit-button', template: '' })
   class MockEditUnitButtonComponent {

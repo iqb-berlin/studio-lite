@@ -24,6 +24,7 @@ describe('GroupManageComponent', () => {
     @Input() workspace!: unknown;
     @Input('show-groups') showGroups!: boolean;
     @Input() selectionCount!: number;
+    @Input() selectedUnitId!: number;
   }
 
   @Component({ selector: 'studio-lite-save-changes', template: '' })
