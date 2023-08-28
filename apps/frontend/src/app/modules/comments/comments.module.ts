@@ -13,6 +13,7 @@ import { NgxTiptapModule } from 'ngx-tiptap';
 import { MatInputModule } from '@angular/material/input';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommentComponent } from './components/comment/comment.component';
 import { CommentEditorComponent } from './components/comment-editor/comment-editor.component';
 import { CommentsComponent } from './components/comments/comments.component';
@@ -47,7 +48,8 @@ import { SharedModule } from '../shared/shared.module';
     MatTooltipModule,
     NgxTiptapModule,
     FormsModule,
-    MatInputModule
+    MatInputModule,
+    MatProgressSpinnerModule
   ],
   declarations: [
     CommentsComponent,
@@ -65,9 +67,7 @@ import { SharedModule } from '../shared/shared.module';
     MomentFromNowPipe,
     IsCommentCommittablePipe
   ],
-  exports: [
-    CommentsComponent
-  ],
+  exports: [CommentsComponent],
   providers: [
     BackendService,
     [
