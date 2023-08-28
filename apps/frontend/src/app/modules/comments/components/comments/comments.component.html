@@ -1,4 +1,7 @@
 <div class="fx-column-start-stretch full-height">
+  <div *ngIf="isCommentProcessing" class="spinner-container">
+    <mat-spinner class="fx-flex-fix-100" ></mat-spinner>
+  </div>
   <div class="comments fx-flex-fill" *ngIf="!newCommentOnly">
     <studio-lite-comment
       *ngFor="let rootComment of comments | rootComments"
