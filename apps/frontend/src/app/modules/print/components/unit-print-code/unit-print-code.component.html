@@ -1,25 +1,25 @@
-<table class="mat-table">
-  <tr class="mat-row">
-    <td class="mat-cell left-cell">
+<table class="codes">
+  <tr>
+    <td class="left-cell">
       <p>{{'print.id' | translate}}</p>
     </td>
-    <td class="mat-cell">
+    <td>
       <p>{{codeData.id}}</p>
     </td>
   </tr>
-  <tr *ngIf="codeData.label" class="mat-row">
-    <td class="mat-cell left-cell">
+  <tr *ngIf="codeData.label">
+    <td class="left-cell">
       <p>{{'print.label' | translate}}</p>
     </td>
-    <td class="mat-cell">
+    <td>
       <p>{{codeData.label}}</p>
     </td>
   </tr>
-  <tr *ngIf="codeData.manualInstruction" class="mat-row">
-    <td class="mat-cell left-cell">
+  <tr *ngIf="codeData.manualInstruction">
+    <td class="left-cell">
       <p>{{'print.manual-instruction' | translate}}</p>
     </td>
-    <td class="mat-cell">
+    <td>
       <div *ngIf="codeData.manualInstruction"
            [innerHTML]="codeData.manualInstruction">
       </div>
