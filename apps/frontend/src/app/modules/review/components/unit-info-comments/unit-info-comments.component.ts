@@ -15,13 +15,17 @@ export class UnitInfoCommentsComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;
   timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   _unitId = 0;
+  _allComments: Comment[] = [];
   @Input('unitId')
   set unitId(value: number) {
     this._unitId = value;
     this.updateContent();
   }
 
-  allComments: Comment[] = [];
+  @Input('allComments')
+  set allComments(value: Comment[]) {
+    this._allComments = value;
+  }
 
   constructor(
     private backendService: BackendService,

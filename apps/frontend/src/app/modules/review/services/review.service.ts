@@ -8,6 +8,7 @@ import { ModuleService } from '../../shared/services/module.service';
 import { UnitData } from '../models/unit-data.class';
 import { BackendService } from './backend.service';
 import { AppService } from '../../../services/app.service';
+import { Comment } from '../../comments/models/comment.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,7 @@ export class ReviewService {
   currentUnitSequenceId = -1;
   unitInfoPanelWidth = 300;
   unitInfoPanelOn = false;
+  allComments: Comment[] = [];
 
   get unitDbId(): number {
     const unitData = this.units.filter(u => u.sequenceId === this.currentUnitSequenceId);
@@ -66,6 +68,14 @@ export class ReviewService {
     } else {
       this.screenHeaderText = '';
     }
+  }
+
+  updateCommentsUnitInfo(unitId:number) {
+    this.backendService.getUnitComments(
+      this.reviewId, unitId
+    ).subscribe(unitComments => {
+      this.allComments = unitComments;
+    });
   }
 
   async loadReviewData(): Promise<void> {
