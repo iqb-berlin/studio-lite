@@ -21,6 +21,7 @@ describe('SelectUnitComponent', () => {
     @Input() disabled!: number[];
     @Input() selectionCount!: number;
     @Input() multiple!: boolean;
+    @Input() selectedUnitId!: number;
   }
 
   beforeEach(async () => {

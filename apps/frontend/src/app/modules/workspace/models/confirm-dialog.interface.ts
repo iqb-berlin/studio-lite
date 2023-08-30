@@ -7,4 +7,5 @@ export interface ConfirmDialogData {
   confirmButton2Label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   confirmButton2Return: any;
+  warning:boolean;
 }

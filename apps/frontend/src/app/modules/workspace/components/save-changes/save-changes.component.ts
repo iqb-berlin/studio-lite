@@ -3,11 +3,11 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'studio-lite-review-save-changes',
-  templateUrl: './review-save-changes.component.html',
-  styleUrls: ['./review-save-changes.component.scss']
+  selector: 'studio-lite-save-changes',
+  templateUrl: './save-changes.component.html',
+  styleUrls: ['./save-changes.component.scss']
 })
-export class ReviewSaveChangesComponent {
+export class SaveChangesComponent {
   @Input() changed!: boolean;
   @Output() discardChanges: EventEmitter<null> = new EventEmitter<null>();
   @Output() saveChanges: EventEmitter<null> = new EventEmitter<null>();

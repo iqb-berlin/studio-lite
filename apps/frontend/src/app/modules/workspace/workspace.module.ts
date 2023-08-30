@@ -68,7 +68,7 @@ import { AddReviewButtonComponent } from './components/add-review-button/add-rev
 import { StartReviewButtonComponent } from './components/start-review-button/start-review-button.component';
 import { CopyReviewLinkButtonComponent } from './components/copy-review-link-button/copy-review-link-button.component';
 import { ReviewMenuComponent } from './components/review-menu/review-menu.component';
-import { ReviewSaveChangesComponent } from './components/review-save-changes/review-save-changes.component';
+import { SaveChangesComponent } from './components/save-changes/save-changes.component';
 import { ReviewConfigComponent } from './components/review-config/review-config.component';
 import { BookletConfigEditComponent } from './components/booklet-config-edit/booklet-config-edit.component';
 import { ExportReviewButtonComponent } from './components/export-review-button/export-review-button.component';
@@ -77,6 +77,7 @@ import { GroupMenuComponent } from './components/group-menu/group-menu.component
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
 import { SharedModule } from '../shared/shared.module';
+import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 
 @NgModule({
   imports: [
@@ -152,15 +153,21 @@ import { SharedModule } from '../shared/shared.module';
     StartReviewButtonComponent,
     CopyReviewLinkButtonComponent,
     ReviewMenuComponent,
-    ReviewSaveChangesComponent,
+    SaveChangesComponent,
     ReviewConfigComponent,
     ExportReviewButtonComponent,
     NewGroupButtonComponent,
     GroupMenuComponent,
     PreviewBarComponent,
-    StatusIndicationComponent
+    StatusIndicationComponent,
+    UnitGroupsComponent
   ],
-  exports: [WorkspaceComponent, UnitCommentsComponent],
+  exports: [
+    WorkspaceComponent,
+    UnitCommentsComponent,
+    UnitGroupComponent,
+    UnitTableComponent
+  ],
   providers: [
     UnitRoutingCanDeactivateGuard,
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }

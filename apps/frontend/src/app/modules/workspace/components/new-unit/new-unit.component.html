@@ -1,15 +1,15 @@
 <h1 mat-dialog-title>{{data.title}}</h1>
-<p *ngIf="data.subTitle">{{data.subTitle}}</p>
+<p class="subTitle" *ngIf="data.subTitle">{{data.subTitle}}</p>
 <mat-dialog-content>
   <form [formGroup]="newUnitForm"
         class="fx-column-start-stretch">
     <mat-form-field>
       <input matInput
              formControlName="key"
-             placeholder="Kurzname"
+             [placeholder]="'workspace.unit-key' | translate"
              [value]="data.key" >
       <mat-error *ngIf="newUnitForm.controls['key']?.invalid">
-        {{'workspace.invalid-unit-name' | translate}}
+        {{'workspace.invalid-unit-key' | translate}}
       </mat-error>
     </mat-form-field>
     <mat-form-field>

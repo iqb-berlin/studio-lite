@@ -4,8 +4,11 @@
 
 .selected {
   background-color: #006064BB;
-  > .mat-cell {
+  > .mat-mdc-cell {
     color: white;
+  }
+  &:hover {
+    background-color: #006064BB;
   }
 }
 

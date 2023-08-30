@@ -10,10 +10,11 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
 
 export interface SelectUnitData {
-  title: string,
-  buttonLabel: string,
-  fromOtherWorkspacesToo: boolean,
-  multiple: boolean
+  title: string;
+  buttonLabel: string;
+  fromOtherWorkspacesToo: boolean;
+  multiple: boolean;
+  selectedUnitId: number;
 }
 
 @Component({

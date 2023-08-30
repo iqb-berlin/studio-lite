@@ -1,7 +1,10 @@
 .selected {
   background-color: #006064BB;
-  > .mat-cell {
+  > .mat-mdc-cell {
     color: white;
+  }
+  &:hover {
+    background-color: #006064BB;
   }
 }
 
@@ -36,10 +39,6 @@
 
 .units-wrapper {
   height: 64vh;
-}
-
-.changes-container {
-  padding: 5px;
 }
 
 .groups {

@@ -23,16 +23,19 @@ describe('UnitsAreaComponent', () => {
     @Input() navLinks!: string[];
     @Input() unitList!: UnitInListDto[];
     @Input() selectedRouterLink!: number;
+    @Input() unitGroupList!: number;
   }
   @Component({ selector: 'studio-lite-add-unit-button', template: '' })
   class MockAddUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;
+    @Input() selectedUnitId!: number;
   }
   @Component({ selector: 'studio-lite-delete-unit-button', template: '' })
   class MockDeleteUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;
+    @Input() selectedUnitId!: number;
   }
   @Component({ selector: 'studio-lite-edit-unit-button', template: '' })
   class MockEditUnitButtonComponent {

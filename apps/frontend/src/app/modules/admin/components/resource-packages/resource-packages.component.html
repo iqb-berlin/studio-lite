@@ -7,7 +7,7 @@
           (click)="hiddenInput.click()"
           [matTooltip]="'admin.upload-resource-package' | translate"
           matTooltipPosition="above">
-    <mat-icon>cloud_upload</mat-icon>
+    <studio-lite-wrapped-icon icon="cloud_upload"></studio-lite-wrapped-icon>
   </button>
   <button
           mat-button
@@ -15,7 +15,7 @@
           [matTooltip]="'admin.delete-selected' | translate"
           matTooltipPosition="above"
           (click)="deleteSelected()">
-    <mat-icon>delete</mat-icon>
+    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
 </div>
 <iqb-files-upload-queue #fileUploadQueue

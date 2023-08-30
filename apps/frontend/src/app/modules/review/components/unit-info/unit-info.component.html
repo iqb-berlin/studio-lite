@@ -4,12 +4,12 @@
     <button mat-button *ngIf="reviewService.unitInfoPanelOn"
             [matTooltip]="'review.less-information' | translate"
             (click)="elementWidth = 0">
-      <mat-icon>chevron_right</mat-icon>
+      <studio-lite-wrapped-icon icon="chevron_right"></studio-lite-wrapped-icon>
     </button>
     <button mat-button *ngIf="!reviewService.unitInfoPanelOn"
             [matTooltip]="'review.more-information' | translate"
             (click)="elementWidth = reviewService.unitInfoPanelWidth">
-      <mat-icon>chevron_left</mat-icon>
+      <studio-lite-wrapped-icon icon="chevron_left"></studio-lite-wrapped-icon>
     </button>
   </div>
   <div #infoPanelSplitter class="infoPanelSplitter fx-flex-row-fix-6"></div>

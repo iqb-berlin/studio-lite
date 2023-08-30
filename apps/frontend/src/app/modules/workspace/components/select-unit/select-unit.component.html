@@ -17,7 +17,8 @@
   <mat-dialog-content>
     <studio-lite-select-unit-list #unitSelectionTable
                                   [workspace]="ds.selectedWorkspaceId"
-                                  [multiple]="data.multiple">
+                                  [multiple]="data.multiple"
+                                  [selectedUnitId]="data.selectedUnitId">
     </studio-lite-select-unit-list>
   </mat-dialog-content>
 

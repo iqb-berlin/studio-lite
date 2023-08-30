@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterTestingModule } from '@angular/router/testing';
 import { PrintReviewButtonComponent } from './print-review-button.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('PrintReviewButtonComponent', () => {
   let component: PrintReviewButtonComponent;
@@ -12,7 +13,10 @@ describe('PrintReviewButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PrintReviewButtonComponent],
+      declarations: [
+        PrintReviewButtonComponent,
+        WrappedIconComponent
+      ],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,

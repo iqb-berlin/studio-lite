@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { CanDeactivate } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
@@ -7,11 +6,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
 import { WorkspaceService } from '../services/workspace.service';
-import { WorkspaceComponent } from '../components/workspace/workspace.component';
 import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
 @Injectable()
-export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceComponent> {
+export class UnitRoutingCanDeactivateGuard {
   constructor(
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,
@@ -21,15 +19,26 @@ export class UnitRoutingCanDeactivateGuard implements CanDeactivate<WorkspaceCom
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.workspaceService.isChanged()) {
+      let content = '';
+      let isWarning = true;
+      this.workspaceService.isValidFormKey.subscribe(isValid => {
+        isWarning = !isValid;
+        if (isValid) {
+          content = this.translateService.instant('workspace.save-unit-data-changes');
+        } else {
+          content = this.translateService.instant('workspace.save-unit-data-changes-warning');
+        }
+      });
       const dialogRef = this.confirmDialog.open(SaveOrDiscardComponent, {
         width: '500px',
         data: <ConfirmDialogData> {
           title: this.translateService.instant('workspace.save'),
-          content: this.translateService.instant('workspace.save-unit-data-changes'),
+          content: content,
           confirmButtonLabel: this.translateService.instant('workspace.save'),
           confirmButtonReturn: 'YES',
           confirmButton2Label: this.translateService.instant('workspace.reject-changes-label'),
-          confirmButton2Return: 'NO'
+          confirmButton2Return: 'NO',
+          warning: isWarning
         }
       });
       return dialogRef.afterClosed().pipe(

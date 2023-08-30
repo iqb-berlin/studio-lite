@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
+import { BehaviorSubject } from 'rxjs';
 import { UnitGroupComponent } from './unit-group.component';
 
 describe('UnitGroupComponent', () => {
@@ -18,6 +19,7 @@ describe('UnitGroupComponent', () => {
 
     fixture = TestBed.createComponent(UnitGroupComponent);
     component = fixture.componentInstance;
+    component.expandAll = new BehaviorSubject<boolean>(true);
     fixture.detectChanges();
   });
 

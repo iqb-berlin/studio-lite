@@ -2,29 +2,29 @@
   <button mat-button
           [matTooltip]="'wsg-admin.add-workspace' | translate"
           (click)="addObject()">
-    <mat-icon>add</mat-icon>
+    <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="selectedWorkspaceId === 0 && checkedRows.length === 0"
           [matTooltip]="'wsg-admin.delete-selected-workspaces' | translate"
           (click)="deleteObject()">
-    <mat-icon>delete</mat-icon>
+    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="selectedWorkspaceId === 0 && checkedRows.length !== 1"
           [matTooltip]="'wsg-admin.rename-workspace' | translate"
           (click)="renameObject()">
-    <mat-icon>edit</mat-icon>
+    <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="selectedWorkspaceId === 0 && checkedRows.length !== 1"
           [matTooltip]="'wsg-admin.change-workspace-settings' | translate"
           (click)="changeObject()">
-    <mat-icon>settings</mat-icon>
+    <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [matTooltip]="'wsg-admin.download-workspaces-excel' | translate"
           (click)="download.emit()">
-    <mat-icon>save_alt</mat-icon>
+    <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
   </button>
 </div>

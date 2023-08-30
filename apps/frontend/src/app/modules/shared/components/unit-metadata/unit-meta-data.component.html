@@ -1,45 +1,45 @@
 <h2>{{key}}</h2>
 <h3 *ngIf="name">{{name}}</h3>
 
-<table class="mat-table">
-  <tr *ngIf="groupName" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.group-name' | translate}}</td>
-    <td class="mat-cell">{{groupName}}</td>
+<table class="metadata">
+  <tr *ngIf="groupName">
+    <td class="cell left-cell">{{'print.group-name' | translate}}</td>
+    <td class="cell">{{groupName}}</td>
   </tr>
-  <tr *ngIf="description" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.description' | translate}}</td>
-    <td class="mat-cell">{{description}}</td>
+  <tr *ngIf="description">
+    <td class="cell left-cell">{{'print.description' | translate}}</td>
+    <td class="cell">{{description}}</td>
   </tr>
-  <tr *ngIf="transcript" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.transcript' | translate}}</td>
-    <td class="mat-cell">{{transcript}}</td>
+  <tr *ngIf="transcript">
+    <td class="cell left-cell">{{'print.transcript' | translate}}</td>
+    <td class="cell">{{transcript}}</td>
   </tr>
-  <tr *ngIf="reference" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.reference' | translate}}</td>
-    <td class="mat-cell">{{reference}}</td>
+  <tr *ngIf="reference">
+    <td class="cell left-cell">{{'print.reference' | translate}}</td>
+    <td class="cell">{{reference}}</td>
   </tr>
-  <tr *ngIf="lastChangedDefinition" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.last-changed-definition' | translate}}</td>
-    <td class="mat-cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
+  <tr *ngIf="lastChangedDefinition">
+    <td class="cell left-cell">{{'print.last-changed-definition' | translate}}</td>
+    <td class="cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
   </tr>
-  <tr *ngIf="lastChangedMetadata" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
-    <td class="mat-cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
+  <tr *ngIf="lastChangedMetadata">
+    <td class="cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
+    <td class="cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
   </tr>
-  <tr *ngIf="lastChangedScheme" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
-    <td class="mat-cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
+  <tr *ngIf="lastChangedScheme">
+    <td class="cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
+    <td class="cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
   </tr>
-  <tr *ngIf="player" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.player' | translate}}</td>
-    <td class="mat-cell">{{player}}</td>
+  <tr *ngIf="player">
+    <td class="cell left-cell">{{'print.player' | translate}}</td>
+    <td class="cell">{{player}}</td>
   </tr>
-  <tr *ngIf="editor" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.editor' | translate}}</td>
-    <td class="mat-cell">{{editor}}</td>
+  <tr *ngIf="editor">
+    <td class="cell left-cell">{{'print.editor' | translate}}</td>
+    <td class="cell">{{editor}}</td>
   </tr>
-  <tr *ngIf="schemer" class="mat-row">
-    <td class="mat-cell left-cell">{{'print.schemer' | translate}}</td>
-    <td class="mat-cell">{{schemer}}</td>
+  <tr *ngIf="schemer">
+    <td class="cell left-cell">{{'print.schemer' | translate}}</td>
+    <td class="cell">{{schemer}}</td>
   </tr>
 </table>

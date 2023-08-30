@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserMenuComponent } from './user-menu.component';
+import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UserMenuComponent', () => {
   let component: UserMenuComponent;
@@ -20,7 +21,8 @@ describe('UserMenuComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         UserMenuComponent,
-        MockAccountActionComponentComponent
+        MockAccountActionComponentComponent,
+        WrappedIconComponent
       ],
       imports: [
         MatTooltipModule,

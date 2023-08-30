@@ -7,7 +7,7 @@
             [routerLink]="['/admin']"
             [matTooltip]="'home.goto-admin' | translate"
             matTooltipPosition="above">
-      <mat-icon>settings</mat-icon>
+      <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
     </button>
     <studio-lite-user-menu></studio-lite-user-menu>
   </div>
@@ -17,7 +17,6 @@
 </studio-lite-warning>
 
 <studio-lite-user-workspaces-groups
-  class="fx-column-start-stretch"
-  [style.overflow-y]="'auto'"
+  class="fx-column-start-stretch workspace-groups"
   [workspaceGroups]="workspaceGroups">
 </studio-lite-user-workspaces-groups>

@@ -1,0 +1,135 @@
+{
+  "name": "frontend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/frontend/src",
+  "prefix": "studio-lite",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/frontend",
+        "index": "apps/frontend/src/index.html",
+        "main": "apps/frontend/src/main.ts",
+        "polyfills": "apps/frontend/src/polyfills.ts",
+        "tsConfig": "apps/frontend/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": ["apps/frontend/src/assets"],
+        "styles": [
+          "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
+          "apps/frontend/src/styles.scss",
+          "apps/frontend/src/iqb-theme3.scss"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "100kb"
+            }
+          ],
+          "fileReplacements": [
+            {
+              "replace": "apps/frontend/src/environments/environment.ts",
+              "with": "apps/frontend/src/environments/environment.prod.ts"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "browserTarget": "frontend:build:production"
+        },
+        "development": {
+          "browserTarget": "frontend:build:development"
+        }
+      },
+      "options": {
+        "proxyConfig": "apps/frontend/proxy.conf.json",
+        "browserTarget": "frontend:build:development"
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "browserTarget": "frontend:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/frontend/src/**/*.ts",
+          "apps/frontend/src/**/*.html"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["coverage/apps/frontend"],
+      "options": {
+        "jestConfig": "apps/frontend/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "apps/frontend/tsconfig.editor.json",
+        "outputPath": "dist/compodoc/frontend"
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "docker login {args.registry}",
+            "forwardAllArgs": false
+          },
+          "docker build -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag} -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:latest .",
+          "docker push -q -a {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend"
+        ],
+        "parallel": false
+      }
+    },
+    "docker-scan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}",
+          "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --scanners vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

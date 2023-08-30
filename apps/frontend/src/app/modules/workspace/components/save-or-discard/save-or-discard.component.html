@@ -1,10 +1,11 @@
 <h1 mat-dialog-title>{{ confirmData.title }}</h1>
 <mat-dialog-content>
-  <p> {{ confirmData.content }} </p>
+  <p [style]="confirmData.warning ? 'color:red': null "> {{ confirmData.content }} </p>
 </mat-dialog-content>
 <mat-dialog-actions>
   <button mat-raised-button
           color="primary"
+          [disabled]="confirmData.warning"
           [mat-dialog-close]="confirmData.confirmButtonReturn">
     {{ confirmData.confirmButtonLabel }}
   </button>

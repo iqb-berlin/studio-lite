@@ -2,23 +2,23 @@
   <button mat-button
           [matTooltip]="'admin.add-group' | translate"
           (click)="addGroup()">
-    <mat-icon>add</mat-icon>
+    <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="!selectedWorkspaceGroupId && (!checkedRows || !checkedRows.length)"
           [matTooltip]="'admin.delete-selected-groups' | translate"
           (click)="deleteGroups()">
-    <mat-icon>delete</mat-icon>
+    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="!selectedWorkspaceGroupId  && checkedRows && checkedRows.length !== 1"
           [matTooltip]="'admin.edit-selected-group' | translate"
           (click)="editGroup()">
-    <mat-icon>edit</mat-icon>
+    <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [matTooltip]="'admin.download-xlsx' | translate"
           (click)="downloadWorkspacesReport.emit(true)">
-    <mat-icon>save_alt</mat-icon>
+    <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
   </button>
 </div>

@@ -15,12 +15,15 @@
   <div class="fx-row-start-stretch">
     <studio-lite-add-unit-button class="unit-crud-button"
                                  [navLinks]="navLinks"
-                                 [selectedRouterLink]="selectedRouterLink">
+                                 [selectedRouterLink]="selectedRouterLink"
+                                 [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0">
+
     </studio-lite-add-unit-button>
 
     <studio-lite-delete-unit-button class="unit-crud-button"
                                     [navLinks]="navLinks"
-                                    [selectedRouterLink]="selectedRouterLink">
+                                    [selectedRouterLink]="selectedRouterLink"
+                                    [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0">
     </studio-lite-delete-unit-button>
 
     <studio-lite-edit-unit-button class="unit-crud-button"

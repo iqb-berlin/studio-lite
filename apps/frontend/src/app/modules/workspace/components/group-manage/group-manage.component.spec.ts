@@ -24,6 +24,12 @@ describe('GroupManageComponent', () => {
     @Input() workspace!: unknown;
     @Input('show-groups') showGroups!: boolean;
     @Input() selectionCount!: number;
+    @Input() selectedUnitId!: number;
+  }
+
+  @Component({ selector: 'studio-lite-save-changes', template: '' })
+  class MockSaveChangesComponent {
+    @Input() changed!: boolean;
   }
 
   @Component({ selector: 'studio-lite-group-menu', template: '' })
@@ -42,7 +48,8 @@ describe('GroupManageComponent', () => {
         GroupManageComponent,
         MockGroupMenuComponent,
         MockSelectUnitListComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        MockSaveChangesComponent
       ],
       imports: [
         HttpClientModule,

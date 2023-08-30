@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, Input } from '@angular/core';
 import { CreateUnitDto, UnitInListDto } from '@studio-lite-lib/api-dto';
 import { lastValueFrom, map, Subscription } from 'rxjs';
 import { UntypedFormGroup } from '@angular/forms';
@@ -25,6 +25,7 @@ import { NewUnitData } from '../../models/new-unit.interface';
 })
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   private uploadSubscription: Subscription | null = null;
+  @Input() selectedUnitId!: number;
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -147,7 +148,8 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
           title: this.translateService.instant('workspace.new-copy-unit'),
           buttonLabel: this.translateService.instant('next'),
           fromOtherWorkspacesToo: true,
-          multiple: false
+          multiple: false,
+          selectedUnitId: this.selectedUnitId
         }
       });
       return lastValueFrom(dialogRef.afterClosed().pipe(

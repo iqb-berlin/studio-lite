@@ -2,18 +2,18 @@
   <button mat-button
           [matTooltip]="'admin.add-user' | translate"
           (click)="addUser()">
-    <mat-icon>add</mat-icon>
+    <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="!selectedUser && (!checkedRows || !checkedRows.length)"
           [matTooltip]="'admin.delete-selected-users' | translate"
           (click)="deleteUsers()">
-    <mat-icon>delete</mat-icon>
+    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
           [disabled]="!selectedUser && checkedRows && checkedRows.length !== 1"
           [matTooltip]="'admin.edit-user-data' | translate"
           (click)="editUser()">
-    <mat-icon>edit</mat-icon>
+    <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
 </div>

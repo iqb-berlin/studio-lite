@@ -24,6 +24,7 @@ export class NewUnitComponent {
         Validators.required,
         Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
+        Validators.maxLength(19),
         WorkspaceService.unitKeyUniquenessValidator(0, this.ds.unitList)
       ]),
       label: this.fb.control(data.label),

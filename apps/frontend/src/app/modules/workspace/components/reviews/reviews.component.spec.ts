@@ -34,6 +34,7 @@ describe('ReviewsComponent', () => {
     @Input() workspace!: number;
     @Input() disabled!: number[];
     @Input() selectionCount!: number;
+    @Input() selectedUnitId!: number;
   }
 
   @Component({ selector: 'studio-lite-review-config', template: '' })
@@ -50,8 +51,8 @@ describe('ReviewsComponent', () => {
     @Input() title!: string;
   }
 
-  @Component({ selector: 'studio-lite-review-save-changes', template: '' })
-  class MockReviewSaveChangesComponent {
+  @Component({ selector: 'studio-lite-save-changes', template: '' })
+  class MockSaveChangesComponent {
     @Input() changed!: boolean;
   }
 
@@ -62,7 +63,7 @@ describe('ReviewsComponent', () => {
         MockReviewMenuComponent,
         MockSelectUnitListComponent,
         MockReviewConfigComponent,
-        MockReviewSaveChangesComponent,
+        MockSaveChangesComponent,
         MockSearchFilterComponent
       ],
       imports: [

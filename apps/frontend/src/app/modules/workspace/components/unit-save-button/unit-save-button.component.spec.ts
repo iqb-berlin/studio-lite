@@ -7,6 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { UnitSaveButtonComponent } from './unit-save-button.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UnitSaveButtonComponent', () => {
   let component: UnitSaveButtonComponent;
@@ -14,7 +15,10 @@ describe('UnitSaveButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitSaveButtonComponent],
+      declarations: [
+        UnitSaveButtonComponent,
+        WrappedIconComponent
+      ],
       imports: [
         MatIconModule,
         MatTooltipModule,

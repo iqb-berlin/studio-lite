@@ -19,6 +19,14 @@ class MockSearchFilterComponent {
   value: string = '';
 }
 
+@Component({ selector: 'studio-lite-unit-groups', template: '' })
+class MockUnitGroupsComponent {
+  @Input() expandedGroups !: number;
+  @Input() numberOfGroups !: number;
+  @Input() groupsInfo !: string;
+  @Input() 'unitGroupList' !: [];
+}
+
 describe('UnitSelectionComponent', () => {
   let component: UnitSelectionComponent;
   let fixture: ComponentFixture<UnitSelectionComponent>;
@@ -28,7 +36,8 @@ describe('UnitSelectionComponent', () => {
       declarations: [
         UnitSelectionComponent,
         MockUnitTableComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        MockUnitGroupsComponent
       ],
       imports: [
         TranslateModule.forRoot(),

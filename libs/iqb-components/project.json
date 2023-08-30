@@ -1,0 +1,27 @@
+{
+  "name": "iqb-components",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/iqb-components/src",
+  "prefix": "studio-lite",
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["coverage/libs/iqb-components"],
+      "options": {
+        "jestConfig": "libs/iqb-components/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/iqb-components/src/**/*.ts",
+          "libs/iqb-components/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

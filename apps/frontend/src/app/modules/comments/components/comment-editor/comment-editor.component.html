@@ -6,7 +6,7 @@
             [matTooltipShowDelay]="300"
             [class.active]="editor.isActive('bold')"
             (click)="toggleBold()">
-      <mat-icon>format_bold</mat-icon>
+      <studio-lite-wrapped-icon icon="format_bold"></studio-lite-wrapped-icon>
     </button>
     <button type="button" mat-icon-button
             matTooltip="{{'comment-editor.italic' | translate}}"
@@ -14,7 +14,7 @@
             [matTooltipShowDelay]="300"
             [class.active]="editor.isActive('italic')"
             (click)="toggleItalic()">
-      <mat-icon>format_italic</mat-icon>
+      <studio-lite-wrapped-icon icon="format_italic"></studio-lite-wrapped-icon>
     </button>
     <button type="button" mat-icon-button
             matTooltip="{{'comment-editor.underline' | translate}}"
@@ -22,7 +22,7 @@
             [matTooltipShowDelay]="300"
             [class.active]="editor.isActive('underline')"
             (click)="toggleUnderline()" style="text-decoration: underline">
-      <mat-icon>format_underlined</mat-icon>
+      <studio-lite-wrapped-icon icon="format_underlined"></studio-lite-wrapped-icon>
     </button>
     <button type="button" mat-icon-button
             matTooltip="{{'comment-editor.superscript' | translate}}"
@@ -30,7 +30,7 @@
             [matTooltipShowDelay]="300"
             [class.active]="editor.isActive('superscript')"
             (click)="toggleSuperscript()">
-      <mat-icon>superscript</mat-icon>
+      <studio-lite-wrapped-icon icon="superscript"></studio-lite-wrapped-icon>
     </button>
     <button type="button" mat-icon-button
             matTooltip="{{'comment-editor.subscript' | translate}}"
@@ -38,7 +38,7 @@
             [matTooltipShowDelay]="300"
             [class.active]="editor.isActive('subscript')"
             (click)="toggleSubscript()">
-      <mat-icon>subscript</mat-icon>
+      <studio-lite-wrapped-icon icon="subscript"></studio-lite-wrapped-icon>
     </button>
     <button type="button" mat-icon-button
             matTooltip="{{'comment-editor.strike' | translate}}"
@@ -46,7 +46,7 @@
             [matTooltipShowDelay]="300"
             [class.active]="editor.isActive('strike')"
             (click)="toggleStrike()">
-      <mat-icon>strikethrough_s</mat-icon>
+      <studio-lite-wrapped-icon icon="strikethrough_s"></studio-lite-wrapped-icon>
     </button>
     <div class="fx-row-start-stretch"
          matTooltip="{{'comment-editor.text-color' | translate}}"
@@ -54,7 +54,7 @@
       <button type="button"
               mat-icon-button
               (click)="applyFontColor()">
-        <mat-icon>format_color_text</mat-icon>
+        <studio-lite-wrapped-icon icon="format_color_text"></studio-lite-wrapped-icon>
       </button>
       <mat-select
         class="editor-color-select-button"
@@ -72,7 +72,7 @@
       <button type="button"
               mat-icon-button
               (click)="applyHighlightColor()">
-        <mat-icon>format_color_fill</mat-icon>
+        <studio-lite-wrapped-icon icon="format_color_fill"></studio-lite-wrapped-icon>
       </button>
       <mat-select class="editor-color-select-button"
                   [style.background-image]="'linear-gradient(135deg, white 60%, ' + selectedHighlightColor +' 60%)'"
@@ -89,14 +89,14 @@
             [matTooltipPosition]="'above'"
             [class.active]="editor.isActive('bulletList')"
             (click)="toggleBulletList()">
-      <mat-icon>format_list_bulleted</mat-icon>
+      <studio-lite-wrapped-icon icon="format_list_bulleted"></studio-lite-wrapped-icon>
     </button>
     <button type="button"
             mat-icon-button
             matTooltip="{{'comment-editor.image' | translate}}"
             [matTooltipPosition]="'above'"
             (click)="addImage()">
-      <mat-icon>image</mat-icon>
+      <studio-lite-wrapped-icon icon="image"></studio-lite-wrapped-icon>
     </button>
   </div>
   <div class="editor-area fx-row-start-stretch">
@@ -111,7 +111,7 @@
               [matTooltipPosition]="'below'"
               (click)="onReset()"
               class="reset-button">
-        <mat-icon>close</mat-icon>
+        <studio-lite-wrapped-icon icon="close"></studio-lite-wrapped-icon>
       </button>
       <button mat-fab
               [disabled]="!(editorHTML | isCommentCommittable)"
@@ -120,7 +120,7 @@
               [matTooltipPosition]="'above'"
               (click)="onSubmit()"
               class="submit-button">
-        <mat-icon>send</mat-icon>
+        <studio-lite-wrapped-icon icon="send"></studio-lite-wrapped-icon>
       </button>
     </div>
   </div>

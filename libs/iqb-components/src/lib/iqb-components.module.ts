@@ -10,6 +10,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { HttpClientModule } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
+import { TranslateModule } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from './dialogs/confirm-dialog.component';
 import { MessageDialogComponent, MessageDialogData, MessageType } from './dialogs/message-dialog.component';
 import { BytesPipe } from './pipes/bytes.pipe';
@@ -30,7 +31,8 @@ import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInput
     MatInputModule,
     HttpClientModule,
     MatProgressBarModule,
-    MatCardModule
+    MatCardModule,
+    TranslateModule
   ],
   declarations: [
     ConfirmDialogComponent,
@@ -53,9 +55,7 @@ export class IqbComponentsModule {
   static forRoot(): ModuleWithProviders<IqbComponentsModule> {
     return {
       ngModule: IqbComponentsModule,
-      providers: [
-        { provide: IqbComponentsConfig }
-      ]
+      providers: [{ provide: IqbComponentsConfig }]
     };
   }
 
