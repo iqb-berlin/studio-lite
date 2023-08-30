@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatDialogClose, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
-
+import { TranslateModule } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 describe('ConfirmDialogComponent', () => {
@@ -20,6 +20,9 @@ describe('ConfirmDialogComponent', () => {
       declarations: [
         ConfirmDialogComponent,
         MatDialogClose
+      ],
+      imports: [
+        TranslateModule.forRoot()
       ],
       providers: [
         {
@@ -47,8 +50,8 @@ describe('ConfirmDialogComponent', () => {
 
   it('should take default properties for those which are omitted on #ngOnInit()', async () => {
     component.ngOnInit();
-    expect(component.confirmData.title).toEqual('Bitte bestätigen!');
-    expect(component.confirmData.confirmButtonLabel).toEqual('Bestätigen');
+    expect(component.confirmData.title).toEqual('workspace.please-confirm!');
+    expect(component.confirmData.confirmButtonLabel).toEqual('workspace.confirm!');
     expect(component.confirmData.content).toEqual('');
   });
 });
