@@ -239,6 +239,7 @@
     "enter-name": "Bitte Namen eingeben",
     "create": "Anlegen",
     "rename-workspace": "Arbeitsbereich umbenennen",
+    "move-workspace": "Arbeitsbereich verschieben",
     "deleting-of-workspaces": "Löschen von Arbeitsbereichen",
     "delete-workspace": "Soll der Arbeitsbereich \"{{name}}\" gelöscht werden?",
     "delete-workspace-with-units": "Soll der Arbeitsbereich \"{{name}}\" mit allen enthaltenen Aufgaben gelöscht werden?",

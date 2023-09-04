@@ -18,6 +18,12 @@
   </button>
   <button mat-button
           [disabled]="selectedWorkspaceId === 0 && checkedRows.length !== 1"
+          [matTooltip]="'wsg-admin.move-workspace' | translate"
+          (click)="moveObject()">
+    <studio-lite-wrapped-icon icon="subdirectory_arrow_right"></studio-lite-wrapped-icon>
+  </button>
+  <button mat-button
+          [disabled]="selectedWorkspaceId === 0 && checkedRows.length !== 1"
           [matTooltip]="'wsg-admin.change-workspace-settings' | translate"
           (click)="changeObject()">
     <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>

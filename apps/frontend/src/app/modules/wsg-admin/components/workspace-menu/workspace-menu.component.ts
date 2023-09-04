@@ -59,6 +59,13 @@ export class WorkspaceMenuComponent {
     });
   }
 
+  moveObject() {
+    let selectedRows = this.selectedRows;
+    if (selectedRows.length === 0) {
+      selectedRows = this.checkedRows;
+    }
+  }
+
   renameObject() {
     let selectedRows = this.selectedRows;
     if (selectedRows.length === 0) {
