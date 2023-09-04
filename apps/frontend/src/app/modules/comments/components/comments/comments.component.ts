@@ -29,6 +29,7 @@ export class CommentsComponent implements OnInit {
   comments: Comment[] = [];
   activeComment: ActiveComment | null = null;
   latestCommentId: Subject<number> = new Subject();
+  isCommentProcessing: boolean = false;
 
   private latestComment!: Comment;
   private ngUnsubscribe = new Subject<void>();
@@ -50,6 +51,7 @@ export class CommentsComponent implements OnInit {
   }
 
   updateComment({ text, commentId }: { text: string; commentId: number; }): void {
+    this.isCommentProcessing = true;
     if (!this.newCommentOnly) {
       const updateComment = { body: text, userId: this.userId };
       this.backendService
@@ -63,6 +65,7 @@ export class CommentsComponent implements OnInit {
         )
         .subscribe(() => {
           this.setLatestCommentId();
+          this.isCommentProcessing = false;
         });
     }
   }
@@ -88,6 +91,7 @@ export class CommentsComponent implements OnInit {
         takeUntil(this.ngUnsubscribe),
         switchMap(result => {
           if (result) {
+            this.isCommentProcessing = true;
             return this.backendService.deleteComment(commentId, this.workspaceId, this.unitId, this.reviewId);
           }
           return of(null);
@@ -95,6 +99,7 @@ export class CommentsComponent implements OnInit {
         switchMap(() => this.getUpdatedComments())
       ).subscribe(() => {
         this.setLatestCommentId();
+        this.isCommentProcessing = false;
       });
   }
 
@@ -109,6 +114,7 @@ export class CommentsComponent implements OnInit {
   }
 
   addComment({ text, parentId }: { text: string; parentId: number | null; }): void {
+    this.isCommentProcessing = true;
     const comment = {
       body: text,
       userName: this.userName,
@@ -128,6 +134,7 @@ export class CommentsComponent implements OnInit {
       )
       .subscribe(() => {
         this.setLatestCommentId();
+        this.isCommentProcessing = false;
       });
   }
 

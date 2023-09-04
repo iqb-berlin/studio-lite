@@ -28,7 +28,7 @@
                                   [unitId]="_unitId">
     </studio-lite-unit-info-coding>
     <studio-lite-unit-info-comments *ngIf="reviewService.reviewConfig.showOthersComments && _unitMetadata"
-                                    [unitId]="_unitId">
+                                    [unitId]="_unitId" [allComments]="reviewService.allComments">
     </studio-lite-unit-info-comments>
   </div>
 </div>
