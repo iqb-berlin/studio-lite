@@ -1,1 +1,27 @@
-<p>move-workspace works!</p>
+<h1 mat-dialog-title>{{typedData.title}}</h1>
+<mat-dialog-content>
+  <form class="fx-column-start-stretch">
+    <mat-form-field>
+    <mat-label>Arbeitsbereich auswählen</mat-label>
+    <mat-select>
+      <mat-option *ngFor="let res of typedData.wResponse" [value]="res">{{res}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit">
+    {{typedData.okButtonLabel}}
+  </button>
+  <button mat-raised-button>
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+
+
+<p>{{typedData.wResponse}}move-workspace works!</p>
+
+
