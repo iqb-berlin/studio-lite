@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=node:18.16-bookworm-slim
+ARG BASE_IMAGE=node:18.17-bookworm-slim
 
 
 FROM ${BASE_IMAGE} AS build
