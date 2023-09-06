@@ -82,6 +82,7 @@
     "file-saver-es": "^2.0.5",
     "multer": "^1.4.5-lts.1",
     "ngx-tiptap": "^6.0.0",
+    "npm": "^10.0.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
