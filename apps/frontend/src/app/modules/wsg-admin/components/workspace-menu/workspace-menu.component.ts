@@ -8,9 +8,11 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
+import { BackendService } from '../../services/backend.service';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
+import { MoveWorkspaceComponent } from '../../../shared/components/move-workspace/move-workspace.component';
 
 @Component({
   selector: 'studio-lite-workspace-menu',
@@ -23,6 +25,8 @@ export class WorkspaceMenuComponent {
   @Input() checkedRows!: WorkspaceInListDto[];
 
   @Output() workspaceAdded: EventEmitter<string> = new EventEmitter<string>();
+
+  @Output() workspaceMoved: EventEmitter<string> = new EventEmitter<string>();
   @Output() workspaceRenamed: EventEmitter<{ selection: WorkspaceInListDto[], name: string }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], name: string }>();
 
@@ -38,6 +42,7 @@ export class WorkspaceMenuComponent {
     private editWorkspaceSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
     private messsageDialog: MatDialog,
+    private backendService: BackendService,
     private appBackendService: AppBackendService,
     private translateService: TranslateService
   ) {}
@@ -63,6 +68,26 @@ export class WorkspaceMenuComponent {
     let selectedRows = this.selectedRows;
     if (selectedRows.length === 0) {
       selectedRows = this.checkedRows;
+    }
+    if (selectedRows.length) {
+      this.backendService.moveWorkspaces(2, [1]).subscribe(wResponse => {
+        if (wResponse) {
+          console.log(wResponse, 'wResponse');
+          const dialogRef = this.editWorkspaceDialog.open(MoveWorkspaceComponent, {
+            width: '600px',
+            data: {
+              title: this.translateService.instant('wsg-admin.move-workspace'),
+              prompt: this.translateService.instant('wsg-admin.enter-name'),
+              default: selectedRows[0].name,
+              wResponse: wResponse,
+              okButtonLabel: this.translateService.instant('save')
+            }
+          });
+          dialogRef.afterClosed().subscribe(result => {
+            this.workspaceMoved.emit('s');
+          });
+        }
+      });
     }
   }
 
