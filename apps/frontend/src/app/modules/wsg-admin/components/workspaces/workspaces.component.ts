@@ -263,6 +263,24 @@ export class WorkspacesComponent implements OnInit {
       });
   }
 
+  moveWorkspace(a:string) {
+    this.appService.dataLoading = true;
+    this.backendService.moveWorkspaces(2, [1]).subscribe(val => {
+      this.appService.dataLoading = false;
+      if (!val) {
+        this.snackBar.open(
+          this.translateService.instant('wsg-admin.workspace-settings-not-changed'),
+          this.translateService.instant('error'),
+          { duration: 3000 });
+      } else {
+        this.snackBar.open(
+          this.translateService.instant('wsg-admin.workspace-settings-changed'),
+          '',
+          { duration: 1000 });
+      }
+    });
+  }
+
   onWorkspaceNotLoaded(): void {
     this.snackBar.open(
       this.translateService.instant('wsg-admin.workspace-not-loaded'),
