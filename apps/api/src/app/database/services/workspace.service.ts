@@ -276,6 +276,22 @@ export class WorkspaceService {
     });
   }
 
+  async moveGroup(id: number, groupId: number): Promise<number[]> {
+    const ws: WorkspaceInListDto[] = await this.findAll(1);
+    const validWorkspaces: number[] = [];
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    if (id) {
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
+        .find({ where: { userId: id } });
+      workspaceUsers.forEach(wsU => validWorkspaces.push(wsU.workspaceId));
+    }
+    const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
+      .find({ where: { userId: id } });
+    return validWorkspaces;
+  }
+
   async patchName(id: number, newName: string): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }

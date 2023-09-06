@@ -86,6 +86,15 @@ export class BackendService {
       );
   }
 
+  moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
+    return this.http
+      .get(`${this.serverUrl}admin/workspaces/1/group/4`)
+      .pipe(
+        catchError(() => of(false)),
+        map(val => val)
+      );
+  }
+
   // *******************************************************************
   getUsersByWorkspace(workspaceId: number): Observable<UserInListDto[]> {
     return this.http
