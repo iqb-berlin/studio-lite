@@ -115,4 +115,15 @@ export class WorkspacesController {
     @Body() users: number[]) {
     return this.userService.setUsersByWorkspace(id, users);
   }
+
+  @Get(':id/group/:group')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Workspace moved successfully.' })
+  @ApiNotFoundResponse({ description: 'Workspace not moved.' })
+  @ApiTags('move workspace')
+  async moveGroup(@Param('id') id: number, @Body() group: number) {
+    const ws = await this.workspaceService.moveGroup(id, group);
+    return ws;
+  }
 }
