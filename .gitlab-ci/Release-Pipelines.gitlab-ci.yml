@@ -119,7 +119,7 @@ build-main-pr-backend-test-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/api/Dockerfile --target=dev --build-arg project=api
+    - docker build -f apps/api/Dockerfile --target=dev --build-arg project=api --progress plain
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   after_script:
@@ -142,7 +142,7 @@ build-main-pr-frontend-test-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/frontend/Dockerfile --target=dev
+    - docker build -f apps/frontend/Dockerfile --target=dev --progress plain
       --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
@@ -166,7 +166,8 @@ build-main-pr-frontend-e2e-test-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/frontend-e2e/Dockerfile
+    - docker build --progress plain
+      -f apps/frontend-e2e/Dockerfile
       -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
       -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
     - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
@@ -190,7 +191,8 @@ build-main-pr-db-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Postgres.Dockerfile
+    - docker build --progress plain
+      -f database/Postgres.Dockerfile
       -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -213,7 +215,8 @@ build-main-pr-liquibase-image:
     - docker network inspect bridge | grep mtu
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build -q -f database/Liquibase.Dockerfile
+    - docker build --progress plain
+      -f database/Liquibase.Dockerfile
       -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -239,8 +242,8 @@ build-main-pr-backend-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
-    - docker build --cache-from ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
-      -q -f apps/api/Dockerfile --target=prod --build-arg project=api
+    - docker build --progress plain --cache-from ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+      -f apps/api/Dockerfile --target=prod --build-arg project=api
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -266,8 +269,8 @@ build-main-pr-frontend-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
-    - docker build --cache-from ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
-      -q -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
+    - docker build --progress plain --cache-from ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+      -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -671,7 +674,7 @@ build-main-commit-db-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} --progress plain .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $CI_REGISTRY
@@ -692,7 +695,7 @@ build-main-commit-liquibase-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} --progress plain .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
     - docker logout $REGISTRY
@@ -713,7 +716,7 @@ build-main-commit-backend-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/api/Dockerfile --target=prod --build-arg project=api
+    - docker build -f apps/api/Dockerfile --target=prod --build-arg project=api --progress plain
       -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
@@ -735,7 +738,7 @@ build-main-commit-frontend-image:
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -q -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
+    - docker build -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend --progress plain
       -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
     - docker push ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
