@@ -201,7 +201,6 @@ export class WorkspaceService {
 
   // TODO: id als Parameter
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
-    this.logger.log(`Updating workspace with id: ${workspaceData.id}`);
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });
@@ -212,6 +211,13 @@ export class WorkspaceService {
     } else {
       throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
     }
+  }
+
+  async patchMany(ids:string[], workspaceGroupId:number): Promise<void> {
+    await Promise.all(ids.map(async id => {
+      const parsedId = parseInt(id, 10);
+      await this.patch({ id: parsedId, groupId: workspaceGroupId });
+    }));
   }
 
   async patchGroupName(id: number, oldName: string, newName: string): Promise<void> {
@@ -274,22 +280,6 @@ export class WorkspaceService {
     {
       groupName: ''
     });
-  }
-
-  async moveGroup(id: number, groupId: number): Promise<number[]> {
-    const ws: WorkspaceInListDto[] = await this.findAll(1);
-    const validWorkspaces: number[] = [];
-    const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: { id: id }
-    });
-    if (id) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
-        .find({ where: { userId: id } });
-      workspaceUsers.forEach(wsU => validWorkspaces.push(wsU.workspaceId));
-    }
-    const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
-      .find({ where: { userId: id } });
-    return validWorkspaces;
   }
 
   async patchName(id: number, newName: string): Promise<void> {
