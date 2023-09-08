@@ -247,7 +247,7 @@
     "delete-workspace-with-units": "Soll der Arbeitsbereich \"{{name}}\" mit allen enthaltenen Aufgaben gelöscht werden?",
     "workspaces-deleted": "Arbeitsbereich/e gelöscht",
     "workspaces-not-deleted": "Konnte Arbeitsbereich/e nicht löschen",
-    "workspaces-moved": "Arbeitsbereich/e verschieben",
+    "workspaces-moved": "Arbeitsbereich/e verschoben",
     "workspaces-not-moved": "Konnte Arbeitsbereich/e nicht verschieben",
     "workspace-added": "Arbeitsbereich hinzugefügt",
     "workspace-not-added": "Konnte Arbeitsbereich nicht hinzufügen",
