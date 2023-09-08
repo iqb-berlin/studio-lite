@@ -88,7 +88,7 @@ export class BackendService {
 
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
     return this.http
-      .get(`${this.serverUrl}admin/workspaces/1/group/4`)
+      .patch(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`, {})
       .pipe(
         catchError(() => of(false)),
         map(val => val)
@@ -117,6 +117,16 @@ export class BackendService {
     return this.http
       .get<WorkspaceGroupFullDto>(
       `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`
+    )
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  getWorkspaceGroupsByUser(userId: number): Observable<WorkspaceGroupFullDto[] | null> {
+    return this.http
+      .get<WorkspaceGroupFullDto[]>(
+      `${this.serverUrl}admin/users/${userId}/workspace-groups`
     )
       .pipe(
         catchError(() => of(null))
