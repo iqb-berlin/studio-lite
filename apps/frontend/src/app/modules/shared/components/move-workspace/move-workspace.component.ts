@@ -1,18 +1,21 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 
 export interface MoveComponentData {
   title: string,
-  prompt: string,
+  content: string,
   default: string,
   okButtonLabel: string,
-  wResponse: number[]
+  data: WorkspaceGroupFullDto[],
+  selectedRows: WorkspaceInListDto[]
 }
 @Component({
   selector: 'studio-lite-move-workspace',
   templateUrl: './move-workspace.component.html',
   styleUrls: ['./move-workspace.component.scss']
 })
+
 export class MoveWorkspaceComponent {
   typedData: MoveComponentData;
   selectedValue:string = '';
