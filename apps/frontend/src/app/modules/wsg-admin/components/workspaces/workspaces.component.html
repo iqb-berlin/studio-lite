@@ -7,15 +7,14 @@
       (workspaceAdded)="addWorkspace($event)"
       (workspaceRenamed)="renameWorkspace($event)"
       (workspaceChanged)="changeWorkspace($event)"
-      (workspaceMoved)="moveWorkspace($event)"
       (workspaceNotLoaded)="onWorkspaceNotLoaded()"
+      (workspaceMoved)="moveWorkspace($event)"
       (workspaceDeleted)="deleteWorkspace($event)"
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
     <ng-container *ngIf="objectsDatasource.data.length">
-      <studio-lite-search-filter
-                                 [title]="'search-filter.filter-workspaces' | translate"
+      <studio-lite-search-filter [title]="'search-filter.filter-workspaces' | translate"
                                  (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
       </studio-lite-search-filter>
 

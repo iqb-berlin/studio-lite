@@ -195,6 +195,31 @@ export class WorkspacesComponent implements OnInit {
     );
   }
 
+  moveWorkspace(value: { selection: WorkspaceInListDto[], workspaceGroupId: number }) {
+    this.appService.dataLoading = true;
+    const workspacesToMove: number[] = [];
+    value.selection.forEach((r: WorkspaceInListDto) => workspacesToMove.push(r.id));
+    this.backendService.moveWorkspaces(value.workspaceGroupId, workspacesToMove).subscribe(
+      respOk => {
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('wsg-admin.workspaces-moved'),
+            '',
+            { duration: 1000 }
+          );
+          this.updateWorkspaceList();
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('wsg-admin.workspaces-not-moved'),
+            this.translateService.instant('error'),
+            { duration: 1000 }
+          );
+          this.appService.dataLoading = false;
+        }
+      }
+    );
+  }
+
   addWorkspace(result: string) {
     this.appService.dataLoading = true;
     this.backendService.addWorkspace(<CreateWorkspaceDto>{
@@ -261,24 +286,6 @@ export class WorkspacesComponent implements OnInit {
             { duration: 1000 });
         }
       });
-  }
-
-  moveWorkspace(a:string) {
-    this.appService.dataLoading = true;
-    this.backendService.moveWorkspaces(2, [1]).subscribe(val => {
-      this.appService.dataLoading = false;
-      if (!val) {
-        this.snackBar.open(
-          this.translateService.instant('wsg-admin.workspace-settings-not-changed'),
-          this.translateService.instant('error'),
-          { duration: 3000 });
-      } else {
-        this.snackBar.open(
-          this.translateService.instant('wsg-admin.workspace-settings-changed'),
-          '',
-          { duration: 1000 });
-      }
-    });
   }
 
   onWorkspaceNotLoaded(): void {
