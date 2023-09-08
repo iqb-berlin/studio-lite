@@ -21,18 +21,21 @@
   </label>
   <div class="fx-column-start-stretch fx-flex-row-50">
     <mat-form-field>
+      <mat-label>{{'unit-download.add-test-takers-review' | translate}}</mat-label>
       <input matInput type="number" min="0"
              [placeholder]="'unit-download.add-test-takers-review' | translate"
              [ngModel]="addTestTakersReview"
              (ngModelChange)="addTestTakersReviewChange.emit($event)">
     </mat-form-field>
     <mat-form-field>
-      <input matInput type="number" min="0"
+      <mat-label>{{'unit-download.add-test-takers-monitor' | translate}}</mat-label>
+      <input matInput type="number"
              [placeholder]="'unit-download.add-test-takers-monitor' | translate"
              [ngModel]="addTestTakersMonitor"
              (ngModelChange)="addTestTakersMonitorChange.emit($event)">
     </mat-form-field>
     <mat-form-field>
+      <mat-label>{{'unit-download.add-test-takers-hot' | translate}}</mat-label>
       <input matInput type="number" min="0"
              [placeholder]="'unit-download.add-test-takers-hot' | translate"
              [ngModel]="addTestTakersHot"
