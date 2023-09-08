@@ -91,7 +91,7 @@ export class BackendService {
       .patch(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`, {})
       .pipe(
         catchError(() => of(false)),
-        map(val => val)
+        map(() => true)
       );
   }
 
