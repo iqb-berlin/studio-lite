@@ -73,6 +73,18 @@ export class WorkspacesController {
     return this.workspaceService.remove(idsAsNumberArray);
   }
 
+  @Patch(':ids/:workspace_group_id')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
+  @ApiTags('admin workspaces')
+  async patchGroups(@Param('ids') ids: string, @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
+    const splittedIds = ids.split(';');
+    return this.workspaceService.patchMany(splittedIds, workspace_group_id);
+  }
+
   @Post(':workspace_group_id')
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
@@ -114,16 +126,5 @@ export class WorkspacesController {
   async patchOnesUsers(@Param('id') id: number,
     @Body() users: number[]) {
     return this.userService.setUsersByWorkspace(id, users);
-  }
-
-  @Get(':id/group/:group')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace moved successfully.' })
-  @ApiNotFoundResponse({ description: 'Workspace not moved.' })
-  @ApiTags('move workspace')
-  async moveGroup(@Param('id') id: number, @Body() group: number) {
-    const ws = await this.workspaceService.moveGroup(id, group);
-    return ws;
   }
 }
