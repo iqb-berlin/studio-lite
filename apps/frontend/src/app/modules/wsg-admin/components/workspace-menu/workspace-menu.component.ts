@@ -2,17 +2,18 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+
+import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { BackendService } from '../../services/backend.service';
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
-import { BackendService } from '../../services/backend.service';
+import { MoveWorkspaceComponent } from '../../../shared/components/move-workspace/move-workspace.component';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
-import { MoveWorkspaceComponent } from '../../../shared/components/move-workspace/move-workspace.component';
 
 @Component({
   selector: 'studio-lite-workspace-menu',
@@ -25,8 +26,6 @@ export class WorkspaceMenuComponent {
   @Input() checkedRows!: WorkspaceInListDto[];
 
   @Output() workspaceAdded: EventEmitter<string> = new EventEmitter<string>();
-
-  @Output() workspaceMoved: EventEmitter<string> = new EventEmitter<string>();
   @Output() workspaceRenamed: EventEmitter<{ selection: WorkspaceInListDto[], name: string }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], name: string }>();
 
@@ -36,16 +35,19 @@ export class WorkspaceMenuComponent {
   @Output() workspaceNotLoaded: EventEmitter<void> = new EventEmitter<void>();
   @Output() workspaceDeleted: EventEmitter<WorkspaceInListDto[]> = new EventEmitter<WorkspaceInListDto[]>();
   @Output() download: EventEmitter<void> = new EventEmitter<void>();
+  @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> = new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
 
   constructor(
     private editWorkspaceDialog: MatDialog,
     private editWorkspaceSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
-    private messsageDialog: MatDialog,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
     private translateService: TranslateService
   ) {}
+
+  workspaceGroupsByUser: WorkspaceGroupFullDto[] | null = [];
+  userId:number = 0;
 
   addObject(): void {
     const dialogRef = this.editWorkspaceDialog.open(InputTextComponent, {
@@ -69,26 +71,43 @@ export class WorkspaceMenuComponent {
     if (selectedRows.length === 0) {
       selectedRows = this.checkedRows;
     }
-    if (selectedRows.length) {
-      this.backendService.moveWorkspaces(2, [1]).subscribe(wResponse => {
-        if (wResponse) {
-          console.log(wResponse, 'wResponse');
+
+    this.appBackendService.getAuthData().subscribe(user => {
+      this.backendService.getWorkspaceGroupsByUser(user.userId).subscribe(dat => {
+        this.workspaceGroupsByUser = dat;
+        if (selectedRows.length) {
+          let prompt;
+          if (selectedRows.length === 1) {
+            prompt = (selectedRows.length) ?
+              this.translateService
+                .instant('wsg-admin.move-workspace-with-units', { name: selectedRows[0].name }) :
+              this.translateService
+                .instant('wsg-admin.move-workspace', { name: selectedRows[0].name });
+          } else {
+            prompt = this.translateService
+              .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
+          }
           const dialogRef = this.editWorkspaceDialog.open(MoveWorkspaceComponent, {
             width: '600px',
             data: {
-              title: this.translateService.instant('wsg-admin.move-workspace'),
-              prompt: this.translateService.instant('wsg-admin.enter-name'),
-              default: selectedRows[0].name,
-              wResponse: wResponse,
-              okButtonLabel: this.translateService.instant('save')
+              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+              content: prompt,
+              data: this.workspaceGroupsByUser,
+              selectedRows: selectedRows,
+              okButtonLabel: this.translateService.instant('move')
             }
           });
           dialogRef.afterClosed().subscribe(result => {
-            this.workspaceMoved.emit('s');
+            if (result) {
+              this.workspaceMoved.emit({
+                selection: selectedRows,
+                workspaceGroupId: result as number
+              });
+            }
           });
         }
       });
-    }
+    });
   }
 
   renameObject() {
