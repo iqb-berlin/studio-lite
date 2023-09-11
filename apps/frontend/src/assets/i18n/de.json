@@ -48,9 +48,9 @@
     "booklet-config": {
       "paging-mode": {
         "label": "Modus Seitenwechsel",
-        "separate": "Seiten extra blättern",
-        "concat-scroll": "Seiten untereinander stapeln",
-        "concat-scroll-snap": "Seiten untereinander - schnappen/magnetisch"
+        "separate": "Blättern",
+        "concat-scroll": "Scrollen",
+        "concat-scroll-snap": "Magnetisch Scrollen"
       },
       "unit_navibuttons": {
         "label": "Buttons für Unit-Navigation",
@@ -491,9 +491,9 @@
     "show-xml-params": "XML Parameter zeigen",
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
-      "separate": "Getrennt - Zugriff über Navigation",
-      "concat-scroll": "Aneinandergehängt - untereinander ohne Zwischenraum",
-      "concat-scroll-snap": "Aneinandergehängt - schnappen/magnetisch"
+      "separate": "Blättern",
+      "concat-scroll": "Scrollen",
+      "concat-scroll-snap": "Magnetisch Scrollen"
     },
     "pageNaviButtons": {
       "label": "Buttons für Seitennavigation",
