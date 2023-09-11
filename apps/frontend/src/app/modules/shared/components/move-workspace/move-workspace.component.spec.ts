@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatSelectModule } from '@angular/material/select';
 import { MoveWorkspaceComponent } from './move-workspace.component';
-import {MAT_DIALOG_DATA, MatDialogModule} from "@angular/material/dialog";
-import {ReactiveFormsModule} from "@angular/forms";
-import {NoopAnimationsModule} from "@angular/platform-browser/animations";
-import {TranslateModule} from "@ngx-translate/core";
-import {MatSelectModule} from "@angular/material/select";
 
 describe('MoveWorkspaceComponent', () => {
   let component: MoveWorkspaceComponent;

@@ -72,18 +72,15 @@ export class WorkspaceMenuComponent {
     if (selectedRows.length === 0) {
       selectedRows = this.checkedRows;
     }
-
     this.appBackendService.getAuthData().subscribe(user => {
       this.backendService.getWorkspaceGroupsByUser(user.userId).subscribe(dat => {
         this.workspaceGroupsByUser = dat;
-        if (selectedRows.length) {
+        if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length) {
           let prompt;
           if (selectedRows.length === 1) {
-            prompt = (selectedRows.length) ?
-              this.translateService
-                .instant('wsg-admin.move-workspace-with-units', { name: selectedRows[0].name }) :
-              this.translateService
-                .instant('wsg-admin.move-workspace', { name: selectedRows[0].name });
+            prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
+              name: selectedRows[0].name
+            });
           } else {
             prompt = this.translateService
               .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
@@ -93,7 +90,7 @@ export class WorkspaceMenuComponent {
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
               content: prompt,
-              data: this.workspaceGroupsByUser,
+              workspaceGroups: this.workspaceGroupsByUser,
               selectedRows: selectedRows,
               okButtonLabel: this.translateService.instant('move')
             }
@@ -104,6 +101,16 @@ export class WorkspaceMenuComponent {
                 selection: selectedRows,
                 workspaceGroupId: result as number
               });
+            }
+          });
+        } else {
+          this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+            width: '600px',
+            data: {
+              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+              content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
+              workspaceGroups: this.workspaceGroupsByUser,
+              okButtonLabel: this.translateService.instant('close')
             }
           });
         }

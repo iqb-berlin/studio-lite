@@ -1,26 +1,28 @@
-<h1 mat-dialog-title>{{typedData.title}}</h1>
-<mat-dialog-content>
-  <form class="fx-column-start-stretch">
-    <p>
-      {{ typedData.content }}
-    </p>
-    <mat-form-field>
-      <mat-label>{{'wsg-admin.select-workspace-group' | translate}}</mat-label>
-      <mat-select [(value)]="selectedValue">
-        <mat-option *ngFor="let wsg of typedData.data" [value]="wsg.id">{{wsg.name}}</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
+  <h1 mat-dialog-title>{{typedData.title}}</h1>
+  <mat-dialog-content>
+    <form class="fx-column-start-stretch">
+      <p>
+        {{ typedData.content }}
+      </p>
+      <mat-form-field *ngIf="typedData.workspaceGroups && typedData.workspaceGroups.length">
+        <mat-label>{{'wsg-admin.select-workspace-group' | translate}}</mat-label>
+        <mat-select [(value)]="selectedValue" >
+          <mat-option *ngFor="let wsg of typedData.workspaceGroups" [value]="wsg.id">{{wsg.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
 
-<mat-dialog-actions>
-  <button mat-raised-button
-          color="primary"
-          type="submit"
-          [mat-dialog-close]="selectedValue">
-    {{typedData.okButtonLabel}}
-  </button>
-  <button mat-raised-button [mat-dialog-close]="false">
-    {{'cancel' | translate}}
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions [ngClass]="{'center': typedData.workspaceGroups && !typedData.workspaceGroups.length}">
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="selectedValue">
+      {{typedData.okButtonLabel}}
+    </button >
+    <button mat-raised-button
+            *ngIf="typedData.workspaceGroups && typedData.workspaceGroups.length"
+            [mat-dialog-close]="false">
+      {{'cancel' | translate}}
+    </button>
+  </mat-dialog-actions>

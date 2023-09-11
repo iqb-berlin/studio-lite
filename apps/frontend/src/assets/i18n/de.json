@@ -242,6 +242,7 @@
     "rename-workspace": "Arbeitsbereich umbenennen",
     "moving-of-workspaces": "Verschieben von Arbeitsbereichen",
     "move-workspace-with-units": "Soll der Arbeitsbereich \"{{name}}\" mit allen enthaltenen Aufgaben verschoben werden?",
+    "move-workspaces-no-workspace-groups-hint": "Keine vorhandenen Rechte Arbeitsbereich(e) in andere Bereichsgruppe zu verschieben.",
     "deleting-of-workspaces": "Löschen von Arbeitsbereichen",
     "delete-workspace": "Soll der Arbeitsbereich \"{{name}}\" gelöscht werden?",
     "delete-workspace-with-units": "Soll der Arbeitsbereich \"{{name}}\" mit allen enthaltenen Aufgaben gelöscht werden?",
