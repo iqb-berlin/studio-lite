@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, UseFilters, UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, Req, Request, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
@@ -80,9 +80,13 @@ export class WorkspacesController {
   @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('admin workspaces')
-  async patchGroups(@Param('ids') ids: string, @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
+  async patchGroups(
+    @Req() req: Request,
+      @Param('ids') ids: string,
+      @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
     const splittedIds = ids.split(';');
-    return this.workspaceService.patchWorkspaceGroups(splittedIds, workspace_group_id);
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    return this.workspaceService.patchWorkspaceGroups(splittedIds, workspace_group_id, req['user'].id);
   }
 
   @Post(':workspace_group_id')

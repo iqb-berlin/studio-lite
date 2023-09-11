@@ -20,6 +20,9 @@ import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
+import {
+  UserWorkspaceGroupNotAdminException
+} from '../../exceptions/user-workspace-group-not-admin';
 
 @Injectable()
 export class WorkspaceService {
@@ -213,10 +216,14 @@ export class WorkspaceService {
     }
   }
 
-  async patchWorkspaceGroups(ids:string[], newWorkspaceGroupId:number): Promise<void> {
+  async patchWorkspaceGroups(ids:string[], newWorkspaceGroupId:number, userId:number): Promise<void> {
     await Promise.all(ids.map(async id => {
-      const parsedId = parseInt(id, 10);
-      await this.patch({ id: parsedId, groupId: newWorkspaceGroupId });
+      if (await this.usersService.isWorkspaceGroupAdmin(userId, newWorkspaceGroupId)) {
+        const parsedId = parseInt(id, 10);
+        await this.patch({ id: parsedId, groupId: newWorkspaceGroupId });
+      } else {
+        throw new UserWorkspaceGroupNotAdminException(newWorkspaceGroupId, 'PATCH');
+      }
     }));
   }
 
