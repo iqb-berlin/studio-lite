@@ -11,7 +11,6 @@ export interface MoveComponentData {
   selectedRows: WorkspaceInListDto[]
 }
 @Component({
-  selector: 'studio-lite-move-workspace',
   templateUrl: './move-workspace.component.html',
   styleUrls: ['./move-workspace.component.scss']
 })
