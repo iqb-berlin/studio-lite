@@ -38,6 +38,7 @@ export class WorkspaceMenuComponent {
   @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> = new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
 
   constructor(
+    private moveWorkspaceDialog: MatDialog,
     private editWorkspaceDialog: MatDialog,
     private editWorkspaceSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
@@ -87,7 +88,7 @@ export class WorkspaceMenuComponent {
             prompt = this.translateService
               .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
           }
-          const dialogRef = this.editWorkspaceDialog.open(MoveWorkspaceComponent, {
+          const dialogRef = this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
             width: '600px',
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
