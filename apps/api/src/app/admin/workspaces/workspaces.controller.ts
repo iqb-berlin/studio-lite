@@ -82,7 +82,7 @@ export class WorkspacesController {
   @ApiTags('admin workspaces')
   async patchGroups(@Param('ids') ids: string, @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
     const splittedIds = ids.split(';');
-    return this.workspaceService.patchMany(splittedIds, workspace_group_id);
+    return this.workspaceService.patchWorkspaceGroups(splittedIds, workspace_group_id);
   }
 
   @Post(':workspace_group_id')

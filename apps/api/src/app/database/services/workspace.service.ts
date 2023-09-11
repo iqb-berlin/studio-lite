@@ -213,10 +213,10 @@ export class WorkspaceService {
     }
   }
 
-  async patchMany(ids:string[], workspaceGroupId:number): Promise<void> {
+  async patchWorkspaceGroups(ids:string[], newWorkspaceGroupId:number): Promise<void> {
     await Promise.all(ids.map(async id => {
       const parsedId = parseInt(id, 10);
-      await this.patch({ id: parsedId, groupId: workspaceGroupId });
+      await this.patch({ id: parsedId, groupId: newWorkspaceGroupId });
     }));
   }
 
