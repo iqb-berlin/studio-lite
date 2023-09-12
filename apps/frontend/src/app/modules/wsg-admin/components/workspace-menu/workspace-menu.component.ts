@@ -75,7 +75,7 @@ export class WorkspaceMenuComponent {
     this.appBackendService.getAuthData().subscribe(user => {
       this.backendService.getWorkspaceGroupsByUser(user.userId).subscribe(dat => {
         this.workspaceGroupsByUser = dat;
-        if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length) {
+        if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length > 1) {
           let prompt;
           if (selectedRows.length === 1) {
             prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
