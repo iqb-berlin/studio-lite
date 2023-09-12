@@ -218,8 +218,9 @@ export class WorkspaceService {
 
   async patchWorkspaceGroups(ids:string[], newWorkspaceGroupId:number, userId:number): Promise<void> {
     await Promise.all(ids.map(async id => {
-      if (await this.usersService.isWorkspaceGroupAdmin(userId, newWorkspaceGroupId)) {
-        const parsedId = parseInt(id, 10);
+      const parsedId = parseInt(id, 10);
+      const workspaceById = await this.findOne(parsedId);
+      if (await this.usersService.isWorkspaceGroupAdmin(userId, workspaceById.groupId)) {
         await this.patch({ id: parsedId, groupId: newWorkspaceGroupId });
       } else {
         throw new UserWorkspaceGroupNotAdminException(newWorkspaceGroupId, 'PATCH');
