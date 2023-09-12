@@ -20,6 +20,9 @@ import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
+import {
+  UserWorkspaceGroupNotAdminException
+} from '../../exceptions/user-workspace-group-not-admin';
 
 @Injectable()
 export class WorkspaceService {
@@ -201,7 +204,6 @@ export class WorkspaceService {
 
   // TODO: id als Parameter
   async patch(workspaceData: WorkspaceFullDto): Promise<void> {
-    this.logger.log(`Updating workspace with id: ${workspaceData.id}`);
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });
@@ -212,6 +214,18 @@ export class WorkspaceService {
     } else {
       throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
     }
+  }
+
+  async patchWorkspaceGroups(ids:string[], newWorkspaceGroupId:number, userId:number): Promise<void> {
+    await Promise.all(ids.map(async id => {
+      const parsedId = parseInt(id, 10);
+      const workspaceById = await this.findOne(parsedId);
+      if (await this.usersService.isWorkspaceGroupAdmin(userId, workspaceById.groupId)) {
+        await this.patch({ id: parsedId, groupId: newWorkspaceGroupId });
+      } else {
+        throw new UserWorkspaceGroupNotAdminException(newWorkspaceGroupId, 'PATCH');
+      }
+    }));
   }
 
   async patchGroupName(id: number, oldName: string, newName: string): Promise<void> {

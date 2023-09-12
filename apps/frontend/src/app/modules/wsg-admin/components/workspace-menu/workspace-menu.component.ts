@@ -2,12 +2,15 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+
+import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { BackendService } from '../../services/backend.service';
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
+import { MoveWorkspaceComponent } from '../../../shared/components/move-workspace/move-workspace.component';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
@@ -32,15 +35,20 @@ export class WorkspaceMenuComponent {
   @Output() workspaceNotLoaded: EventEmitter<void> = new EventEmitter<void>();
   @Output() workspaceDeleted: EventEmitter<WorkspaceInListDto[]> = new EventEmitter<WorkspaceInListDto[]>();
   @Output() download: EventEmitter<void> = new EventEmitter<void>();
+  @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> = new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
 
   constructor(
+    private moveWorkspaceDialog: MatDialog,
     private editWorkspaceDialog: MatDialog,
     private editWorkspaceSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
-    private messsageDialog: MatDialog,
+    private backendService: BackendService,
     private appBackendService: AppBackendService,
     private translateService: TranslateService
   ) {}
+
+  workspaceGroupsByUser: WorkspaceGroupFullDto[] | null = [];
+  userId:number = 0;
 
   addObject(): void {
     const dialogRef = this.editWorkspaceDialog.open(InputTextComponent, {
@@ -56,6 +64,57 @@ export class WorkspaceMenuComponent {
       if (result) {
         this.workspaceAdded.emit(result as string);
       }
+    });
+  }
+
+  moveObject() {
+    let selectedRows = this.selectedRows;
+    if (selectedRows.length === 0) {
+      selectedRows = this.checkedRows;
+    }
+    this.appBackendService.getAuthData().subscribe(user => {
+      this.backendService.getWorkspaceGroupsByUser(user.userId).subscribe(dat => {
+        this.workspaceGroupsByUser = dat;
+        if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length > 1) {
+          let prompt;
+          if (selectedRows.length === 1) {
+            prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
+              name: selectedRows[0].name
+            });
+          } else {
+            prompt = this.translateService
+              .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
+          }
+          const dialogRef = this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+            width: '600px',
+            data: {
+              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+              content: prompt,
+              workspaceGroups: this.workspaceGroupsByUser,
+              selectedRows: selectedRows,
+              okButtonLabel: this.translateService.instant('move')
+            }
+          });
+          dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+              this.workspaceMoved.emit({
+                selection: selectedRows,
+                workspaceGroupId: result as number
+              });
+            }
+          });
+        } else {
+          this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+            width: '600px',
+            data: {
+              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+              content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
+              workspaceGroups: this.workspaceGroupsByUser,
+              okButtonLabel: this.translateService.instant('close')
+            }
+          });
+        }
+      });
     });
   }
 
