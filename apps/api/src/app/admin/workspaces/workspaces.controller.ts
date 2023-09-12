@@ -77,16 +77,16 @@ export class WorkspacesController {
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
+  @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('admin workspaces')
   async patchGroups(
     @Req() req: Request,
       @Param('ids') ids: string,
       @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
-    const splittedIds = ids.split(';');
+    const splitIds = ids.split(';');
     // eslint-disable-next-line @typescript-eslint/dot-notation
-    return this.workspaceService.patchWorkspaceGroups(splittedIds, workspace_group_id, req['user'].id);
+    return this.workspaceService.patchWorkspaceGroups(splitIds, workspace_group_id, req['user'].id);
   }
 
   @Post(':workspace_group_id')
