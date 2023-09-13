@@ -82,9 +82,9 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiParam({
-    name:'name',
-    type:'String',
-    description:'hexadecimal representation of the group name'
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
   })
   @ApiTags('workspace')
   // todo: declare body parameter {body: 'xxx'} or parse body as string
@@ -100,9 +100,9 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiParam({
-    name:'name',
-    type:'String',
-    description:'hexadecimal representation of the group name'
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
   })
   @ApiTags('workspace')
   async patchUnitsGroup(@WorkspaceId() workspaceId: number,
@@ -118,9 +118,9 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
   @ApiParam({
-    name:'name',
-    type:'String',
-    description:'hexadecimal representation of the group name'
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
   })
   @ApiTags('workspace')
   async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
