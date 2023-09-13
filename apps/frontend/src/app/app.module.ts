@@ -57,6 +57,7 @@ import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 import { SharedModule } from './modules/shared/shared.module';
+import { MoveWorkspaceComponent } from './modules/shared/components/move-workspace/move-workspace.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -86,7 +87,8 @@ export function createTranslateLoader(http: HttpClient) {
     UserIssuesPipe,
     DataLoadingIsNumberPipe,
     DataLoadingAsTextPipe,
-    IsInArrayPipe
+    IsInArrayPipe,
+    MoveWorkspaceComponent
   ],
   imports: [
     ApplicationModule,

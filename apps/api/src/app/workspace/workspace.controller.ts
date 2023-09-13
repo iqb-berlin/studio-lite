@@ -2,7 +2,7 @@ import {
   Body, Controller, Delete, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
   WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
@@ -81,6 +81,11 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
+  })
   @ApiTags('workspace')
   // todo: declare body parameter {body: 'xxx'} or parse body as string
   async renameUnitGroup(@WorkspaceId() workspaceId: number,
@@ -94,6 +99,11 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
+  })
   @ApiTags('workspace')
   async patchUnitsGroup(@WorkspaceId() workspaceId: number,
     @Param('name') groupName: string,
@@ -107,6 +117,11 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
+  })
   @ApiTags('workspace')
   async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
     return this.workspaceService

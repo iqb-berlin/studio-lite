@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, UseFilters, UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, Req, Request, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
@@ -71,6 +71,22 @@ export class WorkspacesController {
       if (validWorkspaceIds.indexOf(idAsNumber) >= 0) idsAsNumberArray.push(idAsNumber);
     });
     return this.workspaceService.remove(idsAsNumberArray);
+  }
+
+  @Patch(':ids/:workspace_group_id')
+  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
+  @ApiTags('admin workspaces')
+  async patchGroups(
+    @Req() req: Request,
+      @Param('ids') ids: string,
+      @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
+    const splitIds = ids.split(';');
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    return this.workspaceService.patchWorkspaceGroups(splitIds, workspace_group_id, req['user'].id);
   }
 
   @Post(':workspace_group_id')
