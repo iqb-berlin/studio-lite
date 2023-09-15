@@ -53,6 +53,25 @@ export class WorkspacesController {
     return this.workspaceService.findOne(id);
   }
 
+  @Get(':id/users')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin workspace users retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
+  @ApiTags('admin workspaces')
+  async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
+    return this.userService.findAllUsers(id);
+  }
+
+  @Patch(':id/users')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin workspaces')
+  async patchOnesUsers(@Param('id') id: number,
+    @Body() users: number[]) {
+    return this.userService.setUsersByWorkspace(id, users);
+  }
+
   // TODO: Sollen hier mehrere Workspaces gelöscht werden? Sollte über Query gelöst werden.
   @Delete(':ids/:workspace_group_id')
   @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
@@ -111,24 +130,5 @@ export class WorkspacesController {
   @ApiTags('admin workspaces')
   async patch(@Body() workspaceFullDto: WorkspaceFullDto) {
     return this.workspaceService.patch(workspaceFullDto);
-  }
-
-  @Get(':id/users')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace users retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
-  @ApiTags('admin workspaces')
-  async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
-    return this.userService.findAllUsers(id);
-  }
-
-  @Patch(':id/users')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiTags('admin workspaces')
-  async patchOnesUsers(@Param('id') id: number,
-    @Body() users: number[]) {
-    return this.userService.setUsersByWorkspace(id, users);
   }
 }
