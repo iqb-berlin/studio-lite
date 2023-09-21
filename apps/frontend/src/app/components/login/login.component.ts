@@ -5,8 +5,10 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
+import { AuthService } from '../../modules/auth/service/auth.service';
 
 @Component({
   selector: 'studio-lite-login',
@@ -18,8 +20,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginNamePreset = '';
   redirectTo = '';
   errorMessage = '';
+  loggedInKeycloak: boolean = false;
+  userProfile: KeycloakProfile = {};
   private routingSubscription: Subscription | null = null;
+  private loggedUsers: KeycloakTokenParsed | undefined;
   constructor(private fb: UntypedFormBuilder,
+              private authService: AuthService,
               private route: ActivatedRoute,
               private router: Router,
               private backendService: BackendService,
@@ -31,7 +37,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.redirectTo = queryParams['redirectTo'];
@@ -43,6 +49,14 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
       }
     });
+
+    this.loggedInKeycloak = await this.authService.isLoggedIn();
+    if (this.loggedInKeycloak) {
+      this.userProfile = await this.authService.loadUserProfile();
+      this.loggedUsers = this.authService.getLoggedUser();
+      console.log(this.userProfile);
+      console.log((this.loggedUsers));
+    }
   }
 
   login(): void {
@@ -68,6 +82,14 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.appService.errorMessagesDisabled = false;
       });
     }
+  }
+
+  loginKeycloak(): void {
+    this.authService.login();
+  }
+
+  logoutKeycloak(): void {
+    this.authService.logout();
   }
 
   ngOnDestroy(): void {

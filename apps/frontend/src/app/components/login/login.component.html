@@ -9,6 +9,19 @@
                      [warnMessage]="'home.no-user' | translate">
 </studio-lite-warning>
 
+
+<button mat-raised-button
+        type="submit"
+        color="primary"
+        *ngIf="!loggedInKeycloak"
+        (click)="loginKeycloak()">Login mit Keycloak
+</button>
+<button mat-raised-button
+        type="submit"
+        color="primary"
+        *ngIf="loggedInKeycloak"
+        (click)="logoutKeycloak()">Logout von Keycloak
+</button>
 <form class="fx-column-start-stretch"
       [formGroup]="loginForm"
       (ngSubmit)="login()">
@@ -39,3 +52,4 @@
           color="primary">{{'next' | translate}}
   </button>
 </form>
+
