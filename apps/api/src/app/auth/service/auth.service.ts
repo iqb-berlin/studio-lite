@@ -43,6 +43,22 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
+  async keycloakLogin(user:any) {
+    const {
+      username, lastName, firstName, email, identity
+    } = user;
+    const newUserId = await this.usersService.createKeycloakUser({
+      identity: identity,
+      username: username,
+      email: email,
+      lastName: lastName,
+      firstName: firstName
+    });
+    this.logger.log(`First Keycloak User with id '${newUserId}' is logging in.`);
+    const payload = { username: username, sub: newUserId, sub2: 0 };
+    return this.jwtService.sign(payload);
+  }
+
   async isAdminUser(userId: number): Promise<boolean> {
     return userId && this.usersService.getUserIsAdmin(userId);
   }

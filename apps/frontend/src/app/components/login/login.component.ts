@@ -54,8 +54,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (this.loggedInKeycloak) {
       this.userProfile = await this.authService.loadUserProfile();
       this.loggedUsers = this.authService.getLoggedUser();
-      console.log(this.userProfile);
-      console.log((this.loggedUsers));
+      const keycloakUser = {
+        identity: this.userProfile.id,
+        username: this.userProfile.username,
+        lastName: 'lastName',
+        firstName: 'firstName',
+        email: 'email'
+      };
+      this.keycloakLogin(keycloakUser);
     }
   }
 
@@ -82,6 +88,10 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.appService.errorMessagesDisabled = false;
       });
     }
+  }
+
+  keycloakLogin(user:any): void {
+    this.backendService.keycloakLogin(user).subscribe(val => { });
   }
 
   loginKeycloak(): void {

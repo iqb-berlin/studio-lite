@@ -53,6 +53,38 @@ export class BackendService {
       );
   }
 
+  keycloakLogin(user:any): Observable<boolean> {
+    const {
+      username, lastName, firstName, email, identity
+    } = user;
+    const queryParams = new HttpParams()
+      .set('username', username)
+      .set('lastName', lastName)
+      .set('firstName', firstName)
+      .set('identity', identity)
+      .set('email', email);
+    return this.http.post<string>(
+      `${this.serverUrl}keycloak-login?${queryParams.toString()}`, 'jojo'
+    )
+      .pipe(
+        catchError(() => of(false)),
+        switchMap(loginToken => {
+          if (typeof loginToken === 'string') {
+            localStorage.setItem('id_token', loginToken);
+            return this.getAuthData()
+              .pipe(
+                map(authData => {
+                  this.appService.authData = authData;
+                  return true;
+                }),
+                catchError(() => of(false))
+              );
+          }
+          return of(loginToken);
+        })
+      );
+  }
+
   getAuthData(): Observable<AuthDataDto> {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
   }

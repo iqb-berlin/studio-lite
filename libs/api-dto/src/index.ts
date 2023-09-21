@@ -39,3 +39,4 @@ export { UnitCommentDto } from './lib/dto/unit-comment/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dto/unit-comment/create-unit-comment-dto';
 export { UpdateUnitCommentDto } from './lib/dto/unit-comment/update-unit-comment-dto';
 export { UpdateUnitUserDto } from './lib/dto/unit-user/update-unit-user-dto';
+export { CreateKeycloakUserDto } from './lib/dto/user/create-keycloak-user-dto';

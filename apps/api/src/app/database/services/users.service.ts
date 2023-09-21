@@ -3,7 +3,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
-  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
+  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto, CreateKeycloakUserDto
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
@@ -14,6 +14,7 @@ import Workspace from '../entities/workspace.entity';
 import Review from '../entities/review.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
+import KeycloakUser from '../entities/keycloak-user.entity';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(KeycloakUser)
+    private keycloakUsersRepository: Repository<KeycloakUser>,
     @InjectRepository(WorkspaceUser)
     private workspaceUsersRepository: Repository<WorkspaceUser>,
     @InjectRepository(WorkspaceGroupAdmin)
@@ -208,6 +211,12 @@ export class UsersService {
     user.password = UsersService.getPasswordHash(user.password);
     const newUser = await this.usersRepository.create(user);
     await this.usersRepository.save(newUser);
+    return newUser.id;
+  }
+
+  async createKeycloakUser(keycloakUser: CreateKeycloakUserDto): Promise<number> {
+    const newUser = await this.keycloakUsersRepository.create(keycloakUser);
+    await this.keycloakUsersRepository.save(newUser);
     return newUser.id;
   }
 

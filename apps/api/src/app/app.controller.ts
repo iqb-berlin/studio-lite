@@ -64,6 +64,39 @@ export class AppController {
     return `"${token}"`;
   }
 
+  @Post('keycloak-login')
+  @UseGuards(AppVersionGuard)
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
+  @ApiQuery({ type: String, name: 'username', required: true })
+  @ApiQuery({ type: String, name: 'identity', required: true })
+  @ApiQuery({ type: String, name: 'email', required: false })
+  @ApiQuery({ type: String, name: 'lastName', required: true })
+  @ApiQuery({ type: String, name: 'firstName', required: true })
+  async KeycloakLogin(
+  @Query('username') username: string,
+    @Query('identity') identity: string,
+    @Query('email') email: string,
+    @Query('lastName') lastName: string,
+    @Query('firstName') firstName: string
+  ) {
+    const user = {
+      username,
+      identity,
+      email,
+      lastName,
+      firstName
+    };
+    const token = await this.authService.keycloakLogin(user);
+    return `"${token}"`;
+  }
+
   @Get('auth-data')
   @UseGuards(JwtAuthGuard, AppVersionGuard)
   @ApiHeader({
