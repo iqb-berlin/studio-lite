@@ -1,10 +1,10 @@
 <div class="fx-column-start-stretch unit-data">
   <nav mat-tab-nav-bar
        [tabPanel]="tabPanel">
-    <a *ngFor="let link of navLinks"
+    <a *ngFor="let link of navLinks; let i = index"
        mat-tab-link
        routerLinkActive="active-link"
-       [disabled]="(workspaceService.selectedUnit$ | async) === 0"
+       [disabled]="(workspaceService.selectedUnit$ | async) === 0 || disabledRouterLinkIndex === i"
        [routerLink]="routingOutlet | namedRouterLink: link"
        #rla="routerLinkActive"
        [active]="rla.isActive"

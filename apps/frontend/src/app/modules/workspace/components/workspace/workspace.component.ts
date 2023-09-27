@@ -17,6 +17,7 @@ export class WorkspaceComponent implements OnInit {
   navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
   rightNavLinks = ['preview', 'schemer', 'comments'];
   selectedRouterLink = -1;
+  rightSelectedRouterLink = -1;
 
   constructor(
     public appService: AppService,

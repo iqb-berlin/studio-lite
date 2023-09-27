@@ -11,6 +11,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 })
 export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;
+  @Input() disabledRouterLinkIndex!: number;
   @Input() navLinks!: string[];
   @Input() routingOutlet: string = 'primary'; // angular default
   @Output() selectedRouterIndexChange: EventEmitter<number> = new EventEmitter<number>();
