@@ -15,6 +15,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 export class WorkspaceComponent implements OnInit {
   uploadProcessId = '';
   navLinks = ['metadata', 'editor', 'preview', 'schemer', 'comments'];
+  rightNavLinks = ['preview', 'schemer', 'comments'];
   selectedRouterLink = -1;
 
   constructor(

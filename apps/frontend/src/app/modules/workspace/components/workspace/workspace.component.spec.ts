@@ -42,6 +42,7 @@ describe('WorkspaceComponent', () => {
   })
   class MockStudioLiteUnitDataAreaComponent {
     @Input() navLinks!: string[];
+    @Input() routingOutlet: string = 'primary'; // angular default
   }
 
   beforeEach(async () => {

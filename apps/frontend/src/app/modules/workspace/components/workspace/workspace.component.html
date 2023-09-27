@@ -1,17 +1,21 @@
 <studio-lite-splitter class="authoring-body">
 
   <studio-lite-splitter-pane [initialSize]="275">
-    <studio-lite-units-area
-      [navLinks]="navLinks"
-      [selectedRouterLink]="selectedRouterLink">
+    <studio-lite-units-area [navLinks]="navLinks"
+                            [selectedRouterLink]="selectedRouterLink">
     </studio-lite-units-area>
   </studio-lite-splitter-pane>
 
   <studio-lite-splitter-pane>
-    <studio-lite-unit-data-area
-     [navLinks]="navLinks"
-     (selectedRouterIndexChange)="selectedRouterLink = $event">
+    <studio-lite-unit-data-area [navLinks]="navLinks"
+                                (selectedRouterIndexChange)="selectedRouterLink = $event">
    </studio-lite-unit-data-area>
   </studio-lite-splitter-pane>
 
+  <studio-lite-splitter-pane>
+    <studio-lite-unit-data-area [routingOutlet]="'right'"
+                                [navLinks]="rightNavLinks"
+                                (selectedRouterIndexChange)="selectedRouterLink = $event">
+    </studio-lite-unit-data-area>
+  </studio-lite-splitter-pane>
 </studio-lite-splitter>
