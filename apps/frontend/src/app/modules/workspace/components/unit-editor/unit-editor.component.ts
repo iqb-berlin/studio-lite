@@ -124,8 +124,10 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId).subscribe(
               ued => {
                 if (ued) {
-                  this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
-                  this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                  this.workspaceService.setUnitDefinitionStore(new UnitDefinitionStore(unitId, ued));
+                  if (this.workspaceService.unitDefinitionStore) {
+                    this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                  }
                 } else {
                   this.snackBar.open(
                     this.translateService.instant('workspace.unit-definition-not-loaded'),

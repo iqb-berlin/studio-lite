@@ -12,20 +12,21 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
+import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 
 @Component({
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' }
 })
-export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
+export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
   private iFrameElement: HTMLIFrameElement | undefined;
-  private ngUnsubscribe = new Subject<void>();
   private sessionId = '';
-  postMessageTarget: Window | undefined;
   private lastPlayerId = '';
+  ngUnsubscribe = new Subject<void>();
+  postMessageTarget: Window | undefined;
   playerName = '';
   playerApiVersion = 3;
 
@@ -45,6 +46,7 @@ export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
     private moduleService: ModuleService,
     public previewService: PreviewService
   ) {
+    super();
     this.appService.postMessage$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((m: MessageEvent) => {
@@ -74,7 +76,7 @@ export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
               this.sessionId = Math.floor(Math.random() * 20000000 + 10000000)
                 .toString();
               this.postMessageTarget = m.source as Window;
-              this.sendUnitDataToPlayer();
+              this.sendUnitData();
               break;
 
             case 'vo.FromPlayer.StartedNotification':
@@ -147,11 +149,12 @@ export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.message = '';
-        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToPlayer());
+        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitData());
       });
+    this.addSubscriptionForUnitDefinitionChanges();
   }
 
-  async sendUnitDataToPlayer() {
+  async sendUnitData() {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
@@ -163,7 +166,6 @@ export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
         VeronaModuleFactory.getBestMatch(unitMetadata.player, Object.keys(this.moduleService.players)) : '';
       if (playerId) {
         if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
-          // TODO: Ist das nicht EditorCode, der hier entfernt werden kann?
           if (this.workspaceService.unitDefinitionStore) {
             this.postUnitDef(this.workspaceService.unitDefinitionStore);
           } else {
@@ -171,8 +173,10 @@ export class UnitPreviewComponent implements AfterViewInit, OnDestroy {
               .subscribe(
                 ued => {
                   if (ued) {
-                    this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(this.unitId, ued);
-                    this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                    this.workspaceService.setUnitDefinitionStore(new UnitDefinitionStore(this.unitId, ued));
+                    if (this.workspaceService.unitDefinitionStore) {
+                      this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                    }
                   } else {
                     this.snackBar.open(
                       'Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 }

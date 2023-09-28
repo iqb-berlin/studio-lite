@@ -1,7 +1,7 @@
 import {
-  AfterViewInit, Component, ElementRef, HostListener, ViewChild
+  AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 
@@ -11,13 +11,14 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
+import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 
 @Component({
   selector: 'studio-lite-unit-schemer',
   templateUrl: './unit-schemer.component.html',
   styleUrls: ['./unit-schemer.component.scss']
 })
-export class UnitSchemerComponent implements AfterViewInit {
+export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   private readonly postMessageSubscription: Subscription;
   private unitIdChangedSubscription: Subscription | undefined;
@@ -25,16 +26,18 @@ export class UnitSchemerComponent implements AfterViewInit {
   private postMessageTarget: Window | undefined;
   private sessionId = '';
   private lastSchemerId = '';
+  ngUnsubscribe = new Subject<void>();
   message = '';
 
   constructor(
     private backendService: BackendService,
-    private workspaceService: WorkspaceService,
+    public workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
     private moduleService: ModuleService,
     private appService: AppService,
     private translateService: TranslateService
   ) {
+    super();
     this.postMessageSubscription = this.appService.postMessage$.subscribe((m: MessageEvent) => {
       const msgData = m.data;
       const msgType = msgData.type;
@@ -45,7 +48,7 @@ export class UnitSchemerComponent implements AfterViewInit {
           case 'vosReadyNotification':
             this.sessionId = Math.floor(Math.random() * 20000000 + 10000000).toString();
             this.postMessageTarget = m.source as Window;
-            this.sendUnitDataToSchemer();
+            this.sendUnitData();
             break;
 
           case 'vosSchemeChangedNotification':
@@ -74,11 +77,12 @@ export class UnitSchemerComponent implements AfterViewInit {
     this.iFrameElement = this.hostingIframe.nativeElement;
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
       this.message = '';
-      this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToSchemer());
+      this.workspaceService.loadUnitMetadata().then(() => this.sendUnitData());
     });
+    this.addSubscriptionForUnitDefinitionChanges();
   }
 
-  async sendUnitDataToSchemer() {
+  async sendUnitData() {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
@@ -175,5 +179,7 @@ export class UnitSchemerComponent implements AfterViewInit {
   ngOnDestroy(): void {
     if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
     if (this.postMessageSubscription !== null) this.postMessageSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
