@@ -4,6 +4,7 @@ import {
 import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { TranslateService } from '@ngx-translate/core';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -44,7 +45,8 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     private backendService: BackendService,
     public workspaceService: WorkspaceService,
     private moduleService: ModuleService,
-    public previewService: PreviewService
+    public previewService: PreviewService,
+    private translateService: TranslateService
   ) {
     super();
     this.appService.postMessage$
@@ -103,25 +105,39 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
               break;
 
             case 'vo.FromPlayer.PageNavigationRequest':
-              this.snackBar.open(`Player sendet PageNavigationRequest: "${
-                msgData.newPage}"`, '', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService
+                  .instant('workspace.player-send-page-navigation-request', { target: msgData.newPage }),
+                '',
+                { duration: 3000 });
               this.gotoPage({ action: msgData.newPage });
               break;
 
             case 'vopPageNavigationCommand':
-              this.snackBar.open(`Player sendet PageNavigationRequest: "${
-                msgData.target}"`, '', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService
+                  .instant('workspace.player-send-page-navigation-request', { target: msgData.target }),
+                '',
+                { duration: 3000 });
               this.gotoPage({ action: msgData.target });
               break;
 
             case 'vo.FromPlayer.UnitNavigationRequest':
-              this.snackBar.open(`Player sendet UnitNavigationRequest: "${
-                msgData.navigationTarget}"`, '', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService
+                  .instant('workspace.player-send-unit-navigation-request',
+                    { target: msgData.navigationTarget }),
+                '',
+                { duration: 3000 });
               break;
 
             case 'vopUnitNavigationRequestedNotification':
-              this.snackBar.open(`Player sendet UnitNavigationRequest: "${
-                msgData.target}"`, '', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService
+                  .instant('workspace.player-send-unit-navigation-request',
+                    { target: msgData.target }),
+                '',
+                { duration: 3000 });
               break;
 
             case 'vopWindowFocusChangedNotification':
@@ -179,8 +195,9 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                     }
                   } else {
                     this.snackBar.open(
-                      'Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 }
-                    );
+                      this.translateService.instant('workspace.unit-definition-not-loaded'),
+                      this.translateService.instant('workspace.error'),
+                      { duration: 3000 });
                   }
                 }
               );
@@ -191,11 +208,11 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
           // player gets unit data via ReadyNotification
         }
       } else {
-        this.message = 'Kein gültiger Player zugewiesen. Bitte gehen Sie zu "Eigenschaften".';
+        this.message = this.translateService.instant('workspace.no-player');
         this.buildPlayer();
       }
     } else {
-      this.message = 'Aufgabe nicht gefunden oder Daten fehlerhaft.';
+      this.message = this.translateService.instant('workspace.unit-not-found');
       this.buildPlayer();
     }
   }
@@ -251,7 +268,8 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
               this.setupPlayerIFrame(playerData);
               this.lastPlayerId = playerId;
             } else {
-              this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
+              this.message = this.translateService
+                .instant('workspace.player-not-loaded', { id: playerId });
               this.lastPlayerId = '';
             }
           });
