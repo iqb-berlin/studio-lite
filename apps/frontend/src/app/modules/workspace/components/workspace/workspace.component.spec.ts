@@ -41,8 +41,11 @@ describe('WorkspaceComponent', () => {
     template: ''
   })
   class MockStudioLiteUnitDataAreaComponent {
-    @Input() navLinks!: string[];
+    @Input() navTabs!: { name: string; duplicable: boolean }[];
     @Input() routingOutlet: string = 'primary'; // angular default
+    @Input() secondaryRoutingOutlet!: string;
+    @Input() pinIcon!: string;
+    @Input() disabledRouterLink!: string;
   }
 
   beforeEach(async () => {
