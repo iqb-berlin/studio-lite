@@ -2,9 +2,9 @@ import {
   ActivatedRoute, DefaultUrlSerializer, NavigationEnd, Router
 } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
-import { filter } from 'rxjs';
+import { filter, Subject, takeUntil } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -16,7 +16,7 @@ import { WorkspaceService } from '../../services/workspace.service';
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss']
 })
-export class WorkspaceComponent implements OnInit {
+export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
   navTabs: { name: string; duplicable: boolean }[] = [
     { name: 'metadata', duplicable: false },
@@ -31,6 +31,7 @@ export class WorkspaceComponent implements OnInit {
   pinnedNavTab: { name: string, duplicable: boolean }[] = [];
   secondaryRoutingOutlet: string = 'secondary';
   routingOutlet: string = 'primary';
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     public appService: AppService,
@@ -71,7 +72,9 @@ export class WorkspaceComponent implements OnInit {
       }
     );
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        filter(event => event instanceof NavigationEnd))
       .subscribe(event => {
         const url = (event as NavigationEnd).url;
         this.openSecondaryOutlet(url);
@@ -103,5 +106,10 @@ export class WorkspaceComponent implements OnInit {
     this.workspaceService.isWorkspaceGroupAdmin =
       this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
     this.moduleService.loadList();
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
