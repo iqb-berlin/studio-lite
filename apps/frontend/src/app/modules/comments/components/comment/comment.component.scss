@@ -7,7 +7,7 @@
   background-color: #f3f3f3;
   line-height: 1em;
   border-radius: 5px;
-  min-width: 420px;
+  min-width: 300px;
   p {
     word-break: break-all;
   }
@@ -27,7 +27,7 @@
 }
 
 .comment-action{
-  color: #bbbbbb;
+  color: #777;
   &:hover{
     color: #666666;
   }
