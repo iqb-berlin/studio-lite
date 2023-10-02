@@ -14,7 +14,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 @Component({
   selector: 'studio-lite-workspace',
   templateUrl: './workspace.component.html',
-  styleUrls: ['./workspace.component.css']
+  styleUrls: ['./workspace.component.scss']
 })
 export class WorkspaceComponent implements OnInit {
   uploadProcessId = '';
@@ -29,8 +29,8 @@ export class WorkspaceComponent implements OnInit {
   navLinks = this.navTabs.map(link => link.name);
   selectedRouterLink = -1;
   pinnedNavTab: { name: string, duplicable: boolean }[] = [];
-  secondaryRoutingOutlet = 'secondary';
-  routingOutlet = 'primary';
+  secondaryRoutingOutlet: string = 'secondary';
+  routingOutlet: string = 'primary';
 
   constructor(
     public appService: AppService,
@@ -80,11 +80,18 @@ export class WorkspaceComponent implements OnInit {
   }
 
   private openSecondaryOutlet(url: string): void {
+    const secondaryOutletTab = WorkspaceComponent
+      .getSecondaryOutlet(url, this.routingOutlet, this.secondaryRoutingOutlet);
+    this.pinnedNavTab = secondaryOutletTab ? [{ name: secondaryOutletTab, duplicable: true }] : [];
+  }
+
+  static getSecondaryOutlet(url: string,
+                            primaryRoutingOutlet: string,
+                            secondaryRoutingOutlet: string): string | null {
     const serializer = new DefaultUrlSerializer();
     const urlTree = serializer.parse(url);
-    const secondaryOutletTab = urlTree
-      .root.children[this.routingOutlet]?.children[this.secondaryRoutingOutlet]?.segments[0]?.path || null;
-    this.pinnedNavTab = secondaryOutletTab ? [{ name: secondaryOutletTab, duplicable: true }] : [];
+    return urlTree
+      .root.children[primaryRoutingOutlet]?.children[secondaryRoutingOutlet]?.segments[0]?.path || null;
   }
 
   private initWorkspace(workspace: WorkspaceFullDto): void {

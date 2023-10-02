@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../services/workspace.service';
 import { BackendService } from '../services/backend.service';
+import { WorkspaceComponent } from '../components/workspace/workspace.component';
 
 @Directive()
 export abstract class SelectUnitDirective {
@@ -15,12 +16,16 @@ export abstract class SelectUnitDirective {
 
   abstract backendService: BackendService;
 
+  secondaryRoutingOutlet: string = 'secondary';
+  routingOutlet: string = 'primary';
+
   updateUnitList(unitToSelect?: number): void {
     let queryParams = new HttpParams();
     queryParams = queryParams.append('withLastSeenCommentTimeStamp', true);
-    this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId).subscribe(groups => {
-      this.workspaceService.workspaceSettings.unitGroups = groups;
-    });
+    this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId)
+      .subscribe(groups => {
+        this.workspaceService.workspaceSettings.unitGroups = groups;
+      });
     this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams).subscribe(
       uResponse => {
         this.workspaceService.resetUnitList(uResponse);
@@ -37,6 +42,17 @@ export abstract class SelectUnitDirective {
     if (unitId) {
       const selectedTab = this.selectedRouterLink;
       const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
+      const secondaryOutletTab = WorkspaceComponent.getSecondaryOutlet(
+        this.router.routerState.snapshot.url,
+        this.routingOutlet,
+        this.secondaryRoutingOutlet
+      );
+      if (secondaryOutletTab) {
+        return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent })
+          .then(() => this.router
+            .navigate([{ outlets: { secondary: [secondaryOutletTab] } }], { relativeTo: this.route })
+          );
+      }
       return this.router.navigate([`${unitId}${routeSuffix}`], { relativeTo: this.route.parent });
     }
     return this.router.navigate(
