@@ -1,6 +1,8 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
+import { EventEmitter } from '@angular/core';
 
 export class UnitDefinitionStore {
+  dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitDefinitionDto;
   private changedData: UnitDefinitionDto;
   private unitId: number;
@@ -22,6 +24,7 @@ export class UnitDefinitionStore {
     } else {
       this.changedData.definition = newDefinition;
     }
+    this.dataChange.emit();
   }
 
   isChanged(): boolean {

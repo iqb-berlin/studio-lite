@@ -78,6 +78,7 @@ import { PreviewBarComponent } from './components/preview-bar/preview-bar.compon
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
 import { SharedModule } from '../shared/shared.module';
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
+import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 
 @NgModule({
   imports: [
@@ -147,6 +148,7 @@ import { UnitGroupsComponent } from './components/unit-groups/unit-groups.compon
     UnitGroupComponent,
     UpdateUnitsButtonComponent,
     HasNewCommentsPipe,
+    NamedRouterLinkPipe,
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
     AddReviewButtonComponent,

@@ -4,6 +4,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Component, Input } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceComponent } from './workspace.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -41,7 +42,11 @@ describe('WorkspaceComponent', () => {
     template: ''
   })
   class MockStudioLiteUnitDataAreaComponent {
-    @Input() navLinks!: string[];
+    @Input() navTabs!: { name: string; duplicable: boolean }[];
+    @Input() routingOutlet: string = 'primary'; // angular default
+    @Input() secondaryRoutingOutlet!: string;
+    @Input() pinIcon!: string;
+    @Input() disabledRouterLink!: string;
   }
 
   beforeEach(async () => {
@@ -56,7 +61,8 @@ describe('WorkspaceComponent', () => {
       imports: [
         HttpClientModule,
         RouterTestingModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        TranslateModule.forRoot()
       ],
       providers: [{
         provide: 'SERVER_URL',

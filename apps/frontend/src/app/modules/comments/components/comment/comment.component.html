@@ -11,7 +11,7 @@
       <div>{{ comment.createdAt | momentFromNow }}</div>
     </div>
 
-    <div class="fx-row-start-stretch">
+    <div class="fx-row-start-stretch fx-wrap">
       <div>
         <div *ngIf="!(activeComment | isEditing: comment)"
              class="comment-html"

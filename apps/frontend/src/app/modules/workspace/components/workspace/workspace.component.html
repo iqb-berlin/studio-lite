@@ -1,17 +1,25 @@
 <studio-lite-splitter class="authoring-body">
 
   <studio-lite-splitter-pane [initialSize]="275">
-    <studio-lite-units-area
-      [navLinks]="navLinks"
-      [selectedRouterLink]="selectedRouterLink">
+    <studio-lite-units-area [navLinks]="navLinks"
+                            [selectedRouterLink]="selectedRouterLink">
     </studio-lite-units-area>
   </studio-lite-splitter-pane>
 
   <studio-lite-splitter-pane>
-    <studio-lite-unit-data-area
-     [navLinks]="navLinks"
-     (selectedRouterIndexChange)="selectedRouterLink = $event">
+    <studio-lite-unit-data-area [navTabs]="navTabs"
+                                [secondaryRoutingOutlet]="secondaryRoutingOutlet"
+                                [pinIcon]="'push_pin'"
+                                [disabledRouterLink]="pinnedNavTab.length ? pinnedNavTab[0].name : ''"
+                                (selectedRouterIndexChange)="selectedRouterLink = $event">
    </studio-lite-unit-data-area>
   </studio-lite-splitter-pane>
 
+  <studio-lite-splitter-pane *ngIf="pinnedNavTab.length">
+    <studio-lite-unit-data-area [routingOutlet]="secondaryRoutingOutlet"
+                                [secondaryRoutingOutlet]="secondaryRoutingOutlet"
+                                [pinIcon]="'close'"
+                                [navTabs]="pinnedNavTab">
+    </studio-lite-unit-data-area>
+  </studio-lite-splitter-pane>
 </studio-lite-splitter>

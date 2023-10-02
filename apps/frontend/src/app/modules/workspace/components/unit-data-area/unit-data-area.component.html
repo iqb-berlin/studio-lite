@@ -1,20 +1,34 @@
 <div class="fx-column-start-stretch unit-data">
   <nav mat-tab-nav-bar
        [tabPanel]="tabPanel">
-    <a *ngFor="let link of navLinks"
-       mat-tab-link
-       routerLinkActive="active-link"
-       [disabled]="(workspaceService.selectedUnit$ | async) === 0"
-       [routerLink]="link"
-       #rla="routerLinkActive"
-       [active]="rla.isActive"
-       (isActiveChange)="onActiveRouterLinkChange($event)">
-      {{'workspace.routes.' + link | translate}}
-    </a>
+      <a *ngFor="let link of navTabs"
+         mat-tab-link
+         routerLinkActive="active-link"
+         [class.tab-link]="link.duplicable"
+         [class.secondary-tab-header]="secondaryRoutingOutlet === routingOutlet"
+         [disabled]="(workspaceService.selectedUnit$ | async) === 0 || disabledRouterLink === link.name"
+         [disableRipple]="secondaryRoutingOutlet === routingOutlet"
+         [routerLink]="secondaryRoutingOutlet === routingOutlet ?
+                        undefined:
+                        (routingOutlet | namedRouterLink: link.name)"
+         #rla="routerLinkActive"
+         [active]="rla.isActive"
+         (isActiveChange)="onActiveRouterLinkChange($event)">
+        <span>{{'workspace.routes.' + link.name | translate}}</span>
+        <a *ngIf="link.duplicable"
+           mat-icon-button
+           color="primary"
+           [disabled]="(workspaceService.selectedUnit$ | async) === 0 ||
+                        disabledRouterLink === link.name ||
+                        (rla.isActive && routingOutlet !== secondaryRoutingOutlet)"
+           (click)="togglePinnedTab(secondaryRoutingOutlet === routingOutlet ? null : [link.name])">
+          <mat-icon [fontIcon]="pinIcon"></mat-icon>
+        </a>
+      </a>
   </nav>
   <div class="fx-flex-fill">
     <mat-tab-nav-panel #tabPanel>
-      <router-outlet></router-outlet>
+      <router-outlet name="{{routingOutlet}}"></router-outlet>
     </mat-tab-nav-panel>
   </div>
 </div>

@@ -20,6 +20,7 @@ export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
   @Input() initialHTML: string = '';
   @Input() editorHTML: string = '';
+  @Input() label: string = '';
 
   @Output() handleSubmit = new EventEmitter<string>();
   @Output() handleCancel = new EventEmitter<void>();
