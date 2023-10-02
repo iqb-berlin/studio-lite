@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnInit } from '@angular/core';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { filter } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -38,7 +39,8 @@ export class WorkspaceComponent implements OnInit {
     private router: Router,
     private appBackendService: AppBackendService,
     private moduleService: ModuleService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
 
   ) {
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
@@ -61,7 +63,9 @@ export class WorkspaceComponent implements OnInit {
           this.initWorkspace(wResponse);
         } else {
           this.snackBar.open(
-            'Konnte Daten für Arbeitsbereich nicht laden', 'Fehler', { duration: 3000 }
+            this.translateService.instant('workspace.workspace-not-loaded'),
+            this.translateService.instant('error'),
+            { duration: 3000 }
           );
         }
       }

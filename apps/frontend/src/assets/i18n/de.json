@@ -308,6 +308,7 @@
       "comments": "Kommentare"
     },
     "title": "Arbeitsbereich",
+    "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
     "new-comments": "Neue Kommentare",
     "unit-key": "Kurzname",
     "invalid-unit-key": "Ungültige Länge, ungültige Zeichen oder schon vorhanden",
