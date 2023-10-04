@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -281,17 +281,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   private setupPlayerIFrame(playerHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
       this.iFrameElement.srcdoc = playerHtml;
-    }
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
     }
   }
 

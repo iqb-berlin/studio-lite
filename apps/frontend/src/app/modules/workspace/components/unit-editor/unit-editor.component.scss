@@ -1,7 +1,20 @@
-.host-editor-container {
+:host.unit-editor {
   height: 100%;
+  flex-direction: row;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.host-editor-container {
+  //height: 100%;
+  width: 100%;
+  padding: 0;
 }
 
 .message {
   margin: 30px;
+}
+
+.unitHost {
+  height: 100%;
 }
