@@ -5,14 +5,17 @@ export class CreateKeycloakUserDto {
     identity!: string;
 
   @ApiProperty()
+    issuer!: string;
+
+  @ApiProperty()
     username!: string;
 
   @ApiProperty()
-    email?: string;
+    email!: string;
 
   @ApiProperty()
-    lastName?: string;
+    lastName!: string;
 
   @ApiProperty()
-    firstName?: string;
+    firstName!: string;
 }

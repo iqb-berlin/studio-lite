@@ -8,6 +8,7 @@ import {
 import {
   AuthDataDto,
   ChangePasswordDto,
+  CreateKeycloakUserDto,
   MyDataDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
@@ -76,6 +77,7 @@ export class AppController {
   @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
   @ApiQuery({ type: String, name: 'username', required: true })
   @ApiQuery({ type: String, name: 'identity', required: true })
+  @ApiQuery({ type: String, name: 'issuer', required: true })
   @ApiQuery({ type: String, name: 'email', required: false })
   @ApiQuery({ type: String, name: 'lastName', required: true })
   @ApiQuery({ type: String, name: 'firstName', required: true })
@@ -84,17 +86,18 @@ export class AppController {
     @Query('identity') identity: string,
     @Query('email') email: string,
     @Query('lastName') lastName: string,
-    @Query('firstName') firstName: string
+    @Query('firstName') firstName: string,
+    @Query('issuer') issuer: string
   ) {
-    const user = {
+    const user:CreateKeycloakUserDto = {
       username,
       identity,
       email,
       lastName,
-      firstName
+      firstName,
+      issuer
     };
-    const token = await this.authService.keycloakLogin(user);
-    return `"${token}"`;
+    await this.authService.keycloakLogin(user);
   }
 
   @Get('auth-data')
@@ -127,6 +130,26 @@ export class AppController {
       isAdmin: false,
       workspaces: [],
       reviews: [await this.reviewService.findOneForAuth(reviewId)]
+    };
+  }
+
+  @Get('auth-data-keycloak')
+  @UseGuards(AppVersionGuard)
+  @ApiHeader({
+    name: 'app-version',
+    description: 'version of frontend',
+    required: true,
+    allowEmptyValue: false
+  })
+  @ApiOkResponse({ description: 'User auth data successfully retrieved.' })
+  @ApiTags('auth')
+  async setUser(): Promise<AuthDataDto> {
+    return <AuthDataDto>{
+      userId: 0,
+      userName: '',
+      isAdmin: false,
+      workspaces: [],
+      reviews: []
     };
   }
 

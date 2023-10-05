@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
+import { CreateKeycloakUserDto } from '@studio-lite-lib/api-dto';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { AuthService } from '../../modules/auth/service/auth.service';
@@ -23,7 +24,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   loggedInKeycloak: boolean = false;
   userProfile: KeycloakProfile = {};
   private routingSubscription: Subscription | null = null;
-  private loggedUsers: KeycloakTokenParsed | undefined;
+  private loggedUser: KeycloakTokenParsed | undefined;
   constructor(private fb: UntypedFormBuilder,
               private authService: AuthService,
               private route: ActivatedRoute,
@@ -52,16 +53,17 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.loggedInKeycloak = await this.authService.isLoggedIn();
     if (this.loggedInKeycloak) {
-      this.userProfile = await this.authService.loadUserProfile();
-      this.loggedUsers = this.authService.getLoggedUser();
-      const keycloakUser = {
-        identity: this.userProfile.id,
-        username: this.userProfile.username,
-        lastName: 'lastName',
-        firstName: 'firstName',
-        email: 'email'
-      };
-      this.keycloakLogin(keycloakUser);
+      if (this.userProfile.id && this.userProfile.username) {
+        const keycloakUser:CreateKeycloakUserDto = {
+          issuer: this.loggedUser?.iss || '',
+          identity: this.userProfile.id,
+          username: this.userProfile.username,
+          lastName: this.userProfile.lastName || '',
+          firstName: this.userProfile.firstName || '',
+          email: this.userProfile.email || ''
+        };
+        this.keycloakLogin(keycloakUser);
+      }
     }
   }
 
@@ -90,8 +92,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-  keycloakLogin(user:any): void {
-    this.backendService.keycloakLogin(user).subscribe(val => { });
+  keycloakLogin(user:CreateKeycloakUserDto): void {
+    this.backendService.keycloakLogin(user);
   }
 
   loginKeycloak(): void {

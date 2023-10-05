@@ -70,6 +70,7 @@
       "concat-scroll-snap": "Magnetisch Scrollen"
     }
   },
+
   "home": {
     "welcome": "Willkommen!",
     "home-page": "Startseite",
@@ -116,6 +117,10 @@
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
       "unit-copy": "Aufgaben kopieren - unvollständig"
     }
+  },
+  "directives": {
+    "logout": "Abmelden",
+    "logout-confirmation": "Möchten Sie sich abmelden?"
   },
   "user": {
     "full-name": "Name",

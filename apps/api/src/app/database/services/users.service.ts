@@ -3,7 +3,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
-  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto, CreateKeycloakUserDto
+  CreateUserDto, CreateKeycloakUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
@@ -209,13 +209,34 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<number> {
     this.logger.log(`Creating user with name: ${user.name}`);
     user.password = UsersService.getPasswordHash(user.password);
-    const newUser = await this.usersRepository.create(user);
+    const newUser = this.usersRepository.create(user);
     await this.usersRepository.save(newUser);
     return newUser.id;
   }
 
   async createKeycloakUser(keycloakUser: CreateKeycloakUserDto): Promise<number> {
-    const newUser = await this.keycloakUsersRepository.create(keycloakUser);
+    const existingUser = await this.keycloakUsersRepository.findOne({
+      where: { identity: keycloakUser.identity },
+      select: {
+        username: true,
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        issuer: true
+      }
+    });
+    if (existingUser) {
+      this.logger.log(`Creating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
+      if (keycloakUser.username) existingUser.username = keycloakUser.username;
+      if (keycloakUser.lastName) existingUser.lastName = keycloakUser.lastName;
+      if (keycloakUser.firstName) existingUser.firstName = keycloakUser.firstName;
+      if (keycloakUser.email) existingUser.email = keycloakUser.email;
+      if (keycloakUser.issuer) existingUser.issuer = keycloakUser.issuer;
+      await this.keycloakUsersRepository.save(existingUser);
+      return existingUser.id;
+    }
+    const newUser = this.keycloakUsersRepository.create(keycloakUser);
     await this.keycloakUsersRepository.save(newUser);
     return newUser.id;
   }

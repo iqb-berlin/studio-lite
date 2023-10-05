@@ -6,6 +6,12 @@ class KeycloakUser {
     id: number;
 
   @Column()
+    identity: string;
+
+  @Column()
+    issuer: string;
+
+  @Column()
     username: string;
 
   @Column({
