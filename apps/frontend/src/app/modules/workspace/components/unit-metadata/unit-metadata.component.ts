@@ -1,11 +1,16 @@
 import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+  FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { NestedTreeComponent } from '../../../shared/components/nested-tree/nested-tree.component';
 
 @Component({
   templateUrl: './unit-metadata.component.html',
@@ -23,11 +28,35 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   private schemerSelectionChangedSubscription: Subscription | undefined;
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
+  form = new FormGroup({});
+  model: any = {};
+  fields: FormlyFieldConfig[] = [
+    {
+      key: 'text',
+      type: 'input',
+      props: {
+        label: 'Text',
+        placeholder: 'Type here to see the other field become enabled...'
+      }
+    },
+    {
+      key: 'text2',
+      type: 'input',
+      props: {
+        label: 'Hey!',
+        placeholder: 'This one is disabled if there is no text in the other input'
+      },
+      expressions: {
+        'props.disabled': '!model.text'
+      }
+    }
+  ];
 
   constructor(
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
-    public moduleService: ModuleService
+    public moduleService: ModuleService,
+    private educationalStandardDialog : MatDialog
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
@@ -45,6 +74,14 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.readData();
       });
+  }
+
+  showEducationalStandard() {
+    const dialogRef = this.educationalStandardDialog.open(NestedTreeComponent, {
+      width: '80%', height: '80%'
+    });
+
+    dialogRef.afterClosed().subscribe((vale: any) => { console.log(vale); });
   }
 
   private async readData() {
