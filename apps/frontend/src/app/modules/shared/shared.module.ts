@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTreeModule } from '@angular/material/tree';
 import { SelectModuleComponent } from './components/select-module/select-module.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
 import { InputTextComponent } from './components/input-text/input-text.component';
@@ -18,6 +19,7 @@ import { SearchFilterComponent } from './components/search-filter/search-filter.
 import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
+import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +29,8 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
     SearchFilterComponent,
     PageNavigationComponent,
     UnitMetaDataComponent,
-    WrappedIconComponent
+    WrappedIconComponent,
+    NestedTreeComponent
   ],
   imports: [
     CommonModule,
@@ -42,7 +45,8 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
     MatSelectModule,
     MatIconModule,
     MatTooltipModule,
-    TranslateModule
+    TranslateModule,
+    MatTreeModule
   ],
   exports: [
     EditWorkspaceSettingsComponent,
