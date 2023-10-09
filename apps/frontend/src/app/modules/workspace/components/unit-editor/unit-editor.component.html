@@ -1,9 +1,11 @@
-<div *ngIf="message"
-     class="message">
-  {{message}}
-</div>
-<div class="host-editor-container">
-  <iframe #hostingIframe
-          class="unitHost">
-  </iframe>
+<div class="fx-column-start-stretch fx-flex-row-100">
+  <div *ngIf="message"
+       class="message">
+    {{message}}
+  </div>
+  <div class="host-editor-container fx-flex-fill">
+    <iframe #hostingIframe
+            class="unitHost">
+    </iframe>
+  </div>
 </div>

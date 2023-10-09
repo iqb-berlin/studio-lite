@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,7 +16,8 @@ import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscr
 @Component({
   selector: 'studio-lite-unit-schemer',
   templateUrl: './unit-schemer.component.html',
-  styleUrls: ['./unit-schemer.component.scss']
+  styleUrls: ['./unit-schemer.component.scss'],
+  host: { class: 'unit-schemer' }
 })
 export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
@@ -162,17 +163,7 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   private setupSchemerIFrame(schemerHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
       this.iFrameElement.srcdoc = schemerHtml;
-    }
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
     }
   }
 
