@@ -1,9 +1,14 @@
 :host {
   background-color:white;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .unit-data{
   height: 100%;
 }
+
+.tab-link{
+  padding-right: 0;
+}
+

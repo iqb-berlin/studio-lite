@@ -22,10 +22,10 @@
   </div>
 
   <div class="new-comment">
-    <div class="editor-label">{{'comments.write-comment' | translate}}</div>
-      <studio-lite-comment-editor
-        submitLabel="comment-editor.write"
-        (handleSubmit)="addComment({ text: $event, parentId: null })">
-      </studio-lite-comment-editor>
+    <studio-lite-comment-editor
+      submitLabel="comment-editor.write"
+      [label]="'comments.write-comment' | translate"
+      (handleSubmit)="addComment({ text: $event, parentId: null })">
+    </studio-lite-comment-editor>
   </div>
 </div>

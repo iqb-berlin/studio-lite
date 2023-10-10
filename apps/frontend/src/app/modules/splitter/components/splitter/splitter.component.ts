@@ -16,6 +16,12 @@ export class SplitterComponent implements AfterViewInit {
   availablePanesSize: number = 0;
 
   ngAfterViewInit() {
+    this.updateContent();
+    this.panes.changes
+      .subscribe(() => this.updateContent());
+  }
+
+  private updateContent(): void {
     this.panes.forEach((pane, index) => {
       setTimeout(() => pane.init(index, index === this.panes.length - 1));
     });

@@ -33,6 +33,7 @@ export class WorkspaceService {
   isValidFormKey = new BehaviorSubject<boolean>(true);
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
+  @Output() unitDefinitionStoreChanged = new EventEmitter<void>();
 
   constructor(
     private backendService: BackendService,
@@ -70,6 +71,11 @@ export class WorkspaceService {
     this.lastChangedDefinition = undefined;
     this.unitSchemeStore = undefined;
     this.lastChangedScheme = undefined;
+  }
+
+  setUnitDefinitionStore(unitDefinitionStore: UnitDefinitionStore): void {
+    this.unitDefinitionStore = unitDefinitionStore;
+    this.unitDefinitionStoreChanged.emit();
   }
 
   // TODO: Remove usage fom unit-save-button template!

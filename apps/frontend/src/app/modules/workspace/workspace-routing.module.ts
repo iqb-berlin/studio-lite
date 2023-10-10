@@ -18,13 +18,18 @@ const routes: Routes = [
     component: WorkspaceComponent,
     canDeactivate: [UnitRoutingCanDeactivateGuard],
     children: [
-      { path: '', redirectTo: 'metadata', pathMatch: 'full' },
+      {
+        path: '', redirectTo: 'metadata', pathMatch: 'full'
+      },
       { path: 'metadata', component: UnitMetadataComponent },
       { path: 'editor', component: UnitEditorComponent },
       { path: 'preview', component: UnitPreviewComponent },
       { path: 'schemer', component: UnitSchemerComponent },
       { path: 'comments', component: UnitCommentsComponent },
-      { path: '**', component: UnitMetadataComponent }
+      { path: '**', component: UnitMetadataComponent },
+      { path: 'preview', component: UnitPreviewComponent, outlet: 'secondary' },
+      { path: 'schemer', component: UnitSchemerComponent, outlet: 'secondary' },
+      { path: 'comments', component: UnitCommentsComponent, outlet: 'secondary' }
     ]
   }
 ];

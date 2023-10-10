@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -14,7 +14,8 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 @Component({
   selector: 'studio-lite-unit-editor',
   templateUrl: './unit-editor.component.html',
-  styleUrls: ['./unit-editor.component.scss']
+  styleUrls: ['./unit-editor.component.scss'],
+  host: { class: 'unit-editor' }
 })
 
 export class UnitEditorComponent implements AfterViewInit, OnDestroy {
@@ -124,8 +125,10 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId).subscribe(
               ued => {
                 if (ued) {
-                  this.workspaceService.unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
-                  this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                  this.workspaceService.setUnitDefinitionStore(new UnitDefinitionStore(unitId, ued));
+                  if (this.workspaceService.unitDefinitionStore) {
+                    this.postUnitDef(this.workspaceService.unitDefinitionStore);
+                  }
                 } else {
                   this.snackBar.open(
                     this.translateService.instant('workspace.unit-definition-not-loaded'),
@@ -195,17 +198,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
 
   private setupEditorIFrame(editorHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
       this.iFrameElement.srcdoc = editorHtml;
-    }
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
     }
   }
 
