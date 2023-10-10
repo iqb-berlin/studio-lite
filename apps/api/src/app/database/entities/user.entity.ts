@@ -14,6 +14,12 @@ class User {
   @Column()
     description: string | null;
 
+  @Column()
+    identity: string | null;
+
+  @Column()
+    issuer: string | null;
+
   @Column({
     name: 'is_admin'
   })
