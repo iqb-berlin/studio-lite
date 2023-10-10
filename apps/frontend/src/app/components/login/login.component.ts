@@ -23,10 +23,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   redirectTo = '';
   errorMessage = '';
   userProfile: KeycloakProfile = {};
+  loggedInKeycloak: boolean = false;
   private routingSubscription: Subscription | null = null;
   private loggedUser: KeycloakTokenParsed | undefined;
   constructor(private fb: UntypedFormBuilder,
-              private authService: AuthService,
+              public authService: AuthService,
               private route: ActivatedRoute,
               private router: Router,
               private backendService: BackendService,
@@ -53,6 +54,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
 
     if (await this.authService.isLoggedIn()) {
+      this.loggedInKeycloak = true;
       this.loggedUser = this.authService.getLoggedUser();
       this.userProfile = await this.authService.loadUserProfile();
       if (this.userProfile.id && this.userProfile.username) {
@@ -120,6 +122,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   async logoutKeycloak(): Promise<void> {
     await this.authService.logout();
+    this.loggedInKeycloak = false;
   }
 
   ngOnDestroy(): void {
