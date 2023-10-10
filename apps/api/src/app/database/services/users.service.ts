@@ -3,7 +3,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
-  CreateUserDto, CreateKeycloakUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
+  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
@@ -14,7 +14,6 @@ import Workspace from '../entities/workspace.entity';
 import Review from '../entities/review.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
-import KeycloakUser from '../entities/keycloak-user.entity';
 
 @Injectable()
 export class UsersService {
@@ -23,8 +22,6 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @InjectRepository(KeycloakUser)
-    private keycloakUsersRepository: Repository<KeycloakUser>,
     @InjectRepository(WorkspaceUser)
     private workspaceUsersRepository: Repository<WorkspaceUser>,
     @InjectRepository(WorkspaceGroupAdmin)
@@ -214,30 +211,31 @@ export class UsersService {
     return newUser.id;
   }
 
-  async createKeycloakUser(keycloakUser: CreateKeycloakUserDto): Promise<number> {
-    const existingUser = await this.keycloakUsersRepository.findOne({
-      where: { identity: keycloakUser.identity },
+  async createKeycloakUser(keycloakUser: CreateUserDto): Promise<number> {
+    const existingUser:User = await this.usersRepository.findOne({
+      where: { identity: keycloakUser.identity, issuer: keycloakUser.issuer },
       select: {
-        username: true,
+        name: true,
         id: true,
         firstName: true,
         lastName: true,
-        email: true,
-        issuer: true
+        email: true
       }
     });
     if (existingUser) {
-      this.logger.log(`Creating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
-      if (keycloakUser.username) existingUser.username = keycloakUser.username;
+      if (keycloakUser.name) existingUser.name = keycloakUser.name;
       if (keycloakUser.lastName) existingUser.lastName = keycloakUser.lastName;
       if (keycloakUser.firstName) existingUser.firstName = keycloakUser.firstName;
       if (keycloakUser.email) existingUser.email = keycloakUser.email;
       if (keycloakUser.issuer) existingUser.issuer = keycloakUser.issuer;
-      await this.keycloakUsersRepository.save(existingUser);
-      return existingUser.id;
+      if (keycloakUser.identity) existingUser.identity = keycloakUser.identity;
+      const updatedUser = await this.usersRepository.save(existingUser);
+      this.logger.log(`Updating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
+      return updatedUser.id;
     }
-    const newUser = this.keycloakUsersRepository.create(keycloakUser);
-    await this.keycloakUsersRepository.save(newUser);
+    this.logger.log(`Creating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
+    const newUser = this.usersRepository.create(keycloakUser);
+    await this.usersRepository.save(newUser);
     return newUser.id;
   }
 
@@ -389,7 +387,7 @@ export class UsersService {
     this.logger.log(`Adding ${users.length} users for workspaceId: ${workspaceId}`);
     return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
       await Promise.all(users.map(async userId => {
-        const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+        const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
           userId: userId,
           workspaceId: workspaceId
         });
@@ -417,7 +415,7 @@ export class UsersService {
   async setWorkspaceGroupAdmins(workspaceGroupId: number, users: number[]) {
     return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
       await Promise.all(users.map(async userId => {
-        const newWorkspaceGroupAdmin = await this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
+        const newWorkspaceGroupAdmin = this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
           userId: userId,
           workspaceGroupId: workspaceGroupId
         });
@@ -429,7 +427,7 @@ export class UsersService {
   async setWorkspaceGroupAdminsByWorkspaceGroup(workspaceGroupId: number, users: number[]) {
     return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
       await Promise.all(users.map(async userId => {
-        const newWorkspaceGroupAdmin = await this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
+        const newWorkspaceGroupAdmin = this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
           userId: userId,
           workspaceGroupId: workspaceGroupId
         });

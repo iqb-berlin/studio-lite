@@ -11,7 +11,7 @@ import {
   VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto, VeronaModuleFileDto, CreateKeycloakUserDto
+  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -52,25 +52,24 @@ export class BackendService {
       );
   }
 
-  keycloakLogin(user:CreateKeycloakUserDto): Observable<boolean> {
+  keycloakLogin(user:CreateUserDto): Observable<boolean> {
     const {
-      username, lastName, firstName, email, identity, issuer
+      name, lastName, firstName, email, identity, issuer
     } = user;
     const queryParams = new HttpParams()
-      .set('username', username)
-      .set('lastName', lastName)
-      .set('firstName', firstName)
-      .set('issuer', issuer)
-      .set('identity', identity)
-      .set('email', email);
-    return this.http.post<string>(
-      `${this.serverUrl}keycloak-login?${queryParams.toString()}`, 'jojo'
-    )
+      .set('name', name)
+      .set('lastName', lastName || '')
+      .set('firstName', firstName || '')
+      .set('issuer', issuer || '')
+      .set('identity', identity || '')
+      .set('email', email || '');
+    return this.http.post<string>(`${this.serverUrl}keycloak-login?${queryParams.toString()}`, '')
       .pipe(
         catchError(() => of(false)),
         switchMap(loginToken => {
           if (typeof loginToken === 'string') {
-            return this.getAuthDataKeycloak()
+            localStorage.setItem('id_token', loginToken);
+            return this.getAuthData()
               .pipe(
                 map(authData => {
                   this.appService.authData = authData;

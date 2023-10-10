@@ -8,7 +8,7 @@ import {
 import {
   AuthDataDto,
   ChangePasswordDto,
-  CreateKeycloakUserDto,
+  CreateUserDto,
   MyDataDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
@@ -75,29 +75,34 @@ export class AppController {
   })
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
-  @ApiQuery({ type: String, name: 'username', required: true })
+  @ApiQuery({ type: String, name: 'name', required: true })
   @ApiQuery({ type: String, name: 'identity', required: true })
   @ApiQuery({ type: String, name: 'issuer', required: true })
   @ApiQuery({ type: String, name: 'email', required: false })
-  @ApiQuery({ type: String, name: 'lastName', required: true })
-  @ApiQuery({ type: String, name: 'firstName', required: true })
+  @ApiQuery({ type: String, name: 'lastName', required: false })
+  @ApiQuery({ type: String, name: 'firstName', required: false })
+
   async KeycloakLogin(
-  @Query('username') username: string,
+  @Query('name') name: string,
     @Query('identity') identity: string,
     @Query('email') email: string,
     @Query('lastName') lastName: string,
     @Query('firstName') firstName: string,
     @Query('issuer') issuer: string
   ) {
-    const user:CreateKeycloakUserDto = {
-      username,
+    const user:CreateUserDto = {
+      name,
       identity,
       email,
       lastName,
       firstName,
-      issuer
+      issuer,
+      password: '',
+      isAdmin: false,
+      description: ''
     };
-    await this.authService.keycloakLogin(user);
+    const token = await this.authService.keycloakLogin(user);
+    return `"${token}"`;
   }
 
   @Get('auth-data')
@@ -130,26 +135,6 @@ export class AppController {
       isAdmin: false,
       workspaces: [],
       reviews: [await this.reviewService.findOneForAuth(reviewId)]
-    };
-  }
-
-  @Get('auth-data-keycloak')
-  @UseGuards(AppVersionGuard)
-  @ApiHeader({
-    name: 'app-version',
-    description: 'version of frontend',
-    required: true,
-    allowEmptyValue: false
-  })
-  @ApiOkResponse({ description: 'User auth data successfully retrieved.' })
-  @ApiTags('auth')
-  async setUser(): Promise<AuthDataDto> {
-    return <AuthDataDto>{
-      userId: 0,
-      userName: '',
-      isAdmin: false,
-      workspaces: [],
-      reviews: []
     };
   }
 

@@ -5,14 +5,12 @@ import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
 @Injectable()
 export class AuthService {
   constructor(private keycloakService: KeycloakService) {}
-
   getLoggedUser(): KeycloakTokenParsed | undefined {
     try {
       return this.keycloakService.getKeycloakInstance()
         .idTokenParsed;
     } catch (e) {
-      console.error('Exception', e);
-      return undefined;
+      return { message: 'Parsing id token failed', err: e };
     }
   }
 
@@ -28,16 +26,16 @@ export class AuthService {
     return this.keycloakService.loadUserProfile();
   }
 
-  login() : void {
-    this.keycloakService.login();
+  async login() : Promise<void> {
+    await this.keycloakService.login();
   }
 
-  logout() : void {
-    this.keycloakService.logout(window.location.origin);
+  async logout() : Promise<void> {
+    await this.keycloakService.logout(window.location.origin);
   }
 
-  redirectToProfile(): void {
-    this.keycloakService.getKeycloakInstance().accountManagement();
+  async redirectToProfile(): Promise<void> {
+    await this.keycloakService.getKeycloakInstance().accountManagement();
   }
 
   getRoles(): string[] {
