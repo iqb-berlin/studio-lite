@@ -70,6 +70,20 @@
       "concat-scroll-snap": "Magnetisch Scrollen"
     }
   },
+  "login": {
+    "no-success": "Login nicht erfolgreich",
+    "error": "Fehler"
+
+  },
+
+  "user-profile": {
+    "data-edited": "Nutzerdaten geändert",
+    "data-edit-error": "Konnte Nutzerdaten nicht ändern",
+    "new-password": "Neues Kennwort gespeichert",
+    "new-password-error": "Konnte Kennwort nicht ändern.",
+    "error": "Fehler",
+    "ok": "OK"
+  },
 
   "home": {
     "welcome": "Willkommen!",

@@ -1,8 +1,12 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { EditMyDataDirective } from './edit-my-data.directive';
 import { environment } from '../../environments/environment';
-import { AuthService } from '../modules/auth/service/auth.service';
+import { AppService } from '../services/app.service';
+import { BackendService } from '../services/backend.service';
 
 describe('EditMyDataDirective', () => {
   beforeEach(async () => {
@@ -18,9 +22,13 @@ describe('EditMyDataDirective', () => {
   });
 
   it('should create an instance',
-    inject([],
-      (authService:AuthService) => {
-        const directive = new EditMyDataDirective(authService);
-        expect(directive).toBeTruthy();
-      }));
+    inject([], (
+      appService:AppService,
+      dialog:MatDialog,
+      backendService:BackendService,
+      snackBar:MatSnackBar,
+      translateService:TranslateService) => {
+      const directive = new EditMyDataDirective(appService, dialog, backendService, snackBar, translateService);
+      expect(directive).toBeTruthy();
+    }));
 });

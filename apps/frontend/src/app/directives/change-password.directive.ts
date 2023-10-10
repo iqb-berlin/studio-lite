@@ -1,6 +1,7 @@
 import { Directive, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../services/backend.service';
 import { ChangePasswordComponent } from '../components/change-password/change-password.component';
 
@@ -11,7 +12,8 @@ export class ChangePasswordDirective {
   constructor(
     private changePasswordDialog: MatDialog,
     private backendService: BackendService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
   ) {}
 
   @HostListener('click') changePassword() : void {
@@ -24,8 +26,12 @@ export class ChangePasswordDirective {
         this.backendService.setUserPassword(result.controls.pw_old.value, result.controls.pw_new1.value).subscribe(
           respOk => {
             this.snackBar.open(
-              respOk ? 'Neues Kennwort gespeichert' : 'Konnte Kennwort nicht ändern.',
-              respOk ? 'OK' : 'Fehler',
+              respOk ?
+                this.translateService.instant('user-profile.new-password') :
+                this.translateService.instant('user-profile.new-password-error'),
+              respOk ?
+                this.translateService.instant('user-profile.ok') :
+                this.translateService.instant('user-profile.error'),
               { duration: 3000 }
             );
           }

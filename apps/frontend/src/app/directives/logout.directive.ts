@@ -30,8 +30,8 @@ export class LogoutDirective {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
-        // this.backendService.logout();
         this.authService.logout();
+        this.backendService.logout();
       }
     });
   }
