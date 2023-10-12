@@ -301,7 +301,8 @@
   },
   "workspace": {
     "routes": {
-      "metadata": "Eigenschaften",
+      "properties": "Eigenschaften",
+      "metadata": "Metadaten",
       "editor": "Editor",
       "preview": "Vorschau",
       "schemer": "Kodierung",
