@@ -1,13 +1,16 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component, Input, OnInit, Inject
+} from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import * as educationalStandardMPr22Inh from '../../../workspace/components/unit-metadata/educational-standards/Bildungsstandards-Mathematik-Primar-2022-Inhaltsbezogene-Kompetenzen.json';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 interface NotationNode {
   name: string;
   children?: NotationNode[];
   url?:string;
   prefLabel?:string;
+  selected?:boolean;
 }
 
 @Component({
@@ -17,20 +20,32 @@ interface NotationNode {
 
 })
 export class NestedTreeComponent implements OnInit {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) { }
+
+  @Input() treeDepth!:number;
+  values:Array<string> = [];
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   ngOnInit() {
-    const JSONdata = JSON.parse(JSON.stringify(educationalStandardMPr22Inh));
-    const mappedData = JSONdata.hasTopConcept.map((topConcept: { notation: any[]; prefLabel: any; narrower: any[]; }) => (
-      {
-        name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
-        children: topConcept.narrower.length !== 0 ? mapNarrower(topConcept.narrower) : []
-      }
-    ));
+    const JSONData = JSON.parse(JSON.stringify(this.data));
+    const mappedData = JSONData.hasTopConcept.map(
+      (topConcept: { notation: string[]; prefLabel: any; narrower: any[]; }
+      ) => (
+        {
+          name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
+          notation: topConcept.notation[0],
+          description: '',
+          children: topConcept.narrower.length !== 0 ? mapNarrower(topConcept.narrower) : []
+        }
+      ));
     function mapNarrower(arr: any[]): any {
       return arr.map(((arrElement: any) => (
         {
           name: `${arrElement.notation[0]} - ${arrElement.prefLabel.de}`,
+          description: '',
+          notation: arrElement.notation[0],
           children: arrElement.narrower ? mapNarrower(arrElement.narrower) : []
         }
       )));
