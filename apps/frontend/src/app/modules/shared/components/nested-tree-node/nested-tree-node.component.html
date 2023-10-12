@@ -1,0 +1,11 @@
+<div class="container">
+  <mat-checkbox (click)="onSelect()">{{node.name}}</mat-checkbox>
+  <textarea matInput
+            *ngIf="checkboxSelected()"
+            cdkTextareaAutosize
+            #autosize="cdkTextareaAutosize"
+            cdkAutosizeMinRows="3"
+            cdkAutosizeMaxRows="5">
+    {{node.description}}
+  </textarea>
+</div>

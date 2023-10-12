@@ -20,6 +20,7 @@ import { PageNavigationComponent } from './components/page-navigation/page-navig
 import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
+import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tree-node.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { NestedTreeComponent } from './components/nested-tree/nested-tree.compon
     PageNavigationComponent,
     UnitMetaDataComponent,
     WrappedIconComponent,
-    NestedTreeComponent
+    NestedTreeComponent,
+    NestedTreeNodeComponent
   ],
   imports: [
     CommonModule,
