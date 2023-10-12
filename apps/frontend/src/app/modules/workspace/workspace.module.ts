@@ -80,6 +80,7 @@ import { StatusIndicationComponent } from './components/status-indication/status
 import { SharedModule } from '../shared/shared.module';
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
+import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 
 @NgModule({
   imports: [
@@ -165,7 +166,8 @@ import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
     GroupMenuComponent,
     PreviewBarComponent,
     StatusIndicationComponent,
-    UnitGroupsComponent
+    UnitGroupsComponent,
+    UnitPropertiesComponent
   ],
   exports: [
     WorkspaceComponent,

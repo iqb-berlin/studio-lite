@@ -19,6 +19,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
   navTabs: { name: string; duplicable: boolean }[] = [
+    { name: 'properties', duplicable: false },
     { name: 'metadata', duplicable: false },
     { name: 'editor', duplicable: false },
     { name: 'preview', duplicable: true },

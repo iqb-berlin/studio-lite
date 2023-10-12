@@ -7,6 +7,7 @@ import { UnitEditorComponent } from './components/unit-editor/unit-editor.compon
 import { UnitPreviewComponent } from './components/unit-preview/unit-preview.component';
 import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.component';
 import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
+import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 
 const routes: Routes = [
   {
@@ -19,8 +20,9 @@ const routes: Routes = [
     canDeactivate: [UnitRoutingCanDeactivateGuard],
     children: [
       {
-        path: '', redirectTo: 'metadata', pathMatch: 'full'
+        path: '', redirectTo: 'properties', pathMatch: 'full'
       },
+      { path: 'properties', component: UnitPropertiesComponent },
       { path: 'metadata', component: UnitMetadataComponent },
       { path: 'editor', component: UnitEditorComponent },
       { path: 'preview', component: UnitPreviewComponent },
