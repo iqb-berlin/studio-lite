@@ -1,0 +1,22 @@
+<div class="fx-column-start-stretch">
+  <form [formGroup]="form">
+    <formly-form [model]="model" [fields]="fields" [form]="form"></formly-form>
+  </form>
+
+  <mat-form-field class="fx-flex-fill">
+    <mat-label >{{"Vocab"}}</mat-label>
+    <mat-chip-grid #chipGrid aria-label="Select vocab" (click)=" showVocab()">
+      <mat-chip-row *ngFor="let selection of selections"
+                    [editable]="true"
+                    [aria-description]="'press enter to edit ' + selection.name">
+        {{selection.name}}
+        <button matChipRemove [attr.aria-label]="">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+      <input placeholder="Bildungsplankompetenz"
+             [matChipInputFor]="chipGrid">
+    </mat-chip-grid>
+  </mat-form-field>
+</div>
+
