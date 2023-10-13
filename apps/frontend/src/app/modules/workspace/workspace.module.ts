@@ -27,8 +27,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { FormlyModule } from '@ngx-formly/core';
-import { FormlyMaterialModule } from '@ngx-formly/material';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
@@ -81,11 +79,13 @@ import { SharedModule } from '../shared/shared.module';
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
+import { MetadataModule } from '../metadata/metadata.module';
 
 @NgModule({
   imports: [
     CommonModule,
     SharedModule,
+    MetadataModule,
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,
@@ -116,9 +116,7 @@ import { UnitPropertiesComponent } from './components/unit-properties/unit-prope
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    SplitterModule,
-    FormlyModule.forRoot(),
-    FormlyMaterialModule
+    SplitterModule
   ],
   declarations: [
     TestConfigComponent,

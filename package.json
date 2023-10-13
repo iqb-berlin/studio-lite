@@ -47,7 +47,7 @@
     "@nestjs/platform-express": "10.0.5",
     "@nestjs/swagger": "7.1.1",
     "@nestjs/typeorm": "^10.0.0",
-    "@ngx-formly/core": "^6.2.0",
+    "@ngx-formly/core": "^6.2.1",
     "@ngx-formly/material": "^6.2.0",
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",

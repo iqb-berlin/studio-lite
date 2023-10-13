@@ -53,5 +53,6 @@ export class NestedTreeComponent implements OnInit {
     this.dataSource.data = mappedData;
   }
 
+  // TODO: Replace with Pipe
   hasChild = (_: number, node: NotationNode) => !!node.children && node.children.length > 0;
 }

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { NestedTreeComponent } from './nested-tree.component';
-import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('NestedTreeComponent', () => {
   let component: NestedTreeComponent;
