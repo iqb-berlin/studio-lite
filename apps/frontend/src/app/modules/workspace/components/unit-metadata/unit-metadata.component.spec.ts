@@ -7,14 +7,14 @@ describe('StartReviewButtonComponent', () => {
   let component: UnitMetadataComponent;
   let fixture: ComponentFixture<UnitMetadataComponent>;
 
-  @Component({ selector: 'studio-lite-vocabs', template: '' })
-  class MockVocabsComponent {}
+  @Component({ selector: 'studio-lite-metadata', template: '' })
+  class MockMetadataComponent {}
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
         UnitMetadataComponent,
-        MockVocabsComponent
+        MockMetadataComponent
       ]
     }).compileComponents();
 

@@ -16,7 +16,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tree-node.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
-import { VocabsComponent } from './components/vocabs/vocabs.component';
+import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
+import { MetadataComponent } from './components/metadata/metadata.component';
 
 @NgModule({
   imports: [
@@ -36,14 +37,29 @@ import { VocabsComponent } from './components/vocabs/vocabs.component';
     MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
-    FormlyModule.forRoot(),
+    FormlyModule.forRoot({
+      types: [
+        {
+          name: 'chips',
+          wrappers: ['form-field'],
+          component: FormlyChipsComponent,
+          defaultOptions: {
+            defaultValue: []
+          }
+        }
+      ],
+      validationMessages: [
+        { name: 'required', message: 'This field is required' }
+      ]
+    }),
     FormlyMaterialModule
   ],
   declarations: [
-    VocabsComponent,
+    FormlyChipsComponent,
     NestedTreeNodeComponent,
-    NestedTreeComponent
+    NestedTreeComponent,
+    MetadataComponent
   ],
-  exports: [VocabsComponent]
+  exports: [MetadataComponent]
 })
 export class MetadataModule {}
