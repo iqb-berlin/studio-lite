@@ -29,7 +29,7 @@ export class NestedTreeComponent implements OnInit {
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   ngOnInit() {
-    const JSONData = JSON.parse(JSON.stringify(this.data));
+    const JSONData = JSON.parse(JSON.stringify(this.data[0]));
     const mappedData = JSONData.hasTopConcept.map(
       (topConcept: { notation: string[]; prefLabel: any; narrower: any[]; }
       ) => (
@@ -37,18 +37,22 @@ export class NestedTreeComponent implements OnInit {
           name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
           notation: topConcept.notation[0],
           description: '',
-          children: topConcept.narrower.length !== 0 ? mapNarrower(topConcept.narrower) : []
+          children: topConcept.narrower.length !== 0 ? mapNarrower(topConcept.narrower, this.data[1]) : []
         }
       ));
-    function mapNarrower(arr: any[]): any {
-      return arr.map(((arrElement: any) => (
-        {
+    function mapNarrower(arr: any[], value: any) :any {
+      return arr.map(((arrElement: any) => {
+        const isSelected = !!value.find((val: any) => val.name === arrElement.notation[0]);
+        return ({
           name: `${arrElement.notation[0]} - ${arrElement.prefLabel.de}`,
           description: '',
+          selected: isSelected,
           notation: arrElement.notation[0],
-          children: arrElement.narrower ? mapNarrower(arrElement.narrower) : []
-        }
-      )));
+          children: arrElement.narrower ? mapNarrower(arrElement.narrower, value) : []
+        });
+      }
+
+      ));
     }
     this.dataSource.data = mappedData;
   }

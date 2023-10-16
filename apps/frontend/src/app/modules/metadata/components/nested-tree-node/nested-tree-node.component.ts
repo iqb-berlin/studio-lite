@@ -6,10 +6,11 @@ import { Component, Input, signal } from '@angular/core';
   styleUrls: ['./nested-tree-node.component.scss']
 
 })
+
 export class NestedTreeNodeComponent {
   checkboxSelected = signal<boolean>(false);
   @Input() node = {
-    url: '', name: '', description: '', notation: ''
+    url: '', name: '', description: '', notation: '', selected: false
   };
 
   @Input() values:Array<string> = [];
