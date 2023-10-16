@@ -23,6 +23,9 @@ export class UnitMetadataDto {
     groupName?: string;
 
   @ApiProperty()
+    metadata?: any;
+
+  @ApiProperty()
     player?: string;
 
   @ApiProperty()

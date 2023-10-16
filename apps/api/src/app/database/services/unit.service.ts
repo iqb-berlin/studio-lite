@@ -143,6 +143,7 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
+    if (dataKeys.indexOf('metadata') >= 0) unitToUpdate.metadata = newData.metadata;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
       unitToUpdate.groupName = newData.groupName;
     }
