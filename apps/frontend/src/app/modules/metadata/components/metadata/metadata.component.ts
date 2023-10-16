@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 
@@ -8,8 +10,9 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
   styleUrls: ['./metadata.component.scss']
 })
 export class MetadataComponent {
+  @Output() modelChange: EventEmitter<any> = new EventEmitter<any>();
+  @Input() model!: any;
   form = new FormGroup({});
-  model: any = {};
   fields: FormlyFieldConfig[] = [
     {
       key: 'text',

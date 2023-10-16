@@ -5,4 +5,8 @@ import { Component } from '@angular/core';
   styleUrls: ['unit-metadata.component.scss']
 })
 
-export class UnitMetadataComponent {}
+export class UnitMetadataComponent {
+  onMetadataChange(metadata: any): void {
+    console.log(metadata);
+  }
+}
