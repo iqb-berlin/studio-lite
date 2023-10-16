@@ -9,7 +9,7 @@ export class UnitMetadataStore {
     this.changedData = <UnitMetadataDto>{ id: originalData.id };
   }
 
-  setPlayer(newPlayer: string) {
+  setPlayer(newPlayer: string): void {
     if (newPlayer === this.originalData.player) {
       if (this.changedData.player) delete this.changedData.player;
     } else {
@@ -17,7 +17,7 @@ export class UnitMetadataStore {
     }
   }
 
-  setEditor(newEditor: string) {
+  setEditor(newEditor: string): void {
     if (newEditor === this.originalData.editor) {
       if (this.changedData.editor) delete this.changedData.editor;
     } else {
@@ -25,7 +25,7 @@ export class UnitMetadataStore {
     }
   }
 
-  setSchemer(newSchemer: string) {
+  setSchemer(newSchemer: string): void {
     if (newSchemer === this.originalData.schemer) {
       if (this.changedData.schemer) delete this.changedData.schemer;
     } else {
@@ -73,6 +73,14 @@ export class UnitMetadataStore {
     }
   }
 
+  setMetadata(newMetadata: any): void {
+    if (JSON.stringify(newMetadata) === JSON.stringify(this.originalData.metadata)) {
+      if (this.changedData.metadata) delete this.changedData.metadata;
+    } else {
+      this.changedData.metadata = newMetadata;
+    }
+  }
+
   isChanged(): boolean {
     return Object.keys(this.changedData).length > 1;
   }
@@ -90,12 +98,12 @@ export class UnitMetadataStore {
     return { ...this.originalData, ...this.changedData };
   }
 
-  applyChanges() {
+  applyChanges(): void {
     this.originalData = this.getData();
     this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
   }
 
-  restore() {
+  restore(): void {
     this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
   }
 }
