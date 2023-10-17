@@ -1,17 +1,12 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import {
-  Component, Input, OnInit, Inject
+  Component, OnInit, Inject, Input
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-
-interface NotationNode {
-  name: string;
-  children?: NotationNode[];
-  url?:string;
-  prefLabel?:string;
-  selected?:boolean;
-}
+import {
+  DialogData, NestedTreeParameters, NotationNode, SelectedNode
+} from '../../models/types';
 
 @Component({
   selector: 'studio-lite-nested-tree',
@@ -21,34 +16,53 @@ interface NotationNode {
 })
 export class NestedTreeComponent implements OnInit {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) { }
 
-  @Input() treeDepth!:number;
-  values:Array<string> = [];
+  @Input() treeParameters!:NestedTreeParameters;
+  treeDepth:number = 0;
+  selectedNodes = this.data.selectedNodes;
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   ngOnInit() {
-    const JSONData = JSON.parse(JSON.stringify(this.data[0]));
+    const JSONData = JSON.parse(JSON.stringify(this.data.vocab));
     const mappedData = JSONData.hasTopConcept.map(
-      (topConcept: { notation: string[]; prefLabel: any; narrower: any[]; }
+      (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
       ) => (
         {
+          id: topConcept.id,
           name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
           notation: topConcept.notation[0],
           description: '',
-          children: topConcept.narrower.length !== 0 ? mapNarrower(topConcept.narrower, this.data[1]) : []
+          children: topConcept.narrower.length !== 0 ? mapNarrower(
+            topConcept.narrower, this.data.value, this.treeDepth, this.data.params.maxLevel, this.selectedNodes
+          ) : []
         }
       ));
-    function mapNarrower(arr: any[], value: any) :any {
-      return arr.map(((arrElement: any) => {
-        const isSelected = !!value.find((val: any) => val.name === arrElement.notation[0]);
+    function mapNarrower(
+      nodes: NotationNode[],
+      value: { name:string },
+      treeDepth:number,
+      maxLevel:number,
+      selectedNodes:Array<SelectedNode>) :NotationNode[] {
+      const depth = treeDepth + 1;
+      return nodes.map(((arrElement: NotationNode): NotationNode => {
+        let description = '';
+        let isSelected = false;
+        const filteredResult = selectedNodes.find((val:SelectedNode) => val.id === arrElement.id);
+        if (filteredResult) {
+          isSelected = true;
+          description = filteredResult?.description;
+        }
         return ({
-          name: `${arrElement.notation[0]} - ${arrElement.prefLabel.de}`,
-          description: '',
+          id: arrElement.id,
+          description: description,
+          name: `${arrElement.notation[0]} - ${arrElement.prefLabel?.de}`,
           selected: isSelected,
           notation: arrElement.notation[0],
-          children: arrElement.narrower ? mapNarrower(arrElement.narrower, value) : []
+          label: arrElement.prefLabel?.de,
+          children: arrElement.narrower && (depth < maxLevel) ?
+            mapNarrower(arrElement.narrower, value, depth, maxLevel, selectedNodes) : []
         });
       }
 
@@ -58,5 +72,6 @@ export class NestedTreeComponent implements OnInit {
   }
 
   // TODO: Replace with Pipe
+  // eslint-disable-next-line class-methods-use-this
   hasChild = (_: number, node: NotationNode) => !!node.children && node.children.length > 0;
 }
