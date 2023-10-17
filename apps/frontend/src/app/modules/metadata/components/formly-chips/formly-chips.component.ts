@@ -6,6 +6,7 @@ import { FormControl } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 import * as vocab from './Bildungsstandards-Mathematik-Primar-2022-Inhaltsbezogene-Kompetenzen.json';
+import { SelectedNode } from '../../models/types';
 
 @Component({
   selector: 'studio-lite-formly-chips',
@@ -15,6 +16,7 @@ import * as vocab from './Bildungsstandards-Mathematik-Primar-2022-Inhaltsbezoge
 export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   itemControl = new FormControl();
+  selectedNodes: Array<SelectedNode> = [];
 
   constructor(
     private vocabsDialog : MatDialog
@@ -53,7 +55,20 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
 
   showNodeTree(): void {
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
-      data: [vocab, this.formControl.value],
+      data: {
+        vocab: vocab,
+        value: this.formControl.value,
+        selectedNodes: this.selectedNodes,
+        params: {
+          url: '',
+          allowMultipleValues: false,
+          maxLevel: 2,
+          hideNumbering: false,
+          hideDescription: true,
+          hideTitle: false,
+          addTextLanguages: ['de', 'en']
+        }
+      },
       width: '80%',
       height: '80%'
     });
@@ -61,7 +76,10 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(results => {
-        results.forEach((nodeName: string) => this.addChip(nodeName));
+        this.formControl.reset();
+        results.forEach((node:SelectedNode) => {
+          this.addChip(node.notation);
+        });
       });
   }
 }
