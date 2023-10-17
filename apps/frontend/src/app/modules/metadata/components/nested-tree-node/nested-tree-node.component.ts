@@ -1,4 +1,8 @@
-import { Component, Input, signal } from '@angular/core';
+import {
+  Component, Input, OnInit, signal
+} from '@angular/core';
+
+import { NestedTreeParameters, NotationNode, SelectedNode } from '../../models/types';
 
 @Component({
   selector: 'studio-lite-nested-tree-node',
@@ -7,26 +11,58 @@ import { Component, Input, signal } from '@angular/core';
 
 })
 
-export class NestedTreeNodeComponent {
+export class NestedTreeNodeComponent implements OnInit {
   checkboxSelected = signal<boolean>(false);
-  @Input() node = {
-    url: '', name: '', description: '', notation: '', selected: false
+  description = signal<string>('');
+  displayText: string = '';
+  @Input() params!: NestedTreeParameters;
+  @Input() node:NotationNode = {
+    url: '', description: '', notation: '', selected: false, id: '', label: '', name: ''
   };
 
-  @Input() values:Array<string> = [];
+  @Input() selectedNodes:Array<SelectedNode> = [];
   onSelect() {
     this.checkboxSelected.set(!this.checkboxSelected());
     if (this.checkboxSelected()) {
-      this.values.push(this.node.notation);
+      const isExisting = this.selectedNodes.find((val:SelectedNode):boolean => val.id === this.node.id);
+      if (!isExisting) {
+        this.selectedNodes.push({
+          id: this.node.id,
+          notation: this.node.notation,
+          label: this.node.label || '',
+          description: this.description()
+        });
+      }
     } else {
-      this.values.filter((value, index) => {
-        if (value === this.node.notation) {
+      this.selectedNodes.filter((value, index) => {
+        if (value.notation === this.node.notation) {
           // Removes the value from the original array
-          this.values.splice(index, 1);
+          this.selectedNodes.splice(index, 1);
           return true;
         }
         return false;
       });
     }
+  }
+
+  onInput(e:any) {
+    this.description.set(e.target.value);
+    const index = this.selectedNodes.findIndex(val => val.id === this.node.id);
+    this.selectedNodes[index] = {
+      id: this.node.id,
+      notation: this.node.notation,
+      label: this.node.label || '',
+      description: this.description()
+    };
+  }
+
+  ngOnInit(): void {
+    if (this.params.hideTitle && !this.params.hideNumbering) { this.displayText = `${this.node.notation}`; }
+    if (this.params.hideNumbering && !this.params.hideTitle) { this.displayText = `${this.node.label}`; }
+    if (!this.params.hideNumbering && !this.params.hideTitle) {
+      this.displayText = `${this.node.notation} - ${this.node.label}`;
+    }
+    if (this.node.selected) this.checkboxSelected.set(true);
+    if (this.node.description) this.description.set(this.node.description);
   }
 }
