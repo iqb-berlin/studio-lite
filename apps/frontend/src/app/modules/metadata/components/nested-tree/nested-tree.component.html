@@ -4,7 +4,7 @@
     <!-- There is inline padding applied to this node using styles.
       This padding value depends on the mat-icon-button width. -->
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        <studio-lite-nested-tree-node [node]="node" [values]="values"></studio-lite-nested-tree-node>
+        <studio-lite-nested-tree-node [node]="node" [selectedNodes]="selectedNodes" [params] = "data.params"></studio-lite-nested-tree-node>
       </mat-tree-node>
     <!-- This is the tree node template for expandable nodes -->
     <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
@@ -31,7 +31,7 @@
   <button mat-raised-button
           color="primary"
           type="submit"
-          [mat-dialog-close]="values">
+          [mat-dialog-close]="selectedNodes">
     Schließen
   </button >
 </mat-dialog-actions>
