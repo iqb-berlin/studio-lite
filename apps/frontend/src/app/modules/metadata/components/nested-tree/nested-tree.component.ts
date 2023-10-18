@@ -25,20 +25,23 @@ export class NestedTreeComponent implements OnInit {
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   ngOnInit() {
-    const JSONData = JSON.parse(JSON.stringify(this.data.vocab));
-    const mappedData = JSONData.hasTopConcept.map(
-      (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
-      ) => (
-        {
-          id: topConcept.id,
-          name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
-          notation: topConcept.notation[0],
-          description: '',
-          children: topConcept.narrower.length !== 0 ? mapNarrower(
-            topConcept.narrower, this.data.value, this.treeDepth, this.data.params.maxLevel, this.selectedNodes
-          ) : []
-        }
-      ));
+    const jsonString = JSON.stringify(this.data.vocab);
+    if (typeof jsonString !== 'undefined') {
+      const jsonObj = JSON.parse(jsonString);
+      this.dataSource.data = jsonObj.hasTopConcept.map(
+        (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
+        ) => (
+          {
+            id: topConcept.id,
+            name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
+            notation: topConcept.notation[0],
+            description: '',
+            children: topConcept.narrower.length !== 0 ? mapNarrower(
+              topConcept.narrower, this.data.value, this.treeDepth, this.data.params.maxLevel, this.selectedNodes
+            ) : []
+          }
+        ));
+    }
     function mapNarrower(
       nodes: NotationNode[],
       value: { name:string },
@@ -68,7 +71,6 @@ export class NestedTreeComponent implements OnInit {
 
       ));
     }
-    this.dataSource.data = mappedData;
   }
 
   // TODO: Replace with Pipe

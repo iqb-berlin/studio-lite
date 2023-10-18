@@ -15,7 +15,16 @@ export class NestedTreeNodeComponent implements OnInit {
   checkboxSelected = signal<boolean>(false);
   description = signal<string>('');
   displayText: string = '';
-  @Input() params!: NestedTreeParameters;
+  @Input() params: NestedTreeParameters = {
+    url: '',
+    allowMultipleValues: true,
+    maxLevel: 0,
+    hideNumbering: false,
+    hideDescription: false,
+    hideTitle: false,
+    addTextLanguages: ['de', 'en']
+  };
+
   @Input() node:NotationNode = {
     url: '', description: '', notation: '', selected: false, id: '', label: '', name: ''
   };
