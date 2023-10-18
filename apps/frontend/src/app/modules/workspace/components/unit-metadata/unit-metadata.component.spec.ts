@@ -1,7 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
 import { UnitMetadataComponent } from './unit-metadata.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -10,12 +11,15 @@ describe('StartReviewButtonComponent', () => {
   let fixture: ComponentFixture<UnitMetadataComponent>;
 
   @Component({ selector: 'studio-lite-metadata', template: '' })
-  class MockMetadataComponent {}
+  class MockMetadataComponent {
+    @Input() model!: any;
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        HttpClientModule
+        HttpClientModule,
+        TranslateModule.forRoot()
       ],
       declarations: [
         UnitMetadataComponent,

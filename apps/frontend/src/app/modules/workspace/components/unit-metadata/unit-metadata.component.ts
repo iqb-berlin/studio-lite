@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
@@ -8,10 +9,11 @@ import { WorkspaceService } from '../../services/workspace.service';
 })
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
-  metadata: any = {};
+  metadata: any = { lang: this.translateService.store.currentLang };
   private ngUnsubscribe = new Subject<void>();
 
-  constructor(private workspaceService: WorkspaceService) {}
+  constructor(private workspaceService: WorkspaceService,
+              private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.workspaceService.selectedUnit$
@@ -26,6 +28,9 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
       this.metadata = JSON.parse(JSON.stringify(unitMetadata.metadata)); // use duplicate to destroy the reference
+      if (!this.metadata.lang) {
+        this.metadata.lang = this.translateService.store.currentLang;
+      }
     }
   }
 
