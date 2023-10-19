@@ -59,15 +59,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
         vocab: vocab,
         value: this.formControl.value,
         selectedNodes: this.selectedNodes,
-        params: {
-          url: '',
-          allowMultipleValues: false,
-          maxLevel: 2,
-          hideNumbering: false,
-          hideDescription: true,
-          hideTitle: false,
-          addTextLanguages: ['de', 'en']
-        }
+        props: this.props
       },
       width: '80%',
       height: '80%'

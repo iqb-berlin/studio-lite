@@ -14,10 +14,14 @@ import { MatTreeModule } from '@angular/material/tree';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tree-node.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
+import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wrapper.component';
 
 @NgModule({
   imports: [
@@ -35,9 +39,14 @@ import { MetadataComponent } from './components/metadata/metadata.component';
     FormlyModule,
     MatCardModule,
     MatChipsModule,
+    MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,
+    FormlyMatToggleModule,
     FormlyModule.forRoot({
+      wrappers: [
+        { name: 'panel', component: PanelFieldWrapper }
+      ],
       types: [
         {
           name: 'chips',
@@ -52,13 +61,15 @@ import { MetadataComponent } from './components/metadata/metadata.component';
         { name: 'required', message: 'This field is required' }
       ]
     }),
-    FormlyMaterialModule
+    FormlyMaterialModule,
+    MatProgressSpinnerModule
   ],
   declarations: [
     FormlyChipsComponent,
     NestedTreeNodeComponent,
     NestedTreeComponent,
-    MetadataComponent
+    MetadataComponent,
+    PanelFieldWrapper
   ],
   exports: [MetadataComponent]
 })

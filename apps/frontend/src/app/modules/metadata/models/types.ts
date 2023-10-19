@@ -34,5 +34,5 @@ export type DialogData = {
   vocab: any,
   value: { name:string },
   selectedNodes: SelectedNode[],
-  params: NestedTreeParameters
+  props: NestedTreeParameters
 };
