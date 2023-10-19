@@ -21,32 +21,31 @@ export class NestedTreeComponent implements OnInit {
 
   @Input() treeParameters!:NestedTreeParameters;
   treeDepth:number = 0;
+  spinnerOn: boolean = false;
   selectedNodes = this.data.selectedNodes;
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
-  ngOnInit() {
-    const jsonString = JSON.stringify(this.data.vocab);
-    if (typeof jsonString !== 'undefined') {
-      const jsonObj = JSON.parse(jsonString);
-      this.dataSource.data = jsonObj.hasTopConcept.map(
-        (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
-        ) => (
-          {
-            id: topConcept.id,
-            name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
-            notation: topConcept.notation[0],
-            description: '',
-            children: topConcept.narrower.length !== 0 ? mapNarrower(
-              topConcept.narrower, this.data.value, this.treeDepth, this.data.params.maxLevel, this.selectedNodes
-            ) : []
-          }
-        ));
-    }
+  async ngOnInit() {
+    const jsonFetch = await this.fetchVocab(this.data.props.url);
+    this.dataSource.data = jsonFetch.data.hasTopConcept.map(
+      (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
+      ) => (
+        {
+          id: topConcept.id,
+          name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
+          notation: topConcept.notation[0],
+          description: '',
+          children: topConcept.narrower.length !== 0 ? mapNarrower(
+            topConcept.narrower, this.data.value, this.treeDepth, this.data.props, this.selectedNodes
+          ) : []
+        }
+      ));
+
     function mapNarrower(
       nodes: NotationNode[],
       value: { name:string },
       treeDepth:number,
-      maxLevel:number,
+      props:NestedTreeParameters,
       selectedNodes:Array<SelectedNode>) :NotationNode[] {
       const depth = treeDepth + 1;
       return nodes.map(((arrElement: NotationNode): NotationNode => {
@@ -64,13 +63,28 @@ export class NestedTreeComponent implements OnInit {
           selected: isSelected,
           notation: arrElement.notation[0],
           label: arrElement.prefLabel?.de,
-          children: arrElement.narrower && (depth < maxLevel) ?
-            mapNarrower(arrElement.narrower, value, depth, maxLevel, selectedNodes) : []
+          children: arrElement.narrower && (depth < props.maxLevel) ?
+            mapNarrower(arrElement.narrower, value, depth, props, selectedNodes) : []
         });
       }
-
       ));
     }
+  }
+
+  async fetchVocab(url:string) : Promise<any> {
+    this.spinnerOn = true;
+    const response = await fetch(`${url}index.json`);
+    if (response.ok) {
+      const vocab = await response.json();
+      this.spinnerOn = false;
+      return {
+        message: 'Vokabular geladen',
+        data: vocab,
+        error: false
+      };
+    }
+    this.spinnerOn = false;
+    return { message: 'Vokabular konnte nicht geladen werden', error: true };
   }
 
   // TODO: Replace with Pipe
