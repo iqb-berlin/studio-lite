@@ -17,11 +17,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tree-node.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wrapper.component';
+import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
 
 @NgModule({
   imports: [
@@ -31,6 +33,7 @@ import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wr
     TranslateModule,
     MatDialogModule,
     MatCheckboxModule,
+    MatSlideToggleModule,
     MatIconModule,
     MatButtonModule,
     MatInputModule,
@@ -44,14 +47,20 @@ import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wr
     MatIconModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
-      wrappers: [
-        { name: 'panel', component: PanelFieldWrapper }
-      ],
+      wrappers: [{ name: 'panel', component: PanelFieldWrapper }],
       types: [
         {
           name: 'chips',
           wrappers: ['form-field'],
           component: FormlyChipsComponent,
+          defaultOptions: {
+            defaultValue: []
+          }
+        },
+        {
+          name: 'formlyToggle',
+          wrappers: ['form-field'],
+          component: FormlyToggleComponent,
           defaultOptions: {
             defaultValue: []
           }
@@ -69,7 +78,8 @@ import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wr
     NestedTreeNodeComponent,
     NestedTreeComponent,
     MetadataComponent,
-    PanelFieldWrapper
+    PanelFieldWrapper,
+    FormlyToggleComponent
   ],
   exports: [MetadataComponent]
 })
