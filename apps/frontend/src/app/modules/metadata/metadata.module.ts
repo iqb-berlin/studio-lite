@@ -62,7 +62,7 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
           wrappers: ['form-field'],
           component: FormlyToggleComponent,
           defaultOptions: {
-            defaultValue: []
+            defaultValue: false
           }
         }
       ],
