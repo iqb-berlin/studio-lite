@@ -14,11 +14,11 @@ export class MetadataComponent implements OnInit {
   @Output() modelChange: EventEmitter<any> = new EventEmitter<any>();
   @Input() model!: any;
 
-  labels: Record<string, string>[] = [];
+  labels: Record<string, string> = {};
 
   form = new FormGroup({});
   profile!: any;
-  groups!:any;
+  groups!: any;
   fields!: FormlyFieldConfig[];
 
   ngOnInit() {
