@@ -54,7 +54,7 @@ export class MetadataComponent implements OnInit {
       textarea: 'textarea'
     };
     return groups?.map((group: { label: { value: any; }[]; entries: any[]; }) => ({
-      key: 'text',
+      key: 'values',
       wrappers: ['panel'],
       props: { label: group.label[0].value },
       fieldGroup:
