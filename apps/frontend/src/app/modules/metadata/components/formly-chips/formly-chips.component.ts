@@ -5,7 +5,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
-import * as vocab from './Bildungsstandards-Mathematik-Primar-2022-Inhaltsbezogene-Kompetenzen.json';
 import { SelectedNode } from '../../models/types';
 
 @Component({
@@ -46,17 +45,16 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     this.field.focus = false;
   }
 
-  private addChip(name: string): void {
+  private addChip(name: string, id: string): void {
     this.formControl.setValue([
       ...this.formControl.value,
-      { name }
+      { name, id }
     ]);
   }
 
   showNodeTree(): void {
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
       data: {
-        vocab: vocab,
         value: this.formControl.value,
         selectedNodes: this.selectedNodes,
         props: this.props
@@ -70,7 +68,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       .subscribe(results => {
         this.formControl.reset();
         results.forEach((node:SelectedNode) => {
-          this.addChip(node.notation);
+          this.addChip(node.notation, node.id);
         });
       });
   }
