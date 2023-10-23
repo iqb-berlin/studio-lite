@@ -4,6 +4,7 @@ import {
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
+import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
 import * as profile from './profile.json';
 
 @Component({
@@ -28,16 +29,26 @@ export class MetadataComponent implements OnInit {
     }
   }
 
-  private profileToFormlyMapper(): FormlyFieldConfig[] {
-    const groups = this.mdProfile?.groups;
-
-    const typesMapping: any = {
+  private static mapType(entry: MDProfileEntry): string {
+    let type: string = entry.type;
+    if (entry.parameters instanceof ProfileEntryParametersText) {
+      if (entry.parameters.format === 'multiline') {
+        type = 'textarea';
+      }
+    }
+    const typesMapping: Record<string, string> = {
       text: 'input',
       boolean: 'formlyToggle',
       number: 'number',
       vocabulary: 'chips',
       textarea: 'textarea'
     };
+    return typesMapping[type];
+  }
+
+  private profileToFormlyMapper(): FormlyFieldConfig[] {
+    const groups = this.mdProfile?.groups;
+
     return groups?.map((group: MDProfileGroup) => ({
       key: 'values',
       wrappers: ['panel'],
@@ -49,14 +60,10 @@ export class MetadataComponent implements OnInit {
             label: entry.label,
             ...entry.parameters
           };
-          // TODO
-          // if (entry.type === 'text' && entry.parameters?.multiLine) {
-          //   entry.type = 'textarea';
-          // }
           return (
             {
               key: entry.id,
-              type: typesMapping[entry.type],
+              type: MetadataComponent.mapType(entry),
               props: props
             });
         })
