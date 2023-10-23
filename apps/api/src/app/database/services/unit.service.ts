@@ -164,7 +164,7 @@ export class UnitService {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unitToUpdate = await this.unitsRepository.findOne({
         where: { id: unitId },
-        select: ['id', 'key', 'workspaceId']
+        select: ['id', 'key', 'workspaceId', 'variables', 'metadata']
       });
       const existingUnit = await this.unitsRepository.findOne({
         where: { workspaceId: newWorkspace, key: unitToUpdate.key },
