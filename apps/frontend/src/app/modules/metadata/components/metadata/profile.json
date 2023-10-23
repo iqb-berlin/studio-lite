@@ -97,7 +97,7 @@
           }],
           "type": "text",
           "parameters": {
-            "multiLine": true
+            "format": "multiline"
           }
         },
         {
