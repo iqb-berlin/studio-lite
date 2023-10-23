@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import * as profile from './profile.json';
 
 @Component({
@@ -15,36 +16,20 @@ export class MetadataComponent implements OnInit {
   @Input() model!: any;
 
   labels: Record<string, string> = {};
-
   form = new FormGroup({});
-  profile!: any;
-  groups!: any;
+  mdProfile!: MDProfile;
   fields!: FormlyFieldConfig[];
 
   ngOnInit() {
     const jsonString = JSON.stringify(profile);
     if (jsonString !== 'undefined') {
-      this.profile = JSON.parse(jsonString);
+      this.mdProfile = new MDProfile(JSON.parse(jsonString));
+      this.fields = this.profileToFormlyMapper();
     }
-    this.fields = this.jsonToFormlyMapper();
   }
 
-  addLabel(entry: any, labelKey: string): Record<string, string> | null {
-    const labelsLength = entry[labelKey].length;
-    if (labelsLength) {
-      if (labelKey === 'label') {
-        this.labels[entry.id] = entry.label[0]?.value;
-      }
-      return {
-        [`props.${labelKey}`]:
-          `field.model.lang !== "de" ? "${entry[labelKey][0].value}" : "${entry[labelKey][labelsLength - 1]?.value}"`
-      };
-    }
-    return null;
-  }
-
-  private jsonToFormlyMapper() {
-    const groups = this.profile?.groups;
+  private profileToFormlyMapper(): FormlyFieldConfig[] {
+    const groups = this.mdProfile?.groups;
 
     const typesMapping: any = {
       text: 'input',
@@ -53,31 +38,26 @@ export class MetadataComponent implements OnInit {
       vocabulary: 'chips',
       textarea: 'textarea'
     };
-    return groups?.map((group: { label: { value: any; }[]; entries: any[]; }) => ({
+    return groups?.map((group: MDProfileGroup) => ({
       key: 'values',
       wrappers: ['panel'],
-      props: { label: group.label[0].value },
+      props: { label: group.label },
       fieldGroup:
-        group.entries.map(entry => {
+        group.entries.map((entry: MDProfileEntry) => {
           const props = {
             placeholder: '',
+            label: entry.label,
             ...entry.parameters
           };
-          if (entry.type === 'text' && entry.parameters?.multiLine) {
-            entry.type = 'textarea';
-          }
+          // TODO
+          // if (entry.type === 'text' && entry.parameters?.multiLine) {
+          //   entry.type = 'textarea';
+          // }
           return (
             {
               key: entry.id,
               type: typesMapping[entry.type],
-              props: props,
-              expressions: {
-                ...(entry.label && entry.label.length && this.addLabel(entry, 'label')),
-                ...(entry.parameters && entry.parameters.trueLabel &&
-                  entry.parameters.trueLabel.length && this.addLabel(entry.parameters, 'trueLabel')),
-                ...(entry.parameters && entry.parameters.falseLabel &&
-                  entry.parameters.falseLabel.length && this.addLabel(entry.parameters, 'falseLabel'))
-              }
+              props: props
             });
         })
     })
