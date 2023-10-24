@@ -45,7 +45,8 @@ export class WorkspaceService {
       defaultPlayer: '',
       defaultSchemer: '',
       unitGroups: [],
-      stableModulesOnly: true
+      stableModulesOnly: true,
+      profile: ''
     };
   }
 

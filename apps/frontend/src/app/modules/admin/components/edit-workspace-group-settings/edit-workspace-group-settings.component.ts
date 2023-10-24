@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
-import { BackendService } from '../../../metadata/services/backend.service';
+import { BackendService } from '../../services/backend.service';
 
 type ProfileStore = {
   url: string,
@@ -28,6 +28,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   PROFILE_REGISTRY = 'http://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
   profilesSelected :Array<string> = [];
   stores:any = [];
+  fetchedProfiles: string[] = [];
 
   constructor(
     public backendService: BackendService,
@@ -122,11 +123,20 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
     });
   }
 
-  addProfile(e:any) {
-    this.profilesSelected.push(e.source.name);
+  isChecked(id:string):boolean {
+    return !!this.fetchedProfiles.find(profile => profile === id);
+  }
+
+  changeSelection(e:any) {
+    e.checked ? this.profilesSelected.push(e.source.name) :
+      this.profilesSelected = this.profilesSelected.filter(profile => profile !== e.source.name);
   }
 
   async ngOnInit(): Promise<void> {
     await this.readCsv();
+    this.backendService.getWorkspaceGroupProfiles(1).subscribe(res => {
+      this.fetchedProfiles = res.settings?.profiles;
+      this.profilesSelected = this.fetchedProfiles;
+    });
   }
 }

@@ -12,7 +12,7 @@
               </mat-panel-description>
             </mat-expansion-panel-header>
             <div *ngFor="let profile of store.profiles">
-              <mat-checkbox (change)="addProfile($event)" [name]="profile.id">
+              <mat-checkbox [checked]= "isChecked(profile.id)" (change)="changeSelection($event)" [name]="profile.id">
                 {{profile.label}}
               </mat-checkbox>
             </div>
