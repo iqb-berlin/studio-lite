@@ -9,4 +9,7 @@ export class WorkspaceGroupSettingsDto {
 
   @ApiProperty()
     defaultSchemer = '';
+
+  @ApiProperty()
+    profiles?:string[] = [];
 }

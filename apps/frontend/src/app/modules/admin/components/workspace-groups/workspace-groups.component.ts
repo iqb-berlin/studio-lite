@@ -1,6 +1,6 @@
 import { MatTableDataSource } from '@angular/material/table';
 import {
-  ViewChild, Component, OnInit, EventEmitter
+  ViewChild, Component, OnInit
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -88,7 +88,8 @@ export class WorkspaceGroupsComponent implements OnInit {
       settings: {
         defaultSchemer: '',
         defaultPlayer: '',
-        defaultEditor: ''
+        defaultEditor: '',
+        profiles: []
       }
     })
       .subscribe(
@@ -111,9 +112,11 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
-  editGroupSettings(e:EventEmitter<any>): void {
+  editGroupSettings(res:{ profiles:string[], selectedRow: number }): void {
     this.appService.dataLoading = true;
-    this.backendService.setWorkspaceGroupProfiles({ defaultEditor: '', defaultPlayer: '', defaultSchemer: '' }, 4)
+    this.backendService.setWorkspaceGroupProfiles({
+      defaultEditor: '', defaultPlayer: '', defaultSchemer: '', profiles: res.profiles
+    }, res.selectedRow)
       .subscribe(
         respOk => {
           if (respOk) {

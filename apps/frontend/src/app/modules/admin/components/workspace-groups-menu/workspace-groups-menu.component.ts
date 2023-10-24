@@ -79,7 +79,7 @@ export class WorkspaceGroupsMenuComponent {
     }
   }
 
-  editGroupSettings(): void {
+  async editGroupSettings(): Promise<void> {
     let selectedRows = this.selectedRows;
     if (selectedRows.length === 0) {
       selectedRows = this.checkedRows;
@@ -89,6 +89,7 @@ export class WorkspaceGroupsMenuComponent {
         width: '80%',
         data: {
           name: selectedRows[0].name,
+          id: selectedRows[0].id,
           title: this.translateService.instant('admin.edit-group-settings'),
           saveButtonLabel: this.translateService.instant('save')
         }
@@ -96,7 +97,7 @@ export class WorkspaceGroupsMenuComponent {
       dialogRef.afterClosed().subscribe(result => {
         if (typeof result !== 'undefined') {
           if (result !== false) {
-            this.groupSettingsEdited.emit();
+            this.groupSettingsEdited.emit({ profiles: result, selectedRow: selectedRows[0].id });
           }
         }
       });
