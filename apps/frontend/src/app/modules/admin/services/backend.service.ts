@@ -10,6 +10,7 @@ import {
   WorkspaceGroupFullDto, WorkspaceGroupInListDto,
   UnitExportConfigDto
 } from '@studio-lite-lib/api-dto';
+import { WorkspaceSettings } from '../../wsg-admin/models/workspace-settings.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,24 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
+
+  getWorkspaceGroupProfiles(workspaceGroupId: number) {
+    return this.http
+      .get(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  setWorkspaceGroupProfiles(settings:WorkspaceSettings, workspaceGroupId: number): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`, settings)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http

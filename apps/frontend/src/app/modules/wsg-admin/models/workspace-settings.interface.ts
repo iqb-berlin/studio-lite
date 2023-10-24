@@ -4,4 +4,5 @@ export interface WorkspaceSettings {
   defaultSchemer: string;
   unitGroups?: string[];
   stableModulesOnly?: boolean;
+  profile?: string;
 }

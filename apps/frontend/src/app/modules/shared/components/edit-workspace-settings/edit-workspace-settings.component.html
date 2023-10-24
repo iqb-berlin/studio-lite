@@ -47,6 +47,16 @@
         </mat-checkbox>
         <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
+      <mat-label>
+        {{"Metadaten Profil"}}
+      </mat-label>
+      <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
+
+        <mat-select (click)="$event.stopPropagation()">
+          <mat-option *ngFor="let workspace of list" [value]="list">
+          {{list}}
+        </mat-option></mat-select>
+      </div>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions>

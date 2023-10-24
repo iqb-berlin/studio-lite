@@ -4,6 +4,7 @@ import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../../../services/app.service';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 @Component({
   selector: 'studio-lite-edit-workspace-settings',
@@ -15,11 +16,15 @@ export class EditWorkspaceSettingsComponent {
 
   constructor(
     public appService: AppService,
+    public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
     @Inject(MAT_DIALOG_DATA) public data: unknown
   ) {
     this.dialogData = this.data as WorkspaceSettingsDto;
   }
+
+  list: Array<string> = ['a', 'b'];
+  settings = { ...this.workspaceService.workspaceSettings, profile: '' };
 
   setStableChecked($event: MatCheckboxChange) {
     this.dialogData.stableModulesOnly = $event.checked;
