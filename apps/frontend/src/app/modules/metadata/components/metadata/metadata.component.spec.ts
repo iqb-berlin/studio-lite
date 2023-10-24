@@ -4,6 +4,7 @@ import {
   FormArray, FormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { MatCardModule } from '@angular/material/card';
 import { MetadataComponent } from './metadata.component';
 
 describe('MetadataComponent', () => {
@@ -24,6 +25,7 @@ describe('MetadataComponent', () => {
         MockFormlyFormComponent
       ],
       imports: [
+        MatCardModule,
         FormsModule,
         ReactiveFormsModule
       ]
