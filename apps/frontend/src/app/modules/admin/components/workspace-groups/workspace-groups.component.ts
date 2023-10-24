@@ -1,6 +1,7 @@
 import { MatTableDataSource } from '@angular/material/table';
-import { ViewChild, Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  ViewChild, Component, OnInit, EventEmitter
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { UntypedFormGroup } from '@angular/forms';
@@ -33,8 +34,6 @@ export class WorkspaceGroupsComponent implements OnInit {
   constructor(
     private appService: AppService,
     private backendService: BackendService,
-    private workspaceGroupsDialog: MatDialog,
-    private messsageDialog: MatDialog,
     private snackBar: MatSnackBar,
     private translateService: TranslateService
   ) {
@@ -92,6 +91,29 @@ export class WorkspaceGroupsComponent implements OnInit {
         defaultEditor: ''
       }
     })
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('admin.group-edited'),
+              '',
+              { duration: 1000 });
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('admin.group-not-edited'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.appService.dataLoading = false;
+        }
+      );
+  }
+
+  editGroupSettings(e:EventEmitter<any>): void {
+    this.appService.dataLoading = true;
+    this.backendService.setWorkspaceGroupProfiles({ defaultEditor: '', defaultPlayer: '', defaultSchemer: '' }, 4)
       .subscribe(
         respOk => {
           if (respOk) {

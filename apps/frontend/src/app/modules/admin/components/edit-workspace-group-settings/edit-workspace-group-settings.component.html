@@ -1,0 +1,37 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<mat-dialog-content >
+  <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch">
+      <div *ngFor="let store of profileStores">
+          <mat-expansion-panel expanded>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{store.title}}
+              </mat-panel-title>
+              <mat-panel-description>
+                {{store.description}}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div *ngFor="let profile of store.profiles">
+              <mat-checkbox (change)="addProfile($event)" [name]="profile.id">
+                {{profile.label}}
+              </mat-checkbox>
+            </div>
+          </mat-expansion-panel>
+      </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="profilesSelected"
+          [disabled]="editWorkspaceGroupSettingsForm.invalid">
+    {{data.saveButtonLabel}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+

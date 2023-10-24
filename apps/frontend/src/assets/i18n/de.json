@@ -188,7 +188,8 @@
     "delete-groups-title": "Löschen von Arbeitsbereichsgruppen",
     "groups-deleted": "Arbeitsbereichsgruppe(n) gelöscht",
     "groups-not-deleted": "Arbeitsbereichsgruppe(n) konnten nicht gelöscht werden",
-    "groups-title": "Admin: Arbeitsbereichsgruppen"
+    "groups-title": "Admin: Arbeitsbereichsgruppen",
+    "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen"
   },
   "settings": {
     "texts": "Texte",

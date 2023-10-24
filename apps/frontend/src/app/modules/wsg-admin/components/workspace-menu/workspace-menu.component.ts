@@ -35,7 +35,8 @@ export class WorkspaceMenuComponent {
   @Output() workspaceNotLoaded: EventEmitter<void> = new EventEmitter<void>();
   @Output() workspaceDeleted: EventEmitter<WorkspaceInListDto[]> = new EventEmitter<WorkspaceInListDto[]>();
   @Output() download: EventEmitter<void> = new EventEmitter<void>();
-  @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> = new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
+  @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> =
+    new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
 
   constructor(
     private moveWorkspaceDialog: MatDialog,
@@ -158,7 +159,8 @@ export class WorkspaceMenuComponent {
               defaultPlayer: '',
               defaultSchemer: '',
               unitGroups: [],
-              stableModulesOnly: true
+              stableModulesOnly: true,
+              profile: ''
             };
             const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
               width: '600px',
