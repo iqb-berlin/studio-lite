@@ -5,6 +5,7 @@ import {
 } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MatCardModule } from '@angular/material/card';
+import { BehaviorSubject } from 'rxjs';
 import { MetadataComponent } from './metadata.component';
 
 describe('MetadataComponent', () => {
@@ -33,6 +34,7 @@ describe('MetadataComponent', () => {
 
     fixture = TestBed.createComponent(MetadataComponent);
     component = fixture.componentInstance;
+    component.metadataLoader = new BehaviorSubject<any>({});
     fixture.detectChanges();
   });
 
