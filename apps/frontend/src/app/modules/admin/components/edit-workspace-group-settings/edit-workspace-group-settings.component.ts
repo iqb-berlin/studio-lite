@@ -29,6 +29,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   profilesSelected :Array<string> = [];
   stores:any = [];
   fetchedProfiles: string[] = [];
+  isLoading: boolean = false;
 
   constructor(
     public backendService: BackendService,
@@ -43,6 +44,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
     try {
       const response = await fetch(this.PROFILE_REGISTRY);
       if (response.ok) {
+        this.isLoading = true;
         const data = await response.text();
         this.csvToObj(data, '"');
         // eslint-disable-next-line no-restricted-syntax
@@ -51,11 +53,11 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
           store.profiles = await this.getProfiles(sanitizedUrl);
           this.profileStores.push(store);
         }
-      } else {
-        console.log(`Error code ${response.status}`);
+        this.isLoading = false;
       }
     } catch (err) {
       console.log('ERR', err);
+      this.isLoading = false;
     }
   }
 
