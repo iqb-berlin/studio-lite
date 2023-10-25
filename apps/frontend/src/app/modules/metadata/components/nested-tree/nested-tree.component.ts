@@ -27,15 +27,16 @@ export class NestedTreeComponent implements OnInit {
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   async ngOnInit() {
     const jsonFetch = await this.fetchVocab(this.data.props.url);
+    console.log('jsonFetch',jsonFetch);
     this.dataSource.data = jsonFetch.data.hasTopConcept.map(
       (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
       ) => (
         {
           id: topConcept.id,
-          name: `${topConcept.notation[0]} - ${topConcept.prefLabel.de}`,
-          notation: topConcept.notation[0],
+          name: `${(topConcept.notation && topConcept?.notation[0]) ? topConcept?.notation[0] : ''} - ${topConcept.prefLabel.de}`,
+          notation: topConcept.notation && topConcept?.notation[0] ? topConcept?.notation[0] : '',
           description: '',
-          children: topConcept.narrower.length !== 0 ? mapNarrower(
+          children: topConcept.narrower && topConcept.narrower.length ? mapNarrower(
             topConcept.narrower, this.data.value, this.treeDepth, this.data.props, this.selectedNodes
           ) : []
         }
@@ -72,10 +73,13 @@ export class NestedTreeComponent implements OnInit {
   }
 
   async fetchVocab(url:string) : Promise<any> {
+    console.log(url);
     this.spinnerOn = true;
     const response = await fetch(`${url}index.json`);
+    console.log(response);
     if (response.ok) {
       const vocab = await response.json();
+      console.log(vocab);
       this.spinnerOn = false;
       return {
         message: 'Vokabular geladen',

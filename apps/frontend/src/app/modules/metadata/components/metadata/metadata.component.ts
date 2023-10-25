@@ -5,7 +5,8 @@ import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import * as profile from './profile.json';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
@@ -18,7 +19,7 @@ export class MetadataComponent implements OnInit {
   @Output() metadataChange: EventEmitter<any> = new EventEmitter<any>();
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() language!: string;
-  @Input() workspaceSettings!:WorkspaceSettings;
+  @Input() workspaceSettings!: WorkspaceSettings;
 
   private PROFILES_URL:string = 'https://w3id.org/iqb/profiles/';
   profileId!: string;
@@ -29,18 +30,63 @@ export class MetadataComponent implements OnInit {
   fields!: FormlyFieldConfig[];
   model: any = {};
 
-  ngOnInit() {
-    const jsonString = JSON.stringify(profile);
-    if (jsonString !== 'undefined') {
-      this.profile = new MDProfile(JSON.parse(jsonString));
-      this.profileId = this.PROFILES_URL + this.profile.id;
+  constructor(private httpClient: HttpClient) {}
 
-      this.metadataLoader.subscribe(metadata => {
-        this.mapMetadataValuesToFormlyModel(metadata);
-        this.mapProfileToFormlyFieldConfig();
-      });
+  ngOnInit() {
+    console.log('profile', profile);
+    this.getProfile(this.workspaceSettings.unitMDProfile as string);
+
+    //const jsonString = JSON.stringify(profile);
+    // if (jsonString !== 'undefined') {
+    //   this.profile = new MDProfile(JSON.parse(jsonString));
+    //   this.profileId = this.PROFILES_URL + this.profile.id;
+    //
+    //   this.metadataLoader.subscribe(metadata => {
+    //     this.mapMetadataValuesToFormlyModel(metadata);
+    //     this.mapProfileToFormlyFieldConfig();
+    //   });
+    // }
+  }
+
+  loadProfile(json: any) {
+    this.profile = new MDProfile(json);
+    this.profileId = this.PROFILES_URL + this.profile.id;
+
+    this.metadataLoader.subscribe(metadata => {
+      this.mapMetadataValuesToFormlyModel(metadata);
+      this.mapProfileToFormlyFieldConfig();
+    });
+  }
+
+  private getProfileok(url: string | undefined): void {
+    if (url) {
+      this.httpClient
+        .get(url)
+        .subscribe(response => console.log(response));
     }
   }
+
+  async getProfile(profile:string) {
+    try {
+      const response = await fetch(`${profile}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        this.loadProfile(data);
+        return data;
+      }
+      return {
+        message: 'Profil konnte nicht geladen werden',
+        err: response.status
+      };
+    } catch (err) {
+      return {
+        message: 'Profil konnte nicht geladen werden',
+        err: err
+      };
+    }
+  }
+
 
   private static mapType(entry: MDProfileEntry): string {
     let type: string = entry.type;
