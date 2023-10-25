@@ -37,6 +37,14 @@ export class BackendService {
       );
   }
 
+  getWorkspaceProfile(workspaceId: number):Observable<any> {
+    return this.http
+      .get(`${this.serverUrl}workspace/${workspaceId}`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
   getUsers(): Observable<UserInListDto[]> {
     return this.http
       .get<UserInListDto[]>(`${this.serverUrl}admin/users`)

@@ -6,6 +6,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
 import * as profile from './profile.json';
+import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
   selector: 'studio-lite-metadata',
@@ -15,12 +16,11 @@ import * as profile from './profile.json';
 export class MetadataComponent implements OnInit {
   @Output() modelChange: EventEmitter<any> = new EventEmitter<any>();
   @Input() model!: any;
-
+  @Input() workspaceSettings!:WorkspaceSettings;
   labels: Record<string, string> = {};
   form = new FormGroup({});
   mdProfile!: MDProfile;
   fields!: FormlyFieldConfig[];
-
   ngOnInit() {
     const jsonString = JSON.stringify(profile);
     if (jsonString !== 'undefined') {
