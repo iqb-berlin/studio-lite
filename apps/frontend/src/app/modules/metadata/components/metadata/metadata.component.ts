@@ -5,6 +5,7 @@ import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
+import { BehaviorSubject } from 'rxjs';
 import * as profile from './profile.json';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
@@ -14,18 +15,30 @@ import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.
   styleUrls: ['./metadata.component.scss']
 })
 export class MetadataComponent implements OnInit {
-  @Output() modelChange: EventEmitter<any> = new EventEmitter<any>();
-  @Input() model!: any;
+  @Output() metadataChange: EventEmitter<any> = new EventEmitter<any>();
+  @Input() metadataLoader!: BehaviorSubject<any>;
+  @Input() language!: string;
   @Input() workspaceSettings!:WorkspaceSettings;
+
+  private PROFILES_URL:string = 'https://w3id.org/iqb/profiles/';
+  profileId!: string;
+
   labels: Record<string, string> = {};
   form = new FormGroup({});
-  mdProfile!: MDProfile;
+  profile!: MDProfile;
   fields!: FormlyFieldConfig[];
+  model: any = {};
+
   ngOnInit() {
     const jsonString = JSON.stringify(profile);
     if (jsonString !== 'undefined') {
-      this.mdProfile = new MDProfile(JSON.parse(jsonString));
-      this.fields = this.profileToFormlyMapper();
+      this.profile = new MDProfile(JSON.parse(jsonString));
+      this.profileId = this.PROFILES_URL + this.profile.id;
+
+      this.metadataLoader.subscribe(metadata => {
+        this.mapMetadataValuesToFormlyModel(metadata);
+        this.mapProfileToFormlyFieldConfig();
+      });
     }
   }
 
@@ -46,15 +59,51 @@ export class MetadataComponent implements OnInit {
     return typesMapping[type];
   }
 
-  private profileToFormlyMapper(): FormlyFieldConfig[] {
-    const groups = this.mdProfile?.groups;
+  mapFormlyModelToMetadataValues(): any {
+    return {
+      entries: [
+        ...Object.entries(this.model).map((value:any) => {
+          const valuesId = MetadataComponent.getMappedValue(value[1]);
+          return ({
+            id: value[0],
+            label: [
+              {
+                lang: this.language,
+                value: this.labels[value[0]]
+              }
+            ],
+            value: valuesId
+          });
+        }
+        )
+      ],
+      profileId: this.profileId
+    };
+  }
 
-    return groups?.map((group: MDProfileGroup) => ({
-      key: 'values',
+  private mapMetadataValuesToFormlyModel(metadata: any): any {
+    if (metadata.entries) {
+      metadata.entries.forEach((entry: any) => {
+        this.model[entry.id] = entry.value;
+      });
+    }
+  }
+
+  private static getMappedValue(value: any): any {
+    if (Array.isArray(value)) {
+      return value.map((val: { id: string; }) => val.id.split('/')?.pop());
+    }
+    return value;
+  }
+
+  private mapProfileToFormlyFieldConfig(): void {
+    const groups = this.profile?.groups;
+    this.fields = groups?.map((group: MDProfileGroup) => ({
       wrappers: ['panel'],
       props: { label: group.label },
       fieldGroup:
         group.entries.map((entry: MDProfileEntry) => {
+          this.registerLabel(entry);
           const props = {
             placeholder: '',
             label: entry.label,
@@ -69,5 +118,14 @@ export class MetadataComponent implements OnInit {
         })
     })
     );
+  }
+
+  private registerLabel(entry: MDProfileEntry): void {
+    this.labels[entry.id] = entry.label;
+  }
+
+  onModelChange() {
+    const metadata = this.mapFormlyModelToMetadataValues();
+    this.metadataChange.emit(metadata);
   }
 }

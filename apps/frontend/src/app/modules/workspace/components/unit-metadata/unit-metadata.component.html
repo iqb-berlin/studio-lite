@@ -1,7 +1,8 @@
 <div class="metadata-container">
   <studio-lite-metadata
-          [workspaceSettings]="this.workspaceSettings"
-          [model]="metadata"
-          (modelChange)="onMetadataChange($event)">
+    [workspaceSettings]="workspaceSettings"
+    [metadataLoader]="metadataLoader"
+    [language]="language"
+    (metadataChange)="onMetadataChange($event)">
   </studio-lite-metadata>
 </div>
