@@ -52,10 +52,11 @@
       </mat-label>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
 
-        <mat-select (click)="$event.stopPropagation()">
-          <mat-option *ngFor="let workspace of list" [value]="list">
-          {{list}}
-        </mat-option></mat-select>
+        <mat-select [(value)]="selected" (click)="$event.stopPropagation()" (selectionChange)="selectProfile($event)" >
+          <mat-option *ngFor="let profile of profiles" [value]="profile">
+            {{profile}}
+          </mat-option>
+        </mat-select>
       </div>
     </div>
   </mat-dialog-content>

@@ -2,7 +2,6 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-
 import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
@@ -164,7 +163,7 @@ export class WorkspaceMenuComponent {
             };
             const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
               width: '600px',
-              data: wsSettings
+              data: { settings: wsSettings, selectedRow: selectedRows[0].id }
             });
             dialogRef.afterClosed().subscribe(result => {
               if (result) {

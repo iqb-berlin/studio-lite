@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import * as profile from './profile.json';
 
@@ -14,11 +15,12 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   metadata: any = { lang: this.translateService.store.currentLang };
   private ngUnsubscribe = new Subject<void>();
   profile!:any;
-
+  workspaceSettings!: WorkspaceSettingsDto;
   constructor(private workspaceService: WorkspaceService,
               private translateService: TranslateService) {}
 
   ngOnInit(): void {
+    this.workspaceSettings = this.workspaceService.workspaceSettings;
     this.profile = JSON.parse(JSON.stringify(profile));
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
