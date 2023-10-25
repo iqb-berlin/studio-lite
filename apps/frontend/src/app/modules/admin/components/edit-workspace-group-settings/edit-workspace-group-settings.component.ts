@@ -94,7 +94,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
         for await (const profile of store.profiles) {
           const afterWith = (profileStore.slice(0, profileStore.lastIndexOf('/')));
           const pro = await this.getProfile(`${afterWith}/${profile}`);
-          if (profile !== 'item.json') profiles.push(pro);
+          profiles.push(pro);
         }
         return profiles;
       }
@@ -136,8 +136,8 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.readCsv();
-    this.backendService.getWorkspaceGroupProfiles(1).subscribe(res => {
-      this.fetchedProfiles = res.settings?.profiles;
+    this.backendService.getWorkspaceGroupProfiles(this.data.id).subscribe(res => {
+      this.fetchedProfiles = res.settings?.profiles || [];
       this.profilesSelected = this.fetchedProfiles;
     });
   }
