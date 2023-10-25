@@ -46,7 +46,8 @@ export class WorkspaceService {
       defaultSchemer: '',
       unitGroups: [],
       stableModulesOnly: true,
-      profile: ''
+      itemMDProfile: '',
+      unitMDProfile: ''
     };
   }
 

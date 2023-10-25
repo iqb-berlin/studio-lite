@@ -17,5 +17,8 @@ export class WorkspaceSettingsDto {
     stableModulesOnly?: boolean = true;
 
   @ApiProperty()
-    profile?: string;
+    unitMDProfile?: string;
+
+  @ApiProperty()
+    itemMDProfile?: string;
 }
