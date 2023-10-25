@@ -1,6 +1,9 @@
 <h1 mat-dialog-title>{{data.title}}</h1>
 <mat-dialog-content >
-  <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch">
+  <mat-spinner *ngIf="isLoading">
+
+  </mat-spinner>
+  <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch" *ngIf="!isLoading">
       <div *ngFor="let store of profileStores">
           <mat-expansion-panel expanded>
             <mat-expansion-panel-header>
