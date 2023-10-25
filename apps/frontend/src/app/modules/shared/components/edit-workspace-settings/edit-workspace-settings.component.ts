@@ -45,15 +45,15 @@ export class EditWorkspaceSettingsComponent implements OnInit {
   }
 
   selectProfile(e:any) {
-    this.dialogData.profile = e.value;
+    this.dialogData.unitMDProfile = e.value;
   }
 
   ngOnInit(): void {
     this.backendService.getWorkspaceGroupProfiles(this.data.selectedRow).subscribe(res => {
-      this.profiles = res.settings.profiles;
+      this.profiles = res.settings.profiles || [];
     });
     this.backendService.getWorkspaceProfile(this.data.selectedRow).subscribe(res => {
-      this.selected = res.settings.profile;
+      this.selected = res.settings.profiles;
     });
   }
 }
