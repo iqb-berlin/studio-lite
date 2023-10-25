@@ -66,6 +66,7 @@ export class NestedTreeNodeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.node, this.params);
     if (this.params.hideTitle && !this.params.hideNumbering) { this.displayText = `${this.node.notation}`; }
     if (this.params.hideNumbering && !this.params.hideTitle) { this.displayText = `${this.node.label}`; }
     if (!this.params.hideNumbering && !this.params.hideTitle) {
