@@ -1,11 +1,11 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
@@ -13,7 +13,7 @@ import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.
   templateUrl: './metadata.component.html',
   styleUrls: ['./metadata.component.scss']
 })
-export class MetadataComponent implements OnInit {
+export class MetadataComponent implements OnInit, OnDestroy {
   @Output() metadataChange: EventEmitter<any> = new EventEmitter<any>();
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() itemsLoader!: BehaviorSubject<string[]>;
@@ -21,6 +21,7 @@ export class MetadataComponent implements OnInit {
   @Input() workspaceSettings!: WorkspaceSettings;
 
   profileId!: string;
+  items: string[] = [];
 
   labels: Record<string, string> = {};
   form = new FormGroup({});
@@ -28,7 +29,7 @@ export class MetadataComponent implements OnInit {
   fields!: FormlyFieldConfig[];
   model: any = {};
 
-  items: string[] = [];
+  private ngUnsubscribe = new Subject<void>();
 
   ngOnInit() {
     this.init().then((profile => this.loadProfile(profile)));
@@ -41,13 +42,17 @@ export class MetadataComponent implements OnInit {
   loadProfile(json: any) {
     this.profile = new MDProfile(json);
     this.profileId = this.profile.id;
-    this.metadataLoader.subscribe(metadata => {
-      this.mapMetadataValuesToFormlyModel(metadata);
-      this.mapProfileToFormlyFieldConfig();
-    });
-    this.itemsLoader.subscribe(items => {
-      this.items = items;
-    });
+    this.metadataLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(metadata => {
+        this.mapMetadataValuesToFormlyModel(metadata);
+        this.mapProfileToFormlyFieldConfig();
+      });
+    this.itemsLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(items => {
+        this.items = items;
+      });
   }
 
   static async getProfile(profileUrl:string) {
@@ -153,5 +158,10 @@ export class MetadataComponent implements OnInit {
   onModelChange() {
     const metadata = this.mapFormlyModelToMetadataValues();
     this.metadataChange.emit(metadata);
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
