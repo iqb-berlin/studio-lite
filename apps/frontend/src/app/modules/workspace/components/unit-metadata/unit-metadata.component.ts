@@ -48,7 +48,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   getItems(): string[] {
     const data = this.workspaceService.unitSchemeStore?.getData();
     if (data) {
-      const variables = data.variables || [];
+      const unitSchemeVariables = data.variables || [];
+      const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitSchemeVariables;
       const variableIds = variables.map((variable: any) => variable.id);
       const scheme = JSON.parse(data.scheme);
       const variableCodings = scheme?.variableCodings || [];
