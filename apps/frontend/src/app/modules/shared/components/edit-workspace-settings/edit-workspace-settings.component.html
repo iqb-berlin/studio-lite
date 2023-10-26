@@ -55,10 +55,10 @@
           <mat-label>
             {{'metadata.unit-profile' | translate }}
           </mat-label>
-          <mat-select  class="select-profile" label="unitM" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
-            <mat-option *ngFor="let unitMDProfile of unitMDProfiles" [value]="unitMDProfile">
-              {{unitMDProfile}}
-            </mat-option>
+          <mat-select  class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
+              <mat-option *ngFor="let unitMDProfile of unitMDProfiles" [value]="unitMDProfile.id">
+                {{unitMDProfile.label }}
+              </mat-option>
           </mat-select>
         </div>
         <div class="fx-column-start-start">
@@ -66,8 +66,8 @@
             {{'metadata.item-profile' | translate }}
           </mat-label>
           <mat-select class="select-profile"  placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedItemMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectItemMDProfile($event)" >
-            <mat-option *ngFor="let itemMDProfile of itemMDProfiles" [value]="itemMDProfile">
-              {{itemMDProfile}}
+            <mat-option *ngFor="let itemMDProfile of itemMDProfiles" [value]="itemMDProfile.id">
+              {{itemMDProfile.label}}
             </mat-option>
           </mat-select>
         </div>
