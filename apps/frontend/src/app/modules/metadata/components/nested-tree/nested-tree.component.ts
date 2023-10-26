@@ -27,7 +27,6 @@ export class NestedTreeComponent implements OnInit {
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   async ngOnInit() {
     const jsonFetch = await this.fetchVocab(this.data.props.url);
-    console.log('jsonFetch', jsonFetch);
     this.dataSource.data = jsonFetch.data.hasTopConcept.map(
       (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
       ) => (

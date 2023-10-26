@@ -47,16 +47,30 @@
         </mat-checkbox>
         <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
-      <mat-label>
-        {{"Metadaten Profil"}}
-      </mat-label>
-      <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
-
-        <mat-select [(value)]="selected" (click)="$event.stopPropagation()" (selectionChange)="selectProfile($event)" >
-          <mat-option *ngFor="let profile of profiles" [value]="profile">
-            {{profile}}
-          </mat-option>
-        </mat-select>
+      <div>
+        <h3>
+          {{'metadata.metadata' | translate }}
+        </h3>
+        <div class="fx-column-start-start">
+          <mat-label>
+            {{'metadata.unit-profile' | translate }}
+          </mat-label>
+          <mat-select  class="select-profile" label="unitM" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
+            <mat-option *ngFor="let unitMDProfile of unitMDProfiles" [value]="unitMDProfile">
+              {{unitMDProfile}}
+            </mat-option>
+          </mat-select>
+        </div>
+        <div class="fx-column-start-start">
+          <mat-label>
+            {{'metadata.item-profile' | translate }}
+          </mat-label>
+          <mat-select class="select-profile"  placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedItemMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectItemMDProfile($event)" >
+            <mat-option *ngFor="let itemMDProfile of itemMDProfiles" [value]="itemMDProfile">
+              {{itemMDProfile}}
+            </mat-option>
+          </mat-select>
+        </div>
       </div>
     </div>
   </mat-dialog-content>

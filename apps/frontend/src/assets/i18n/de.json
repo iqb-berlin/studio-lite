@@ -191,6 +191,13 @@
     "groups-title": "Admin: Arbeitsbereichsgruppen",
     "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen"
   },
+
+  "metadata": {
+    "metadata": "Metadaten",
+    "unit-profile": "Allgemeines Profil",
+    "item-profile": "Item Profil",
+    "select-profile": "Profil auswählen..."
+  },
   "settings": {
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
