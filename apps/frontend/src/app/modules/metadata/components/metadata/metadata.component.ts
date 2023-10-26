@@ -6,7 +6,6 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
 import { BehaviorSubject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
@@ -17,6 +16,7 @@ import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.
 export class MetadataComponent implements OnInit {
   @Output() metadataChange: EventEmitter<any> = new EventEmitter<any>();
   @Input() metadataLoader!: BehaviorSubject<any>;
+  @Input() itemsLoader!: BehaviorSubject<string[]>;
   @Input() language!: string;
   @Input() workspaceSettings!: WorkspaceSettings;
 
@@ -28,6 +28,7 @@ export class MetadataComponent implements OnInit {
   fields!: FormlyFieldConfig[];
   model: any = {};
 
+  items: string[] = [];
 
   ngOnInit() {
     this.init().then((profile => this.loadProfile(profile)));
@@ -43,6 +44,9 @@ export class MetadataComponent implements OnInit {
     this.metadataLoader.subscribe(metadata => {
       this.mapMetadataValuesToFormlyModel(metadata);
       this.mapProfileToFormlyFieldConfig();
+    });
+    this.itemsLoader.subscribe(items => {
+      this.items = items;
     });
   }
 

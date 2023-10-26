@@ -1,8 +1,9 @@
 <div class="metadata-container">
   <studio-lite-metadata *ngIf="workspaceSettings"
-    [workspaceSettings]="workspaceSettings"
-    [metadataLoader]="metadataLoader"
-    [language]="language"
-    (metadataChange)="onMetadataChange($event)">
+                        [workspaceSettings]="workspaceSettings"
+                        [metadataLoader]="metadataLoader"
+                        [itemsLoader]="itemsLoader"
+                        [language]="language"
+                        (metadataChange)="onMetadataChange($event)">
   </studio-lite-metadata>
 </div>

@@ -18,6 +18,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatListModule } from '@angular/material/list';
 import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tree-node.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
@@ -47,7 +48,10 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
     MatIconModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
-      wrappers: [{ name: 'panel', component: PanelFieldWrapper }],
+      wrappers: [{
+        name: 'panel',
+        component: PanelFieldWrapper
+      }],
       types: [
         {
           name: 'chips',
@@ -67,11 +71,15 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
         }
       ],
       validationMessages: [
-        { name: 'required', message: 'This field is required' }
+        {
+          name: 'required',
+          message: 'This field is required'
+        }
       ]
     }),
     FormlyMaterialModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatListModule
   ],
   declarations: [
     FormlyChipsComponent,
