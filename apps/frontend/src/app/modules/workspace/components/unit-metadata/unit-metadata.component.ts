@@ -26,7 +26,6 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.workspaceSettings = this.workspaceService.workspaceSettings;
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
@@ -61,6 +60,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   }
 
   private loadMetaData() {
+    this.workspaceSettings = this.workspaceService.workspaceSettings;
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
