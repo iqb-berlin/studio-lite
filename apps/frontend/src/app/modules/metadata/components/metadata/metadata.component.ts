@@ -5,9 +5,8 @@ import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import * as profile from './profile.json';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
@@ -21,7 +20,6 @@ export class MetadataComponent implements OnInit {
   @Input() language!: string;
   @Input() workspaceSettings!: WorkspaceSettings;
 
-  private PROFILES_URL:string = 'https://w3id.org/iqb/profiles/';
   profileId!: string;
 
   labels: Record<string, string> = {};
@@ -30,50 +28,29 @@ export class MetadataComponent implements OnInit {
   fields!: FormlyFieldConfig[];
   model: any = {};
 
-  constructor(private httpClient: HttpClient) {}
 
   ngOnInit() {
-    console.log('profile', profile);
-    this.getProfile(this.workspaceSettings.unitMDProfile as string);
+    this.init().then((profile => this.loadProfile(profile)));
+  }
 
-    //const jsonString = JSON.stringify(profile);
-    // if (jsonString !== 'undefined') {
-    //   this.profile = new MDProfile(JSON.parse(jsonString));
-    //   this.profileId = this.PROFILES_URL + this.profile.id;
-    //
-    //   this.metadataLoader.subscribe(metadata => {
-    //     this.mapMetadataValuesToFormlyModel(metadata);
-    //     this.mapProfileToFormlyFieldConfig();
-    //   });
-    // }
+  private async init() {
+    return MetadataComponent.getProfile(this.workspaceSettings.unitMDProfile as string);
   }
 
   loadProfile(json: any) {
     this.profile = new MDProfile(json);
-    this.profileId = this.PROFILES_URL + this.profile.id;
-
+    this.profileId = this.profile.id;
     this.metadataLoader.subscribe(metadata => {
       this.mapMetadataValuesToFormlyModel(metadata);
       this.mapProfileToFormlyFieldConfig();
     });
   }
 
-  private getProfileok(url: string | undefined): void {
-    if (url) {
-      this.httpClient
-        .get(url)
-        .subscribe(response => console.log(response));
-    }
-  }
-
-  async getProfile(profile:string) {
+  static async getProfile(profileUrl:string) {
     try {
-      const response = await fetch(`${profile}`);
+      const response = await fetch(`${profileUrl}`);
       if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        this.loadProfile(data);
-        return data;
+        return await response.json();
       }
       return {
         message: 'Profil konnte nicht geladen werden',
@@ -86,7 +63,6 @@ export class MetadataComponent implements OnInit {
       };
     }
   }
-
 
   private static mapType(entry: MDProfileEntry): string {
     let type: string = entry.type;
