@@ -27,7 +27,10 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     this.dialogData = this.data.settings as WorkspaceSettingsDto;
   }
 
-  selected :string = '';
+  itemMDProfiles:string[] = [];
+  unitMDProfiles:string[] = [];
+  selectedItemMDProfile:string = '';
+  selectedUnitMDProfile:string = '';
   profiles: Array<string> = [];
   settings = { ...this.workspaceService.workspaceSettings, profile: '' };
   setStableChecked($event: MatCheckboxChange) {
@@ -44,16 +47,22 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     }
   }
 
-  selectProfile(e:any) {
+  selectUnitMDProfile(e:any) {
     this.dialogData.unitMDProfile = e.value;
+  }
+
+  selectItemMDProfile(e:any) {
+    this.dialogData.itemMDProfile = e.value;
   }
 
   ngOnInit(): void {
     this.backendService.getWorkspaceGroupProfiles(this.data.selectedRow).subscribe(res => {
-      this.profiles = res.settings.profiles || [];
+      this.unitMDProfiles = res.settings.profiles.filter((profile:string) => profile.split('/').pop() !== 'item.json') || [];
+      this.itemMDProfiles = res.settings.profiles.filter((profile:string) => profile.split('/').pop() === 'item.json') || [];
     });
     this.backendService.getWorkspaceProfile(this.data.selectedRow).subscribe(res => {
-      this.selected = res.settings.profiles;
+      if (res.settings.itemMDProfile) this.selectedItemMDProfile = res.settings.itemMDProfile;
+      if (res.settings.unitMDProfile) this.selectedUnitMDProfile = res.settings.unitMDProfile;
     });
   }
 }
