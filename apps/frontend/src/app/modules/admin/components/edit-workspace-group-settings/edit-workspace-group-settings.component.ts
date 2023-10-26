@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
 
@@ -26,9 +27,9 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   profiles: Array<Profile> = [];
   profileStores : Array<ProfileStore> = [];
   PROFILE_REGISTRY = 'http://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
-  profilesSelected :Array<string> = [];
+  profilesSelected : Profile[] = [];
   stores:any = [];
-  fetchedProfiles: string[] = [];
+  fetchedProfiles: Profile[] = [];
   isLoading: boolean = false;
 
   constructor(
@@ -126,12 +127,12 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   }
 
   isChecked(id:string):boolean {
-    return !!this.fetchedProfiles.find(profile => profile === id);
+    return !!this.fetchedProfiles?.find((profile: { id: string; }) => profile.id === id);
   }
 
-  changeSelection(e:any) {
-    e.checked ? this.profilesSelected.push(e.source.name) :
-      this.profilesSelected = this.profilesSelected.filter(profile => profile !== e.source.name);
+  changeSelection(e:MatCheckboxChange) {
+    e.checked ? this.profilesSelected.push({ id: e.source.name || '', label: e.source.id }) :
+      this.profilesSelected = this.profilesSelected.filter((profile: Profile) => profile.id !== e.source.name);
   }
 
   async ngOnInit(): Promise<void> {
