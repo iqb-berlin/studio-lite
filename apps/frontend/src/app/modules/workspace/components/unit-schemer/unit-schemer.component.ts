@@ -126,7 +126,6 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
   private postUnitScheme(unitSchemeStore: UnitSchemeStore): void {
     const unitScheme = unitSchemeStore.getData();
     const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitScheme.variables;
-    console.log(variables, JSON.parse(unitScheme.scheme));
     if (this.postMessageTarget) {
       this.postMessageTarget.postMessage({
         type: 'vosStartCommand',
