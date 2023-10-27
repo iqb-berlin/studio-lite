@@ -1,7 +1,18 @@
-<form [formGroup]="form">
-  <formly-form [model]="model"
-               [fields]="fields"
-               [options]="options"
-               [form]="form">
-  </formly-form>
-</form>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      Items
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="form">
+      <formly-form [model]="model"
+                   [fields]="fields"
+                   [form]="form"
+                   (modelChange)="onModelChange()">
+      </formly-form>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+{{model | json}}

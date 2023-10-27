@@ -27,6 +27,7 @@ import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wra
 import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
 import { ItemProfileComponent } from './components/item-profile/item-profile.component';
 import { FormlyRepeatSectionComponent } from './components/formly-repeat-section/formly-repeat-section.component';
+import { UnitProfileComponent } from './components/unit-profile/unit-profile.component';
 
 @NgModule({
   imports: [
@@ -97,7 +98,8 @@ import { FormlyRepeatSectionComponent } from './components/formly-repeat-section
     FormlyWrapperPanel,
     FormlyToggleComponent,
     ItemProfileComponent,
-    FormlyRepeatSectionComponent
+    FormlyRepeatSectionComponent,
+    UnitProfileComponent
   ],
   exports: [MetadataComponent]
 })
