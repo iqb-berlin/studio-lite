@@ -1,32 +1,20 @@
-<div class="fx-column-start-stretch">
-  <mat-card>
-    <mat-card-header *ngIf="unitProfile">
-      <mat-card-title>
-        {{unitProfile.label}}
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="form">
-        <formly-form
-          [model]="model"
-          [fields]="fields"
-          [form]="form"
-          (modelChange)="onModelChange()">
-        </formly-form>
-      </form>
-    </mat-card-content>
-  </mat-card>
+<div class="fx-row-space-between-stretch fx-gap-10">
+  <studio-lite-unit-profile *ngIf="workspaceSettings"
+                            class="fx-flex-row-50"
+                            [profileUrl]="workspaceSettings.unitMDProfile"
+                            [metadataKey]="'unit'"
+                            [metadataLoader]="metadataLoader"
+                            [language]="language"
+                            (metadataChange)="onMetadataChange($event)">
+  </studio-lite-unit-profile>
 
-  <mat-card *ngIf="items.length">
-    <mat-card-header>
-      <mat-card-title>
-        Items
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <studio-lite-item-profile [items]="items">
-      </studio-lite-item-profile>
-    </mat-card-content>
-  </mat-card>
-
-</div>{{model | json}}
+  <studio-lite-item-profile *ngIf="workspaceSettings && items"
+                            class="fx-flex-row-50"
+                            [items]="items"
+                            [metadataKey]="'items'"
+                            [profileUrl]="workspaceSettings.itemMDProfile"
+                            [metadataLoader]="metadataLoader"
+                            [language]="language"
+                            (metadataChange)="onMetadataChange($event)">
+  </studio-lite-item-profile>
+</div>

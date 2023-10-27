@@ -1,51 +1,54 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { MDProfile } from '@iqb/metadata';
+import { takeUntil } from 'rxjs';
+import { ProfileFormlyMappingDirective } from '../../directives/profile-formly-mapping.directive';
 
 @Component({
   selector: 'studio-lite-item-profile',
   templateUrl: './item-profile.component.html',
   styleUrls: ['./item-profile.component.scss']
 })
-export class ItemProfileComponent implements OnInit {
+export class ItemProfileComponent extends ProfileFormlyMappingDirective implements OnInit {
   @Input() items!: string[];
 
-  form = new FormGroup({});
-  fields!: FormlyFieldConfig[];
-  model: any = {};
-  options: FormlyFormOptions = {};
-
-  ngOnInit(): void {
-    this.fields = [
-      {
-        key: 'items',
-        type: 'repeat',
-        props: {
-          addText: 'Item-Variable hinzufügen',
-          label: 'Item Variablen bearbeiten'
-        },
-        fieldArray: {
-          fieldGroup: [
-            {
-              type: 'input',
-              props: {
-                placeholder: 'Task name',
-                required: true
-              }
+  override loadProfile(json: any) {
+    this.profile = new MDProfile(json);
+    this.metadataLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(metadata => {
+        this.model = ProfileFormlyMappingDirective.mapMetadataValuesToFormlyModel(metadata[this.metadataKey] || {});
+        const itemFields = this.mapProfileToFormlyFieldConfig(this.profile);
+        this.fields = [
+          {
+            key: this.metadataKey,
+            type: 'repeat',
+            props: {
+              addText: 'Item-Variable hinzufügen',
+              label: 'Item Variablen bearbeiten'
             },
-            {
-              type: 'select',
-              props: {
-                label: 'Select',
-                placeholder: 'Placeholder',
-                description: 'Description',
-                required: true,
-                options: this.items.map(item => ({ value: item, label: item }))
-              }
+            fieldArray: {
+              fieldGroup: [
+                {
+                  type: 'input',
+                  key: 'profileItemId',
+                  props: {
+                    placeholder: 'Item Id',
+                    required: true
+                  }
+                },
+                {
+                  type: 'select',
+                  key: 'codingItemId',
+                  props: {
+                    placeholder: 'Variable auswählen',
+                    options: this.items.map(item => ({ value: item, label: item }))
+                  }
+                },
+                ...itemFields
+              ]
             }
-          ]
-        }
-      }
-    ];
+          }
+        ];
+      });
   }
 }
