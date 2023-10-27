@@ -25,6 +25,8 @@ import { FormlyChipsComponent } from './components/formly-chips/formly-chips.com
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wrapper.component';
 import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
+import { ItemProfileComponent } from './components/item-profile/item-profile.component';
+import { FormlyRepeatSectionComponent } from './components/formly-repeat-section/formly-repeat-section.component';
 
 @NgModule({
   imports: [
@@ -48,10 +50,12 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
     MatIconModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
-      wrappers: [{
-        name: 'panel',
-        component: PanelFieldWrapper
-      }],
+      wrappers: [
+        {
+          name: 'panel',
+          component: PanelFieldWrapper
+        }
+      ],
       types: [
         {
           name: 'chips',
@@ -68,6 +72,10 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
           defaultOptions: {
             defaultValue: false
           }
+        },
+        {
+          name: 'repeat',
+          component: FormlyRepeatSectionComponent
         }
       ],
       validationMessages: [
@@ -87,7 +95,9 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
     NestedTreeComponent,
     MetadataComponent,
     PanelFieldWrapper,
-    FormlyToggleComponent
+    FormlyToggleComponent,
+    ItemProfileComponent,
+    FormlyRepeatSectionComponent
   ],
   exports: [MetadataComponent]
 })
