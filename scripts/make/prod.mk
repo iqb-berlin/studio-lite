@@ -99,17 +99,8 @@ studio-lite-volumes-prune:
 
 ## Remove all unused (not just dangling) images!
 studio-lite-images-clean: .EXPORT_ALL_VARIABLES
-	if test "$(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-db)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-db);\
-	fi
-	if test "$(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase);\
-	fi
-	if test "$(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-backend)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-backend);\
-	fi
-	if test "$(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-frontend)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-frontend);\
+	if test "$(shell docker images -f reference=${REGISTRY_PATH}iqbberlin/studio-lite-* -q)";\
+		then docker rmi $(shell docker images -f reference=${REGISTRY_PATH}iqbberlin/studio-lite-* -q);\
 	fi
 
 ## Outputs the count of changesets that have not been deployed
