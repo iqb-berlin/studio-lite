@@ -50,8 +50,8 @@ export class MetadataComponent implements OnInit, OnDestroy {
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
-        this.mapMetadataValuesToFormlyModel(metadata);
-        this.mapProfileToFormlyFieldConfig();
+        this.model = MetadataComponent.mapMetadataValuesToFormlyModel(metadata);
+        this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
       });
   }
 
@@ -102,10 +102,10 @@ export class MetadataComponent implements OnInit, OnDestroy {
     return typesMapping[type];
   }
 
-  mapFormlyModelToMetadataValues(): any {
+  mapFormlyModelToMetadataValues(model: any, profileId: string): any {
     return {
       entries: [
-        ...Object.entries(this.model).map((value:any) => {
+        ...Object.entries(model).map((value:any) => {
           const valuesId = value[1];
           return ({
             id: value[0],
@@ -120,21 +120,23 @@ export class MetadataComponent implements OnInit, OnDestroy {
         }
         )
       ],
-      profileId: this.profileId
+      profileId: profileId
     };
   }
 
-  private mapMetadataValuesToFormlyModel(metadata: any): any {
+  private static mapMetadataValuesToFormlyModel(metadata: any): any {
+    const model: any = {};
     if (metadata.entries) {
       metadata.entries.forEach((entry: any) => {
-        this.model[entry.id] = entry.value;
+        model[entry.id] = entry.value;
       });
     }
+    return model;
   }
 
-  private mapProfileToFormlyFieldConfig(): void {
-    const groups = this.profile?.groups;
-    this.fields = groups?.map((group: MDProfileGroup) => ({
+  private mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
+    const groups = profile?.groups;
+    return groups?.map((group: MDProfileGroup) => ({
       wrappers: ['panel'],
       props: { label: group.label },
       fieldGroup:
@@ -161,7 +163,7 @@ export class MetadataComponent implements OnInit, OnDestroy {
   }
 
   onModelChange() {
-    const metadata = this.mapFormlyModelToMetadataValues();
+    const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profileId);
     this.metadataChange.emit(metadata);
   }
 
