@@ -23,7 +23,7 @@ import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tr
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
-import { PanelFieldWrapper } from './components/expansion-panel-wrapper/panel-wrapper.component';
+import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
 import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
 import { ItemProfileComponent } from './components/item-profile/item-profile.component';
 import { FormlyRepeatSectionComponent } from './components/formly-repeat-section/formly-repeat-section.component';
@@ -53,7 +53,7 @@ import { FormlyRepeatSectionComponent } from './components/formly-repeat-section
       wrappers: [
         {
           name: 'panel',
-          component: PanelFieldWrapper
+          component: FormlyWrapperPanel
         }
       ],
       types: [
@@ -94,7 +94,7 @@ import { FormlyRepeatSectionComponent } from './components/formly-repeat-section
     NestedTreeNodeComponent,
     NestedTreeComponent,
     MetadataComponent,
-    PanelFieldWrapper,
+    FormlyWrapperPanel,
     FormlyToggleComponent,
     ItemProfileComponent,
     FormlyRepeatSectionComponent

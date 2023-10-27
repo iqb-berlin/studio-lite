@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FieldWrapper } from '@ngx-formly/core';
 
 @Component({
-  selector: 'formly-wrapper-panel',
+  selector: 'studio-lite-formly-wrapper-panel',
   template: `
       <mat-expansion-panel>
         <mat-expansion-panel-header>
@@ -16,5 +16,5 @@ import { FieldWrapper } from '@ngx-formly/core';
       </mat-expansion-panel>
   `
 })
-export class PanelFieldWrapper extends FieldWrapper {
+export class FormlyWrapperPanel extends FieldWrapper {
 }
