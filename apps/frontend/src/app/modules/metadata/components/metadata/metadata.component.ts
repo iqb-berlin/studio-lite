@@ -20,12 +20,11 @@ export class MetadataComponent implements OnInit, OnDestroy {
   @Input() language!: string;
   @Input() workspaceSettings!: WorkspaceSettings;
 
-  profileId!: string;
   items: string[] = [];
 
   labels: Record<string, string> = {};
   form = new FormGroup({});
-  profile!: MDProfile;
+  unitProfile!: MDProfile;
   fields!: FormlyFieldConfig[];
   model: any = {};
 
@@ -45,13 +44,12 @@ export class MetadataComponent implements OnInit, OnDestroy {
   }
 
   loadProfile(json: any) {
-    this.profile = new MDProfile(json);
-    this.profileId = this.profile.id;
+    this.unitProfile = new MDProfile(json);
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
         this.model = MetadataComponent.mapMetadataValuesToFormlyModel(metadata);
-        this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
+        this.fields = this.mapProfileToFormlyFieldConfig(this.unitProfile);
       });
   }
 
@@ -163,7 +161,7 @@ export class MetadataComponent implements OnInit, OnDestroy {
   }
 
   onModelChange() {
-    const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profileId);
+    const metadata = this.mapFormlyModelToMetadataValues(this.model, this.unitProfile.id);
     this.metadataChange.emit(metadata);
   }
 
