@@ -59,8 +59,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
         selectedNodes: this.selectedNodes,
         props: this.props
       },
-      width: '80%',
-      height: '80%'
+      width: '800px'
     });
 
     dialogRef.afterClosed()
@@ -68,7 +67,8 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       .subscribe(results => {
         this.formControl.reset();
         results.forEach((node:SelectedNode) => {
-          this.addChip(node.notation, node.id);
+          if (node.notation) node.label = node.notation;
+          this.addChip(node.label, node.id);
         });
       });
   }
