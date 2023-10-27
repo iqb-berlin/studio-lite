@@ -1,0 +1,42 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, Input } from '@angular/core';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import {
+  FormArray, FormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
+import { ItemProfileComponent } from './item-profile.component';
+
+describe('ItemProfileComponent', () => {
+  let component: ItemProfileComponent;
+  let fixture: ComponentFixture<ItemProfileComponent>;
+
+  @Component({ selector: 'formly-form', template: '' })
+  class MockFormlyFormComponent {
+    @Input() model!: any;
+    @Input() fields!: FormlyFieldConfig;
+    @Input() form!: FormGroup | FormArray;
+    @Input() options!: FormlyFormOptions;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [
+        ItemProfileComponent,
+        MockFormlyFormComponent
+      ],
+      imports: [
+        FormsModule,
+        ReactiveFormsModule
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ItemProfileComponent);
+    component = fixture.componentInstance;
+    component.items = [];
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

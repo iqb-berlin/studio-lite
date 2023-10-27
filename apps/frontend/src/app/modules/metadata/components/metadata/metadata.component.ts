@@ -32,10 +32,15 @@ export class MetadataComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
 
   ngOnInit() {
-    this.init().then((profile => this.loadProfile(profile)));
+    this.initProfile().then((profile => this.loadProfile(profile)));
+    this.initItemProfile().then((profile => this.loadItemProfile(profile)));
   }
 
-  private async init() {
+  private async initItemProfile() {
+    return MetadataComponent.getProfile(this.workspaceSettings.itemMDProfile as string);
+  }
+
+  private async initProfile() {
     return MetadataComponent.getProfile(this.workspaceSettings.unitMDProfile as string);
   }
 
@@ -48,6 +53,13 @@ export class MetadataComponent implements OnInit, OnDestroy {
         this.mapMetadataValuesToFormlyModel(metadata);
         this.mapProfileToFormlyFieldConfig();
       });
+  }
+
+  loadItemProfile(json: any) {
+    const itemProfile = new MDProfile(json);
+
+    console.log(itemProfile);
+
     this.itemsLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(items => {
