@@ -94,7 +94,7 @@ export class MetadataComponent implements OnInit, OnDestroy {
     return {
       entries: [
         ...Object.entries(this.model).map((value:any) => {
-          const valuesId = MetadataComponent.getMappedValue(value[1]);
+          const valuesId = value[1];
           return ({
             id: value[0],
             label: [
@@ -118,13 +118,6 @@ export class MetadataComponent implements OnInit, OnDestroy {
         this.model[entry.id] = entry.value;
       });
     }
-  }
-
-  private static getMappedValue(value: any): any {
-    if (Array.isArray(value)) {
-      return value.map((val: { id: string; }) => val.id.split('/')?.pop());
-    }
-    return value;
   }
 
   private mapProfileToFormlyFieldConfig(): void {
