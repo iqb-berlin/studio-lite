@@ -28,12 +28,15 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
             },
             fieldArray: {
               wrappers: ['panel'],
+              props: {
+                label: '<ohne ID>'
+              },
               fieldGroup: [
                 {
                   type: 'input',
                   key: 'profileItemId',
                   props: {
-                    placeholder: 'Item Id',
+                    placeholder: 'Item ID',
                     required: true
                   }
                 },

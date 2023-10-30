@@ -7,10 +7,8 @@ import { FieldWrapper } from '@ngx-formly/core';
   template: `
       <mat-expansion-panel>
         <mat-expansion-panel-header>
-          <mat-panel-title>{{ props.label }}
+          <mat-panel-title>{{ model['profileItemId'] || props.label }}
           </mat-panel-title>
-          <mat-panel-description>
-          </mat-panel-description>
         </mat-expansion-panel-header>
           <ng-container #fieldComponent></ng-container>
       </mat-expansion-panel>
