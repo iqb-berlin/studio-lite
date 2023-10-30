@@ -64,12 +64,28 @@ export class EditWorkspaceSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.backendService.getWorkspaceGroupProfiles(this.wsgAdminService.selectedWorkspaceGroupId).subscribe(res => {
-      this.unitMDProfiles = res.settings?.profiles
-        .filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
-      this.itemMDProfiles = res.settings?.profiles
-        .filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
-    });
+    let workspaceId = this.wsgAdminService.selectedWorkspaceGroupId;
+    if (workspaceId === 0) {
+      this.backendService.getWorkspaceGroupList().subscribe(groupsList => {
+        const found = groupsList
+          .find(group => group.name === this.workspaceService.selectedWorkspaceName.split(':')[0]);
+        workspaceId = found?.id as number;
+        this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
+          this.unitMDProfiles = res.settings?.profiles
+            .filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
+          this.itemMDProfiles = res.settings?.profiles
+            .filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
+        });
+      });
+    } else {
+      this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
+        this.unitMDProfiles = res.settings?.profiles
+          .filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
+        this.itemMDProfiles = res.settings?.profiles
+          .filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
+      });
+    }
+
     this.backendService.getWorkspaceProfile(this.data.selectedRow).subscribe(res => {
       if (res.settings?.itemMDProfile) this.selectedItemMDProfile = res.settings.itemMDProfile;
       if (res.settings?.unitMDProfile) this.selectedUnitMDProfile = res.settings.unitMDProfile;

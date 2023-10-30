@@ -86,7 +86,7 @@ export class WorkspaceGroupsMenuComponent {
     }
     if (selectedRows.length) {
       const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupSettingsComponent, {
-        width: '80%',
+        width: '1000px',
         data: {
           name: selectedRows[0].name,
           id: selectedRows[0].id,
@@ -94,10 +94,11 @@ export class WorkspaceGroupsMenuComponent {
           saveButtonLabel: this.translateService.instant('save')
         }
       });
-      dialogRef.afterClosed().subscribe(result => {
-        if (typeof result !== 'undefined') {
-          if (result !== false) {
-            this.groupSettingsEdited.emit({ profiles: result, selectedRow: selectedRows[0].id });
+      dialogRef.afterClosed().subscribe(data => {
+        if (typeof data !== 'undefined') {
+          if (data !== false) {
+            this.groupSettingsEdited
+              .emit({ states: data.states, profiles: data.profilesSelected, selectedRow: selectedRows[0].id });
           }
         }
       });
