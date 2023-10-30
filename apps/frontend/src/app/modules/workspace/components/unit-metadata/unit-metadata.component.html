@@ -1,9 +1,11 @@
-<div class="metadata-container">
-  <studio-lite-metadata *ngIf="workspaceSettings"
-                        [workspaceSettings]="workspaceSettings"
-                        [metadataLoader]="metadataLoader"
-                        [itemsLoader]="itemsLoader"
-                        [language]="language"
-                        (metadataChange)="onMetadataChange($event)">
-  </studio-lite-metadata>
+<div class="fx-column-start-stretch full-height">
+  <div class="metadata-container">
+    <studio-lite-metadata *ngIf="workspaceSettings"
+                          [workspaceSettings]="workspaceSettings"
+                          [metadataLoader]="metadataLoader"
+                          [itemsLoader]="itemsLoader"
+                          [language]="language"
+                          (metadataChange)="onMetadataChange($event)">
+    </studio-lite-metadata>
+  </div>
 </div>
