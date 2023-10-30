@@ -39,7 +39,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
-        this.model = ProfileFormlyMappingDirective.mapMetadataValuesToFormlyModel(metadata[this.metadataKey] || {});
+        this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
         this.fields = this.mapProfileToFormlyFieldConfig(this.profile, 'panel');
       });
   }
@@ -80,35 +80,37 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   }
 
   mapFormlyModelToMetadataValues(model: any, profileId: string): any {
+    return this.mapFormlyModelToMetadataValueEntries(Object.entries(model), profileId);
+  }
+
+  mapFormlyModelToMetadataValueEntries(array: any[], profileId: string) : any {
     return {
       entries: [
-        ...Object.entries(model)
-          .map((value: any) => {
-            const valuesId = value[1];
-            return ({
-              id: value[0],
-              label: [
-                {
-                  lang: this.language,
-                  value: this.labels[value[0]]
-                }
-              ],
-              value: valuesId
-            });
-          }
-          )
+        ...array
+          .map((keyValue: any) => ({
+            id: keyValue[0],
+            label: [{
+              lang: this.language,
+              value: this.labels[keyValue[0]]
+            }],
+            value: keyValue[1]
+          }))
       ],
       profileId: profileId
     };
   }
 
-  protected static mapMetadataValuesToFormlyModel(metadata: any): any {
+  // eslint-disable-next-line class-methods-use-this
+  mapMetadataValuesToFormlyModel(metadata: any): any {
+    if (!metadata || !metadata.entries) return {};
+    return ProfileFormlyMappingDirective.mapToObject(metadata.entries);
+  }
+
+  static mapToObject(entries: any[]): any {
     const model: any = {};
-    if (metadata.entries) {
-      metadata.entries.forEach((entry: any) => {
-        model[entry.id] = entry.value;
-      });
-    }
+    entries.forEach((entry: any) => {
+      model[entry.id] = entry.value;
+    });
     return model;
   }
 
