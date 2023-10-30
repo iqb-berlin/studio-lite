@@ -40,7 +40,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
         this.model = ProfileFormlyMappingDirective.mapMetadataValuesToFormlyModel(metadata[this.metadataKey] || {});
-        this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
+        this.fields = this.mapProfileToFormlyFieldConfig(this.profile, 'panel');
       });
   }
 
@@ -112,10 +112,10 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     return model;
   }
 
-  protected mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
+  protected mapProfileToFormlyFieldConfig(profile: MDProfile, wrapper: string): FormlyFieldConfig[] {
     const groups = profile?.groups;
     return groups?.map((group: MDProfileGroup) => ({
-      wrappers: ['panel'],
+      wrappers: wrapper ? [wrapper] : undefined,
       props: { label: group.label },
       fieldGroup:
           group.entries.map((entry: MDProfileEntry) => {
