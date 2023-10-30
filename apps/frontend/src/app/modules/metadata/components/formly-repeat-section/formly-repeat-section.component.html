@@ -1,10 +1,10 @@
 <legend *ngIf="props.label">{{ props.label }}</legend>
 <p *ngIf="props.description">{{ props.description }}</p>
 <div *ngFor="let field of field.fieldGroup; let i = index">
-  <formly-field
-    [field]="field">
-  </formly-field>
-  <div>
+  <div class="fx-row-space-between-start">
+    <formly-field
+      [field]="field">
+    </formly-field>
     <button mat-icon-button
             color="warn"
             type="button"

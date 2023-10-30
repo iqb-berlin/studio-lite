@@ -17,7 +17,7 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
         this.model = ProfileFormlyMappingDirective.mapMetadataValuesToFormlyModel(metadata[this.metadataKey] || {});
-        const itemFields = this.mapProfileToFormlyFieldConfig(this.profile);
+        const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
         this.fields = [
           {
             key: this.metadataKey,
@@ -27,6 +27,7 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
               label: 'Item Variablen bearbeiten'
             },
             fieldArray: {
+              wrappers: ['panel'],
               fieldGroup: [
                 {
                   type: 'input',
