@@ -7,6 +7,9 @@ import { FieldTypeConfig } from '@ngx-formly/core';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 import { SelectedNode } from '../../models/types';
 
+interface FormlyNode extends SelectedNode {
+  name:string
+}
 @Component({
   selector: 'studio-lite-formly-chips',
   templateUrl: './formly-chips.component.html',
@@ -45,13 +48,6 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     this.field.focus = false;
   }
 
-  private addChip(name: string, id: string): void {
-    this.formControl.setValue([
-      ...this.formControl.value,
-      { name, id }
-    ]);
-  }
-
   showNodeTree(): void {
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
       data: {
@@ -59,17 +55,20 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
         selectedNodes: this.selectedNodes,
         props: this.props
       },
-      width: '800px'
+      width: '600px'
     });
 
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(results => {
         this.formControl.reset();
-        results.forEach((node:SelectedNode) => {
-          if (node.notation) node.label = node.notation;
-          this.addChip(node.label, node.id);
-        });
+        const mappedResults = results.map((result:FormlyNode) => ({
+          name: result.label,
+          id: result.id,
+          notation: result.notation,
+          description: result.description
+        }));
+        this.formControl.setValue(mappedResults);
       });
   }
 }
