@@ -1,17 +1,22 @@
-
-    <mat-dialog-content>
-      <mat-spinner *ngIf="spinnerOn"
-      >
-      </mat-spinner>
-      <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+<mat-dialog-content>
+      <mat-spinner *ngIf="spinnerOn"></mat-spinner>
+      <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree" *ngIf="vocabFetched">
       <!-- This is the tree node template for leaf nodes -->
       <!-- There is inline padding applied to this node using styles.
         This padding value depends on the mat-icon-button width. -->
-        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-          <studio-lite-nested-tree-node [node]="node" [selectedNodes]="selectedNodes" [params] = "data.props"></studio-lite-nested-tree-node>
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle >
+          <studio-lite-nested-tree-node
+                  [node]="node" [selectedNodes]="this.data.value"
+                  [totalSelected] =totalSelected
+                  [params]="data.props"
+                  (selectionChange)="selectionChange($event)"
+                  (descriptionChange)="descriptionChange($event)"
+          >
+
+          </studio-lite-nested-tree-node>
         </mat-tree-node>
       <!-- This is the tree node template for expandable nodes -->
-      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild" >
         <div class="mat-tree-node">
           <button mat-icon-button matTreeNodeToggle
                   [attr.aria-label]="'Toggle ' + node.name">
@@ -29,12 +34,14 @@
         </div>
       </mat-nested-tree-node>
     </mat-tree>
+      <mat-error *ngIf="!vocabFetched">{{'metadata.vocab-loading-error' | translate}}</mat-error>
+
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-raised-button
             color="primary"
             type="submit"
-            [mat-dialog-close]="selectedNodes">
+            [mat-dialog-close]="nodesSelected">
       Schließen
     </button >
   </mat-dialog-actions>

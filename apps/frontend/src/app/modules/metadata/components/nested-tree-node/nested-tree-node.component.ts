@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnInit, signal
+  Component, EventEmitter, Input, OnInit, Output, signal
 } from '@angular/core';
 
 import { NestedTreeParameters, NotationNode, SelectedNode } from '../../models/types';
@@ -15,6 +15,13 @@ export class NestedTreeNodeComponent implements OnInit {
   checkboxSelected = signal<boolean>(false);
   description = signal<string>('');
   displayText: string = '';
+
+  @Output() selectionChange:
+  EventEmitter<{ state: boolean; node: SelectedNode }> = new EventEmitter<{ state: boolean; node: SelectedNode }>();
+
+  @Output() descriptionChange:
+  EventEmitter<{ description: string; node: SelectedNode }> = new EventEmitter<{ description: string; node: SelectedNode }>();
+
   @Input() params: NestedTreeParameters = {
     url: '',
     allowMultipleValues: true,
@@ -30,32 +37,32 @@ export class NestedTreeNodeComponent implements OnInit {
   };
 
   @Input() selectedNodes:Array<SelectedNode> = [];
+  @Input() totalSelected!:number;
   onSelect() {
-    this.checkboxSelected.set(!this.checkboxSelected());
-    if (this.checkboxSelected()) {
-      const isExisting = this.selectedNodes.find((val:SelectedNode):boolean => val.id === this.node.id);
-      if (!isExisting) {
-        this.selectedNodes.push({
-          id: this.node.id,
-          notation: this.node.notation,
-          label: this.node.label || '',
-          description: this.description()
-        });
+    this.selectionChange.emit({
+      state: !this.checkboxSelected(),
+      node: {
+        id: this.node.id,
+        label: this.node.label || '',
+        notation: this.node.notation,
+        description: this.node.description
       }
-    } else {
-      this.selectedNodes.filter((value, index) => {
-        if (value.notation === this.node.notation) {
-          // Removes the value from the original array
-          this.selectedNodes.splice(index, 1);
-          return true;
-        }
-        return false;
-      });
-    }
+    });
+    this.checkboxSelected.set(!this.checkboxSelected());
   }
 
   onInput(e:any) {
     this.description.set(e.target.value);
+    this.descriptionChange.emit({
+      description: this.description(),
+      node: {
+        id: this.node.id,
+        label: this.node.label || '',
+        notation: this.node.notation,
+        description: this.description()
+      }
+    });
+
     const index = this.selectedNodes.findIndex(val => val.id === this.node.id);
     this.selectedNodes[index] = {
       id: this.node.id,

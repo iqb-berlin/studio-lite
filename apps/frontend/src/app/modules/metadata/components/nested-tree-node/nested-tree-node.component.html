@@ -1,5 +1,5 @@
 <div class="container">
-  <mat-checkbox [disabled]="!params.allowMultipleValues && selectedNodes.length >= 1 && !checkboxSelected() " [checked]="node.selected" (click)="onSelect()">{{displayText}}</mat-checkbox>
+  <mat-checkbox [disabled]="!params.allowMultipleValues && totalSelected >= 1 && !checkboxSelected()" [checked]="node.selected" (click)="onSelect()">{{displayText}}</mat-checkbox>
   <textarea matInput
             (input)="onInput($event)"
             [value]= "description()"

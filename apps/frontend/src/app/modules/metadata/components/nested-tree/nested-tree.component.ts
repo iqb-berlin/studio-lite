@@ -8,6 +8,13 @@ import {
   DialogData, NestedTreeParameters, NotationNode, SelectedNode
 } from '../../models/types';
 
+type TopConcept = {
+  notation: string[];
+  prefLabel: { de:string };
+  narrower: NotationNode[];
+  id:string
+};
+
 @Component({
   selector: 'studio-lite-nested-tree',
   templateUrl: './nested-tree.component.html',
@@ -20,72 +27,140 @@ export class NestedTreeComponent implements OnInit {
   ) { }
 
   @Input() treeParameters!:NestedTreeParameters;
-  treeDepth:number = 0;
+  vocabFetched = true;
   spinnerOn: boolean = false;
-  selectedNodes = this.data.selectedNodes;
+  treeDepth:number = 0;
+  totalSelected = 0;
+  nodesSelected : SelectedNode[] = [];
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   async ngOnInit() {
-    const jsonFetch = await this.fetchVocab(this.data.props.url);
-    this.dataSource.data = jsonFetch.data.hasTopConcept.map(
-      (topConcept: { notation: string[]; prefLabel: { de:string }; narrower: NotationNode[]; id:string }
-      ) => (
-        {
-          id: topConcept.id,
-          name: `${(topConcept.notation && topConcept?.notation[0]) ? topConcept?.notation[0] : ''} - ${topConcept.prefLabel.de}`,
-          label: topConcept.prefLabel.de,
-          notation: topConcept.notation && topConcept?.notation[0] ? topConcept?.notation[0] : '',
-          description: '',
-          children: topConcept.narrower && topConcept.narrower.length ? mapNarrower(
-            topConcept.narrower, this.data.value, this.treeDepth, this.data.props, this.selectedNodes
-          ) : []
-        }
-      ));
+    const vocab = await this.fetchVocab(this.data.props.url);
+    this.showTree(vocab);
+  }
 
-    function mapNarrower(
-      nodes: NotationNode[],
-      value: { name:string },
-      treeDepth:number,
-      props:NestedTreeParameters,
-      selectedNodes:Array<SelectedNode>) :NotationNode[] {
-      const depth = treeDepth + 1;
-      return nodes.map(((arrElement: NotationNode): NotationNode => {
-        let description = '';
-        let isSelected = false;
-        const filteredResult = selectedNodes.find((val:SelectedNode) => val.id === arrElement.id);
-        if (filteredResult) {
-          isSelected = true;
-          description = filteredResult?.description;
-        }
-        return ({
-          id: arrElement.id,
-          description: description,
-          name: `${arrElement.notation[0]} - ${arrElement.prefLabel?.de}`,
-          selected: isSelected,
-          notation: arrElement.notation[0],
-          label: arrElement.prefLabel?.de,
-          children: arrElement.narrower && (depth < props.maxLevel) ?
-            mapNarrower(arrElement.narrower, value, depth, props, selectedNodes) : []
-        });
-      }
-      ));
+  selectionChange(checked:{ state: boolean; node: SelectedNode; }) {
+    if (checked.state) {
+      this.nodesSelected.push(checked.node);
+      this.totalSelected += 1;
+    } else {
+      this.nodesSelected = this.nodesSelected.filter(node => node.id !== checked.node.id);
+      this.totalSelected -= 1;
     }
+  }
+
+  descriptionChange(el:{ description: string; node: SelectedNode; }) {
+    const foundNode = this.nodesSelected.findIndex(node => node.id === el.node.id);
+    this.nodesSelected[foundNode] = el.node;
   }
 
   async fetchVocab(url:string) : Promise<any> {
     this.spinnerOn = true;
     const response = await fetch(`${url}index.json`);
     if (response.ok) {
-      const vocab = await response.json();
+      this.vocabFetched = true;
+      this.vocabFetched = true; const vocab = await response.json();
       this.spinnerOn = false;
-      return {
-        message: 'Vokabular geladen',
-        data: vocab,
-        error: false
-      };
+      return { data: vocab };
     }
     this.spinnerOn = false;
-    return { message: 'Vokabular konnte nicht geladen werden', error: true };
+    this.vocabFetched = false;
+    return { data: {} };
+  }
+
+  showTree(vocab:any) {
+    this.dataSource.data = vocab.data?.hasTopConcept.map(
+      (topConcept: TopConcept) => {
+        let description = '';
+        let isSelected = false;
+        const foundElement = this.data.value.find((val:SelectedNode) => val.id === topConcept.id);
+        if (foundElement) {
+          if (this.data.props.allowMultipleValues) {
+            this.nodesSelected.push({
+              id: foundElement.id,
+              notation: foundElement.notation,
+              description: foundElement.description,
+              label: foundElement.label || foundElement.name
+            });
+            isSelected = true;
+            description = foundElement?.description;
+            this.totalSelected += 1;
+          } else if (this.totalSelected < 1) {
+            isSelected = true;
+            description = foundElement?.description;
+            this.totalSelected += 1;
+            this.nodesSelected.push({
+              id: foundElement.id,
+              notation: foundElement.notation,
+              description: foundElement.description,
+              label: foundElement.label || foundElement.name
+            });
+          }
+        }
+        return (
+          {
+            id: topConcept.id,
+            name: `${(topConcept.notation && topConcept?.notation[0]) ?
+              topConcept?.notation[0] : ''} - ${topConcept.prefLabel.de}`,
+            label: topConcept.prefLabel.de,
+            notation: topConcept.notation && topConcept?.notation[0] ? topConcept?.notation[0] : '',
+            selected: isSelected,
+            description: description,
+            children: topConcept.narrower && topConcept.narrower.length ? this.mapNarrower(
+              topConcept.narrower, this.data.value, this.treeDepth, this.data.props, this.nodesSelected
+            ) : []
+          }
+        );
+      });
+  }
+
+  mapNarrower(
+    nodes: NotationNode[],
+    value: SelectedNode[],
+    treeDepth:number,
+    props:NestedTreeParameters,
+    nodesSelected:Array<SelectedNode>
+  ) :NotationNode[] {
+    const depth = treeDepth + 1;
+    return nodes.map((node: NotationNode) => {
+      let description = '';
+      let isSelected = false;
+      const foundElement = nodesSelected.find((val:SelectedNode) => val.id === node.id);
+      if (foundElement) {
+        if (this.data.props.allowMultipleValues) {
+          this.nodesSelected.push({
+            id: foundElement.id,
+            notation: foundElement.notation,
+            description: foundElement.description,
+            label: foundElement.label
+          });
+          isSelected = true;
+          description = foundElement?.description;
+          this.totalSelected += 1;
+        } else if (this.totalSelected < 1) {
+          isSelected = true;
+          description = foundElement?.description;
+          this.totalSelected += 1;
+          this.nodesSelected.push({
+            id: foundElement.id,
+            notation: foundElement.notation,
+            description: foundElement.description,
+            label: foundElement.label
+          });
+        }
+      }
+      return ({
+        id: node.id,
+        description: description,
+        name: `${node.notation[0]} - ${node.prefLabel?.de}`,
+        selected: isSelected,
+        notation: node.notation[0],
+        label: node.prefLabel?.de,
+        children: node.narrower && (depth < props.maxLevel) ?
+          this.mapNarrower(node.narrower, value, depth, props, nodesSelected) : []
+      });
+    }
+    );
   }
 
   // TODO: Replace with Pipe
