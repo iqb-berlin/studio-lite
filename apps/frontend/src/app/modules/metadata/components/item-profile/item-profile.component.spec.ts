@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 import {
   FormArray, FormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
@@ -16,7 +16,6 @@ describe('ItemProfileComponent', () => {
     @Input() model!: any;
     @Input() fields!: FormlyFieldConfig;
     @Input() form!: FormGroup | FormArray;
-    @Input() options!: FormlyFormOptions;
   }
 
   beforeEach(async () => {
