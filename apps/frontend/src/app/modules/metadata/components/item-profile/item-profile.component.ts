@@ -16,7 +16,7 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
-        this.model = ProfileFormlyMappingDirective.mapMetadataValuesToFormlyModel(metadata[this.metadataKey] || {});
+        this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
         const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
         this.fields = [
           {
@@ -51,5 +51,16 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
           }
         ];
       });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  override mapMetadataValuesToFormlyModel(metadata: any): any {
+    if (!Array.isArray(metadata)) return {};
+    return { [this.metadataKey]: metadata.map((item: any) => ProfileFormlyMappingDirective.mapToObject(item.entries)) };
+  }
+
+  override mapFormlyModelToMetadataValues(model: any, profileId: string): any[] {
+    return model[this.metadataKey]
+      .map(((item: any[]) => this.mapFormlyModelToMetadataValueEntries(Object.entries(item), profileId)));
   }
 }
