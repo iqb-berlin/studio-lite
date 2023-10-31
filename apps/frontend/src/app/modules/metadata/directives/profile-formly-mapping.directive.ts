@@ -125,6 +125,9 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
             const props = {
               placeholder: '',
               label: entry.label,
+              autosize: true, // Textarea
+              autosizeMinRows: 3, // Textarea
+              autosizeMaxRows: 10, // Textarea
               ...entry.parameters
             };
             return (
