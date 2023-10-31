@@ -10,6 +10,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { State } from '../../../admin/models/state.type';
 
 type Profile = {
   id:string,
@@ -23,6 +24,7 @@ type Profile = {
 })
 export class EditWorkspaceSettingsComponent implements OnInit {
   dialogData: WorkspaceSettingsDto;
+  selectionChanged!: State[];
 
   constructor(
     public appService: AppService,
@@ -63,7 +65,52 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     this.dialogData.itemMDProfile = e.value;
   }
 
+  addState() {
+    if (this.selectionChanged) {
+      this.selectionChanged.push({
+        id: this.selectionChanged.length + 1,
+        label: '',
+        color: ''
+      });
+    } else {
+      this.selectionChanged = [{
+        id: 1,
+        label: '',
+        color: ''
+      }];
+    }
+  }
+
+  stateSelectionChange(e:any) {
+    const foundState = this.dialogData.states?.find(state => state.id === parseInt(e.target.id, 10));
+    if (foundState) {
+      this.selectionChanged = this.selectionChanged.map(state => {
+        if (state.id === foundState.id) {
+          if (e.target.type === 'color') {
+            return { ...state, color: e.target?.value };
+          }
+          if (e.target.type === 'text') {
+            return { ...state, label: e.target?.value };
+          }
+        }
+        return state;
+      });
+    }
+  }
+
+  deleteState(id:number) {
+    this.dialogData.states = this.dialogData?.states
+      ?.filter(state => state.id !== id).map((state, index) => ({ ...state, id: index + 1 }));
+    this.selectionChanged = this.dialogData.states as State[];
+  }
+
+  addData() {
+    this.dialogData.states = this.selectionChanged;
+    this.selectionChanged = this.dialogData.states as State[];
+  }
+
   ngOnInit(): void {
+    this.selectionChanged = this.dialogData.states as State[];
     let workspaceId = this.wsgAdminService.selectedWorkspaceGroupId;
     if (workspaceId === 0) {
       this.backendService.getWorkspaceGroupList().subscribe(groupsList => {

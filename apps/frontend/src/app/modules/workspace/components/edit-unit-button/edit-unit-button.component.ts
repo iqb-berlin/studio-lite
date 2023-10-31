@@ -55,7 +55,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
 
   settings(): void {
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
-      width: '500px',
+      width: '700px',
       data: {
         settings: this.workspaceService.workspaceSettings,
         selectedRow: this.workspaceService.selectedWorkspaceId
@@ -68,6 +68,8 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
         this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
         this.workspaceService.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
+        this.workspaceService.workspaceSettings.states = result.states;
+
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {

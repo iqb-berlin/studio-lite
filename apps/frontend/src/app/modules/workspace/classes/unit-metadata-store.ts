@@ -39,7 +39,8 @@ export class UnitMetadataStore {
     newDescription: string,
     newGroup: string,
     newTranscript: string,
-    newReference: string
+    newReference: string,
+    newState:string
   ) {
     if (newKey === this.originalData.key) {
       if (this.changedData.key) delete this.changedData.key;
@@ -70,6 +71,11 @@ export class UnitMetadataStore {
       if (this.changedData.reference) delete this.changedData.reference;
     } else {
       this.changedData.reference = newReference;
+    }
+    if (newState === this.originalData.state) {
+      if (this.changedData.state) delete this.changedData.state;
+    } else {
+      this.changedData.state = newState;
     }
   }
 

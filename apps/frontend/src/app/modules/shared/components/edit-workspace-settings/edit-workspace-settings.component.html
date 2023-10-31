@@ -4,6 +4,7 @@
   </h1>
   <mat-dialog-content>
     <div>
+      <h3>{{'workspace-settings.modules' | translate }}</h3>
       <div class="fx-row-space-between-start fx-gap-10">
         <mat-label>
           {{'workspace-settings.default-editor' | translate}}
@@ -48,9 +49,7 @@
         <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
       <div>
-        <h3>
-          {{'metadata.metadata' | translate }}
-        </h3>
+        <h3>{{'metadata.metadata' | translate }}</h3>
         <div class="fx-column-start-start">
           <mat-label>
             {{'metadata.unit-profile' | translate }}
@@ -72,12 +71,30 @@
           </mat-select>
         </div>
       </div>
+      <h3>{{'wsg-settings.state-configs' | translate}}</h3>
+      <div class="state-config">
+        <div *ngFor="let state of dialogData.states" class="fx-row-space-between-start">
+          <mat-form-field class="color-form-field">
+            <input matInput [id]="state.id.toString()"  class="color-input-field" type="color" [value]="state.color" (input)="stateSelectionChange($event)"/>
+          </mat-form-field>
+          <mat-form-field class="text-form-field">
+            <input matInput [id]="state.id.toString()" type="text" [value]="state.label" (input)="stateSelectionChange($event)"/>
+          </mat-form-field>
+          <button class="delete-button" mat-icon-button (click)="deleteState(state.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <div class="add-state" (click)="addState()">
+          <button mat-raised-button>{{'wsg-settings.add-state' | translate}} </button>
+        </div>
+      </div>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-raised-button
             color="primary"
             type="submit"
+            (click)="addData()"
             [mat-dialog-close]="dialogData">
       {{'save' | translate}}
     </button>
@@ -87,3 +104,4 @@
     </button>
   </mat-dialog-actions>
 </div>
+{{dialogData | json}}

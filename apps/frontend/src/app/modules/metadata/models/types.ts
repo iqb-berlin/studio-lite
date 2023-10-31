@@ -32,7 +32,7 @@ export type NestedTreeParameters = {
 
 export type DialogData = {
   vocab: any,
-  value: { name:string },
+  value: any,
   selectedNodes: SelectedNode[],
   props: NestedTreeParameters
 };

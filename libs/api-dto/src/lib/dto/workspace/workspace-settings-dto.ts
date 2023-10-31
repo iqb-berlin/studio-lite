@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { State } from '../../../../../../apps/frontend/src/app/modules/admin/models/state.type';
 
 export class WorkspaceSettingsDto {
   @ApiProperty()
@@ -21,4 +22,7 @@ export class WorkspaceSettingsDto {
 
   @ApiProperty()
     itemMDProfile?: string;
+
+  @ApiProperty()
+    states?: State[];
 }
