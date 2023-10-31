@@ -128,6 +128,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
               autosize: true, // Textarea
               autosizeMinRows: 3, // Textarea
               autosizeMaxRows: 10, // Textarea
+              min: 0, // NumberField
               ...entry.parameters
             };
             return (
