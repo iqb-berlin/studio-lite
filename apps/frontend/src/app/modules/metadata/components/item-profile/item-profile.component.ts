@@ -59,7 +59,10 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
   // eslint-disable-next-line class-methods-use-this
   override mapMetadataValuesToFormlyModel(metadata: any): any {
     if (!Array.isArray(metadata)) return {};
-    return { [this.metadataKey]: metadata.map((item: any) => ProfileFormlyMappingDirective.mapToObject(item.entries)) };
+    return {
+      [this.metadataKey]: metadata
+        .map((item: any) => ProfileFormlyMappingDirective.mapMetaDataEntriesToFormlyModel(item.entries))
+    };
   }
 
   override mapFormlyModelToMetadataValues(model: any, profileId: string): any[] {
