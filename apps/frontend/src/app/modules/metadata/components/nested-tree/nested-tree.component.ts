@@ -69,7 +69,7 @@ export class NestedTreeComponent implements OnInit {
   }
 
   showTree(vocab:any) {
-    this.dataSource.data = vocab.data?.hasTopConcept.map(
+    this.dataSource.data = vocab.data.hasTopConcept?.map(
       (topConcept: TopConcept) => {
         let description = '';
         let isSelected = false;

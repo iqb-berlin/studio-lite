@@ -118,10 +118,10 @@ export class EditWorkspaceSettingsComponent implements OnInit {
           .find(group => group.name === this.workspaceService.selectedWorkspaceName.split(':')[0]);
         workspaceId = found?.id as number;
         this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
-          this.unitMDProfiles = res.settings?.profiles
-            .filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
-          this.itemMDProfiles = res.settings?.profiles
-            .filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
+          this.unitMDProfiles = res.settings.profiles
+            ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
+          this.itemMDProfiles = res.settings.profiles
+            ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
         });
       });
     } else {
