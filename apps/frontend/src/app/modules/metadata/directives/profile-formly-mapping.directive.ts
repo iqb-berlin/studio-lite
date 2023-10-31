@@ -103,10 +103,10 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   // eslint-disable-next-line class-methods-use-this
   mapMetadataValuesToFormlyModel(metadata: any): any {
     if (!metadata || !metadata.entries) return {};
-    return ProfileFormlyMappingDirective.mapToObject(metadata.entries);
+    return ProfileFormlyMappingDirective.mapMetaDataEntriesToFormlyModel(metadata.entries);
   }
 
-  static mapToObject(entries: any[]): any {
+  static mapMetaDataEntriesToFormlyModel(entries: any[]): any {
     const model: any = {};
     entries.forEach((entry: any) => {
       model[entry.id] = entry.value;
