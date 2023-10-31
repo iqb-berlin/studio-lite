@@ -13,6 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
+import { State } from '../../models/state.type';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -112,7 +113,7 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
-  editGroupSettings(res:{ profiles:string[], selectedRow: number }): void {
+  editGroupSettings(res:{ states: State[], profiles:string[], selectedRow: number }): void {
     this.appService.dataLoading = true;
     this.backendService.setWorkspaceGroupProfiles({
       defaultEditor: '', defaultPlayer: '', defaultSchemer: '', profiles: res.profiles
