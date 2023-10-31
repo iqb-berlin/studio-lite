@@ -25,6 +25,11 @@ describe('UnitPrintLayoutComponent', () => {
     @Input() lastChangedScheme!: Date | undefined | null;
   }
 
+  @Component({ selector: 'studio-lite-print-metadata', template: '' })
+  class MockUnitPrintMetaDateComponent {
+    @Input() metadata!: any;
+  }
+
   @Component({ selector: 'studio-lite-unit-print-comments', template: '' })
   class MockUnitPrintCommentsComponent {
     @Input() unitId!: number;
@@ -41,6 +46,7 @@ describe('UnitPrintLayoutComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         UnitPrintLayoutComponent,
+        MockUnitPrintMetaDateComponent,
         MockUnitMetaDataComponent,
         MockUnitPrintCommentsComponent,
         MockUnitPrintCodingComponent
