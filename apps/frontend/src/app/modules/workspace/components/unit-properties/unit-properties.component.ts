@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { State } from '../../../admin/models/state.type';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -23,10 +24,11 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   private editorSelectionChangedSubscription: Subscription | undefined;
   private playerSelectionChangedSubscription: Subscription | undefined;
   private schemerSelectionChangedSubscription: Subscription | undefined;
+  private statesChangedSubscription: Subscription | undefined;
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
-
+  states!: State[];
   constructor(
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
@@ -37,6 +39,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
+      state: this.fb.control(''),
       group: this.fb.control(''),
       transcript: this.fb.control(''),
       reference: this.fb.control('')
@@ -56,10 +59,12 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
+    if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
     this.workspaceService.loadUnitMetadata().then(() => this.setupForm());
   }
 
   private setupForm() {
+    this.states = this.workspaceService.workspaceSettings.states as State[];
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
@@ -72,6 +77,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
       this.unitForm.setValue({
         key: unitMetadata.key,
         name: unitMetadata.name,
+        state: unitMetadata.state,
         description: unitMetadata.description,
         reference: unitMetadata.reference,
         transcript: unitMetadata.transcript,
@@ -106,7 +112,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
           this.unitForm.get('description')?.value,
           this.unitForm.get('group')?.value,
           this.unitForm.get('transcript')?.value,
-          this.unitForm.get('reference')?.value
+          this.unitForm.get('reference')?.value,
+          this.unitForm.get('state')?.value
         );
       });
       this.unitForm.enable();
@@ -115,7 +122,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         key: '',
         name: '',
         description: '',
-        group: ''
+        group: '',
+        state: ''
       }, { emitEvent: false });
       this.unitForm.disable();
     }
@@ -127,5 +135,6 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
+    if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
   }
 }

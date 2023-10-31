@@ -21,6 +21,17 @@
                        formControlName="name"
                        [placeholder]="'workspace.unit-name' | translate">
               </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{'workspace.unit-state' | translate}}</mat-label>
+                <mat-select
+                        formControlName="state"
+                        [placeholder]="'workspace.unit-state' | translate">
+                  <mat-option class="state-option" *ngFor="let state of states" [value]="state.id">
+                    <div class="fx-row-center-center"><span [style.background-color]="state.color" class="state-color"></span>{{state.label}}</div>
+                  </mat-option>
+                </mat-select>
+
+              </mat-form-field>
               <div class="fx-row-space-around-center fx-gap-10">
                 <mat-form-field class="fx-flex-fill">
                   <mat-label>{{'workspace.group' | translate}}</mat-label>

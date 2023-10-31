@@ -114,7 +114,7 @@ export class UnitService {
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme'
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });
   }
@@ -126,7 +126,7 @@ export class UnitService {
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme'
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });
   }
@@ -144,6 +144,7 @@ export class UnitService {
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
     if (dataKeys.indexOf('metadata') >= 0) unitToUpdate.metadata = newData.metadata;
+    if (dataKeys.indexOf('state') >= 0) unitToUpdate.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
       unitToUpdate.groupName = newData.groupName;
     }

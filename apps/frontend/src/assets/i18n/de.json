@@ -196,7 +196,14 @@
     "metadata": "Metadaten",
     "unit-profile": "Allgemeines Profil",
     "item-profile": "Item Profil",
-    "select-profile": "Profil auswählen..."
+    "select-profile": "Profil auswählen...",
+    "assign-metadata-profiles": "Metadaten Profile zuweisen",
+    "vocab-loading-error": "Vokabular konnte nicht geladen werden!"
+  },
+  "wsg-settings": {
+    "state-configs": "Status Konfigurationen",
+    "add-state": "Status hinzufügen"
+
   },
   "settings": {
     "texts": "Texte",
@@ -282,6 +289,7 @@
     "units-count": "Anzahl der Aufgaben"
   },
   "workspace-settings": {
+    "modules": "Module",
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",
     "default-editor": "Voreingestellter Editor",
@@ -322,6 +330,7 @@
     "unit-key": "Kurzname",
     "invalid-unit-key": "Ungültige Länge, ungültige Zeichen oder schon vorhanden",
     "unit-name": "Name",
+    "unit-state": "Status",
     "sort-by-key": "Nach Kurzname sortieren",
     "sort-by-name": "Nach Name sortieren",
     "update-units": "Aufgabenliste aktualisieren",
