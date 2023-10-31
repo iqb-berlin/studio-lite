@@ -23,9 +23,6 @@ type Profile = {
   styleUrls: ['./edit-workspace-settings.component.scss']
 })
 export class EditWorkspaceSettingsComponent implements OnInit {
-  dialogData: WorkspaceSettingsDto;
-  selectionChanged!: State[];
-
   constructor(
     public appService: AppService,
     public backendService: BackendService,
@@ -37,6 +34,8 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     this.dialogData = this.data.settings as WorkspaceSettingsDto;
   }
 
+  dialogData: WorkspaceSettingsDto;
+  selectionChanged!: State[];
   itemMDProfiles:Profile[] = [];
   unitMDProfiles:Profile[] = [];
   selectedItemMDProfile:string = '';
@@ -72,12 +71,14 @@ export class EditWorkspaceSettingsComponent implements OnInit {
         label: '',
         color: ''
       });
+      this.dialogData.states = this.selectionChanged;
     } else {
       this.selectionChanged = [{
         id: 1,
         label: '',
-        color: ''
+        color: '#edb211'
       }];
+      this.dialogData.states = this.selectionChanged;
     }
   }
 
@@ -126,10 +127,10 @@ export class EditWorkspaceSettingsComponent implements OnInit {
       });
     } else {
       this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
-        this.unitMDProfiles = res.settings?.profiles
-          .filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
+        this.unitMDProfiles = res.settings.profiles
+          ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
         this.itemMDProfiles = res.settings?.profiles
-          .filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
+          ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
       });
     }
 

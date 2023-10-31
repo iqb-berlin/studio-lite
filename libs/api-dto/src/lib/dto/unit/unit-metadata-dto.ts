@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { State } from '../../../../../../apps/frontend/src/app/modules/admin/models/state.type';
 
 export class UnitMetadataDto {
   @ApiProperty()
@@ -13,9 +12,6 @@ export class UnitMetadataDto {
 
   @ApiProperty()
     state?: string;
-
-  @ApiProperty()
-    states?: State;
 
   @ApiProperty()
     description?: string;

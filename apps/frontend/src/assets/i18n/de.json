@@ -198,7 +198,9 @@
     "item-profile": "Item Profil",
     "select-profile": "Profil auswählen...",
     "assign-metadata-profiles": "Metadaten Profile zuweisen",
-    "vocab-loading-error": "Vokabular konnte nicht geladen werden!"
+    "vocab-loading-error": "Vokabular konnte nicht geladen werden!",
+    "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",
+    "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!"
   },
   "wsg-settings": {
     "state-configs": "Status Konfigurationen",
