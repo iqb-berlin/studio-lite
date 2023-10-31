@@ -1,6 +1,8 @@
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { EventEmitter } from '@angular/core';
 
 export class UnitMetadataStore {
+  dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitMetadataDto;
   private changedData: UnitMetadataDto;
 
@@ -15,6 +17,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.player = newPlayer;
     }
+    this.dataChange.emit();
   }
 
   setEditor(newEditor: string): void {
@@ -23,6 +26,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.editor = newEditor;
     }
+    this.dataChange.emit();
   }
 
   setSchemer(newSchemer: string): void {
@@ -31,6 +35,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.schemer = newSchemer;
     }
+    this.dataChange.emit();
   }
 
   setBasicData(
@@ -77,6 +82,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.state = newState;
     }
+    this.dataChange.emit();
   }
 
   setMetadata(newMetadata: any): void {
@@ -85,6 +91,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.metadata = newMetadata;
     }
+    this.dataChange.emit();
   }
 
   isChanged(): boolean {
