@@ -596,7 +596,9 @@
     "code-list": "Liste der möglichen Codes",
     "id": "ID",
     "coding": "Kodierung",
-    "no-coding": "Keine Kodierung"
+    "no-coding": "Keine Kodierung",
+    "metadata": "Metadaten",
+    "no-metadata": "Keine Metadaten"
   },
   "review": {
     "header": "Review",
