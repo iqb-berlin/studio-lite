@@ -1,0 +1,34 @@
+.scroll-area {
+  height: calc(100% - 35px);
+  overflow-y: auto;
+}
+
+.object-list {
+  height: calc(100% - 5px);
+}
+
+.fx-flex-row-fix-70 {
+  flex: 1 1 70px;
+  box-sizing: border-box;
+  max-width: 70px;
+}
+
+.secondary-cell {
+  color: gray;
+}
+
+.selected {
+  background-color: #00606415;
+  &:hover {
+    background-color: #00606415 !important;
+  }
+}
+
+.margin-bottom {
+  margin-bottom: 10px;
+}
+
+.select-profile {
+  margin:10px
+}
+

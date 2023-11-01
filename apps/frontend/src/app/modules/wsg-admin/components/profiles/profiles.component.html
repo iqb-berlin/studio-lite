@@ -1,0 +1,33 @@
+
+    <mat-spinner *ngIf="isLoading">
+    </mat-spinner>
+    <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch" *ngIf="!isLoading && !isError">
+      <h3>{{'metadata.assign-metadata-profiles' | translate}}</h3>
+      <div *ngFor="let store of profileStores">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{store.title}}
+            </mat-panel-title>
+            <mat-panel-description>
+              {{store.description}}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div *ngFor="let profile of store.profiles">
+            <mat-checkbox
+                    [id]="profile.label"
+                    [checked]="isChecked(profile.id)"
+                    (change)="changeSelection($event)"
+                    [name]="profile.id">
+              {{profile.label}}
+            </mat-checkbox>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </form>
+    <mat-error *ngIf="isError">
+      {{'metadata.error-fetching-metadata-profiles' | translate}}
+    </mat-error>
+
+
+

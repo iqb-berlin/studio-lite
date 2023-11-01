@@ -200,12 +200,13 @@
     "assign-metadata-profiles": "Metadaten Profile zuweisen",
     "vocab-loading-error": "Vokabular konnte nicht geladen werden!",
     "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",
-    "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!"
+    "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!",
+    "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!"
   },
   "wsg-settings": {
     "state-configs": "Status Konfigurationen",
-    "add-state": "Status hinzufügen"
-
+    "add-state": "Status hinzufügen",
+    "changed": "Einstellungen geändert"
   },
   "settings": {
     "texts": "Texte",
@@ -288,6 +289,7 @@
     "title": "Verwaltung \"{{name}}\"",
     "users": "Nutzer:innen",
     "workspaces": "Arbeitsbereiche",
+    "settings": "Einstellungen",
     "units-count": "Anzahl der Aufgaben"
   },
   "workspace-settings": {

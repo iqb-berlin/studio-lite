@@ -1,0 +1,16 @@
+<div class="scroll-area">
+    <div class="fx-row-end-end">
+        <button mat-raised-button
+                [matTooltip]="'save' | translate"
+                matTooltipPosition="above"
+                [disabled]="!settingsChanged"
+                (click)="saveGroupSettings()">
+            <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
+        </button>
+    </div>
+    <studio-lite-profiles (hasChanged) = profileSettingsChange($event) ></studio-lite-profiles>
+    <studio-lite-states (hasChanged) = stateSettingsChange($event)></studio-lite-states>
+</div>
+
+
+
