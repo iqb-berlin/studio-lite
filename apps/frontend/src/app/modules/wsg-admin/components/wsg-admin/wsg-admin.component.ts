@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { BackendService } from '../../services/backend.service';
@@ -11,12 +11,11 @@ import { AppService } from '../../../../services/app.service';
   styleUrls: ['./wsg-admin.component.scss']
 })
 export class WsgAdminComponent implements OnInit {
-  navLinks: string[] = ['users', 'workspaces'];
+  navLinks: string[] = ['users', 'workspaces', 'settings'];
   constructor(
     private wsgAdminService: WsgAdminService,
     private backendService: BackendService,
     private appService: AppService,
-    private router: Router,
     private route: ActivatedRoute,
     private translateService: TranslateService
   ) {
