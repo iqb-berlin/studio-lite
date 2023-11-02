@@ -1,4 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { State } from '../../../../../../apps/frontend/src/app/modules/admin/models/state.type';
+
+type Profile = {
+  id: string,
+  label: string
+};
 
 export class WorkspaceGroupSettingsDto {
   @ApiProperty()
@@ -11,5 +17,8 @@ export class WorkspaceGroupSettingsDto {
     defaultSchemer = '';
 
   @ApiProperty()
-    profiles?:string[] = [];
+    profiles?:Profile[] = [];
+
+  @ApiProperty()
+    states?:State[] = [];
 }

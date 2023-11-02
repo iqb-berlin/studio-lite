@@ -80,6 +80,7 @@ import { UnitGroupsComponent } from './components/unit-groups/unit-groups.compon
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 import { MetadataModule } from '../metadata/metadata.module';
+import { GetStateColorPipe } from './pipes/get-state-color.pipe';
 
 @NgModule({
   imports: [
@@ -151,6 +152,7 @@ import { MetadataModule } from '../metadata/metadata.module';
     UpdateUnitsButtonComponent,
     HasNewCommentsPipe,
     NamedRouterLinkPipe,
+    GetStateColorPipe,
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
     AddReviewButtonComponent,
