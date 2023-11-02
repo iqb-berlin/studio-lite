@@ -16,6 +16,10 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
+        const profileItemId = 'profileItemId';
+        const codingItemId = 'codingItemId';
+        this.profileItemKeys[profileItemId] = { label: 'Item ID', type: 'custom' };
+        this.profileItemKeys[codingItemId] = { label: 'Variable auswählen', type: 'custom' };
         this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
         const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
         this.fields = [
