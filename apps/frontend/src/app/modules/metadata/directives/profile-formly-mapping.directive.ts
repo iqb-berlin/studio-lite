@@ -2,7 +2,14 @@ import {
   Directive, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
-import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
+import {
+  MDProfile,
+  MDProfileEntry,
+  MDProfileGroup,
+  MDValue,
+  TextsWithLanguageAndId,
+  TextWithLanguage
+} from '@iqb/metadata';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
@@ -17,7 +24,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   @Input() profileUrl!: string | undefined;
   @Input() metadataKey!: 'unit' | 'items';
 
-  labels: Record<string, string> = {};
+  profileItemKeys: Record<string, any> = {};
   form = new FormGroup({});
   profile!: MDProfile;
   fields!: FormlyFieldConfig[];
@@ -83,35 +90,55 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     return this.mapFormlyModelToMetadataValueEntries(Object.entries(model), profileId);
   }
 
-  mapFormlyModelToMetadataValueEntries(array: any[], profileId: string) : any {
+  mapFormlyModelToMetadataValueEntries(allEntries: any[], profileId: string) : any {
     return {
       entries: [
-        ...array
-          .map((keyValue: any) => ({
+        ...allEntries
+          .map((keyValue: Record<string, any>) => ({
             id: keyValue[0],
             label: [{
               lang: this.language,
-              value: this.labels[keyValue[0]]
+              value: this.profileItemKeys[keyValue[0]].label
             }],
-            value: keyValue[1]
+            value: this.mapFormlyModelValueToMetadataValue(keyValue)
           }))
       ],
       profileId: profileId
     };
   }
 
+  mapFormlyModelValueToMetadataValue(
+    keyValue: Record<string, any>
+  ): TextsWithLanguageAndId[] | TextWithLanguage[] | string | null {
+    if (this.profileItemKeys[keyValue[0]].type === 'text') {
+      const textWithLanguages = Object.entries(keyValue[1]);
+      return textWithLanguages
+        .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
+    }
+    return keyValue[1];
+  }
+
   // eslint-disable-next-line class-methods-use-this
-  mapMetadataValuesToFormlyModel(metadata: any): any {
+  mapMetadataValuesToFormlyModel(metadata: { entries: MDValue[] }): any {
     if (!metadata || !metadata.entries) return {};
     return ProfileFormlyMappingDirective.mapMetaDataEntriesToFormlyModel(metadata.entries);
   }
 
-  static mapMetaDataEntriesToFormlyModel(entries: any[]): any {
+  static mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
     const model: any = {};
     entries.forEach((entry: any) => {
-      model[entry.id] = entry.value;
+      model[entry.id] = ProfileFormlyMappingDirective.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
     });
     return model;
+  }
+
+  static mapMetaDataEntriesValueToFormlyModelValue(value: MDValue): any {
+    if (Array.isArray(value)) {
+      if (value.length && value[0].lang) {
+        return value.reduce((obj, currentValue) => ({ ...obj, [currentValue.lang]: currentValue.value }), {});
+      }
+    }
+    return value;
   }
 
   protected mapProfileToFormlyFieldConfig(profile: MDProfile, wrapper: string): FormlyFieldConfig[] {
@@ -121,32 +148,46 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       props: { label: group.label },
       fieldGroup:
           group.entries.map((entry: MDProfileEntry) => {
-            this.registerLabel(entry);
-            const props = {
-              placeholder: '',
-              label: entry.label,
-              autosize: true, // Textarea
-              autosizeMinRows: 3, // Textarea
-              autosizeMaxRows: 10, // Textarea
-              min: 0, // NumberField
-              ...entry.parameters
-            };
-            return (
-              {
-                key: entry.id,
-                type: ProfileFormlyMappingDirective.mapType(entry),
-                props: props
-              });
+            this.registerProfileItem(entry);
+            return ProfileFormlyMappingDirective.getFormlyField(entry);
           })
     })
     );
   }
 
-  private registerLabel(entry: MDProfileEntry): void {
-    this.labels[entry.id] = entry.label;
+  static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {
+    const props = {
+      placeholder: '',
+      label: entry.label,
+      autosize: true, // Textarea
+      autosizeMinRows: 3, // Textarea
+      autosizeMaxRows: 10, // Textarea
+      min: 0, // NumberField
+      ...entry.parameters
+    };
+    if (entry.parameters instanceof ProfileEntryParametersText) {
+      return {
+        key: entry.id,
+        fieldGroup: entry.parameters.textLanguages
+          .map(language => ProfileFormlyMappingDirective.createFormlyField(language, entry, props))
+      };
+    }
+    return ProfileFormlyMappingDirective.createFormlyField(entry.id, entry, props);
   }
 
-  onModelChange() {
+  static createFormlyField(key: string, entry: MDProfileEntry, props: any): FormlyFieldConfig {
+    return {
+      key,
+      type: ProfileFormlyMappingDirective.mapType(entry),
+      props
+    };
+  }
+
+  private registerProfileItem(entry: MDProfileEntry): void {
+    this.profileItemKeys[entry.id] = { label: entry.label, type: entry.type };
+  }
+
+  onModelChange(): void {
     const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profile.id);
     this.metadataChange.emit({ metadata, key: this.metadataKey });
   }
