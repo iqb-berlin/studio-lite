@@ -6,7 +6,6 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
-import { BackendService as AppBackendService } from '../../../services/backend.service';
 import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
@@ -37,7 +36,6 @@ export class WorkspaceService {
 
   constructor(
     private backendService: BackendService,
-    private appBackendService: AppBackendService,
     private appService: AppService
   ) {
     this.workspaceSettings = {

@@ -9,7 +9,7 @@ import {
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
-  UnitSchemeDto, UsersInWorkspaceDto
+  UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -20,6 +20,22 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
+
+  getWorkspaceGroupList(): Observable<WorkspaceGroupInListDto[]> {
+    return this.http
+      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/workspace-groups`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  getWorkspaceGroupProfiles(workspaceGroupId: number):Observable<any> {
+    return this.http
+      .get(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
 
   getUnitList(workspaceId: number, params?: HttpParams): Observable <UnitInListDto[]> {
     return this.http

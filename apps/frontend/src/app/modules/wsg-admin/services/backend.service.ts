@@ -5,7 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import {
   CreateWorkspaceDto,
   UserFullDto,
-  UserInListDto, WorkspaceGroupFullDto,
+  UserInListDto, WorkspaceGroupFullDto, WorkspaceGroupSettingsDto,
   WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 
@@ -17,6 +17,15 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
+
+  setWorkspaceGroupSettings(workspaceGroupId: number, settings:WorkspaceGroupSettingsDto):Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/workspace-groups/`, { id: workspaceGroupId, settings: settings })
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http

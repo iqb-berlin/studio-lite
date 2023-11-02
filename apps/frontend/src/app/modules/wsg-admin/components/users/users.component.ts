@@ -1,6 +1,5 @@
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -24,7 +23,6 @@ export class UsersComponent implements OnInit {
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
-
   userWorkspaces = new WorkspaceToCheckCollection([]);
 
   @ViewChild(MatSort) sort = new MatSort();
@@ -33,13 +31,6 @@ export class UsersComponent implements OnInit {
     private appService: AppService,
     private backendService: BackendService,
     private wsgAdminService: WsgAdminService,
-    private newUserDialog: MatDialog,
-    private newPasswordDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog,
-    private editUserDialog: MatDialog,
-    private confirmDialog: MatDialog,
-    private superadminPasswordDialog: MatDialog,
-    private messsageDialog: MatDialog,
     private snackBar: MatSnackBar,
     private translateService: TranslateService
   ) {

@@ -11,6 +11,10 @@
       {{'workspace.unit-key' | translate}}
     </mat-header-cell>
     <mat-cell *matCellDef="let element" class="unit-cell">
+      <div [style.background-color]="element.state | getStateColor"
+           class="state"
+           [matTooltip]="'workspace.new-comments' | translate">
+      </div>
       <div *ngIf="element | hasNewComments"
            class="new-comments"
            [matTooltip]="'workspace.new-comments' | translate">

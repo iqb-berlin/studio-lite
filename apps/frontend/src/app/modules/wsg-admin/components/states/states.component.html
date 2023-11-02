@@ -7,7 +7,7 @@
     <mat-form-field class="text-form-field">
       <input matInput [id]="state.id.toString()" type="text" [value]="state.label" (input)="stateSelectionChange($event)"/>
     </mat-form-field>
-    <button class="delete-button" mat-icon-button (click)="deleteState(state.id)">
+    <button class="delete-button" mat-icon-button (click)="deleteState(state)">
       <mat-icon>delete</mat-icon>
     </button>
   </div>
