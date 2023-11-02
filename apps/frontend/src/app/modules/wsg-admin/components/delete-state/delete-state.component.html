@@ -1,0 +1,20 @@
+<h1 mat-dialog-title>{{typedData.title}}</h1>
+<mat-dialog-content >
+  <div [style.border-bottom-color] = "typedData.state.color" class="state">{{typedData.state.label}}</div>
+  <div>{{typedData.prompt}}</div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="true"
+  >
+    {{typedData.okButtonLabel}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+

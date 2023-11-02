@@ -206,7 +206,9 @@
   "wsg-settings": {
     "state-configs": "Status Konfigurationen",
     "add-state": "Status hinzufügen",
-    "changed": "Einstellungen geändert"
+    "changed": "Einstellungen geändert",
+    "delete-state-warning":"Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden!",
+    "delete-state":"Status löschen"
   },
   "settings": {
     "texts": "Texte",
