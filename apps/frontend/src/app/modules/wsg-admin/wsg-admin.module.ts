@@ -28,6 +28,7 @@ import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-me
 import { WorkspaceSettingsComponent } from './components/settings/settings.component';
 import { ProfilesComponent } from './components/profiles/profiles.component';
 import { StatesComponent } from './components/states/states.component';
+import { DeleteStateComponent } from './components/delete-state/delete-state.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { StatesComponent } from './components/states/states.component';
     WorkspaceMenuComponent,
     WorkspaceSettingsComponent,
     ProfilesComponent,
-    StatesComponent
+    StatesComponent,
+    DeleteStateComponent
   ],
   imports: [
     CommonModule,
