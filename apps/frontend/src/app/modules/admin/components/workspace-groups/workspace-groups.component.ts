@@ -116,7 +116,7 @@ export class WorkspaceGroupsComponent implements OnInit {
   editGroupSettings(res:{ states: State[], profiles:string[], selectedRow: number }): void {
     this.appService.dataLoading = true;
     this.backendService.setWorkspaceGroupProfiles({
-      defaultEditor: '', defaultPlayer: '', defaultSchemer: '', profiles: res.profiles
+      defaultEditor: '', defaultPlayer: '', defaultSchemer: ''
     }, res.selectedRow)
       .subscribe(
         respOk => {

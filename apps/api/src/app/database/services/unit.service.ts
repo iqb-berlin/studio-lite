@@ -36,7 +36,8 @@ export class UnitService {
         id: true,
         key: true,
         name: true,
-        groupName: true
+        groupName: true,
+        state: true
       }
     });
     if (userId && withLastSeenCommentTimeStamp) {
