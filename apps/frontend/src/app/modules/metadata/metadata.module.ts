@@ -28,6 +28,7 @@ import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.
 import { ItemProfileComponent } from './components/item-profile/item-profile.component';
 import { FormlyRepeatSectionComponent } from './components/formly-repeat-section/formly-repeat-section.component';
 import { UnitProfileComponent } from './components/unit-profile/unit-profile.component';
+import { FormlyDurationComponent } from './components/formly-duration/formly-duration.component';
 
 @NgModule({
   imports: [
@@ -75,6 +76,10 @@ import { UnitProfileComponent } from './components/unit-profile/unit-profile.com
           }
         },
         {
+          name: 'duration',
+          component: FormlyDurationComponent
+        },
+        {
           name: 'repeat',
           component: FormlyRepeatSectionComponent
         }
@@ -99,7 +104,8 @@ import { UnitProfileComponent } from './components/unit-profile/unit-profile.com
     FormlyToggleComponent,
     ItemProfileComponent,
     FormlyRepeatSectionComponent,
-    UnitProfileComponent
+    UnitProfileComponent,
+    FormlyDurationComponent
   ],
   exports: [MetadataComponent]
 })
