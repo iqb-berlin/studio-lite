@@ -34,6 +34,7 @@ export class NestedTreeComponent implements OnInit {
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   async ngOnInit() {
     const vocabulary = this.data.vocabularies.find((vocab:any) => vocab.url === this.data.props.url);
+    this.getTreeDepth(vocabulary.data);
     this.showTree(vocabulary.data);
   }
 
@@ -50,6 +51,18 @@ export class NestedTreeComponent implements OnInit {
   descriptionChange(el:{ description: string; node: SelectedNode; }) {
     const foundNode = this.nodesSelected.findIndex(node => node.id === el.node.id);
     this.nodesSelected[foundNode] = el.node;
+  }
+
+  getTreeDepth(vocab:any) {
+    let treeDepth = 0;
+    function hasNarrower(data:any) {
+      treeDepth += 1;
+      if (data.narrower) {
+        return hasNarrower(data.narrower[0]);
+      } return {};
+    }
+    hasNarrower(vocab.data.hasTopConcept[0]);
+    this.treeDepth = treeDepth;
   }
 
   showTree(vocab:any) {
@@ -109,9 +122,9 @@ export class NestedTreeComponent implements OnInit {
     return nodes.map((node: NotationNode) => {
       let description = '';
       let isSelected = false;
-      const foundElement = nodesSelected.find((val:SelectedNode) => val.id === node.id);
+      const foundElement = value.find((val:SelectedNode) => val.id === node.id);
       if (foundElement) {
-        if (this.data.props.allowMultipleValues) {
+        if (this.data.props.allowMultipleValues && nodesSelected.length >= 1) {
           this.nodesSelected.push({
             id: foundElement.id,
             notation: foundElement.notation,
@@ -140,7 +153,7 @@ export class NestedTreeComponent implements OnInit {
         selected: isSelected,
         notation: node.notation[0],
         label: node.prefLabel?.de,
-        children: node.narrower && (depth < props.maxLevel) ?
+        children: node.narrower && this.treeDepth - this.data.props.maxLevel ?
           this.mapNarrower(node.narrower, value, depth, props, nodesSelected) : []
       });
     }
