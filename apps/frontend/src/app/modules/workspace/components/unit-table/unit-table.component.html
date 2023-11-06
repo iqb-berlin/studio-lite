@@ -11,7 +11,8 @@
       {{'workspace.unit-key' | translate}}
     </mat-header-cell>
     <mat-cell *matCellDef="let element" class="unit-cell">
-      <div [style.background-color]="element.state | getStateColor"
+      <div [style.opacity]="(element.state | getStateColor) ? 1:0 "
+           [style.background-color]="element.state | getStateColor"
            class="state"
            [matTooltip]="'workspace.new-comments' | translate">
       </div>
