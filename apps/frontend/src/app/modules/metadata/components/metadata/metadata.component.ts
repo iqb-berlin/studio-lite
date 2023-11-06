@@ -10,7 +10,7 @@ import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.
   styleUrls: ['./metadata.component.scss']
 })
 export class MetadataComponent implements OnInit, OnDestroy {
-  @Output() metadataChange: EventEmitter<{ metadata: any, key: string, index: number }> = new EventEmitter();
+  @Output() metadataChange: EventEmitter<{ metadata: any, key: string, profileId: string }> = new EventEmitter();
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() itemsLoader!: BehaviorSubject<string[]>;
   @Input() language!: string;
@@ -19,7 +19,7 @@ export class MetadataComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   items!: string[];
 
-  onMetadataChange(metadata: { metadata: any, key: string, index: number }): void {
+  onMetadataChange(metadata: { metadata: any, key: string, profileId: string }): void {
     this.metadataChange.emit(metadata);
   }
 
