@@ -13,6 +13,6 @@ export class GetStateColorPipe implements PipeTransform {
   transform(id: string) {
     const states = this.workspaceService.workspaceSettings.states || [];
     const state = states[Number(id) - 1];
-    return state?.color;
+    if (state) { return state?.color; } return '';
   }
 }
