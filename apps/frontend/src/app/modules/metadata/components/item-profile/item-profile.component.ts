@@ -1,4 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  Component, Input, OnInit
+} from '@angular/core';
 import { MDProfile } from '@iqb/metadata';
 import { takeUntil } from 'rxjs';
 import { ProfileFormlyMappingDirective } from '../../directives/profile-formly-mapping.directive';
@@ -10,9 +12,9 @@ import { ProfileFormlyMappingDirective } from '../../directives/profile-formly-m
 })
 export class ItemProfileComponent extends ProfileFormlyMappingDirective implements OnInit {
   @Input() items!: string[];
-
-  override loadProfile(json: any) {
+  override async loadProfile(json: any) {
     this.profile = new MDProfile(json);
+    await this.metadataService.getProfileVocabularies(this.profile);
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
@@ -65,7 +67,7 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
     if (!Array.isArray(metadata)) return {};
     return {
       [this.metadataKey]: metadata
-        .map((item: any) => ProfileFormlyMappingDirective.mapMetaDataEntriesToFormlyModel(item.entries))
+        .map((item: any) => this.mapMetaDataEntriesToFormlyModel(item.entries))
     };
   }
 

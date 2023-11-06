@@ -3,21 +3,22 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import {
-  MDProfile,
-  MDProfileEntry,
-  MDProfileGroup,
-  MDValue,
-  TextsWithLanguageAndId,
-  TextWithLanguage
+  MDProfile, MDProfileEntry, MDProfileGroup, MDValue
 } from '@iqb/metadata';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
+import { MetadataService } from '../services/metadata.service';
 
 @Directive({
   selector: '[profileFormlyMapping]'
 })
+
 export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy {
+  constructor(
+    public metadataService: MetadataService
+  ) {}
+
   @Output() metadataChange: EventEmitter<{ metadata: any, key: string }> = new EventEmitter();
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() language!: string;
@@ -29,6 +30,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   profile!: MDProfile;
   fields!: FormlyFieldConfig[];
   model: any = {};
+  vocabulariesIdDictionary:any = {};
 
   ngUnsubscribe = new Subject<void>();
 
@@ -41,8 +43,9 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     return ProfileFormlyMappingDirective.getProfile(this.profileUrl as string);
   }
 
-  loadProfile(json: any) {
+  async loadProfile(json: any) {
     this.profile = new MDProfile(json);
+    this.vocabulariesIdDictionary = await this.metadataService.getProfileVocabularies(this.profile);
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
@@ -109,34 +112,48 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
 
   mapFormlyModelValueToMetadataValue(
     keyValue: Record<string, any>
-  ): TextsWithLanguageAndId[] | TextWithLanguage[] | string | null {
+  ) {
     if (this.profileItemKeys[keyValue[0]].type === 'text') {
       const textWithLanguages = Object.entries(keyValue[1]);
       return textWithLanguages
         .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
     }
+    if (this.profileItemKeys[keyValue[0]].type === 'vocabulary') {
+      return [{ id: keyValue[1][0]?.id, text: keyValue[1][0]?.text }];
+    }
     return keyValue[1];
   }
 
   // eslint-disable-next-line class-methods-use-this
-  mapMetadataValuesToFormlyModel(metadata: { entries: MDValue[] }): any {
+  mapMetadataValuesToFormlyModel(metadata: { entries: MDValue[] }) {
     if (!metadata || !metadata.entries) return {};
-    return ProfileFormlyMappingDirective.mapMetaDataEntriesToFormlyModel(metadata.entries);
+    return this.mapMetaDataEntriesToFormlyModel(metadata.entries);
   }
 
-  static mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
+  mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
     const model: any = {};
     entries.forEach((entry: any) => {
-      model[entry.id] = ProfileFormlyMappingDirective.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
+      model[entry.id] = this.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
     });
     return model;
   }
 
-  static mapMetaDataEntriesValueToFormlyModelValue(value: MDValue): any {
+  mapMetaDataEntriesValueToFormlyModelValue(value: MDValue): any {
     if (Array.isArray(value)) {
       if (value.length && value[0].lang) {
         return value.reduce((obj, currentValue) => ({ ...obj, [currentValue.lang]: currentValue.value }), {});
       }
+      if (value.length && value[0].id) {
+        const name = this.metadataService.vocabulariesIdDictionary[value[0].id];
+        if (name.labels.de) {
+          return [{
+            name: name.labels.de,
+            text: value[0].text,
+            id: value[0].id
+          }];
+        }
+      }
+      return [];
     }
     return value;
   }

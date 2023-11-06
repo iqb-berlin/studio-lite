@@ -6,6 +6,7 @@ import { FormControl } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 import { SelectedNode } from '../../models/types';
+import { MetadataService } from '../../services/metadata.service';
 
 interface FormlyNode extends SelectedNode {
   name:string
@@ -21,7 +22,8 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
   selectedNodes: Array<SelectedNode> = [];
 
   constructor(
-    private vocabsDialog : MatDialog
+    private vocabsDialog : MatDialog,
+    private metadataService : MetadataService
   ) {
     super();
   }
@@ -35,7 +37,6 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
 
   remove(i: number): void {
     const value = this.formControl.value;
-
     this.formControl.setValue([
       ...value.slice(0, i),
       ...value.slice(i + 1, value.length)
@@ -52,8 +53,9 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
       data: {
         value: this.formControl.value,
-        selectedNodes: this.selectedNodes,
-        props: this.props
+        selectedNodes: this.formControl.value,
+        props: this.props,
+        vocabularies: this.metadataService.vocabularies
       },
       width: '600px'
     });
@@ -63,10 +65,10 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       .subscribe(results => {
         this.formControl.reset();
         const mappedResults = results.map((result:FormlyNode) => ({
-          name: result.label,
+          name: this.metadataService.vocabulariesIdDictionary[result.id].labels.de,
           id: result.id,
           notation: result.notation,
-          description: result.description
+          text: [{ lang: 'de', value: result.description }]
         }));
         this.formControl.setValue(mappedResults);
       });
