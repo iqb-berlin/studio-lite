@@ -23,26 +23,33 @@
               </mat-form-field>
               <mat-form-field>
                 <mat-label>{{'workspace.unit-state' | translate}}</mat-label>
-                <mat-select
-                        formControlName="state"
-                        [placeholder]="'workspace.unit-state' | translate">
-                  <mat-option class="state-option" *ngFor="let state of states" [value]="state.id">
-                    <div class="fx-row-center-center"><span [style.background-color]="state.color" class="state-color"></span>{{state.label}}</div>
-                  </mat-option>
-                </mat-select>
-
+                <div class="select-state-wrapper">
+                  <mat-select
+                    class="select-state-wrapper"
+                    [(value)]="selectedStateId"
+                    formControlName="state"
+                    [style.border-bottom-color]="selectedStateColor"
+                    [placeholder]="'workspace.unit-state' | translate">
+                    <mat-option class="state-option" *ngFor="let state of states()" [value]="state.id.toString()">
+                      <div class="fx-row-center-center">
+                        <span [style.background-color]="state.color" class="state-color"></span>
+                        {{state.label}}
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                </div>
               </mat-form-field>
               <div class="fx-row-space-around-center fx-gap-10">
                 <mat-form-field class="fx-flex-fill">
-                  <mat-label>{{'workspace.group' | translate}}</mat-label>
-                  <mat-select formControlName="group"
-                              [placeholder]="'workspace.group' | translate">
-                    <mat-option [value]="''"></mat-option>
-                    <mat-option *ngFor="let group of workspaceService.workspaceSettings.unitGroups"
-                                [value]="group">
-                      {{group}}
-                    </mat-option>
-                  </mat-select>
+                    <mat-label>{{'workspace.group' | translate}}</mat-label>
+                    <mat-select formControlName="group"
+                                [placeholder]="'workspace.group' | translate">
+                      <mat-option [value]="''"></mat-option>
+                      <mat-option *ngFor="let group of workspaceService.workspaceSettings.unitGroups"
+                                  [value]="group">
+                        {{group}}
+                      </mat-option>
+                    </mat-select>
                 </mat-form-field>
                 <studio-lite-new-group-button [disabled]="unitForm.disabled"
                                               (groupNameChange)="unitForm.get('group')?.setValue($event)">
