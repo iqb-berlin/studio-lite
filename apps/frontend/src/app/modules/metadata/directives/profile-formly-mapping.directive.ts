@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import {
-  MDProfile, MDProfileEntry, MDProfileGroup, MDValue
+  MDProfile, MDProfileEntry, MDProfileGroup, MDValue, ProfileEntryParametersNumber
 } from '@iqb/metadata';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
@@ -49,7 +49,6 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
-        console.log('allMeta', metadata);
         this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
         this.fields = this.mapProfileToFormlyFieldConfig(this.profile, 'panel');
       });
@@ -79,11 +78,16 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       if (entry.parameters.format === 'multiline') {
         type = 'textarea';
       }
+    } else if (entry.parameters instanceof ProfileEntryParametersNumber) {
+      if (entry.parameters.isPeriodSeconds) {
+        type = 'duration';
+      }
     }
     const typesMapping: Record<string, string> = {
       text: 'input',
       boolean: 'formlyToggle',
       number: 'number',
+      duration: 'duration',
       vocabulary: 'chips',
       textarea: 'textarea'
     };
