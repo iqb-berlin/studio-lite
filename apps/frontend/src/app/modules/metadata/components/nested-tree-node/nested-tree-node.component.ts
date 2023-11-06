@@ -74,7 +74,7 @@ export class NestedTreeNodeComponent implements OnInit {
     if (this.params.hideTitle && !this.params.hideNumbering) { this.displayText = `${this.node.notation}`; }
     if (this.params.hideNumbering && !this.params.hideTitle) { this.displayText = `${this.node.label}`; }
     if (!this.params.hideNumbering && !this.params.hideTitle) {
-      this.node.notation ? this.displayText = `${this.node.notation} - ${this.node.label}` :
+      this.node.notation ? this.displayText = `${this.node.notation}  ${this.node.label}` :
         this.displayText = `${this.node.label}`;
     }
     if (this.node.selected) this.checkboxSelected.set(true);
