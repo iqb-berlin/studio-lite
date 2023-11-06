@@ -145,7 +145,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       }
       if (value.length && value[0].id) {
         const name = this.metadataService.vocabulariesIdDictionary[value[0].id];
-        if (name.labels.de) {
+        if (name?.labels.de) {
           return [{
             name: name.labels.de,
             text: value[0].text,
