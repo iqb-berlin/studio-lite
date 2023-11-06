@@ -1,10 +1,9 @@
 <mat-dialog-content>
-      <mat-spinner *ngIf="spinnerOn"></mat-spinner>
-      <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree" *ngIf="vocabFetched">
+      <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree"  >
       <!-- This is the tree node template for leaf nodes -->
       <!-- There is inline padding applied to this node using styles.
         This padding value depends on the mat-icon-button width. -->
-        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle >
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle  >
           <studio-lite-nested-tree-node
                   [node]="node" [selectedNodes]="this.data.value"
                   [totalSelected] =totalSelected
@@ -34,7 +33,6 @@
         </div>
       </mat-nested-tree-node>
     </mat-tree>
-      <mat-error *ngIf="!vocabFetched">{{'metadata.vocab-loading-error' | translate}}</mat-error>
 
   </mat-dialog-content>
   <mat-dialog-actions>

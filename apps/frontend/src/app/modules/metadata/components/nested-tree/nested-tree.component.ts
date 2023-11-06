@@ -27,16 +27,14 @@ export class NestedTreeComponent implements OnInit {
   ) { }
 
   @Input() treeParameters!:NestedTreeParameters;
-  vocabFetched = true;
-  spinnerOn: boolean = false;
   treeDepth:number = 0;
   totalSelected = 0;
   nodesSelected : SelectedNode[] = [];
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   async ngOnInit() {
-    const vocab = await this.fetchVocab(this.data.props.url);
-    this.showTree(vocab);
+    const vocabulary = this.data.vocabularies.find((vocab:any) => vocab.url === this.data.props.url);
+    this.showTree(vocabulary.data);
   }
 
   selectionChange(checked:{ state: boolean; node: SelectedNode; }) {
@@ -54,20 +52,6 @@ export class NestedTreeComponent implements OnInit {
     this.nodesSelected[foundNode] = el.node;
   }
 
-  async fetchVocab(url:string) : Promise<any> {
-    this.spinnerOn = true;
-    const response = await fetch(`${url}index.json`);
-    if (response.ok) {
-      this.vocabFetched = true;
-      this.vocabFetched = true; const vocab = await response.json();
-      this.spinnerOn = false;
-      return { data: vocab };
-    }
-    this.spinnerOn = false;
-    this.vocabFetched = false;
-    return { data: {} };
-  }
-
   showTree(vocab:any) {
     this.dataSource.data = vocab.data.hasTopConcept?.map(
       (topConcept: TopConcept) => {
@@ -79,7 +63,7 @@ export class NestedTreeComponent implements OnInit {
             this.nodesSelected.push({
               id: foundElement.id,
               notation: foundElement.notation,
-              description: foundElement.description,
+              description: foundElement.text,
               label: foundElement.label || foundElement.name
             });
             isSelected = true;
@@ -92,7 +76,7 @@ export class NestedTreeComponent implements OnInit {
             this.nodesSelected.push({
               id: foundElement.id,
               notation: foundElement.notation,
-              description: foundElement.description,
+              description: foundElement.text,
               label: foundElement.label || foundElement.name
             });
           }
@@ -101,7 +85,7 @@ export class NestedTreeComponent implements OnInit {
           {
             id: topConcept.id,
             name: `${(topConcept.notation && topConcept?.notation[0]) ?
-              topConcept?.notation[0] : ''} - ${topConcept.prefLabel.de}`,
+              topConcept?.notation[0] : ''}   ${topConcept.prefLabel.de}`,
             label: topConcept.prefLabel.de,
             notation: topConcept.notation && topConcept?.notation[0] ? topConcept?.notation[0] : '',
             selected: isSelected,
@@ -152,7 +136,7 @@ export class NestedTreeComponent implements OnInit {
       return ({
         id: node.id,
         description: description,
-        name: `${node.notation[0]} - ${node.prefLabel?.de}`,
+        name: `${node.notation[0]}   ${node.prefLabel?.de}`,
         selected: isSelected,
         notation: node.notation[0],
         label: node.prefLabel?.de,
