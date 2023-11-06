@@ -20,22 +20,20 @@ export class NestedTreeNodeComponent implements OnInit {
   EventEmitter<{ state: boolean; node: SelectedNode }> = new EventEmitter<{ state: boolean; node: SelectedNode }>();
 
   @Output() descriptionChange:
-  EventEmitter<{ description: string; node: SelectedNode }> = new EventEmitter<{ description: string; node: SelectedNode }>();
+  EventEmitter<{ description: string; node: SelectedNode }> =
+      new EventEmitter<{ description: string; node: SelectedNode }>();
 
   @Input() params: NestedTreeParameters = {
     url: '',
-    allowMultipleValues: true,
+    allowMultipleValues: false,
     maxLevel: 0,
     hideNumbering: false,
     hideDescription: false,
     hideTitle: false,
-    addTextLanguages: ['de', 'en']
+    addTextLanguages: []
   };
 
-  @Input() node:NotationNode = {
-    url: '', description: '', notation: '', selected: false, id: '', label: '', name: ''
-  };
-
+  @Input() node!:NotationNode;
   @Input() selectedNodes:Array<SelectedNode> = [];
   @Input() totalSelected!:number;
   onSelect() {
@@ -76,7 +74,8 @@ export class NestedTreeNodeComponent implements OnInit {
     if (this.params.hideTitle && !this.params.hideNumbering) { this.displayText = `${this.node.notation}`; }
     if (this.params.hideNumbering && !this.params.hideTitle) { this.displayText = `${this.node.label}`; }
     if (!this.params.hideNumbering && !this.params.hideTitle) {
-      this.displayText = `${this.node.notation} - ${this.node.label}`;
+      this.node.notation ? this.displayText = `${this.node.notation} - ${this.node.label}` :
+        this.displayText = `${this.node.label}`;
     }
     if (this.node.selected) this.checkboxSelected.set(true);
     if (this.node.description) this.description.set(this.node.description);

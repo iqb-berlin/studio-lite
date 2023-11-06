@@ -3,7 +3,7 @@
   <textarea matInput
             (input)="onInput($event)"
             [value]= "description()"
-            *ngIf="checkboxSelected()"
+            *ngIf="checkboxSelected() && this.params.addTextLanguages.length"
             cdkTextareaAutosize
             #autosize="cdkTextareaAutosize"
             cdkAutosizeMinRows="3"
