@@ -22,9 +22,9 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
         const codingItemId = 'codingItemId';
         this.profileItemKeys[profileItemId] = { label: 'Item ID', type: 'custom' };
         this.profileItemKeys[codingItemId] = { label: 'Variable auswählen', type: 'custom' };
-        this.currentMatadataStorageIndex = !metadata[this.metadataKey] ? 0 : metadata[this.metadataKey].length - 1;
-        this.model = !metadata[this.metadataKey] ? {} : this
-          .mapMetadataValuesToFormlyModel(metadata[this.metadataKey][this.currentMatadataStorageIndex]);
+        this.model = this
+          .mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
+
         const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
         this.fields = [
           {
@@ -64,11 +64,12 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
       });
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override mapMetadataValuesToFormlyModel(metadata: any): any {
-    if (!Array.isArray(metadata)) return {};
+    if (!metadata) return {};
+    const currentMetadataIndex = metadata.findIndex((element: any) => element.profileId === this.profile.id);
+    if (currentMetadataIndex < 0) return {};
     return {
-      [this.metadataKey]: metadata
+      [this.metadataKey]: metadata[currentMetadataIndex].metadata
         .map((item: any) => this.mapMetaDataEntriesToFormlyModel(item.entries))
     };
   }
