@@ -1,18 +1,21 @@
-<mat-form-field class="full-width">
-  <div class="fx-row-space-between-center fx-gap-10">
+<div class="fx-row-space-between-start">
+  <mat-form-field class="full-width">
     <input
       type="number"
       matInput
       min="0"
       [(ngModel)]="duration.minutes"
       (ngModelChange)="durationChange()"/>
-    <span>:</span>
-    <input
-      type="number"
-      matInput
-      min="0"
-      [(ngModel)]="duration.seconds"
-      (ngModelChange)="durationChange()"/>
-  </div>
-</mat-form-field>
+  </mat-form-field>
+  <div class="duration-separator">:</div>
+    <mat-form-field class="full-width">
+      <input
+        type="number"
+        matInput
+        min="0"
+        [(ngModel)]="duration.seconds"
+        (ngModelChange)="durationChange()"/>
+        </mat-form-field>
+</div>
+
 
