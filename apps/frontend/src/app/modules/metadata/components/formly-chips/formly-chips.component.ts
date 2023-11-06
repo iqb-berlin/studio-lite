@@ -63,7 +63,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(results => {
-        this.formControl.reset();
+        // this.formControl.reset();
         const mappedResults = results.map((result:FormlyNode) => ({
           name: this.metadataService.vocabulariesIdDictionary[result.id].labels.de,
           id: result.id,

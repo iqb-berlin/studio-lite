@@ -24,11 +24,17 @@ export class MetadataService {
         if (entry.type === 'vocabulary') vocabularyURLs.push(entryParams.url);
       }
     }
-    this.vocabularies = await Promise.all(vocabularyURLs
+    const vocabularies = await Promise.all(vocabularyURLs
       .map(async url => ({
         url: url,
         data: await this.fetchVocabulary(url)
       })));
+    if (this.vocabularies.length) {
+      this.vocabularies = [...this.vocabularies, ...vocabularies];
+    } else {
+      this.vocabularies = vocabularies;
+    }
+
     // eslint-disable-next-line no-restricted-syntax
     for (const vocabulary of this.vocabularies) {
       this.vocabulariesIdDictionary = {
