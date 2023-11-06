@@ -69,10 +69,13 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     }
   }
 
-  onMetadataChange(metadata: { metadata: any, key: string }): void {
+  onMetadataChange(metadata: { metadata: any, key: string, index: number }): void {
     // get duplicate of stored Data tu destroy the reference
     const storedMetadata = JSON.parse(JSON.stringify(this.workspaceService.unitMetadataStore?.getData().metadata));
-    storedMetadata[metadata.key] = metadata.metadata;
+    if (!storedMetadata[metadata.key]) {
+      storedMetadata[metadata.key] = [];
+    }
+    storedMetadata[metadata.key][metadata.index] = metadata.metadata;
     this.workspaceService.unitMetadataStore?.setMetadata(storedMetadata);
   }
 
