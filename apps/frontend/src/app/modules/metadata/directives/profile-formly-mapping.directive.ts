@@ -19,7 +19,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     public metadataService: MetadataService
   ) {}
 
-  @Output() metadataChange: EventEmitter<{ metadata: any, key: string }> = new EventEmitter();
+  @Output() metadataChange: EventEmitter<{ metadata: any, key: string, index: number }> = new EventEmitter();
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() language!: string;
   @Input() profileUrl!: string | undefined;
@@ -31,6 +31,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   fields!: FormlyFieldConfig[];
   model: any = {};
   vocabulariesIdDictionary:any = {};
+  currentMatadataStorageIndex = 0;
 
   ngUnsubscribe = new Subject<void>();
 
@@ -49,7 +50,9 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
-        this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
+        this.currentMatadataStorageIndex = !metadata[this.metadataKey] ? 0 : metadata[this.metadataKey].length - 1;
+        this.model = !metadata[this.metadataKey] ? {} : this
+          .mapMetadataValuesToFormlyModel(metadata[this.metadataKey][this.currentMatadataStorageIndex]);
         this.fields = this.mapProfileToFormlyFieldConfig(this.profile, 'panel');
       });
   }
@@ -87,6 +90,17 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       textarea: 'textarea'
     };
     return typesMapping[type];
+  }
+
+  configFormlyModelFromMetadata(currentMetadata: any): void {
+    if (currentMetadata) {
+      this.currentMatadataStorageIndex = currentMetadata.length - 1;
+      this.model = this
+        .mapMetadataValuesToFormlyModel(currentMetadata[this.currentMatadataStorageIndex]);
+    } else {
+      this.currentMatadataStorageIndex = 0;
+      this.model = {};
+    }
   }
 
   mapFormlyModelToMetadataValues(model: any, profileId: string): any {
@@ -206,7 +220,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
 
   onModelChange(): void {
     const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profile.id);
-    this.metadataChange.emit({ metadata, key: this.metadataKey });
+    this.metadataChange.emit({ metadata, key: this.metadataKey, index: this.currentMatadataStorageIndex });
   }
 
   ngOnDestroy(): void {

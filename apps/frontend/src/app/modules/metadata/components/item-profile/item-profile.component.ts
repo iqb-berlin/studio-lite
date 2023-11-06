@@ -22,7 +22,9 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
         const codingItemId = 'codingItemId';
         this.profileItemKeys[profileItemId] = { label: 'Item ID', type: 'custom' };
         this.profileItemKeys[codingItemId] = { label: 'Variable auswählen', type: 'custom' };
-        this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
+        this.currentMatadataStorageIndex = !metadata[this.metadataKey] ? 0 : metadata[this.metadataKey].length - 1;
+        this.model = !metadata[this.metadataKey] ? {} : this
+          .mapMetadataValuesToFormlyModel(metadata[this.metadataKey][this.currentMatadataStorageIndex]);
         const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
         this.fields = [
           {
