@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, OnInit, signal, ViewChild
 } from '@angular/core';
 import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators
@@ -9,6 +9,7 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 import { State } from '../../../admin/models/state.type';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -28,11 +29,15 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
-  states!: State[];
+  selectedStateId = 1;
+  selectedStateColor = '';
+  states = signal<State[]>([]);
+
   constructor(
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
-    public moduleService: ModuleService
+    public moduleService: ModuleService,
+    public backendService: BackendService
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
@@ -46,7 +51,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.states.set(await this.workspaceService.getWorkspaceGroupSettings());
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
       .subscribe(() => {
         this.readData();
@@ -64,7 +70,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   private setupForm() {
-    this.states = this.workspaceService.workspaceSettings.states as State[];
+    this.states.set(this.workspaceService.workspaceSettings.states as State[]);
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
@@ -102,6 +108,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         });
       }
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
+        const stateId = Number(this.unitForm.get('state')?.value);
+        this.selectedStateColor = this.states()[stateId - 1].color;
         // eslint-disable-next-line @typescript-eslint/dot-notation
         const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
         // eslint-disable-next-line @typescript-eslint/dot-notation

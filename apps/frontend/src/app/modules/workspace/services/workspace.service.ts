@@ -12,6 +12,8 @@ import {
 import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
+import { WsgAdminService } from '../../wsg-admin/services/wsg-admin.service';
+import { State } from '../../admin/models/state.type';
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +38,8 @@ export class WorkspaceService {
 
   constructor(
     private backendService: BackendService,
-    private appService: AppService
+    private appService: AppService,
+    private wsgAdminService: WsgAdminService
   ) {
     this.workspaceSettings = {
       defaultEditor: '',
@@ -96,6 +99,21 @@ export class WorkspaceService {
         this.unitList[groupName] = [u];
       }
     });
+  }
+
+  async getWorkspaceGroupSettings():Promise<State[]> {
+    let workspaceId = this.wsgAdminService.selectedWorkspaceGroupId;
+    let states !:State[];
+    this.backendService.getWorkspaceGroupList().subscribe(groupsList => {
+      const found = groupsList
+        .find(group => group.name === this.selectedWorkspaceName.split(':')[0]);
+      workspaceId = found?.id as number;
+      this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
+        this.workspaceSettings.states = res.settings.states;
+        states = res.settings.states;
+      });
+    });
+    return states;
   }
 
   async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
