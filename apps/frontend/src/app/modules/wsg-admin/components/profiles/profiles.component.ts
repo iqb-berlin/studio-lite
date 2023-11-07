@@ -57,18 +57,23 @@ export class ProfilesComponent implements OnInit {
 
   async readCsv() {
     try {
-      const response = await fetch(this.PROFILE_REGISTRY);
-      if (response.ok) {
-        this.isLoading = true;
-        const data = await response.text();
-        this.csvToObj(data, '"');
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const store of this.stores) {
-          const sanitizedUrl = store.url.replace(',', '');
-          store.profiles = await this.getProfiles(sanitizedUrl);
-          this.profileStores.push(store);
+      if (this.wsgAdminService.profileStores) {
+        this.profileStores = this.wsgAdminService.profileStores;
+      } else {
+        const response = await fetch(this.PROFILE_REGISTRY);
+        if (response.ok) {
+          this.isLoading = true;
+          const data = await response.text();
+          this.csvToObj(data, '"');
+          // eslint-disable-next-line no-restricted-syntax
+          for await (const store of this.stores) {
+            const sanitizedUrl = store.url.replace(',', '');
+            store.profiles = await this.getProfiles(sanitizedUrl);
+            this.profileStores.push(store);
+          }
+          this.wsgAdminService.profileStores = this.profileStores;
+          this.isLoading = false;
         }
-        this.isLoading = false;
       }
     } catch (err) {
       console.log('ERR', err);
