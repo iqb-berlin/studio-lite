@@ -71,7 +71,7 @@ export class MetadataService {
 
   // eslint-disable-next-line class-methods-use-this
   async fetchVocabulary(url:string) : Promise<any> {
-    const response = await fetch(`${url}index.json`);
+    const response = await fetch(`${url}index.jsonld`);
     if (response.ok) {
       const vocab = await response.json();
       return { data: vocab };

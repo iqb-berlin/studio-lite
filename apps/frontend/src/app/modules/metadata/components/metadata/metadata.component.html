@@ -8,9 +8,9 @@
                             (metadataChange)="onMetadataChange($event)">
   </studio-lite-unit-profile>
 
-  <studio-lite-item-profile *ngIf="workspaceSettings && items"
+  <studio-lite-item-profile *ngIf="workspaceSettings"
                             class="fx-flex-row-50"
-                            [items]="items"
+                            [itemsLoader]="itemsLoader"
                             [metadataKey]="'items'"
                             [profileUrl]="workspaceSettings.itemMDProfile"
                             [metadataLoader]="metadataLoader"

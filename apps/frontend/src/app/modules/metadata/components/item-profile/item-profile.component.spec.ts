@@ -5,6 +5,7 @@ import {
   FormArray, FormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
+import { BehaviorSubject } from 'rxjs';
 import { ItemProfileComponent } from './item-profile.component';
 
 describe('ItemProfileComponent', () => {
@@ -33,7 +34,7 @@ describe('ItemProfileComponent', () => {
 
     fixture = TestBed.createComponent(ItemProfileComponent);
     component = fixture.componentInstance;
-    component.items = [];
+    component.itemsLoader = new BehaviorSubject<string[]>([]);
     fixture.detectChanges();
   });
 

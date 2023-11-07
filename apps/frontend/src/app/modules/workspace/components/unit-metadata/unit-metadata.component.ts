@@ -31,6 +31,11 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.workspaceService.loadUnitMetadata().then(() => this.loadMetaData());
       });
+    this.initItemLoader();
+    this.addSubscriptionForUnitDefinitionChanges();
+  }
+
+  initItemLoader(): void {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (!this.workspaceService.unitSchemeStore) {
       this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
@@ -43,6 +48,26 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     } else {
       this.itemsLoader.next(this.getItems());
     }
+  }
+
+  addSubscriptionForUnitDefinitionChanges(): void {
+    if (this.workspaceService.unitDefinitionStore) {
+      this.subscribeUnitDefinitionChanges();
+    } else {
+      this.workspaceService.unitDefinitionStoreChanged
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          this.subscribeUnitDefinitionChanges();
+        });
+    }
+  }
+
+  private subscribeUnitDefinitionChanges() {
+    this.workspaceService.unitDefinitionStore?.dataChange
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.itemsLoader.next(this.getItems());
+      });
   }
 
   getItems(): string[] {
