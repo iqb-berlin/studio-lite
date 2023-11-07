@@ -9,6 +9,7 @@
   "close": "Schließen",
   "warning": "Warnung",
   "error": "Fehler",
+  "confirm": "Bestätigen",
   "hour": "Uhr",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
