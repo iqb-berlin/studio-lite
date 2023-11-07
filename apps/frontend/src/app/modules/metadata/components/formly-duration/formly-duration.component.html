@@ -1,21 +1,28 @@
-<div class="fx-row-space-between-start">
-  <mat-form-field class="full-width">
-    <input
-      type="number"
-      matInput
-      min="0"
-      [(ngModel)]="duration.minutes"
-      (ngModelChange)="durationChange()"/>
-  </mat-form-field>
-  <div class="duration-separator">:</div>
-    <mat-form-field class="full-width">
+<div class="duration-container">
+  <div class="fx-row-start-start">
+    <mat-form-field class="time-input">
+      <mat-label *ngIf="props.label">  </mat-label>
+      <input
+        type="number"
+        matInput
+        min="0"
+        [(ngModel)]="duration.minutes"
+        (ngModelChange)="durationChange()"/>
+    </mat-form-field>
+    <div class="duration-separator">:</div>
+    <mat-form-field class="time-input">
+      <mat-label *ngIf="props.label">  </mat-label>
       <input
         type="number"
         matInput
         min="0"
         [(ngModel)]="duration.seconds"
         (ngModelChange)="durationChange()"/>
-        </mat-form-field>
+    </mat-form-field>
+  </div>
+  <div *ngIf="props.label"
+       class="label">
+    {{props.label}}
+  </div>
 </div>
-
 
