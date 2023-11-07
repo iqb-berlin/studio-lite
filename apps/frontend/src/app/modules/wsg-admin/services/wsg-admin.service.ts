@@ -5,6 +5,7 @@ import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
   providedIn: 'root'
 })
 export class WsgAdminService {
+  profileStores!: any;
   selectedWorkspaceGroupId = 0;
   selectedWorkspaceGroupName = '';
   selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto = {
