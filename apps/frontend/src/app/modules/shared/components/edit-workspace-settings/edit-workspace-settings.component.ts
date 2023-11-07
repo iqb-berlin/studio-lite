@@ -31,7 +31,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     public wsgAdminService: WsgAdminService,
     @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow: number }
   ) {
-    this.dialogData = this.data.settings as WorkspaceSettingsDto;
+    this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
   }
 
   dialogData: WorkspaceSettingsDto;
@@ -88,7 +88,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
       this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
         this.unitMDProfiles = res.settings.profiles
           ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
-        this.itemMDProfiles = res.settings?.profiles
+        this.itemMDProfiles = res.settings.profiles
           ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
       });
     }

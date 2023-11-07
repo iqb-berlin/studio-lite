@@ -68,6 +68,8 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
         this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
         this.workspaceService.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
+        this.workspaceService.workspaceSettings.unitMDProfile = result.unitMDProfile;
+        this.workspaceService.workspaceSettings.itemMDProfile = result.itemMDProfile;
         this.workspaceService.workspaceSettings.states = result.states;
 
         this.appBackendService.setWorkspaceSettings(
