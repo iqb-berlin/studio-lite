@@ -29,6 +29,8 @@ const routes: Routes = [
       { path: 'schemer', component: UnitSchemerComponent },
       { path: 'comments', component: UnitCommentsComponent },
       { path: '**', component: UnitMetadataComponent },
+      { path: 'metadata', component: UnitMetadataComponent, outlet: 'secondary' },
+      { path: 'editor', component: UnitEditorComponent, outlet: 'secondary' },
       { path: 'preview', component: UnitPreviewComponent, outlet: 'secondary' },
       { path: 'schemer', component: UnitSchemerComponent, outlet: 'secondary' },
       { path: 'comments', component: UnitCommentsComponent, outlet: 'secondary' }
