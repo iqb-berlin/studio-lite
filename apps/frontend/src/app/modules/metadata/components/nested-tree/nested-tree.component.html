@@ -3,7 +3,7 @@
       <!-- This is the tree node template for leaf nodes -->
       <!-- There is inline padding applied to this node using styles.
         This padding value depends on the mat-icon-button width. -->
-        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle  >
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle >
           <studio-lite-nested-tree-node
             [node]="node"
             [selectedNodes]="this.data.value"
@@ -32,13 +32,14 @@
         </div>
       </mat-nested-tree-node>
     </mat-tree>
-
   </mat-dialog-content>
-  <mat-dialog-actions>
-    <button mat-raised-button
-            color="primary"
-            type="submit"
-            [mat-dialog-close]="nodesSelected">
-      Schließen
-    </button >
+<div class="fx-row-center-center">
+  <mat-dialog-actions class="fx-row-end-end">
+      <button mat-raised-button
+              color="primary"
+              type="submit"
+              [mat-dialog-close]="sortedSelection()">
+        {{'confirm' | translate}}
+      </button>
   </mat-dialog-actions>
+</div>

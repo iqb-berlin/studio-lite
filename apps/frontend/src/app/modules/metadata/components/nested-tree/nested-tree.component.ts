@@ -53,6 +53,20 @@ export class NestedTreeComponent implements OnInit {
     this.nodesSelected[foundNode] = el.node;
   }
 
+  sortedSelection() {
+    return this.nodesSelected.sort((a, b) => {
+      const nameA = a.label.toUpperCase(); // ignore upper and lowercase
+      const nameB = b.label.toUpperCase(); // ignore upper and lowercase
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+
   getTreeDepth(vocab:any) {
     let treeDepth = 0;
     function hasNarrower(data:any) {
@@ -149,7 +163,7 @@ export class NestedTreeComponent implements OnInit {
       return ({
         id: node.id,
         description: description,
-        name: `${node.notation[0]}   ${node.prefLabel?.de}`,
+        name: `${node.notation[0]} ${node.prefLabel?.de}`,
         selected: isSelected,
         notation: node.notation[0],
         label: node.prefLabel?.de,
