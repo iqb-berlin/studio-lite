@@ -1,5 +1,5 @@
 import {
-  Directive, EventEmitter, Input, OnDestroy, OnInit, Output
+  Directive, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import {
@@ -14,10 +14,17 @@ import { MetadataService } from '../services/metadata.service';
   selector: '[profileFormlyMapping]'
 })
 
-export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy {
+export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy, OnChanges {
   constructor(
     public metadataService: MetadataService
   ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const profileUrl = 'profileUrl';
+    if (!changes[profileUrl].firstChange && changes[profileUrl].previousValue !== changes[profileUrl].currentValue) {
+      this.init();
+    }
+  }
 
   @Output() metadataChange: EventEmitter<{ metadata: any, key: string, profileId: string }> = new EventEmitter();
   @Input() metadataLoader!: BehaviorSubject<any>;
@@ -35,6 +42,10 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   ngUnsubscribe = new Subject<void>();
 
   ngOnInit() {
+    this.init();
+  }
+
+  init(): void {
     this.initProfile()
       .then((profile => this.loadProfile(profile)));
   }

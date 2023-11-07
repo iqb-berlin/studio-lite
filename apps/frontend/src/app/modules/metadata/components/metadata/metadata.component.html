@@ -1,18 +1,18 @@
 <div class="fx-row-space-between-stretch fx-gap-10">
-  <studio-lite-unit-profile *ngIf="workspaceSettings"
+  <studio-lite-unit-profile *ngIf="unitMDProfile"
                             class="fx-flex-row-50"
-                            [profileUrl]="workspaceSettings.unitMDProfile"
+                            [profileUrl]="unitMDProfile"
                             [metadataKey]="'unit'"
                             [metadataLoader]="metadataLoader"
                             [language]="language"
                             (metadataChange)="onMetadataChange($event)">
   </studio-lite-unit-profile>
 
-  <studio-lite-item-profile *ngIf="workspaceSettings"
+  <studio-lite-item-profile *ngIf="itemMDProfile"
                             class="fx-flex-row-50"
                             [itemsLoader]="itemsLoader"
                             [metadataKey]="'items'"
-                            [profileUrl]="workspaceSettings.itemMDProfile"
+                            [profileUrl]="itemMDProfile"
                             [metadataLoader]="metadataLoader"
                             [language]="language"
                             (metadataChange)="onMetadataChange($event)">
