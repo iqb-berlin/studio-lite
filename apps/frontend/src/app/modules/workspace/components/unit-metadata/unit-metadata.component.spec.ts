@@ -4,7 +4,6 @@ import { Component, Input } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { UnitMetadataComponent } from './unit-metadata.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -17,7 +16,8 @@ describe('StartReviewButtonComponent', () => {
     @Input() model!: any;
     @Input() language!: string;
     @Input() metadataLoader!: BehaviorSubject<any>;
-    @Input() workspaceSettings!: WorkspaceSettingsDto;
+    @Input() unitMDProfile!: string;
+    @Input() itemMDProfile!: string;
   }
 
   beforeEach(async () => {

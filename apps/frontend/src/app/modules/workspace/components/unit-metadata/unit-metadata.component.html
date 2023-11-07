@@ -1,7 +1,8 @@
 <div class="fx-column-start-stretch full-height">
   <div class="metadata-container">
-    <studio-lite-metadata *ngIf="workspaceSettings"
-                          [workspaceSettings]="workspaceSettings"
+    <studio-lite-metadata *ngIf="workspaceSettings && workspaceSettings.unitMDProfile && workspaceSettings.itemMDProfile"
+                          [unitMDProfile]="workspaceSettings.unitMDProfile"
+                          [itemMDProfile]="workspaceSettings.itemMDProfile"
                           [metadataLoader]="metadataLoader"
                           [itemsLoader]="itemsLoader"
                           [language]="language"

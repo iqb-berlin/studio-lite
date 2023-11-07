@@ -2,7 +2,6 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
   selector: 'studio-lite-metadata',
@@ -14,7 +13,8 @@ export class MetadataComponent {
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() itemsLoader!: BehaviorSubject<string[]>;
   @Input() language!: string;
-  @Input() workspaceSettings!: WorkspaceSettings;
+  @Input() unitMDProfile!: string;
+  @Input() itemMDProfile!: string;
 
   onMetadataChange(metadata: { metadata: any, key: string, profileId: string }): void {
     this.metadataChange.emit(metadata);
