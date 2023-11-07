@@ -2,7 +2,7 @@ import {
   Component, Input, OnInit
 } from '@angular/core';
 import { MDProfile } from '@iqb/metadata';
-import { takeUntil } from 'rxjs';
+import { BehaviorSubject, take, takeUntil } from 'rxjs';
 import { ProfileFormlyMappingDirective } from '../../directives/profile-formly-mapping.directive';
 
 @Component({
@@ -11,7 +11,33 @@ import { ProfileFormlyMappingDirective } from '../../directives/profile-formly-m
   styleUrls: ['./item-profile.component.scss']
 })
 export class ItemProfileComponent extends ProfileFormlyMappingDirective implements OnInit {
-  @Input() items!: string[];
+  items: string[] = [];
+  @Input() itemsLoader!: BehaviorSubject<string[]>;
+
+  override ngOnInit() {
+    this.itemsLoader
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        take(1))
+      .subscribe(items => {
+        this.initProfile()
+          .then((profile => this.loadProfile(profile)));
+        this.items = items;
+        this.subscribeForItemChanges();
+      });
+  }
+
+  subscribeForItemChanges(): void {
+    this.itemsLoader
+      .pipe(
+        takeUntil(this.ngUnsubscribe))
+      .subscribe(items => {
+        this.initProfile()
+          .then((profile => this.loadProfile(profile)));
+        this.items = items;
+      });
+  }
+
   override async loadProfile(json: any) {
     this.profile = new MDProfile(json);
     await this.metadataService.getProfileVocabularies(this.profile);
@@ -24,44 +50,47 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
         this.profileItemKeys[codingItemId] = { label: 'Variable auswählen', type: 'custom' };
         this.model = this
           .mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
-
-        const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
-        this.fields = [
-          {
-            key: this.metadataKey,
-            type: 'repeat',
-            props: {
-              addText: 'Item-Variable hinzufügen',
-              label: 'Item Variablen bearbeiten'
-            },
-            fieldArray: {
-              wrappers: ['panel'],
-              props: {
-                label: '<ohne ID>'
-              },
-              fieldGroup: [
-                {
-                  type: 'input',
-                  key: 'profileItemId',
-                  props: {
-                    placeholder: 'Item ID',
-                    required: true
-                  }
-                },
-                {
-                  type: 'select',
-                  key: 'codingItemId',
-                  props: {
-                    placeholder: 'Variable auswählen',
-                    options: this.items.map(item => ({ value: item, label: item }))
-                  }
-                },
-                ...itemFields
-              ]
-            }
-          }
-        ];
+        this.creatFormlyFields();
       });
+  }
+
+  private creatFormlyFields(): void {
+    const itemFields = this.mapProfileToFormlyFieldConfig(this.profile, '');
+    this.fields = [
+      {
+        key: this.metadataKey,
+        type: 'repeat',
+        props: {
+          addText: 'Item-Variable hinzufügen',
+          label: 'Item Variablen bearbeiten'
+        },
+        fieldArray: {
+          wrappers: ['panel'],
+          props: {
+            label: '<ohne ID>'
+          },
+          fieldGroup: [
+            {
+              type: 'input',
+              key: 'profileItemId',
+              props: {
+                placeholder: 'Item ID',
+                required: true
+              }
+            },
+            {
+              type: 'select',
+              key: 'codingItemId',
+              props: {
+                placeholder: 'Variable auswählen',
+                options: this.items.map(item => ({ value: item, label: item }))
+              }
+            },
+            ...itemFields
+          ]
+        }
+      }
+    ];
   }
 
   override mapMetadataValuesToFormlyModel(metadata: any): any {

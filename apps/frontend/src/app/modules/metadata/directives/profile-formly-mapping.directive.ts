@@ -39,7 +39,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       .then((profile => this.loadProfile(profile)));
   }
 
-  private async initProfile() {
+  async initProfile() {
     return ProfileFormlyMappingDirective.getProfile(this.profileUrl as string);
   }
 
