@@ -135,7 +135,7 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
         .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
     }
     if (this.profileItemKeys[keyValue[0]].type === 'vocabulary') {
-      return [{ id: keyValue[1][0]?.id, text: keyValue[1][0]?.text }];
+      return keyValue[1].map((kv:any) => ({ id: kv?.id, text: kv?.text }));
     }
     return keyValue[1];
   }
@@ -162,14 +162,14 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
         return value.reduce((obj, currentValue) => ({ ...obj, [currentValue.lang]: currentValue.value }), {});
       }
       if (value.length && value[0].id) {
-        const name = this.metadataService.vocabulariesIdDictionary[value[0].id];
-        if (name?.labels.de) {
-          return [{
-            name: name.labels.de,
-            text: value[0].text,
-            id: value[0].id
-          }];
-        }
+        return value.map((v:any) => {
+          const name = this.metadataService.vocabulariesIdDictionary[v.id];
+          return {
+            name: name?.labels.de,
+            text: v.text,
+            id: v.id
+          };
+        });
       }
       return [];
     }
