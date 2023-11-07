@@ -108,8 +108,9 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         });
       }
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
-        const stateId = Number(this.unitForm.get('state')?.value);
-        this.selectedStateColor = this.states()[stateId - 1].color;
+        const stateValue = this.unitForm.get('state')?.value;
+        const stateId = Number(stateValue);
+        if (stateValue) this.selectedStateColor = this.states()[stateId - 1].color;
         // eslint-disable-next-line @typescript-eslint/dot-notation
         const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
         // eslint-disable-next-line @typescript-eslint/dot-notation
