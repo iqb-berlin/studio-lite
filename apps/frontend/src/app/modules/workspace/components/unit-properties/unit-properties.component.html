@@ -32,7 +32,7 @@
                     [placeholder]="'workspace.unit-state' | translate">
                     <mat-option class="state-option" *ngFor="let state of states()" [value]="state.id.toString()">
                       <div class="fx-row-center-center">
-                        <span [style.background-color]="state.color" class="state-color"></span>
+                        <span [style.background-color]="state?.color" class="state-color"></span>
                         {{state.label}}
                       </div>
                     </mat-option>

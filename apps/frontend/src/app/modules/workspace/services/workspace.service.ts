@@ -4,7 +4,9 @@ import {
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
-import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto
+} from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import {
   UnitMetadataStore
@@ -32,6 +34,7 @@ export class WorkspaceService {
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
   isValidFormKey = new BehaviorSubject<boolean>(true);
+  states:any = [];
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<void>();
@@ -101,19 +104,22 @@ export class WorkspaceService {
     });
   }
 
-  async getWorkspaceGroupSettings():Promise<State[]> {
+  async getWorkspaceGroupSettings():Promise<any> {
     let workspaceId = this.wsgAdminService.selectedWorkspaceGroupId;
     let states !:State[];
-    this.backendService.getWorkspaceGroupList().subscribe(groupsList => {
-      const found = groupsList
-        .find(group => group.name === this.selectedWorkspaceName.split(':')[0]);
-      workspaceId = found?.id as number;
-      this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
-        this.workspaceSettings.states = res.settings.states;
-        states = res.settings.states;
+    return new Promise((resolve, reject) => {
+      this.backendService.getWorkspaceGroupList().subscribe(groupsList => {
+        const found = groupsList
+          .find(group => group.name === this.selectedWorkspaceName.split(':')[0]);
+        workspaceId = found?.id as number;
+        this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
+          this.workspaceSettings.states = res.settings.states;
+          states = res.settings.states;
+          this.states = states;
+          resolve(states);
+        });
       });
     });
-    return states;
   }
 
   async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
@@ -157,7 +163,7 @@ export class WorkspaceService {
         this.selectedWorkspaceId, this.unitMetadataStore.getChangedData()
       ));
       if (saveOk) {
-        reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupChanged();
+        reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
         this.unitMetadataStore.applyChanges();
         this.lastChangedMetadata = new Date();
       }

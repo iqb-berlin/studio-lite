@@ -14,7 +14,7 @@
       <div [style.opacity]="(element.state | getStateColor) ? 1:0 "
            [style.background-color]="element.state | getStateColor"
            class="state"
-           [matTooltip]="'workspace.new-comments' | translate">
+           [matTooltip]="'workspace.state' | translate">
       </div>
       <div *ngIf="element | hasNewComments"
            class="new-comments"
