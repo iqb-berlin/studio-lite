@@ -3,8 +3,8 @@
     </mat-spinner>
     <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch" *ngIf="!isLoading && !isError">
       <h3>{{'metadata.assign-metadata-profiles' | translate}}</h3>
-      <div *ngFor="let store of profileStores">
-        <mat-expansion-panel>
+      <div *ngFor="let store of profileStores" class="profile-stores">
+        <mat-expansion-panel class="profile-store">
           <mat-expansion-panel-header>
             <mat-panel-title>
               {{store.title}}
