@@ -75,12 +75,12 @@ export class NestedTreeComponent implements OnInit {
         return hasNarrower(data.narrower[0]);
       } return {};
     }
-    hasNarrower(vocab.data.hasTopConcept[0]);
+    hasNarrower(vocab.hasTopConcept[0]);
     this.treeDepth = treeDepth;
   }
 
   showTree(vocab:any) {
-    this.dataSource.data = vocab.data.hasTopConcept?.map(
+    this.dataSource.data = vocab.hasTopConcept?.map(
       (topConcept: TopConcept) => {
         let description = '';
         let isSelected = false;
