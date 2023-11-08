@@ -167,7 +167,7 @@ export class NestedTreeComponent implements OnInit {
         selected: isSelected,
         notation: node.notation[0],
         label: node.prefLabel?.de,
-        children: node.narrower && this.treeDepth - this.data.props.maxLevel ?
+        children: node.narrower && (this.treeDepth <= this.data.props.maxLevel || this.data.props.maxLevel === 0) ?
           this.mapNarrower(node.narrower, value, depth, props, nodesSelected) : []
       });
     }
