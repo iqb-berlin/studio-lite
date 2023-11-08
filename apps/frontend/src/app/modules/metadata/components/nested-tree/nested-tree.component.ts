@@ -32,9 +32,11 @@ export class NestedTreeComponent implements OnInit {
   nodesSelected : SelectedNode[] = [];
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
+  vocabularyTitle = '';
   async ngOnInit() {
     const vocabulary = this.data.vocabularies.find((vocab:any) => vocab.url === this.data.props.url);
     this.getTreeDepth(vocabulary.data);
+    this.vocabularyTitle = vocabulary.data.title.de || '';
     this.showTree(vocabulary.data);
   }
 
