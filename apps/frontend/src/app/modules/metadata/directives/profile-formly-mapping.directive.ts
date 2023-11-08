@@ -180,7 +180,10 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     const groups = profile?.groups;
     return groups?.map((group: MDProfileGroup) => ({
       wrappers: wrapper ? [wrapper] : undefined,
-      props: { label: group.label },
+      props: {
+        label: group.label,
+        expanded: true
+      },
       fieldGroup:
           group.entries.map((entry: MDProfileEntry) => {
             this.registerProfileItem(entry);
