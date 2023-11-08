@@ -64,13 +64,15 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(results => {
         // this.formControl.reset();
-        const mappedResults = results.map((result:FormlyNode) => ({
-          name: this.metadataService.vocabulariesIdDictionary[result.id].labels.de,
-          id: result.id,
-          notation: result.notation,
-          text: [{ lang: 'de', value: result.description }]
-        }));
-        this.formControl.setValue(mappedResults);
+        if (results) {
+          const mappedResults = results.map((result:FormlyNode) => ({
+            name: this.metadataService.vocabulariesIdDictionary[result.id].labels.de,
+            id: result.id,
+            notation: result.notation,
+            text: [{ lang: 'de', value: result.description }]
+          }));
+          this.formControl.setValue(mappedResults);
+        }
       });
   }
 }

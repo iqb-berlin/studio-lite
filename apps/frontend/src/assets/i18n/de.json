@@ -431,6 +431,7 @@
     "copy-units": "Aufgabe(n) kopieren",
     "move": "Verschieben",
     "copy": "Kopieren",
+    "state": "Status",
     "unit-moved-or-copied": "Aufgabe(n) {{action}}",
     "unit-not-moved-or-copied": "Konnte Aufgabe(n) nicht {{action}}",
     "no-units": "Dieser Arbeitsbereich enthält keine Units!",
