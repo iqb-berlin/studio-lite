@@ -28,6 +28,7 @@ export class NestedTreeComponent implements OnInit {
 
   @Input() treeParameters!:NestedTreeParameters;
   treeDepth:number = 0;
+  currentTreeDepth:number = 0;
   totalSelected = 0;
   nodesSelected : SelectedNode[] = [];
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
@@ -120,7 +121,7 @@ export class NestedTreeComponent implements OnInit {
             selected: isSelected,
             description: description,
             children: topConcept.narrower && topConcept.narrower.length ? this.mapNarrower(
-              topConcept.narrower, this.data.value, this.treeDepth, this.data.props, this.nodesSelected
+              topConcept.narrower, this.data.value, this.currentTreeDepth, this.data.props, this.nodesSelected
             ) : []
           }
         );
@@ -168,8 +169,8 @@ export class NestedTreeComponent implements OnInit {
         name: `${node.notation[0]} ${node.prefLabel?.de}`,
         selected: isSelected,
         notation: node.notation[0],
-        label: node.prefLabel?.de,
-        children: node.narrower && (this.treeDepth <= this.data.props.maxLevel || this.data.props.maxLevel === 0) ?
+        label: `${node.prefLabel?.de}`,
+        children: node.narrower && (depth < this.data.props.maxLevel || this.data.props.maxLevel === 0) ?
           this.mapNarrower(node.narrower, value, depth, props, nodesSelected) : []
       });
     }
