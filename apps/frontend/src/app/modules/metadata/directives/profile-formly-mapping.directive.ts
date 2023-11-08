@@ -19,13 +19,6 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     public metadataService: MetadataService
   ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
-    const profileUrl = 'profileUrl';
-    if (!changes[profileUrl].firstChange && changes[profileUrl].previousValue !== changes[profileUrl].currentValue) {
-      this.init();
-    }
-  }
-
   @Output() metadataChange: EventEmitter<{ metadata: any, key: string, profileId: string }> = new EventEmitter();
   @Input() metadataLoader!: BehaviorSubject<any>;
   @Input() language!: string;
@@ -45,7 +38,14 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     this.init();
   }
 
-  init(): void {
+  ngOnChanges(changes: SimpleChanges): void {
+    const profileUrl = 'profileUrl';
+    if (!changes[profileUrl].firstChange && changes[profileUrl].previousValue !== changes[profileUrl].currentValue) {
+      this.init();
+    }
+  }
+
+  private init(): void {
     this.initProfile()
       .then((profile => this.loadProfile(profile)));
   }
@@ -191,16 +191,21 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   }
 
   static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {
-    const props = {
-      placeholder: '',
-      label: entry.label,
-      autosize: true, // Textarea
-      autosizeMinRows: 3, // Textarea
-      autosizeMaxRows: 10, // Textarea
-      min: 0, // NumberField
-      ...entry.parameters
+    const props: any = {
+      ...entry.parameters,
+      label: entry.label
     };
-    if (entry.parameters instanceof ProfileEntryParametersText) {
+    if (entry.parameters instanceof ProfileEntryParametersNumber) {
+      if (ProfileFormlyMappingDirective.mapType(entry) !== 'duration') {
+        props.min = entry.parameters.minValue;
+        props.max = entry.parameters.maxValue;
+      }
+    } else if (entry.parameters instanceof ProfileEntryParametersText) {
+      if (ProfileFormlyMappingDirective.mapType(entry) === 'textarea') {
+        props.autosize = true;
+        props.autosizeMinRows = 3;
+        props.autosizeMaxRows = 10;
+      }
       return {
         key: entry.id,
         fieldGroup: entry.parameters.textLanguages
