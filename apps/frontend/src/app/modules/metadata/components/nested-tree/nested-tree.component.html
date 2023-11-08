@@ -33,13 +33,17 @@
       </mat-nested-tree-node>
     </mat-tree>
   </mat-dialog-content>
-<div class="fx-row-center-center">
-  <mat-dialog-actions class="fx-row-end-end">
+  <mat-dialog-actions>
       <button mat-raised-button
               color="primary"
               type="submit"
               [mat-dialog-close]="sortedSelection()">
         {{'confirm' | translate}}
       </button>
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="[]">
+      {{'cancel' | translate}}
+    </button>
   </mat-dialog-actions>
-</div>
