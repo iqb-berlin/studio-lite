@@ -24,11 +24,12 @@ export class MetadataService {
         if (entry.type === 'vocabulary') vocabularyURLs.push(entryParams.url);
       }
     }
-    const vocabularies = await Promise.all(vocabularyURLs
-      .map(async url => ({
-        url: url,
-        data: await this.fetchVocabulary(url)
-      })));
+    const promises = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const url of vocabularyURLs) {
+      promises.push(this.fetchVocabulary(url));
+    }
+    const vocabularies = await Promise.all(promises);
     if (this.vocabularies.length) {
       this.vocabularies = [...this.vocabularies, ...vocabularies];
     } else {
@@ -39,7 +40,7 @@ export class MetadataService {
     for (const vocabulary of this.vocabularies) {
       this.vocabulariesIdDictionary = {
         ...this.vocabulariesIdDictionary,
-        ...this.mapVocabularyIds(vocabulary.data.data)
+        ...this.mapVocabularyIds(vocabulary.data)
       };
     }
     return this.vocabulariesIdDictionary;
@@ -74,8 +75,8 @@ export class MetadataService {
     const response = await fetch(`${url}index.jsonld`);
     if (response.ok) {
       const vocab = await response.json();
-      return { data: vocab };
+      return { data: vocab, url };
     }
-    return { data: {} };
+    return { data: {}, url };
   }
 }
