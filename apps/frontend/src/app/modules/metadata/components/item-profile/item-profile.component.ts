@@ -61,7 +61,7 @@ export class ItemProfileComponent extends ProfileFormlyMappingDirective implemen
         key: this.metadataKey,
         type: 'repeat',
         props: {
-          addText: 'Item-Variable hinzufügen'
+          addText: 'Item hinzufügen'
         },
         fieldArray: {
           wrappers: ['panel'],
