@@ -98,9 +98,10 @@ export class UnitMetadataStore {
     return Object.keys(this.changedData).length > 1;
   }
 
-  isKeyOrNameOrGroupChanged(): boolean {
+  isKeyOrNameOrGroupOrStateChanged(): boolean {
     const dataKeys = Object.keys(this.changedData);
-    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0 || dataKeys.indexOf('groupName') >= 0);
+    return (dataKeys.indexOf('key') >= 0 ||
+      dataKeys.indexOf('name') >= 0 || dataKeys.indexOf('groupName') >= 0 || dataKeys.indexOf('state') >= 0);
   }
 
   getChangedData(): UnitMetadataDto {
