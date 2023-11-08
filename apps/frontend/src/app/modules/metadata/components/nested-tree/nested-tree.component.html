@@ -38,13 +38,13 @@
       <button mat-raised-button
               color="primary"
               type="submit"
-              [mat-dialog-close]="sortedSelection()">
+              [mat-dialog-close]="nodesSelected ">
         {{'confirm' | translate}}
       </button>
     <button mat-raised-button
             color="primary"
             type="submit"
-            [mat-dialog-close]="[]">
+            [mat-dialog-close]="">
       {{'cancel' | translate}}
     </button>
   </mat-dialog-actions>

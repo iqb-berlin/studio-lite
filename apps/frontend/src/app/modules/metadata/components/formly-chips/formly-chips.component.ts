@@ -53,7 +53,6 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
       data: {
         value: this.formControl.value,
-        selectedNodes: this.formControl.value,
         props: this.props,
         vocabularies: this.metadataService.vocabularies
       },
@@ -65,12 +64,24 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       .subscribe(results => {
         // this.formControl.reset();
         if (results) {
-          const mappedResults = results.map((result:FormlyNode) => ({
-            name: this.metadataService.vocabulariesIdDictionary[result.id].labels.de,
-            id: result.id,
-            notation: result.notation,
-            text: [{ lang: 'de', value: result.description }]
-          }));
+          const mappedResults = results
+            .map((result:FormlyNode) => ({
+              name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`,
+              id: result.id,
+              notation: result.notation,
+              text: [{ lang: 'de', value: result.description }]
+            }))
+            .sort((a:FormlyNode, b:FormlyNode) => {
+              const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+              const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+              if (nameA < nameB) {
+                return -1;
+              }
+              if (nameA > nameB) {
+                return 1;
+              }
+              return 0;
+            });
           this.formControl.setValue(mappedResults);
         }
       });
