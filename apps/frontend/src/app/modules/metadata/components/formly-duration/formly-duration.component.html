@@ -5,7 +5,8 @@
       <input
         type="number"
         matInput
-        min="0"
+        [min]="minMinutes"
+        [max]="maxMinutes"
         [(ngModel)]="duration.minutes"
         (ngModelChange)="durationChange()"/>
     </mat-form-field>
@@ -15,7 +16,8 @@
       <input
         type="number"
         matInput
-        min="0"
+        [min]="minSeconds"
+        [max]="maxSeconds"
         [(ngModel)]="duration.seconds"
         (ngModelChange)="durationChange()"/>
     </mat-form-field>
