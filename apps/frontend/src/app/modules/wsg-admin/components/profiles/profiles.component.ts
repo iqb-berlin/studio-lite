@@ -35,7 +35,7 @@ export class ProfilesComponent implements OnInit {
   data:any = { name: '', id: 1 };
   fetchedProfiles: Profile[] = [];
   stores:any = [];
-  PROFILE_REGISTRY = 'http://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
+  PROFILE_REGISTRY = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
 
   @Output() hasChanged = new EventEmitter<Array<Profile>>();
 
