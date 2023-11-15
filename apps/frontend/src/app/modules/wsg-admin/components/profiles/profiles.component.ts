@@ -3,13 +3,9 @@ import {
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MDProfileStore, MDProfile } from '@iqb/metadata';
-import { WsgAdminService } from '../../services/wsg-admin.service';
+import { WsgAdminService, ProfileStoreWithProfiles } from '../../services/wsg-admin.service';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
-export type ProfileStoreWithProfiles = {
-  profileStore:MDProfileStore,
-  profiles: MDProfile[]
-};
 
 @Component({
   selector: 'studio-lite-profiles',
@@ -39,7 +35,7 @@ export class ProfilesComponent implements OnInit {
 
   async readCsv() {
     try {
-      if (this.wsgAdminService.profileStores) {
+      if (this.wsgAdminService.profileStores.length) {
         this.ProfileStoreWithProfilesCollection = this.wsgAdminService.profileStores;
       } else {
         const profileRegistryResponse = await fetch(this.PROFILE_REGISTRY);
@@ -68,6 +64,7 @@ export class ProfilesComponent implements OnInit {
               }
             }
           }
+          console.log('this.ProfileStoreWithProfilesCollection', this.ProfileStoreWithProfilesCollection);
           this.wsgAdminService.profileStores = this.ProfileStoreWithProfilesCollection;
           this.isLoading = false;
         }
