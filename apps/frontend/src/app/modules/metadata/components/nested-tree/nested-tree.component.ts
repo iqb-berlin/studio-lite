@@ -27,7 +27,7 @@ export class NestedTreeComponent implements OnInit {
   ) { }
 
   @Input() treeParameters!:NestedTreeParameters;
-  treeDepth:number = 0;
+  treeDepth:number = 1;
   currentTreeDepth:number = 0;
   totalSelected = 0;
   nodesSelected : SelectedNode[] = [];
@@ -106,9 +106,10 @@ export class NestedTreeComponent implements OnInit {
             notation: topConcept.notation && topConcept?.notation[0] ? topConcept?.notation[0] : '',
             selected: isSelected,
             description: description,
-            children: topConcept.narrower && topConcept.narrower.length ? this.mapNarrower(
-              topConcept.narrower, this.data.value, this.currentTreeDepth, this.data.props, this.nodesSelected
-            ) : []
+            children: topConcept.narrower && topConcept.narrower.length &&
+            (this.treeDepth < this.data.props.maxLevel || this.data.props.maxLevel === 0) ? this.mapNarrower(
+                topConcept.narrower, this.data.value, this.currentTreeDepth, this.data.props, this.nodesSelected
+              ) : []
           }
         );
       });
