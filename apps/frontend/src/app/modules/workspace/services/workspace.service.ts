@@ -14,13 +14,13 @@ import {
 import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
-import { WsgAdminService } from '../../wsg-admin/services/wsg-admin.service';
 import { State } from '../../admin/models/state.type';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
+  groupId!:number | undefined;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
@@ -34,15 +34,14 @@ export class WorkspaceService {
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
   isValidFormKey = new BehaviorSubject<boolean>(true);
-  states:any = [];
+  states:State[] = [];
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<void>();
 
   constructor(
     private backendService: BackendService,
-    private appService: AppService,
-    private wsgAdminService: WsgAdminService
+    private appService: AppService
   ) {
     this.workspaceSettings = {
       defaultEditor: '',
@@ -104,21 +103,17 @@ export class WorkspaceService {
     });
   }
 
-  async getWorkspaceGroupSettings():Promise<any> {
-    let workspaceId = this.wsgAdminService.selectedWorkspaceGroupId;
-    let states !:State[];
-    return new Promise((resolve, reject) => {
-      this.backendService.getWorkspaceGroupList().subscribe(groupsList => {
-        const found = groupsList
-          .find(group => group.name === this.selectedWorkspaceName.split(':')[0]);
-        workspaceId = found?.id as number;
-        this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
-          this.workspaceSettings.states = res.settings.states;
-          states = res.settings.states;
-          this.states = states;
-          resolve(states);
+  async getWorkspaceGroupStates():Promise<State[]> {
+    return new Promise(resolve => {
+      if (this.groupId) {
+        this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
+          if (res.settings) {
+            this.workspaceSettings.states = res.settings.states;
+            this.states = res.settings.states || [];
+            resolve(this.states);
+          }
         });
-      });
+      }
     });
   }
 

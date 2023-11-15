@@ -20,7 +20,7 @@ export class BackendService {
 
   setWorkspaceGroupSettings(workspaceGroupId: number, settings:WorkspaceGroupSettingsDto):Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspace-groups/`, { id: workspaceGroupId, settings: settings })
+      .patch(`${this.serverUrl}workspace-groups/${workspaceGroupId}`, { id: workspaceGroupId, settings: settings })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -89,6 +89,15 @@ export class BackendService {
   deleteWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  deleteStateInWorkspaceGroupUnits(workspaceGroupId:number, stateId:number):Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}workspace-groups/${workspaceGroupId}/${stateId}`)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

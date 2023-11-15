@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
+import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -21,6 +22,8 @@ export class UnitService {
     private unitDefinitionsRepository: Repository<UnitDefinition>,
     @InjectRepository(WorkspaceUser)
     private workspaceUserRepository: Repository<WorkspaceUser>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService
   ) {}
@@ -263,6 +266,29 @@ export class UnitService {
       scheme: unit.scheme,
       schemeType: unit.schemeType
     };
+  }
+
+  async deleteState(workspaceGroup:number, state_id: string): Promise<void> {
+    const workspaces = await this.workspaceRepository.find({
+      where: { groupId: workspaceGroup }
+    });
+    let units = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const workspace of workspaces) {
+      this.logger.log('workspace', JSON.stringify(workspace));
+      const unit = await this.unitsRepository.find({
+        where: { state: state_id, workspaceId: workspace.id }
+      });
+      this.logger.log('unit', JSON.stringify(unit));
+      if (unit.length) units = [...units, unit[0]];
+    }
+    if (units.length) {
+      // eslint-disable-next-line no-restricted-syntax
+      for await (const unit of units) {
+        unit.state = '';
+        await this.unitsRepository.save(unit);
+      }
+    }
   }
 
   async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto) {
