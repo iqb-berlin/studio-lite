@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, signal, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators
@@ -8,8 +8,8 @@ import { Subscription } from 'rxjs';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
-import { State } from '../../../admin/models/state.type';
 import { BackendService } from '../../services/backend.service';
+import { State } from '../../../admin/models/state.type';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -29,9 +29,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
-  selectedStateId = 1;
+  selectedStateId = '0';
   selectedStateColor = '';
-  states = signal<State[]>([]);
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -44,7 +43,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
-      state: this.fb.control(''),
+      state: this.fb.control('0'),
       group: this.fb.control(''),
       transcript: this.fb.control(''),
       reference: this.fb.control('')
@@ -52,7 +51,6 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.states.set(await this.workspaceService.getWorkspaceGroupSettings());
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
       .subscribe(() => {
         this.readData();
@@ -70,10 +68,10 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   private setupForm() {
-    this.states.set(this.workspaceService.workspaceSettings.states as State[]);
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      this.selectedStateId = unitMetadata.state || '0';
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
@@ -107,10 +105,11 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
           this.workspaceService.unitMetadataStore?.setSchemer(selectedValue);
         });
       }
+      this.selectedStateColor = unitMetadata.state || '0';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
-        const stateValue = this.unitForm.get('state')?.value;
-        const stateId = Number(stateValue);
-        if (stateValue) this.selectedStateColor = this.states()[stateId - 1].color;
+        const filteredState = this.workspaceService.states
+          ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
+        filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
         // eslint-disable-next-line @typescript-eslint/dot-notation
         const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
         // eslint-disable-next-line @typescript-eslint/dot-notation
@@ -126,6 +125,11 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         );
       });
       this.unitForm.enable();
+      setTimeout(() => {
+        const filteredStates = this.workspaceService.states
+          ?.filter((state:State) => state.id.toString() === unitMetadata.state);
+        filteredStates?.length ? this.selectedStateColor = filteredStates[0].color : this.selectedStateColor = '';
+      }, 1);
     } else {
       this.unitForm.setValue({
         key: '',
