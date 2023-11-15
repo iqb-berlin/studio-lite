@@ -291,6 +291,12 @@ export class UnitService {
     }
   }
 
+  async removeUnitState(id: number): Promise<void> {
+    const unit = await this.unitsRepository.findOne({ where: { id: id } });
+    await this.unitsRepository.save({ ...unit, state: '0' }
+    );
+  }
+
   async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto) {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }

@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
+  Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
@@ -21,7 +21,6 @@ import { AppVersionGuard } from '../app-version.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
-  private readonly logger = new Logger(UnitService.name);
   constructor(
     private unitService: UnitService,
     private unitUserService: UnitUserService,
@@ -249,5 +248,14 @@ export class UnitsController {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
     return this.unitService.remove(idsAsNumberArray);
+  }
+
+  @Delete(':id/state')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async deleteUnitState(@Param('id', ParseIntPipe) unitId: number) {
+    return this.unitService.removeUnitState(unitId);
   }
 }

@@ -124,8 +124,7 @@ export class WorkspaceController {
   })
   @ApiTags('workspace')
   async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
-    return this.workspaceService
-      .removeGroup(workspaceId, Buffer.from(groupName, 'hex').toString());
+    return this.workspaceService.removeGroup(workspaceId, Buffer.from(groupName, 'hex').toString());
   }
 
   @Post('upload')
