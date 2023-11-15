@@ -64,7 +64,6 @@ export class ProfilesComponent implements OnInit {
               }
             }
           }
-          console.log('this.ProfileStoreWithProfilesCollection', this.ProfileStoreWithProfilesCollection);
           this.wsgAdminService.profileStores = this.ProfileStoreWithProfilesCollection;
           this.isLoading = false;
         }
