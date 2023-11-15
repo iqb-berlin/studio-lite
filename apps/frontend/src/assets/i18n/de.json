@@ -202,14 +202,18 @@
     "vocab-loading-error": "Vokabular konnte nicht geladen werden!",
     "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",
     "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!",
-    "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!"
+    "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!",
+    "error-states": "Status Liste konnte nicht geladen werden!"
+
   },
   "wsg-settings": {
+    "save-settings": "Einstellungen speichern",
     "state-configs": "Status Konfigurationen",
     "add-state": "Status hinzufügen",
     "changed": "Einstellungen geändert",
-    "delete-state-warning":"Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden!",
-    "delete-state":"Status löschen"
+    "delete-state-warning":"Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Alle vorherigen Statusänderungen werden gespeichert.",
+    "delete-state":"Status löschen",
+    "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?"
   },
   "settings": {
     "texts": "Texte",
