@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { WorkspaceService } from '../services/workspace.service';
+import { State } from '../../admin/models/state.type';
 
 @Pipe({
   name: 'getStateColor'
@@ -10,9 +11,9 @@ export class GetStateColorPipe implements PipeTransform {
   ) {}
 
   // eslint-disable-next-line class-methods-use-this
-  transform(id: string) {
-    const states = this.workspaceService.workspaceSettings.states || [];
-    const state = states[Number(id) - 1];
-    if (state) { return state?.color; } return '';
+  async transform(id: string, property:string) {
+    const states = await this.workspaceService.getWorkspaceGroupStates() || [];
+    const filteredState = states.filter((state:State) => Number(id) === state.id);
+    if (filteredState.length) { return filteredState[0][property]; } return '';
   }
 }
