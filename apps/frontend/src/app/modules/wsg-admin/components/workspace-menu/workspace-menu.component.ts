@@ -90,6 +90,7 @@ export class WorkspaceMenuComponent {
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
               content: prompt,
+              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
               workspaceGroups: this.workspaceGroupsByUser,
               selectedRows: selectedRows,
               okButtonLabel: this.translateService.instant('move')
@@ -109,6 +110,7 @@ export class WorkspaceMenuComponent {
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
               content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
+              warning: this.translateService.instant('move-workspaces-warning'),
               workspaceGroups: this.workspaceGroupsByUser,
               okButtonLabel: this.translateService.instant('close')
             }

@@ -284,6 +284,7 @@
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
     "delete-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben gelöscht werden?",
     "move-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben verschoben werden?",
+    "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt!",
     "add-workspace": "Arbeitsbereich hinzufügen",
     "delete-selected-workspaces": "Markierte/n Arbeitsbereich/e löschen",
     "move-selected-workspaces": "Markierte/n Arbeitsbereich/e verschieben",
