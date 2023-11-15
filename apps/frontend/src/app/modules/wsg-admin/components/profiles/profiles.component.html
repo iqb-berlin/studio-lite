@@ -1,33 +1,28 @@
-
-    <mat-spinner *ngIf="isLoading">
-    </mat-spinner>
-    <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch" *ngIf="!isLoading && !isError">
-      <h3>{{'metadata.assign-metadata-profiles' | translate}}</h3>
-      <div *ngFor="let store of profileStores" class="profile-stores">
+<mat-spinner class="spinner" *ngIf="isLoading"></mat-spinner>
+<div class="container" *ngIf="!isLoading && !isError">
+    <h3>{{'metadata.assign-metadata-profiles' | translate}}</h3>
+    <form class="fx-column-start-stretch scroll-area" >
+      <div *ngFor="let collection of ProfileStoreWithProfilesCollection" class="profile-stores">
         <mat-expansion-panel class="profile-store">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              {{store.title}}
+              {{collection.profileStore.title}}
             </mat-panel-title>
-            <mat-panel-description>
-              {{store.description}}
-            </mat-panel-description>
           </mat-expansion-panel-header>
-          <div *ngFor="let profile of store.profiles">
+          <div *ngFor="let profile of collection.profiles">
             <mat-checkbox
-                    [id]="profile.label"
+                    [id]="profile.id"
                     [checked]="isChecked(profile.id)"
                     (change)="changeSelection($event)"
-                    [name]="profile.id">
+                    [name]="profile.label">
               {{profile.label}}
             </mat-checkbox>
           </div>
         </mat-expansion-panel>
       </div>
     </form>
-    <mat-error *ngIf="isError">
-      {{'metadata.error-fetching-metadata-profiles' | translate}}
-    </mat-error>
-
-
+</div>
+<mat-error *ngIf="isError">
+    {{'metadata.error-fetching-metadata-profiles' | translate}}
+</mat-error>
 

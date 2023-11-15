@@ -1,11 +1,16 @@
 .scroll-area {
-  height: calc(100% - 35px);
+  height: 700px;
   overflow-y: auto;
 }
 
-.profile-stores{
-  width:80%
-}
 .profile-store{
-  margin:5px
+  padding:20px;
+}
+
+.container{
+  margin:20px;
+}
+
+.spinner{
+  margin: auto;
 }
