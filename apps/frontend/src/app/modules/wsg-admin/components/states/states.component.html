@@ -1,19 +1,42 @@
-<h3>{{'wsg-settings.state-configs' | translate}}</h3>
-<div class="state-config">
-  <div *ngFor="let state of states" >
-    <mat-form-field class="color-form-field">
-      <input matInput [id]="state.id.toString()"  class="color-input-field" type="color" [value]="state.color" (input)="stateSelectionChange($event)"/>
-    </mat-form-field>
-    <mat-form-field class="text-form-field">
-      <input matInput [id]="state.id.toString()" type="text" [value]="state.label" (input)="stateSelectionChange($event)"/>
-    </mat-form-field>
-    <button class="delete-button" mat-icon-button (click)="deleteState(state)">
-      <mat-icon>delete</mat-icon>
-    </button>
-
-  </div>
+<mat-spinner class="spinner" *ngIf="isLoading"></mat-spinner>
+<div class="state-container" *ngIf="!isLoading && !isError">
+  <h3>{{'wsg-settings.state-configs' | translate}}</h3>
   <div class="add-state">
-    <button (click)="addState()" mat-raised-button>{{'wsg-settings.add-state' | translate}}</button>
+    <button (click)="addState()" mat-raised-button>
+      {{'wsg-settings.add-state' | translate}}
+    </button>
+  </div>
+  <div class="scroll-area">
+    <div *ngFor="let state of states " class="state" >
+      <mat-form-field class="color-form-field">
+        <input matInput
+               #colorInput
+               [id]="state.id.toString()"
+               class="color-input-field"
+               type="color"
+               [value]="state.color"
+               (input)="stateSelectionChange(colorInput.value,colorInput.type,colorInput.id)"
+        />
+      </mat-form-field>
+      <mat-form-field class="text-form-field">
+        <input matInput
+               #textInput
+               [id]="state.id.toString()"
+               type="text"
+               [value]="state.label"
+               (input)="stateSelectionChange(textInput.value,textInput.type,textInput.id)"
+        />
+      </mat-form-field>
+      <button class="delete-button"
+              [matTooltip]="'delete' | translate"
+              mat-icon-button
+              matTooltipPosition="above"
+              (click)="deleteState(state)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
   </div>
 </div>
-
+<mat-error *ngIf="isError">
+  {{'metadata.error-states' | translate}}
+</mat-error>
