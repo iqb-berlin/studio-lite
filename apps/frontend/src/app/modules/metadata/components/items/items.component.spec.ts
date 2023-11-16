@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatIconModule } from '@angular/material/icon';
+import { BehaviorSubject } from 'rxjs';
 import { ItemsComponent } from './items.component';
 
 describe('ItemsComponent', () => {
@@ -7,11 +9,18 @@ describe('ItemsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ItemsComponent]
+      declarations: [
+        ItemsComponent
+      ],
+      imports: [
+        MatIconModule
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ItemsComponent);
     component = fixture.componentInstance;
+    component.variablesLoader = new BehaviorSubject<string[]>([]);
+    component.metadata = {};
     fixture.detectChanges();
   });
 

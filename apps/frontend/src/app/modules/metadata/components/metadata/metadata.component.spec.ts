@@ -19,7 +19,7 @@ describe('MetadataComponent', () => {
 
     fixture = TestBed.createComponent(MetadataComponent);
     component = fixture.componentInstance;
-    component.variablesLoader = new BehaviorSubject<string[]>([]);
+    component.metadataLoader = new BehaviorSubject<any>([]);
     fixture.detectChanges();
   });
 
