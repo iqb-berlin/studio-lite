@@ -26,13 +26,12 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   @Input() formlyWrapper!: string;
   @Input() panelExpanded!: boolean;
 
-  profileItemKeys: Record<string, any> = {};
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
   model: any = {};
-  vocabulariesIdDictionary:any = {};
 
-  ngUnsubscribe = new Subject<void>();
+  private profileItemKeys: Record<string, any> = {};
+  private ngUnsubscribe = new Subject<void>();
 
   ngOnInit() {
     this.init();
@@ -50,14 +49,14 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       .then((profile => this.loadProfile(profile)));
   }
 
-  async initProfile() {
+  private async initProfile() {
     return ProfileFormComponent.getProfile(this.profileUrl as string);
   }
 
-  async loadProfile(json: any) {
+  private async loadProfile(json: any) {
     const profile = new MDProfile(json);
     this.metadataService.setProfile(profile, this.metadataKey);
-    this.vocabulariesIdDictionary = await this.metadataService.getProfileVocabularies(profile);
+    await this.metadataService.getProfileVocabularies(profile);
     this.model = this.mapMetadataValuesToFormlyModel(
       this.findCurrentProfileMetadata(this.metadata[this.metadataKey])
     );
@@ -69,7 +68,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return metadata.find(data => data.profileId === this.metadataService.getProfile(this.metadataKey)?.id);
   }
 
-  static async getProfile(profileUrl: string) {
+  private static async getProfile(profileUrl: string) {
     try {
       const response = await fetch(`${profileUrl}`);
       if (response.ok) {
@@ -87,7 +86,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private static mapType(entry: MDProfileEntry): string {
+  private static getFormlyType(entry: MDProfileEntry): string {
     let type: string = entry.type;
     if (entry.parameters instanceof ProfileEntryParametersText) {
       if (entry.parameters.format === 'multiline') {
@@ -109,11 +108,14 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return typesMapping[type];
   }
 
-  mapFormlyModelToMetadataValues(model: any, profileId: string): any {
+  // //////////////////////////////////
+  // Formly Model To Metadata Values //
+  // //////////////////////////////////
+  private mapFormlyModelToMetadataValues(model: any, profileId: string): any {
     return this.mapFormlyModelToMetadataValueEntries(Object.entries(model), profileId);
   }
 
-  mapFormlyModelToMetadataValueEntries(allEntries: any[], profileId: string) : any {
+  private mapFormlyModelToMetadataValueEntries(allEntries: any[], profileId: string) : any {
     return {
       entries: [
         ...allEntries
@@ -130,9 +132,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     };
   }
 
-  mapFormlyModelValueToMetadataValue(
-    keyValue: Record<string, any>
-  ) {
+  private mapFormlyModelValueToMetadataValue(keyValue: Record<string, any>) {
     if (this.profileItemKeys[keyValue[0]].type === 'text') {
       const textWithLanguages = Object.entries(keyValue[1]);
       return textWithLanguages
@@ -144,12 +144,16 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return keyValue[1];
   }
 
-  mapMetadataValuesToFormlyModel(metadata: any) {
+  // //////////////////////////////////
+  // Metadata Values To Formly Model //
+  // //////////////////////////////////
+
+  private mapMetadataValuesToFormlyModel(metadata: any) {
     if (!metadata || !metadata.entries) return {};
     return this.mapMetaDataEntriesToFormlyModel(metadata.entries);
   }
 
-  mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
+  private mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
     const model: any = {};
     entries.forEach((entry: any) => {
       model[entry.id] = this.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
@@ -157,7 +161,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return model;
   }
 
-  mapMetaDataEntriesValueToFormlyModelValue(value: MDValue): any {
+  private mapMetaDataEntriesValueToFormlyModelValue(value: MDValue): any {
     if (Array.isArray(value)) {
       if (value.length && value[0].lang) {
         return value.reduce((obj, currentValue) => ({ ...obj, [currentValue.lang]: currentValue.value }), {});
@@ -179,7 +183,11 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return value;
   }
 
-  protected mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
+  // ///////////////////////////
+  // Profile to Formly Config //
+  // ///////////////////////////
+
+  private mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
     const groups = profile?.groups;
     return groups?.map((group: MDProfileGroup) => ({
       wrappers: this.formlyWrapper ? [this.formlyWrapper] : undefined,
@@ -196,18 +204,18 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     );
   }
 
-  static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {
+  private static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {
     const props: any = {
       ...entry.parameters,
       label: entry.label
     };
     if (entry.parameters instanceof ProfileEntryParametersNumber) {
-      if (ProfileFormComponent.mapType(entry) !== 'duration') {
+      if (ProfileFormComponent.getFormlyType(entry) !== 'duration') {
         props.min = entry.parameters.minValue;
         props.max = entry.parameters.maxValue;
       }
     } else if (entry.parameters instanceof ProfileEntryParametersText) {
-      if (ProfileFormComponent.mapType(entry) === 'textarea') {
+      if (ProfileFormComponent.getFormlyType(entry) === 'textarea') {
         props.autosize = true;
         props.autosizeMinRows = 3;
         props.autosizeMaxRows = 10;
@@ -221,10 +229,10 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return ProfileFormComponent.createFormlyField(entry.id, entry, props);
   }
 
-  static createFormlyField(key: string, entry: MDProfileEntry, props: any): FormlyFieldConfig {
+  private static createFormlyField(key: string, entry: MDProfileEntry, props: any): FormlyFieldConfig {
     return {
       key,
-      type: ProfileFormComponent.mapType(entry),
+      type: ProfileFormComponent.getFormlyType(entry),
       props
     };
   }
