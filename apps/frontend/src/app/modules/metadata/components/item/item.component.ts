@@ -31,6 +31,7 @@ export class ItemComponent implements OnInit {
             key: 'itemId',
             props: {
               placeholder: 'Item ID',
+              label: 'Item ID',
               required: true
             }
           },
@@ -39,10 +40,22 @@ export class ItemComponent implements OnInit {
             key: 'variableId',
             props: {
               placeholder: 'Variable auswählen',
+              label: 'Variable auswählen',
               options: this.variables.map(variable => ({
                 value: variable,
                 label: variable
               }))
+            }
+          },
+          {
+            type: 'textarea',
+            key: 'note',
+            props: {
+              placeholder: 'Notiz',
+              label: 'Notiz',
+              autosize: true,
+              autosizeMinRows: 3,
+              autosizeMaxRows: 10
             }
           }
         ]
@@ -53,6 +66,7 @@ export class ItemComponent implements OnInit {
   private initModel(): void {
     if (this.metadata[this.itemIndex].itemId) this.model.itemId = this.metadata[this.itemIndex].itemId;
     if (this.metadata[this.itemIndex].variableId) this.model.variableId = this.metadata[this.itemIndex].variableId;
+    if (this.metadata[this.itemIndex].note) this.model.note = this.metadata[this.itemIndex].note;
   }
 
   onModelChange(): void {
