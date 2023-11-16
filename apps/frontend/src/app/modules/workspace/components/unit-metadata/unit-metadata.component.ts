@@ -13,7 +13,7 @@ import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 export class UnitMetadataComponent implements OnInit, OnDestroy {
   metadataLoader: BehaviorSubject<any> = new BehaviorSubject({});
-  itemsLoader: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+  variablesLoader: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   language: string;
   private ngUnsubscribe = new Subject<void>();
   workspaceSettings!: WorkspaceSettingsDto;
@@ -42,11 +42,11 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
         .subscribe(ues => {
           if (ues) {
             this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);
-            this.itemsLoader.next(this.getItems());
+            this.variablesLoader.next(this.getItems());
           }
         });
     } else {
-      this.itemsLoader.next(this.getItems());
+      this.variablesLoader.next(this.getItems());
     }
   }
 
@@ -66,7 +66,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     this.workspaceService.unitDefinitionStore?.dataChange
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.itemsLoader.next(this.getItems());
+        this.variablesLoader.next(this.getItems());
       });
   }
 
@@ -94,25 +94,8 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     }
   }
 
-  onMetadataChange(metadata: { metadata: any, key: string, profileId: string }): void {
-    // get duplicate of stored Data tu destroy the reference
-    const storedMetadata = JSON.parse(JSON.stringify(this.workspaceService.unitMetadataStore?.getData().metadata));
-    if (!storedMetadata[metadata.key]) {
-      storedMetadata[metadata.key] = [];
-      storedMetadata[metadata.key].push({ profileId: metadata.profileId, metadata: metadata.metadata });
-    } else {
-      const currentMetadataIndex = storedMetadata[metadata.key]
-        .findIndex((element: any) => element.profileId === metadata.profileId);
-      if (currentMetadataIndex < 0) {
-        storedMetadata[metadata.key].push({ profileId: metadata.profileId, metadata: metadata.metadata });
-      } else {
-        storedMetadata[metadata.key][currentMetadataIndex] = ({
-          profileId: metadata.profileId,
-          metadata: metadata.metadata
-        });
-      }
-    }
-    this.workspaceService.unitMetadataStore?.setMetadata(storedMetadata);
+  onMetadataChange(metadata: any): void {
+    this.workspaceService.unitMetadataStore?.setMetadata(metadata);
   }
 
   ngOnDestroy(): void {

@@ -1,0 +1,22 @@
+<mat-expansion-panel [expanded]="false">
+<mat-expansion-panel-header >
+  <mat-panel-title>{{model.itemId || "ohne Id"}}
+  </mat-panel-title>
+</mat-expansion-panel-header>
+<form [formGroup]="form">
+ <formly-form [model]="model"
+              [fields]="fields"
+              [form]="form"
+              (modelChange)="onModelChange()">
+ </formly-form>
+</form>
+<studio-lite-profile-form
+ [profileUrl]="profileUrl"
+ [metadataKey]="'itemProfiles'"
+ [metadata]="metadata[itemIndex]"
+ [language]="language"
+ [formlyWrapper]="''"
+ [panelExpanded]="false"
+ (metadataChange)="onMetadataChange($event)">
+</studio-lite-profile-form>
+</mat-expansion-panel>

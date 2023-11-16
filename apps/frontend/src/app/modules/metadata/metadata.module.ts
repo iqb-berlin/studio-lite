@@ -25,10 +25,10 @@ import { FormlyChipsComponent } from './components/formly-chips/formly-chips.com
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
 import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
-import { ItemProfileComponent } from './components/item-profile/item-profile.component';
-import { FormlyRepeatSectionComponent } from './components/formly-repeat-section/formly-repeat-section.component';
-import { UnitProfileComponent } from './components/unit-profile/unit-profile.component';
 import { FormlyDurationComponent } from './components/formly-duration/formly-duration.component';
+import { ItemsComponent } from './components/items/items.component';
+import { ItemComponent } from './components/item/item.component';
+import { ProfileFormComponent } from './components/profile-form/profile-form.component';
 
 @NgModule({
   imports: [
@@ -78,10 +78,6 @@ import { FormlyDurationComponent } from './components/formly-duration/formly-dur
         {
           name: 'duration',
           component: FormlyDurationComponent
-        },
-        {
-          name: 'repeat',
-          component: FormlyRepeatSectionComponent
         }
       ],
       validationMessages: [
@@ -102,10 +98,10 @@ import { FormlyDurationComponent } from './components/formly-duration/formly-dur
     MetadataComponent,
     FormlyWrapperPanel,
     FormlyToggleComponent,
-    ItemProfileComponent,
-    FormlyRepeatSectionComponent,
-    UnitProfileComponent,
-    FormlyDurationComponent
+    FormlyDurationComponent,
+    ItemsComponent,
+    ItemComponent,
+    ProfileFormComponent
   ],
   exports: [MetadataComponent]
 })

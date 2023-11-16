@@ -1,33 +1,33 @@
 import {
-  Directive, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
 } from '@angular/core';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { FormGroup } from '@angular/forms';
 import {
   MDProfile, MDProfileEntry, MDProfileGroup, MDValue, ProfileEntryParametersNumber
 } from '@iqb/metadata';
-import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { Subject } from 'rxjs';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
-import { MetadataService } from '../services/metadata.service';
+import { MetadataService } from '../../services/metadata.service';
 
-@Directive({
-  selector: '[profileFormlyMapping]'
+@Component({
+  selector: 'studio-lite-profile-form',
+  templateUrl: './profile-form.component.html',
+  styleUrls: ['./profile-form.component.scss']
 })
+export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
+  constructor(public metadataService: MetadataService) {}
 
-export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy, OnChanges {
-  constructor(
-    public metadataService: MetadataService
-  ) {}
-
-  @Output() metadataChange: EventEmitter<{ metadata: any, key: string, profileId: string }> = new EventEmitter();
-  @Input() metadataLoader!: BehaviorSubject<any>;
+  @Output() metadataChange: EventEmitter<any> = new EventEmitter();
   @Input() language!: string;
   @Input() profileUrl!: string | undefined;
-  @Input() metadataKey!: 'unit' | 'items';
+  @Input() metadataKey!: 'unitProfiles' | 'items' | 'itemProfiles';
+  @Input() metadata!: any;
+  @Input() formlyWrapper!: string;
+  @Input() panelExpanded!: boolean;
 
   profileItemKeys: Record<string, any> = {};
   form = new FormGroup({});
-  profile!: MDProfile;
   fields!: FormlyFieldConfig[];
   model: any = {};
   vocabulariesIdDictionary:any = {};
@@ -51,18 +51,22 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   }
 
   async initProfile() {
-    return ProfileFormlyMappingDirective.getProfile(this.profileUrl as string);
+    return ProfileFormComponent.getProfile(this.profileUrl as string);
   }
 
   async loadProfile(json: any) {
-    this.profile = new MDProfile(json);
-    this.vocabulariesIdDictionary = await this.metadataService.getProfileVocabularies(this.profile);
-    this.metadataLoader
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => {
-        this.model = this.mapMetadataValuesToFormlyModel(metadata[this.metadataKey]);
-        this.fields = this.mapProfileToFormlyFieldConfig(this.profile, 'panel');
-      });
+    const profile = new MDProfile(json);
+    this.metadataService.setProfile(profile, this.metadataKey);
+    this.vocabulariesIdDictionary = await this.metadataService.getProfileVocabularies(profile);
+    this.model = this.mapMetadataValuesToFormlyModel(
+      this.findCurrentProfileMetadata(this.metadata[this.metadataKey])
+    );
+    this.fields = this.mapProfileToFormlyFieldConfig(profile);
+  }
+
+  private findCurrentProfileMetadata(metadata: any[]): any {
+    if (!metadata || !metadata.length) return {};
+    return metadata.find(data => data.profileId === this.metadataService.getProfile(this.metadataKey)?.id);
   }
 
   static async getProfile(profileUrl: string) {
@@ -140,12 +144,9 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     return keyValue[1];
   }
 
-  mapMetadataValuesToFormlyModel(metadata: any[]) {
-    if (!metadata) return {};
-    const currentMetadataIndex = metadata
-      .findIndex((element: any) => element.profileId === this.profile.id);
-    if (currentMetadataIndex < 0) return {};
-    return this.mapMetaDataEntriesToFormlyModel(metadata[currentMetadataIndex].metadata.entries);
+  mapMetadataValuesToFormlyModel(metadata: any) {
+    if (!metadata || !metadata.entries) return {};
+    return this.mapMetaDataEntriesToFormlyModel(metadata.entries);
   }
 
   mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
@@ -178,19 +179,19 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
     return value;
   }
 
-  protected mapProfileToFormlyFieldConfig(profile: MDProfile, wrapper: string): FormlyFieldConfig[] {
+  protected mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
     const groups = profile?.groups;
     return groups?.map((group: MDProfileGroup) => ({
-      wrappers: wrapper ? [wrapper] : undefined,
+      wrappers: this.formlyWrapper ? [this.formlyWrapper] : undefined,
       props: {
         label: group.label,
-        expanded: true
+        expanded: this.panelExpanded
       },
       fieldGroup:
-          group.entries.map((entry: MDProfileEntry) => {
-            this.registerProfileItem(entry);
-            return ProfileFormlyMappingDirective.getFormlyField(entry);
-          })
+        group.entries.map((entry: MDProfileEntry) => {
+          this.registerProfileItem(entry);
+          return ProfileFormComponent.getFormlyField(entry);
+        })
     })
     );
   }
@@ -201,12 +202,12 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       label: entry.label
     };
     if (entry.parameters instanceof ProfileEntryParametersNumber) {
-      if (ProfileFormlyMappingDirective.mapType(entry) !== 'duration') {
+      if (ProfileFormComponent.mapType(entry) !== 'duration') {
         props.min = entry.parameters.minValue;
         props.max = entry.parameters.maxValue;
       }
     } else if (entry.parameters instanceof ProfileEntryParametersText) {
-      if (ProfileFormlyMappingDirective.mapType(entry) === 'textarea') {
+      if (ProfileFormComponent.mapType(entry) === 'textarea') {
         props.autosize = true;
         props.autosizeMinRows = 3;
         props.autosizeMaxRows = 10;
@@ -214,16 +215,16 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
       return {
         key: entry.id,
         fieldGroup: entry.parameters.textLanguages
-          .map(language => ProfileFormlyMappingDirective.createFormlyField(language, entry, props))
+          .map(language => ProfileFormComponent.createFormlyField(language, entry, props))
       };
     }
-    return ProfileFormlyMappingDirective.createFormlyField(entry.id, entry, props);
+    return ProfileFormComponent.createFormlyField(entry.id, entry, props);
   }
 
   static createFormlyField(key: string, entry: MDProfileEntry, props: any): FormlyFieldConfig {
     return {
       key,
-      type: ProfileFormlyMappingDirective.mapType(entry),
+      type: ProfileFormComponent.mapType(entry),
       props
     };
   }
@@ -233,8 +234,21 @@ export abstract class ProfileFormlyMappingDirective implements OnInit, OnDestroy
   }
 
   onModelChange(): void {
-    const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profile.id);
-    this.metadataChange.emit({ metadata, key: this.metadataKey, profileId: this.profile.id });
+    const profile = this.metadataService.getProfile(this.metadataKey) as MDProfile;
+    const metadata = this.mapFormlyModelToMetadataValues(this.model, profile.id);
+    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
+    if (loadedMetadata && loadedMetadata[this.metadataKey]) {
+      const index = loadedMetadata[this.metadataKey].findIndex((data: any) => data.profileId === profile.id);
+      if (index < 0) {
+        loadedMetadata[this.metadataKey].push(metadata);
+      } else {
+        loadedMetadata[this.metadataKey][index] = metadata;
+      }
+      this.metadataChange.emit(loadedMetadata);
+    } else {
+      const dataToSave = { [this.metadataKey]: [metadata] };
+      this.metadataChange.emit(dataToSave);
+    }
   }
 
   ngOnDestroy(): void {

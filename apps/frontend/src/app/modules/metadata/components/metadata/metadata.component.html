@@ -1,20 +1,43 @@
 <div class="fx-row-space-between-stretch fx-gap-10">
-  <studio-lite-unit-profile *ngIf="unitMDProfile"
-                            class="fx-flex-row-50"
-                            [profileUrl]="unitMDProfile"
-                            [metadataKey]="'unit'"
-                            [metadataLoader]="metadataLoader"
-                            [language]="language"
-                            (metadataChange)="onMetadataChange($event)">
-  </studio-lite-unit-profile>
+  <div class="fx-flex-row-50">
+    <mat-card>
+      <mat-card-header *ngIf="metadataService.profiles && metadataService.profiles['unitProfiles']">
+        <mat-card-title>
+          {{metadataService.profiles['unitProfiles'] && metadataService.profiles['unitProfiles'].label}}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-profile-form *ngIf="unitMDProfile && metaData"
+                                  [profileUrl]="unitMDProfile"
+                                  [metadataKey]="'unitProfiles'"
+                                  [metadata]="metaData"
+                                  [language]="language"
+                                  [formlyWrapper]="'panel'"
+                                  [panelExpanded]="true"
+                                  (metadataChange)="onMetadataChange($event)">
+        </studio-lite-profile-form>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
-  <studio-lite-item-profile *ngIf="itemMDProfile"
-                            class="fx-flex-row-50"
-                            [itemsLoader]="itemsLoader"
-                            [metadataKey]="'items'"
-                            [profileUrl]="itemMDProfile"
-                            [metadataLoader]="metadataLoader"
-                            [language]="language"
-                            (metadataChange)="onMetadataChange($event)">
-  </studio-lite-item-profile>
+  <div class="fx-flex-row-50">
+    <mat-card>
+      <mat-card-header *ngIf="metadataService.profiles && metadataService.profiles['itemProfiles']">
+        <mat-card-title>
+          {{metadataService.profiles['itemProfiles'] && metadataService.profiles['itemProfiles'].label}}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-items *ngIf="itemMDProfile && metaData"
+                           class="fx-flex-row-50"
+                           [profileUrl]="itemMDProfile"
+                           [metadataKey]="'items'"
+                           [metadata]="metaData"
+                           [language]="language"
+                           [variablesLoader]="variablesLoader"
+                           (metadataChange)="onMetadataChange($event)">
+        </studio-lite-items>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
