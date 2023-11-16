@@ -236,19 +236,17 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   onModelChange(): void {
     const profile = this.metadataService.getProfile(this.metadataKey) as MDProfile;
     const metadata = this.mapFormlyModelToMetadataValues(this.model, profile.id);
-    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
-    if (loadedMetadata && loadedMetadata[this.metadataKey]) {
-      const index = loadedMetadata[this.metadataKey].findIndex((data: any) => data.profileId === profile.id);
+    if (this.metadata && this.metadata[this.metadataKey]) {
+      const index = this.metadata[this.metadataKey].findIndex((data: any) => data.profileId === profile.id);
       if (index < 0) {
-        loadedMetadata[this.metadataKey].push(metadata);
+        this.metadata[this.metadataKey].push(metadata);
       } else {
-        loadedMetadata[this.metadataKey][index] = metadata;
+        this.metadata[this.metadataKey][index] = metadata;
       }
-      this.metadataChange.emit(loadedMetadata);
     } else {
-      const dataToSave = { [this.metadataKey]: [metadata] };
-      this.metadataChange.emit(dataToSave);
+      this.metadata[this.metadataKey] = [metadata];
     }
+    this.metadataChange.emit(this.metadata);
   }
 
   ngOnDestroy(): void {

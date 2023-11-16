@@ -56,19 +56,14 @@ export class ItemComponent implements OnInit {
   }
 
   onModelChange(): void {
-    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
     Object.entries(this.model).forEach((entry => {
-      loadedMetadata[this.itemIndex][entry[0]] = entry[1];
+      this.metadata[this.itemIndex][entry[0]] = entry[1];
     }));
-    this.metadataChange.emit(loadedMetadata);
+    this.metadataChange.emit(this.metadata);
   }
 
   onMetadataChange(metadata: any): void {
-    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
-    Object.entries(this.model).forEach((entry => {
-      loadedMetadata[this.itemIndex][entry[0]] = entry[1];
-    }));
-    loadedMetadata[this.itemIndex] = metadata;
-    this.metadataChange.emit(loadedMetadata);
+    this.metadata[this.itemIndex] = metadata;
+    this.metadataChange.emit(this.metadata);
   }
 }

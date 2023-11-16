@@ -90,7 +90,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
-      this.metadataLoader.next(unitMetadata.metadata);
+      this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
     }
   }
 

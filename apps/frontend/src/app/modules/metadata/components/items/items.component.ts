@@ -17,7 +17,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   @Input() variablesLoader!: BehaviorSubject<string[]>;
   @Input() profileUrl!: string | undefined;
-  @Input() metadataKey!: 'unitProfiles' | 'items';
+  @Input() metadataKey!: 'unitProfiles' | 'items' | 'itemProfiles';
   @Input() metadata!: any;
   @Input() language!: string;
 
@@ -35,18 +35,14 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   remove(index: number): void {
     this.items.splice(index, 1);
-    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
-    loadedMetadata[this.metadataKey] = this.items;
-    this.metadataChange.emit(loadedMetadata);
+    this.metadata[this.metadataKey] = this.items;
+    this.metadataChange.emit(this.metadata);
   }
 
   add(): void {
-    const items = JSON.parse(JSON.stringify(this.items));
-    items.push({});
-    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
-    loadedMetadata[this.metadataKey] = items;
-    this.items = items;
-    this.metadataChange.emit(loadedMetadata);
+    this.items.push({});
+    this.metadata[this.metadataKey] = this.items;
+    this.metadataChange.emit(this.metadata);
   }
 
   ngOnDestroy(): void {
@@ -55,8 +51,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
   }
 
   onMetadataChange(metadata: any) {
-    const loadedMetadata = JSON.parse(JSON.stringify(this.metadata));
-    loadedMetadata[this.metadataKey] = metadata;
-    this.metadataChange.emit(loadedMetadata);
+    this.metadata[this.metadataKey] = metadata;
+    this.metadataChange.emit(this.metadata);
   }
 }

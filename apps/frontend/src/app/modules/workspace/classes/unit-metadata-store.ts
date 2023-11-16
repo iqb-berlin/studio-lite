@@ -89,7 +89,7 @@ export class UnitMetadataStore {
     if (JSON.stringify(newMetadata) === JSON.stringify(this.originalData.metadata)) {
       if (this.changedData.metadata) delete this.changedData.metadata;
     } else {
-      this.changedData.metadata = newMetadata;
+      this.changedData.metadata = JSON.parse(JSON.stringify(newMetadata));
     }
     this.dataChange.emit();
   }
