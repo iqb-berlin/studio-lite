@@ -18,11 +18,11 @@ export class MetadataComponent implements OnInit, OnDestroy {
   @Input() itemMDProfile!: string;
 
   metaData!: any;
-  ngUnsubscribe = new Subject<void>();
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(public metadataService: MetadataService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
