@@ -2,7 +2,6 @@ import {
   Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
-import { MetadataService } from '../../services/metadata.service';
 
 @Component({
   selector: 'studio-lite-metadata',
@@ -19,8 +18,6 @@ export class MetadataComponent implements OnInit, OnDestroy {
 
   metaData!: any;
   private ngUnsubscribe = new Subject<void>();
-
-  constructor(public metadataService: MetadataService) {}
 
   ngOnInit(): void {
     this.metadataLoader
