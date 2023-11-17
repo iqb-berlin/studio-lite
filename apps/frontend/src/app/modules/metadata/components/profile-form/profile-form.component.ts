@@ -38,8 +38,19 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    const metadata = 'metadata';
+    if (changes[metadata] &&
+      !changes[metadata].firstChange &&
+      changes[metadata].previousValue !== changes[metadata].currentValue) {
+      this.model = this.mapMetadataValuesToFormlyModel(
+        this.findCurrentProfileMetadata(this.metadata[this.metadataKey])
+      );
+    }
+
     const profileUrl = 'profileUrl';
-    if (!changes[profileUrl].firstChange && changes[profileUrl].previousValue !== changes[profileUrl].currentValue) {
+    if (changes[profileUrl] &&
+      !changes[profileUrl].firstChange &&
+      changes[profileUrl].previousValue !== changes[profileUrl].currentValue) {
       this.init();
     }
   }

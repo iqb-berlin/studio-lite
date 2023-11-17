@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnDestroy, OnInit, Output
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
 } from '@angular/core';
 import {
   BehaviorSubject, Subject, takeUntil
@@ -10,7 +10,7 @@ import {
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss']
 })
-export class ItemsComponent implements OnInit, OnDestroy {
+export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   items: any[] = [];
   variables!: string[];
   private ngUnsubscribe = new Subject<void>();
@@ -31,6 +31,15 @@ export class ItemsComponent implements OnInit, OnDestroy {
         this.variables = variable;
       });
     this.items = this.metadata[this.metadataKey] || [];
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const metadata = 'metadata';
+    if (changes[metadata] &&
+      !changes[metadata].firstChange &&
+      changes[metadata].previousValue !== changes[metadata].currentValue) {
+      this.items = this.metadata[this.metadataKey] || [];
+    }
   }
 
   remove(index: number): void {
