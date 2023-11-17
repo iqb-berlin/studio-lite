@@ -255,7 +255,8 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   onModelChange(): void {
     const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profile.id);
     if (this.metadata && this.metadata[this.metadataKey]) {
-      const index = this.metadata[this.metadataKey].findIndex((data: any) => data.profileId === this.profile.id);
+      const index = this.metadata[this.metadataKey]
+        .findIndex((data: any) => data.profileId === this.profile.id);
       if (index < 0) {
         this.metadata[this.metadataKey].push(metadata);
       } else {
@@ -264,7 +265,16 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     } else {
       this.metadata[this.metadataKey] = [metadata];
     }
+    this.metadata[this.metadataKey] = this.defineCurrentProfile();
     this.metadataChange.emit(this.metadata);
+  }
+
+  private defineCurrentProfile(): any[] {
+    // eslint-disable-next-line no-return-assign
+    return this.metadata[this.metadataKey].map((metadata: any) => ({
+      ...metadata,
+      current: metadata.profileId === this.profile.id
+    }));
   }
 
   ngOnDestroy(): void {
