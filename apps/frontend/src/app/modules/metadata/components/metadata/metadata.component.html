@@ -2,10 +2,10 @@
   <div class="fx-flex-row-50">
     <mat-card>
       <mat-card-content>
-        <studio-lite-profile-form *ngIf="unitMDProfile && metaData"
+        <studio-lite-profile-form *ngIf="unitMDProfile && metadata"
                                   [profileUrl]="unitMDProfile"
                                   [metadataKey]="'profiles'"
-                                  [metadata]="metaData"
+                                  [metadata]="metadata"
                                   [language]="language"
                                   [formlyWrapper]="'panel'"
                                   [panelExpanded]="true"
@@ -18,11 +18,11 @@
   <div class="fx-flex-row-50">
     <mat-card>
       <mat-card-content>
-        <studio-lite-items *ngIf="itemMDProfile && metaData"
+        <studio-lite-items *ngIf="itemMDProfile && metadata"
                            class="fx-flex-row-50"
                            [profileUrl]="itemMDProfile"
                            [metadataKey]="'items'"
-                           [metadata]="metaData"
+                           [metadata]="metadata"
                            [language]="language"
                            [variablesLoader]="variablesLoader"
                            (metadataChange)="onMetadataChange($event)">

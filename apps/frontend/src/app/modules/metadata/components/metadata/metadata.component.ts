@@ -16,14 +16,14 @@ export class MetadataComponent implements OnInit, OnDestroy {
   @Input() unitMDProfile!: string;
   @Input() itemMDProfile!: string;
 
-  metaData!: any;
+  metadata!: any;
   private ngUnsubscribe = new Subject<void>();
 
   ngOnInit(): void {
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(metadata => {
-        this.metaData = metadata;
+        this.metadata = metadata;
       });
   }
 
