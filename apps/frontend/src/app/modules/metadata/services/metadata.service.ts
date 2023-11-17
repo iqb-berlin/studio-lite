@@ -9,11 +9,6 @@ type TopConcept = {
   id:string
 };
 
-interface Profiles {
-  itemProfiles?: MDProfile;
-  unitProfiles?: MDProfile;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -21,15 +16,6 @@ interface Profiles {
 export class MetadataService {
   vocabulariesIdDictionary:any = {};
   vocabularies:any = [];
-  profiles: Profiles = {};
-
-  setProfile(profile: MDProfile, key: string): void {
-    this.profiles[key as keyof Profiles] = profile;
-  }
-
-  getProfile(key: string): MDProfile | undefined {
-    return this.profiles[key as keyof Profiles];
-  }
 
   async getProfileVocabularies(profile:MDProfile) {
     const vocabularyURLs = [];

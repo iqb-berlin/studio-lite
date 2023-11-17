@@ -29,6 +29,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
   model: any = {};
+  profile!: MDProfile;
 
   private profileItemKeys: Record<string, any> = {};
   private ngUnsubscribe = new Subject<void>();
@@ -65,18 +66,17 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private async loadProfile(json: any) {
-    const profile = new MDProfile(json);
-    this.metadataService.setProfile(profile, this.metadataKey);
-    await this.metadataService.getProfileVocabularies(profile);
+    this.profile = new MDProfile(json);
+    await this.metadataService.getProfileVocabularies(this.profile);
     this.model = this.mapMetadataValuesToFormlyModel(
       this.findCurrentProfileMetadata(this.metadata[this.metadataKey])
     );
-    this.fields = this.mapProfileToFormlyFieldConfig(profile);
+    this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
   }
 
   private findCurrentProfileMetadata(metadata: any[]): any {
     if (!metadata || !metadata.length) return {};
-    return metadata.find(data => data.profileId === this.metadataService.getProfile(this.metadataKey)?.id);
+    return metadata.find(data => data.profileId === this.profile.id);
   }
 
   private static async getProfile(profileUrl: string) {
@@ -253,10 +253,9 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   onModelChange(): void {
-    const profile = this.metadataService.getProfile(this.metadataKey) as MDProfile;
-    const metadata = this.mapFormlyModelToMetadataValues(this.model, profile.id);
+    const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profile.id);
     if (this.metadata && this.metadata[this.metadataKey]) {
-      const index = this.metadata[this.metadataKey].findIndex((data: any) => data.profileId === profile.id);
+      const index = this.metadata[this.metadataKey].findIndex((data: any) => data.profileId === this.profile.id);
       if (index < 0) {
         this.metadata[this.metadataKey].push(metadata);
       } else {
