@@ -28,7 +28,7 @@ export class ItemComponent implements OnInit {
         fieldGroup: [
           {
             type: 'input',
-            key: 'itemId',
+            key: 'id',
             props: {
               placeholder: 'Item ID',
               label: 'Item ID',
@@ -49,7 +49,7 @@ export class ItemComponent implements OnInit {
           },
           {
             type: 'textarea',
-            key: 'note',
+            key: 'description',
             props: {
               placeholder: 'Notiz',
               label: 'Notiz',
@@ -64,9 +64,9 @@ export class ItemComponent implements OnInit {
   }
 
   private initModel(): void {
-    if (this.metadata[this.itemIndex].itemId) this.model.itemId = this.metadata[this.itemIndex].itemId;
+    if (this.metadata[this.itemIndex].id) this.model.id = this.metadata[this.itemIndex].id;
     if (this.metadata[this.itemIndex].variableId) this.model.variableId = this.metadata[this.itemIndex].variableId;
-    if (this.metadata[this.itemIndex].note) this.model.note = this.metadata[this.itemIndex].note;
+    if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
   }
 
   onModelChange(): void {

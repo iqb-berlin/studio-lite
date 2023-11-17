@@ -21,7 +21,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   @Output() metadataChange: EventEmitter<any> = new EventEmitter();
   @Input() language!: string;
   @Input() profileUrl!: string | undefined;
-  @Input() metadataKey!: 'unitProfiles' | 'items' | 'itemProfiles';
+  @Input() metadataKey!: 'profiles' | 'items';
   @Input() metadata!: any;
   @Input() formlyWrapper!: string;
   @Input() panelExpanded!: boolean;

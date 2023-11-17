@@ -17,7 +17,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() variablesLoader!: BehaviorSubject<string[]>;
   @Input() profileUrl!: string | undefined;
-  @Input() metadataKey!: 'unitProfiles' | 'items' | 'itemProfiles';
+  @Input() metadataKey!: 'profiles' | 'items';
   @Input() metadata!: any;
   @Input() language!: string;
 
