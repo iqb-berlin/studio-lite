@@ -152,11 +152,9 @@ export class WorkspaceController {
     @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
     const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
     const file = await UnitDownloadClass.get(
-      this.workspaceService,
       this.unitService,
       this.veronaModuleService,
       this.settingService,
-      workspaceId,
       unitDownloadSettings
     );
     return new StreamableFile(file);

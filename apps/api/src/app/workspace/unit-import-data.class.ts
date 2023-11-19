@@ -11,6 +11,7 @@ export class UnitImportData {
   reference: string;
   definition: string;
   definitionFileName: string;
+  metadataFileName:string;
   player: string;
   editor: string;
   schemer: string;
@@ -82,6 +83,8 @@ export class UnitImportData {
     if (this.key.length === 0) throw new Error('unit id missing');
     const unitLabelElement = metadataElement.find('Label').first();
     this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
+    const unitMetadataReferenceElement = metadataElement.find('Reference').first();
+    this.metadataFileName = unitMetadataReferenceElement.length > 0 ? unitMetadataReferenceElement.text() : '';
     const unitDescriptionElement = metadataElement.find('Description').first();
     this.description =
       unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';

@@ -343,7 +343,6 @@ export class WorkspaceService {
         files.push(f);
       }
     });
-
     const unitData: UnitImportData[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];
@@ -370,6 +369,11 @@ export class WorkspaceService {
           u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
           usedFiles.push(u.definitionFileName);
         }
+
+        if (u.metadataFileName && notXmlFiles[u.metadataFileName]) {
+          u.metadataFileName = notXmlFiles[u.metadataFileName].buffer.toString();
+          usedFiles.push(u.metadataFileName);
+        }
         await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition,
           variables: u.baseVariables
@@ -392,6 +396,7 @@ export class WorkspaceService {
           editor: u.editor,
           player: u.player,
           schemer: u.schemer,
+          metadata: u.metadataFileName,
           description: u.description,
           transcript: u.transcript,
           reference: u.reference,
