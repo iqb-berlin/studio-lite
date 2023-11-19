@@ -7,11 +7,13 @@
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle >
           <studio-lite-nested-tree-node
             [node]="node"
-            [selectedNodes]="this.data.value"
-            [totalSelected] =totalSelected
+            [selectedNodes]= "this.data.value"
+            [totalSelected]= totalSelected
             [params]="data.props"
+            [expandableNode]="false"
             (selectionChange)="selectionChange($event)"
-            (descriptionChange)="descriptionChange($event)">
+            (descriptionChange)="descriptionChange($event)"
+          >
           </studio-lite-nested-tree-node>
         </mat-tree-node>
       <!-- This is the tree node template for expandable nodes -->
@@ -23,7 +25,16 @@
               {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
             </mat-icon>
           </button>
-          {{node.name}}
+          {{node.children | json}}
+          <studio-lite-nested-tree-node
+            [node]="node"
+            [selectedNodes]= "this.data.value"
+            [totalSelected]= totalSelected
+            [params]="data.props"
+            [expandableNode]="true"
+            (selectionChange)="selectionChange($event)"
+            (descriptionChange)="descriptionChange($event)">
+          </studio-lite-nested-tree-node>
         </div>
         <!-- There is inline padding applied to this div using styles.
             This padding value depends on the mat-icon-button width.  -->
@@ -42,9 +53,9 @@
         {{'confirm' | translate}}
       </button>
     <button mat-raised-button
-            color="primary"
             type="submit"
             [mat-dialog-close]="">
       {{'cancel' | translate}}
     </button>
   </mat-dialog-actions>
+

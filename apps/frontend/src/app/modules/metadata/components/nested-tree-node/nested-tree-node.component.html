@@ -1,13 +1,17 @@
 <div class="container">
-  <mat-checkbox
-    [disabled]="!params.allowMultipleValues && totalSelected >= 1 && !checkboxSelected()"
-    [checked]="node.selected"
-    (click)="onSelect()"
-  >
-    {{displayText}}
-  </mat-checkbox>
+  <div class="fx-row-space-around-center   ">
+    <mat-checkbox
+      #checkbox
+      [disabled]="!params.allowMultipleValues && totalSelected >= 1 && !checkboxSelected()"
+      [checked]="node.selected"
+      (click)="onSelect()"
+    ></mat-checkbox>
+    <span class="notation" *ngIf="!this.params.hideNumbering">{{node.notation}}</span>
+    <span *ngIf="!this.params.hideTitle">{{node.label}}</span>
+  </div>
   <textarea matInput
-            (input)="onInput($event)"
+            #input
+            (input)="onInput(input.value)"
             [value]= "description()"
             *ngIf="checkboxSelected() && this.params.addTextLanguages.length"
             cdkTextareaAutosize

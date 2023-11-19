@@ -1,7 +1,8 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output, signal
+  Component, EventEmitter, Input, OnInit, Output, signal, ViewChild
 } from '@angular/core';
 
+import { MatCheckbox } from '@angular/material/checkbox';
 import { NestedTreeParameters, NotationNode, SelectedNode } from '../../models/types';
 
 @Component({
@@ -12,12 +13,13 @@ import { NestedTreeParameters, NotationNode, SelectedNode } from '../../models/t
 })
 
 export class NestedTreeNodeComponent implements OnInit {
+  @ViewChild('checkbox') matCheckbox!:MatCheckbox;
   checkboxSelected = signal<boolean>(false);
   description = signal<string>('');
-  displayText: string = '';
 
   @Output() selectionChange:
-  EventEmitter<{ state: boolean; node: SelectedNode }> = new EventEmitter<{ state: boolean; node: SelectedNode }>();
+  EventEmitter<{ state: boolean; node: SelectedNode, expandable:boolean }> =
+      new EventEmitter<{ state: boolean; node: SelectedNode, expandable:boolean }>();
 
   @Output() descriptionChange:
   EventEmitter<{ description: string; node: SelectedNode }> =
@@ -36,6 +38,7 @@ export class NestedTreeNodeComponent implements OnInit {
   @Input() node!:NotationNode;
   @Input() selectedNodes:Array<SelectedNode> = [];
   @Input() totalSelected!:number;
+  @Input() expandableNode!:boolean;
   onSelect() {
     this.selectionChange.emit({
       state: !this.checkboxSelected(),
@@ -44,13 +47,14 @@ export class NestedTreeNodeComponent implements OnInit {
         label: this.node.label || '',
         notation: this.node.notation || '',
         description: this.node.description
-      }
+      },
+      expandable: this.expandableNode
     });
     this.checkboxSelected.set(!this.checkboxSelected());
   }
 
-  onInput(e:any) {
-    this.description.set(e.target.value);
+  onInput(value:string) {
+    this.description.set(value);
     this.descriptionChange.emit({
       description: this.description(),
       node: {
@@ -71,12 +75,6 @@ export class NestedTreeNodeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.params.hideTitle && !this.params.hideNumbering) { this.displayText = `${this.node.notation}`; }
-    if (this.params.hideNumbering && !this.params.hideTitle) { this.displayText = `${this.node.label}`; }
-    if (!this.params.hideNumbering && !this.params.hideTitle) {
-      this.node.notation ? this.displayText = `${this.node.notation}  ${this.node.label}` :
-        this.displayText = `${this.node.label}`;
-    }
     if (this.node.selected) this.checkboxSelected.set(true);
     if (this.node.description) this.description.set(this.node.description);
   }

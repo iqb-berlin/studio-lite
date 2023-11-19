@@ -41,12 +41,14 @@ export class NestedTreeComponent implements OnInit {
     this.showTree(vocabulary.data);
   }
 
-  selectionChange(checked:{ state: boolean; node: SelectedNode; }) {
-    if (checked.state) {
-      this.nodesSelected.push(checked.node);
+  selectionChange(checkedNode: { state:boolean, node:SelectedNode, expandable:boolean }) {
+    // if (checkedNode.expandable) {}
+
+    if (checkedNode.state) {
+      this.nodesSelected.push(checkedNode.node);
       this.totalSelected += 1;
     } else {
-      this.nodesSelected = this.nodesSelected.filter(node => node.id !== checked.node.id);
+      this.nodesSelected = this.nodesSelected.filter(node => node.id !== checkedNode.node.id);
       this.totalSelected -= 1;
     }
   }
