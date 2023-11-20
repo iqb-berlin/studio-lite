@@ -11,6 +11,7 @@ export class UnitImportData {
   reference: string;
   definition: string;
   definitionFileName: string;
+  metadata:string;
   metadataFileName:string;
   player: string;
   editor: string;
@@ -34,8 +35,6 @@ export class UnitImportData {
     if (this.definition || this.definitionFileName) {
       this.setBaseVariables(xmlDocument);
       this.setCodingSchemeRef(xmlDocument);
-    } else {
-      throw new Error('definition and definition file empty');
     }
   }
 
@@ -69,7 +68,7 @@ export class UnitImportData {
         this.editor = definitionElement.attr('editor');
         const lastChangedDefinition = definitionElement.attr('lastchange');
         if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
-        this.definition = definitionElement.text();
+        this.definition = definitionElement.text() || '';
       }
     }
   }
@@ -84,7 +83,8 @@ export class UnitImportData {
     const unitLabelElement = metadataElement.find('Label').first();
     this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
     const unitMetadataReferenceElement = metadataElement.find('Reference').first();
-    this.metadataFileName = unitMetadataReferenceElement.length > 0 ? unitMetadataReferenceElement.text() : '';
+    this.metadataFileName = unitMetadataReferenceElement.length > 0 ?
+      this.getFolder() + unitMetadataReferenceElement.text() : '';
     const unitDescriptionElement = metadataElement.find('Description').first();
     this.description =
       unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';

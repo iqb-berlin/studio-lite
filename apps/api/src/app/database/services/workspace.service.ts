@@ -350,7 +350,7 @@ export class WorkspaceService {
       if (f.mimetype === 'text/xml') {
         try {
           unitData.push(new UnitImportData(f));
-        } catch {
+        } catch (e) {
           functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.xml-parse' });
           usedFiles.push(f.originalname);
         }
@@ -371,18 +371,13 @@ export class WorkspaceService {
         }
 
         if (u.metadataFileName && notXmlFiles[u.metadataFileName]) {
-          u.metadataFileName = notXmlFiles[u.metadataFileName].buffer.toString();
+          u.metadata = JSON.parse(notXmlFiles[u.metadataFileName].buffer.toString());
           usedFiles.push(u.metadataFileName);
         }
         await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition,
           variables: u.baseVariables
         });
-        if (!u.definition) {
-          functionReturn.messages.push(
-            { objectKey: u.fileName, messageKey: 'unit-upload.api-warning.missing-definition' }
-          );
-        }
         if (u.codingSchemeFileName && notXmlFiles[u.codingSchemeFileName]) {
           u.codingScheme = notXmlFiles[u.codingSchemeFileName].buffer.toString();
           usedFiles.push(u.codingSchemeFileName);
@@ -396,7 +391,7 @@ export class WorkspaceService {
           editor: u.editor,
           player: u.player,
           schemer: u.schemer,
-          metadata: u.metadataFileName,
+          metadata: u.metadata,
           description: u.description,
           transcript: u.transcript,
           reference: u.reference,
