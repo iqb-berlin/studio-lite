@@ -25,7 +25,6 @@
               {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
             </mat-icon>
           </button>
-          {{node.children | json}}
           <studio-lite-nested-tree-node
             [node]="node"
             [selectedNodes]= "this.data.value"
