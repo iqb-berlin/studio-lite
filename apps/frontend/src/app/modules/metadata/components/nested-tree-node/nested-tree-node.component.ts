@@ -46,7 +46,8 @@ export class NestedTreeNodeComponent implements OnInit {
         id: this.node.id,
         label: this.node.label || '',
         notation: this.node.notation || '',
-        description: this.node.description
+        description: this.node.description,
+        children: this.node.children
       },
       expandable: this.expandableNode
     });

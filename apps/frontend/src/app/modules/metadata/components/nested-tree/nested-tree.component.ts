@@ -42,7 +42,39 @@ export class NestedTreeComponent implements OnInit {
   }
 
   selectionChange(checkedNode: { state:boolean, node:SelectedNode, expandable:boolean }) {
-    // if (checkedNode.expandable) {}
+    if (checkedNode.expandable) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const child of checkedNode.node.children || []) {
+        checkedNode.state ? child.selected = true : child.selected = false;
+        checkedNode.node.indeterminate = true;
+        this.nodesSelected.map(obj => {
+          const found = this.nodesSelected.find(o => o.id === checkedNode.node.id) || obj;
+          return { ...found, indeterminate: true };
+        });
+        // const parent = this.nodesSelected.filter((node:SelectedNode) => node.id === checkedNode.node.id);
+
+        this.nodesSelected.push({
+          id: child.id,
+          notation: child.notation,
+          label: child.label || '',
+          description: child.description,
+          children: child.children
+        });
+        if (child.children) {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const childChild of child.children || []) {
+            this.nodesSelected.push({
+              id: child.id,
+              notation: child.notation,
+              label: child.label || '',
+              description: child.description,
+              children: child.children
+            });
+            childChild.selected = !childChild.selected;
+          }
+        }
+      }
+    }
 
     if (checkedNode.state) {
       this.nodesSelected.push(checkedNode.node);
@@ -108,6 +140,7 @@ export class NestedTreeComponent implements OnInit {
             notation: topConcept.notation && topConcept?.notation[0] ? topConcept?.notation[0] : '',
             selected: isSelected,
             description: description,
+            level: this.currentTreeDepth,
             children: topConcept.narrower && topConcept.narrower.length &&
             (this.treeDepth < this.data.props.maxLevel || this.data.props.maxLevel === 0) ? this.mapNarrower(
                 topConcept.narrower, this.data.value, this.currentTreeDepth, this.data.props, this.nodesSelected
@@ -158,6 +191,7 @@ export class NestedTreeComponent implements OnInit {
         name: `${node.notation[0]} ${node.prefLabel?.de}`,
         selected: isSelected,
         notation: node.notation[0],
+        level: depth,
         label: `${node.prefLabel?.de}`,
         children: node.narrower && (depth < this.data.props.maxLevel || this.data.props.maxLevel === 0) ?
           this.mapNarrower(node.narrower, value, depth, props, nodesSelected) : []

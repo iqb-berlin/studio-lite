@@ -1,10 +1,11 @@
 <div class="container">
-  <div class="fx-row-space-around-center   ">
+  <div class="fx-row-space-around-center">
     <mat-checkbox
       #checkbox
       [disabled]="!params.allowMultipleValues && totalSelected >= 1 && !checkboxSelected()"
       [checked]="node.selected"
       (click)="onSelect()"
+      [indeterminate]="node.indeterminate || false"
     ></mat-checkbox>
     <span class="notation" *ngIf="!this.params.hideNumbering">{{node.notation}}</span>
     <span *ngIf="!this.params.hideTitle">{{node.label}}</span>

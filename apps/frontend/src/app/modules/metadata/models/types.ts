@@ -2,7 +2,9 @@ export type SelectedNode = {
   id: string,
   notation:string,
   label:string,
-  description:string
+  description:string,
+  indeterminate?:boolean,
+  children?:NotationNode[] | [],
 };
 
 export type NotationNode = {
@@ -10,7 +12,9 @@ export type NotationNode = {
   notation:string,
   description:string,
   label?:string,
+  level:number,
   name:string,
+  indeterminate?:boolean,
   children?: NotationNode[] | [],
   url?:string,
   prefLabel?:{
