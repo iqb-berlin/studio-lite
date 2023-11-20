@@ -20,7 +20,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
   navTabs: { name: string; duplicable: boolean }[] = [
     { name: 'properties', duplicable: false },
-    { name: 'metadata', duplicable: true },
     { name: 'editor', duplicable: true },
     { name: 'preview', duplicable: true },
     { name: 'schemer', duplicable: true },

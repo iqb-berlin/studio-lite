@@ -33,7 +33,6 @@ import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { NewUnitComponent } from './components/new-unit/new-unit.component';
 import { SelectUnitComponent } from './components/select-unit/select-unit.component';
 import { MoveUnitComponent } from './components/move-unit/move-unit.component';
-import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './components/save-or-discard/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
@@ -125,7 +124,6 @@ import { GetStateColorPipe } from './pipes/get-state-color.pipe';
     NewUnitComponent,
     SelectUnitComponent,
     MoveUnitComponent,
-    UnitMetadataComponent,
     UnitEditorComponent,
     SaveOrDiscardComponent,
     UnitPreviewComponent,
