@@ -9,11 +9,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { environment } from '../../../../../environments/environment';
 import { UnitPropertiesComponent } from './unit-properties.component';
 
-describe('StartReviewButtonComponent', () => {
+describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;
   let fixture: ComponentFixture<UnitPropertiesComponent>;
 
@@ -45,6 +46,7 @@ describe('StartReviewButtonComponent', () => {
         HttpClientModule,
         ReactiveFormsModule,
         MatCardModule,
+        MatExpansionModule,
         TranslateModule.forRoot()
       ],
       providers: [{

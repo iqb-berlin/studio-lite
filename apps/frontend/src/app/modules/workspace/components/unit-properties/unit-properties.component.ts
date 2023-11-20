@@ -4,12 +4,16 @@ import {
 import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import {
+  BehaviorSubject, Subject, Subscription, takeUntil
+} from 'rxjs';
+import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 import { BackendService } from '../../services/backend.service';
 import { State } from '../../../admin/models/state.type';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -26,6 +30,11 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   private playerSelectionChangedSubscription: Subscription | undefined;
   private schemerSelectionChangedSubscription: Subscription | undefined;
   private statesChangedSubscription: Subscription | undefined;
+  private ngUnsubscribe = new Subject<void>();
+  metadata!: any;
+  workspaceSettings!: WorkspaceSettingsDto;
+  metadataLoader: BehaviorSubject<any> = new BehaviorSubject({});
+  variablesLoader: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
@@ -55,8 +64,16 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.readData();
       });
+    this.initItemLoader();
+    this.addSubscriptionForUnitDefinitionChanges();
+    this.metadataLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(metadata => {
+        this.metadata = metadata;
+      });
   }
 
+  // properties
   private async readData() {
     if (Object.keys(this.moduleService.editors).length === 0) await this.moduleService.loadList();
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
@@ -64,7 +81,10 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
-    this.workspaceService.loadUnitMetadata().then(() => this.setupForm());
+    this.workspaceService.loadUnitMetadata().then(() => {
+      this.setupForm();
+      this.loadMetaData();
+    });
   }
 
   private setupForm() {
@@ -142,7 +162,74 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     }
   }
 
+  // metadata
+
+  private loadMetaData() {
+    this.workspaceSettings = this.workspaceService.workspaceSettings;
+    const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
+    if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
+      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
+    }
+  }
+
+  private initItemLoader(): void {
+    const unitId = this.workspaceService.selectedUnit$.getValue();
+    if (!this.workspaceService.unitSchemeStore) {
+      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
+        .subscribe(ues => {
+          if (ues) {
+            this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);
+            this.variablesLoader.next(this.getItems());
+          }
+        });
+    } else {
+      this.variablesLoader.next(this.getItems());
+    }
+  }
+
+  private addSubscriptionForUnitDefinitionChanges(): void {
+    if (this.workspaceService.unitDefinitionStore) {
+      this.subscribeUnitDefinitionChanges();
+    } else {
+      this.workspaceService.unitDefinitionStoreChanged
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          this.subscribeUnitDefinitionChanges();
+        });
+    }
+  }
+
+  private subscribeUnitDefinitionChanges() {
+    this.workspaceService.unitDefinitionStore?.dataChange
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.variablesLoader.next(this.getItems());
+      });
+  }
+
+  private getItems(): string[] {
+    const data = this.workspaceService.unitSchemeStore?.getData();
+    if (data) {
+      const unitSchemeVariables = data.variables || [];
+      const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitSchemeVariables;
+      const variableIds = variables.map((variable: any) => variable.id);
+      const scheme = JSON.parse(data.scheme);
+      const variableCodings = scheme?.variableCodings || [];
+      const variableCodingIds = variableCodings.map((item: any) => item.id);
+      // merge without duplicates
+      return [...new Set([...variableIds, ...variableCodingIds])];
+    }
+    return [];
+  }
+
+  onMetadataChange(metadata: any): void {
+    this.workspaceService.unitMetadataStore?.setMetadata(metadata);
+  }
+
   ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
     if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();

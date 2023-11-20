@@ -103,6 +103,10 @@ import { ProfileFormComponent } from './components/profile-form/profile-form.com
     ItemComponent,
     ProfileFormComponent
   ],
-  exports: [MetadataComponent]
+  exports: [
+    MetadataComponent,
+    ProfileFormComponent,
+    ItemsComponent
+  ]
 })
 export class MetadataModule {}
