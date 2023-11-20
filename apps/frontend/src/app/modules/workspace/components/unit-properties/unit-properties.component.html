@@ -3,72 +3,6 @@
     <form [formGroup]="unitForm">
       <div class="fx-row-start-stretch fx-gap-10">
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                Einstellungen
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-              <div class="fx-column-start-stretch">
-                <mat-form-field>
-                  <mat-label>{{'workspace.unit-key' | translate}}</mat-label>
-                  <input matInput
-                         formControlName="key"
-                         [placeholder]="'workspace.unit-key' | translate">
-                  <mat-error *ngIf="unitForm.get('key')?.invalid">
-                    {{'workspace.invalid-unit-key' | translate}}
-                  </mat-error>
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>{{'workspace.unit-name' | translate}}</mat-label>
-                  <input matInput
-                         formControlName="name"
-                         [placeholder]="'workspace.unit-name' | translate">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>{{'workspace.unit-state' | translate}}</mat-label>
-                  <div class="select-state-wrapper">
-                    <mat-select
-                      class="select-state-wrapper"
-                      [(value)]="selectedStateId"
-                      formControlName="state"
-                      [style.border-bottom-color]="selectedStateColor"
-                      [placeholder]="'workspace.unit-state' | translate">
-                      <mat-option  [value]="0"></mat-option>
-                      <mat-option class="state-option" *ngFor="let state of this.workspaceService.workspaceSettings.states" [value]="state.id.toString()">
-                        <div class="fx-row-center-center">
-                          <span [style.background-color]="state?.color" class="state-color"></span>
-                          {{state.label}}
-                        </div>
-                      </mat-option>
-                    </mat-select>
-                  </div>
-                </mat-form-field>
-                <div class="fx-row-space-around-center fx-gap-10">
-                  <mat-form-field class="fx-flex-fill">
-                      <mat-label>{{'workspace.group' | translate}}</mat-label>
-                      <mat-select formControlName="group"
-                                  [placeholder]="'workspace.group' | translate">
-                        <mat-option [value]="''"></mat-option>
-                        <mat-option *ngFor="let group of workspaceService.workspaceSettings.unitGroups"
-                                    [value]="group">
-                          {{group}}
-                        </mat-option>
-                      </mat-select>
-                  </mat-form-field>
-                  <studio-lite-new-group-button [disabled]="unitForm.disabled"
-                                                (groupNameChange)="unitForm.get('group')?.setValue($event)">
-                  </studio-lite-new-group-button>
-                </div>
-                <mat-form-field>
-                  <mat-label>{{'workspace.description' | translate}}</mat-label>
-                  <textarea matInput
-                            formControlName="description"
-                            cdkTextareaAutosize
-                            cdkAutosizeMinRows="6"></textarea>
-                </mat-form-field>
-              </div>
-          </mat-expansion-panel>
 
           <mat-card>
             <mat-card-header>
@@ -89,114 +23,195 @@
             </mat-card-content>
           </mat-card>
 
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{'workspace.last-changed' | translate}}
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-              <div class="fx-column-start-stretch fx-gap-10">
-                <div *ngIf="workspaceService.lastChangedMetadata">
-                  {{'workspace.last-changed-metadata' | translate: {
-                  date: workspaceService.lastChangedMetadata | date : 'dd.MM.yyyy HH:mm' : timeZone
-                }
-                  }}
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                Aufgaben-Eigenschaften
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Einstellungen
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="fx-column-start-stretch">
+                  <mat-form-field>
+                    <mat-label>{{'workspace.unit-key' | translate}}</mat-label>
+                    <input matInput
+                           formControlName="key"
+                           [placeholder]="'workspace.unit-key' | translate">
+                    <mat-error *ngIf="unitForm.get('key')?.invalid">
+                      {{'workspace.invalid-unit-key' | translate}}
+                    </mat-error>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>{{'workspace.unit-name' | translate}}</mat-label>
+                    <input matInput
+                           formControlName="name"
+                           [placeholder]="'workspace.unit-name' | translate">
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>{{'workspace.unit-state' | translate}}</mat-label>
+                    <div class="select-state-wrapper">
+                      <mat-select
+                        class="select-state-wrapper"
+                        [(value)]="selectedStateId"
+                        formControlName="state"
+                        [style.border-bottom-color]="selectedStateColor"
+                        [placeholder]="'workspace.unit-state' | translate">
+                        <mat-option  [value]="0"></mat-option>
+                        <mat-option class="state-option" *ngFor="let state of this.workspaceService.workspaceSettings.states" [value]="state.id.toString()">
+                          <div class="fx-row-center-center">
+                            <span [style.background-color]="state?.color" class="state-color"></span>
+                            {{state.label}}
+                          </div>
+                        </mat-option>
+                      </mat-select>
+                    </div>
+                  </mat-form-field>
+                  <div class="fx-row-space-around-center fx-gap-10">
+                    <mat-form-field class="fx-flex-fill">
+                      <mat-label>{{'workspace.group' | translate}}</mat-label>
+                      <mat-select formControlName="group"
+                                  [placeholder]="'workspace.group' | translate">
+                        <mat-option [value]="''"></mat-option>
+                        <mat-option *ngFor="let group of workspaceService.workspaceSettings.unitGroups"
+                                    [value]="group">
+                          {{group}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <studio-lite-new-group-button [disabled]="unitForm.disabled"
+                                                  (groupNameChange)="unitForm.get('group')?.setValue($event)">
+                    </studio-lite-new-group-button>
+                  </div>
+                  <mat-form-field>
+                    <mat-label>{{'workspace.description' | translate}}</mat-label>
+                    <textarea matInput
+                              formControlName="description"
+                              cdkTextareaAutosize
+                              cdkAutosizeMinRows="6"></textarea>
+                  </mat-form-field>
                 </div>
+              </mat-expansion-panel>
 
-                <div *ngIf="workspaceService.lastChangedDefinition">
-                  {{'workspace.last-changed-definition' | translate: {
-                  date: workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone
-                }
-                  }}
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Verona-Module
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="fx-column-start-stretch">
+                  <div class="fx-row-space-between-start">
+                    <div class="fx-flex-row-30"
+                         [hidden]="unitForm.disabled">
+                      {{'modules.editor-name' | translate}}
+                    </div>
+                    <studio-lite-select-module #editor
+                                               class="fx-flex-row-60"
+                                               [modules]="this.moduleService.editors"
+                                               [hidden]="unitForm.disabled"
+                                               [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
+                                               moduleType="editor"></studio-lite-select-module>
+                  </div>
+                  <div class="fx-row-space-between-start">
+                    <div class="fx-flex-row-30"
+                         [hidden]="unitForm.disabled">
+                      {{'modules.player-name' | translate}}
+                    </div>
+                    <studio-lite-select-module #player
+                                               class="fx-flex-row-60"
+                                               [modules]="this.moduleService.players"
+                                               [hidden]="unitForm.disabled"
+                                               [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
+                                               moduleType="player">
+                    </studio-lite-select-module>
+                  </div>
+                  <div class="fx-row-space-between-start">
+                    <div class="fx-flex-row-30"
+                         [hidden]="unitForm.disabled">
+                      {{'modules.schemer-name' | translate}}
+                    </div>
+                    <studio-lite-select-module #schemer
+                                               class="fx-flex-row-60"
+                                               [modules]="this.moduleService.schemers"
+                                               [hidden]="unitForm.disabled"
+                                               [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
+                                               moduleType="schemer">
+                    </studio-lite-select-module>
+                  </div>
                 </div>
+              </mat-expansion-panel>
 
-                <div *ngIf="workspaceService.lastChangedScheme">
-                  {{'workspace.last-changed-scheme' | translate: {
-                  date: workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone
-                }
-                  }}
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    {{'workspace.last-changed' | translate}}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="fx-column-start-stretch fx-gap-10">
+                  <div *ngIf="workspaceService.lastChangedMetadata">
+                    {{'workspace.last-changed-metadata' | translate: {
+                    date: workspaceService.lastChangedMetadata | date : 'dd.MM.yyyy HH:mm' : timeZone
+                  }
+                    }}
+                  </div>
+
+                  <div *ngIf="workspaceService.lastChangedDefinition">
+                    {{'workspace.last-changed-definition' | translate: {
+                    date: workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone
+                  }
+                    }}
+                  </div>
+
+                  <div *ngIf="workspaceService.lastChangedScheme">
+                    {{'workspace.last-changed-scheme' | translate: {
+                    date: workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone
+                  }
+                    }}
+                  </div>
+
                 </div>
+              </mat-expansion-panel>
 
-              </div>
-          </mat-expansion-panel>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Deprecated
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="fx-column-start-stretch">
 
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                Deprecated
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-              <div class="fx-column-start-stretch">
+                  <mat-form-field>
+                    <mat-label>{{'workspace.transcript' | translate}}</mat-label>
+                    <textarea readonly
+                              matInput
+                              formControlName="transcript"
+                              cdkTextareaAutosize
+                              cdkAutosizeMinRows="6"></textarea>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>{{'workspace.reference' | translate}}</mat-label>
+                    <textarea readonly
+                              matInput
+                              formControlName="reference"
+                              cdkTextareaAutosize
+                              cdkAutosizeMinRows="6"></textarea>
+                  </mat-form-field>
+                </div>
+              </mat-expansion-panel>
 
-                <mat-form-field>
-                  <mat-label>{{'workspace.transcript' | translate}}</mat-label>
-                  <textarea readonly
-                            matInput
-                            formControlName="transcript"
-                            cdkTextareaAutosize
-                            cdkAutosizeMinRows="6"></textarea>
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>{{'workspace.reference' | translate}}</mat-label>
-                  <textarea readonly
-                            matInput
-                            formControlName="reference"
-                            cdkTextareaAutosize
-                            cdkAutosizeMinRows="6"></textarea>
-                </mat-form-field>
-              </div>
-          </mat-expansion-panel>
+            </mat-card-content>
+          </mat-card>
+
+
+
+
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
-
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                Verona-Module
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-              <div class="fx-column-start-stretch">
-                <div class="fx-row-space-between-start">
-                  <div class="fx-flex-row-30"
-                       [hidden]="unitForm.disabled">
-                    {{'modules.editor-name' | translate}}
-                  </div>
-                  <studio-lite-select-module #editor
-                                     class="fx-flex-row-60"
-                                     [modules]="this.moduleService.editors"
-                                     [hidden]="unitForm.disabled"
-                                     [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
-                                     moduleType="editor"></studio-lite-select-module>
-                </div>
-                <div class="fx-row-space-between-start">
-                  <div class="fx-flex-row-30"
-                       [hidden]="unitForm.disabled">
-                    {{'modules.player-name' | translate}}
-                  </div>
-                  <studio-lite-select-module #player
-                                     class="fx-flex-row-60"
-                                     [modules]="this.moduleService.players"
-                                     [hidden]="unitForm.disabled"
-                                     [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
-                                     moduleType="player">
-                  </studio-lite-select-module>
-                </div>
-                <div class="fx-row-space-between-start">
-                  <div class="fx-flex-row-30"
-                       [hidden]="unitForm.disabled">
-                    {{'modules.schemer-name' | translate}}
-                  </div>
-                  <studio-lite-select-module #schemer
-                                     class="fx-flex-row-60"
-                                     [modules]="this.moduleService.schemers"
-                                     [hidden]="unitForm.disabled"
-                                     [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
-                                     moduleType="schemer">
-                  </studio-lite-select-module>
-                </div>
-              </div>
-          </mat-expansion-panel>
-
           <mat-card>
             <mat-card-header>
               <mat-card-title>
