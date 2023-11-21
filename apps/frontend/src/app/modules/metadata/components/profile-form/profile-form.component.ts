@@ -321,7 +321,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     // eslint-disable-next-line no-return-assign
     return this.metadata[this.metadataKey].map((metadata: any) => ({
       ...metadata,
-      current: metadata.profileId === this.profile.id
+      isCurrent: metadata.profileId === this.profile.id
     }));
   }
 
