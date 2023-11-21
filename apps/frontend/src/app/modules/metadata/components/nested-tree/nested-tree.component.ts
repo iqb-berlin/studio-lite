@@ -38,12 +38,13 @@ export class NestedTreeComponent implements OnInit {
   }
 
   selectionChange(checkedNode: { state:boolean, node:NotationNode }) {
+    const parent = checkedNode.node.parent;
     if (checkedNode.node.children?.length) {
       // eslint-disable-next-line no-restricted-syntax
       for (const child of checkedNode.node.children || []) {
         checkedNode.state ? child.selected = true : child.selected = false;
-        checkedNode.node.indeterminate = true;
-        this.treeControl.expand(child);
+        // checkedNode.node.indeterminate = true;
+        // this.treeControl.expand(child);
         this.nodesSelected = this.nodesSelected.map(obj => {
           const found = this.nodesSelected.find(o => o.id === checkedNode.node.id);
           if (found) {
@@ -51,8 +52,6 @@ export class NestedTreeComponent implements OnInit {
           }
           return obj;
         });
-        // const parent = this.nodesSelected.filter((node:SelectedNode) => node.id === checkedNode.node.id);
-
         this.nodesSelected.push(child);
         if (child.children) {
           // eslint-disable-next-line no-restricted-syntax
@@ -63,7 +62,6 @@ export class NestedTreeComponent implements OnInit {
         }
       }
     }
-
     if (checkedNode.state) {
       const found = this.nodesSelected.find(node => node.id === checkedNode.node.parent?.id);
       if (found && found.children) {
@@ -76,7 +74,6 @@ export class NestedTreeComponent implements OnInit {
           found.indeterminate = true;
         }
       }
-
       this.nodesSelected.push(checkedNode.node);
       this.totalSelected += 1;
     } else {
@@ -107,27 +104,25 @@ export class NestedTreeComponent implements OnInit {
       (topConcept: NotationNode) => {
         let description = '';
         let isSelected = false;
-        const foundElement = this.data.value.find((val:NotationNode) => val.id === topConcept.id);
-        if (foundElement) {
+        const foundNode = this.data.value.find((val:NotationNode) => val.id === topConcept.id);
+        if (foundNode) {
           if (this.data.props.allowMultipleValues) {
-            this.nodesSelected.push(foundElement);
+            this.nodesSelected.push(foundNode);
             isSelected = true;
-            description = foundElement?.description || '';
+            description = foundNode?.description || '';
             this.totalSelected += 1;
           } else if (this.totalSelected < 1) {
             isSelected = true;
-            description = foundElement?.description || '';
+            description = foundNode?.description || '';
             this.totalSelected += 1;
-            this.nodesSelected.push(foundElement);
+            this.nodesSelected.push(foundNode);
           }
         }
         return (
           {
             id: topConcept.id,
-            name: `${(topConcept.notation && topConcept?.notation[0]) ?
-              topConcept?.notation[0] : ''}   ${topConcept.prefLabel?.de}`,
             label: topConcept.prefLabel?.de,
-            notation: topConcept.notation,
+            notation: topConcept.notation || '',
             selected: isSelected,
             description: description,
             level: this.currentTreeDepth,
@@ -174,10 +169,9 @@ export class NestedTreeComponent implements OnInit {
       }
       return ({
         id: node.id,
-        description: description,
-        name: `${node.notation[0]} ${node.prefLabel?.de}`,
-        selected: isSelected,
         notation: node.notation,
+        description: description,
+        selected: isSelected,
         level: depth,
         label: `${node.prefLabel?.de}`,
         parent: parent,

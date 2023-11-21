@@ -5,12 +5,9 @@ import { Subject, takeUntil } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
-import { SelectedNode } from '../../models/types';
+import { NotationNode } from '../../models/types';
 import { MetadataService } from '../../services/metadata.service';
 
-interface FormlyNode extends SelectedNode {
-  name:string
-}
 @Component({
   selector: 'studio-lite-formly-chips',
   templateUrl: './formly-chips.component.html',
@@ -19,7 +16,6 @@ interface FormlyNode extends SelectedNode {
 export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   itemControl = new FormControl();
-  selectedNodes: Array<SelectedNode> = [];
 
   constructor(
     private vocabsDialog : MatDialog,
@@ -64,16 +60,16 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       .subscribe(results => {
         // this.formControl.reset();
         if (results) {
-          const mappedResults = results
-            .map((result:FormlyNode) => ({
+          const selectedVocabularyEntries = results
+            .map((result:NotationNode) => ({
               name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`,
               id: result.id,
               notation: result.notation,
               text: [{ lang: 'de', value: result.description }]
             }))
-            .sort((a:FormlyNode, b:FormlyNode) => {
-              const nameA = a.name.toUpperCase(); // ignore upper and lowercase
-              const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+            .sort((a:NotationNode, b:NotationNode) => {
+              const nameA = a.name?.toUpperCase() || '';
+              const nameB = b.name?.toUpperCase() || '';
               if (nameA < nameB) {
                 return -1;
               }
@@ -82,7 +78,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
               }
               return 0;
             });
-          this.formControl.setValue(mappedResults);
+          this.formControl.setValue(selectedVocabularyEntries);
         }
       });
   }

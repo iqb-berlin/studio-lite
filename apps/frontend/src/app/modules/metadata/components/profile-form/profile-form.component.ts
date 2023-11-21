@@ -152,7 +152,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     if (this.profileItemKeys[keyValue[0]].type === 'vocabulary') {
       return keyValue[1].map((kv:any) => ({ id: kv?.id, text: kv?.text }));
     }
-    return keyValue[1];
+    return keyValue[1].toString();
   }
 
   // //////////////////////////////////
