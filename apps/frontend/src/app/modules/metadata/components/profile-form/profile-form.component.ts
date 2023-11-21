@@ -9,6 +9,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { Subject } from 'rxjs';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
 import { MetadataService } from '../../services/metadata.service';
+import { DurationService } from '../../services/duration.service';
 
 @Component({
   selector: 'studio-lite-profile-form',
@@ -136,7 +137,8 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
               lang: this.language,
               value: this.profileItemKeys[keyValue[0]].label
             }],
-            value: this.mapFormlyModelValueToMetadataValue(keyValue)
+            value: this.mapFormlyModelValueToMetadataValue(keyValue),
+            valueAsText: this.mapFormlyModelValueToMetadataValueAsText(keyValue)
           }))
       ],
       profileId: profileId
@@ -144,15 +146,54 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private mapFormlyModelValueToMetadataValue(keyValue: Record<string, any>) {
-    if (this.profileItemKeys[keyValue[0]].type === 'text') {
+    const type = this.profileItemKeys[keyValue[0]].type;
+    if (type === 'text') {
       const textWithLanguages = Object.entries(keyValue[1]);
       return textWithLanguages
         .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
     }
-    if (this.profileItemKeys[keyValue[0]].type === 'vocabulary') {
+    if (type === 'vocabulary') {
       return keyValue[1].map((kv:any) => ({ id: kv?.id, text: kv?.text }));
     }
     return keyValue[1].toString();
+  }
+
+  private mapFormlyModelValueToMetadataValueAsText(keyValue: Record<string, any>) {
+    const type = this.profileItemKeys[keyValue[0]].type;
+    if (type === 'text') {
+      const textWithLanguages = Object.entries(keyValue[1]);
+      return textWithLanguages
+        .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
+    }
+    if (type === 'vocabulary') {
+      return keyValue[1].map((kv:any) => kv?.text).flat();
+    }
+    if (type === 'boolean') {
+      return {
+        lang: this.language,
+        value: this.getBooleanTypeLabel(keyValue[0])
+      };
+    }
+    if (type === 'number') {
+      if (this.profileItemKeys[keyValue[0]].parameters.isPeriodSeconds) {
+        const duration = DurationService.convertSecondsToMinutes(keyValue[1]);
+        return {
+          lang: this.language,
+          value: `${duration.minutes}:${duration.seconds}`
+        };
+      }
+    }
+    return {
+      lang: this.language,
+      value: keyValue[1].toString()
+    };
+  }
+
+  private getBooleanTypeLabel(id: string): string {
+    if (id) {
+      return this.profileItemKeys[id].parameters.trueLabel || id.toString();
+    }
+    return this.profileItemKeys[id].parameters.falseLabel || id.toString();
   }
 
   // //////////////////////////////////
@@ -172,7 +213,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return model;
   }
 
-  private mapMetaDataEntriesValueToFormlyModelValue(value: MDValue): any {
+  private mapMetaDataEntriesValueToFormlyModelValue(value: any): any {
     if (Array.isArray(value)) {
       if (value.length && value[0].lang) {
         return value.reduce((obj, currentValue) => ({ ...obj, [currentValue.lang]: currentValue.value }), {});
@@ -191,7 +232,10 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       }
       return [];
     }
-    return value;
+    // must be a boolean or number
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return parseInt(value, 10);
   }
 
   // ///////////////////////////
@@ -249,7 +293,11 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private registerProfileItem(entry: MDProfileEntry): void {
-    this.profileItemKeys[entry.id] = { label: entry.label, type: entry.type };
+    this.profileItemKeys[entry.id] = {
+      label: entry.label,
+      type: entry.type,
+      parameters: entry.parameters
+    };
   }
 
   onModelChange(): void {

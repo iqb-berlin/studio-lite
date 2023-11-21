@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { FieldTypeConfig, FormlyFieldProps } from '@ngx-formly/core/public_api';
-
-interface Duration {
-  minutes: string;
-  seconds: string;
-}
+import { Duration } from '../../models/duration.interface';
+import { DurationService } from '../../services/duration.service';
 
 interface FormlyDurationProps extends FormlyFieldProps {
   minValue?: number;
@@ -48,21 +45,13 @@ export class FormlyDurationComponent extends FieldType<FieldTypeConfig<FormlyDur
   }
 
   private convertSecondsToMinutes(totalSeconds: number): void {
-    const totalMinutes = totalSeconds / 60;
-    const minutes = Math.floor(totalMinutes);
-    const seconds = Math.round((totalMinutes - minutes) * 60);
-    this.displayDuration(minutes, 'minutes');
-    this.displayDuration(seconds, 'seconds');
+    this.duration = DurationService.convertSecondsToMinutes(totalSeconds);
   }
 
   private convertMinutesToSeconds(): number {
     const minutes = Number(this.duration.minutes);
     const seconds: number = Number(this.duration.seconds);
     return minutes * 60 + seconds;
-  }
-
-  private displayDuration(number: number, control: string) {
-    this.duration[control as keyof Duration] = (number < 10) ? `0${number}` : number.toString();
   }
 
   durationChange() {
