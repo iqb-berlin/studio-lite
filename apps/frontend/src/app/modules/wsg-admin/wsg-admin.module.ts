@@ -17,6 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
 import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
@@ -61,7 +62,8 @@ import { DeleteStateComponent } from './components/delete-state/delete-state.com
     MatOptionModule,
     MatSelectModule,
     MatExpansionModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatFormFieldModule
   ],
   providers: [
     BackendService,

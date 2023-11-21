@@ -12,6 +12,8 @@ import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceSettingsComponent } from './settings.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { ProfilesComponent } from '../profiles/profiles.component';
+import { StatesComponent } from '../states/states.component';
 
 describe('UsersComponent', () => {
   let component: WorkspaceSettingsComponent;
@@ -27,7 +29,9 @@ describe('UsersComponent', () => {
       declarations: [
         WorkspaceSettingsComponent,
         MockSearchFilterComponent,
-        WrappedIconComponent
+        WrappedIconComponent,
+        ProfilesComponent,
+        StatesComponent
       ],
       imports: [
         MatDialogModule,

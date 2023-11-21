@@ -3,8 +3,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
+import { HttpClientModule } from '@angular/common/http';
 import { WorkspaceGroupsMenuComponent } from './workspace-groups-menu.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { environment } from '../../../../../environments/environment';
 
 describe('WorkspaceGroupsMenuComponent', () => {
   let component: WorkspaceGroupsMenuComponent;
@@ -16,7 +18,12 @@ describe('WorkspaceGroupsMenuComponent', () => {
         WorkspaceGroupsMenuComponent,
         WrappedIconComponent
       ],
+      providers: [{
+        provide: 'SERVER_URL',
+        useValue: environment.backendUrl
+      }],
       imports: [
+        HttpClientModule,
         MatDialogModule,
         MatIconModule,
         MatTooltipModule,

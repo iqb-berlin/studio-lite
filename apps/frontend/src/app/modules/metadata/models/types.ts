@@ -20,7 +20,7 @@ export type NotationNode = {
     de:string
   },
   parent?:NotationNode,
-  selected:boolean,
+  selected?:boolean,
   narrower?: NotationNode[]
 };
 

@@ -62,7 +62,7 @@ export class NestedTreeNodeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.node && this.node.selected) this.checkboxSelected.set(true);
+    if (this.node && this.node?.selected) this.checkboxSelected.set(true);
     if (this.node && this.node.description) this.description.set(this.node.description);
   }
 }

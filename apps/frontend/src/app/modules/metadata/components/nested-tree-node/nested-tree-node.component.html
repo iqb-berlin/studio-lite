@@ -3,12 +3,12 @@
     <mat-checkbox
       #checkbox
       [disabled]="!params.allowMultipleValues && totalSelected >= 1 && !checkboxSelected()"
-      [checked]="node.selected"
+      [checked]="node?.selected || false"
       (click)="onSelect()"
-      [indeterminate]="node.indeterminate || false"
+      [indeterminate]="node?.indeterminate || false"
     ></mat-checkbox>
-    <span class="notation" *ngIf="!this.params.hideNumbering">{{node.notation}}</span>
-    <span *ngIf="!this.params.hideTitle">{{node.label}}</span>
+    <span class="notation" *ngIf="!this.params.hideNumbering">{{node?.notation}}</span>
+    <span *ngIf="!this.params.hideTitle">{{node?.label}}</span>
   </div>
   <textarea matInput
             #input

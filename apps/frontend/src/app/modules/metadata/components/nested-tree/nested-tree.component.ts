@@ -29,7 +29,7 @@ export class NestedTreeComponent implements OnInit {
   vocabularyTitle = '';
   async ngOnInit() {
     const vocabulary = this.data.vocabularies
-      .find((vocab: { url:string, data:Vocabulary }) => vocab.url === this.data.props.url);
+      ?.find((vocab: { url:string, data:Vocabulary }) => vocab.url === this.data.props.url);
     if (vocabulary && vocabulary.data) {
       this.getTreeDepth(vocabulary.data);
       this.vocabularyTitle = vocabulary.data.title.de || '';
@@ -46,7 +46,7 @@ export class NestedTreeComponent implements OnInit {
         // checkedNode.node.indeterminate = true;
         // this.treeControl.expand(child);
         this.nodesSelected = this.nodesSelected.map(obj => {
-          const found = this.nodesSelected.find(o => o.id === checkedNode.node.id);
+          const found = this.nodesSelected?.find(o => o.id === checkedNode.node.id) || obj;
           if (found) {
             return { ...found, indeterminate: true };
           }
@@ -63,7 +63,7 @@ export class NestedTreeComponent implements OnInit {
       }
     }
     if (checkedNode.state) {
-      const found = this.nodesSelected.find(node => node.id === checkedNode.node.parent?.id);
+      const found = this.nodesSelected?.find(node => node.id === checkedNode.node.parent?.id);
       if (found && found.children) {
         let countSelectedChildren = 0;
         // eslint-disable-next-line no-restricted-syntax

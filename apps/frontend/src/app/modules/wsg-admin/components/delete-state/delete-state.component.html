@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>{{typedData.title}}</h1>
 <mat-dialog-content >
-  <div [style.border-bottom-color] = "typedData.state.color" class="state">{{typedData.state.label}}</div>
+  <div [style.border-bottom-color] = "typedData.state?.color" class="state">{{typedData.state?.label}}</div>
   <div>{{typedData.prompt}}</div>
 </mat-dialog-content>
 

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
@@ -40,11 +40,14 @@ describe('UsersComponent', () => {
         MatTooltipModule,
         TranslateModule.forRoot()
       ],
-      providers: [
-        {
-          provide: 'SERVER_URL',
-          useValue: environment.backendUrl
-        }
+      providers: [{
+        provide: MAT_DIALOG_DATA,
+        useValue: {}
+      },
+      {
+        provide: 'SERVER_URL',
+        useValue: environment.backendUrl
+      }
       ]
     })
       .compileComponents();
