@@ -9,18 +9,18 @@ export type SelectedNode = {
 
 export type NotationNode = {
   id: string,
-  notation:string,
-  description:string,
+  notation:string[],
+  description?:string,
   label?:string,
-  level:number,
-  name:string,
+  level?:number,
+  name?:string,
   indeterminate?:boolean,
   children?: NotationNode[] | [],
-  url?:string,
   prefLabel?:{
     de:string
   },
-  selected:boolean,
+  parent?:NotationNode,
+  selected?:boolean,
   narrower?: NotationNode[]
 };
 
@@ -34,10 +34,17 @@ export type NestedTreeParameters = {
   addTextLanguages: Array<string>
 };
 
+export type Vocabulary = {
+  id: string,
+  type: string,
+  title: { de:string },
+  hasTopConcept: Array<NotationNode>,
+};
+
 export type DialogData = {
-  vocab: any,
-  value: any,
+  vocab: Vocabulary,
+  value: NotationNode[],
   selectedNodes: SelectedNode[],
   props: NestedTreeParameters,
-  vocabularies:any
+  vocabularies: Array< { url:string, data:Vocabulary }>
 };

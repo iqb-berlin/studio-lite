@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { MatCheckbox } from '@angular/material/checkbox';
-import { NestedTreeParameters, NotationNode, SelectedNode } from '../../models/types';
+import { NestedTreeParameters, NotationNode } from '../../models/types';
 
 @Component({
   selector: 'studio-lite-nested-tree-node',
@@ -18,12 +18,12 @@ export class NestedTreeNodeComponent implements OnInit {
   description = signal<string>('');
 
   @Output() selectionChange:
-  EventEmitter<{ state: boolean; node: SelectedNode, expandable:boolean }> =
-      new EventEmitter<{ state: boolean; node: SelectedNode, expandable:boolean }>();
+  EventEmitter<{ state: boolean; node: NotationNode }> =
+      new EventEmitter<{ state: boolean; node: NotationNode }>();
 
   @Output() descriptionChange:
-  EventEmitter<{ description: string; node: SelectedNode }> =
-      new EventEmitter<{ description: string; node: SelectedNode }>();
+  EventEmitter<{ description: string; node: NotationNode }> =
+      new EventEmitter<{ description: string; node: NotationNode }>();
 
   @Input() params: NestedTreeParameters = {
     url: '',
@@ -36,20 +36,13 @@ export class NestedTreeNodeComponent implements OnInit {
   };
 
   @Input() node!:NotationNode;
-  @Input() selectedNodes:Array<SelectedNode> = [];
+  @Input() selectedNodes:Array<NotationNode> = [];
   @Input() totalSelected!:number;
   @Input() expandableNode!:boolean;
   onSelect() {
     this.selectionChange.emit({
       state: !this.checkboxSelected(),
-      node: {
-        id: this.node.id,
-        label: this.node.label || '',
-        notation: this.node.notation || '',
-        description: this.node.description,
-        children: this.node.children
-      },
-      expandable: this.expandableNode
+      node: this.node
     });
     this.checkboxSelected.set(!this.checkboxSelected());
   }
@@ -58,19 +51,12 @@ export class NestedTreeNodeComponent implements OnInit {
     this.description.set(value);
     this.descriptionChange.emit({
       description: this.description(),
-      node: {
-        id: this.node.id,
-        label: this.node.label || '',
-        notation: this.node.notation,
-        description: this.description()
-      }
+      node: this.node
     });
 
     const index = this.selectedNodes.findIndex(val => val.id === this.node.id);
     this.selectedNodes[index] = {
-      id: this.node.id,
-      notation: this.node.notation,
-      label: this.node.label || '',
+      ...this.node,
       description: this.description()
     };
   }
