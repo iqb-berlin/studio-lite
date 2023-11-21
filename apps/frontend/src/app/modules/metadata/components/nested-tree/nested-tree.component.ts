@@ -27,48 +27,109 @@ export class NestedTreeComponent implements OnInit {
   treeControl = new NestedTreeControl<NotationNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<NotationNode>();
   vocabularyTitle = '';
+  foundNode!:NotationNode;
   async ngOnInit() {
     const vocabulary = this.data.vocabularies
       ?.find((vocab: { url:string, data:Vocabulary }) => vocab.url === this.data.props.url);
     if (vocabulary && vocabulary.data) {
       this.getTreeDepth(vocabulary.data);
       this.vocabularyTitle = vocabulary.data.title.de || '';
+      this.treeControl.dataNodes = this.dataSource.data;
       this.showTree(vocabulary.data);
+      // console.log(this.dataSource.data, 'this.dataSource.data');
+      // this.treeControl.expandAll();
+      // this.treeControl.expand(this.dataSource.data[1]);
+      // this.treeControl.expandDescendants(this.dataSource.data[1]);
     }
   }
 
   private selectNodeChildren(checkedNode: { state:boolean | undefined, node:NotationNode }) {
+    checkedNode.node.selected = checkedNode.state;
     checkedNode.node.children?.forEach(child => {
       checkedNode.state ? child.selected = true : child.selected = false;
       this.selectNodeChildren({ state: child.selected, node: child });
     });
   }
 
-  private selectNodeAncestors(node:NotationNode) {
-    if (node.parent) {}
+  private searchChildren(children:NotationNode[], node:NotationNode) {
+    const foundNode = children.find(n => n.id === node.id);
+    if (foundNode) {
+      if (!this.foundNode) {
+        this.foundNode = foundNode;
+      }
+    }
+    children.forEach(child => {
+      if (child.children) {
+        this.searchChildren(child.children, child);
+      }
+    });
+  }
+
+  private findNodeInTree(node:NotationNode) {
+    const foundNode = this.dataSource.data.find(n => n.id === node.id);
+    if (foundNode) {
+      this.foundNode = foundNode;
+    }
+    this.dataSource.data.forEach(d => {
+      if (d.children) {
+        this.searchChildren(d.children, node);
+      }
+    });
+  }
+
+  private indeterminateNodeAncestors(node: NotationNode | undefined) {
+    if (node) {
+      let countSelectedChildren = 0;
+      this.findNodeInTree(node);
+      this.foundNode.children?.forEach(child => {
+        if (child.selected) countSelectedChildren += 1;
+      });
+      if (countSelectedChildren < (this.foundNode.children?.length || 0)) {
+        this.indeterminateNodeAncestors(this.foundNode);
+      }
+      this.foundNode.selected = false;
+      this.foundNode.indeterminate = true;
+
+      if (this.foundNode.parent) {
+        this.indeterminateNodeAncestors(this.foundNode.parent);
+      }
+    }
   }
 
   selectionChange(checkedNode: { state:boolean, node:NotationNode }) {
+    this.findNodeInTree(checkedNode.node);
     if (checkedNode.node.children?.length) {
-      this.nodesSelected.push({ ...checkedNode.node, selected: checkedNode.state });
+      if (checkedNode.state) {
+        this.nodesSelected
+          .push({ ...checkedNode.node, selected: checkedNode.state });
+        this.totalSelected += 1;
+      } else {
+        this.nodesSelected = this.nodesSelected.filter(node => node.id !== checkedNode.node.id);
+        this.totalSelected -= 1;
+      }
       this.selectNodeChildren(checkedNode);
-    } else if (checkedNode.state) {
-      const found = this.nodesSelected?.find(node => node.id === checkedNode.node.parent?.id);
-      if (found && found.children) {
+      this.indeterminateNodeAncestors(checkedNode.node.parent);
+    } else {
+      if (checkedNode.state) {
+        this.nodesSelected
+          .push({ ...checkedNode.node, selected: checkedNode.state });
+        this.totalSelected += 1;
+      } else {
+        this.nodesSelected = this.nodesSelected.filter(node => node.id !== checkedNode.node.id);
+        this.totalSelected -= 1;
+      }
+      if (checkedNode && (checkedNode.node.parent)) {
         let countSelectedChildren = 0;
-        // eslint-disable-next-line no-restricted-syntax
-        for (const child of found.children) {
+        this.findNodeInTree(checkedNode.node.parent);
+        this.foundNode.children?.forEach(child => {
           if (child.selected) countSelectedChildren += 1;
-        }
-        if (countSelectedChildren < found.children.length) {
-          found.indeterminate = true;
+        });
+        if (countSelectedChildren < (this.foundNode.children?.length || 0)) {
+          this.indeterminateNodeAncestors(this.foundNode);
         }
       }
-      this.nodesSelected.push(checkedNode.node);
-      this.totalSelected += 1;
-    } else {
-      this.nodesSelected = this.nodesSelected.filter(node => node.id !== checkedNode.node.id);
-      this.totalSelected -= 1;
+
+      checkedNode.node.selected = checkedNode.state;
     }
   }
 
@@ -98,10 +159,14 @@ export class NestedTreeComponent implements OnInit {
         if (foundNode) {
           if (this.data.props.allowMultipleValues || this.totalSelected < 1) {
             this.nodesSelected.push(foundNode);
-            this.selectNodeChildren({ state: true, node: foundNode });
             isSelected = true;
             description = foundNode?.description || '';
             this.totalSelected += 1;
+            setTimeout(() => {
+              this.findNodeInTree(foundNode);
+              this.selectNodeChildren({ state: this.foundNode.selected, node: this.foundNode });
+              this.indeterminateNodeAncestors(this.foundNode.parent);
+            });
           }
         }
         return (
@@ -143,10 +208,14 @@ export class NestedTreeComponent implements OnInit {
       if (foundNode) {
         if ((this.data.props.allowMultipleValues && nodesSelected.length >= 1) || this.totalSelected < 1) {
           this.nodesSelected.push(foundNode);
-          this.selectNodeChildren({ state: foundNode.selected, node: foundNode });
           isSelected = true;
           description = foundNode?.description || '';
           this.totalSelected += 1;
+          setTimeout(() => {
+            this.findNodeInTree(foundNode);
+            this.selectNodeChildren({ state: this.foundNode.selected, node: this.foundNode });
+            this.indeterminateNodeAncestors(this.foundNode.parent);
+          });
         }
       }
       return ({
