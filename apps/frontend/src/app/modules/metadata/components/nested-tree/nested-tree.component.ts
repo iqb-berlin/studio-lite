@@ -37,32 +37,22 @@ export class NestedTreeComponent implements OnInit {
     }
   }
 
+  private selectNodeChildren(checkedNode: { state:boolean | undefined, node:NotationNode }) {
+    checkedNode.node.children?.forEach(child => {
+      checkedNode.state ? child.selected = true : child.selected = false;
+      this.selectNodeChildren({ state: child.selected, node: child });
+    });
+  }
+
+  private selectNodeAncestors(node:NotationNode) {
+    if (node.parent) {}
+  }
+
   selectionChange(checkedNode: { state:boolean, node:NotationNode }) {
-    const parent = checkedNode.node.parent;
     if (checkedNode.node.children?.length) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const child of checkedNode.node.children || []) {
-        checkedNode.state ? child.selected = true : child.selected = false;
-        // checkedNode.node.indeterminate = true;
-        // this.treeControl.expand(child);
-        this.nodesSelected = this.nodesSelected.map(obj => {
-          const found = this.nodesSelected?.find(o => o.id === checkedNode.node.id) || obj;
-          if (found) {
-            return { ...found, indeterminate: true };
-          }
-          return obj;
-        });
-        this.nodesSelected.push(child);
-        if (child.children) {
-          // eslint-disable-next-line no-restricted-syntax
-          for (const childChild of child.children || []) {
-            this.nodesSelected.push(child);
-            childChild.selected = !childChild.selected;
-          }
-        }
-      }
-    }
-    if (checkedNode.state) {
+      this.nodesSelected.push({ ...checkedNode.node, selected: checkedNode.state });
+      this.selectNodeChildren(checkedNode);
+    } else if (checkedNode.state) {
       const found = this.nodesSelected?.find(node => node.id === checkedNode.node.parent?.id);
       if (found && found.children) {
         let countSelectedChildren = 0;
@@ -104,18 +94,14 @@ export class NestedTreeComponent implements OnInit {
       (topConcept: NotationNode) => {
         let description = '';
         let isSelected = false;
-        const foundNode = this.data.value.find((val:NotationNode) => val.id === topConcept.id);
+        const foundNode = this.data.value.find((node:NotationNode) => node.id === topConcept.id);
         if (foundNode) {
-          if (this.data.props.allowMultipleValues) {
+          if (this.data.props.allowMultipleValues || this.totalSelected < 1) {
             this.nodesSelected.push(foundNode);
+            this.selectNodeChildren({ state: true, node: foundNode });
             isSelected = true;
             description = foundNode?.description || '';
             this.totalSelected += 1;
-          } else if (this.totalSelected < 1) {
-            isSelected = true;
-            description = foundNode?.description || '';
-            this.totalSelected += 1;
-            this.nodesSelected.push(foundNode);
           }
         }
         return (
@@ -153,18 +139,14 @@ export class NestedTreeComponent implements OnInit {
     return nodes.map((node: NotationNode) => {
       let description = '';
       let isSelected = false;
-      const foundElement = value.find((val:NotationNode) => val.id === node.id);
-      if (foundElement) {
-        if (this.data.props.allowMultipleValues && nodesSelected.length >= 1) {
-          this.nodesSelected.push(foundElement);
+      const foundNode = value.find((nodeValue:NotationNode) => nodeValue.id === node.id);
+      if (foundNode) {
+        if ((this.data.props.allowMultipleValues && nodesSelected.length >= 1) || this.totalSelected < 1) {
+          this.nodesSelected.push(foundNode);
+          this.selectNodeChildren({ state: foundNode.selected, node: foundNode });
           isSelected = true;
-          description = foundElement?.description || '';
+          description = foundNode?.description || '';
           this.totalSelected += 1;
-        } else if (this.totalSelected < 1) {
-          isSelected = true;
-          description = foundElement?.description || '';
-          this.totalSelected += 1;
-          this.nodesSelected.push(foundElement);
         }
       }
       return ({
