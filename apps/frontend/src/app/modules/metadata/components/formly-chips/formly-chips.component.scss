@@ -1,7 +1,8 @@
- .clip-text {
-    max-width: 250px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
+.clip-text {
+  max-width: 250px;
+  min-width: 250px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
 

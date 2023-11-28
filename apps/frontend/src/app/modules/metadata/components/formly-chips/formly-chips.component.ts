@@ -4,9 +4,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
-import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 import { NotationNode } from '../../models/types';
 import { MetadataService } from '../../services/metadata.service';
+import { NewNestedTreeComponent } from '../new-nested-tree/new-nested-tree.component';
 
 @Component({
   selector: 'studio-lite-formly-chips',
@@ -18,8 +18,8 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
   itemControl = new FormControl();
 
   constructor(
-    private vocabsDialog : MatDialog,
-    private metadataService : MetadataService
+    private vocabsDialog: MatDialog,
+    private metadataService: MetadataService
   ) {
     super();
   }
@@ -29,7 +29,9 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     this.ngUnsubscribe.complete();
   }
 
-  override get empty() { return this.formControl.value.length === 0; }
+  override get empty() {
+    return this.formControl.value.length === 0;
+  }
 
   remove(i: number): void {
     const value = this.formControl.value;
@@ -46,13 +48,13 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
   }
 
   showNodeTree(): void {
-    const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
+    const dialogRef = this.vocabsDialog.open(NewNestedTreeComponent, {
       data: {
         value: this.formControl.value,
         props: this.props,
         vocabularies: this.metadataService.vocabularies
       },
-      width: '600px'
+      width: '1200px'
     });
 
     dialogRef.afterClosed()
@@ -61,13 +63,13 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
         // this.formControl.reset();
         if (results) {
           const selectedVocabularyEntries = results
-            .map((result:NotationNode) => ({
+            .map((result: NotationNode) => ({
               name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`,
               id: result.id,
               notation: result.notation,
               text: [{ lang: 'de', value: result.description }]
             }))
-            .sort((a:NotationNode, b:NotationNode) => {
+            .sort((a: NotationNode, b: NotationNode) => {
               const nameA = a.name?.toUpperCase() || '';
               const nameB = b.name?.toUpperCase() || '';
               if (nameA < nameB) {

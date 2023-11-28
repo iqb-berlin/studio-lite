@@ -19,8 +19,6 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatListModule } from '@angular/material/list';
-import { NestedTreeNodeComponent } from './components/nested-tree-node/nested-tree-node.component';
-import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
@@ -29,6 +27,7 @@ import { FormlyDurationComponent } from './components/formly-duration/formly-dur
 import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { ProfileFormComponent } from './components/profile-form/profile-form.component';
+import { NewNestedTreeComponent } from './components/new-nested-tree/new-nested-tree.component';
 
 @NgModule({
   imports: [
@@ -93,15 +92,14 @@ import { ProfileFormComponent } from './components/profile-form/profile-form.com
   ],
   declarations: [
     FormlyChipsComponent,
-    NestedTreeNodeComponent,
-    NestedTreeComponent,
     MetadataComponent,
     FormlyWrapperPanel,
     FormlyToggleComponent,
     FormlyDurationComponent,
     ItemsComponent,
     ItemComponent,
-    ProfileFormComponent
+    ProfileFormComponent,
+    NewNestedTreeComponent
   ],
   exports: [
     MetadataComponent,
