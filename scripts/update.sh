@@ -145,7 +145,7 @@ update_files() {
 
   download_file docker-compose.studio-lite.yaml docker-compose.yaml
   download_file docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml
-  download_file scripts/studio-lite.mk scripts/make/prod.mk
+  download_file scripts/make/studio-lite.mk scripts/make/prod.mk
 
   printf "File download done.\n\n"
 }
@@ -245,14 +245,16 @@ customize_settings() {
   sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.studio-lite
 
   # Setup makefiles
-  sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$(pwd)#" scripts/studio-lite.mk
+  sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$(pwd)#" scripts/make/studio-lite.mk
+  sed -i "s#scripts/update.sh#scripts/update_${APP_NAME}.sh#" scripts/make/studio-lite.mk
+
   if [ -f Makefile ]; then
-    printf "include %s/scripts/studio-lite.mk\n" "$(pwd)" >>Makefile
+    printf "include %s/scripts/make/studio-lite.mk\n" "$(pwd)" >>Makefile
   else
-    printf "include %s/scripts/studio-lite.mk\n" "$(pwd)" >Makefile
+    printf "include %s/scripts/make/studio-lite.mk\n" "$(pwd)" >Makefile
   fi
   if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$(pwd)" ]; then
-    printf "include %s/scripts/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
+    printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
   fi
 }
 
@@ -386,7 +388,7 @@ update_application_infrastructure() {
       printf '\n# Infrastructure\nTRAEFIK_DIR=%s\n' "$TRAEFIK_DIR" >>.env.studio-lite
     fi
     if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$(pwd)" ]; then
-      printf "include %s/scripts/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
+      printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
     fi
     printf 'Infrastructure installation checked.\n'
 
@@ -398,13 +400,13 @@ update_application_infrastructure() {
 
     printf "Go to infrastructure directory '%s' and execute infrastructure 'update script' ... " "$TRAEFIK_DIR"
     APP_DIR=$(pwd)
-    if [ -e "$TRAEFIK_DIR/update_traefik.sh" ]; then
-      cd "$TRAEFIK_DIR" && ./update_traefik.sh
+    if [ -e "$TRAEFIK_DIR/scripts/update_traefik.sh" ]; then
+      cd "$TRAEFIK_DIR" && ./scripts/update_traefik.sh
 
-      printf "include %s/scripts/traefik.mk\n" "$TRAEFIK_DIR" >>"$APP_DIR"/Makefile
+      printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>"$APP_DIR"/Makefile
       printf "Infrastructure update script finished.\n\n"
     else
-      printf "Infrastructure update script '%s' not found." "$TRAEFIK_DIR/update_traefik.sh"
+      printf "Infrastructure update script '%s' not found." "$TRAEFIK_DIR/scripts/update_traefik.sh"
       printf "'%s' update script finished with error.\n" $APP_NAME
       exit 1
     fi
