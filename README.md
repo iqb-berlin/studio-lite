@@ -47,7 +47,7 @@ Bitte beachten Sie hierbei, dass selbst-signierte Zertifikate nur eine Notlösun
 Um weiterentwickelte Software-Versionen von Studio-Lite oder der IQB-Infrastruktur zu installieren,
 ein abgelaufenes selbst-signiertes TLS-Zertifikat zu erneuern
 oder die Login-Daten für die Infrastruktur zu ändern,
-rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `bash update_studio-lite.sh` auf.
+rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `make studio-lite-update` auf.
 
 ## Starten und Stoppen der Anwendung mit  `make`
 Zur Steuerung der Anwendungslandschaft existieren eine Reihe von Make-Targets,

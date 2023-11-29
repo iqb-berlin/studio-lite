@@ -17,7 +17,12 @@ load_environment_variables() {
 }
 
 get_new_release_version() {
-  LATEST_RELEASE=$(curl -s "$REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+  LATEST_RELEASE=$(curl -s "$REPO_API"/releases/latest |
+    grep tag_name |
+    cut -d : -f 2,3 |
+    tr -d \" |
+    tr -d , |
+    tr -d " ")
 
   if [ "$SOURCE_TAG" = "latest" ]; then
     SOURCE_TAG="$LATEST_RELEASE"
@@ -85,7 +90,7 @@ run_update_script_in_selected_version() {
     printf "  Current update script will now call the downloaded update script and terminate itself.\n"
     printf "Update script modification check done.\n\n"
 
-    ./update_$APP_NAME.sh "$TARGET_TAG"
+    bash update_$APP_NAME.sh "$TARGET_TAG"
     exit $?
 
   else
@@ -96,38 +101,11 @@ run_update_script_in_selected_version() {
 
 prepare_installation_dir() {
   mkdir -p backup/release
-  if [ -d database_dumps ]; then
-    mv database_dumps backup/database_dump
-  else
-    mkdir -p backup/database_dump
-  fi
+  mkdir -p backup/database_dump
   mkdir -p config/frontend
-  if [ -d config/traefik ]; then
-    rm -rf config/traefik
-  fi
-  if [ -d grafana ]; then
-    rm -rf grafana
-  fi
-  if [ -d prometheus ]; then
-    rm -rf prometheus
-  fi
-  mkdir -p scripts
-  if [ -f docker-compose.prod.yml ]; then
-    mv docker-compose.prod.yml docker-compose.$APP_NAME.prod.yaml
-  fi
-  if [ -f docker-compose.yml ]; then
-    mv docker-compose.yml docker-compose.$APP_NAME.yaml
-  fi
-  if [ -f .env.prod ]; then
-    mv .env.prod .env.$APP_NAME
-  fi
-  if [ -f .env.prod.template ]; then
-    mv .env.prod.template .env.$APP_NAME.template
-  fi
+  mkdir -p scripts/make
+  mkdir -p scripts/migration
   rm Makefile
-  if [ -f update.sh ]; then
-    mv update.sh update_$APP_NAME.sh
-  fi
 }
 
 download_file() {
@@ -228,14 +206,67 @@ get_modified_file() {
   fi
 }
 
-check_template_files_modifications() {
+check_environment_file_modifications() {
   # check environment file
   printf "5. Environment template file modification check\n"
   get_modified_file .env.studio-lite.template .env.studio-lite.template "env-file"
   printf "Environment template file modification check done.\n\n"
+}
 
+run_optional_migration_scripts() {
+  printf "6. Optional migration scripts check\n"
+  RELEASE_TAGS=$(curl -s $REPO_API/releases |
+    grep tag_name |
+    cut -d : -f 2,3 |
+    tr -d \" |
+    tr -d , |
+    tr -d " " |
+    sed -n -e "/$TARGET_TAG/,/$SOURCE_TAG/p" |
+    head -n -1)
+
+  if [ -n "$RELEASE_TAGS" ]; then
+    for RELEASE_TAG in $RELEASE_TAGS; do
+      declare -a MIGRATION_SCRIPTS
+      MIGRATION_SCRIPT_CHECK_URL=$REPO_URL/"$TARGET_TAG"/scripts/migration/"$RELEASE_TAG".sh
+      if curl --head --silent --fail --output /dev/null "$MIGRATION_SCRIPT_CHECK_URL" 2>/dev/null; then
+        MIGRATION_SCRIPTS+=("$RELEASE_TAG".sh)
+      fi
+    done
+
+    if [ ${#MIGRATION_SCRIPTS[@]} -eq 0 ]; then
+      printf -- "- No additional migration scripts to execute.\n\n"
+
+    else
+      printf "6.1 The following migration scripts are executed for the migration from version %s to version %s:\n" "$SOURCE_TAG" "$TARGET_TAG"
+      for MIGRATION_SCRIPT in "${MIGRATION_SCRIPTS[@]}"; do
+        printf -- "- %s\n" "$MIGRATION_SCRIPT"
+      done
+      printf "\n6.2 Migration script download\n"
+      mkdir -p scripts/migration
+      for MIGRATION_SCRIPT in "${MIGRATION_SCRIPTS[@]}"; do
+        download_file scripts/migration/"$MIGRATION_SCRIPT" scripts/migration/"$MIGRATION_SCRIPT"
+        chmod +x scripts/migration/"$MIGRATION_SCRIPT"
+      done
+
+      printf "\n6.3 Migration script execution\n"
+      for ((i = ${#MIGRATION_SCRIPTS[@]} - 1; i >= 0; i--)); do
+        printf "Exceuting '%s' ...\n" "${MIGRATION_SCRIPTS[$i]}"
+        bash scripts/migration/"${MIGRATION_SCRIPTS[$i]}"
+        rm scripts/migration/"${MIGRATION_SCRIPTS[$i]}"
+      done
+
+      printf "\nMigration scripts successfully executed.\n\n"
+      printf "\n------------------------------------------------------------\n"
+      printf "Proceed with the original '%s' installation ..." $APP_NAME
+      printf "\n------------------------------------------------------------\n"
+      printf "\n"
+    fi
+  fi
+}
+
+check_config_files_modifications() {
   # check nginx configuration files
-  printf "6. Configuration template files modification check\n"
+  printf "7. Configuration template files modification check\n"
   get_modified_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
   printf "Configuration template files modification check done.\n\n"
 }
@@ -259,7 +290,7 @@ customize_settings() {
 }
 
 finalize_update() {
-  printf "7. Summary\n"
+  printf "8. Summary\n"
   if [ $HAS_ENV_FILE_UPDATE == "true" ] || [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
     if [ $HAS_ENV_FILE_UPDATE == "true" ] && [ $HAS_CONFIG_FILE_UPDATE == "true" ]; then
       printf -- '- Version, environment, and configuration update applied!\n\n'
@@ -338,7 +369,12 @@ update_application_infrastructure() {
   printf "Checking IQB infrastructure software to be updated ...\n"
 
   if [ -z "$TRAEFIK_DIR" ]; then
-    LATEST_TRAEFIK_RELEASE=$(curl -s "$TRAEFIK_REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+    LATEST_TRAEFIK_RELEASE=$(curl -s "$TRAEFIK_REPO_API"/releases/latest |
+      grep tag_name |
+      cut -d : -f 2,3 |
+      tr -d \" |
+      tr -d , |
+      tr -d " ")
 
     printf -- "- No IQB infrastructure installation found.\n\n"
     printf "Installing missing IQB application infrastructure software:\n"
@@ -443,7 +479,9 @@ main() {
         run_update_script_in_selected_version
         prepare_installation_dir
         update_files
-        check_template_files_modifications
+        check_environment_file_modifications
+        run_optional_migration_scripts
+        check_config_files_modifications
         customize_settings
         finalize_update
 
@@ -467,10 +505,12 @@ main() {
   else
     TARGET_TAG="$SELECTED_VERSION"
 
-    prepare_installation_dir
     load_environment_variables
+    prepare_installation_dir
     update_files
-    check_template_files_modifications
+    check_environment_file_modifications
+    run_optional_migration_scripts
+    check_config_files_modifications
     customize_settings
     finalize_update
   fi

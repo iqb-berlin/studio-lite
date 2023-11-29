@@ -119,7 +119,7 @@ install_application_infrastructure() {
     DIR_COUNT=${#TRAEFIK_DIR_ARRAY[*]}
 
     if [ "$DIR_COUNT" -eq 0 ]; then
-      printf '- No IQB Infrastructure environment file found.\n'
+      printf -- '- No IQB Infrastructure environment file found.\n'
       printf 'Install script finished with error\n'
       exit 1
 
