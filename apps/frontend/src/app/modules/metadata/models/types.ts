@@ -46,6 +46,7 @@ export class VocabNode {
   id!: string;
   label!: string;
   notation!: string;
+  description!: string;
 }
 
 /** Flat to-do item node with expandable and level information */
@@ -54,5 +55,6 @@ export class VocabFlatNode {
   label!: string;
   notation!: string;
   level!: number;
+  description!: string;
   expandable!: boolean;
 }

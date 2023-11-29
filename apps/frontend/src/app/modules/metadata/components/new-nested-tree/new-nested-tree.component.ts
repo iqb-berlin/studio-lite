@@ -24,7 +24,7 @@ export class ChecklistDatabase {
   }
 
   makeTree(vocab: Vocabulary) {
-    const tree = vocab.hasTopConcept?.map(
+    return vocab.hasTopConcept?.map(
       (topConcept: any) => {
         const foundNode = new VocabNode();
 
@@ -33,6 +33,7 @@ export class ChecklistDatabase {
             foundNode.id = v.id;
             foundNode.label = v.name.substring(v.name.indexOf(' ') + 1);
             foundNode.notation = v.notation || '';
+            foundNode.description = v.description || '';
             foundNode.children = topConcept.narrower && topConcept.narrower.length ? this.mapNarrower(
               topConcept.narrower
             ) : [];
@@ -47,17 +48,17 @@ export class ChecklistDatabase {
         node.id = topConcept.id;
         node.label = topConcept.prefLabel?.de;
         node.notation = topConcept.notation || '';
+        node.description = topConcept.description || '';
         node.children = topConcept.narrower && topConcept.narrower.length ? this.mapNarrower(
           topConcept.narrower
         ) : [];
         return node;
       }
     );
-    return tree;
   }
 
   mapNarrower(
-    nodes: any
+    nodes: VocabFlatNode[]
   ) {
     return nodes?.map((n: any) => {
       const foundNode = new VocabNode();
@@ -67,6 +68,7 @@ export class ChecklistDatabase {
           foundNode.id = v.id;
           foundNode.label = v.name.substring(v.name.indexOf(' ') + 1);
           foundNode.notation = v.notation || '';
+          foundNode.description = v.description || '';
           foundNode.children = n.narrower && n.narrower.length ? this.mapNarrower(
             n.narrower
           ) : [];
@@ -79,6 +81,7 @@ export class ChecklistDatabase {
       node.id = n.id;
       node.label = n.prefLabel?.de;
       node.notation = n.notation || '';
+      node.description = n.description || '';
       node.children = n.narrower ? this.mapNarrower(n.narrower) : [];
       return node;
     }
@@ -148,18 +151,21 @@ export class NewNestedTreeComponent implements OnInit {
     }
 
     if (this.dialogData && this.dialogData.value) {
-      const data = this.dataSource.data;
-      this.dialogData.value.forEach((v: any) => {
-        this.searchNodeInTree(data, v);
+      this.dialogData.value.forEach((v: VocabFlatNode) => {
+        this.searchNodeInTree(v);
       });
     }
   }
 
-  searchNodeInTree(nodes: VocabNode[], targetNode: VocabFlatNode) {
-    nodes?.forEach(node => {
+  searchNodeInTree(targetNode: VocabFlatNode) {
+    this.dialogData.value.forEach(value => {
+      this.checklistSelection.toggle(value);
+    });
+
+  /*  ?.forEach(node => {
       if (node?.id === targetNode?.id) {
         const nodeInMap = this.nestedNodeMap.get(node);
-        if (nodeInMap) {
+        if (nodeInMap && Object.keys(nodeInMap).length === 0) {
           this.VocabNodeSelectionToggle(nodeInMap);
         }
       }
@@ -174,7 +180,7 @@ export class NewNestedTreeComponent implements OnInit {
           if (child.children.length > 0) this.searchNodeInTree(child.children, targetNode);
         });
       }
-    });
+    }); */
   }
 
   nodesList: VocabFlatNode[] = [];
@@ -203,6 +209,7 @@ export class NewNestedTreeComponent implements OnInit {
     flatNode.notation = node.notation;
     flatNode.level = level;
     flatNode.id = node.id;
+    flatNode.description = node.description;
     flatNode.expandable = !!node.children?.length;
     this.flatNodeMap.set(flatNode, node);
     this.nestedNodeMap.set(node, flatNode);
@@ -213,6 +220,10 @@ export class NewNestedTreeComponent implements OnInit {
   filterLeafNode(node: VocabFlatNode): boolean {
     if (!this.searchString) {
       return false;
+    }
+    if (node.notation.length !== 0) {
+      return node.notation.toLowerCase()
+        .indexOf(this.searchString?.toLowerCase()) === -1;
     }
     return node.label.toLowerCase()
       .indexOf(this.searchString?.toLowerCase()) === -1;
@@ -228,16 +239,11 @@ export class NewNestedTreeComponent implements OnInit {
     }
     const descendants = this.treeControl.getDescendants(node);
 
-    if (
-      descendants.some(
-        descendantNode => descendantNode.label
-          .toLowerCase()
-          .indexOf(this.searchString?.toLowerCase()) !== -1
-      )
-    ) {
-      return false;
-    }
-    return true;
+    return !descendants.some(
+      descendantNode => descendantNode.label
+        .toLowerCase()
+        .indexOf(this.searchString?.toLowerCase()) !== -1
+    );
   }
 
   // search filter logic end
@@ -245,9 +251,8 @@ export class NewNestedTreeComponent implements OnInit {
   /** Whether all the descendants of the node are selected. */
   descendantsAllSelected(node: VocabFlatNode): boolean {
     const descendants = this.treeControl.getDescendants(node);
-    const descAllSelected = descendants.length > 0 &&
-      descendants.every(child => this.checklistSelection.isSelected(child));
-    return descAllSelected;
+    return descendants.length > 0 &&
+        descendants.every(child => this.checklistSelection.isSelected(child));
   }
 
   /** Whether part of the descendants are selected */
@@ -255,6 +260,23 @@ export class NewNestedTreeComponent implements OnInit {
     const descendants = this.treeControl.getDescendants(node);
     const result = descendants.some(child => this.checklistSelection.isSelected(child));
     return result && !this.descendantsAllSelected(node);
+  }
+
+  closeDialog() {
+    const nodesList:Set<VocabFlatNode> = new Set();
+    this.checklistSelection.selected.forEach(selected => {
+      const parent = this.getParentNode(selected);
+      if (parent && (this.getLastParentSelected(selected) === parent)) {
+        nodesList.add(parent);
+      } else {
+        nodesList.add(selected);
+      }
+      const node = this.flatNodeMap.get(selected);
+      if (node && node.children) {
+      //  node.children.some(child => this.checklistSelection.isSelected(child));
+      }
+    });
+    return [...nodesList];
   }
 
   /** Toggle the vocab entry selection. Select/deselect all the descendants node */
@@ -295,11 +317,28 @@ export class NewNestedTreeComponent implements OnInit {
     }
   }
 
+  getLastParentSelected(node: VocabFlatNode): VocabFlatNode | null {
+    let parent: VocabFlatNode | null = this.getParentNode(node);
+    let lastParent!: VocabFlatNode;
+    while (parent) {
+      lastParent = parent;
+      this.checkRootNodeSelection(parent);
+      parent = this.getParentNode(parent);
+    }
+    const nodeSelected = this.checklistSelection.isSelected(lastParent);
+    if (nodeSelected) {
+      this.nodesList.push(lastParent);
+      return lastParent;
+    }
+    return null;
+  }
+
   /** Check root node checked state and change it accordingly */
   checkRootNodeSelection(node: VocabFlatNode): void {
     const nodeSelected = this.checklistSelection.isSelected(node);
     const descendants = this.treeControl.getDescendants(node);
-    const descAllSelected = descendants.length > 0 && descendants.every(child => this.checklistSelection.isSelected(child));
+    const descAllSelected = descendants.length > 0 &&
+        descendants.every(child => this.checklistSelection.isSelected(child));
     if (nodeSelected && !descAllSelected) {
       this.checklistSelection.deselect(node);
     } else if (!nodeSelected && descAllSelected) {

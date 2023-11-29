@@ -1,8 +1,5 @@
 <h1 mat-dialog-content>{{vocabularyTitle}}</h1>
 <mat-dialog-content>
-  <input [(ngModel)]="searchString"/>
-  {{nodesList | json}}
-  {{dialogData.value | json}}
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <mat-tree-node
       *matTreeNodeDef="let node"
@@ -59,7 +56,7 @@
   <button mat-raised-button
           color="primary"
           type="submit"
-          [mat-dialog-close]="checklistSelection.selected">
+          [mat-dialog-close]="closeDialog()">
     {{'confirm' | translate}}
   </button>
   <button mat-raised-button
