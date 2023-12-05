@@ -1,67 +1,65 @@
 <h1 mat-dialog-content>{{vocabularyTitle}}</h1>
 <mat-dialog-content>
-  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
-    <mat-tree-node
-      *matTreeNodeDef="let node"
-      [style.display]="
-      filterLeafNode(node) ? 'none' : 'block'
-    "
-      matTreeNodeToggle
-      matTreeNodePadding
-      matTreeNodePaddingIndent="20"
-    >
-      <div class="fx-row-start-center">
-        <button class="button__arrow" mat-icon-button disabled></button>
-        <mat-checkbox
-          class="checklist-leaf-node"
-          [checked]="checklistSelection.isSelected(node)"
-          (change)="VocabLeafSelectionToggle(node)"
-        ></mat-checkbox>
-        <span class="notation" *ngIf="!this.dialogData.props.hideNumbering">{{node.notation}}</span>
-        <span *ngIf="!this.dialogData.props.hideTitle">{{node?.label}}</span>
-      </div>
-    </mat-tree-node>
-
-    <mat-tree-node
-      *matTreeNodeDef="let node; when: hasChild"
-      [style.display]="filterParentNode(node) ? 'none' : 'block'"
-      matTreeNodePadding
-      matTreeNodePaddingIndent="20"
-    >
-      <div class="fx-row-start-center">
-        <button
-          class="button__arrow"
-          mat-icon-button
-          matTreeNodeToggle
-          [attr.aria-label]="'Toggle ' + node?.label"
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+        <mat-tree-node
+                *matTreeNodeDef="let node"
+                [style.display]="filterLeafNode(node) ? 'none' : 'block'"
+                matTreeNodeToggle
+                matTreeNodePadding
+                matTreeNodePaddingIndent="20"
         >
-          <mat-icon class="mat-icon-rtl-mirror">
-            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-          </mat-icon>
-        </button>
+            <div class="fx-row-start-center">
+                <button class="button__arrow" mat-icon-button disabled></button>
+                <mat-checkbox
+                        class="checklist-leaf-node"
+                        [checked]="checklistSelection.isSelected(node)"
+                        (change)="VocabLeafSelectionToggle(node)"
+                ></mat-checkbox>
+                <span class="notation" *ngIf="!this.dialogData.props.hideNumbering">{{node.notation}}</span>
+                <span *ngIf="!this.dialogData.props.hideTitle">{{node?.label}}</span>
+            </div>
+        </mat-tree-node>
 
-        <mat-checkbox
-          [checked]="descendantsAllSelected(node)"
-          [indeterminate]="descendantsPartiallySelected(node)"
-          (change)="VocabNodeSelectionToggle(node)"
-        ></mat-checkbox>
-        <span class="notation" *ngIf="!this.dialogData.props.hideNumbering">{{node.notation}}</span>
-        <span *ngIf="!this.dialogData.props.hideTitle">{{node?.label}}</span>
-      </div>
-    </mat-tree-node>
-  </mat-tree>
+        <mat-tree-node
+                *matTreeNodeDef="let node; when: hasChild"
+                [style.display]="filterParentNode(node) ? 'none' : 'block'"
+                matTreeNodePadding
+                matTreeNodePaddingIndent="20"
+        >
+            <div class="fx-row-start-center">
+                <button
+                        class="button__arrow"
+                        mat-icon-button
+                        matTreeNodeToggle
+                        [attr.aria-label]="'Toggle ' + node?.label"
+                >
+                    <mat-icon class="mat-icon-rtl-mirror">
+                        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                    </mat-icon>
+                </button>
+
+                <mat-checkbox
+                        [checked]="descendantsAllSelected(node)"
+                        [indeterminate]="descendantsPartiallySelected(node)"
+                        (change)="VocabNodeSelectionToggle(node)"
+                ></mat-checkbox>
+                <span class="notation" *ngIf="!this.dialogData.props.hideNumbering">{{node.notation}}</span>
+                <span *ngIf="!this.dialogData.props.hideTitle">{{node?.label}}</span>
+            </div>
+        </mat-tree-node>
+    </mat-tree>
 </mat-dialog-content>
 
 <mat-dialog-actions>
-  <button mat-raised-button
-          color="primary"
-          type="submit"
-          [mat-dialog-close]="closeDialog()">
-    {{'confirm' | translate}}
-  </button>
-  <button mat-raised-button
-          type="submit"
-          [mat-dialog-close]="">
-    {{'cancel' | translate}}
-  </button>
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="getSelectedNodesList()">
+        {{'confirm' | translate}}
+    </button>
+    <button mat-raised-button
+            type="submit"
+            [mat-dialog-close]="">
+        {{'cancel' | translate}}
+    </button>
 </mat-dialog-actions>

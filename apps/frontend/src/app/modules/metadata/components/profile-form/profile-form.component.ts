@@ -135,7 +135,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
             id: keyValue[0],
             label: [{
               lang: this.language,
-              value: this.profileItemKeys[keyValue[0]].label
+              value: this.profileItemKeys[keyValue[0]]?.label
             }],
             value: this.mapFormlyModelValueToMetadataValue(keyValue),
             valueAsText: this.mapFormlyModelValueToMetadataValueAsText(keyValue)
@@ -146,7 +146,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private mapFormlyModelValueToMetadataValue(keyValue: Record<string, any>) {
-    const type = this.profileItemKeys[keyValue[0]].type;
+    const type = this.profileItemKeys[keyValue[0]]?.type;
     if (type === 'text') {
       const textWithLanguages = Object.entries(keyValue[1]);
       return textWithLanguages
@@ -159,7 +159,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private mapFormlyModelValueToMetadataValueAsText(keyValue: Record<string, any>) {
-    const type = this.profileItemKeys[keyValue[0]].type;
+    const type = this.profileItemKeys[keyValue[0]]?.type;
     if (type === 'text') {
       const textWithLanguages = Object.entries(keyValue[1]);
       return textWithLanguages
