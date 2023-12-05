@@ -10,7 +10,7 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=3333"
       - "traefik.docker.network=app-net"
     volumes:
-      - backend_vol:/studio-lite-api/packages
+      - backend_vol:/studio-lite-api
 
   frontend:
     labels:
