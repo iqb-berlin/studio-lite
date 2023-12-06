@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_LOCALE, MatOptionModule } from '@angular/material/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
@@ -14,6 +14,10 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
 import { UsersComponent } from './components/users/users.component';
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
@@ -22,13 +26,21 @@ import { BackendService } from './services/backend.service';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-menu.component';
+import { WorkspaceSettingsComponent } from './components/settings/settings.component';
+import { ProfilesComponent } from './components/profiles/profiles.component';
+import { StatesComponent } from './components/states/states.component';
+import { DeleteStateComponent } from './components/delete-state/delete-state.component';
 
 @NgModule({
   declarations: [
     WorkspacesComponent,
     UsersComponent,
     WsgAdminComponent,
-    WorkspaceMenuComponent
+    WorkspaceMenuComponent,
+    WorkspaceSettingsComponent,
+    ProfilesComponent,
+    StatesComponent,
+    DeleteStateComponent
   ],
   imports: [
     CommonModule,
@@ -46,7 +58,12 @@ import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-me
     RouterModule,
     MatTabsModule,
     WsgAdminRoutingModule,
-    TranslateModule
+    TranslateModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatFormFieldModule
   ],
   providers: [
     BackendService,

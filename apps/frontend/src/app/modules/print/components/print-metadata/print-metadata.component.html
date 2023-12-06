@@ -1,0 +1,11 @@
+<h3 *ngIf="metadata && (metadata.unit || metadata.items)">{{'print.metadata' | translate}}</h3>
+<h3 *ngIf="!metadata || (!metadata.unit && !metadata.items)">{{'print.no-metadata' | translate}}</h3>
+<studio-lite-metadata-table *ngIf="metadata && metadata.unit"
+                            [metadata] = metadata.unit>
+</studio-lite-metadata-table>
+
+<ng-container *ngIf="metadata && metadata.items">
+  <studio-lite-metadata-table *ngFor="let itemMetadata of metadata.items"
+                              [metadata] = itemMetadata>
+  </studio-lite-metadata-table>
+</ng-container>

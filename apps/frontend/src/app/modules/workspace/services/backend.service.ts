@@ -9,7 +9,7 @@ import {
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitMetadataDto,
-  UnitSchemeDto, UsersInWorkspaceDto
+  UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -20,6 +20,14 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
+
+  getWorkspaceGroupStates(workspaceGroupId: number):Observable<WorkspaceGroupFullDto> {
+    return this.http
+      .get<WorkspaceGroupFullDto>(`${this.serverUrl}workspace-groups/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => [])
+      );
+  }
 
   getUnitList(workspaceId: number, params?: HttpParams): Observable <UnitInListDto[]> {
     return this.http
@@ -271,6 +279,15 @@ export class BackendService {
   deleteUnitGroup(workspaceId: number, group: string): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspace/${workspaceId}/group/${BackendService.utf8AsHexString(group)}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  deleteUnitState(workspaceId: number, unitId:number): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}workspace/${workspaceId}/${unitId}/state`)
       .pipe(
         map(() => true),
         catchError(() => of(false))

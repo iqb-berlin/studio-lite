@@ -4,6 +4,7 @@
   </h1>
   <mat-dialog-content>
     <div>
+      <h3>{{'workspace-settings.modules' | translate }}</h3>
       <div class="fx-row-space-between-start fx-gap-10">
         <mat-label>
           {{'workspace-settings.default-editor' | translate}}
@@ -47,12 +48,34 @@
         </mat-checkbox>
         <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
+      <div>
+        <h3>{{'metadata.metadata' | translate }}</h3>
+        <div class="fx-column-start-start">
+          <mat-label>{{'metadata.unit-profile' | translate }}</mat-label>
+          <mat-error *ngIf="unitMDProfiles.length === 0">{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
+          <mat-select  class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
+              <mat-option *ngFor="let unitMDProfile of unitMDProfiles" [value]="unitMDProfile.id">
+                {{unitMDProfile.label }}
+              </mat-option>
+          </mat-select>
+        </div>
+        <div class="fx-column-start-start">
+          <mat-label>{{'metadata.item-profile' | translate }}</mat-label>
+          <mat-error *ngIf="itemMDProfiles.length === 0">{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
+          <mat-select class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedItemMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectItemMDProfile($event)" >
+            <mat-option *ngFor="let itemMDProfile of itemMDProfiles" [value]="itemMDProfile.id">
+              {{itemMDProfile.label}}
+            </mat-option>
+          </mat-select>
+        </div>
+      </div>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-raised-button
             color="primary"
             type="submit"
+            (click)="addData()"
             [mat-dialog-close]="dialogData">
       {{'save' | translate}}
     </button>

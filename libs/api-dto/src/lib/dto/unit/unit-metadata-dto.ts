@@ -11,6 +11,9 @@ export class UnitMetadataDto {
     name?: string;
 
   @ApiProperty()
+    state?: string;
+
+  @ApiProperty()
     description?: string;
 
   @ApiProperty()
@@ -21,6 +24,9 @@ export class UnitMetadataDto {
 
   @ApiProperty()
     groupName?: string;
+
+  @ApiProperty()
+    metadata?: any;
 
   @ApiProperty()
     player?: string;

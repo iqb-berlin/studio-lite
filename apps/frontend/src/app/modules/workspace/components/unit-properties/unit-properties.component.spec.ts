@@ -9,13 +9,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { environment } from '../../../../../environments/environment';
-import { UnitMetadataComponent } from './unit-metadata.component';
+import { UnitPropertiesComponent } from './unit-properties.component';
 
-describe('StartReviewButtonComponent', () => {
-  let component: UnitMetadataComponent;
-  let fixture: ComponentFixture<UnitMetadataComponent>;
+describe('UnitPropertiesComponent', () => {
+  let component: UnitPropertiesComponent;
+  let fixture: ComponentFixture<UnitPropertiesComponent>;
 
   @Component({ selector: 'studio-lite-new-group-button', template: '' })
   class MockNewGroupButtonComponent {
@@ -32,7 +33,7 @@ describe('StartReviewButtonComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitMetadataComponent,
+        UnitPropertiesComponent,
         MockNewGroupButtonComponent,
         MockSelectModuleComponent
       ],
@@ -45,6 +46,7 @@ describe('StartReviewButtonComponent', () => {
         HttpClientModule,
         ReactiveFormsModule,
         MatCardModule,
+        MatExpansionModule,
         TranslateModule.forRoot()
       ],
       providers: [{
@@ -53,7 +55,7 @@ describe('StartReviewButtonComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitMetadataComponent);
+    fixture = TestBed.createComponent(UnitPropertiesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -2,7 +2,6 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-
 import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
@@ -35,7 +34,8 @@ export class WorkspaceMenuComponent {
   @Output() workspaceNotLoaded: EventEmitter<void> = new EventEmitter<void>();
   @Output() workspaceDeleted: EventEmitter<WorkspaceInListDto[]> = new EventEmitter<WorkspaceInListDto[]>();
   @Output() download: EventEmitter<void> = new EventEmitter<void>();
-  @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> = new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
+  @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> =
+    new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
 
   constructor(
     private moveWorkspaceDialog: MatDialog,
@@ -90,6 +90,7 @@ export class WorkspaceMenuComponent {
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
               content: prompt,
+              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
               workspaceGroups: this.workspaceGroupsByUser,
               selectedRows: selectedRows,
               okButtonLabel: this.translateService.instant('move')
@@ -109,6 +110,7 @@ export class WorkspaceMenuComponent {
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
               content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
+              warning: this.translateService.instant('move-workspaces-warning'),
               workspaceGroups: this.workspaceGroupsByUser,
               okButtonLabel: this.translateService.instant('close')
             }
@@ -158,11 +160,12 @@ export class WorkspaceMenuComponent {
               defaultPlayer: '',
               defaultSchemer: '',
               unitGroups: [],
-              stableModulesOnly: true
+              stableModulesOnly: true,
+              profile: ''
             };
             const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
               width: '600px',
-              data: wsSettings
+              data: { settings: wsSettings, selectedRow: selectedRows[0].id }
             });
             dialogRef.afterClosed().subscribe(result => {
               if (result) {

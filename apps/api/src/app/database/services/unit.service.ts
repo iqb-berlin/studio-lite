@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
+import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -21,6 +22,8 @@ export class UnitService {
     private unitDefinitionsRepository: Repository<UnitDefinition>,
     @InjectRepository(WorkspaceUser)
     private workspaceUserRepository: Repository<WorkspaceUser>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService
   ) {}
@@ -36,7 +39,8 @@ export class UnitService {
         id: true,
         key: true,
         name: true,
-        groupName: true
+        groupName: true,
+        state: true
       }
     });
     if (userId && withLastSeenCommentTimeStamp) {
@@ -114,7 +118,7 @@ export class UnitService {
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme'
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });
   }
@@ -126,7 +130,7 @@ export class UnitService {
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme'
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });
   }
@@ -143,6 +147,8 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
+    if (dataKeys.indexOf('metadata') >= 0) unitToUpdate.metadata = newData.metadata;
+    if (dataKeys.indexOf('state') >= 0) unitToUpdate.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
       unitToUpdate.groupName = newData.groupName;
     }
@@ -260,6 +266,35 @@ export class UnitService {
       scheme: unit.scheme,
       schemeType: unit.schemeType
     };
+  }
+
+  async deleteState(workspaceGroup:number, state_id: string): Promise<void> {
+    const workspaces = await this.workspaceRepository.find({
+      where: { groupId: workspaceGroup }
+    });
+    let units = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const workspace of workspaces) {
+      this.logger.log('workspace', JSON.stringify(workspace));
+      const unit = await this.unitsRepository.find({
+        where: { state: state_id, workspaceId: workspace.id }
+      });
+      this.logger.log('unit', JSON.stringify(unit));
+      if (unit.length) units = [...units, unit[0]];
+    }
+    if (units.length) {
+      // eslint-disable-next-line no-restricted-syntax
+      for await (const unit of units) {
+        unit.state = '';
+        await this.unitsRepository.save(unit);
+      }
+    }
+  }
+
+  async removeUnitState(id: number): Promise<void> {
+    const unit = await this.unitsRepository.findOne({ where: { id: id } });
+    await this.unitsRepository.save({ ...unit, state: '0' }
+    );
   }
 
   async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto) {

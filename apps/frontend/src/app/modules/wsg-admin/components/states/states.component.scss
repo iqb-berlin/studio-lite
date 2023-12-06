@@ -1,0 +1,39 @@
+.scroll-area {
+  height: 700px;
+  overflow-y: auto;
+}
+
+.color-form-field {
+  margin-right: 10px;
+  max-width:50px;
+}
+
+.color-input-field{
+  min-width:20px;
+  min-height: 20px;
+}
+
+.text-form-field{
+  width: 100%;
+}
+
+.state{
+  display:flex;
+  flex-direction: row;
+  justify-content: start;
+  align-content: center;
+  margin-right: 20px;
+}
+
+.delete-button{
+  margin-left:20px;
+  margin-top :5px;
+}
+
+.add-state{
+  margin-bottom:20px;
+}
+
+.spinner{
+  margin: auto;
+}

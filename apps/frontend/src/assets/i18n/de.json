@@ -9,6 +9,7 @@
   "close": "Schließen",
   "warning": "Warnung",
   "error": "Fehler",
+  "confirm": "Bestätigen",
   "hour": "Uhr",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
@@ -188,7 +189,31 @@
     "delete-groups-title": "Löschen von Arbeitsbereichsgruppen",
     "groups-deleted": "Arbeitsbereichsgruppe(n) gelöscht",
     "groups-not-deleted": "Arbeitsbereichsgruppe(n) konnten nicht gelöscht werden",
-    "groups-title": "Admin: Arbeitsbereichsgruppen"
+    "groups-title": "Admin: Arbeitsbereichsgruppen",
+    "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen"
+  },
+
+  "metadata": {
+    "metadata": "Metadaten",
+    "unit-profile": "Aufgaben Profil",
+    "item-profile": "Item Profil",
+    "select-profile": "Profil auswählen...",
+    "assign-metadata-profiles": "Metadaten Profile zuweisen",
+    "vocab-loading-error": "Vokabular konnte nicht geladen werden!",
+    "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",
+    "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!",
+    "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!",
+    "error-states": "Status Liste konnte nicht geladen werden!"
+
+  },
+  "wsg-settings": {
+    "save-settings": "Einstellungen speichern",
+    "state-configs": "Status Konfigurationen",
+    "add-state": "Status hinzufügen",
+    "changed": "Einstellungen geändert",
+    "delete-state-warning":"Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Alle vorherigen Statusänderungen werden gespeichert.",
+    "delete-state":"Status löschen",
+    "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?"
   },
   "settings": {
     "texts": "Texte",
@@ -259,6 +284,7 @@
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
     "delete-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben gelöscht werden?",
     "move-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben verschoben werden?",
+    "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt!",
     "add-workspace": "Arbeitsbereich hinzufügen",
     "delete-selected-workspaces": "Markierte/n Arbeitsbereich/e löschen",
     "move-selected-workspaces": "Markierte/n Arbeitsbereich/e verschieben",
@@ -271,9 +297,11 @@
     "title": "Verwaltung \"{{name}}\"",
     "users": "Nutzer:innen",
     "workspaces": "Arbeitsbereiche",
+    "settings": "Einstellungen",
     "units-count": "Anzahl der Aufgaben"
   },
   "workspace-settings": {
+    "modules": "Module",
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",
     "default-editor": "Voreingestellter Editor",
@@ -301,7 +329,8 @@
   },
   "workspace": {
     "routes": {
-      "metadata": "Eigenschaften",
+      "properties": "Eigenschaften",
+      "metadata": "Metadaten",
       "editor": "Editor",
       "preview": "Vorschau",
       "schemer": "Kodierung",
@@ -313,6 +342,7 @@
     "unit-key": "Kurzname",
     "invalid-unit-key": "Ungültige Länge, ungültige Zeichen oder schon vorhanden",
     "unit-name": "Name",
+    "unit-state": "Status",
     "sort-by-key": "Nach Kurzname sortieren",
     "sort-by-name": "Nach Name sortieren",
     "update-units": "Aufgabenliste aktualisieren",
@@ -406,6 +436,7 @@
     "copy-units": "Aufgabe(n) kopieren",
     "move": "Verschieben",
     "copy": "Kopieren",
+    "state": "Status",
     "unit-moved-or-copied": "Aufgabe(n) {{action}}",
     "unit-not-moved-or-copied": "Konnte Aufgabe(n) nicht {{action}}",
     "no-units": "Dieser Arbeitsbereich enthält keine Units!",
@@ -578,7 +609,9 @@
     "code-list": "Liste der möglichen Codes",
     "id": "ID",
     "coding": "Kodierung",
-    "no-coding": "Keine Kodierung"
+    "no-coding": "Keine Kodierung",
+    "metadata": "Metadaten",
+    "no-metadata": "Keine Metadaten"
   },
   "review": {
     "header": "Review",

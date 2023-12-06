@@ -1,9 +1,8 @@
   <h1 mat-dialog-title>{{typedData.title}}</h1>
   <mat-dialog-content>
     <form class="fx-column-start-stretch">
-      <p>
-        {{ typedData.content }}
-      </p>
+      <p>{{ typedData.content }}</p>
+      <p>{{ typedData.warning }}</p>
       <mat-form-field *ngIf="typedData.workspaceGroups && typedData.workspaceGroups.length">
         <mat-label>{{'wsg-admin.select-workspace-group' | translate}}</mat-label>
         <mat-select [(value)]="selectedValue" >

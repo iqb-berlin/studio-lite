@@ -9,6 +9,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { ReviewModule } from './review/review.module';
 import { AppVersionProvider } from './app-version.guard';
 import { DownloadModule } from './download/download.module';
+import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { DownloadModule } from './download/download.module';
     WorkspaceModule,
     ReviewModule,
     DownloadModule,
-    MulterModule
+    MulterModule,
+    WorkspaceGroupsModule
   ],
   controllers: [AppController],
   providers: [AppVersionProvider],

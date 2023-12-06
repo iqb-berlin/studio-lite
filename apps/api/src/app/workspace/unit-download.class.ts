@@ -4,7 +4,6 @@ import {
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
 import { VeronaModuleKeyCollection, VeronaVariable } from '@studio-lite/shared-code';
-import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
 import { SettingService } from '../database/services/setting.service';
@@ -12,11 +11,9 @@ import { SettingService } from '../database/services/setting.service';
 export class UnitDownloadClass {
   // TODO: Devide into submethods
   static async get(
-    workspaceService: WorkspaceService,
     unitService: UnitService,
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
-    workspaceId: number,
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
     const zip = new AdmZip();
@@ -41,12 +38,14 @@ export class UnitDownloadClass {
             '@lastChange': unitMetadata.lastChangedMetadata ? unitMetadata.lastChangedMetadata.toISOString() : '',
             Id: unitMetadata.key,
             Label: unitMetadata.name,
-            Description: unitMetadata.description
-            // Transcript: unitMetadata.transcript, // TODO: after transcript is in testcenter xsd
-            // Reference: unitMetadata.reference // TODO: after reference is in testcenter xsd
+            Description: unitMetadata.description,
+            Reference: Object.keys(unitMetadata.metadata).length !== 0 ? `${unitMetadata.key}.vomd` : ''
           }
         }
       });
+      if (Object.keys(unitMetadata.metadata).length !== 0) {
+        zip.addFile(`${unitMetadata.key}.vomd`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
+      }
       const definitionData = await unitService.findOnesDefinition(unitId);
       if (definitionData && definitionData.definition && definitionData.definition.length > 0) {
         unitXml.root().ele({

@@ -32,6 +32,7 @@ describe('UnitCommentsComponent', () => {
     @Input() submitLabel!: string;
     @Input() initialHTML!: string;
     @Input() editorHTML!: string;
+    @Input() label!: string;
   }
 
   @Component({ selector: 'studio-lite-comment', template: '' })

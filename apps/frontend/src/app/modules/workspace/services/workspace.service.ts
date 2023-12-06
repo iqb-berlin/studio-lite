@@ -4,20 +4,23 @@ import {
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
-import { UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto
+} from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
-import { BackendService as AppBackendService } from '../../../services/backend.service';
 import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
 import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
+import { State } from '../../admin/models/state.type';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
+  groupId!:number | undefined;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
@@ -31,13 +34,13 @@ export class WorkspaceService {
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
   isValidFormKey = new BehaviorSubject<boolean>(true);
+  states:State[] = [];
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<void>();
 
   constructor(
     private backendService: BackendService,
-    private appBackendService: AppBackendService,
     private appService: AppService
   ) {
     this.workspaceSettings = {
@@ -45,7 +48,9 @@ export class WorkspaceService {
       defaultPlayer: '',
       defaultSchemer: '',
       unitGroups: [],
-      stableModulesOnly: true
+      stableModulesOnly: true,
+      itemMDProfile: '',
+      unitMDProfile: ''
     };
   }
 
@@ -98,6 +103,20 @@ export class WorkspaceService {
     });
   }
 
+  async getWorkspaceGroupStates():Promise<State[]> {
+    return new Promise(resolve => {
+      if (this.groupId) {
+        this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
+          if (res.settings) {
+            this.workspaceSettings.states = res.settings.states;
+            this.states = res.settings.states || [];
+            resolve(this.states);
+          }
+        });
+      }
+    });
+  }
+
   async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
     if (this.unitMetadataStore) return this.unitMetadataStore;
     const selectedUnitId = this.selectedUnit$.getValue();
@@ -139,7 +158,7 @@ export class WorkspaceService {
         this.selectedWorkspaceId, this.unitMetadataStore.getChangedData()
       ));
       if (saveOk) {
-        reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupChanged();
+        reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
         this.unitMetadataStore.applyChanges();
         this.lastChangedMetadata = new Date();
       }

@@ -6,6 +6,7 @@
                                        [checkedRows]="tableSelectionCheckbox.selected"
                                        (groupAdded)="addGroup($event)"
                                        (groupEdited)="editGroup($event)"
+                                       (groupSettingsEdited)="editGroupSettings($event)"
                                        (groupsDeleted)="deleteGroups($event)"
                                        (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-groups-menu>

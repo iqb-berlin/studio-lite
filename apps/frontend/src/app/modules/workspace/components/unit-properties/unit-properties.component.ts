@@ -1,18 +1,26 @@
 import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import {
+  FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators
+} from '@angular/forms';
+import {
+  BehaviorSubject, Subject, Subscription, takeUntil
+} from 'rxjs';
+import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { BackendService } from '../../services/backend.service';
+import { State } from '../../../admin/models/state.type';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 @Component({
-  templateUrl: './unit-metadata.component.html',
-  styleUrls: ['unit-metadata.component.scss']
+  templateUrl: './unit-properties.component.html',
+  styleUrls: ['unit-properties.component.scss']
 })
 
-export class UnitMetadataComponent implements OnInit, OnDestroy {
+export class UnitPropertiesComponent implements OnInit, OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
@@ -21,45 +29,69 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   private editorSelectionChangedSubscription: Subscription | undefined;
   private playerSelectionChangedSubscription: Subscription | undefined;
   private schemerSelectionChangedSubscription: Subscription | undefined;
+  private statesChangedSubscription: Subscription | undefined;
+  private ngUnsubscribe = new Subject<void>();
+  metadata!: any;
+  workspaceSettings!: WorkspaceSettingsDto;
+  metadataLoader: BehaviorSubject<any> = new BehaviorSubject({});
+  variablesLoader: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
+  form = new FormGroup({});
+  selectedStateId = '0';
+  selectedStateColor = '';
 
   constructor(
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
-    public moduleService: ModuleService
+    public moduleService: ModuleService,
+    public backendService: BackendService
   ) {
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
+      state: this.fb.control('0'),
       group: this.fb.control(''),
       transcript: this.fb.control(''),
       reference: this.fb.control('')
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
       .subscribe(() => {
         this.readData();
       });
+    this.initItemLoader();
+    this.addSubscriptionForUnitDefinitionChanges();
+    this.metadataLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(metadata => {
+        this.metadata = metadata;
+      });
   }
 
+  // properties
   private async readData() {
     if (Object.keys(this.moduleService.editors).length === 0) await this.moduleService.loadList();
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
-    this.workspaceService.loadUnitMetadata().then(() => this.setupForm());
+    if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
+    this.workspaceService.loadUnitMetadata().then(() => {
+      this.setupForm();
+      this.loadMetaData();
+    });
   }
 
   private setupForm() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
       const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      this.selectedStateId = unitMetadata.state || '0';
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
@@ -69,6 +101,7 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
       this.unitForm.setValue({
         key: unitMetadata.key,
         name: unitMetadata.name,
+        state: unitMetadata.state,
         description: unitMetadata.description,
         reference: unitMetadata.reference,
         transcript: unitMetadata.transcript,
@@ -92,7 +125,11 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           this.workspaceService.unitMetadataStore?.setSchemer(selectedValue);
         });
       }
+      this.selectedStateColor = unitMetadata.state || '0';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
+        const filteredState = this.workspaceService.states
+          ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
+        filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
         // eslint-disable-next-line @typescript-eslint/dot-notation
         const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
         // eslint-disable-next-line @typescript-eslint/dot-notation
@@ -103,26 +140,101 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           this.unitForm.get('description')?.value,
           this.unitForm.get('group')?.value,
           this.unitForm.get('transcript')?.value,
-          this.unitForm.get('reference')?.value
+          this.unitForm.get('reference')?.value,
+          this.unitForm.get('state')?.value
         );
       });
       this.unitForm.enable();
+      setTimeout(() => {
+        const filteredStates = this.workspaceService.states
+          ?.filter((state:State) => state.id.toString() === unitMetadata.state);
+        filteredStates?.length ? this.selectedStateColor = filteredStates[0].color : this.selectedStateColor = '';
+      }, 1);
     } else {
       this.unitForm.setValue({
         key: '',
         name: '',
         description: '',
-        group: ''
+        group: '',
+        state: ''
       }, { emitEvent: false });
       this.unitForm.disable();
     }
   }
 
+  // metadata
+
+  private loadMetaData() {
+    this.workspaceSettings = this.workspaceService.workspaceSettings;
+    const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
+    if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
+      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+      this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
+    }
+  }
+
+  private initItemLoader(): void {
+    const unitId = this.workspaceService.selectedUnit$.getValue();
+    if (!this.workspaceService.unitSchemeStore) {
+      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
+        .subscribe(ues => {
+          if (ues) {
+            this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);
+            this.variablesLoader.next(this.getItems());
+          }
+        });
+    } else {
+      this.variablesLoader.next(this.getItems());
+    }
+  }
+
+  private addSubscriptionForUnitDefinitionChanges(): void {
+    if (this.workspaceService.unitDefinitionStore) {
+      this.subscribeUnitDefinitionChanges();
+    } else {
+      this.workspaceService.unitDefinitionStoreChanged
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          this.subscribeUnitDefinitionChanges();
+        });
+    }
+  }
+
+  private subscribeUnitDefinitionChanges() {
+    this.workspaceService.unitDefinitionStore?.dataChange
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.variablesLoader.next(this.getItems());
+      });
+  }
+
+  private getItems(): string[] {
+    const data = this.workspaceService.unitSchemeStore?.getData();
+    if (data) {
+      const unitSchemeVariables = data.variables || [];
+      const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitSchemeVariables;
+      const variableIds = variables.map((variable: any) => variable.id);
+      const scheme = JSON.parse(data.scheme);
+      const variableCodings = scheme?.variableCodings || [];
+      const variableCodingIds = variableCodings.map((item: any) => item.id);
+      // merge without duplicates
+      return [...new Set([...variableIds, ...variableCodingIds])];
+    }
+    return [];
+  }
+
+  onMetadataChange(metadata: any): void {
+    this.workspaceService.unitMetadataStore?.setMetadata(metadata);
+  }
+
   ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
     if (this.unitIdChangedSubscription) this.unitIdChangedSubscription.unsubscribe();
     if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
     if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
+    if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
   }
 }

@@ -85,6 +85,7 @@ export class SelectModuleComponent implements OnDestroy {
     }
     this.moduleFormDataChangedSubscription = this.moduleForm.valueChanges.subscribe(() => {
       this.selectionChanged.emit(this.moduleForm.get('moduleSelector')?.value);
+      this.isEmpty = false;
     });
     this.moduleForm.setValue({ moduleSelector: newModuleSelectorValue }, { emitEvent: false });
   }

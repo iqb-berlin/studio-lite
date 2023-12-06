@@ -48,7 +48,6 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     private messsageDialog: MatDialog,
     private showUsersDialog: MatDialog,
     private groupDialog: MatDialog,
-    private translateService: TranslateService,
     private reviewsDialog: MatDialog
   ) {
     super();
@@ -56,8 +55,11 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
 
   settings(): void {
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
-      width: '500px',
-      data: this.workspaceService.workspaceSettings
+      width: '700px',
+      data: {
+        settings: this.workspaceService.workspaceSettings,
+        selectedRow: this.workspaceService.selectedWorkspaceId
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -66,6 +68,10 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
         this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
         this.workspaceService.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
+        this.workspaceService.workspaceSettings.unitMDProfile = result.unitMDProfile;
+        this.workspaceService.workspaceSettings.itemMDProfile = result.itemMDProfile;
+        this.workspaceService.workspaceSettings.states = result.states;
+
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
         ).subscribe(isOK => {

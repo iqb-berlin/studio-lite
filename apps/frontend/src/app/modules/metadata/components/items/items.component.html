@@ -1,0 +1,26 @@
+
+      <div *ngFor="let item of items; let i = index">
+        <div class="fx-row-space-between-start">
+          <studio-lite-item [variables]="variables"
+                            [itemIndex]="i"
+                            [metadata]="metadata[metadataKey]"
+                            [language]="language"
+                            [profileUrl]="profileUrl"
+                            (metadataChange)="onMetadataChange($event)">
+          </studio-lite-item>
+          <button mat-icon-button
+                  color="primary"
+                  type="button"
+                  (click)="remove(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button mat-fab extended
+              color="primary"
+              type="button"
+              class="add-button"
+              (click)="add()">
+        <mat-icon>add</mat-icon>
+        Item hinzufügen
+      </button>

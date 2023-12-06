@@ -8,7 +8,7 @@ import {
   UserFullDto,
   UserInListDto,
   WorkspaceGroupFullDto, WorkspaceGroupInListDto,
-  UnitExportConfigDto
+  UnitExportConfigDto, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -19,6 +19,31 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
+
+  setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/workspace-groups/`, { id: workspaceGroupId, settings: settings })
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  getWorkspaceGroupProfiles(workspaceGroupId: number):Observable<any> {
+    return this.http
+      .get(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  getWorkspaceProfile(workspaceId: number):Observable<any> {
+    return this.http
+      .get(`${this.serverUrl}workspace/${workspaceId}`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http

@@ -1,6 +1,7 @@
 import { MatTableDataSource } from '@angular/material/table';
-import { ViewChild, Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  ViewChild, Component, OnInit
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { UntypedFormGroup } from '@angular/forms';
@@ -12,6 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
+import { State } from '../../models/state.type';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -33,8 +35,6 @@ export class WorkspaceGroupsComponent implements OnInit {
   constructor(
     private appService: AppService,
     private backendService: BackendService,
-    private workspaceGroupsDialog: MatDialog,
-    private messsageDialog: MatDialog,
     private snackBar: MatSnackBar,
     private translateService: TranslateService
   ) {
@@ -89,9 +89,35 @@ export class WorkspaceGroupsComponent implements OnInit {
       settings: {
         defaultSchemer: '',
         defaultPlayer: '',
-        defaultEditor: ''
+        defaultEditor: '',
+        profiles: []
       }
     })
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('admin.group-edited'),
+              '',
+              { duration: 1000 });
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('admin.group-not-edited'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.appService.dataLoading = false;
+        }
+      );
+  }
+
+  editGroupSettings(res:{ states: State[], profiles:string[], selectedRow: number }): void {
+    this.appService.dataLoading = true;
+    this.backendService.setWorkspaceGroupProfiles({
+      defaultEditor: '', defaultPlayer: '', defaultSchemer: ''
+    }, res.selectedRow)
       .subscribe(
         respOk => {
           if (respOk) {

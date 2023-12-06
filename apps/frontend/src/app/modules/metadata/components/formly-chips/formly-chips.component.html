@@ -1,0 +1,18 @@
+<mat-chip-grid #chipGrid
+               (click)="showNodeTree()">
+  <mat-chip-row *ngFor="let item of formControl.value;let i = index"
+                [editable]="false">
+    <div class="clip-text">
+      {{item.name}}
+    </div>
+    <button matChipRemove
+            (click)="remove(i)">
+      <mat-icon>cancel</mat-icon>
+    </button>
+  </mat-chip-row>
+  <input [formControl]="itemControl"
+         (keydown)="$event.preventDefault()"
+         [matChipInputFor]="chipGrid"
+         [matChipInputAddOnBlur]="false"
+         (blur)="onBlur()">
+</mat-chip-grid>

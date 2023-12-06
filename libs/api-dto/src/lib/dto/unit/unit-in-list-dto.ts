@@ -11,6 +11,9 @@ export class UnitInListDto {
     name?: string;
 
   @ApiProperty()
+    state?: string;
+
+  @ApiProperty()
     groupName?: string;
 
   @ApiProperty()
