@@ -15,7 +15,7 @@ import ResourcePackage from '../entities/resource-package.entity';
 @Injectable()
 export class ResourcePackageService {
   private readonly logger = new Logger(ResourcePackageService.name);
-  private resourcePackagesPath = './packages'; // TODO Konfigurierbar
+  private resourcePackagesPath = './data/packages'; // TODO Konfigurierbar
 
   constructor(
     @InjectRepository(ResourcePackage)

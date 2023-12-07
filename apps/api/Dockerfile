@@ -53,7 +53,7 @@ ARG project
 
 # Copy the build artifacts from the previous stage
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project .
-RUN mkdir packages && chown -R node:node packages
+RUN mkdir data && chown -R node:node data
 
 
 FROM source AS prod
