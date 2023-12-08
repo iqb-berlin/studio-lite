@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { FormlyModule, FORMLY_CONFIG } from '@ngx-formly/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogModule } from '@angular/material/dialog';
-import { FormlyModule } from '@ngx-formly/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,6 +28,19 @@ import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { ProfileFormComponent } from './components/profile-form/profile-form.component';
 import { NewNestedTreeComponent } from './components/new-nested-tree/new-nested-tree.component';
+
+export function formlyValidationConfig(translate: TranslateService) {
+  return {
+    validationMessages: [
+      {
+        name: 'required',
+        message() {
+          return translate.stream('metadata.formly-field-required');
+        }
+      }
+    ]
+  };
+}
 
 @NgModule({
   imports: [
@@ -78,12 +91,6 @@ import { NewNestedTreeComponent } from './components/new-nested-tree/new-nested-
           name: 'duration',
           component: FormlyDurationComponent
         }
-      ],
-      validationMessages: [
-        {
-          name: 'required',
-          message: 'This field is required'
-        }
       ]
     }),
     FormlyMaterialModule,
@@ -101,6 +108,9 @@ import { NewNestedTreeComponent } from './components/new-nested-tree/new-nested-
     ProfileFormComponent,
     NewNestedTreeComponent
   ],
+  providers: [{
+    provide: FORMLY_CONFIG, multi: true, useFactory: formlyValidationConfig, deps: [TranslateService]
+  }],
   exports: [
     MetadataComponent,
     ProfileFormComponent,
