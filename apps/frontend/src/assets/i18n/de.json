@@ -203,7 +203,13 @@
     "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",
     "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!",
     "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!",
-    "error-states": "Status Liste konnte nicht geladen werden!"
+    "error-states": "Status Liste konnte nicht geladen werden!",
+    "without-id": "ohne ID",
+    "choose-item-variable":"Variable auswählen",
+    "item-description":"Notiz",
+    "item-weighting":"Wichtung",
+    "formly-field-required": "Pflichtfeld",
+    "formly-field-pattern-float-number": "Ungültiger Wert"
 
   },
   "wsg-settings": {
