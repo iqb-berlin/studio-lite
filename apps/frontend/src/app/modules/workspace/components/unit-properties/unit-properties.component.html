@@ -3,26 +3,6 @@
     <form [formGroup]="unitForm">
       <div class="fx-row-start-stretch fx-gap-10">
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
-
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>
-                Metadaten (Aufgabe)
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <studio-lite-profile-form *ngIf="workspaceSettings && workspaceSettings.unitMDProfile && metadata"
-                                        [profileUrl]="workspaceSettings && workspaceSettings.unitMDProfile"
-                                        [metadataKey]="'profiles'"
-                                        [metadata]="metadata"
-                                        [language]="'de'"
-                                        [formlyWrapper]="'panel'"
-                                        [panelExpanded]="true"
-                                        (metadataChange)="onMetadataChange($event)">
-              </studio-lite-profile-form>
-            </mat-card-content>
-          </mat-card>
-
           <mat-card>
             <mat-card-header>
               <mat-card-title>
@@ -30,8 +10,7 @@
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-
-              <mat-expansion-panel>
+              <mat-expansion-panel [expanded]="true">
                 <mat-expansion-panel-header>
                   <mat-panel-title>
                     Einstellungen
@@ -57,11 +36,11 @@
                     <mat-label>{{'workspace.unit-state' | translate}}</mat-label>
                     <div class="select-state-wrapper">
                       <mat-select
-                        class="select-state-wrapper"
-                        [(value)]="selectedStateId"
-                        formControlName="state"
-                        [style.border-bottom-color]="selectedStateColor"
-                        [placeholder]="'workspace.unit-state' | translate">
+                              class="select-state-wrapper"
+                              [(value)]="selectedStateId"
+                              formControlName="state"
+                              [style.border-bottom-color]="selectedStateColor"
+                              [placeholder]="'workspace.unit-state' | translate">
                         <mat-option  [value]="0"></mat-option>
                         <mat-option class="state-option" *ngFor="let state of this.workspaceService.workspaceSettings.states" [value]="state.id.toString()">
                           <div class="fx-row-center-center">
@@ -159,24 +138,20 @@
                   }
                     }}
                   </div>
-
                   <div *ngIf="workspaceService.lastChangedDefinition">
                     {{'workspace.last-changed-definition' | translate: {
                     date: workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone
                   }
                     }}
                   </div>
-
                   <div *ngIf="workspaceService.lastChangedScheme">
                     {{'workspace.last-changed-scheme' | translate: {
                     date: workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone
                   }
                     }}
                   </div>
-
                 </div>
               </mat-expansion-panel>
-
               <mat-expansion-panel>
                 <mat-expansion-panel-header>
                   <mat-panel-title>
@@ -203,13 +178,26 @@
                   </mat-form-field>
                 </div>
               </mat-expansion-panel>
-
             </mat-card-content>
           </mat-card>
-
-
-
-
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                Metadaten (Aufgabe)
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <studio-lite-profile-form *ngIf="workspaceSettings && workspaceSettings.unitMDProfile && metadata"
+                                        [profileUrl]="workspaceSettings && workspaceSettings.unitMDProfile"
+                                        [metadataKey]="'profiles'"
+                                        [metadata]="metadata"
+                                        [language]="'de'"
+                                        [formlyWrapper]="'panel'"
+                                        [panelExpanded]="true"
+                                        (metadataChange)="onMetadataChange($event)">
+              </studio-lite-profile-form>
+            </mat-card-content>
+          </mat-card>
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
           <mat-card>
