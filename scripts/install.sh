@@ -251,13 +251,13 @@ customize_settings() {
   sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$TARGET_DIR#" scripts/make/studio-lite.mk
   sed -i "s#scripts/update.sh#scripts/update_${APP_NAME}.sh#" scripts/make/studio-lite.mk
 
-  if [ -f Makefile ]; then
-    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >>Makefile
-  else
-    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >Makefile
-  fi
   if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$TARGET_DIR" ]; then
-    printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
+    cp "$TRAEFIK_DIR"/Makefile "$TARGET_DIR"/Makefile
+    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >>"$TARGET_DIR"/Makefile
+  elif [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" == "$TARGET_DIR" ]; then
+    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >>"$TARGET_DIR"Makefile
+  else
+    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >"$TARGET_DIR"/Makefile
   fi
 
   # Init nginx http configuration

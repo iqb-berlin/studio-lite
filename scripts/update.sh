@@ -14,6 +14,7 @@ load_environment_variables() {
   # Load current environment variables in .env.studio-lite
   source .env.studio-lite
   SOURCE_TAG=$TAG
+  APP_DIR=$(pwd)
 }
 
 get_new_release_version() {
@@ -105,7 +106,6 @@ prepare_installation_dir() {
   mkdir -p config/frontend
   mkdir -p scripts/make
   mkdir -p scripts/migration
-  rm Makefile
 }
 
 download_file() {
@@ -250,7 +250,7 @@ run_optional_migration_scripts() {
 
       printf "\n6.3 Migration script execution\n"
       for ((i = ${#MIGRATION_SCRIPTS[@]} - 1; i >= 0; i--)); do
-        printf "Exceuting '%s' ...\n" "${MIGRATION_SCRIPTS[$i]}"
+        printf "Executing '%s' ...\n" "${MIGRATION_SCRIPTS[$i]}"
         bash scripts/migration/"${MIGRATION_SCRIPTS[$i]}"
         rm scripts/migration/"${MIGRATION_SCRIPTS[$i]}"
       done
@@ -271,6 +271,18 @@ check_config_files_modifications() {
   printf "Configuration template files modification check done.\n\n"
 }
 
+update_makefile() {
+  if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$APP_DIR" ]; then
+    rm Makefile
+    cp "$TRAEFIK_DIR"/Makefile "$APP_DIR"/Makefile
+    printf "include %s/scripts/make/studio-lite.mk\n" "$APP_DIR" >>"$APP_DIR"/Makefile
+  elif [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" == "$APP_DIR" ]; then
+    printf "include %s/scripts/make/studio-lite.mk\n" "$APP_DIR" >>"$APP_DIR"/Makefile
+  else
+    printf "include %s/scripts/make/studio-lite.mk\n" "$APP_DIR" >"$APP_DIR"/Makefile
+  fi
+}
+
 customize_settings() {
   # write chosen version tag to env file
   sed -i "s#TAG.*#TAG=$TARGET_TAG#" .env.studio-lite
@@ -278,15 +290,7 @@ customize_settings() {
   # Setup makefiles
   sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$(pwd)#" scripts/make/studio-lite.mk
   sed -i "s#scripts/update.sh#scripts/update_${APP_NAME}.sh#" scripts/make/studio-lite.mk
-
-  if [ -f Makefile ]; then
-    printf "include %s/scripts/make/studio-lite.mk\n" "$(pwd)" >>Makefile
-  else
-    printf "include %s/scripts/make/studio-lite.mk\n" "$(pwd)" >Makefile
-  fi
-  if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$(pwd)" ]; then
-    printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
-  fi
+  update_makefile
 }
 
 finalize_update() {
@@ -397,7 +401,7 @@ update_application_infrastructure() {
     DIR_COUNT=${#TRAEFIK_DIR_ARRAY[*]}
 
     if [ "$DIR_COUNT" -eq 0 ]; then
-      printf '- No IQB Infrastructure environment file found.\n'
+      printf -- '- No IQB Infrastructure environment file found.\n'
       printf 'Update script finished with error\n'
       exit 1
 
@@ -418,14 +422,16 @@ update_application_infrastructure() {
       done
     fi
 
+    # Set or update traefik installation directory in studio environment file
     if grep TRAEFIK_DIR= .env.studio-lite >/dev/null; then
       sed -i "s#TRAEFIK_DIR.*#TRAEFIK_DIR=$TRAEFIK_DIR#" .env.studio-lite
     else
       printf '\n# Infrastructure\nTRAEFIK_DIR=%s\n' "$TRAEFIK_DIR" >>.env.studio-lite
     fi
-    if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$(pwd)" ]; then
-      printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
-    fi
+
+    # Update studio Makefile
+    update_makefile
+
     printf 'Infrastructure installation checked.\n'
 
     printf "\nMissing IQB application infrastructure successfully installed.\n\n"
@@ -434,16 +440,17 @@ update_application_infrastructure() {
   else
     printf -- "- Updating existing IQB infrastructure installation at: %s \n\n" "$TRAEFIK_DIR"
 
-    printf "Go to infrastructure directory '%s' and execute infrastructure 'update script' ... " "$TRAEFIK_DIR"
-    APP_DIR=$(pwd)
+    printf "Go to infrastructure directory '%s' and execute infrastructure 'update script' ... \n\n" "$TRAEFIK_DIR"
     if [ -e "$TRAEFIK_DIR/scripts/update_traefik.sh" ]; then
       cd "$TRAEFIK_DIR" && ./scripts/update_traefik.sh
 
-      printf "include %s/scripts/make/traefik.mk\n" "$TRAEFIK_DIR" >>"$APP_DIR"/Makefile
+      # Update Studio Makefile
+      update_makefile
+
       printf "Infrastructure update script finished.\n\n"
     else
-      printf "Infrastructure update script '%s' not found." "$TRAEFIK_DIR/scripts/update_traefik.sh"
-      printf "'%s' update script finished with error.\n" $APP_NAME
+      printf "Infrastructure update script '%s' not found.\n" "$TRAEFIK_DIR/scripts/update_traefik.sh"
+      printf "'%s' update script finished with error.\n\n" $APP_NAME
       exit 1
     fi
     if [ -e "$APP_DIR" ]; then
