@@ -10,6 +10,7 @@ import { ReviewModule } from './review/review.module';
 import { AppVersionProvider } from './app-version.guard';
 import { DownloadModule } from './download/download.module';
 import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.modul
     ReviewModule,
     DownloadModule,
     MulterModule,
-    WorkspaceGroupsModule
+    WorkspaceGroupsModule,
+    ProfileModule
   ],
   controllers: [AppController],
   providers: [AppVersionProvider],

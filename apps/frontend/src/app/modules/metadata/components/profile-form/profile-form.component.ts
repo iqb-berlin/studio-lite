@@ -10,6 +10,7 @@ import { Subject } from 'rxjs';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
 import { MetadataService } from '../../services/metadata.service';
 import { DurationService } from '../../services/duration.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-profile-form',
@@ -17,7 +18,7 @@ import { DurationService } from '../../services/duration.service';
   styleUrls: ['./profile-form.component.scss']
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
-  constructor(public metadataService: MetadataService) {}
+  constructor(public metadataService: MetadataService, public backendService:BackendService) {}
 
   @Output() metadataChange: EventEmitter<any> = new EventEmitter();
   @Input() language!: string;
@@ -63,7 +64,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private async initProfile() {
-    return ProfileFormComponent.getProfile(this.profileUrl as string);
+    return this.getProfile(this.profileUrl as string);
   }
 
   private async loadProfile(json: any) {
@@ -80,21 +81,20 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return metadata.find(data => data.profileId === this.profile.id);
   }
 
-  private static async getProfile(profileUrl: string) {
+  private async getProfile(profileUrl: string) {
     try {
       const response = await fetch(`${profileUrl}`);
       if (response.ok) {
-        return await response.json();
+        const profile = await response.json();
+        this.backendService.saveProfile(profile).subscribe(() => {});
+        return profile;
       }
-      return {
-        message: 'Profil konnte nicht geladen werden',
-        err: response.status
-      };
+      return await new Promise(resolve => {
+        this.backendService.getProfile(profileUrl)
+          .subscribe(profile => { resolve(profile); });
+      });
     } catch (err) {
-      return {
-        message: 'Profil konnte nicht geladen werden',
-        err: err
-      };
+      return {};
     }
   }
 

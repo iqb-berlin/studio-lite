@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MDProfile } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { BackendService } from './backend.service';
 
 type TopConcept = {
   notation: string[];
@@ -16,6 +17,8 @@ type TopConcept = {
 export class MetadataService {
   vocabulariesIdDictionary:any = {};
   vocabularies:any = [];
+
+  constructor(private backendService:BackendService) { }
 
   async getProfileVocabularies(profile:MDProfile) {
     const vocabularyURLs = [];
@@ -33,6 +36,7 @@ export class MetadataService {
       promises.push(this.fetchVocabulary(url));
     }
     const vocabularies = await Promise.all(promises);
+    this.backendService.saveVocabs(vocabularies).subscribe(() => {});
     if (this.vocabularies.length) {
       this.vocabularies = [...this.vocabularies, ...vocabularies];
     } else {
@@ -75,11 +79,18 @@ export class MetadataService {
 
   // eslint-disable-next-line class-methods-use-this
   async fetchVocabulary(url:string) : Promise<any> {
-    const response = await fetch(`${url}index.jsonld`);
-    if (response.ok) {
-      const vocab = await response.json();
-      return { data: vocab, url };
+    try {
+      const response = await fetch(`${url}index.jsonld`);
+      if (response.ok) {
+        const vocab = await response.json();
+        return { data: vocab, url };
+      }
+      return await new Promise(resolve => {
+        this.backendService.getVocab(url)
+          .subscribe((vocab:any) => resolve({ data: vocab, url }));
+      });
+    } catch {
+      return { data: {}, url };
     }
-    return { data: {}, url };
   }
 }
