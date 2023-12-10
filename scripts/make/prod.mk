@@ -10,7 +10,7 @@ include $(STUDIO_LITE_BASE_DIR)/.env.studio-lite
 .PHONY: studio-lite-up studio-lite-down studio-lite-start studio-lite-stop studio-lite-status studio-lite-logs\
 	studio-lite-config studio-lite-system-prune studio-lite-volumes-prune studio-lite-images-clean\
 	studio-lite-liquibase-status studio-lite-connect-db studio-lite-dump-all studio-lite-restore-all studio-lite-dump-db\
-	studio-lite-restore-db studio-lite-dump-db-data-only studio-lite-restore-db-data-only
+	studio-lite-restore-db studio-lite-dump-db-data-only studio-lite-restore-db-data-only studio-lite-update
 
 ## disables printing the recipe of a make target before executing it
 .SILENT: prod-images-clean
@@ -292,3 +292,6 @@ studio-lite-restore-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
 			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
+
+studio-lite-update:
+	bash $(STUDIO_LITE_BASE_DIR)/scripts/update.sh

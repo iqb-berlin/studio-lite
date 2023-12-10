@@ -119,7 +119,7 @@ install_application_infrastructure() {
     DIR_COUNT=${#TRAEFIK_DIR_ARRAY[*]}
 
     if [ "$DIR_COUNT" -eq 0 ]; then
-      printf '- No IQB Infrastructure environment file found.\n'
+      printf -- '- No IQB Infrastructure environment file found.\n'
       printf 'Install script finished with error\n'
       exit 1
 
@@ -189,7 +189,8 @@ prepare_installation_dir() {
   mkdir -p "$TARGET_DIR"/backup/release
   mkdir -p "$TARGET_DIR"/backup/database_dump
   mkdir -p "$TARGET_DIR"/config/frontend
-  mkdir -p "$TARGET_DIR"/scripts
+  mkdir -p "$TARGET_DIR"/scripts/make
+  mkdir -p "$TARGET_DIR"/scripts/migration
 
   cd "$TARGET_DIR"
 }
@@ -212,9 +213,9 @@ download_files() {
   download_file docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml
   download_file .env.studio-lite.template .env.studio-lite.template
   download_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template
-  download_file scripts/studio-lite.mk scripts/make/prod.mk
-  download_file update_$APP_NAME.sh scripts/update.sh
-  chmod +x update_$APP_NAME.sh
+  download_file scripts/make/studio-lite.mk scripts/make/prod.mk
+  download_file scripts/update_$APP_NAME.sh scripts/update.sh
+  chmod +x scripts/update_$APP_NAME.sh
 
   printf "Downloads done!\n\n"
 }
@@ -247,14 +248,16 @@ customize_settings() {
   done
 
   # Setup makefiles
-  sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$TARGET_DIR#" scripts/studio-lite.mk
-  if [ -f Makefile ]; then
-    printf "include %s/scripts/studio-lite.mk\n" "$TARGET_DIR" >>Makefile
-  else
-    printf "include %s/scripts/studio-lite.mk\n" "$TARGET_DIR" >Makefile
-  fi
+  sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$TARGET_DIR#" scripts/make/studio-lite.mk
+  sed -i "s#scripts/update.sh#scripts/update_${APP_NAME}.sh#" scripts/make/studio-lite.mk
+
   if [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" != "$TARGET_DIR" ]; then
-    printf "include %s/scripts/traefik.mk\n" "$TRAEFIK_DIR" >>Makefile
+    cp "$TRAEFIK_DIR"/Makefile "$TARGET_DIR"/Makefile
+    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >>"$TARGET_DIR"/Makefile
+  elif [ -n "$TRAEFIK_DIR" ] && [ "$TRAEFIK_DIR" == "$TARGET_DIR" ]; then
+    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >>"$TARGET_DIR"Makefile
+  else
+    printf "include %s/scripts/make/studio-lite.mk\n" "$TARGET_DIR" >"$TARGET_DIR"/Makefile
   fi
 
   # Init nginx http configuration
