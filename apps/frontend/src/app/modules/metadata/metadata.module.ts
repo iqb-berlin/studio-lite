@@ -27,7 +27,7 @@ import { FormlyDurationComponent } from './components/formly-duration/formly-dur
 import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { ProfileFormComponent } from './components/profile-form/profile-form.component';
-import { NewNestedTreeComponent } from './components/new-nested-tree/new-nested-tree.component';
+import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 
 export function formlyValidationConfig(translate: TranslateService) {
   return {
@@ -106,7 +106,7 @@ export function formlyValidationConfig(translate: TranslateService) {
     ItemsComponent,
     ItemComponent,
     ProfileFormComponent,
-    NewNestedTreeComponent
+    NestedTreeComponent
   ],
   providers: [{
     provide: FORMLY_CONFIG, multi: true, useFactory: formlyValidationConfig, deps: [TranslateService]
