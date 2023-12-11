@@ -6,7 +6,7 @@ import { FormControl } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
 import { NotationNode } from '../../models/types';
 import { MetadataService } from '../../services/metadata.service';
-import { NewNestedTreeComponent } from '../new-nested-tree/new-nested-tree.component';
+import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 
 @Component({
   selector: 'studio-lite-formly-chips',
@@ -48,7 +48,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
   }
 
   showNodeTree(): void {
-    const dialogRef = this.vocabsDialog.open(NewNestedTreeComponent, {
+    const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
       data: {
         value: this.formControl.value,
         props: this.props,

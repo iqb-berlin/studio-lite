@@ -8,14 +8,13 @@ import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree'
 import { BehaviorSubject } from 'rxjs';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
-  DialogData, NotationNode, VocabFlatNode, VocabNode, Vocabulary
+  DialogData, VocabFlatNode, VocabNode, Vocabulary
 } from '../../models/types';
 
 @Injectable()
 export class ChecklistDatabase {
   dataChange = new BehaviorSubject<VocabNode[]>([]);
   treeDepth: number = 1;
-  currentTreeDepth: number = 0;
 
   get data(): VocabNode[] {
     return this.dataChange.value;
@@ -25,26 +24,22 @@ export class ChecklistDatabase {
     this.initialize();
   }
 
-  getTreeDepth(vocab: Vocabulary) {
-    let treeDepth = 0;
-
-    function hasNarrower(data: NotationNode) {
-      treeDepth += 1;
-      if (data.narrower) {
-        return hasNarrower(data.narrower[0]);
+  getTreeDepth(treeNodes:any) {
+    const lengths = treeNodes.map((node:any) => {
+      if (node.narrower === undefined) {
+        return 1;
       }
-      return {};
-    }
-
-    hasNarrower(vocab.hasTopConcept[0]);
-    this.treeDepth = treeDepth;
+      return this.getTreeDepth(node.narrower) + 1;
+    });
+    const max = Math.max(...lengths);
+    return max;
   }
 
   makeTree(vocab: Vocabulary) {
     return vocab.hasTopConcept?.map(
       (topConcept: any) => {
+        const treeDepth = 1;
         const foundNode = new VocabNode();
-
         this.dialogData.value.forEach((v: any) => {
           if (v.id === topConcept.id) {
             foundNode.id = v.id;
@@ -52,9 +47,9 @@ export class ChecklistDatabase {
             foundNode.notation = v.notation || '';
             foundNode.description = v.description || '';
             foundNode.children = topConcept.narrower && topConcept.narrower.length &&
-              (this.treeDepth < this.dialogData.props.maxLevel || this.dialogData.props.maxLevel === 0) ?
+              (treeDepth < this.dialogData.props.maxLevel || this.dialogData.props.maxLevel === 0) ?
               this.mapNarrower(
-                topConcept.narrower, this.currentTreeDepth
+                topConcept.narrower, this.treeDepth
               ) : [];
           }
         });
@@ -69,8 +64,8 @@ export class ChecklistDatabase {
         node.notation = topConcept.notation || '';
         node.description = topConcept.description || '';
         node.children = topConcept.narrower && topConcept.narrower.length &&
-          (this.treeDepth < this.dialogData.props.maxLevel || this.dialogData.props.maxLevel === 0) ?
-          this.mapNarrower(topConcept.narrower, this.currentTreeDepth) : [];
+          (treeDepth < this.dialogData.props.maxLevel || this.dialogData.props.maxLevel === 0) ?
+          this.mapNarrower(topConcept.narrower, this.treeDepth) : [];
         return node;
       }
     );
@@ -114,7 +109,7 @@ export class ChecklistDatabase {
     const vocabulary = this.dialogData.vocabularies
       ?.find((vocab: { url: string, data: Vocabulary }) => vocab.url === this.dialogData.props.url);
     if (vocabulary && vocabulary.data) {
-      this.getTreeDepth(vocabulary.data);
+      this.treeDepth = this.getTreeDepth(vocabulary.data.hasTopConcept);
       const tree = this.makeTree(vocabulary.data);
       this.dataChange.next(tree);
     }
@@ -123,13 +118,13 @@ export class ChecklistDatabase {
 
 @Component({
   selector: 'studio-lite-new-nested-tree',
-  templateUrl: './new-nested-tree.component.html',
-  styleUrls: ['./new-nested-tree.component.scss'],
+  templateUrl: './nested-tree.component.html',
+  styleUrls: ['./nested-tree.component.scss'],
   providers: [ChecklistDatabase]
 
 })
 
-export class NewNestedTreeComponent implements OnInit {
+export class NestedTreeComponent implements OnInit {
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<VocabFlatNode, VocabNode>();
 

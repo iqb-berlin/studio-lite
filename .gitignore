@@ -2,6 +2,8 @@
 
 # custom folders
 /packages
+/profiles
+/data
 /database/changelogDocs
 /backup
 

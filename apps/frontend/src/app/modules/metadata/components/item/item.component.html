@@ -1,6 +1,6 @@
 <mat-expansion-panel [expanded]="false">
   <mat-expansion-panel-header >
-    <mat-panel-title>{{model.itemId || "ohne Id"}}
+    <mat-panel-title>{{model.id || 'metadata.without-id' | translate}}
     </mat-panel-title>
   </mat-expansion-panel-header>
     <form [formGroup]="form">
