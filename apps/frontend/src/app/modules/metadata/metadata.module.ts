@@ -19,6 +19,7 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
@@ -28,6 +29,7 @@ import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { ProfileFormComponent } from './components/profile-form/profile-form.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
+import { SharedModule } from '../shared/shared.module';
 
 export function formlyValidationConfig(translate: TranslateService) {
   return {
@@ -95,7 +97,9 @@ export function formlyValidationConfig(translate: TranslateService) {
     }),
     FormlyMaterialModule,
     MatProgressSpinnerModule,
-    MatListModule
+    MatListModule,
+    SharedModule,
+    MatTooltipModule
   ],
   declarations: [
     FormlyChipsComponent,
@@ -117,4 +121,5 @@ export function formlyValidationConfig(translate: TranslateService) {
     ItemsComponent
   ]
 })
-export class MetadataModule {}
+export class MetadataModule {
+}
