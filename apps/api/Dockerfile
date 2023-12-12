@@ -55,6 +55,7 @@ ARG project
 COPY --chown=node:node --from=build /studio-lite/dist/apps/$project .
 RUN mkdir packages && chown -R node:node packages
 RUN mkdir profiles && chown -R node:node profiles
+RUN mkdir ./profiles/vocabs && chown -R node:node ./profiles/vocabs
 
 
 FROM source AS prod
