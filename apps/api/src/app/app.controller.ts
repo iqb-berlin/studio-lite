@@ -30,7 +30,8 @@ export class AppController {
     private workspaceService: WorkspaceService,
     private reviewService: ReviewService,
     private veronaModulesService: VeronaModulesService
-  ) {}
+  ) {
+  }
 
   @Post('login')
   @UseGuards(LocalAuthGuard, AppVersionGuard)
@@ -42,8 +43,6 @@ export class AppController {
     allowEmptyValue: false
   })
   @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
-  @ApiQuery({ type: String, name: 'password', required: true })
-  @ApiQuery({ type: String, name: 'username', required: true })
   async login(@Request() req) {
     const token = await this.authService.login(req.user);
     return `"${token}"`;

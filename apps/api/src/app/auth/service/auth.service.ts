@@ -1,8 +1,6 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../database/services/users.service';
-import { WorkspaceService } from '../../database/services/workspace.service';
-import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 import { ReviewService } from '../../database/services/review.service';
 
 @Injectable()
@@ -11,11 +9,10 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    private workspaceService: WorkspaceService,
     private reviewService: ReviewService,
-    private workspaceGroupService: WorkspaceGroupService,
     private jwtService: JwtService
-  ) {}
+  ) {
+  }
 
   async validateUser(username: string, pass: string): Promise<number | null> {
     return this.usersService.getUserByNameAndPassword(username, pass);
