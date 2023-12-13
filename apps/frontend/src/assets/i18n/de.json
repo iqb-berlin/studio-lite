@@ -80,6 +80,7 @@
     "goto-wsg-admin": "Verwaltung der Bereichsgruppe",
     "imprint": "Impressum/Datenschutz",
     "logout": "Abmelden",
+    "confirm-logout": "Möchten Sie sich abmelden?",
     "changePassword": "Kennwort ändern",
     "password-info": "Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.",
     "password": "Kennwort",
@@ -87,7 +88,7 @@
     "new-password": "Neues Kennwort",
     "repeat-new-password": "Neues Kennwort (Wiederholung)",
     "user-name": "Anmeldename",
-    "editMyData": "Name/E-Mail ändern",
+    "editMyData": "Nutzerdaten ändern",
     "edit-my-data-title": "Meine Daten ändern",
     "login": "Anmelden",
     "lastName": "Nachname",
@@ -99,7 +100,7 @@
     "no-user": " Dieses System hat aktuell keine User angelegt. Mit den Anmeldedaten unten legen Sie einen ersten Account mit Administrationsrechten an. Bitte notieren Sie sich die Daten!",
     "login-with-preset": "Sie haben einen direkten Link benutzt, um auf Inhalte dieser Webanwendung zuzugreifen. Es ist noch die Eingabe eines Kennwortes erforderlich.",
     "no-user-workspaces": "Für diese Anmeldung wurden keine Arbeitsbereiche gefunden.",
-    "user-menu": "Meine Daten/Anmelden",
+    "user-menu": "Profil verwalten",
     "appName": "Kennung der Anwendung: {{name}}",
     "appVersion": "Version: {{version}}",
     "not-logged-in": "Nicht angemeldet",
@@ -192,7 +193,6 @@
     "groups-title": "Admin: Arbeitsbereichsgruppen",
     "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen"
   },
-
   "metadata": {
     "metadata": "Metadaten",
     "unit-profile": "Aufgaben Profil",
@@ -205,20 +205,19 @@
     "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!",
     "error-states": "Status Liste konnte nicht geladen werden!",
     "without-id": "ohne ID",
-    "choose-item-variable":"Variable auswählen",
-    "item-description":"Notiz",
-    "item-weighting":"Wichtung",
+    "choose-item-variable": "Variable auswählen",
+    "item-description": "Notiz",
+    "item-weighting": "Wichtung",
     "formly-field-required": "Pflichtfeld",
     "formly-field-pattern-float-number": "Ungültiger Wert"
-
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
     "state-configs": "Status Konfigurationen",
     "add-state": "Status hinzufügen",
     "changed": "Einstellungen geändert",
-    "delete-state-warning":"Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Alle vorherigen Statusänderungen werden gespeichert.",
-    "delete-state":"Status löschen",
+    "delete-state-warning": "Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Alle vorherigen Statusänderungen werden gespeichert.",
+    "delete-state": "Status löschen",
     "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?"
   },
   "settings": {

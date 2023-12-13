@@ -1,6 +1,7 @@
 import { Directive, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { TranslateService } from '@ngx-translate/core';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 
@@ -11,17 +12,18 @@ export class LogoutDirective {
   constructor(
     public appService: AppService,
     public confirmDialog: MatDialog,
-    private backendService: BackendService
-  ) {}
+    private backendService: BackendService,
+    private translateService: TranslateService
+  ) {
+  }
 
   @HostListener('click') logout(): void {
     const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
       width: '400px',
-      height: '300px',
       data: <ConfirmDialogData>{
-        title: 'Abmelden',
-        content: 'Möchten Sie sich abmelden?',
-        confirmButtonLabel: 'Abmelden',
+        title: this.translateService.instant('home.logout'),
+        content: this.translateService.instant('home.confirm-logout'),
+        confirmButtonLabel: this.translateService.instant('home.logout'),
         showCancel: true
       }
     });
