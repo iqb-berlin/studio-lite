@@ -12,13 +12,13 @@
   <div *ngIf="userList.workspaceGroupAdmins.length">
     <div class="data-text">
       {{'workspace.workspace-group-admins' | translate}}
-     </div>
+    </div>
     <studio-lite-user-list [users]="userList.workspaceGroupAdmins">
     </studio-lite-user-list>
   </div>
   <div *ngIf="userList.admins.length">
     <div class="data-text">
-      {{'workspace.admins' | translate}}
+      {{'workspace.workspace-admins' | translate}}
     </div>
     <studio-lite-user-list
       [users]="userList.admins">
@@ -26,7 +26,7 @@
   </div>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-raised-button
+  <button class="close-button" mat-raised-button
           [mat-dialog-close]="false">
     {{'close' | translate}}
   </button>
