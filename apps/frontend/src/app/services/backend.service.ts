@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
@@ -11,7 +11,8 @@ import {
   VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto, VeronaModuleFileDto
+  ResourcePackageDto,
+  VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -23,14 +24,15 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private appService: AppService,
     private http: HttpClient
-  ) { }
+  ) {
+  }
 
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
-    const queryParams = new HttpParams()
-      .set('username', name)
-      .set('password', password);
     return this.http.post<string>(
-      `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}?${queryParams.toString()}`, 'jojo'
+      `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`, {
+        username: name,
+        password: password
+      }
     )
       .pipe(
         catchError(() => of(false)),
