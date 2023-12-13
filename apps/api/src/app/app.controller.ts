@@ -67,14 +67,8 @@ export class AppController {
 
   @Post('keycloak-login')
   @UseGuards(AppVersionGuard)
-  @ApiHeader({
-    name: 'app-version',
-    description: 'version of frontend',
-    required: true,
-    allowEmptyValue: false
-  })
   @ApiTags('auth')
-  @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
+  @ApiOkResponse({ description: 'Keycloak login successful.' })
   @ApiQuery({ type: String, name: 'name', required: true })
   @ApiQuery({ type: String, name: 'identity', required: true })
   @ApiQuery({ type: String, name: 'issuer', required: true })
@@ -90,7 +84,7 @@ export class AppController {
     @Query('firstName') firstName: string,
     @Query('issuer') issuer: string
   ) {
-    const user:CreateUserDto = {
+    const user: CreateUserDto = {
       name,
       identity,
       email,
