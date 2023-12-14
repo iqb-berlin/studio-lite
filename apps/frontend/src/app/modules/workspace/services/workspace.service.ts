@@ -20,7 +20,7 @@ import { State } from '../../admin/models/state.type';
   providedIn: 'root'
 })
 export class WorkspaceService {
-  groupId!:number | undefined;
+  groupId!: number | undefined;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
@@ -34,8 +34,9 @@ export class WorkspaceService {
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
   isValidFormKey = new BehaviorSubject<boolean>(true);
-  states:State[] = [];
-
+  states: State[] = [];
+  codingSchemer: any;
+  codingScheme: any;
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<void>();
 

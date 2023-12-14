@@ -27,7 +27,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatRadioModule } from '@angular/material/radio';
+import { NgxCodingComponentsModule } from '@iqb/ngx-coding-components/lib/ngx-coding-components.module';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
@@ -119,7 +119,7 @@ import { ShowMetadataComponent } from './components/show-metadata/show-metadata.
     CommentsModule,
     MatBadgeModule,
     SplitterModule,
-    MatRadioModule
+    NgxCodingComponentsModule
   ],
   declarations: [
     TestConfigComponent,

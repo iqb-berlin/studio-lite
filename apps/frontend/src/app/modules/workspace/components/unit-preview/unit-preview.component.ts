@@ -1,10 +1,15 @@
 import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import {
+  Subject, takeUntil
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
+import { CodingScheme, Response } from '@iqb/responses';
+import { MatDialog } from '@angular/material/dialog';
+import { ShowCodingProblemsDialogComponent } from '@iqb/ngx-coding-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -34,10 +39,10 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
   message = '';
   unitId: number = 0;
   pageList: PageData[] = [];
-
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
   hasFocus: boolean = false;
+  responses!: Response[];
 
   constructor(
     private appService: AppService,
@@ -46,7 +51,8 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     public workspaceService: WorkspaceService,
     private moduleService: ModuleService,
     public previewService: PreviewService,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private dialog: MatDialog
   ) {
     super();
     this.appService.postMessage$
@@ -93,6 +99,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                 this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
               }
               if (msgData.unitState) {
+                this.responses = JSON.parse(msgData.unitState.dataParts.elementCodes);
                 this.setPresentationStatus(msgData.unitState.presentationProgress);
                 this.setResponsesStatus(msgData.unitState.responseProgress);
               }
@@ -415,6 +422,43 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   setFocusStatus(status: boolean): void {
     this.hasFocus = status;
+  }
+
+  checkCoding() {
+    let codingScheme: any;
+    const SchemeData = this.workspaceService.unitSchemeStore?.getData();
+    if (this.workspaceService.codingScheme) {
+      codingScheme = this.workspaceService.codingScheme.variableCodings;
+      this.workspaceService.codingSchemer = new CodingScheme(this.workspaceService.codingScheme.variableCodings);
+    } else {
+      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .subscribe(schemeData => {
+          if (schemeData) {
+            codingScheme = JSON.parse(schemeData.scheme);
+          }
+          this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
+        });
+    }
+    this.workspaceService.codingSchemer?.code(this.responses);
+    const unitDefData = this.workspaceService.unitDefinitionStore?.getData();
+    if (unitDefData?.variables) {
+      const validation = this.workspaceService.codingSchemer?.validate(unitDefData.variables);
+      this.openCodingProblemsDialog(validation);
+      console.log('validate', validation);
+    }
+  }
+
+  private openCodingProblemsDialog(validation: any): void {
+    this.dialog
+      .open(ShowCodingProblemsDialogComponent, {
+        data: validation,
+        width: '400px'
+      })
+      .afterClosed()
+      .pipe(
+        takeUntil(this.ngUnsubscribe)
+      ).subscribe(() => {
+      });
   }
 
   ngOnDestroy(): void {

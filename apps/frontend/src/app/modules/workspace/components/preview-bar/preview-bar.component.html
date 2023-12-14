@@ -10,6 +10,10 @@
             (click)="navigationDenied.emit()">
       {{'workspace.validate' | translate}}
     </button>
+    <button mat-raised-button
+            (click)="checkCoding.emit()">
+      Codierprüfung
+    </button>
     <p>{{ playerName }}</p>
   </div>
 
