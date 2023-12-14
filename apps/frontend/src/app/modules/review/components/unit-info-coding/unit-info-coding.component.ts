@@ -1,10 +1,14 @@
 import {
   Component, Input, ViewChild
 } from '@angular/core';
-import { CodingSchemeDto, VariableCodingData } from '@studio-lite/shared-code';
+import { VariableCodingData } from '@iqb/responses';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
+
+interface CodingSchemeDto {
+  variableCodings: VariableCodingData[];
+}
 
 @Component({
   selector: 'studio-lite-unit-info-coding',
@@ -25,7 +29,8 @@ export class UnitInfoCodingComponent {
   constructor(
     private backendService: BackendService,
     public reviewService: ReviewService
-  ) {}
+  ) {
+  }
 
   updateContent() {
     this.allVariables = [];
