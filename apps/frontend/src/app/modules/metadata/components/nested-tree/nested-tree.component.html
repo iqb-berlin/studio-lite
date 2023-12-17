@@ -6,33 +6,29 @@
                 [style.display]="filterLeafNode(node) ? 'none' : 'block'"
                 matTreeNodeToggle
                 matTreeNodePadding
-                matTreeNodePaddingIndent="20"
-        >
+                matTreeNodePaddingIndent="20">
             <div class="fx-row-start-center">
-                <button class="button__arrow" mat-icon-button></button>
+                <button class="button__arrow" mat-icon-button disabled></button>
                 <mat-checkbox
                         class="checklist-leaf-node"
                         [checked]="checklistSelection.isSelected(node)"
-                        (change)="VocabLeafSelectionToggle(node)"
-                ></mat-checkbox>
+                        (change)="VocabLeafSelectionToggle(node)">
+                </mat-checkbox>
                 <span class="notation" *ngIf="!this.dialogData.props.hideNumbering">{{node.notation}}</span>
                 <span *ngIf="!this.dialogData.props.hideTitle">{{node?.label}}</span>
             </div>
         </mat-tree-node>
-
         <mat-tree-node
                 *matTreeNodeDef="let node; when: hasChild"
                 [style.display]="filterParentNode(node) ? 'none' : 'block'"
                 matTreeNodePadding
-                matTreeNodePaddingIndent="20"
-        >
+                matTreeNodePaddingIndent="20">
             <div class="fx-row-start-center">
                 <button
                         class="button__arrow"
                         mat-icon-button
                         matTreeNodeToggle
-                        [attr.aria-label]="'Toggle ' + node?.label"
-                >
+                        [attr.aria-label]="'Toggle ' + node?.label">
                     <mat-icon class="mat-icon-rtl-mirror">
                         {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                     </mat-icon>

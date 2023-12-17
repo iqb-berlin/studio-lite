@@ -49,6 +49,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
 
   showNodeTree(): void {
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
+      autoFocus: false,
       data: {
         value: this.formControl.value,
         props: this.props,
