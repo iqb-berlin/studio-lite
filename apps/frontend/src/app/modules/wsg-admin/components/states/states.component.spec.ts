@@ -9,11 +9,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../../../../../environments/environment';
 import { StatesComponent } from './states.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
-describe('UsersComponent', () => {
+describe('StatesComponent', () => {
   let component: StatesComponent;
   let fixture: ComponentFixture<StatesComponent>;
 
@@ -38,6 +39,7 @@ describe('UsersComponent', () => {
         MatListModule,
         MatIconModule,
         MatTooltipModule,
+        MatProgressSpinnerModule,
         TranslateModule.forRoot()
       ],
       providers: [
