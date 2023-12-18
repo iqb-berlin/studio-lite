@@ -13,6 +13,9 @@ export class ProfileService {
       const url = vocab.url.replace(this.baseUrlVocabs, '').replace(/\//g, '');
       if (Object.keys(vocab.data).length !== 0) {
         const content = JSON.stringify(vocab.data);
+        if (!fs.existsSync(this.vocabsPath)) {
+          fs.mkdirSync(this.vocabsPath);
+        }
         fs.writeFileSync(`${this.vocabsPath}/${url}.json`, content);
       }
     });
@@ -38,6 +41,9 @@ export class ProfileService {
     const url = profile.id.replace(this.baseUrlProfile, '').replace(/\//g, '');
     if (Object.keys(profile).length !== 0) {
       const content = JSON.stringify(profile);
+      if (!fs.existsSync(this.profilesPath)) {
+        fs.mkdirSync(this.profilesPath);
+      }
       fs.writeFileSync(`${this.profilesPath}/${url}`, content);
     }
   }
