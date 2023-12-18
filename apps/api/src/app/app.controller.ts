@@ -58,13 +58,9 @@ export class AppController {
   })
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
-  @ApiQuery({ type: String, name: 'username', required: true })
-  @ApiQuery({ type: String, name: 'password', required: true })
-  async initLogin(
-  @Query('username') username: string,
-    @Query('password') password: string
+  async initLogin(@Body() body: { username: string, password: string }
   ) {
-    const token = await this.authService.initLogin(username, password);
+    const token = await this.authService.initLogin(body.username, body.password);
     return `"${token}"`;
   }
 
