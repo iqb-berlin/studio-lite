@@ -56,6 +56,14 @@ describe('UsersComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(DeleteStateComponent);
     component = fixture.componentInstance;
+    component.typedData = {
+      title: 'title',
+      prompt: '',
+      okButtonLabel: 'ok',
+      state: {
+        id: 0, label: 'label', color: 'red'
+      }
+    };
     fixture.detectChanges();
   });
 
