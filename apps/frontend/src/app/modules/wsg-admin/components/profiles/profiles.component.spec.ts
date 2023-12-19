@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { environment } from '../../../../../environments/environment';
 import { ProfilesComponent } from './profiles.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
@@ -38,6 +39,7 @@ describe('UsersComponent', () => {
         MatListModule,
         MatIconModule,
         MatTooltipModule,
+        MatFormFieldModule,
         TranslateModule.forRoot()
       ],
       providers: [
