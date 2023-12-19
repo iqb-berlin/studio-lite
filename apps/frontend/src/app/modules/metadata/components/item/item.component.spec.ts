@@ -3,6 +3,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { FormlyModule } from '@ngx-formly/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { ItemComponent } from './item.component';
 
 describe('ItemComponent', () => {
@@ -28,7 +29,8 @@ describe('ItemComponent', () => {
       imports: [
         MatExpansionModule,
         FormlyModule.forRoot(),
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        TranslateModule.forRoot()
       ]
     }).compileComponents();
 
