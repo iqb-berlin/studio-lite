@@ -8,6 +8,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
 import { environment } from '../../../../../environments/environment';
 
+global.fetch = jest.fn(() => Promise.resolve({
+  json: () => Promise.resolve({ test: 100 })
+})) as jest.Mock;
+
 describe('EditWorkspaceGroupComponent', () => {
   let component: EditWorkspaceGroupSettingsComponent;
   let fixture: ComponentFixture<EditWorkspaceGroupSettingsComponent>;
