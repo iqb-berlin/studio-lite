@@ -117,7 +117,7 @@ export class ChecklistDatabase {
 }
 
 @Component({
-  selector: 'studio-lite-new-nested-tree',
+  selector: 'studio-lite-nested-tree',
   templateUrl: './nested-tree.component.html',
   styleUrls: ['./nested-tree.component.scss'],
   providers: [ChecklistDatabase]

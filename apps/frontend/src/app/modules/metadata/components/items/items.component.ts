@@ -5,6 +5,23 @@ import {
   BehaviorSubject, Subject, takeUntil
 } from 'rxjs';
 
+import {
+  MDValue
+} from '@iqb/metadata';
+
+type ExtendedMDProfile = {
+  isCurrent: boolean,
+  profileId: string,
+  entries: MDValue[],
+};
+type Item = {
+  id: string,
+  weighting: number,
+  description: string,
+  variableId: string,
+  profiles: ExtendedMDProfile[]
+} | Record<string, never>;
+
 @Component({
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',
@@ -13,6 +30,7 @@ import {
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   items: any[] = [];
   variables!: string[];
+  isTextOnlyView = false;
   private ngUnsubscribe = new Subject<void>();
 
   @Input() variablesLoader!: BehaviorSubject<string[]>;
@@ -40,6 +58,10 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
       changes[metadata].previousValue !== changes[metadata].currentValue) {
       this.items = this.metadata[this.metadataKey] || [];
     }
+  }
+
+  togglePresentation() {
+    this.isTextOnlyView = !this.isTextOnlyView;
   }
 
   remove(index: number): void {

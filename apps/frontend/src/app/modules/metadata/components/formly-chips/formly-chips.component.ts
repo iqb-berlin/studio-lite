@@ -49,6 +49,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
 
   showNodeTree(): void {
     const dialogRef = this.vocabsDialog.open(NestedTreeComponent, {
+      autoFocus: false,
       data: {
         value: this.formControl.value,
         props: this.props,
@@ -67,7 +68,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
               name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`,
               id: result.id,
               notation: result.notation,
-              text: [{ lang: 'de', value: result.description }]
+              text: [{ lang: 'de', value: `${result.notation} ${result.label}` }]
             }))
             .sort((a: NotationNode, b: NotationNode) => {
               const nameA = a.name?.toUpperCase() || '';

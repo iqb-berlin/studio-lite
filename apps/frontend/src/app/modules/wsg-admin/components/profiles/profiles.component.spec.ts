@@ -14,7 +14,7 @@ import { environment } from '../../../../../environments/environment';
 import { ProfilesComponent } from './profiles.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
-describe('UsersComponent', () => {
+describe('ProfilesComponent', () => {
   let component: ProfilesComponent;
   let fixture: ComponentFixture<ProfilesComponent>;
 
