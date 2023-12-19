@@ -206,7 +206,8 @@
                 Metadaten (Items)
               </mat-card-title>
             </mat-card-header>
-            <mat-card-content>
+            <mat-card-content
+              [class.metadata-items]="workspaceSettings && workspaceSettings.itemMDProfile">
               <studio-lite-items *ngIf="workspaceSettings && workspaceSettings.itemMDProfile && metadata"
                                  class="fx-flex-row-50"
                                  [profileUrl]="workspaceSettings && workspaceSettings.itemMDProfile"
