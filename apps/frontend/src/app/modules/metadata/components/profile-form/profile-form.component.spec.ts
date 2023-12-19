@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { ProfileFormComponent } from './profile-form.component';
+import { environment } from '../../../../../environments/environment';
 
 describe('ProfileFormComponent', () => {
   let component: ProfileFormComponent;
@@ -11,8 +13,15 @@ describe('ProfileFormComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ProfileFormComponent],
       imports: [
+        HttpClientModule,
         ReactiveFormsModule,
         FormlyModule.forRoot()
+      ],
+      providers: [
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
       ]
     }).compileComponents();
 
