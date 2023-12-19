@@ -99,6 +99,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                 this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
               }
               if (msgData.unitState) {
+                // TODO: elementCodes are specific for aspect
                 this.responses = JSON.parse(msgData.unitState.dataParts.elementCodes);
                 this.setPresentationStatus(msgData.unitState.presentationProgress);
                 this.setResponsesStatus(msgData.unitState.responseProgress);
@@ -439,12 +440,13 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
           this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
         });
     }
+    // TODO: Wait for subscription: this.workspaceService.codingSchemer is undefined
     this.workspaceService.codingSchemer?.code(this.responses);
     const unitDefData = this.workspaceService.unitDefinitionStore?.getData();
     if (unitDefData?.variables) {
       const validation = this.workspaceService.codingSchemer?.validate(unitDefData.variables);
-      this.openCodingProblemsDialog(validation);
-      console.log('validate', validation);
+      if (validation) this.openCodingProblemsDialog(validation);
+      console.log('validate', validation, unitDefData?.variables);
     }
   }
 
