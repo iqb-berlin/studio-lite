@@ -73,17 +73,8 @@ dev-volumes-clean:
 
 ## Remove all unused (not just dangling) images!
 dev-images-clean: .EXPORT_ALL_VARIABLES
-	if test "$(shell docker images -q $(REGISTRY_PATH)iqbberlin/studio-lite-db)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-db);\
-	fi
-	if test "$(shell docker images -q $(REGISTRY_PATH)iqbberlin/studio-lite-liquibase)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase);\
-	fi
-	if test "$(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-backend)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-backend);\
-	fi
-	if test "$(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-frontend)";\
-		then docker rmi $(shell docker images -q ${REGISTRY_PATH}iqbberlin/studio-lite-frontend);\
+	if test "$(shell docker images -f reference=$(REGISTRY_PATH)iqbberlin/studio-lite-* -q)";\
+		then docker rmi $(shell docker images -f reference=${REGISTRY_PATH}iqbberlin/studio-lite-* -q);\
 	fi
 
 ## Remove all unused data volumes, images, containers, networks, and cache.

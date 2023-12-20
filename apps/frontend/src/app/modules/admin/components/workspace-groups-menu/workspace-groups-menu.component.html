@@ -21,4 +21,10 @@
           (click)="downloadWorkspacesReport.emit(true)">
     <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
   </button>
+  <button mat-button
+          [disabled]="!selectedWorkspaceGroupId  && checkedRows && checkedRows.length !== 1"
+          [matTooltip]="'admin.settings' | translate"
+          (click)="editGroupSettings()">
+    <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
+  </button>
 </div>

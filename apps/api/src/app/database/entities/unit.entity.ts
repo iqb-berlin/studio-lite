@@ -30,6 +30,9 @@ class Unit {
   @Column()
     transcript: string;
 
+  @Column()
+    state: string;
+
   @Column({
     type: 'jsonb',
     array: false,

@@ -19,8 +19,8 @@ import { WorkspaceService } from '../../services/workspace.service';
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
   navTabs: { name: string; duplicable: boolean }[] = [
-    { name: 'metadata', duplicable: false },
-    { name: 'editor', duplicable: false },
+    { name: 'properties', duplicable: false },
+    { name: 'editor', duplicable: true },
     { name: 'preview', duplicable: true },
     { name: 'schemer', duplicable: true },
     { name: 'comments', duplicable: true }
@@ -99,7 +99,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private initWorkspace(workspace: WorkspaceFullDto): void {
     this.workspaceService.selectedWorkspaceName = `${workspace.groupName}: ${workspace.name}`;
+    this.workspaceService.groupId = workspace.groupId;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
+    this.workspaceService.getWorkspaceGroupStates();
+
     if (workspace.settings) {
       this.workspaceService.workspaceSettings = workspace.settings;
     }

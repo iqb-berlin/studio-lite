@@ -13,10 +13,6 @@ services:
       <<: *env-postgres
     volumes:
       - db_vol:/var/lib/postgresql/data
-    healthcheck:
-      test: "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"
-      interval: "1s"
-      retries: 60
     networks:
       - application-network
 
@@ -69,6 +65,7 @@ services:
 volumes:
   db_vol:
   backend_vol:
+  backend_profiles_vol:
 
 networks:
   application-network:

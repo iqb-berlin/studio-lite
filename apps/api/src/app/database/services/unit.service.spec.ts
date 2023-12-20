@@ -15,7 +15,10 @@ describe('UnitService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UnitService,
+        {
+          provide: UnitService,
+          useValue: createMock<UnitService>()
+        },
         {
           provide: UnitUserService,
           useValue: createMock<UnitUserService>()

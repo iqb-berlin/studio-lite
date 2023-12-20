@@ -26,6 +26,7 @@ export class AppComponent implements OnInit {
     private router: Router
   ) {
     setDefaultOptions({ locale: de });
+    this.translateService.use('de');
   }
 
   ngOnInit(): void {

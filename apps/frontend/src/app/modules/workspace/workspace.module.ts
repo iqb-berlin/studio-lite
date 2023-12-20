@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTabsModule } from '@angular/material/tabs';
-
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
@@ -34,7 +33,6 @@ import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { NewUnitComponent } from './components/new-unit/new-unit.component';
 import { SelectUnitComponent } from './components/select-unit/select-unit.component';
 import { MoveUnitComponent } from './components/move-unit/move-unit.component';
-import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
 import { SaveOrDiscardComponent } from './components/save-or-discard/save-or-discard.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
@@ -79,11 +77,15 @@ import { StatusIndicationComponent } from './components/status-indication/status
 import { SharedModule } from '../shared/shared.module';
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
+import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
+import { MetadataModule } from '../metadata/metadata.module';
+import { GetStateColorPipe } from './pipes/get-state-color.pipe';
 
 @NgModule({
   imports: [
     CommonModule,
     SharedModule,
+    MetadataModule,
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,
@@ -122,7 +124,6 @@ import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
     NewUnitComponent,
     SelectUnitComponent,
     MoveUnitComponent,
-    UnitMetadataComponent,
     UnitEditorComponent,
     SaveOrDiscardComponent,
     UnitPreviewComponent,
@@ -149,6 +150,7 @@ import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
     UpdateUnitsButtonComponent,
     HasNewCommentsPipe,
     NamedRouterLinkPipe,
+    GetStateColorPipe,
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
     AddReviewButtonComponent,
@@ -162,7 +164,8 @@ import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
     GroupMenuComponent,
     PreviewBarComponent,
     StatusIndicationComponent,
-    UnitGroupsComponent
+    UnitGroupsComponent,
+    UnitPropertiesComponent
   ],
   exports: [
     WorkspaceComponent,

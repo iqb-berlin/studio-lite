@@ -1,0 +1,33 @@
+<div class="fx-row-space-between-stretch fx-gap-10">
+  <div class="fx-flex-row-50">
+    <mat-card>
+      <mat-card-content>
+        <studio-lite-profile-form *ngIf="unitMDProfile && metadata"
+                                  [profileUrl]="unitMDProfile"
+                                  [metadataKey]="'profiles'"
+                                  [metadata]="metadata"
+                                  [language]="language"
+                                  [formlyWrapper]="'panel'"
+                                  [panelExpanded]="true"
+                                  (metadataChange)="onMetadataChange($event)">
+        </studio-lite-profile-form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="fx-flex-row-50">
+    <mat-card>
+      <mat-card-content>
+        <studio-lite-items *ngIf="itemMDProfile && metadata"
+                           class="fx-flex-row-50"
+                           [profileUrl]="itemMDProfile"
+                           [metadataKey]="'items'"
+                           [metadata]="metadata"
+                           [language]="language"
+                           [variablesLoader]="variablesLoader"
+                           (metadataChange)="onMetadataChange($event)">
+        </studio-lite-items>
+    </mat-card-content>
+    </mat-card>
+  </div>
+</div>

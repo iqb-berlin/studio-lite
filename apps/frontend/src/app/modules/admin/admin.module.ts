@@ -23,6 +23,7 @@ import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { AdminRoutingModule } from './admin-routing.module';
 import { WorkspaceGroupsComponent } from './components/workspace-groups/workspace-groups.component';
 import { UsersComponent } from './components/users/users.component';
@@ -45,6 +46,9 @@ import { ToTimePipe } from './pipes/to-time.pipe';
 import { UsersMenuComponent } from './components/users-menu/users-menu.component';
 import { SharedModule } from '../shared/shared.module';
 import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu/workspace-groups-menu.component';
+import {
+  EditWorkspaceGroupSettingsComponent
+} from './components/edit-workspace-group-settings/edit-workspace-group-settings.component';
 
 @NgModule({
   imports: [
@@ -74,7 +78,8 @@ import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu
     FormsModule,
     TranslateModule,
     HttpClientModule,
-    SharedModule
+    SharedModule,
+    MatExpansionModule
   ],
   exports: [AdminComponent],
   declarations: [
@@ -96,7 +101,8 @@ import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu
     SafeUrlPipe,
     ToTimePipe,
     UsersMenuComponent,
-    WorkspaceGroupsMenuComponent
+    WorkspaceGroupsMenuComponent,
+    EditWorkspaceGroupSettingsComponent
   ],
   providers: [
     BackendService,

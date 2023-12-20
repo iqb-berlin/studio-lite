@@ -6,6 +6,7 @@ import { UsersService } from './database/services/users.service';
 import { WorkspaceService } from './database/services/workspace.service';
 import { ReviewService } from './database/services/review.service';
 import { VeronaModulesService } from './database/services/verona-modules.service';
+import { UnitService } from './database/services/unit.service';
 
 describe('AppController', () => {
   let controller: AppController;
@@ -21,6 +22,10 @@ describe('AppController', () => {
         {
           provide: AuthService,
           useValue: createMock<AuthService>()
+        },
+        {
+          provide: UnitService,
+          useValue: createMock<UnitService>()
         },
         {
           provide: UsersService,

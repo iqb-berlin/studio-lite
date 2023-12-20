@@ -1,6 +1,8 @@
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { EventEmitter } from '@angular/core';
 
 export class UnitMetadataStore {
+  dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitMetadataDto;
   private changedData: UnitMetadataDto;
 
@@ -9,28 +11,31 @@ export class UnitMetadataStore {
     this.changedData = <UnitMetadataDto>{ id: originalData.id };
   }
 
-  setPlayer(newPlayer: string) {
+  setPlayer(newPlayer: string): void {
     if (newPlayer === this.originalData.player) {
       if (this.changedData.player) delete this.changedData.player;
     } else {
       this.changedData.player = newPlayer;
     }
+    this.dataChange.emit();
   }
 
-  setEditor(newEditor: string) {
+  setEditor(newEditor: string): void {
     if (newEditor === this.originalData.editor) {
       if (this.changedData.editor) delete this.changedData.editor;
     } else {
       this.changedData.editor = newEditor;
     }
+    this.dataChange.emit();
   }
 
-  setSchemer(newSchemer: string) {
+  setSchemer(newSchemer: string): void {
     if (newSchemer === this.originalData.schemer) {
       if (this.changedData.schemer) delete this.changedData.schemer;
     } else {
       this.changedData.schemer = newSchemer;
     }
+    this.dataChange.emit();
   }
 
   setBasicData(
@@ -39,7 +44,8 @@ export class UnitMetadataStore {
     newDescription: string,
     newGroup: string,
     newTranscript: string,
-    newReference: string
+    newReference: string,
+    newState:string
   ) {
     if (newKey === this.originalData.key) {
       if (this.changedData.key) delete this.changedData.key;
@@ -71,15 +77,31 @@ export class UnitMetadataStore {
     } else {
       this.changedData.reference = newReference;
     }
+    if (newState === this.originalData.state) {
+      if (this.changedData.state) delete this.changedData.state;
+    } else {
+      this.changedData.state = newState;
+    }
+    this.dataChange.emit();
+  }
+
+  setMetadata(newMetadata: any): void {
+    if (JSON.stringify(newMetadata) === JSON.stringify(this.originalData.metadata)) {
+      if (this.changedData.metadata) delete this.changedData.metadata;
+    } else {
+      this.changedData.metadata = JSON.parse(JSON.stringify(newMetadata));
+    }
+    this.dataChange.emit();
   }
 
   isChanged(): boolean {
     return Object.keys(this.changedData).length > 1;
   }
 
-  isKeyOrNameOrGroupChanged(): boolean {
+  isKeyOrNameOrGroupOrStateChanged(): boolean {
     const dataKeys = Object.keys(this.changedData);
-    return (dataKeys.indexOf('key') >= 0 || dataKeys.indexOf('name') >= 0 || dataKeys.indexOf('groupName') >= 0);
+    return (dataKeys.indexOf('key') >= 0 ||
+      dataKeys.indexOf('name') >= 0 || dataKeys.indexOf('groupName') >= 0 || dataKeys.indexOf('state') >= 0);
   }
 
   getChangedData(): UnitMetadataDto {
@@ -90,12 +112,12 @@ export class UnitMetadataStore {
     return { ...this.originalData, ...this.changedData };
   }
 
-  applyChanges() {
+  applyChanges(): void {
     this.originalData = this.getData();
     this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
   }
 
-  restore() {
+  restore(): void {
     this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
   }
 }

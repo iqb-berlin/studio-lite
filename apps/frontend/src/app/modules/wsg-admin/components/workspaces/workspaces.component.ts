@@ -11,6 +11,7 @@ import { saveAs } from 'file-saver-es';
 import { TranslateService } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
+import { BackendService as WorkspaceBackendService } from '../../../workspace/services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
@@ -37,6 +38,7 @@ export class WorkspacesComponent implements OnInit {
     private appService: AppService,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
+    private workspaceBackendService: WorkspaceBackendService,
     private wsgAdminService: WsgAdminService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService
@@ -198,7 +200,17 @@ export class WorkspacesComponent implements OnInit {
   moveWorkspace(value: { selection: WorkspaceInListDto[], workspaceGroupId: number }) {
     this.appService.dataLoading = true;
     const workspacesToMove: number[] = [];
-    value.selection.forEach((r: WorkspaceInListDto) => workspacesToMove.push(r.id));
+    value.selection.forEach((workspace: WorkspaceInListDto) => {
+      if (workspace.groupId !== value.workspaceGroupId) {
+        this.workspaceBackendService.getUnitList(workspace.id).subscribe(async units => {
+          // eslint-disable-next-line no-restricted-syntax
+          for await (const unit of units) {
+            this.workspaceBackendService.deleteUnitState(workspace.id, unit.id).subscribe(() => null);
+          }
+        });
+      }
+      workspacesToMove.push(workspace.id);
+    });
     this.backendService.moveWorkspaces(value.workspaceGroupId, workspacesToMove).subscribe(
       respOk => {
         if (respOk) {

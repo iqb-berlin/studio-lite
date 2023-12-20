@@ -30,7 +30,8 @@ export class AppController {
     private workspaceService: WorkspaceService,
     private reviewService: ReviewService,
     private veronaModulesService: VeronaModulesService
-  ) {}
+  ) {
+  }
 
   @Post('login')
   @UseGuards(LocalAuthGuard, AppVersionGuard)
@@ -42,8 +43,6 @@ export class AppController {
     allowEmptyValue: false
   })
   @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
-  @ApiQuery({ type: String, name: 'password', required: true })
-  @ApiQuery({ type: String, name: 'username', required: true })
   async login(@Request() req) {
     const token = await this.authService.login(req.user);
     return `"${token}"`;
@@ -59,13 +58,9 @@ export class AppController {
   })
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
-  @ApiQuery({ type: String, name: 'username', required: true })
-  @ApiQuery({ type: String, name: 'password', required: true })
-  async initLogin(
-  @Query('username') username: string,
-    @Query('password') password: string
+  async initLogin(@Body() body: { username: string, password: string }
   ) {
-    const token = await this.authService.initLogin(username, password);
+    const token = await this.authService.initLogin(body.username, body.password);
     return `"${token}"`;
   }
 

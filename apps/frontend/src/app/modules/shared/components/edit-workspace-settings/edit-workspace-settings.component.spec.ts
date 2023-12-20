@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
 import { VeronaModuleClass } from '../../models/verona-module.class';
 import { environment } from '../../../../../environments/environment';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
@@ -34,6 +35,7 @@ describe('EditWorkspaceSettingsComponent', () => {
         MatCheckboxModule,
         HttpClientModule,
         MatDialogModule,
+        MatSelectModule,
         TranslateModule.forRoot()
       ],
       providers: [

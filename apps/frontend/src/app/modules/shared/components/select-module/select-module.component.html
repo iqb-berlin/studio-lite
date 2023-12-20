@@ -3,17 +3,16 @@
     {{'modules.no-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
   </p>
 </div>
-<form *ngIf="hasListEntries"
-      [formGroup]="moduleForm">
-  <p class="smaller-font" *ngIf="isEmpty">
+<form *ngIf="hasListEntries" [formGroup]="moduleForm">
+  <span class="smaller-font" *ngIf="isEmpty">
     {{'modules.not-defined-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
-  </p>
-  <p class="smaller-font" *ngIf="!isValid">
+  </span>
+  <span class="smaller-font" *ngIf="!isValid">
     {{'modules.not-valid-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
-  </p>
-  <p class="smaller-font" *ngIf="moduleSubstitute">
+  </span>
+  <span class="smaller-font" *ngIf="moduleSubstitute">
     {{'modules.replaced' | translate: { selectedModuleId, moduleSubstitute } }}
-  </p>
+  </span>
   <div class="fx-column-start-stretch">
     <mat-form-field>
       <mat-select

@@ -1,0 +1,41 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<mat-dialog-content>
+  <mat-spinner *ngIf="isLoading">
+  </mat-spinner>
+  <form [formGroup]="editWorkspaceGroupSettingsForm" class="fx-column-start-stretch" *ngIf="!isLoading">
+
+    <h1 mat-dialog-content>{{'metadata.assign-metadata-profiles' | translate}}</h1>
+    <div *ngFor="let store of profileStores">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{store.title}}
+            </mat-panel-title>
+            <mat-panel-description>
+              {{store.description}}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div *ngFor="let profile of store.profiles">
+            <mat-checkbox [id]="profile.label" [checked]="isChecked(profile.id)" (change)="changeSelection($event)" [name]="profile.id">
+              {{profile.label}}
+            </mat-checkbox>
+          </div>
+        </mat-expansion-panel>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="formData"
+          [disabled]="editWorkspaceGroupSettingsForm.invalid">
+    {{data.saveButtonLabel}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+

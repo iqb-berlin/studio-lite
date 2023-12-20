@@ -7,6 +7,11 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditWorkspaceGroupComponent } from '../edit-workspace-group/edit-workspace-group.component';
+import {
+  EditWorkspaceGroupSettingsComponent
+} from '../edit-workspace-group-settings/edit-workspace-group-settings.component';
+import { BackendService } from '../../services/backend.service';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 @Component({
   selector: 'studio-lite-workspace-groups-menu',
@@ -17,16 +22,19 @@ export class WorkspaceGroupsMenuComponent {
   @Input() selectedWorkspaceGroupId!: number;
   @Input() selectedRows!: WorkspaceGroupInListDto[];
   @Input() checkedRows!: WorkspaceGroupInListDto[];
-
   @Output() downloadWorkspacesReport: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
   @Output() groupsDeleted: EventEmitter< WorkspaceGroupInListDto[]> = new EventEmitter< WorkspaceGroupInListDto[]>();
+  @Output() groupSettingsEdited = new EventEmitter();
   @Output() groupEdited: EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }> =
     new EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }>();
 
-  constructor(private editWorkspaceDialog: MatDialog,
-              private deleteConfirmDialog: MatDialog,
-              private translateService: TranslateService) {}
+  constructor(
+    public backendService: BackendService,
+    public workspaceService: WorkspaceService,
+    private editWorkspaceDialog: MatDialog,
+    private deleteConfirmDialog: MatDialog,
+    private translateService: TranslateService) {}
 
   addGroup(): void {
     const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
@@ -65,6 +73,32 @@ export class WorkspaceGroupsMenuComponent {
         if (typeof result !== 'undefined') {
           if (result !== false) {
             this.groupEdited.emit({ selection: selectedRows, group: result as UntypedFormGroup });
+          }
+        }
+      });
+    }
+  }
+
+  async editGroupSettings(): Promise<void> {
+    let selectedRows = this.selectedRows;
+    if (selectedRows.length === 0) {
+      selectedRows = this.checkedRows;
+    }
+    if (selectedRows.length) {
+      const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupSettingsComponent, {
+        width: '1000px',
+        data: {
+          name: selectedRows[0].name,
+          id: selectedRows[0].id,
+          title: this.translateService.instant('admin.edit-group-settings'),
+          saveButtonLabel: this.translateService.instant('save')
+        }
+      });
+      dialogRef.afterClosed().subscribe(data => {
+        if (typeof data !== 'undefined') {
+          if (data !== false) {
+            this.groupSettingsEdited
+              .emit({ states: data.states, profiles: data.profilesSelected, selectedRow: selectedRows[0].id });
           }
         }
       });
