@@ -14,7 +14,7 @@ export class AppConfig {
   readonly hasUsers: boolean;
 
   constructor(titleService: Title, appConfig?: ConfigDto, sanitizer?: DomSanitizer) {
-    this.appTitle = appConfig ? appConfig.appTitle : 'IQB-Studio-Lite';
+    this.appTitle = appConfig ? appConfig.appTitle : 'IQB-Studio';
     this.pageTitle = '';
     if (appConfig && appConfig.introHtml && sanitizer) {
       this.introHtml = sanitizer.bypassSecurityTrustHtml(appConfig.introHtml);
