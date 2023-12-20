@@ -26,7 +26,7 @@ export class SettingService {
     }
     // TODO: Template ist Aufgabe des Frontends (findConfig ist get):
     return <ConfigDto> {
-      appTitle: 'IQB-Studio-Lite',
+      appTitle: 'IQB-Studio',
       introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
       imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
       hasUsers: hasUsers
