@@ -83,6 +83,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
     this.workspaceService.loadUnitMetadata().then(() => {
       this.setupForm();
+      this.initItemLoader();
       this.loadMetaData();
     });
   }

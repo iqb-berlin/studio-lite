@@ -43,10 +43,9 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     this.variablesLoader
-      .pipe(
-        takeUntil(this.ngUnsubscribe))
-      .subscribe(variable => {
-        this.variables = variable;
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(variables => {
+        this.variables = variables;
       });
     this.items = this.metadata[this.metadataKey] || [];
   }
@@ -76,13 +75,13 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     this.metadataChange.emit(this.metadata);
   }
 
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
-  }
-
   onMetadataChange(metadata: any) {
     this.metadata[this.metadataKey] = metadata;
     this.metadataChange.emit(this.metadata);
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
