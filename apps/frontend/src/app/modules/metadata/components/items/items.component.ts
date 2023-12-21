@@ -5,23 +5,6 @@ import {
   BehaviorSubject, Subject, takeUntil
 } from 'rxjs';
 
-import {
-  MDValue
-} from '@iqb/metadata';
-
-type ExtendedMDProfile = {
-  isCurrent: boolean,
-  profileId: string,
-  entries: MDValue[],
-};
-type Item = {
-  id: string,
-  weighting: number,
-  description: string,
-  variableId: string,
-  profiles: ExtendedMDProfile[]
-} | Record<string, never>;
-
 @Component({
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',
@@ -59,7 +42,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  togglePresentation() {
+  togglePresentation(): void {
     this.isTextOnlyView = !this.isTextOnlyView;
   }
 
@@ -75,7 +58,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     this.metadataChange.emit(this.metadata);
   }
 
-  onMetadataChange(metadata: any) {
+  onMetadataChange(metadata: any): void {
     this.metadata[this.metadataKey] = metadata;
     this.metadataChange.emit(this.metadata);
   }
