@@ -103,18 +103,15 @@ export class WorkspaceService {
     });
   }
 
-  async getWorkspaceGroupStates():Promise<State[]> {
-    return new Promise(resolve => {
-      if (this.groupId) {
-        this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
-          if (res.settings) {
-            this.workspaceSettings.states = res.settings.states;
-            this.states = res.settings.states || [];
-            resolve(this.states);
-          }
-        });
-      }
-    });
+  setWorkspaceGroupStates(): void {
+    if (this.groupId) {
+      this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
+        if (res.settings) {
+          this.workspaceSettings.states = res.settings.states;
+          this.states = res.settings.states || [];
+        }
+      });
+    }
   }
 
   async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
