@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output
+  Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss']
 })
-export class ItemComponent implements OnInit {
+export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }
   @Input() variables!: string[];
   @Input() metadata!: any;
@@ -25,6 +25,18 @@ export class ItemComponent implements OnInit {
 
   ngOnInit(): void {
     this.initModel();
+    this.initField();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const variables: string = 'variables';
+    if (changes[variables] &&
+      !changes[variables].firstChange) {
+      this.initField();
+    }
+  }
+
+  private initField(): void {
     this.fields = [
       {
         fieldGroup: [
