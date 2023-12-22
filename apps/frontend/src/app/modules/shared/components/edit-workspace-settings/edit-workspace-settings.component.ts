@@ -9,7 +9,6 @@ import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';
-import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
 
 type Profile = {
@@ -28,7 +27,6 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     public backendService: BackendService,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
-    public wsgAdminService: WsgAdminService,
     @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow: number }
   ) {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
@@ -42,6 +40,24 @@ export class EditWorkspaceSettingsComponent implements OnInit {
   selectedUnitMDProfile:string = '';
   profiles: Array<string> = [];
   settings = { ...this.workspaceService.workspaceSettings, profile: '' };
+
+  ngOnInit(): void {
+    this.selectionChanged = this.dialogData.states as State[];
+    const workspaceGroupId = this.workspaceService.groupId;
+    if (workspaceGroupId) {
+      this.backendService.getWorkspaceGroupProfiles(workspaceGroupId).subscribe(res => {
+        this.unitMDProfiles = res.settings.profiles
+          ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
+        this.itemMDProfiles = res.settings.profiles
+          ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
+      });
+      this.backendService.getWorkspaceProfile(this.data.selectedRow).subscribe(res => {
+        if (res.settings?.itemMDProfile) this.selectedItemMDProfile = res.settings.itemMDProfile;
+        if (res.settings?.unitMDProfile) this.selectedUnitMDProfile = res.settings.unitMDProfile;
+      });
+    }
+  }
+
   setStableChecked($event: MatCheckboxChange) {
     this.dialogData.stableModulesOnly = $event.checked;
   }
@@ -67,35 +83,5 @@ export class EditWorkspaceSettingsComponent implements OnInit {
   addData() {
     this.dialogData.states = this.selectionChanged;
     this.selectionChanged = this.dialogData.states as State[];
-  }
-
-  ngOnInit(): void {
-    this.selectionChanged = this.dialogData.states as State[];
-    let workspaceId = this.wsgAdminService.selectedWorkspaceGroupId;
-    if (workspaceId === 0) {
-      this.backendService.getWorkspaceGroupList().subscribe(groupsList => {
-        const found = groupsList
-          .find(group => group.name === this.workspaceService.selectedWorkspaceName.split(':')[0]);
-        workspaceId = found?.id as number;
-        this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
-          this.unitMDProfiles = res.settings.profiles
-            ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
-          this.itemMDProfiles = res.settings.profiles
-            ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
-        });
-      });
-    } else {
-      this.backendService.getWorkspaceGroupProfiles(workspaceId).subscribe(res => {
-        this.unitMDProfiles = res.settings.profiles
-          ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
-        this.itemMDProfiles = res.settings.profiles
-          ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
-      });
-    }
-
-    this.backendService.getWorkspaceProfile(this.data.selectedRow).subscribe(res => {
-      if (res.settings?.itemMDProfile) this.selectedItemMDProfile = res.settings.itemMDProfile;
-      if (res.settings?.unitMDProfile) this.selectedUnitMDProfile = res.settings.unitMDProfile;
-    });
   }
 }
