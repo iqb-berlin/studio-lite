@@ -11,9 +11,14 @@ export class GetStateColorPipe implements PipeTransform {
   ) {}
 
   // eslint-disable-next-line class-methods-use-this
-  async transform(id: string, property:string) {
-    const states = await this.workspaceService.getWorkspaceGroupStates() || [];
-    const filteredState = states.filter((state:State) => Number(id) === state.id);
-    if (filteredState.length) { return filteredState[0][property]; } return '';
+  transform(id: string, property:string, states: State[]): any {
+    if (states) {
+      const filteredState = states
+        .filter((state: State) => Number(id) === state.id);
+      if (filteredState.length) {
+        return filteredState[0][property];
+      }
+    }
+    return '';
   }
 }

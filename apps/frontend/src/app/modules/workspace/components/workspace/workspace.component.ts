@@ -101,7 +101,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.selectedWorkspaceName = `${workspace.groupName}: ${workspace.name}`;
     this.workspaceService.groupId = workspace.groupId;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
-    this.workspaceService.getWorkspaceGroupStates();
+    this.workspaceService.setWorkspaceGroupStates();
 
     if (workspace.settings) {
       this.workspaceService.workspaceSettings = workspace.settings;
