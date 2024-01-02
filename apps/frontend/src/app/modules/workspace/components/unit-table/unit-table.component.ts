@@ -4,6 +4,7 @@ import {
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
+import { State } from '../../../admin/models/state.type';
 
 @Component({
   selector: 'studio-lite-unit-table',
@@ -13,6 +14,7 @@ import { UnitInListDto } from '@studio-lite-lib/api-dto';
 export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSort) sortTable!: MatSort;
   @ViewChild(MatSortHeader) sortHeader!: MatSortHeader;
+  @Input() states!: State[];
   @Input() selectedUnitId!: number;
   @Input() unitList!: UnitInListDto[];
   @Input() filter!: string;

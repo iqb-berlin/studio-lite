@@ -27,6 +27,7 @@
         <studio-lite-unit-table
           [hasSortHeader]="false"
           [unitList]="unitGroup.value"
+          [states]="workspaceService.states"
           [filter]="filterInput.value"
           [selectedUnitId]="selectedUnitId"
           (selectUnit)="selectUnit($event)">
