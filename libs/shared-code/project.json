@@ -13,7 +13,7 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["coverage/libs/shared-code"],
+      "outputs": ["{workspaceRoot}/coverage/libs/shared-code"],
       "options": {
         "jestConfig": "libs/shared-code/jest.config.ts",
         "passWithNoTests": true

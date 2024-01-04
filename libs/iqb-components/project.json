@@ -7,7 +7,7 @@
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["coverage/libs/iqb-components"],
+      "outputs": ["{workspaceRoot}/coverage/libs/iqb-components"],
       "options": {
         "jestConfig": "libs/iqb-components/jest.config.ts",
         "passWithNoTests": true
