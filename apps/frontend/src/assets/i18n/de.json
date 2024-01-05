@@ -322,6 +322,7 @@
     "move-selected-workspaces": "Markierte/n Arbeitsbereich/e verschieben",
     "change-workspace-settings": "Einstellungen des Arbeitsbereiches ändern",
     "download-workspaces-excel": "Xlsx Bericht Arbeitsbereiche: Module",
+    "report-workspaces": "Bericht Arbeitsbereiche",
     "workspaces-excel-name": "{{date}} Arbeitsbereiche.xlsx",
     "select-workspace-group": "Bereichsgruppe auswählen",
     "unknown": "unbekannt",
