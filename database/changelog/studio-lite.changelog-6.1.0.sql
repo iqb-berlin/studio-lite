@@ -3,7 +3,7 @@
 -- changeset jurei733:1
 ALTER TABLE "public"."user"
   ADD COLUMN "issuer" TEXT;
--- rollback ALTER TABLE "public"."user" DROP COLUMN "issuer
+-- rollback ALTER TABLE "public"."user" DROP COLUMN "issuer";
 
 -- changeset jurei733:2
 ALTER TABLE "public"."user"
