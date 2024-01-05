@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
@@ -11,8 +11,7 @@ import {
   VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto,
-  VeronaModuleFileDto
+  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -53,8 +52,43 @@ export class BackendService {
       );
   }
 
+  keycloakLogin(user: CreateUserDto): Observable<boolean> {
+    const {
+      name, lastName, firstName, email, identity, issuer
+    } = user;
+    const queryParams = new HttpParams()
+      .set('name', name)
+      .set('lastName', lastName || '')
+      .set('firstName', firstName || '')
+      .set('issuer', issuer || '')
+      .set('identity', identity || '')
+      .set('email', email || '');
+    return this.http.post<string>(`${this.serverUrl}keycloak-login?${queryParams.toString()}`, '')
+      .pipe(
+        catchError(() => of(false)),
+        switchMap(loginToken => {
+          if (typeof loginToken === 'string') {
+            localStorage.setItem('id_token', loginToken);
+            return this.getAuthData()
+              .pipe(
+                map(authData => {
+                  this.appService.authData = authData;
+                  return true;
+                }),
+                catchError(() => of(false))
+              );
+          }
+          return of(loginToken);
+        })
+      );
+  }
+
   getAuthData(): Observable<AuthDataDto> {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
+  }
+
+  getAuthDataKeycloak(): Observable<AuthDataDto> {
+    return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data-keycloak`);
   }
 
   getMyData(): Observable<MyDataDto | null> {

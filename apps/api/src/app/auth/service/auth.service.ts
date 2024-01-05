@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../../database/services/users.service';
 import { ReviewService } from '../../database/services/review.service';
 
@@ -40,6 +41,26 @@ export class AuthService {
     });
     this.logger.log(`First User with id '${newUserId}' is logging in.`);
     const payload = { username: username, sub: newUserId, sub2: 0 };
+    return this.jwtService.sign(payload);
+  }
+
+  async keycloakLogin(user:CreateUserDto) {
+    const {
+      name, lastName, firstName, email, identity, issuer
+    } = user;
+    const newUserId = await this.usersService.createKeycloakUser({
+      identity: identity,
+      name: name,
+      email: email,
+      lastName: lastName,
+      firstName: firstName,
+      issuer: issuer,
+      password: '',
+      isAdmin: false,
+      description: ''
+    });
+    this.logger.log(`Keycloak User with id '${newUserId}' is logging in.`);
+    const payload = { username: name, sub: newUserId, sub2: 0 };
     return this.jwtService.sign(payload);
   }
 

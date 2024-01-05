@@ -8,6 +8,7 @@ import {
 import {
   AuthDataDto,
   ChangePasswordDto,
+  CreateUserDto,
   MyDataDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
@@ -61,6 +62,40 @@ export class AppController {
   async initLogin(@Body() body: { username: string, password: string }
   ) {
     const token = await this.authService.initLogin(body.username, body.password);
+    return `"${token}"`;
+  }
+
+  @Post('keycloak-login')
+  @UseGuards(AppVersionGuard)
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Keycloak login successful.' })
+  @ApiQuery({ type: String, name: 'name', required: true })
+  @ApiQuery({ type: String, name: 'identity', required: true })
+  @ApiQuery({ type: String, name: 'issuer', required: true })
+  @ApiQuery({ type: String, name: 'email', required: false })
+  @ApiQuery({ type: String, name: 'lastName', required: false })
+  @ApiQuery({ type: String, name: 'firstName', required: false })
+
+  async KeycloakLogin(
+  @Query('name') name: string,
+    @Query('identity') identity: string,
+    @Query('email') email: string,
+    @Query('lastName') lastName: string,
+    @Query('firstName') firstName: string,
+    @Query('issuer') issuer: string
+  ) {
+    const user: CreateUserDto = {
+      name,
+      identity,
+      email,
+      lastName,
+      firstName,
+      issuer,
+      password: '',
+      isAdmin: false,
+      description: ''
+    };
+    const token = await this.authService.keycloakLogin(user);
     return `"${token}"`;
   }
 

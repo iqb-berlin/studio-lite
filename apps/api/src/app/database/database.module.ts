@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
+import KeycloakUser from './entities/keycloak-user.entity';
 import User from './entities/user.entity';
 import { UsersService } from './services/users.service';
 import VeronaModule from './entities/verona-module.entity';
@@ -32,6 +32,7 @@ import { ResourcePackageService } from './services/resource-package.service';
 @Module({
   imports: [
     User,
+    KeycloakUser,
     Workspace,
     Unit,
     WorkspaceGroup,
@@ -56,6 +57,7 @@ import { ResourcePackageService } from './services/resource-package.service';
         database: configService.get('POSTGRES_DB'),
         entities: [
           User,
+          KeycloakUser,
           Workspace,
           WorkspaceGroup,
           WorkspaceUser,
@@ -76,6 +78,7 @@ import { ResourcePackageService } from './services/resource-package.service';
     }),
     TypeOrmModule.forFeature([
       User,
+      KeycloakUser,
       Workspace,
       WorkspaceGroup,
       WorkspaceUser,
@@ -107,6 +110,7 @@ import { ResourcePackageService } from './services/resource-package.service';
   ],
   exports: [
     User,
+    KeycloakUser,
     Unit,
     UnitDefinition,
     UnitComment,

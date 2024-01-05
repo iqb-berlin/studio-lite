@@ -1,14 +1,22 @@
-<studio-lite-area-title
-  [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
-</studio-lite-area-title>
-
-<studio-lite-warning *ngIf="appService.globalWarning"
-                     [warnMessage]="appService.globalWarning">
-</studio-lite-warning>
-<studio-lite-warning *ngIf="!appService.appConfig.hasUsers"
-                     [warnMessage]="'home.no-user' | translate">
-</studio-lite-warning>
-
+<div class="fx-row-space-between-stretch">
+  <studio-lite-area-title
+    [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
+  </studio-lite-area-title>
+  <button type="button" mat-icon-button
+          matTooltip="{{'login.alternative' | translate}}"
+          [matTooltipPosition]="'above'"
+          [matTooltipShowDelay]="300"
+          *ngIf="!loggedInKeycloak"
+          (click)="loginKeycloak()">
+    <studio-lite-wrapped-icon icon="login"></studio-lite-wrapped-icon>
+  </button>
+  <studio-lite-warning *ngIf="appService.globalWarning"
+                       [warnMessage]="appService.globalWarning">
+  </studio-lite-warning>
+  <studio-lite-warning *ngIf="!appService.appConfig.hasUsers"
+                       [warnMessage]="'home.no-user' | translate">
+  </studio-lite-warning>
+</div>
 <form class="fx-column-start-stretch"
       [formGroup]="loginForm"
       (ngSubmit)="login()">
@@ -19,7 +27,7 @@
              (keyup.enter)="pw.focus()">
     </mat-form-field>
     <p *ngIf="loginNamePreset">
-      {{'home.login-with-preset' | translate}}
+      {{ 'home.login-with-preset' | translate }}
     </p>
     <mat-form-field>
       <input matInput #pw
@@ -31,11 +39,12 @@
   </div>
   <p *ngIf="errorMessage"
      class="error-message">
-    {{errorMessage}}
+    {{ errorMessage }}
   </p>
   <button mat-raised-button
           type="submit"
           [disabled]="loginForm.invalid"
-          color="primary">{{'next' | translate}}
+          color="primary">{{ 'next' | translate }}
   </button>
 </form>
+

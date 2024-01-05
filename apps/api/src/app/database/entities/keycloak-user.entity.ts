@@ -1,29 +1,18 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-class User {
+class KeycloakUser {
   @PrimaryGeneratedColumn()
     id: number;
 
   @Column()
-    name: string;
+    identity: string;
 
   @Column()
-    password: string;
+    issuer: string;
 
   @Column()
-    description: string | null;
-
-  @Column()
-    identity: string | null;
-
-  @Column()
-    issuer: string | null;
-
-  @Column({
-    name: 'is_admin'
-  })
-    isAdmin: boolean;
+    username: string;
 
   @Column({
     name: 'last_name'
@@ -37,11 +26,6 @@ class User {
 
   @Column()
     email: string | null;
-
-  @Column({
-    name: 'email_publish_approved'
-  })
-    emailPublishApproved: boolean;
 }
 
-export default User;
+export default KeycloakUser;

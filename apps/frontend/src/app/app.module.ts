@@ -58,6 +58,7 @@ import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 import { SharedModule } from './modules/shared/shared.module';
 import { MoveWorkspaceComponent } from './modules/shared/components/move-workspace/move-workspace.component';
+import { AuthModule } from './modules/auth/auth.module';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -91,6 +92,7 @@ export function createTranslateLoader(http: HttpClient) {
     MoveWorkspaceComponent
   ],
   imports: [
+    AuthModule,
     ApplicationModule,
     BrowserModule,
     BrowserAnimationsModule,

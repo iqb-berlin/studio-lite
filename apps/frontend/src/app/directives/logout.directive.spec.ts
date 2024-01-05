@@ -6,6 +6,7 @@ import { LogoutDirective } from './logout.directive';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { environment } from '../../environments/environment';
+import { AuthService } from '../modules/auth/service/auth.service';
 
 describe('LogoutDirective', () => {
   beforeEach(async () => {
@@ -22,14 +23,14 @@ describe('LogoutDirective', () => {
   });
 
   it('should create an instance',
-    inject([],
-      (appService: AppService,
-       dialog: MatDialog,
-       backendService: BackendService,
-       translateService: TranslateService) => {
-        const directive = new LogoutDirective(
-          appService, dialog, backendService, translateService
-        );
-        expect(directive).toBeTruthy();
-      }));
+    inject([], (
+      appService: AppService,
+      dialog: MatDialog,
+      backendService: BackendService,
+      translateService:TranslateService,
+      authServices:AuthService
+    ) => {
+      const directive = new LogoutDirective(appService, dialog, backendService, translateService, authServices);
+      expect(directive).toBeTruthy();
+    }));
 });

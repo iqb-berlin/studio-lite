@@ -70,6 +70,19 @@
       "concat-scroll-snap": "Magnetisch Scrollen"
     }
   },
+  "login": {
+    "alternative": "alternativer Login (experimentell)",
+    "no-success": "Login nicht erfolgreich",
+    "error": "Fehler"
+  },
+  "user-profile": {
+    "data-edited": "Nutzerdaten geändert",
+    "data-edit-error": "Konnte Nutzerdaten nicht ändern",
+    "new-password": "Neues Kennwort gespeichert",
+    "new-password-error": "Konnte Kennwort nicht ändern.",
+    "error": "Fehler",
+    "ok": "OK"
+  },
   "home": {
     "welcome": "Willkommen!",
     "home-page": "Startseite",
@@ -116,6 +129,10 @@
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
       "unit-copy": "Aufgaben kopieren - unvollständig"
     }
+  },
+  "directives": {
+    "logout": "Abmelden",
+    "logout-confirmation": "Möchten Sie sich abmelden?"
   },
   "user": {
     "full-name": "Name",

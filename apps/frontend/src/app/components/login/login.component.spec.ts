@@ -11,6 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
+import { AuthService } from '../../modules/auth/service/auth.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -24,6 +25,13 @@ describe('LoginComponent', () => {
   @Component({ selector: 'studio-lite-area-title', template: '' })
   class MockAreaTitleComponent {
     @Input() title!: string;
+  }
+
+  class MockAuthService {
+    loggedIn: boolean = false;
+    isLoggedIn() {
+      return this.loggedIn;
+    }
   }
 
   beforeEach(async () => {
@@ -46,6 +54,9 @@ describe('LoginComponent', () => {
       providers: [{
         provide: 'SERVER_URL',
         useValue: environment.backendUrl
+      }, {
+        provide: AuthService,
+        useClass: MockAuthService
       }]
     }).compileComponents();
     fixture = TestBed.createComponent(LoginComponent);
