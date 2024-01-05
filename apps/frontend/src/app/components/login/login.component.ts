@@ -26,6 +26,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   loggedInKeycloak: boolean = false;
   private routingSubscription: Subscription | null = null;
   private loggedUser: KeycloakTokenParsed | undefined;
+
   constructor(private fb: UntypedFormBuilder,
               public authService: AuthService,
               private route: ActivatedRoute,
@@ -55,10 +56,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (await this.authService.isLoggedIn()) {
       this.loggedInKeycloak = true;
+      this.appService.isLoggedInKeycloak = true;
       this.loggedUser = this.authService.getLoggedUser();
       this.userProfile = await this.authService.loadUserProfile();
       if (this.userProfile.id && this.userProfile.username) {
-        const keycloakUser:CreateUserDto = {
+        const keycloakUser: CreateUserDto = {
           issuer: this.loggedUser?.iss || '',
           identity: this.userProfile.id,
           name: this.userProfile.username,
@@ -89,7 +91,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-  keycloakLogin(user:CreateUserDto): void {
+  keycloakLogin(user: CreateUserDto): void {
     this.errorMessage = '';
     this.appService.clearErrorMessages();
     this.appService.dataLoading = true;
@@ -100,7 +102,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  async validLoginCheck(ok:boolean, initLoginMode:boolean) {
+  async validLoginCheck(ok: boolean, initLoginMode: boolean) {
     this.appService.dataLoading = false;
     if (ok) {
       if (this.redirectTo) {
@@ -118,11 +120,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   async loginKeycloak(): Promise<void> {
     await this.authService.login();
-  }
-
-  async logoutKeycloak(): Promise<void> {
-    await this.authService.logout();
-    this.loggedInKeycloak = false;
   }
 
   ngOnDestroy(): void {

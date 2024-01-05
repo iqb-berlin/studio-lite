@@ -4,7 +4,9 @@ import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
 
 @Injectable()
 export class AuthService {
-  constructor(private keycloakService: KeycloakService) {}
+  constructor(private keycloakService: KeycloakService) {
+  }
+
   getLoggedUser(): KeycloakTokenParsed | undefined {
     try {
       return this.keycloakService.getKeycloakInstance()
@@ -18,19 +20,19 @@ export class AuthService {
     return this.keycloakService.getToken();
   }
 
-  isLoggedIn() : Promise<boolean> {
+  isLoggedIn(): Promise<boolean> {
     return this.keycloakService.isLoggedIn();
   }
 
-  loadUserProfile() : Promise<KeycloakProfile> {
+  loadUserProfile(): Promise<KeycloakProfile> {
     return this.keycloakService.loadUserProfile();
   }
 
-  async login() : Promise<void> {
+  async login(): Promise<void> {
     await this.keycloakService.login();
   }
 
-  async logout() : Promise<void> {
+  async logout(): Promise<void> {
     await this.keycloakService.logout(window.location.origin);
   }
 

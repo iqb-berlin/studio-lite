@@ -71,11 +71,10 @@
     }
   },
   "login": {
+    "alternative": "alternativer Login (experimentell)",
     "no-success": "Login nicht erfolgreich",
     "error": "Fehler"
-
   },
-
   "user-profile": {
     "data-edited": "Nutzerdaten geändert",
     "data-edit-error": "Konnte Nutzerdaten nicht ändern",
@@ -84,7 +83,6 @@
     "error": "Fehler",
     "ok": "OK"
   },
-
   "home": {
     "welcome": "Willkommen!",
     "home-page": "Startseite",
