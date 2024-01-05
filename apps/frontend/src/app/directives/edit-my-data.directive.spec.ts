@@ -7,6 +7,7 @@ import { EditMyDataDirective } from './edit-my-data.directive';
 import { environment } from '../../environments/environment';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
+import { AuthService } from '../modules/auth/service/auth.service';
 
 describe('EditMyDataDirective', () => {
   beforeEach(async () => {
@@ -23,12 +24,14 @@ describe('EditMyDataDirective', () => {
 
   it('should create an instance',
     inject([], (
-      appService:AppService,
-      dialog:MatDialog,
-      backendService:BackendService,
-      snackBar:MatSnackBar,
-      translateService:TranslateService) => {
-      const directive = new EditMyDataDirective(appService, dialog, backendService, snackBar, translateService);
+      appService: AppService,
+      dialog: MatDialog,
+      backendService: BackendService,
+      snackBar: MatSnackBar,
+      translateService: TranslateService,
+      authService: AuthService) => {
+      const directive =
+        new EditMyDataDirective(appService, dialog, backendService, snackBar, translateService, authService);
       expect(directive).toBeTruthy();
     }));
 });

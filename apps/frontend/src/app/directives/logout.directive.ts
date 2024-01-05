@@ -16,7 +16,8 @@ export class LogoutDirective {
     private backendService: BackendService,
     private translateService: TranslateService,
     private authService: AuthService
-  ) {}
+  ) {
+  }
 
   @HostListener('click') logout(): void {
     const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
@@ -29,7 +30,7 @@ export class LogoutDirective {
       }
     });
     dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
+      if (result) {
         this.authService.logout();
         this.backendService.logout();
       }
