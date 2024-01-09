@@ -32,7 +32,8 @@ export class UsersService {
     private reviewRepository: Repository<Review>,
     private unitService: UnitService,
     private unitUserService: UnitUserService
-  ) {}
+  ) {
+  }
 
   async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
     // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
@@ -212,7 +213,17 @@ export class UsersService {
   }
 
   async createKeycloakUser(keycloakUser: CreateUserDto): Promise<number> {
-    const existingUser:User = await this.usersRepository.findOne({
+    const existingUser: User = await this.usersRepository.findOne({
+      where: { name: keycloakUser.name },
+      select: {
+        name: true,
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
+    });
+    const existingKeycloakUser: User = await this.usersRepository.findOne({
       where: { identity: keycloakUser.identity, issuer: keycloakUser.issuer },
       select: {
         name: true,
@@ -223,16 +234,40 @@ export class UsersService {
       }
     });
     if (existingUser) {
-      if (keycloakUser.name) existingUser.name = keycloakUser.name;
-      if (keycloakUser.lastName) existingUser.lastName = keycloakUser.lastName;
-      if (keycloakUser.firstName) existingUser.firstName = keycloakUser.firstName;
-      if (keycloakUser.email) existingUser.email = keycloakUser.email;
-      if (keycloakUser.issuer) existingUser.issuer = keycloakUser.issuer;
-      if (keycloakUser.identity) existingUser.identity = keycloakUser.identity;
-      const updatedUser = await this.usersRepository.save(existingUser);
+      if (keycloakUser.name) existingUser.name = keycloakUser?.name || '';
+      if (keycloakUser.lastName) existingUser.lastName = keycloakUser?.lastName || '';
+      if (keycloakUser.firstName) existingUser.firstName = keycloakUser?.firstName || '';
+      if (keycloakUser.email) existingUser.email = keycloakUser?.email || '';
+      if (keycloakUser.issuer) existingUser.issuer = keycloakUser?.issuer;
+      if (keycloakUser.identity) existingUser.identity = keycloakUser?.identity;
+      await this.usersRepository.update(
+        { id: existingUser.id },
+        {
+          identity: keycloakUser.identity,
+          issuer: keycloakUser.issuer
+        }
+      );
       this.logger.log(`Updating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
-      return updatedUser.id;
+      return existingKeycloakUser.id;
     }
+    if (existingKeycloakUser) {
+      if (keycloakUser.name) existingKeycloakUser.name = keycloakUser?.name || '';
+      if (keycloakUser.lastName) existingKeycloakUser.lastName = keycloakUser?.lastName || '';
+      if (keycloakUser.firstName) existingKeycloakUser.firstName = keycloakUser?.firstName || '';
+      if (keycloakUser.email) existingKeycloakUser.email = keycloakUser?.email || '';
+      if (keycloakUser.issuer) existingKeycloakUser.issuer = keycloakUser?.issuer;
+      if (keycloakUser.identity) existingKeycloakUser.identity = keycloakUser?.identity;
+      await this.usersRepository.update(
+        { id: existingKeycloakUser.id },
+        {
+          identity: keycloakUser.identity,
+          issuer: keycloakUser.issuer
+        }
+      );
+      this.logger.log(`Updating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
+      return existingKeycloakUser.id;
+    }
+
     this.logger.log(`Creating keycloak user with username: ${JSON.stringify(keycloakUser)}`);
     const newUser = this.usersRepository.create(keycloakUser);
     await this.usersRepository.save(newUser);

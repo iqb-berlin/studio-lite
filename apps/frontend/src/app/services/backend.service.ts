@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
@@ -53,17 +53,7 @@ export class BackendService {
   }
 
   keycloakLogin(user: CreateUserDto): Observable<boolean> {
-    const {
-      name, lastName, firstName, email, identity, issuer
-    } = user;
-    const queryParams = new HttpParams()
-      .set('name', name)
-      .set('lastName', lastName || '')
-      .set('firstName', firstName || '')
-      .set('issuer', issuer || '')
-      .set('identity', identity || '')
-      .set('email', email || '');
-    return this.http.post<string>(`${this.serverUrl}keycloak-login?${queryParams.toString()}`, '')
+    return this.http.post<string>(`${this.serverUrl}keycloak-login`, user)
       .pipe(
         catchError(() => of(false)),
         switchMap(loginToken => {
@@ -85,10 +75,6 @@ export class BackendService {
 
   getAuthData(): Observable<AuthDataDto> {
     return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data`);
-  }
-
-  getAuthDataKeycloak(): Observable<AuthDataDto> {
-    return this.http.get<AuthDataDto>(`${this.serverUrl}auth-data-keycloak`);
   }
 
   getMyData(): Observable<MyDataDto | null> {
