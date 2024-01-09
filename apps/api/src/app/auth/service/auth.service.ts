@@ -44,11 +44,11 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async keycloakLogin(user:CreateUserDto) {
+  async keycloakLogin(user: CreateUserDto) {
     const {
       name, lastName, firstName, email, identity, issuer
     } = user;
-    const newUserId = await this.usersService.createKeycloakUser({
+    const userId = await this.usersService.createKeycloakUser({
       identity: identity,
       name: name,
       email: email,
@@ -59,8 +59,8 @@ export class AuthService {
       isAdmin: false,
       description: ''
     });
-    this.logger.log(`Keycloak User with id '${newUserId}' is logging in.`);
-    const payload = { username: name, sub: newUserId, sub2: 0 };
+    this.logger.log(`Keycloak User with id '${userId}' is logging in.`);
+    const payload = { username: name, sub: userId, sub2: 0 };
     return this.jwtService.sign(payload);
   }
 
