@@ -85,9 +85,15 @@ export class XlsxDownloadWorkspacesClass {
     const headerRow = [
       'Gruppe Name', 'Gruppe Id', 'Arbeitsbereich Name', 'Arbeitsbereich Id', 'Letzte Änderung', 'Anzahl Units'
     ];
-    allEditors.forEach(m => { headerRow.push(m || 'Kein Editor'); });
-    allPlayers.forEach(m => { headerRow.push(m || 'Kein Player'); });
-    allSchemers.forEach(m => { headerRow.push(m || 'Kein Schemer'); });
+    allEditors.forEach(m => {
+      headerRow.push(m || 'Kein Editor');
+    });
+    allPlayers.forEach(m => {
+      headerRow.push(m || 'Kein Player');
+    });
+    allSchemers.forEach(m => {
+      headerRow.push(m || 'Kein Schemer');
+    });
     const xlsxData = [headerRow];
     wsDataWithMetadata.forEach(wsData => {
       const rowData = [

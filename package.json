@@ -88,6 +88,7 @@
     "keycloak-js": "^22.0.3",
     "multer": "^1.4.5-lts.1",
     "ngx-tiptap": "^6.0.0",
+    "node-xlsx": "^0.23.0",
     "npm": "^10.0.0",
     "openid-client": "^5.5.0",
     "passport": "^0.6.0",
@@ -101,7 +102,7 @@
     "tslib": "^2.0.0",
     "typeorm": "^0.3.10",
     "uuid": "^8.3.2",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz",
+    "xlsx": "file:vendor/xlsx-0.20.1.tgz",
     "xmlbuilder2": "^3.0.2",
     "zone.js": "0.13.1"
   },
