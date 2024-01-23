@@ -1,6 +1,23 @@
-<h1 mat-dialog-content>{{ 'metadata.items-table-overview' | translate }}</h1>
+<div class="fx-row-start-center">
+  <div>
+    <h1 *ngIf="data.report === 'items'" mat-dialog-content>{{ 'metadata.items-table-overview' | translate }}</h1>
+    <h1 *ngIf="data.report === 'units'" mat-dialog-content>{{ 'metadata.unit-table-overview' | translate }}</h1>
+  </div>
+  <button type="button" mat-icon-button (click)="downloadItemsMetadata()">
+    <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
+  </button>
+</div>
 <mat-dialog-content>
-  <table mat-table [dataSource]="tableData" class="mat-elevation-z8">
+  <table mat-table [dataSource]="tableData" class="mat-elevation-z8" *ngIf="data.report === 'items'">
+    <ng-container [matColumnDef]="column" *ngFor="let column of columnsToDisplay">
+      <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+  </table>
+  <table mat-table [dataSource]="tableData" class="mat-elevation-z8" *ngIf="data.report === 'units'">
     <ng-container [matColumnDef]="column" *ngFor="let column of columnsToDisplay">
       <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
       <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>

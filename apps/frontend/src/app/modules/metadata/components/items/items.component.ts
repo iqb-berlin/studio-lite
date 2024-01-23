@@ -62,14 +62,14 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   downloadItemsMetadata() {
     this.metadataService.downloadItemsMetadataReport().subscribe(b => {
       const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
-      saveAs(b, `${thisDate} Bericht Arbeitsbereiche.xlsx`);
+      saveAs(b, `${thisDate} Bericht Metadaten Aufgaben Items.xlsx`);
     });
   }
 
   showItemsMetadataTable() {
     this.metadataService.createItemsMetadataReport().subscribe((units: any) => {
       this.dialog.open(TableViewComponent, {
-        data: { units: units }
+        data: { report: 'items', units: units }
       }).afterClosed().pipe(
         takeUntil(this.ngUnsubscribe));
     });

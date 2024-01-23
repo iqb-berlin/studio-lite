@@ -399,6 +399,8 @@
     "print": "Drucken",
     "print-units": "Aufgabe(n) drucken",
     "print-review": "Aufgabenfolge drucken",
+    "metadata": "Metadaten",
+    "show-metadata": "Metadaten anzeigen",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",

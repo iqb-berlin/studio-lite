@@ -86,7 +86,6 @@ export class MetadataService {
     return idLabelDictionary;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async fetchVocabulary(url: string): Promise<any> {
     try {
       const response = await fetch(`${url}index.jsonld`);
@@ -104,15 +103,34 @@ export class MetadataService {
   }
 
   downloadItemsMetadataReport(): Observable<Blob> {
-    return this.http.get(`${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}`, {
-      headers: {
-        Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      },
-      responseType: 'blob'
-    });
+    return this.http.get(
+      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}`, {
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'blob'
+      });
+  }
+
+  downloadUnitsMetadataReport(): Observable<Blob> {
+    return this.http.get(
+      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}`, {
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'blob'
+      });
   }
 
   createItemsMetadataReport(): Observable<any> {
+    return this.http.get(`${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
+      .pipe(
+        catchError(() => of(false)),
+        map(report => report)
+      );
+  }
+
+  createUnitsMetadataReport(): Observable<any> {
     return this.http.get(`${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
       .pipe(
         catchError(() => of(false)),
