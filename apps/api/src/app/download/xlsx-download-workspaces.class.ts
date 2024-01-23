@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import * as Excel from 'exceljs';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 
@@ -15,6 +16,67 @@ interface WorkspaceData {
 }
 
 export class XlsxDownloadWorkspacesClass {
+  static async getWorkspaceItemsMetadataReport(workspaceService: WorkspaceService, unitService: UnitService, workspaceId: number): Promise<Buffer> {
+    const data = await unitService.findAllWithMetadata(workspaceId);
+    const rows = this.getUnitsItemsDataRows(data);
+    const SHEET_NAME = 'Metadaten Items';
+    const wb = new Excel.Workbook();
+    const ws = wb.addWorksheet(SHEET_NAME);
+    wb.created = new Date();
+    wb.title = 'Webanwendung IQB Studio';
+    wb.subject = 'Daten der Aufgaben Metadaten Items';
+    ws.addRows(rows);
+    ws.getRow(1).values = this.getTableColumnsDefinitions(data);
+    ws.getRow(2).values = (Object.values(rows[0]));
+    const r3 = ws.getRow(3);
+    r3.values = rows[0];
+    return await wb.xlsx.writeBuffer() as Buffer;
+  }
+
+  static getUnitsItemsDataRows(units: any[]): any {
+    const allUnits: any[] = [];
+    units.forEach((unit: any) => {
+      const totalValues: any[] = [];
+      unit.metadata.items.forEach((item: any, i: number) => {
+        const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
+        if (activeProfile) {
+          const values: any = [];
+          activeProfile.entries.forEach((entry: any) => {
+            if (entry.valueAsText.length > 1) {
+              const textValues: any[] = [];
+              entry.valueAsText.forEach((textValue: any) => {
+                textValues.push(textValue.value);
+              });
+              values[entry.label[0].value] = textValues.join(', ');
+            } else {
+              values[entry.label[0].value] = entry.valueAsText[0]?.value;
+            }
+            if (i === 0) values.Aufgabe = unit.key;
+            values['Item-Id'] = item.id;
+            values.Variablen = item.variableId;
+            values.Wichtung = item.weighting;
+            values.Notiz = item.description;
+          });
+          totalValues.push(values);
+        }
+      });
+      allUnits.push(totalValues);
+    });
+    return allUnits.flat();
+  }
+
+  static getTableColumnsDefinitions(data: any): string[] {
+    const displayedColumns: string[] = ['Aufgabe', 'Item-Id', 'Variablen', 'Wichtung', 'Notiz'];
+    const metadataItems = data[0].metadata.items;
+    const activeProfile = metadataItems[0].profiles?.find((profile: any) => profile.isCurrent);
+    const columnsDefinitions = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
+    return [...displayedColumns, ...columnsDefinitions];
+  }
+
+  static getWorkspaceUnitsMetadataReport(workspaceService: WorkspaceService, unitService: UnitService, workspaceId: number): void {
+
+  }
+
   static async getWorkspaceReport(
     workspaceService: WorkspaceService,
     unitService: UnitService,
