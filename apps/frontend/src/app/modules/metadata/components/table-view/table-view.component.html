@@ -1,0 +1,21 @@
+<h1 mat-dialog-content>{{ 'metadata.items-table-overview' | translate }}</h1>
+<mat-dialog-content>
+  <table mat-table [dataSource]="tableData" class="mat-elevation-z8">
+    <ng-container [matColumnDef]="column" *ngFor="let column of columnsToDisplay">
+      <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="">
+    {{ 'close' | translate }}
+  </button>
+</mat-dialog-actions>
