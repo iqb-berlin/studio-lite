@@ -123,15 +123,8 @@ export class MetadataService {
   }
 
   createItemsMetadataReport(): Observable<any> {
-    return this.http.get(`${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
-      .pipe(
-        catchError(() => of(false)),
-        map(report => report)
-      );
-  }
-
-  createUnitsMetadataReport(): Observable<any> {
-    return this.http.get(`${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
+    return this.http.get(
+      `${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
       .pipe(
         catchError(() => of(false)),
         map(report => report)

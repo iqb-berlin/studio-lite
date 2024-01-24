@@ -1,5 +1,5 @@
 <div class="fx-column-start-stretch">
-  <h1 mat-dialog-title>{{ 'workspace.show-metadata' | translate }}</h1>
+  <h2 mat-dialog-title>{{ 'workspace.show-metadata' | translate }}</h2>
 
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <mat-radio-group [(ngModel)]="metadataDisplayFormat" aria-label="Metadaten Anzeige Format auswählen">
@@ -10,20 +10,20 @@
                                   [filter]="data && data.units ? data.units : []"
                                   [initialSelection]="data && data.units ? data.units : []"
                                   [workspace]="workspaceService.selectedWorkspaceId"
-                                  (selectionChanged)="xxx = $event">
+                                  (selectionChanged)="unitList = $event">
     </studio-lite-select-unit-list>
   </mat-dialog-content>
-  <mat-dialog-actions class="fx-column-start-stretch">
-    <div class="fx-row-start-stretch">
-      <button mat-raised-button color="primary"
-              type="submit"
-              [mat-dialog-close]="{selectedUnits:xxx, displayFormat:metadataDisplayFormat}"
-      >
-        {{ 'Anzeigen' | translate }}
-      </button>
-      <button mat-raised-button [mat-dialog-close]="false">
-        {{ 'dialogs.cancel' | translate }}
-      </button>
-    </div>
+  <mat-dialog-actions align="end">
+
+    <button mat-raised-button color="primary"
+            type="submit"
+            [disabled]="unitList.length === 0"
+            [mat-dialog-close]="{selectedUnits:unitList , displayFormat:metadataDisplayFormat}"
+    >
+      {{ 'display' | translate }}
+    </button>
+    <button mat-raised-button [mat-dialog-close]="false">
+      {{ 'dialogs.cancel' | translate }}
+    </button>
   </mat-dialog-actions>
 </div>

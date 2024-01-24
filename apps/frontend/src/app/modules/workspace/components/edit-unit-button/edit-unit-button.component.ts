@@ -242,8 +242,9 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         width: '1000px'
       }).afterClosed().subscribe(res => {
         this.metadataService.createItemsMetadataReport().subscribe((units: any) => {
+          const filteredUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
           this.showMetadataDialog.open(TableViewComponent, {
-            data: { report: res.displayFormat, units: units }
+            data: { report: res.displayFormat, units: filteredUnits }
           });
         });
       });

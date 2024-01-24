@@ -5,6 +5,8 @@
   "move": "Verschieben",
   "create": "Anlegen",
   "delete": "Löschen",
+  "excel-download": "Herunterladen als Excel-Datei",
+  "display": "Anzeigen",
   "cancel": "Abbrechen",
   "close": "Schließen",
   "warning": "Warnung",
