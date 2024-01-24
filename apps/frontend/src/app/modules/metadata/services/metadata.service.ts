@@ -62,7 +62,7 @@ export class MetadataService {
     return this.vocabulariesIdDictionary;
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line
   mapVocabularyIds(vocabulary: any) {
     const idLabelDictionary: any = {};
     const hasNarrower = (narrower: TopConcept[]) => {
@@ -122,7 +122,7 @@ export class MetadataService {
       });
   }
 
-  createItemsMetadataReport(): Observable<any> {
+  createItemsMetadataReport(): Observable<boolean | unknown> {
     return this.http.get(
       `${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
       .pipe(

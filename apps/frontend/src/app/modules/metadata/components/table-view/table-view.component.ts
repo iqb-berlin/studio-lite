@@ -1,22 +1,13 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output,
-  Inject, ViewChild
+  Component, OnInit,
+  Inject
 } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatTable } from '@angular/material/table';
 import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
 import { MetadataService } from '../../services/metadata.service';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 const datePipe = new DatePipe('de-DE');
-
-export interface TableRow {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
 
 @Component({
   selector: 'studio-lite-table-view',
@@ -25,15 +16,11 @@ export interface TableRow {
 })
 
 export class TableViewComponent implements OnInit {
-  constructor(private workspaceService: WorkspaceService,
-              private metadataService: MetadataService,
-              @Inject(MAT_DIALOG_DATA) public data: any
+  constructor(
+    private metadataService: MetadataService,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
   }
-
-  @Input() variables!: string[];
-  @Input() metadata!: any;
-  @Output() metadataChange: EventEmitter<any> = new EventEmitter();
 
   displayedColumns: string[] = ['Aufgabe', 'Item-Id', 'Variablen', 'Wichtung', 'Notiz'];
   columnsToDisplay: string[] = this.data.report === 'items' ?
@@ -41,8 +28,6 @@ export class TableViewComponent implements OnInit {
     this.getTableUnitsColumnsDefinitions().slice();
 
   tableData: any = [];
-  @ViewChild(MatTable)
-    table!: MatTable<any>;
 
   ngOnInit(): void {
     if (this.data.report === 'items') {
@@ -91,6 +76,7 @@ export class TableViewComponent implements OnInit {
     const metadataItems = this.data.units[0].metadata.items;
     const activeProfile = metadataItems[1].profiles?.find((profile: any) => profile.isCurrent);
     const columnsDefinitions = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
+    if (!columnsDefinitions) return [];
     return [...this.displayedColumns, ...columnsDefinitions];
   }
 
@@ -98,6 +84,7 @@ export class TableViewComponent implements OnInit {
     const metadataUnits = this.data.units[0].metadata.profiles;
     const activeProfile = metadataUnits?.find((profile: any) => profile.isCurrent);
     const columnsDefinitions: string[] = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
+    if (!columnsDefinitions) return [];
     return ['Aufgabe', ...columnsDefinitions];
   }
 
@@ -107,7 +94,7 @@ export class TableViewComponent implements OnInit {
       const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
       if (activeProfile) {
         const values: any = {};
-        activeProfile.entries.forEach((entry: any, i: number) => {
+        activeProfile.entries.forEach((entry: any) => {
           if (entry.valueAsText.length > 1) {
             const textValues: any[] = [];
             entry.valueAsText.forEach((textValue: any) => {

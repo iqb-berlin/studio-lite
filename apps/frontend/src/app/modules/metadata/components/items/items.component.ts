@@ -5,14 +5,7 @@ import {
   BehaviorSubject, Subject, takeUntil
 } from 'rxjs';
 
-import { DatePipe } from '@angular/common';
-
 import { MatDialog } from '@angular/material/dialog';
-import { saveAs } from 'file-saver-es';
-import { MetadataService } from '../../services/metadata.service';
-import { TableViewComponent } from '../table-view/table-view.component';
-
-const datePipe = new DatePipe('de-DE');
 
 @Component({
   selector: 'studio-lite-items',
@@ -34,7 +27,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   @Output() metadataChange: EventEmitter<any> = new EventEmitter();
 
-  constructor(private metadataService: MetadataService, public dialog: MatDialog) {
+  constructor(public dialog: MatDialog) {
   }
 
   ngOnInit(): void {

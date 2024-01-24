@@ -25,7 +25,7 @@ export class XlsxDownloadWorkspacesClass {
     wb.created = new Date();
     wb.title = 'Webanwendung IQB Studio';
     wb.subject = 'Daten der Metadaten Aufgaben Items';
-    ws.columns = this.getTableColumnsDefinitions(data).map((column: string) => ({
+    ws.columns = this.getTableColumnsDefinitions(data)?.map((column: string) => ({
       header: column,
       key: column,
       width: 40,
@@ -45,7 +45,7 @@ export class XlsxDownloadWorkspacesClass {
     wb.created = new Date();
     wb.title = 'Webanwendung IQB Studio';
     wb.subject = 'Daten der Metadaten Aufgaben ';
-    ws.columns = this.getTableUnitsColumnsDefinitions(data).map((column: string) => ({
+    ws.columns = this.getTableUnitsColumnsDefinitions(data)?.map((column: string) => ({
       header: column,
       key: column,
       width: 40,
@@ -94,6 +94,7 @@ export class XlsxDownloadWorkspacesClass {
     const metadataItems = data[0].metadata.items;
     const activeProfile = metadataItems[0].profiles?.find((profile: any) => profile.isCurrent);
     const columnsDefinitions = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
+    if (!columnsDefinitions) return [];
     return [...displayedColumns, ...columnsDefinitions];
   }
 
@@ -126,6 +127,7 @@ export class XlsxDownloadWorkspacesClass {
     const metadataUnits = data[0].metadata.profiles;
     const activeProfile = metadataUnits?.find((profile: any) => profile.isCurrent);
     const columnsDefinitions: string[] = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
+    if (!columnsDefinitions) return [];
     return ['Aufgabe', ...columnsDefinitions];
   }
 
