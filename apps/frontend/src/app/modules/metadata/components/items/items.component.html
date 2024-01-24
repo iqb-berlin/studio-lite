@@ -6,8 +6,8 @@
           (click)="togglePresentation()"
           *ngIf="!isTextOnlyView">
     <studio-lite-wrapped-icon icon="visibility"></studio-lite-wrapped-icon>
-
   </button>
+
   <button type="button" mat-icon-button
           matTooltip="{{'metadata.items-editable-view' | translate}}"
           [matTooltipPosition]="'above'"
@@ -16,6 +16,7 @@
           *ngIf="isTextOnlyView">
     <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
+
 </div>
 <div *ngIf="!isTextOnlyView">
   <div *ngFor="let item of items; let i = index">
@@ -47,30 +48,30 @@
 </div>
 <div *ngIf="isTextOnlyView">
   <div *ngFor="let item of items">
-    <h4 class="item-id">{{item.id || 'metadata.without-id' | translate}}</h4>
+    <h4 class="item-id">{{ item.id || 'metadata.without-id' | translate }}</h4>
     <div class="fx-row-space-between-start">
       <span class="item-key">Wichtung</span>
-      <span>{{item.weighting || '-'}}</span>
+      <span>{{ item.weighting || '-' }}</span>
     </div>
     <div class="fx-row-space-between-start">
       <span class="item-key">Variablen Id</span>
-      <span>{{item.variableId || '-'}}</span>
+      <span>{{ item.variableId || '-' }}</span>
     </div>
     <div class="fx-row-space-between-start">
       <span class="item-key">Notiz</span>
-      <div>{{item.description || '-'}}</div>
+      <div>{{ item.description || '-' }}</div>
     </div>
     <div *ngFor="let profile of item.profiles">
       <div *ngIf="profile.isCurrent">
         <div *ngFor="let entry of profile.entries">
           <div class="fx-row-space-between-start">
-            <span class="item-key">{{entry.label[0].value}}</span>
+            <span class="item-key">{{ entry.label[0].value }}</span>
             <div *ngIf="entry.valueAsText?.length > 1">
               <ul *ngFor="let value of entry.valueAsText">
-                <li>{{value.value}}</li>
+                <li>{{ value.value }}</li>
               </ul>
             </div>
-            <span *ngIf="entry.valueAsText">{{entry.valueAsText?.value }}</span>
+            <span *ngIf="entry.valueAsText">{{ entry.valueAsText?.value }}</span>
             <span *ngIf="entry.valueAsText?.length === 1">{{ entry.valueAsText[0]?.value }}</span>
             <span *ngIf="entry.valueAsText?.length === 0">-</span>
           </div>

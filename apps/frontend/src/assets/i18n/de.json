@@ -5,6 +5,8 @@
   "move": "Verschieben",
   "create": "Anlegen",
   "delete": "Löschen",
+  "excel-download": "Herunterladen als Excel-Datei",
+  "display": "Anzeigen",
   "cancel": "Abbrechen",
   "close": "Schließen",
   "warning": "Warnung",
@@ -228,7 +230,9 @@
     "formly-field-required": "Pflichtfeld",
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
-    "items-editable-view": "Items bearbeitbar anzeigen"
+    "items-editable-view": "Items bearbeitbar anzeigen",
+    "items-table-overview": "Tabellenübersicht Metadaten Items",
+    "unit-table-overview": "Tabellenübersicht Metadaten Aufgaben"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
@@ -397,6 +401,8 @@
     "print": "Drucken",
     "print-units": "Aufgabe(n) drucken",
     "print-review": "Aufgabenfolge drucken",
+    "metadata": "Metadaten",
+    "show-metadata": "Metadaten anzeigen",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",
@@ -608,6 +614,7 @@
     "404": "Daten/Objekt nicht gefunden.",
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "500": "Allgemeines Server-Problem.",
+    "504": "Zeitüberschreitung bei der Verarbeitung der Anfrage",
     "520": "Server derzeit nicht erreichbar.",
     "521": "Bitte Anwendung neu laden!",
     "close": "Fehlermeldung ausblenden",

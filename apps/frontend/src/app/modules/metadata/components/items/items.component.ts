@@ -5,11 +5,14 @@ import {
   BehaviorSubject, Subject, takeUntil
 } from 'rxjs';
 
+import { MatDialog } from '@angular/material/dialog';
+
 @Component({
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss']
 })
+
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   items: any[] = [];
   variables!: string[];
@@ -23,6 +26,9 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() language!: string;
 
   @Output() metadataChange: EventEmitter<any> = new EventEmitter();
+
+  constructor(public dialog: MatDialog) {
+  }
 
   ngOnInit(): void {
     this.variablesLoader
