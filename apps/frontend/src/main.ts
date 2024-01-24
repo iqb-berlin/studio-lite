@@ -19,11 +19,11 @@ platformBrowserDynamic([
   },
   {
     provide: 'APP_NAME',
-    useValue: 'Studio-Lite'
+    useValue: 'Studio'
   },
   {
     provide: 'APP_VERSION',
-    useValue: '6.0.2'
+    useValue: '6.1.0'
   }
 ])
   .bootstrapModule(AppModule)

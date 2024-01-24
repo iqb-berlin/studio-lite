@@ -8,7 +8,8 @@ import {
 
 @Injectable()
 export class AppVersionGuard implements CanActivate {
-  constructor(@Inject('APP_VERSION') readonly appVersion: string) {}
+  constructor(@Inject('APP_VERSION') readonly appVersion: string) {
+  }
 
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest();
@@ -26,5 +27,5 @@ export class AppVersionGuard implements CanActivate {
 
 export const AppVersionProvider = {
   provide: 'APP_VERSION',
-  useValue: '6.0.2'
+  useValue: '6.1.0'
 };
