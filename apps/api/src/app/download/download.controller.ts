@@ -55,8 +55,7 @@ export class DownloadController {
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @ApiTags('download')
   async downloadXlsxItemsMetadata(@Param('workspace_id') workspaceId: number) {
-    const file = await XlsxDownloadWorkspacesClass.getWorkspaceItemsMetadataReport(
-      this.workspaceService, this.unitService, workspaceId);
+    const file = await XlsxDownloadWorkspacesClass.getWorkspaceItemsMetadataReport(this.unitService, workspaceId);
     return new StreamableFile(file);
   }
 
@@ -68,7 +67,7 @@ export class DownloadController {
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @ApiTags('download')
   async downloadXlsxUnitsMetadata(@Param('workspace_id') workspaceId: number) {
-    const file = await XlsxDownloadWorkspacesClass.getWorkspaceUnitsMetadataReport(
-      this.workspaceService, this.unitService, workspaceId);
+    const file = await XlsxDownloadWorkspacesClass.getWorkspaceUnitsMetadataReport(this.unitService, workspaceId);
+    return new StreamableFile(file);
   }
 }

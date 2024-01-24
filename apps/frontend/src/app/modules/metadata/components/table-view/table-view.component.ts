@@ -67,11 +67,11 @@ export class TableViewComponent implements OnInit {
             if (entry.valueAsText.length > 1) {
               const textValues: any[] = [];
               entry.valueAsText.forEach((textValue: any) => {
-                textValues.push(textValue.value);
+                textValues.push(`${textValue.value}`);
               });
-              values[entry.label[0].value] = textValues.join(', ');
+              values[entry.label[0].value] = textValues.join('<br>');
             } else {
-              values[entry.label[0].value] = entry.valueAsText[0]?.value;
+              values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value;
             }
             if (i === 0) values.Aufgabe = unit.key;
             values['Item-Id'] = item.id;
@@ -89,7 +89,7 @@ export class TableViewComponent implements OnInit {
 
   getTableItemsColumnsDefinitions(): string[] {
     const metadataItems = this.data.units[0].metadata.items;
-    const activeProfile = metadataItems[0].profiles?.find((profile: any) => profile.isCurrent);
+    const activeProfile = metadataItems[1].profiles?.find((profile: any) => profile.isCurrent);
     const columnsDefinitions = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
     return [...this.displayedColumns, ...columnsDefinitions];
   }
@@ -115,7 +115,7 @@ export class TableViewComponent implements OnInit {
             });
             values[entry.label[0].value] = textValues.join(', ');
           } else {
-            values[entry.label[0].value] = entry.valueAsText[0]?.value;
+            values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value;
           }
           values.Aufgabe = unit.key;
         });
@@ -129,6 +129,13 @@ export class TableViewComponent implements OnInit {
     this.metadataService.downloadItemsMetadataReport().subscribe(b => {
       const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
       saveAs(b, `${thisDate} Bericht Metadaten Aufgaben Items.xlsx`);
+    });
+  }
+
+  downloadUnitsMetadata() {
+    this.metadataService.downloadUnitsMetadataReport().subscribe(b => {
+      const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+      saveAs(b, `${thisDate} Bericht Aufgaben Metadaten.xlsx`);
     });
   }
 }
