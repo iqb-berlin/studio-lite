@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import * as Excel from 'exceljs';
 import { logger } from 'nx/src/utils/logger';
 import { WorkspaceService } from '../database/services/workspace.service';
@@ -136,24 +135,22 @@ export class XlsxDownloadWorkspacesClass {
     workspaceGroupId: number
   ): Promise<Buffer> {
     const SHEET_NAME = 'Arbeitsbereiche';
-    const wb = XLSX.utils.book_new();
-    wb.Props = {
-      Title: 'Webanwendung IQB Studio',
-      Subject: 'Daten der Arbeitsbereiche',
-      CreatedDate: new Date()
-    };
-    wb.SheetNames.push(SHEET_NAME);
+    const wb = new Excel.Workbook();
+    wb.created = new Date();
+    wb.title = 'Webanwendung IQB Studio';
+    wb.subject = 'Daten der Arbeitsbereiche ';
+    const ws = wb.addWorksheet(SHEET_NAME);
     const allGroups = await workspaceService.findAllGroupwise();
     const wsDataWithMetadataPromises: Promise<WorkspaceData>[] = [];
     allGroups.forEach(group => {
       if (workspaceGroupId === 0 || group.id === workspaceGroupId) {
-        group.workspaces.forEach(ws => {
+        group.workspaces.forEach(w => {
           wsDataWithMetadataPromises.push(
-            unitService.findAllWithMetadata(ws.id)
+            unitService.findAllWithMetadata(w.id)
               .then(unitData => {
                 const returnData = <WorkspaceData>{
-                  id: ws.id,
-                  name: ws.name,
+                  id: w.id,
+                  name: w.name,
                   groupId: group.id,
                   groupName: group.name,
                   latestChange: new Date(2000, 1, 1, 12, 12),
@@ -200,6 +197,9 @@ export class XlsxDownloadWorkspacesClass {
     const headerRow = [
       'Gruppe Name', 'Gruppe Id', 'Arbeitsbereich Name', 'Arbeitsbereich Id', 'Letzte Änderung', 'Anzahl Units'
     ];
+
+    ws.getRow(1).font = { bold: true };
+
     allEditors.forEach(m => {
       headerRow.push(m || 'Kein Editor');
     });
@@ -209,13 +209,17 @@ export class XlsxDownloadWorkspacesClass {
     allSchemers.forEach(m => {
       headerRow.push(m || 'Kein Schemer');
     });
-    const xlsxData = [headerRow];
+
+    ws.columns = headerRow.map((column: string) => ({
+      header: column,
+      key: column,
+      width: 20,
+      style: { alignment: { wrapText: true } }
+    }));
     wsDataWithMetadata.forEach(wsData => {
       const rowData = [
         wsData.groupName, wsData.groupId.toString(10), wsData.name, wsData.id.toString(10),
-        `${wsData.latestChange.getDay()
-          .toString(10).padStart(2, '0')}.${wsData.latestChange.getMonth()
-          .toString(10).padStart(2, '0')}.${wsData.latestChange.getFullYear().toString(10)}`,
+        `${wsData.latestChange.getDate()}.${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`,
         wsData.unitNumber.toString()
       ];
       allEditors.forEach(moduleKey => {
@@ -227,12 +231,13 @@ export class XlsxDownloadWorkspacesClass {
       allSchemers.forEach(moduleKey => {
         rowData.push(wsData.schemers[moduleKey] ? wsData.schemers[moduleKey].toString(10) : '');
       });
-      xlsxData.push(rowData);
+
+      const data = {};
+      headerRow.forEach((column, i) => {
+        data[column] = rowData[i];
+      });
+      ws.addRows([data]);
     });
-    wb.Sheets[SHEET_NAME] = XLSX.utils.aoa_to_sheet(xlsxData);
-    return XLSX.write(wb, {
-      type: 'buffer',
-      bookType: 'xlsx'
-    });
+    return await wb.xlsx.writeBuffer() as Buffer;
   }
 }
