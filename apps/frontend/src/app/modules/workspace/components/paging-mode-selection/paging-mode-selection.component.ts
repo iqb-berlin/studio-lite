@@ -8,7 +8,7 @@ import { PagingMode } from '../../models/types';
   styleUrls: ['./paging-mode-selection.component.scss']
 })
 export class PagingModeSelectionComponent {
-  pagingModes: PagingMode[] = ['separate', 'concat-scroll', 'concat-scroll-snap'];
+  pagingModes: PagingMode[] = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];
 
   constructor(public previewService: PreviewService) {}
 }
