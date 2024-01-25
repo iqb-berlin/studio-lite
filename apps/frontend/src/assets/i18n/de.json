@@ -53,6 +53,7 @@
       "paging-mode": {
         "label": "Modus Seitenwechsel",
         "separate": "Blättern",
+        "buttons": "Schaltflächen",
         "concat-scroll": "Scrollen",
         "concat-scroll-snap": "Magnetisch Scrollen"
       },
@@ -68,6 +69,7 @@
     "paging-selection-mode": {
       "label": "Seitendarstellung",
       "separate": "Blättern",
+      "buttons": "Schaltflächen",
       "concat-scroll": "Scrollen",
       "concat-scroll-snap": "Magnetisch Scrollen"
     }
@@ -567,6 +569,7 @@
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
       "separate": "Blättern",
+      "buttons": "Schaltflächen",
       "concat-scroll": "Scrollen",
       "concat-scroll-snap": "Magnetisch Scrollen"
     },

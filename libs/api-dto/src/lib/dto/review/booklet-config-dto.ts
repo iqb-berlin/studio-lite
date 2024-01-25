@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class BookletConfigDto {
   @ApiProperty({
-    examples: ['separate', 'concat-scroll', 'concat-scroll-snap']
+    examples: ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap']
   })
     pagingMode? = 'separate';
 

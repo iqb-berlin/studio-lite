@@ -9,7 +9,7 @@ import { BookletConfigDto } from '@studio-lite-lib/api-dto';
   styleUrls: ['./booklet-config-edit.component.scss']
 })
 export class BookletConfigEditComponent {
-  pagingModeOptions = ['separate', 'concat-scroll', 'concat-scroll-snap'];
+  pagingModeOptions = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];
   pageNaviButtonsOptions = ['OFF', 'SEPARATE_BOTTOM'];
   unitNaviButtonsOptions = ['OFF', 'ARROWS_ONLY', 'FULL'];
   controllerDesignOptions = ['2018', '2022'];

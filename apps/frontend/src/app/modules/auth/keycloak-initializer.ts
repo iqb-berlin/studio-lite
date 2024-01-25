@@ -22,7 +22,7 @@ export function initializer(keycloak: KeycloakService): () => Promise<boolean> {
   }
   const options: KeycloakOptions = {
     config: {
-      url: 'localhost:8080',
+      url: 'https://www.iqb-login.de',
       realm: 'iqb',
       clientId: 'studio'
     },
