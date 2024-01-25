@@ -7,7 +7,7 @@ interface WorkspaceData {
   name: string;
   groupId: number;
   groupName: string;
-  latestChange: Date;
+  latestChange: Date | null;
   unitNumber: number;
   editors: { [key: string]: number };
   players: { [key: string]: number };
@@ -122,16 +122,18 @@ export class XlsxDownloadWorkspacesClass {
                   name: w.name,
                   groupId: group.id,
                   groupName: group.name,
-                  latestChange: new Date(2000, 1, 1, 12, 12),
+                  latestChange: null,
                   unitNumber: unitData.length,
                   editors: {},
                   players: {},
                   schemers: {}
                 };
                 unitData.forEach(u => {
-                  if (
-                    returnData.latestChange < u.lastChangedMetadata
-                  ) returnData.latestChange = u.lastChangedMetadata;
+                  if (u.lastChangedMetadata !== null) {
+                    returnData.latestChange = u.lastChangedMetadata;
+                  } else {
+                    returnData.latestChange = null;
+                  }
                   if (
                     returnData.latestChange < u.lastChangedDefinition
                   ) returnData.latestChange = u.lastChangedDefinition;
@@ -166,7 +168,6 @@ export class XlsxDownloadWorkspacesClass {
     const headerRow = [
       'Gruppe Name', 'Gruppe Id', 'Arbeitsbereich Name', 'Arbeitsbereich Id', 'Letzte Änderung', 'Anzahl Units'
     ];
-
     ws.getRow(1).font = { bold: true };
 
     allEditors.forEach(m => {
@@ -186,10 +187,13 @@ export class XlsxDownloadWorkspacesClass {
       style: { alignment: { wrapText: true } }
     }));
     wsDataWithMetadata.forEach(wsData => {
+      let date = '';
+      if (wsData.latestChange !== null) {
+        date = `${wsData.latestChange.getDate()}.${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`;
+      }
       const rowData = [
         wsData.groupName, wsData.groupId.toString(10), wsData.name, wsData.id.toString(10),
-        `${wsData.latestChange.getDate()}.${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`,
-        wsData.unitNumber.toString()
+        date, wsData.unitNumber.toString()
       ];
       allEditors.forEach(moduleKey => {
         rowData.push(wsData.editors[moduleKey] ? wsData.editors[moduleKey].toString(10) : '');
