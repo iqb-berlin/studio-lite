@@ -1,5 +1,4 @@
 import * as Excel from 'exceljs';
-import { logger } from 'nx/src/utils/logger';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 
@@ -57,7 +56,6 @@ export class XlsxDownloadWorkspacesClass {
   }
 
   static getUnitsItemsDataRows(units: any[]): any {
-    logger.log('activeProfile');
     const allUnits: any[] = [];
     units.forEach((unit: any) => {
       const totalValues: any[] = [];
@@ -105,7 +103,6 @@ export class XlsxDownloadWorkspacesClass {
       if (activeProfile) {
         const values: any = {};
         activeProfile.entries.forEach((entry: any, i: number) => {
-          logger.log('activeProfile', activeProfile);
           if (entry.valueAsText.length > 1) {
             const textValues: any[] = [];
             entry.valueAsText.forEach((textValue: any) => {
