@@ -160,6 +160,7 @@ export class WorkspacesComponent implements OnInit {
   }
 
   xlsxDownloadWorkspaceReport() {
+    this.appService.dataLoading = true;
     this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
       .subscribe(workspace => {
         const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
@@ -167,6 +168,7 @@ export class WorkspacesComponent implements OnInit {
           workspace,
           this.translateService.instant('wsg-admin.workspaces-excel-name', { date: thisDate })
         );
+        this.appService.dataLoading = false;
       });
   }
 
