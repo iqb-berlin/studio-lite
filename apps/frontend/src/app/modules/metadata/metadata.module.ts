@@ -21,6 +21,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
@@ -67,6 +68,8 @@ export function formlyValidationConfig(translate: TranslateService) {
     MatFormFieldModule,
     MatTableModule,
     MatIconModule,
+    MatTabsModule,
+    MatDialogModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
       wrappers: [

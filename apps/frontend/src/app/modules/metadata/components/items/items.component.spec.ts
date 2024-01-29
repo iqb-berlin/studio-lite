@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { ItemsComponent } from './items.component';
 
 describe('ItemsComponent', () => {
@@ -20,9 +21,16 @@ describe('ItemsComponent', () => {
         ItemsComponent,
         MockWrappedIconComponent
       ],
+      providers: [
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {}
+        }
+      ],
       imports: [
         MatTooltipModule,
         MatIconModule,
+        MatDialogModule,
         TranslateModule.forRoot()
       ]
     }).compileComponents();

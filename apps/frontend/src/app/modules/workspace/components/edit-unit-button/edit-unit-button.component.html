@@ -37,18 +37,18 @@
     {{ 'workspace.export' | translate }}
   </button>
   <button mat-menu-item
+          [matTooltip]="'metadata.show' | translate"
+          matTooltipPosition="right"
+          (click)="showMetadata()">
+    <mat-icon>description</mat-icon>
+    {{ 'workspace.metadata' | translate }}
+  </button>
+  <button mat-menu-item
           [matTooltip]="'workspace.print' | translate"
           matTooltipPosition="right"
           (click)="printUnits()">
     <mat-icon>print</mat-icon>
     {{ 'workspace.print' | translate }}
-  </button>
-  <button mat-menu-item
-          [matTooltip]="'workspace.metadata' | translate"
-          matTooltipPosition="right"
-          (click)="showMetadata()">
-    <mat-icon>description</mat-icon>
-    {{ 'workspace.metadata' | translate }}
   </button>
   <button mat-menu-item
           [matTooltip]="'workspace.move-unit' | translate"

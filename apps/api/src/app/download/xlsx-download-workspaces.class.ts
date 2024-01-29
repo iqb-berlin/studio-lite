@@ -15,71 +15,33 @@ interface WorkspaceData {
 }
 
 export class XlsxDownloadWorkspacesClass {
-  static async getWorkspaceItemsMetadataReport(unitService: UnitService, workspaceId: number): Promise<Buffer> {
-    const data = await unitService.findAllWithMetadata(workspaceId);
-    const rows = this.getUnitsItemsDataRows(data);
-    const SHEET_NAME = 'Metadaten Items';
-    const wb = new Excel.Workbook();
-    const ws = wb.addWorksheet(SHEET_NAME);
-    wb.created = new Date();
-    wb.title = 'Webanwendung IQB Studio';
-    wb.subject = 'Daten der Metadaten Aufgaben Items';
-    ws.columns = this.getTableColumnsDefinitions(data)?.map((column: string) => ({
-      header: column,
-      key: column,
-      width: 40,
-      style: { alignment: { wrapText: true } }
-    }));
-    ws.getRow(1).font = { bold: true };
-    ws.addRows(rows);
-    return await wb.xlsx.writeBuffer() as Buffer;
-  }
-
-  static async getWorkspaceUnitsMetadataReport(unitService: UnitService, workspaceId: number): Promise<Buffer> {
-    const data = await unitService.findAllWithMetadata(workspaceId);
-    const rows = this.getUnitsDataRows(data);
-    const SHEET_NAME = 'Aufgaben Metadaten ';
-    const wb = new Excel.Workbook();
-    const ws = wb.addWorksheet(SHEET_NAME);
-    wb.created = new Date();
-    wb.title = 'Webanwendung IQB Studio';
-    wb.subject = 'Daten der Metadaten Aufgaben ';
-    ws.columns = this.getTableUnitsColumnsDefinitions(data)?.map((column: string) => ({
-      header: column,
-      key: column,
-      width: 40,
-      style: { alignment: { wrapText: true } }
-    }));
-    ws.getRow(1).font = { bold: true };
-    ws.addRows(rows);
-    return await wb.xlsx.writeBuffer() as Buffer;
-  }
-
-  static getUnitsItemsDataRows(units: any[]): any {
+  static setUnitsItemsDataRows(units: any[]): any {
     const allUnits: any[] = [];
     units.forEach((unit: any) => {
-      const totalValues: any[] = [];
+      const totalValues: Record<string, string>[] = [];
       unit.metadata.items.forEach((item: any, i: number) => {
         const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
         if (activeProfile) {
-          const values: any = {};
+          const values: Record<string, string> = {};
           activeProfile.entries.forEach((entry: any) => {
             if (entry.valueAsText.length > 1) {
               const textValues: any[] = [];
               entry.valueAsText.forEach((textValue: any) => {
-                textValues.push(textValue.value);
+                textValues.push(`${textValue.value || ''}`);
               });
-              values[entry.label[0].value] = textValues.join(', ');
+              values[entry.label[0].value] = textValues.join('<br>');
             } else {
-              values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value;
+              values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
             }
-            if (i === 0) values.Aufgabe = unit.key;
-            values['Item-Id'] = item.id;
-            values.Variablen = item.variableId;
-            values.Wichtung = item.weighting;
-            values.Notiz = item.description;
+            if (i === 0) values.Aufgabe = unit.key || '–';
+            values['Item-Id'] = item.id || '–';
+            values.Variablen = item.variableId || '';
+            values.Wichtung = item.weighting || '';
+            values.Notiz = item.description || '';
           });
           totalValues.push(values);
+        } else {
+          totalValues.push({ 'Item-Id': '–' });
         }
       });
       allUnits.push(totalValues);
@@ -87,45 +49,53 @@ export class XlsxDownloadWorkspacesClass {
     return allUnits.flat();
   }
 
-  static getTableColumnsDefinitions(data: any): string[] {
-    const displayedColumns: string[] = ['Aufgabe', 'Item-Id', 'Variablen', 'Wichtung', 'Notiz'];
-    const metadataItems = data[0].metadata.items;
-    const activeProfile = metadataItems[0].profiles?.find((profile: any) => profile.isCurrent);
-    const columnsDefinitions = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
-    if (!columnsDefinitions) return [];
-    return [...displayedColumns, ...columnsDefinitions];
-  }
-
-  static getUnitsDataRows(units: any[]): any {
-    const totalValues: any[] = [];
+  static setUnitsDataRows(units: any): any {
+    const totalValues: Record<string, string>[] = [];
     units.forEach((unit: any) => {
       const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
       if (activeProfile) {
-        const values: any = {};
-        activeProfile.entries.forEach((entry: any, i: number) => {
+        const values: Record<string, string> = {};
+        activeProfile.entries.forEach((entry: any) => {
           if (entry.valueAsText.length > 1) {
             const textValues: any[] = [];
             entry.valueAsText.forEach((textValue: any) => {
-              textValues.push(textValue.value);
+              textValues.push(textValue.value || '');
             });
             values[entry.label[0].value] = textValues.join(', ');
           } else {
-            values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value;
+            values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
           }
-          values.Aufgabe = unit.key;
+          values.Aufgabe = unit.key || '–';
         });
         totalValues.push(values);
+      } else {
+        totalValues.push({ Aufgabe: unit.key || '–' });
       }
     });
     return totalValues.flat();
   }
 
-  static getTableUnitsColumnsDefinitions(data: any): string[] {
-    const metadataUnits = data[0].metadata.profiles;
-    const activeProfile = metadataUnits?.find((profile: any) => profile.isCurrent);
-    const columnsDefinitions: string[] = activeProfile?.entries?.map((entry: any) => entry.label[0].value);
-    if (!columnsDefinitions) return [];
-    return ['Aufgabe', ...columnsDefinitions];
+  static async getWorkspaceMetadataReport(reportType: string,
+                                          unitService: UnitService,
+                                          workspaceId: number,
+                                          columns:string): Promise<Buffer> {
+    const data = await unitService.findAllWithMetadata(workspaceId);
+    const rows = (reportType === 'units') ? this.setUnitsDataRows(data) : this.setUnitsItemsDataRows(data);
+    const SHEET_NAME = (reportType === 'units') ? 'Aufgaben Metadaten ' : ' Items Metadaten ';
+    const wb = new Excel.Workbook();
+    const ws = wb.addWorksheet(SHEET_NAME);
+    wb.created = new Date();
+    wb.title = 'Webanwendung IQB Studio';
+    wb.subject = (reportType === 'units') ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
+    ws.columns = columns.split(',').map((column: string) => ({
+      header: column,
+      key: column,
+      width: 30,
+      style: { alignment: { wrapText: true } }
+    }));
+    ws.getRow(1).font = { bold: true };
+    ws.addRows(rows);
+    return await wb.xlsx.writeBuffer() as Buffer;
   }
 
   static async getWorkspaceReport(

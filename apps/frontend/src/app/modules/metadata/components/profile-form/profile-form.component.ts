@@ -244,6 +244,12 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
 
   private mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
     const groups = profile?.groups;
+    if (groups[0].label === 'Item') {
+      this.metadataService.itemProfileColumns = groups[0];
+    }
+    if (groups[0].label === 'Aufgabe') {
+      this.metadataService.unitProfileColumns = groups[0];
+    }
     return groups?.map((group: MDProfileGroup) => ({
       wrappers: this.formlyWrapper ? [this.formlyWrapper] : undefined,
       props: {

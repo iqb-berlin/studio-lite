@@ -6,6 +6,7 @@
   "create": "Anlegen",
   "delete": "Löschen",
   "excel-download": "Herunterladen als Excel-Datei",
+  "download": "Herunterladen",
   "display": "Anzeigen",
   "cancel": "Abbrechen",
   "close": "Schließen",
@@ -216,6 +217,7 @@
   },
   "metadata": {
     "metadata": "Metadaten",
+    "show": "Metadaten anzeigen",
     "unit-profile": "Aufgaben Profil",
     "item-profile": "Item Profil",
     "select-profile": "Profil auswählen...",
@@ -233,8 +235,8 @@
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
     "items-editable-view": "Items bearbeitbar anzeigen",
-    "items-table-overview": "Tabellenübersicht Metadaten Items",
-    "unit-table-overview": "Tabellenübersicht Metadaten Aufgaben"
+    "items": "Metadaten Items",
+    "units": "Metadaten Aufgaben"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
