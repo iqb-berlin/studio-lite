@@ -112,12 +112,14 @@ export class TableViewComponent implements OnInit {
   }
 
   getTableItemsColumnsDefinitions(): string[] {
-    const columnsDefinitions:string[] = this.metadataService.itemProfileColumns.entries.map(entry => entry.label);
+    const columnsDefinitions:string[] = this.metadataService.itemProfileColumns.entries
+      ?.map(entry => entry.label) || [];
     return [...this.displayedColumns, ...columnsDefinitions];
   }
 
   getTableUnitsColumnsDefinitions(): string[] {
-    const columnsDefinitions:string[] = this.metadataService.unitProfileColumns.entries.map(entry => entry.label);
+    const columnsDefinitions:string[] = this.metadataService.unitProfileColumns.entries
+      ?.map(entry => entry.label) || [];
     return ['Aufgabe', ...columnsDefinitions];
   }
 

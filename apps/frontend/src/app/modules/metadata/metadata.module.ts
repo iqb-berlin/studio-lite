@@ -69,6 +69,7 @@ export function formlyValidationConfig(translate: TranslateService) {
     MatTableModule,
     MatIconModule,
     MatTabsModule,
+    MatDialogModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
       wrappers: [
