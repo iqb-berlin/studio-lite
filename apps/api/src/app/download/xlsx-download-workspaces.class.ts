@@ -184,7 +184,7 @@ export class XlsxDownloadWorkspacesClass {
       header: column,
       key: column,
       width: 20,
-      style: { alignment: { wrapText: true } }
+      style: { alignment: { wrapText: true, horizontal: 'left' } }
     }));
     wsDataWithMetadata.forEach(wsData => {
       let date = '';
@@ -192,17 +192,17 @@ export class XlsxDownloadWorkspacesClass {
         date = `${wsData.latestChange.getDate()}.${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`;
       }
       const rowData = [
-        wsData.groupName, wsData.groupId.toString(10), wsData.name, wsData.id.toString(10),
-        date, wsData.unitNumber.toString()
+        wsData.groupName, wsData.groupId, wsData.name, wsData.id,
+        date, wsData.unitNumber
       ];
       allEditors.forEach(moduleKey => {
-        rowData.push(wsData.editors[moduleKey] ? wsData.editors[moduleKey].toString(10) : '');
+        rowData.push(wsData.editors[moduleKey] ? wsData.editors[moduleKey] : '');
       });
       allPlayers.forEach(moduleKey => {
-        rowData.push(wsData.players[moduleKey] ? wsData.players[moduleKey].toString(10) : '');
+        rowData.push(wsData.players[moduleKey] ? wsData.players[moduleKey] : '');
       });
       allSchemers.forEach(moduleKey => {
-        rowData.push(wsData.schemers[moduleKey] ? wsData.schemers[moduleKey].toString(10) : '');
+        rowData.push(wsData.schemers[moduleKey] ? wsData.schemers[moduleKey] : '');
       });
 
       const data = {};
