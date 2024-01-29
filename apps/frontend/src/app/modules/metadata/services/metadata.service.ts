@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -21,6 +21,8 @@ type TopConcept = {
 export class MetadataService {
   vocabulariesIdDictionary: any = {};
   vocabularies: any = [];
+  unitProfileColumns:MDProfileGroup = {} as MDProfileGroup;
+  itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   constructor(@Inject('SERVER_URL') private readonly serverUrl: string,
               private backendService: BackendService,
@@ -102,9 +104,9 @@ export class MetadataService {
     }
   }
 
-  downloadItemsMetadataReport(): Observable<Blob> {
+  downloadItemsMetadataReport(columns:string[]): Observable<Blob> {
     return this.http.get(
-      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${columns.join(',')}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
@@ -112,9 +114,9 @@ export class MetadataService {
       });
   }
 
-  downloadUnitsMetadataReport(): Observable<Blob> {
+  downloadUnitsMetadataReport(columns:string[]): Observable<Blob> {
     return this.http.get(
-      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${columns.join(',')}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },

@@ -1,5 +1,4 @@
 import { Component, Inject } from '@angular/core';
-import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WorkspaceService } from '../../services/workspace.service';
 
@@ -10,11 +9,10 @@ import { WorkspaceService } from '../../services/workspace.service';
 
 export class ShowMetadataComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletConfigSettings: BookletConfigDto },
+    @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService
   ) {
   }
 
-  metadataDisplayFormat: string = 'units';
   unitList: number[] = [];
 }

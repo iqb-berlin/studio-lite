@@ -49,7 +49,6 @@ describe('TableViewComponent', () => {
 
     fixture = TestBed.createComponent(TableViewComponent);
     component = fixture.componentInstance;
-    component.metadata = {};
   });
 
   it('should create', () => {

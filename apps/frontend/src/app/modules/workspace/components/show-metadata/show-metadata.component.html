@@ -2,10 +2,6 @@
   <h2 mat-dialog-title>{{ 'workspace.show-metadata' | translate }}</h2>
 
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
-    <mat-radio-group [(ngModel)]="metadataDisplayFormat" aria-label="Metadaten Anzeige Format auswählen">
-      <mat-radio-button value="units">Aufgaben</mat-radio-button>
-      <mat-radio-button value="items">Aufgaben-Items</mat-radio-button>
-    </mat-radio-group>
     <studio-lite-select-unit-list #unitSelectionTable
                                   [filter]="data && data.units ? data.units : []"
                                   [initialSelection]="data && data.units ? data.units : []"
@@ -18,7 +14,7 @@
     <button mat-raised-button color="primary"
             type="submit"
             [disabled]="unitList.length === 0"
-            [mat-dialog-close]="{selectedUnits:unitList , displayFormat:metadataDisplayFormat}"
+            [mat-dialog-close]="{selectedUnits:unitList}"
     >
       {{ 'display' | translate }}
     </button>
