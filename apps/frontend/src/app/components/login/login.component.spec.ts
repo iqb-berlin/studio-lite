@@ -9,9 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../modules/auth/service/auth.service';
+import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -29,6 +33,7 @@ describe('LoginComponent', () => {
 
   class MockAuthService {
     loggedIn: boolean = false;
+
     isLoggedIn() {
       return this.loggedIn;
     }
@@ -39,7 +44,8 @@ describe('LoginComponent', () => {
       declarations: [
         LoginComponent,
         MockWarningComponent,
-        MockAreaTitleComponent
+        MockAreaTitleComponent,
+        WrappedIconComponent
       ],
       imports: [
         ReactiveFormsModule,
@@ -48,13 +54,21 @@ describe('LoginComponent', () => {
         MatSnackBarModule,
         MatFormFieldModule,
         MatInputModule,
+        MatDialogModule,
         BrowserAnimationsModule,
+        MatIconModule,
+        MatTooltipModule,
         TranslateModule.forRoot()
       ],
       providers: [{
         provide: 'SERVER_URL',
         useValue: environment.backendUrl
-      }, {
+      },
+      {
+        provide: MAT_DIALOG_DATA,
+        useValue: {}
+      },
+      {
         provide: AuthService,
         useClass: MockAuthService
       }]

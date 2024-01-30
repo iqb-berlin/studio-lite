@@ -6,11 +6,13 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
-import { CreateUserDto } from '@studio-lite-lib/api-dto';
+import { CreateUserDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { AuthService } from '../../modules/auth/service/auth.service';
+import { LoginAlternativeWarningComponent } from '../login-alternative-warning/login-alternative-warning.component';
 
 @Component({
   selector: 'studio-lite-login',
@@ -34,6 +36,7 @@ export class LoginComponent implements OnInit, OnDestroy {
               private backendService: BackendService,
               private snackBar: MatSnackBar,
               private translateService: TranslateService,
+              private dialog: MatDialog,
               public appService: AppService) {
     this.loginForm = this.fb.group({
       name: this.fb.control('', [Validators.required, Validators.minLength(1)]),
@@ -119,7 +122,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async loginKeycloak(): Promise<void> {
-    await this.authService.login();
+    this.dialog
+      .open(LoginAlternativeWarningComponent, { width: '800px' }).afterClosed()
+      .subscribe(async (res: UnitDownloadSettingsDto | boolean) => {
+        if (res) {
+          await this.authService.login();
+        }
+      });
   }
 
   ngOnDestroy(): void {
