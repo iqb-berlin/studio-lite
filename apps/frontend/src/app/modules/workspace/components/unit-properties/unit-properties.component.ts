@@ -96,7 +96,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
-        Validators.maxLength(19),
+        Validators.maxLength(20),
         Validators.pattern('[a-zA-Z-0-9_]+'),
         WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList)]);
       this.unitForm.setValue({
