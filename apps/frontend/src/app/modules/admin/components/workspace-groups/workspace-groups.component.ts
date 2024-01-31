@@ -25,8 +25,8 @@ const datePipe = new DatePipe('de-DE');
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
-  tableSelectionCheckbox = new SelectionModel <WorkspaceGroupInListDto>(true, []);
-  tableSelectionRow = new SelectionModel <WorkspaceGroupInListDto>(false, []);
+  tableSelectionCheckbox = new SelectionModel<WorkspaceGroupInListDto>(true, []);
+  tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
   workspaceUsers = new UserToCheckCollection([]);
 
@@ -53,7 +53,7 @@ export class WorkspaceGroupsComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createUserList();
-      this.appService.appConfig.setPageTitle('Admin: Arbeitsbereiche');
+      this.appService.appConfig.setPageTitle(`Admin: ${this.translateService.instant('wsg-admin.workspaces')}`);
     });
   }
 
@@ -113,7 +113,7 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
-  editGroupSettings(res:{ states: State[], profiles:string[], selectedRow: number }): void {
+  editGroupSettings(res: { states: State[], profiles: string[], selectedRow: number }): void {
     this.appService.dataLoading = true;
     this.backendService.setWorkspaceGroupProfiles({
       defaultEditor: '', defaultPlayer: '', defaultSchemer: ''
@@ -258,9 +258,15 @@ export class WorkspaceGroupsComponent implements OnInit {
   }
 
   xlsxDownloadWorkspaceReport() {
-    this.backendService.getXlsWorkspaces().subscribe(b => {
-      const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
-      saveAs(b, `${thisDate} Bericht Arbeitsbereiche.xlsx`);
-    });
+    this.appService.dataLoading = true;
+    try {
+      this.backendService.getXlsWorkspaces().subscribe(b => {
+        const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+        saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
+        this.appService.dataLoading = false;
+      });
+    } catch (e) {
+      this.appService.dataLoading = false;
+    }
   }
 }

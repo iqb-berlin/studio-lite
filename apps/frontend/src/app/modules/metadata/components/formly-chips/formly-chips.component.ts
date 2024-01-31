@@ -61,14 +61,13 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(results => {
-        // this.formControl.reset();
         if (results) {
           const selectedVocabularyEntries = results
             .map((result: NotationNode) => ({
-              name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`,
+              name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`.trim(),
               id: result.id,
               notation: result.notation,
-              text: [{ lang: 'de', value: `${result.notation} ${result.label}` }]
+              text: [{ lang: 'de', value: `${result.notation} ${result.label}`.trim() }]
             }))
             .sort((a: NotationNode, b: NotationNode) => {
               const nameA = a.name?.toUpperCase() || '';

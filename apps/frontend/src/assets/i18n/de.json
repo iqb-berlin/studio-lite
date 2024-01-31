@@ -5,6 +5,9 @@
   "move": "Verschieben",
   "create": "Anlegen",
   "delete": "Löschen",
+  "excel-download": "Herunterladen als Excel-Datei",
+  "download": "Herunterladen",
+  "display": "Anzeigen",
   "cancel": "Abbrechen",
   "close": "Schließen",
   "warning": "Warnung",
@@ -51,6 +54,7 @@
       "paging-mode": {
         "label": "Modus Seitenwechsel",
         "separate": "Blättern",
+        "buttons": "Schaltflächen",
         "concat-scroll": "Scrollen",
         "concat-scroll-snap": "Magnetisch Scrollen"
       },
@@ -66,9 +70,23 @@
     "paging-selection-mode": {
       "label": "Seitendarstellung",
       "separate": "Blättern",
+      "buttons": "Schaltflächen",
       "concat-scroll": "Scrollen",
       "concat-scroll-snap": "Magnetisch Scrollen"
     }
+  },
+  "login": {
+    "alternative": "alternativer Login (experimentell)",
+    "no-success": "Login nicht erfolgreich",
+    "error": "Fehler"
+  },
+  "user-profile": {
+    "data-edited": "Nutzerdaten geändert",
+    "data-edit-error": "Konnte Nutzerdaten nicht ändern",
+    "new-password": "Neues Kennwort gespeichert",
+    "new-password-error": "Konnte Kennwort nicht ändern.",
+    "error": "Fehler",
+    "ok": "OK"
   },
   "home": {
     "welcome": "Willkommen!",
@@ -116,6 +134,10 @@
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
       "unit-copy": "Aufgaben kopieren - unvollständig"
     }
+  },
+  "directives": {
+    "logout": "Abmelden",
+    "logout-confirmation": "Möchten Sie sich abmelden?"
   },
   "user": {
     "full-name": "Name",
@@ -175,7 +197,7 @@
     "add-group": "Gruppe hinzufügen",
     "delete-selected-groups": "Markierte Gruppe(n) löschen",
     "edit-selected-group": "Markierte Gruppe ändern",
-    "download-xlsx": "Xlsx Bericht Arbeitsbereiche: Module",
+    "download-xlsx": "Excel Bericht über Module in Arbeitsbereich(en) ",
     "group-name": "Name",
     "select-group": "Zugriffsrechte: Bitte links Gruppe wählen",
     "selected-group": "Zugriffsrechte für \"{{group}}\"",
@@ -195,6 +217,7 @@
   },
   "metadata": {
     "metadata": "Metadaten",
+    "show": "Metadaten anzeigen",
     "unit-profile": "Aufgaben Profil",
     "item-profile": "Item Profil",
     "select-profile": "Profil auswählen...",
@@ -211,7 +234,9 @@
     "formly-field-required": "Pflichtfeld",
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
-    "items-editable-view": "Items bearbeitbar anzeigen"
+    "items-editable-view": "Items bearbeitbar anzeigen",
+    "items": "Metadaten Items",
+    "units": "Metadaten Aufgaben"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
@@ -296,7 +321,8 @@
     "delete-selected-workspaces": "Markierte/n Arbeitsbereich/e löschen",
     "move-selected-workspaces": "Markierte/n Arbeitsbereich/e verschieben",
     "change-workspace-settings": "Einstellungen des Arbeitsbereiches ändern",
-    "download-workspaces-excel": "Xlsx Bericht Arbeitsbereiche: Module",
+    "download-workspaces-excel": "Excel Bericht über Module in Arbeitsbereich(en)",
+    "report-workspaces": "Bericht Arbeitsbereiche",
     "workspaces-excel-name": "{{date}} Arbeitsbereiche.xlsx",
     "select-workspace-group": "Bereichsgruppe auswählen",
     "unknown": "unbekannt",
@@ -380,6 +406,8 @@
     "print": "Drucken",
     "print-units": "Aufgabe(n) drucken",
     "print-review": "Aufgabenfolge drucken",
+    "metadata": "Metadaten",
+    "show-metadata": "Metadaten anzeigen",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",
@@ -544,6 +572,7 @@
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
       "separate": "Blättern",
+      "buttons": "Schaltflächen",
       "concat-scroll": "Scrollen",
       "concat-scroll-snap": "Magnetisch Scrollen"
     },
@@ -591,6 +620,7 @@
     "404": "Daten/Objekt nicht gefunden.",
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "500": "Allgemeines Server-Problem.",
+    "504": "Zeitüberschreitung bei der Verarbeitung der Anfrage",
     "520": "Server derzeit nicht erreichbar.",
     "521": "Bitte Anwendung neu laden!",
     "close": "Fehlermeldung ausblenden",

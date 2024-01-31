@@ -11,8 +11,7 @@ import {
   VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto,
-  VeronaModuleFileDto
+  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -34,6 +33,27 @@ export class BackendService {
         password: password
       }
     )
+      .pipe(
+        catchError(() => of(false)),
+        switchMap(loginToken => {
+          if (typeof loginToken === 'string') {
+            localStorage.setItem('id_token', loginToken);
+            return this.getAuthData()
+              .pipe(
+                map(authData => {
+                  this.appService.authData = authData;
+                  return true;
+                }),
+                catchError(() => of(false))
+              );
+          }
+          return of(loginToken);
+        })
+      );
+  }
+
+  keycloakLogin(user: CreateUserDto): Observable<boolean> {
+    return this.http.post<string>(`${this.serverUrl}keycloak-login`, user)
       .pipe(
         catchError(() => of(false)),
         switchMap(loginToken => {

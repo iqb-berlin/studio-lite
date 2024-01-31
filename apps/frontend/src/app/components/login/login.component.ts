@@ -5,8 +5,14 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
+import { CreateUserDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
+import { TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
+import { AuthService } from '../../modules/auth/service/auth.service';
+import { LoginAlternativeWarningComponent } from '../login-alternative-warning/login-alternative-warning.component';
 
 @Component({
   selector: 'studio-lite-login',
@@ -18,12 +24,19 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginNamePreset = '';
   redirectTo = '';
   errorMessage = '';
+  userProfile: KeycloakProfile = {};
+  loggedInKeycloak: boolean = false;
   private routingSubscription: Subscription | null = null;
+  private loggedUser: KeycloakTokenParsed | undefined;
+
   constructor(private fb: UntypedFormBuilder,
+              public authService: AuthService,
               private route: ActivatedRoute,
               private router: Router,
               private backendService: BackendService,
               private snackBar: MatSnackBar,
+              private translateService: TranslateService,
+              private dialog: MatDialog,
               public appService: AppService) {
     this.loginForm = this.fb.group({
       name: this.fb.control('', [Validators.required, Validators.minLength(1)]),
@@ -31,7 +44,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.redirectTo = queryParams['redirectTo'];
@@ -43,6 +56,27 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
       }
     });
+
+    if (await this.authService.isLoggedIn()) {
+      this.loggedInKeycloak = true;
+      this.appService.isLoggedInKeycloak = true;
+      this.loggedUser = this.authService.getLoggedUser();
+      this.userProfile = await this.authService.loadUserProfile();
+      if (this.userProfile.id && this.userProfile.username) {
+        const keycloakUser: CreateUserDto = {
+          issuer: this.loggedUser?.iss || '',
+          identity: this.userProfile.id,
+          name: this.userProfile.username,
+          lastName: this.userProfile.lastName || '',
+          firstName: this.userProfile.firstName || '',
+          email: this.userProfile.email || '',
+          password: '',
+          description: '',
+          isAdmin: false
+        };
+        this.keycloakLogin(keycloakUser);
+      }
+    }
   }
 
   login(): void {
@@ -54,20 +88,47 @@ export class LoginComponent implements OnInit, OnDestroy {
       const initLoginMode = !this.appService.appConfig.hasUsers;
       this.backendService.login(
         this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value, initLoginMode
-      ).subscribe(ok => {
-        this.appService.dataLoading = false;
-        if (ok) {
-          if (this.redirectTo) {
-            this.router.navigate([this.redirectTo]);
-          } else if (initLoginMode) {
-            this.router.navigate(['/admin']);
-          }
-        } else {
-          this.snackBar.open('Login nicht erfolgreich', 'Fehler', { duration: 3000 });
-        }
-        this.appService.errorMessagesDisabled = false;
+      ).subscribe(async ok => {
+        await this.validLoginCheck(ok, initLoginMode);
       });
     }
+  }
+
+  keycloakLogin(user: CreateUserDto): void {
+    this.errorMessage = '';
+    this.appService.clearErrorMessages();
+    this.appService.dataLoading = true;
+    this.appService.errorMessagesDisabled = true;
+    const initLoginMode = !this.appService.appConfig.hasUsers;
+    this.backendService.keycloakLogin(user).subscribe(async ok => {
+      await this.validLoginCheck(ok, initLoginMode);
+    });
+  }
+
+  async validLoginCheck(ok: boolean, initLoginMode: boolean) {
+    this.appService.dataLoading = false;
+    if (ok) {
+      if (this.redirectTo) {
+        await this.router.navigate([this.redirectTo]);
+      } else if (initLoginMode) {
+        await this.router.navigate(['/admin']);
+      }
+    } else {
+      this.snackBar.open(
+        this.translateService.instant('login.no-success'),
+        this.translateService.instant('login.error'),
+        { duration: 3000 });
+    }
+  }
+
+  async loginKeycloak(): Promise<void> {
+    this.dialog
+      .open(LoginAlternativeWarningComponent, { width: '800px' }).afterClosed()
+      .subscribe(async (res: UnitDownloadSettingsDto | boolean) => {
+        if (res) {
+          await this.authService.login();
+        }
+      });
   }
 
   ngOnDestroy(): void {

@@ -8,6 +8,7 @@ import {
 import {
   AuthDataDto,
   ChangePasswordDto,
+  CreateUserDto,
   MyDataDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
@@ -61,6 +62,15 @@ export class AppController {
   async initLogin(@Body() body: { username: string, password: string }
   ) {
     const token = await this.authService.initLogin(body.username, body.password);
+    return `"${token}"`;
+  }
+
+  @Post('keycloak-login')
+  @UseGuards(AppVersionGuard)
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Keycloak login successful.' })
+  async keycloakLogin(@Body() user: CreateUserDto) {
+    const token = await this.authService.keycloakLogin(user);
     return `"${token}"`;
   }
 

@@ -58,6 +58,10 @@ import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 import { SharedModule } from './modules/shared/shared.module';
 import { MoveWorkspaceComponent } from './modules/shared/components/move-workspace/move-workspace.component';
+import { AuthModule } from './modules/auth/auth.module';
+import {
+  LoginAlternativeWarningComponent
+} from './components/login-alternative-warning/login-alternative-warning.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -88,9 +92,11 @@ export function createTranslateLoader(http: HttpClient) {
     DataLoadingIsNumberPipe,
     DataLoadingAsTextPipe,
     IsInArrayPipe,
-    MoveWorkspaceComponent
+    MoveWorkspaceComponent,
+    LoginAlternativeWarningComponent
   ],
   imports: [
+    AuthModule,
     ApplicationModule,
     BrowserModule,
     BrowserAnimationsModule,
@@ -151,4 +157,5 @@ export function createTranslateLoader(http: HttpClient) {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule {
+}

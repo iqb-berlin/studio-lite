@@ -1,13 +1,17 @@
-import { Injectable } from '@angular/core';
-import { MDProfile } from '@iqb/metadata';
+import { Inject, Injectable } from '@angular/core';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { BackendService } from './backend.service';
+import { WorkspaceService } from '../../workspace/services/workspace.service';
 
 type TopConcept = {
   notation: string[];
-  prefLabel: { de:string };
+  prefLabel: { de: string };
   narrower: TopConcept[];
-  id:string
+  id: string
 };
 
 @Injectable({
@@ -15,12 +19,18 @@ type TopConcept = {
 })
 
 export class MetadataService {
-  vocabulariesIdDictionary:any = {};
-  vocabularies:any = [];
+  vocabulariesIdDictionary: any = {};
+  vocabularies: any = [];
+  unitProfileColumns:MDProfileGroup = {} as MDProfileGroup;
+  itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
-  constructor(private backendService:BackendService) { }
+  constructor(@Inject('SERVER_URL') private readonly serverUrl: string,
+              private backendService: BackendService,
+              private workspaceService: WorkspaceService,
+              private http: HttpClient) {
+  }
 
-  async getProfileVocabularies(profile:MDProfile) {
+  async getProfileVocabularies(profile: MDProfile) {
     const vocabularyURLs = [];
     // eslint-disable-next-line no-restricted-syntax
     for (const group of profile.groups) {
@@ -36,7 +46,8 @@ export class MetadataService {
       promises.push(this.fetchVocabulary(url));
     }
     const vocabularies = await Promise.all(promises);
-    this.backendService.saveVocabs(vocabularies).subscribe(() => {});
+    this.backendService.saveVocabs(vocabularies).subscribe(() => {
+    });
     if (this.vocabularies.length) {
       this.vocabularies = [...this.vocabularies, ...vocabularies];
     } else {
@@ -53,10 +64,10 @@ export class MetadataService {
     return this.vocabulariesIdDictionary;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  mapVocabularyIds(vocabulary:any) {
-    const idLabelDictionary:any = {};
-    const hasNarrower = (narrower:TopConcept[]) => {
+  // eslint-disable-next-line
+  mapVocabularyIds(vocabulary: any) {
+    const idLabelDictionary: any = {};
+    const hasNarrower = (narrower: TopConcept[]) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const vocabularyEntry of narrower) {
         idLabelDictionary[vocabularyEntry.id] = {
@@ -77,8 +88,7 @@ export class MetadataService {
     return idLabelDictionary;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async fetchVocabulary(url:string) : Promise<any> {
+  async fetchVocabulary(url: string): Promise<any> {
     try {
       const response = await fetch(`${url}index.jsonld`);
       if (response.ok) {
@@ -87,10 +97,39 @@ export class MetadataService {
       }
       return await new Promise(resolve => {
         this.backendService.getVocab(url)
-          .subscribe((vocab:any) => resolve({ data: vocab, url }));
+          .subscribe((vocab: any) => resolve({ data: vocab, url }));
       });
     } catch {
       return { data: {}, url };
     }
+  }
+
+  downloadItemsMetadataReport(columns:string[]): Observable<Blob> {
+    return this.http.get(
+      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${columns.join(',')}`, {
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'blob'
+      });
+  }
+
+  downloadUnitsMetadataReport(columns:string[]): Observable<Blob> {
+    return this.http.get(
+      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${columns.join(',')}`, {
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'blob'
+      });
+  }
+
+  createItemsMetadataReport(): Observable<boolean | unknown> {
+    return this.http.get(
+      `${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
+      .pipe(
+        catchError(() => of(false)),
+        map(report => report)
+      );
   }
 }

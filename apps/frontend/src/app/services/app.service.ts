@@ -36,6 +36,7 @@ export class AppService {
   };
 
   authData = AppService.defaultAuthData;
+  isLoggedInKeycloak = false;
   appConfig: AppConfig;
   appLogo: AppLogoDto | null = null;
   errorMessages: AppHttpError[] = [];

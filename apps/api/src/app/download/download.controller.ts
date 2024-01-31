@@ -1,7 +1,8 @@
 import {
-  Controller, Get, Header, StreamableFile, UseFilters, UseGuards
+  Controller, Get, Header, Param, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -43,6 +44,32 @@ export class DownloadController {
     const file = await XlsxDownloadWorkspacesClass.getWorkspaceReport(
       this.workspaceService, this.unitService, 0
     );
+    return new StreamableFile(file);
+  }
+
+  @Get('xlsx/unit-metadata-items/:workspace_id/:columns')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @Header('Content-Disposition', 'attachment; filename="iqb-studio-unit-metadata-items-report.xlsx"')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @ApiTags('download')
+  async downloadXlsxItemsMetadata(@Param('workspace_id') workspaceId: number, @Param('columns') columns: string) {
+    const file = await XlsxDownloadWorkspacesClass.getWorkspaceMetadataReport(
+      'items', this.unitService, workspaceId, columns);
+    return new StreamableFile(file);
+  }
+
+  @Get('xlsx/unit-metadata/:workspace_id/:columns')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @Header('Content-Disposition', 'attachment; filename="iqb-studio-unit-metadata-report.xlsx"')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @ApiTags('download')
+  async downloadXlsxUnitsMetadata(@Param('workspace_id') workspaceId: number, @Param('columns') columns: string) {
+    const file = await XlsxDownloadWorkspacesClass.getWorkspaceMetadataReport(
+      'units', this.unitService, workspaceId, columns);
     return new StreamableFile(file);
   }
 }

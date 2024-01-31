@@ -10,6 +10,7 @@ import {
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss']
 })
+
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   items: any[] = [];
   variables!: string[];

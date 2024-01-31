@@ -27,6 +27,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatRadioModule } from '@angular/material/radio';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
@@ -80,6 +81,7 @@ import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 import { MetadataModule } from '../metadata/metadata.module';
 import { GetStateColorPipe } from './pipes/get-state-color.pipe';
+import { ShowMetadataComponent } from './components/show-metadata/show-metadata.component';
 
 @NgModule({
   imports: [
@@ -116,7 +118,8 @@ import { GetStateColorPipe } from './pipes/get-state-color.pipe';
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    SplitterModule
+    SplitterModule,
+    MatRadioModule
   ],
   declarations: [
     TestConfigComponent,
@@ -165,7 +168,8 @@ import { GetStateColorPipe } from './pipes/get-state-color.pipe';
     PreviewBarComponent,
     StatusIndicationComponent,
     UnitGroupsComponent,
-    UnitPropertiesComponent
+    UnitPropertiesComponent,
+    ShowMetadataComponent
   ],
   exports: [
     WorkspaceComponent,
@@ -178,4 +182,5 @@ import { GetStateColorPipe } from './pipes/get-state-color.pipe';
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
   ]
 })
-export class WorkspaceModule {}
+export class WorkspaceModule {
+}

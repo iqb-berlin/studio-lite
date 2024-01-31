@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as Excel from 'exceljs';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 
@@ -7,7 +7,7 @@ interface WorkspaceData {
   name: string;
   groupId: number;
   groupName: string;
-  latestChange: Date;
+  latestChange: Date | null;
   unitNumber: number;
   editors: { [key: string]: number };
   players: { [key: string]: number };
@@ -15,42 +15,125 @@ interface WorkspaceData {
 }
 
 export class XlsxDownloadWorkspacesClass {
+  static setUnitsItemsDataRows(units: any[]): any {
+    const allUnits: any[] = [];
+    units.forEach((unit: any) => {
+      const totalValues: Record<string, string>[] = [];
+      unit.metadata.items.forEach((item: any, i: number) => {
+        const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
+        if (activeProfile) {
+          const values: Record<string, string> = {};
+          activeProfile.entries.forEach((entry: any) => {
+            if (entry.valueAsText.length > 1) {
+              const textValues: any[] = [];
+              entry.valueAsText.forEach((textValue: any) => {
+                textValues.push(`${textValue.value || ''}`);
+              });
+              values[entry.label[0].value] = textValues.join('<br>');
+            } else {
+              values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
+            }
+            if (i === 0) values.Aufgabe = unit.key || '–';
+            values['Item-Id'] = item.id || '–';
+            values.Variablen = item.variableId || '';
+            values.Wichtung = item.weighting || '';
+            values.Notiz = item.description || '';
+          });
+          totalValues.push(values);
+        } else {
+          totalValues.push({ 'Item-Id': '–' });
+        }
+      });
+      allUnits.push(totalValues);
+    });
+    return allUnits.flat();
+  }
+
+  static setUnitsDataRows(units: any): any {
+    const totalValues: Record<string, string>[] = [];
+    units.forEach((unit: any) => {
+      const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
+      if (activeProfile) {
+        const values: Record<string, string> = {};
+        activeProfile.entries.forEach((entry: any) => {
+          if (entry.valueAsText.length > 1) {
+            const textValues: any[] = [];
+            entry.valueAsText.forEach((textValue: any) => {
+              textValues.push(textValue.value || '');
+            });
+            values[entry.label[0].value] = textValues.join(', ');
+          } else {
+            values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
+          }
+          values.Aufgabe = unit.key || '–';
+        });
+        totalValues.push(values);
+      } else {
+        totalValues.push({ Aufgabe: unit.key || '–' });
+      }
+    });
+    return totalValues.flat();
+  }
+
+  static async getWorkspaceMetadataReport(reportType: string,
+                                          unitService: UnitService,
+                                          workspaceId: number,
+                                          columns:string): Promise<Buffer> {
+    const data = await unitService.findAllWithMetadata(workspaceId);
+    const rows = (reportType === 'units') ? this.setUnitsDataRows(data) : this.setUnitsItemsDataRows(data);
+    const SHEET_NAME = (reportType === 'units') ? 'Aufgaben Metadaten ' : ' Items Metadaten ';
+    const wb = new Excel.Workbook();
+    const ws = wb.addWorksheet(SHEET_NAME);
+    wb.created = new Date();
+    wb.title = 'Webanwendung IQB Studio';
+    wb.subject = (reportType === 'units') ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
+    ws.columns = columns.split(',').map((column: string) => ({
+      header: column,
+      key: column,
+      width: 30,
+      style: { alignment: { wrapText: true } }
+    }));
+    ws.getRow(1).font = { bold: true };
+    ws.addRows(rows);
+    return await wb.xlsx.writeBuffer() as Buffer;
+  }
+
   static async getWorkspaceReport(
     workspaceService: WorkspaceService,
     unitService: UnitService,
     workspaceGroupId: number
   ): Promise<Buffer> {
     const SHEET_NAME = 'Arbeitsbereiche';
-    const wb = XLSX.utils.book_new();
-    wb.Props = {
-      Title: 'Webanwendung IQB Studio',
-      Subject: 'Daten der Arbeitsbereiche',
-      CreatedDate: new Date()
-    };
-    wb.SheetNames.push(SHEET_NAME);
+    const wb = new Excel.Workbook();
+    wb.created = new Date();
+    wb.title = 'Webanwendung IQB Studio';
+    wb.subject = 'Daten der Arbeitsbereiche ';
+    const ws = wb.addWorksheet(SHEET_NAME);
     const allGroups = await workspaceService.findAllGroupwise();
     const wsDataWithMetadataPromises: Promise<WorkspaceData>[] = [];
     allGroups.forEach(group => {
       if (workspaceGroupId === 0 || group.id === workspaceGroupId) {
-        group.workspaces.forEach(ws => {
+        group.workspaces.forEach(w => {
           wsDataWithMetadataPromises.push(
-            unitService.findAllWithMetadata(ws.id)
+            unitService.findAllWithMetadata(w.id)
               .then(unitData => {
                 const returnData = <WorkspaceData>{
-                  id: ws.id,
-                  name: ws.name,
+                  id: w.id,
+                  name: w.name,
                   groupId: group.id,
                   groupName: group.name,
-                  latestChange: new Date(2000, 1, 1, 12, 12),
+                  latestChange: null,
                   unitNumber: unitData.length,
                   editors: {},
                   players: {},
                   schemers: {}
                 };
                 unitData.forEach(u => {
-                  if (
-                    returnData.latestChange < u.lastChangedMetadata
-                  ) returnData.latestChange = u.lastChangedMetadata;
+                  if (u.lastChangedMetadata !== null) {
+                    returnData.latestChange = u.lastChangedMetadata;
+                  } else {
+                    returnData.latestChange = null;
+                  }
                   if (
                     returnData.latestChange < u.lastChangedDefinition
                   ) returnData.latestChange = u.lastChangedDefinition;
@@ -85,33 +168,49 @@ export class XlsxDownloadWorkspacesClass {
     const headerRow = [
       'Gruppe Name', 'Gruppe Id', 'Arbeitsbereich Name', 'Arbeitsbereich Id', 'Letzte Änderung', 'Anzahl Units'
     ];
-    allEditors.forEach(m => { headerRow.push(m || 'Kein Editor'); });
-    allPlayers.forEach(m => { headerRow.push(m || 'Kein Player'); });
-    allSchemers.forEach(m => { headerRow.push(m || 'Kein Schemer'); });
-    const xlsxData = [headerRow];
+    ws.getRow(1).font = { bold: true };
+
+    allEditors.forEach(m => {
+      headerRow.push(m || 'Kein Editor');
+    });
+    allPlayers.forEach(m => {
+      headerRow.push(m || 'Kein Player');
+    });
+    allSchemers.forEach(m => {
+      headerRow.push(m || 'Kein Schemer');
+    });
+
+    ws.columns = headerRow.map((column: string) => ({
+      header: column,
+      key: column,
+      width: 20,
+      style: { alignment: { wrapText: true, horizontal: 'left' } }
+    }));
     wsDataWithMetadata.forEach(wsData => {
+      let date = '';
+      if (wsData.latestChange !== null) {
+        date = `${wsData.latestChange.getDate()}.${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`;
+      }
       const rowData = [
-        wsData.groupName, wsData.groupId.toString(10), wsData.name, wsData.id.toString(10),
-        `${wsData.latestChange.getDay()
-          .toString(10).padStart(2, '0')}.${wsData.latestChange.getMonth()
-          .toString(10).padStart(2, '0')}.${wsData.latestChange.getFullYear().toString(10)}`,
-        wsData.unitNumber.toString()
+        wsData.groupName, wsData.groupId, wsData.name, wsData.id,
+        date, wsData.unitNumber
       ];
       allEditors.forEach(moduleKey => {
-        rowData.push(wsData.editors[moduleKey] ? wsData.editors[moduleKey].toString(10) : '');
+        rowData.push(wsData.editors[moduleKey] ? wsData.editors[moduleKey] : '');
       });
       allPlayers.forEach(moduleKey => {
-        rowData.push(wsData.players[moduleKey] ? wsData.players[moduleKey].toString(10) : '');
+        rowData.push(wsData.players[moduleKey] ? wsData.players[moduleKey] : '');
       });
       allSchemers.forEach(moduleKey => {
-        rowData.push(wsData.schemers[moduleKey] ? wsData.schemers[moduleKey].toString(10) : '');
+        rowData.push(wsData.schemers[moduleKey] ? wsData.schemers[moduleKey] : '');
       });
-      xlsxData.push(rowData);
+
+      const data = {};
+      headerRow.forEach((column, i) => {
+        data[column] = rowData[i];
+      });
+      ws.addRows([data]);
     });
-    wb.Sheets[SHEET_NAME] = XLSX.utils.aoa_to_sheet(xlsxData);
-    return XLSX.write(wb, {
-      type: 'buffer',
-      bookType: 'xlsx'
-    });
+    return await wb.xlsx.writeBuffer() as Buffer;
   }
 }

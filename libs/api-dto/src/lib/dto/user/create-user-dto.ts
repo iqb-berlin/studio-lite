@@ -21,4 +21,10 @@ export class CreateUserDto {
 
   @ApiProperty()
     firstName?: string;
+
+  @ApiProperty()
+    issuer?: string;
+
+  @ApiProperty()
+    identity?: string;
 }

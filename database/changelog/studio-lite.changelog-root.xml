@@ -2,11 +2,8 @@
 <databaseChangeLog
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:pro="http://www.liquibase.org/xml/ns/pro"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
-      http://www.liquibase.org/xml/ns/pro
-      http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
   <!--includeAll path="liquibase/changelog/"/ does not work with docker!!! -->
   <include file="studio-lite.changelog-1.0.0.sql"/>
   <include file="studio-lite.changelog-2.0.0-beta.sql"/>
@@ -16,4 +13,5 @@
   <include file="studio-lite.changelog-2.0.0-beta11.sql"/>
   <include file="studio-lite.changelog-3.1.0.sql"/>
   <include file="studio-lite.changelog-6.0.0.sql"/>
+  <include file="studio-lite.changelog-6.1.0.sql"/>
 </databaseChangeLog>

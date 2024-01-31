@@ -26,6 +26,9 @@ import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
+import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
+import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
+import { MetadataService } from '../../../metadata/services/metadata.service';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -45,10 +48,12 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     private uploadReportDialog: MatDialog,
     private appService: AppService,
     private translate: TranslateService,
-    private messsageDialog: MatDialog,
+    private messageDialog: MatDialog,
     private showUsersDialog: MatDialog,
     private groupDialog: MatDialog,
-    private reviewsDialog: MatDialog
+    private reviewsDialog: MatDialog,
+    private showMetadataDialog: MatDialog,
+    private metadataService: MetadataService
   ) {
     super();
   }
@@ -97,7 +102,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
       width: '500px',
       height: '700px',
-      data: <MoveUnitData> {
+      data: <MoveUnitData>{
         title: moveOnly ?
           this.translate.instant('workspace.move-units') :
           this.translate.instant('workspace.copy-units'),
@@ -178,7 +183,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
         }
       });
     } else {
-      this.messsageDialog.open(MessageDialogComponent, {
+      this.messageDialog.open(MessageDialogComponent, {
         width: '400px',
         data: <MessageDialogData>{
           title: this.translate.instant('unit-download.dialog.title'),
@@ -229,6 +234,25 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
           return false;
         })
       ));
+  }
+
+  showMetadata(): void {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      this.selectUnitDialog.open(ShowMetadataComponent, {
+        width: '600px'
+
+      }).afterClosed().subscribe(res => {
+        this.metadataService.createItemsMetadataReport().subscribe((units: any) => {
+          const selectedUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
+          this.showMetadataDialog.open(TableViewComponent, {
+            width: '80%',
+            height: '80%',
+            data: { units: selectedUnits },
+            autoFocus: false
+          });
+        });
+      });
+    }
   }
 
   userList(): void {
