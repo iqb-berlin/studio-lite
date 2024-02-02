@@ -27,7 +27,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   editWorkspaceGroupSettingsForm: UntypedFormGroup;
   profiles: Array<Profile> = [];
   profileStores : Array<ProfileStore> = [];
-  PROFILE_REGISTRY = 'http://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
+  PROFILE_REGISTRY = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
   formData: {
     profilesSelected : Profile[],
     states: State[]
