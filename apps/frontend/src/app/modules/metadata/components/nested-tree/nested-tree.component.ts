@@ -281,11 +281,11 @@ export class NestedTreeComponent implements OnInit {
     if (!this.checklistSelection.isSelected(node)) {
       if (this.getSelectedNodesList() && this.dialogData.props.allowMultipleValues) {
         this.checklistSelection.toggle(node);
-        this.checkAllParentsSelection(node);
+        if (this.checklistSelection.selected.length > 1) this.checkAllParentsSelection(node);
       } else {
         this.checklistSelection.clear();
         this.checklistSelection.toggle(node);
-        this.checkAllParentsSelection(node);
+        if (this.checklistSelection.selected.length > 1) this.checkAllParentsSelection(node);
       }
     } else {
       if (!this.dialogData.props.allowMultipleValues) this.checklistSelection.clear();
@@ -294,6 +294,8 @@ export class NestedTreeComponent implements OnInit {
         if (this.checklistSelection.isSelected(parent)) {
           this.checklistSelection.toggle(node);
           this.checkAllParentsSelection(node);
+        } else {
+          this.checklistSelection.toggle(node);
         }
       } else {
         this.checklistSelection.toggle(node);
