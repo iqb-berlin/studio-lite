@@ -55,7 +55,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
         props: this.props,
         vocabularies: this.metadataService.vocabularies
       },
-      width: '1200px'
+      width: '1000px'
     });
 
     dialogRef.afterClosed()
