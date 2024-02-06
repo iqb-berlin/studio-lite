@@ -145,7 +145,6 @@ export class NestedTreeComponent implements OnInit {
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
     _database.dataChange.subscribe(data => {
       this.dataSource.data = data;
-      this.treeControl.expand(this.treeControl.dataNodes[0]);
     });
   }
 
