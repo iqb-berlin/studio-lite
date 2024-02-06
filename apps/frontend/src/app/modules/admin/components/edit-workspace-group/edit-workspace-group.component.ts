@@ -10,11 +10,11 @@ import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-gro
 })
 export class EditWorkspaceGroupComponent {
   editWorkspaceGroupForm: UntypedFormGroup;
-
+  name = this.data.wsg?.name || '';
   constructor(private fb: UntypedFormBuilder,
               @Inject(MAT_DIALOG_DATA) public data: EditWorkspaceGroupComponentData) {
     this.editWorkspaceGroupForm = this.fb.group({
-      name: this.fb.control(this.data.name, [Validators.required, Validators.minLength(3)])
+      name: this.fb.control(this.name, [Validators.required, Validators.minLength(3)])
     });
   }
 }

@@ -5,6 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -27,6 +28,7 @@ describe('EditWorkspaceGroupComponent', () => {
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatDialogModule,
+        MatSnackBarModule,
         TranslateModule.forRoot()
       ],
       providers: [{

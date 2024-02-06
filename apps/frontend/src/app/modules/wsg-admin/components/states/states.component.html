@@ -1,6 +1,6 @@
 <mat-spinner class="spinner" *ngIf="isLoading"></mat-spinner>
 <div class="state-container" *ngIf="!isLoading && !isError">
-  <h3>{{'wsg-settings.state-configs' | translate}}</h3>
+  <h4>{{'wsg-settings.state-configs' | translate}}</h4>
   <div class="add-state">
     <button (click)="addState()" mat-raised-button>
       {{'wsg-settings.add-state' | translate}}

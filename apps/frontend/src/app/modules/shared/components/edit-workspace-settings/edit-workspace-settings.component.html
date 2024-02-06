@@ -4,7 +4,7 @@
   </h1>
   <mat-dialog-content>
     <div>
-      <h3>{{'workspace-settings.modules' | translate }}</h3>
+      <h4>{{'workspace-settings.modules' | translate }}</h4>
       <div class="fx-row-space-between-start fx-gap-10">
         <mat-label>
           {{'workspace-settings.default-editor' | translate}}
@@ -49,7 +49,7 @@
         <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
       <div>
-        <h3>{{'metadata.metadata' | translate }}</h3>
+        <h4>{{'metadata.metadata' | translate }}</h4>
         <div class="fx-column-start-start">
           <mat-label>{{'metadata.unit-profile' | translate }}</mat-label>
           <mat-error *ngIf="unitMDProfiles.length === 0">{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
@@ -71,7 +71,7 @@
       </div>
     </div>
   </mat-dialog-content>
-  <mat-dialog-actions>
+  <mat-dialog-actions align="end">
     <button mat-raised-button
             color="primary"
             type="submit"

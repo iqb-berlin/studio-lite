@@ -40,7 +40,9 @@ export class WorkspaceGroupsMenuComponent {
     const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
       width: '600px',
       data: {
-        name: '',
+        wsg: {
+          name: ''
+        },
         title: this.translateService.instant('admin.new-group'),
         saveButtonLabel: this.translateService.instant('create')
       }
@@ -64,9 +66,10 @@ export class WorkspaceGroupsMenuComponent {
       const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupComponent, {
         width: '600px',
         data: {
-          name: selectedRows[0].name,
+          wsg: selectedRows[0],
           title: this.translateService.instant('admin.edit-group'),
           saveButtonLabel: this.translateService.instant('save')
+
         }
       });
       dialogRef.afterClosed().subscribe(result => {
@@ -86,12 +89,12 @@ export class WorkspaceGroupsMenuComponent {
     }
     if (selectedRows.length) {
       const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupSettingsComponent, {
-        width: '1000px',
+        width: '600px',
         data: {
-          name: selectedRows[0].name,
-          id: selectedRows[0].id,
+          wsg: selectedRows[0],
           title: this.translateService.instant('admin.edit-group-settings'),
           saveButtonLabel: this.translateService.instant('save')
+
         }
       });
       dialogRef.afterClosed().subscribe(data => {

@@ -1,9 +1,10 @@
 import {
-  Component, OnInit, Output, EventEmitter
+  Component, OnInit, Output, EventEmitter, Input
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MDProfileStore, MDProfile } from '@iqb/metadata';
-import { WsgAdminService, ProfileStoreWithProfiles } from '../../services/wsg-admin.service';
+import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { Profile } from '../../../admin/components/workspace-groups/workspace-groups.component';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
@@ -20,16 +21,17 @@ export class ProfilesComponent implements OnInit {
   ProfileStoreWithProfilesCollection : ProfileStoreWithProfiles[] = [];
   fetchedProfiles: CoreProfile[] = [];
   profilesSelected : CoreProfile[] = [];
+  profile!:Profile;
 
   @Output() hasChanged = new EventEmitter<Array<CoreProfile>>();
-
+  @Input() profiles!: Profile[];
   constructor(
     private wsgAdminService: WsgAdminService
   ) {}
 
   async ngOnInit(): Promise<void> {
     await this.readCsv();
-    this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || [];
+    this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
     this.profilesSelected = this.fetchedProfiles;
   }
 
@@ -80,22 +82,21 @@ export class ProfilesComponent implements OnInit {
       .split('\n')
       .map(item => item.split(splitter));
     const storesArray = rest.map(e => e.filter(el => (el !== ',' && el !== '')));
-    const storesURLs = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const store of storesArray) {
+    const storesURLs:any = [];
+    storesArray.forEach(store => {
       const sanitizedURL = store[2].replace(',', '');
       storesURLs.push(sanitizedURL);
-    }
+    });
     this.storesURLs = storesURLs;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async getProfile(profileURL:string) {
     try {
       const response = await fetch(`${profileURL}`);
       if (response.ok) {
         const data = await response.json();
-        return new MDProfile(data);
+        this.profile = new MDProfile(data);
+        return this.profile;
       }
       return [];
     } catch {
@@ -106,7 +107,7 @@ export class ProfilesComponent implements OnInit {
   }
 
   isChecked(id:string):boolean {
-    return !!this.fetchedProfiles?.find((profile: { id: string; }) => profile.id === id);
+    return !!this.profilesSelected?.find((profile: { id: string; }) => profile.id === id);
   }
 
   changeSelection(checkbox:MatCheckboxChange) {

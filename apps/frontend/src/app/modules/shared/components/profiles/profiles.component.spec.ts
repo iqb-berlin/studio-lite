@@ -12,7 +12,7 @@ import { Component, Input } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { environment } from '../../../../../environments/environment';
 import { ProfilesComponent } from './profiles.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 describe('ProfilesComponent', () => {
   let component: ProfilesComponent;

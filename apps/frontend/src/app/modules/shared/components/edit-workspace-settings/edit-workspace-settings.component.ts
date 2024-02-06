@@ -10,6 +10,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';
 import { State } from '../../../admin/models/state.type';
+import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 
 type Profile = {
   id:string,
@@ -27,6 +28,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     public backendService: BackendService,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
+    public wsgAdminService: WsgAdminService,
     @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow: number }
   ) {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
@@ -43,7 +45,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectionChanged = this.dialogData.states as State[];
-    const workspaceGroupId = this.workspaceService.groupId;
+    const workspaceGroupId = this.wsgAdminService.selectedWorkspaceGroupId;
     if (workspaceGroupId) {
       this.backendService.getWorkspaceGroupProfiles(workspaceGroupId).subscribe(res => {
         this.unitMDProfiles = res.settings.profiles

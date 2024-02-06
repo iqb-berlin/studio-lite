@@ -1,6 +1,8 @@
 export type EditWorkspaceGroupComponentData = {
+  wsg:{
+    id: number
+    name: string,
+  },
   title: string,
-  name: string,
-  saveButtonLabel: string
-  id: number
+  saveButtonLabel: string,
 };

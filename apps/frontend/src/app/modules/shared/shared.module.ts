@@ -11,6 +11,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SelectModuleComponent } from './components/select-module/select-module.component';
 import { EditWorkspaceSettingsComponent } from './components/edit-workspace-settings/edit-workspace-settings.component';
 import { InputTextComponent } from './components/input-text/input-text.component';
@@ -18,6 +20,7 @@ import { SearchFilterComponent } from './components/search-filter/search-filter.
 import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
 import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
+import { ProfilesComponent } from './components/profiles/profiles.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +30,8 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
     SearchFilterComponent,
     PageNavigationComponent,
     UnitMetaDataComponent,
-    WrappedIconComponent
+    WrappedIconComponent,
+    ProfilesComponent
   ],
   imports: [
     CommonModule,
@@ -42,7 +46,9 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
     MatSelectModule,
     MatIconModule,
     MatTooltipModule,
-    TranslateModule
+    TranslateModule,
+    MatProgressSpinnerModule,
+    MatExpansionModule
   ],
   exports: [
     EditWorkspaceSettingsComponent,
@@ -51,7 +57,8 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
     SearchFilterComponent,
     PageNavigationComponent,
     UnitMetaDataComponent,
-    WrappedIconComponent
+    WrappedIconComponent,
+    ProfilesComponent
   ]
 })
 export class SharedModule {}
