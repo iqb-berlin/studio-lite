@@ -67,7 +67,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return this.getProfile(this.profileUrl as string);
   }
 
-  private async loadProfile(json: any) {
+  private async loadProfile(json: unknown) {
     this.profile = new MDProfile(json);
     await this.metadataService.getProfileVocabularies(this.profile);
     this.model = this.mapMetadataValuesToFormlyModel(
@@ -223,7 +223,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
           const name = this.metadataService.vocabulariesIdDictionary[v.id].labels.de;
           const notation = this.metadataService.vocabulariesIdDictionary[v.id].notation[0] || '';
           return {
-            name: `${notation} ${name} `,
+            name: `${this.metadataService.vocabulariesIdDictionary[v.id].hideNumbering ? '' : notation} ${name} `,
             notation: notation,
             text: v.text,
             id: v.id
