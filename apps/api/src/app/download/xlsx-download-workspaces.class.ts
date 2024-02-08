@@ -19,31 +19,33 @@ export class XlsxDownloadWorkspacesClass {
     const allUnits: any[] = [];
     units.forEach((unit: any) => {
       const totalValues: Record<string, string>[] = [];
-      unit.metadata.items.forEach((item: any, i: number) => {
-        const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
-        if (activeProfile) {
-          const values: Record<string, string> = {};
-          activeProfile.entries.forEach((entry: any) => {
-            if (entry.valueAsText.length > 1) {
-              const textValues: any[] = [];
-              entry.valueAsText.forEach((textValue: any) => {
-                textValues.push(`${textValue.value || ''}`);
-              });
-              values[entry.label[0].value] = textValues.join('<br>');
-            } else {
-              values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
-            }
-            if (i === 0) values.Aufgabe = unit.key || '–';
-            values['Item-Id'] = item.id || '–';
-            values.Variablen = item.variableId || '';
-            values.Wichtung = item.weighting || '';
-            values.Notiz = item.description || '';
-          });
-          totalValues.push(values);
-        } else {
-          totalValues.push({ 'Item-Id': '–' });
-        }
-      });
+      if (unit.metadata.items) {
+        unit.metadata.items.forEach((item: any, i: number) => {
+          const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
+          if (activeProfile) {
+            const values: Record<string, string> = {};
+            activeProfile.entries.forEach((entry: any) => {
+              if (entry.valueAsText.length > 1) {
+                const textValues: any[] = [];
+                entry.valueAsText.forEach((textValue: any) => {
+                  textValues.push(`${textValue.value || ''}`);
+                });
+                values[entry.label[0].value] = textValues.join('<br>');
+              } else {
+                values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
+              }
+              if (i === 0) values.Aufgabe = unit.key || '–';
+              values['Item-Id'] = item.id || '–';
+              values.Variablen = item.variableId || '';
+              values.Wichtung = item.weighting || '';
+              values.Notiz = item.description || '';
+            });
+            totalValues.push(values);
+          } else {
+            totalValues.push({ 'Item-Id': '–' });
+          }
+        });
+      }
       allUnits.push(totalValues);
     });
     return allUnits.flat();
@@ -87,7 +89,7 @@ export class XlsxDownloadWorkspacesClass {
     wb.created = new Date();
     wb.title = 'Webanwendung IQB Studio';
     wb.subject = (reportType === 'units') ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
-    ws.columns = columns.split(',').map((column: string) => ({
+    ws.columns = decodeURIComponent(columns).split(',').map((column: string) => ({
       header: column,
       key: column,
       width: 30,
@@ -189,7 +191,8 @@ export class XlsxDownloadWorkspacesClass {
     wsDataWithMetadata.forEach(wsData => {
       let date = '';
       if (wsData.latestChange !== null) {
-        date = `${wsData.latestChange.getDate()}.${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`;
+        date = `${wsData.latestChange.getDate()}
+        .${wsData.latestChange.getMonth() + 1}.${wsData.latestChange.getFullYear()}`;
       }
       const rowData = [
         wsData.groupName, wsData.groupId, wsData.name, wsData.id,
