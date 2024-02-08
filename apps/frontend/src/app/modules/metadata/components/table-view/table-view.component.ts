@@ -6,10 +6,33 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
 import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+import { MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { MetadataService } from '../../services/metadata.service';
 
 const datePipe = new DatePipe('de-DE');
 
+type Unit = {
+  id: number,
+  workspaceId: number,
+  key: string,
+  name: string,
+  groupName: string,
+  description: string,
+  reference: string,
+  transcript: string,
+  state: string,
+  metadata: any,
+  player: string,
+  editor: string,
+  definitionId: number,
+  variables: any,
+  lastChangedDefinition: Date,
+  schemer: string,
+  scheme: string,
+  schemeType: string,
+  lastChangedScheme: Date,
+  lastChangedMetadata: Date
+};
 @Component({
   selector: 'studio-lite-table-view',
   templateUrl: './table-view.component.html',
@@ -50,35 +73,38 @@ export class TableViewComponent implements OnInit {
     }
   }
 
-  setUnitsItemsDataRows(units: any[]): any {
-    const allUnits: any[] = [];
-    units.forEach((unit: any) => {
-      const totalValues: Record<string, string>[] = [];
-      unit.metadata.items.forEach((item: any, i: number) => {
-        const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
-        if (activeProfile) {
-          const values: any = {};
-          activeProfile.entries.forEach((entry: any) => {
-            if (entry.valueAsText.length > 1) {
-              const textValues: any[] = [];
-              entry.valueAsText.forEach((textValue: any) => {
-                textValues.push(`${textValue.value || ''}`);
-              });
-              values[entry.label[0].value] = textValues.join('<br>');
-            } else {
-              values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
-            }
-            if (i === 0) values.Aufgabe = unit.key || '–';
-            values['Item-Id'] = item.id || '–';
-            values.Variablen = item.variableId || '';
-            values.Wichtung = item.weighting || '';
-            values.Notiz = item.description || '';
-          });
-          totalValues.push(values);
-        } else {
-          totalValues.push({ 'Item-Id': '–' });
-        }
-      });
+  setUnitsItemsDataRows(units: Unit[]): any {
+    const allUnits: any = [];
+    units.forEach((unit: Unit) => {
+      const totalValues: any = [];
+      if (unit.metadata.items) {
+        unit.metadata.items.forEach((item: any, i: number) => {
+          const activeProfile: MDProfileGroup = item.profiles?.find((profile: any) => profile.isCurrent);
+          if (activeProfile) {
+            const values: any = {};
+            activeProfile.entries.forEach((entry: any) => {
+              if (entry.valueAsText.length > 1) {
+                const textValues: any[] = [];
+                entry.valueAsText.forEach((textValue: any) => {
+                  textValues.push(`${textValue.value || ''}`);
+                });
+                values[entry.label[0].value] = textValues.join('<br>');
+              } else {
+                values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
+              }
+              if (i === 0) values.Aufgabe = unit.key || '–';
+              values['Item-Id'] = item.id || '–';
+              values.Variablen = item.variableId || '';
+              values.Wichtung = item.weighting || '';
+              values.Notiz = item.description || '';
+            });
+            totalValues.push(values);
+          } else {
+            totalValues.push({ 'Item-Id': '–' });
+          }
+        });
+      }
+
       allUnits.push(totalValues);
     });
     this.tableData = allUnits.flat();
@@ -91,7 +117,7 @@ export class TableViewComponent implements OnInit {
       if (activeProfile) {
         const values: Record<string, string> = {};
         activeProfile.entries.forEach((entry: any) => {
-          if (entry.valueAsText.length > 1) {
+          if (entry.valueAsText.length > 0) {
             const textValues: any[] = [];
             entry.valueAsText.forEach((textValue: any) => {
               textValues.push(textValue.value || '');
@@ -112,15 +138,19 @@ export class TableViewComponent implements OnInit {
   }
 
   getTableItemsColumnsDefinitions(): string[] {
+    if (!this.metadataService.itemProfileColumns) return [];
     const columnsDefinitions:string[] = this.metadataService.itemProfileColumns.entries
       ?.map(entry => entry.label) || [];
     return [...this.displayedColumns, ...columnsDefinitions];
   }
 
   getTableUnitsColumnsDefinitions(): string[] {
-    const columnsDefinitions:string[] = this.metadataService.unitProfileColumns.entries
-      ?.map(entry => entry.label) || [];
-    return ['Aufgabe', ...columnsDefinitions];
+    const columnsDefinitions:string[] = [];
+    if (!this.metadataService.unitProfileColumns) return [];
+    this.metadataService.unitProfileColumns.forEach((group: any) => {
+      columnsDefinitions.push(group.entries.map((entry:MDProfileEntry) => entry.label));
+    });
+    return ['Aufgabe', ...columnsDefinitions.flat()];
   }
 
   downloadMetadata() {

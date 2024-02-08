@@ -241,7 +241,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         width: '600px'
       }).afterClosed().subscribe(res => {
-        this.metadataService.createItemsMetadataReport().subscribe((units: any) => {
+        this.metadataService.createMetadataReport().subscribe((units: any) => {
           if (res) {
             const selectedUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
             this.showMetadataDialog.open(TableViewComponent, {
