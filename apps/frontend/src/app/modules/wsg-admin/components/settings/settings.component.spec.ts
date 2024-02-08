@@ -12,8 +12,8 @@ import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceSettingsComponent } from './settings.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { ProfilesComponent } from '../profiles/profiles.component';
 import { StatesComponent } from '../states/states.component';
+import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
 
 describe('UsersComponent', () => {
   let component: WorkspaceSettingsComponent;

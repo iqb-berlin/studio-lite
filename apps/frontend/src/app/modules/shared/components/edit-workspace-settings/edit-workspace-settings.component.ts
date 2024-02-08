@@ -10,6 +10,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';
 import { State } from '../../../admin/models/state.type';
+import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 
 type Profile = {
   id:string,
@@ -34,6 +35,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     public backendService: BackendService,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
+
     @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow:SelectedRow }
   ) {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };

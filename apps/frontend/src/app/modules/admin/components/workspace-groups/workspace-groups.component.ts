@@ -17,6 +17,11 @@ import { State } from '../../models/state.type';
 
 const datePipe = new DatePipe('de-DE');
 
+export type Profile = {
+  id: string,
+  label: string
+};
+
 @Component({
   selector: 'studio-lite-workspace-groups',
   templateUrl: './workspace-groups.component.html',
@@ -113,10 +118,10 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
-  editGroupSettings(res: { states: State[], profiles: string[], selectedRow: number }): void {
+  editGroupSettings(res: { states: State[], profiles: Profile[], selectedRow: number }): void {
     this.appService.dataLoading = true;
     this.backendService.setWorkspaceGroupProfiles({
-      defaultEditor: '', defaultPlayer: '', defaultSchemer: ''
+      defaultEditor: '', defaultPlayer: '', defaultSchemer: '', states: res.states, profiles: res.profiles
     }, res.selectedRow)
       .subscribe(
         respOk => {

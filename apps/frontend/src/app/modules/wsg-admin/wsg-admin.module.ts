@@ -27,7 +27,6 @@ import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-menu.component';
 import { WorkspaceSettingsComponent } from './components/settings/settings.component';
-import { ProfilesComponent } from './components/profiles/profiles.component';
 import { StatesComponent } from './components/states/states.component';
 import { DeleteStateComponent } from './components/delete-state/delete-state.component';
 
@@ -38,7 +37,6 @@ import { DeleteStateComponent } from './components/delete-state/delete-state.com
     WsgAdminComponent,
     WorkspaceMenuComponent,
     WorkspaceSettingsComponent,
-    ProfilesComponent,
     StatesComponent,
     DeleteStateComponent
   ],
@@ -68,7 +66,10 @@ import { DeleteStateComponent } from './components/delete-state/delete-state.com
   providers: [
     BackendService,
     [
-      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+      {
+        provide: MAT_DATE_LOCALE,
+        useValue: 'de-DE'
+      },
       {
         provide: HTTP_INTERCEPTORS,
         useClass: AuthInterceptor,

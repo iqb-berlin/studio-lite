@@ -5,10 +5,9 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
-import { BackendService } from '../../services/backend.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
-import { CoreProfile } from '../profiles/profiles.component';
+import { CoreProfile } from '../../../shared/components/profiles/profiles.component';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -20,7 +19,6 @@ export class WorkspaceSettingsComponent implements OnInit {
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
-    private backendService: BackendService,
     public wsgAdminService:WsgAdminService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService
@@ -37,7 +35,7 @@ export class WorkspaceSettingsComponent implements OnInit {
   }
 
   async saveGroupSettings() {
-    this.backendService.setWorkspaceGroupSettings(
+    this.wsgAdminService.setWorkspaceGroupSettings(
       this.wsgAdminService.selectedWorkspaceGroupId, this.settings)
       .pipe(
         takeUntil(this.ngUnsubscribe))
