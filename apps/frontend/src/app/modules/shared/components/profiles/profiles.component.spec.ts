@@ -10,6 +10,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../../../../../environments/environment';
 import { ProfilesComponent } from './profiles.component';
 import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
@@ -40,6 +41,7 @@ describe('ProfilesComponent', () => {
         MatIconModule,
         MatTooltipModule,
         MatFormFieldModule,
+        MatProgressSpinnerModule,
         TranslateModule.forRoot()
       ],
       providers: [

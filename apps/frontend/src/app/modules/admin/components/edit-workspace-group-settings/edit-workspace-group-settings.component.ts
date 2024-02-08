@@ -1,6 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Subject } from 'rxjs';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
@@ -41,7 +40,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.settings = this.wsgAdminService.selectedWorkspaceGroupSettings;
-    this.backendService.getWorkspaceGroupProfiles(this.data.wsg.id).subscribe(res => {
+    this.backendService.getWorkspaceGroupProfiles(this.data.wsg?.id).subscribe(res => {
       this.fetchedProfiles = res.settings?.profiles || [];
       this.formData.profilesSelected = this.fetchedProfiles;
     });

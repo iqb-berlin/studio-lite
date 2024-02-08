@@ -8,6 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
 import { environment } from '../../../../../environments/environment';
+import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
 
 global.fetch = jest.fn(() => Promise.resolve({
   json: () => Promise.resolve({ test: 100 })
@@ -20,7 +21,8 @@ describe('EditWorkspaceGroupComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        EditWorkspaceGroupSettingsComponent
+        EditWorkspaceGroupSettingsComponent,
+        ProfilesComponent
       ],
       imports: [
         HttpClientModule,
