@@ -13,7 +13,7 @@
                            moduleType="editor"
                            [modules]="this.moduleService.editors"
                            [value]="dialogData.defaultEditor"
-                           (selectionChanged)="selectModul('editor', $event)"
+                           (selectionChanged)="selectModule('editor', $event)"
                            [stableOnly]="false">
         </studio-lite-select-module>
       </div>
@@ -26,7 +26,7 @@
                            [modules]="this.moduleService.players"
                            [value]="dialogData.defaultPlayer"
                            [stableOnly]="false"
-                           (selectionChanged)="selectModul('player', $event)">
+                           (selectionChanged)="selectModule('player', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -38,7 +38,7 @@
                            [modules]="this.moduleService.schemers"
                            [value]="dialogData.defaultSchemer"
                            [stableOnly]="false"
-                           (selectionChanged)="selectModul('schemer', $event)">
+                           (selectionChanged)="selectModule('schemer', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
@@ -62,7 +62,11 @@
         <div class="fx-column-start-start">
           <mat-label>{{'metadata.item-profile' | translate }}</mat-label>
           <mat-error *ngIf="itemMDProfiles.length === 0">{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
-          <mat-select class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedItemMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectItemMDProfile($event)" >
+          <mat-select class="select-profile"
+                      placeholder="{{'metadata.select-profile' | translate }}"
+                      [(value)]="selectedItemMDProfile"
+                      (click)="$event.stopPropagation()"
+                      (selectionChange)="selectItemMDProfile($event)" >
             <mat-option *ngFor="let itemMDProfile of itemMDProfiles" [value]="itemMDProfile.id">
               {{itemMDProfile.label}}
             </mat-option>

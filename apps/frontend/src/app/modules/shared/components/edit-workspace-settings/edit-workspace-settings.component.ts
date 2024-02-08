@@ -17,6 +17,13 @@ type Profile = {
   label:string
 };
 
+type SelectedRow = {
+  id:number,
+  groupId:number,
+  name:string,
+  unitsCount:number,
+};
+
 @Component({
   selector: 'studio-lite-edit-workspace-settings',
   templateUrl: './edit-workspace-settings.component.html',
@@ -28,8 +35,8 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     public backendService: BackendService,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
-    public wsgAdminService: WsgAdminService,
-    @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow: number }
+
+    @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow:SelectedRow }
   ) {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
   }
@@ -45,7 +52,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectionChanged = this.dialogData.states as State[];
-    const workspaceGroupId = this.wsgAdminService.selectedWorkspaceGroupId;
+    const workspaceGroupId = this.data.selectedRow.groupId || this.workspaceService.groupId;
     if (workspaceGroupId) {
       this.backendService.getWorkspaceGroupProfiles(workspaceGroupId).subscribe(res => {
         this.unitMDProfiles = res.settings.profiles
@@ -53,7 +60,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
         this.itemMDProfiles = res.settings.profiles
           ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
       });
-      this.backendService.getWorkspaceProfile(this.data.selectedRow).subscribe(res => {
+      this.backendService.getWorkspaceProfile(this.data.selectedRow.id).subscribe(res => {
         if (res.settings?.itemMDProfile) this.selectedItemMDProfile = res.settings.itemMDProfile;
         if (res.settings?.unitMDProfile) this.selectedUnitMDProfile = res.settings.unitMDProfile;
       });
@@ -64,12 +71,12 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     this.dialogData.stableModulesOnly = $event.checked;
   }
 
-  selectModul(modulType: string, newValue: string) {
-    if (modulType === 'editor') {
+  selectModule(moduleType: string, newValue: string) {
+    if (moduleType === 'editor') {
       this.dialogData.defaultEditor = newValue;
-    } else if (modulType === 'schemer') {
+    } else if (moduleType === 'schemer') {
       this.dialogData.defaultSchemer = newValue;
-    } else if (modulType === 'player') {
+    } else if (moduleType === 'player') {
       this.dialogData.defaultPlayer = newValue;
     }
   }
