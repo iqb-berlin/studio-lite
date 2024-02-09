@@ -4,7 +4,6 @@ import {
 import { Subject, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-
 import { TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
@@ -55,12 +54,13 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
           case 'vosSchemeChangedNotification':
             if (msgData.sessionId === this.sessionId) {
               if (msgData.codingScheme) {
+                this.workspaceService.codingScheme = JSON.parse(msgData.codingScheme);
                 this.workspaceService.unitSchemeStore?.setData(msgData.codingScheme, msgData.codingSchemeType);
-              // } else { TODO: find solution for vosGetSchemeRequest
-              //   this.postMessageTarget.postMessage({
-              //     type: 'vosGetSchemeRequest',
-              //     sessionId: this.sessionId
-              //   }, '*');
+                // } else { TODO: find solution for vosGetSchemeRequest
+                //   this.postMessageTarget.postMessage({
+                //     type: 'vosGetSchemeRequest',
+                //     sessionId: this.sessionId
+                //   }, '*');
               }
             }
             break;

@@ -9,6 +9,7 @@
     </iframe>
   </div>
   <studio-lite-preview-bar [pageList]="pageList"
+                           [responses]="responses"
                            [unitId]="unitId"
                            [playerApiVersion]="playerApiVersion"
                            [postMessageTarget]="postMessageTarget"
@@ -17,6 +18,7 @@
                            [responseProgress]="responseProgress"
                            [hasFocus]="hasFocus"
                            (gotoPage)="gotoPage($event)"
-                           (navigationDenied)="postNavigationDenied()">
+                           (navigationDenied)="postNavigationDenied()"
+                           (checkCoding)="checkCoding()">
   </studio-lite-preview-bar>
 </div>
