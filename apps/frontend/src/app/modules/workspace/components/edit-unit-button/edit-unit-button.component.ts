@@ -63,7 +63,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       width: '700px',
       data: {
         settings: this.workspaceService.workspaceSettings,
-        selectedRow: this.workspaceService.selectedWorkspaceId
+        selectedRow: { id: this.workspaceService.selectedWorkspaceId }
       }
     });
 
@@ -240,16 +240,17 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         width: '600px'
-
       }).afterClosed().subscribe(res => {
-        this.metadataService.createItemsMetadataReport().subscribe((units: any) => {
-          const selectedUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
-          this.showMetadataDialog.open(TableViewComponent, {
-            width: '80%',
-            height: '80%',
-            data: { units: selectedUnits },
-            autoFocus: false
-          });
+        this.metadataService.createMetadataReport().subscribe((units: any) => {
+          if (res) {
+            const selectedUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
+            this.showMetadataDialog.open(TableViewComponent, {
+              width: '80%',
+              height: '80%',
+              data: { units: selectedUnits },
+              autoFocus: false
+            });
+          }
         });
       });
     }

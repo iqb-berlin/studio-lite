@@ -1,9 +1,9 @@
 <mat-spinner class="spinner" *ngIf="isLoading"></mat-spinner>
 <div class="container" *ngIf="!isLoading && !isError">
-    <h3>{{'metadata.assign-metadata-profiles' | translate}}</h3>
+    <h4 mat-dialog-title>{{'metadata.assign-metadata-profiles' | translate}}</h4>
     <form class="fx-column-start-stretch scroll-area" >
       <div *ngFor="let collection of ProfileStoreWithProfilesCollection" class="profile-stores">
-        <mat-expansion-panel class="profile-store">
+        <mat-expansion-panel class="profile-store mat-elevation-z0">
           <mat-expansion-panel-header>
             <mat-panel-title>
               {{collection.profileStore.title}}
@@ -25,4 +25,3 @@
 <mat-error *ngIf="isError">
     {{'metadata.error-fetching-metadata-profiles' | translate}}
 </mat-error>
-

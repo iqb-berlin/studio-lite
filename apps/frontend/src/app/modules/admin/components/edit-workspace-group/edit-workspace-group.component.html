@@ -6,12 +6,12 @@
         <input matInput
                formControlName="name"
                [placeholder]="'admin.group-name' | translate"
-               [value]="data.name">
+               [value]="name">
       </mat-form-field>
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions>
+<mat-dialog-actions align="end">
   <button mat-raised-button
           color="primary"
           type="submit"
@@ -19,6 +19,7 @@
           [disabled]="editWorkspaceGroupForm.invalid">
     {{data.saveButtonLabel}}
   </button>
+
   <button mat-raised-button
           [mat-dialog-close]="false">
     {{'cancel' | translate}}

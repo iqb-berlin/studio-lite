@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { MDProfile, MDProfileGroup } from '@iqb/metadata';
+import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -19,9 +19,10 @@ type TopConcept = {
 })
 
 export class MetadataService {
+  idLabelDictionary: any = {};
   vocabulariesIdDictionary: any = {};
   vocabularies: any = [];
-  unitProfileColumns:MDProfileGroup = {} as MDProfileGroup;
+  unitProfileColumns:MDProfileGroup[] = [];
   itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   constructor(@Inject('SERVER_URL') private readonly serverUrl: string,
@@ -31,61 +32,58 @@ export class MetadataService {
   }
 
   async getProfileVocabularies(profile: MDProfile) {
-    const vocabularyURLs = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const group of profile.groups) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const entry of group.entries) {
+    const vocabularyURLs:any = [];
+    profile.groups.forEach(group => {
+      group.entries.forEach(entry => {
         const entryParams = entry.parameters as ProfileEntryParametersVocabulary;
-        if (entry.type === 'vocabulary') vocabularyURLs.push(entryParams.url);
-      }
-    }
-    const promises = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const url of vocabularyURLs) {
-      promises.push(this.fetchVocabulary(url));
-    }
-    const vocabularies = await Promise.all(promises);
-    this.backendService.saveVocabs(vocabularies).subscribe(() => {
+        if (entry.type === 'vocabulary') vocabularyURLs.push(entryParams);
+      });
     });
+    const promises:any = [];
+    vocabularyURLs.forEach((entryParams:any) => {
+      promises.push(this.fetchVocabulary(entryParams.url));
+    });
+    const vocabularies = await Promise.all(promises);
+    this.backendService.saveVocabs(vocabularies).subscribe(() => {});
     if (this.vocabularies.length) {
       this.vocabularies = [...this.vocabularies, ...vocabularies];
     } else {
       this.vocabularies = vocabularies;
     }
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const vocabulary of this.vocabularies) {
-      this.vocabulariesIdDictionary = {
-        ...this.vocabulariesIdDictionary,
-        ...this.mapVocabularyIds(vocabulary.data)
-      };
-    }
+    this.vocabularies.forEach((vocabulary:any) => {
+      vocabularyURLs.forEach((entryParams:any) => {
+        if (entryParams.url === vocabulary.url) {
+          this.vocabulariesIdDictionary = {
+            ...this.vocabulariesIdDictionary,
+            ...this.mapVocabularyIds(vocabulary.data, entryParams)
+          };
+        }
+      });
+    });
     return this.vocabulariesIdDictionary;
   }
 
-  // eslint-disable-next-line
-  mapVocabularyIds(vocabulary: any) {
-    const idLabelDictionary: any = {};
+  mapVocabularyIds(vocabulary: any, entryParams: MDProfileEntry) {
     const hasNarrower = (narrower: TopConcept[]) => {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const vocabularyEntry of narrower) {
-        idLabelDictionary[vocabularyEntry.id] = {
+      narrower.forEach((vocabularyEntry: TopConcept) => {
+        this.idLabelDictionary[vocabularyEntry.id] = {
           labels: vocabularyEntry.prefLabel,
-          notation: vocabularyEntry.notation || ''
+          notation: vocabularyEntry.notation || '',
+          ...entryParams
         };
         if (vocabularyEntry.narrower) hasNarrower(vocabularyEntry.narrower);
-      }
+      });
     };
 
     if (vocabulary.hasTopConcept) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const topConcept of vocabulary.hasTopConcept) {
-        idLabelDictionary[topConcept.id] = { labels: topConcept.prefLabel, notation: topConcept.notation || '' };
+      vocabulary.hasTopConcept.forEach((topConcept: TopConcept) => {
+        this.idLabelDictionary[topConcept.id] = {
+          labels: topConcept.prefLabel, notation: topConcept.notation || '', ...entryParams
+        };
         if (topConcept.narrower) hasNarrower(topConcept.narrower);
-      }
+      });
     }
-    return idLabelDictionary;
+    return this.idLabelDictionary;
   }
 
   async fetchVocabulary(url: string): Promise<any> {
@@ -105,8 +103,9 @@ export class MetadataService {
   }
 
   downloadItemsMetadataReport(columns:string[]): Observable<Blob> {
+    const joinedString = columns.join(',');
     return this.http.get(
-      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${columns.join(',')}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${encodeURIComponent(joinedString)}}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
@@ -115,8 +114,9 @@ export class MetadataService {
   }
 
   downloadUnitsMetadataReport(columns:string[]): Observable<Blob> {
+    const joinedString = columns.join(',');
     return this.http.get(
-      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${columns.join(',')}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${encodeURIComponent(joinedString)}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
@@ -124,7 +124,7 @@ export class MetadataService {
       });
   }
 
-  createItemsMetadataReport(): Observable<boolean | unknown> {
+  createMetadataReport(): Observable<boolean | unknown> {
     return this.http.get(
       `${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
       .pipe(

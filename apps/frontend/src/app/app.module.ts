@@ -63,8 +63,11 @@ import {
   LoginAlternativeWarningComponent
 } from './components/login-alternative-warning/login-alternative-warning.component';
 
+// eslint-disable-next-line no-bitwise
+const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
+
 export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+  return new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math.abs(hash(new Date().toISOString()))}`);
 }
 
 @NgModule({

@@ -67,7 +67,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return this.getProfile(this.profileUrl as string);
   }
 
-  private async loadProfile(json: any) {
+  private async loadProfile(json: unknown) {
     this.profile = new MDProfile(json);
     await this.metadataService.getProfileVocabularies(this.profile);
     this.model = this.mapMetadataValuesToFormlyModel(
@@ -220,10 +220,10 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       }
       if (value.length && value[0].id) {
         return value.map((v:any) => {
-          const name = this.metadataService.vocabulariesIdDictionary[v.id].labels.de;
-          const notation = this.metadataService.vocabulariesIdDictionary[v.id].notation[0] || '';
+          const name = this.metadataService.vocabulariesIdDictionary[v.id]?.labels.de;
+          const notation = this.metadataService.vocabulariesIdDictionary[v.id]?.notation[0] || '';
           return {
-            name: `${notation} ${name} `,
+            name: `${this.metadataService.vocabulariesIdDictionary[v.id]?.hideNumbering ? '' : notation} ${name} `,
             notation: notation,
             text: v.text,
             id: v.id
@@ -243,26 +243,28 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   // ///////////////////////////
 
   private mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
-    const groups = profile?.groups;
-    if (groups[0].label === 'Item') {
-      this.metadataService.itemProfileColumns = groups[0];
-    }
-    if (groups[0].label === 'Aufgabe') {
-      this.metadataService.unitProfileColumns = groups[0];
-    }
-    return groups?.map((group: MDProfileGroup) => ({
-      wrappers: this.formlyWrapper ? [this.formlyWrapper] : undefined,
-      props: {
-        label: group.label,
-        expanded: this.panelExpanded
-      },
-      fieldGroup:
-        group.entries.map((entry: MDProfileEntry) => {
-          this.registerProfileItem(entry);
-          return ProfileFormComponent.getFormlyField(entry);
-        })
-    })
-    );
+    if (profile) {
+      const groups = profile?.groups;
+      if (groups[0].label === 'Item') {
+        this.metadataService.itemProfileColumns = groups[0];
+      } else {
+        this.metadataService.unitProfileColumns = groups;
+      }
+
+      return groups?.map((group: MDProfileGroup) => ({
+        wrappers: this.formlyWrapper ? [this.formlyWrapper] : undefined,
+        props: {
+          label: group.label,
+          expanded: this.panelExpanded
+        },
+        fieldGroup:
+            group.entries.map((entry: MDProfileEntry) => {
+              this.registerProfileItem(entry);
+              return ProfileFormComponent.getFormlyField(entry);
+            })
+      })
+      );
+    } return [];
   }
 
   private static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {

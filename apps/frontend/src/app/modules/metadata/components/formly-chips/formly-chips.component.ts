@@ -55,19 +55,20 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
         props: this.props,
         vocabularies: this.metadataService.vocabularies
       },
-      width: '1200px'
+      width: '1000px'
     });
 
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(results => {
+      .subscribe((results:{ nodes:NotationNode[], hideNumbering:boolean }) => {
         if (results) {
-          const selectedVocabularyEntries = results
+          const selectedVocabularyEntries = results.nodes
             .map((result: NotationNode) => ({
-              name: `${result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`.trim(),
+              name: `${results.hideNumbering ? '' :
+                result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`.trim(),
               id: result.id,
               notation: result.notation,
-              text: [{ lang: 'de', value: `${result.notation} ${result.label}`.trim() }]
+              text: [{ lang: 'de', value: `${results.hideNumbering ? '' : result.notation} ${result.label}`.trim() }]
             }))
             .sort((a: NotationNode, b: NotationNode) => {
               const nameA = a.name?.toUpperCase() || '';

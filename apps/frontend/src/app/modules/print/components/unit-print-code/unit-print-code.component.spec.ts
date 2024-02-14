@@ -17,7 +17,7 @@ describe('UnitPrintCodeComponent', () => {
     fixture = TestBed.createComponent(UnitPrintCodeComponent);
     component = fixture.componentInstance;
     component.codeData = {
-      id: 1, label: 'test', score: 0, rules: [], manualInstruction: ''
+      id: 1, label: 'test', score: 0, manualInstruction: '', ruleSets: [], ruleSetOperatorAnd: true
     };
     fixture.detectChanges();
   });
