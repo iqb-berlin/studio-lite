@@ -1,25 +1,25 @@
 import {
-  changePassword, createNewUser, grantPrivilegeOn, clickButtonToAccept, insertCredentials, logout, visitLoginPage
+  createNewUser, grantPrivilegeOn, clickButtonToAccept, insertCredentials, logout, visitLoginPage
 } from '../../support/util';
 import { adminData } from '../../support/config/userdata';
 
 describe('Usermanagement (user-tab)', () => {
   beforeEach(visitLoginPage);
 
-  it.skip('should be possible login with credentials', () => {
+  it('should be possible login with credentials', () => {
     insertCredentials(adminData.user_name, adminData.user_pass);
     clickButtonToAccept('Weiter');
     logout();
   });
 
-  it.skip('should not be able to login with incorrect credentials', () => {
+  it('should not be able to login with incorrect credentials', () => {
     insertCredentials(adminData.user_name, 'nopass');
     cy.intercept('POST', '/api/login').as('responseLogin');
     clickButtonToAccept('Weiter');
     cy.wait('@responseLogin').its('response.statusCode').should('eq', 401);
   });
 
-  it.skip('should be able to find admin user setting button', () => {
+  it('should be able to find admin user setting button', () => {
     insertCredentials(adminData.user_name, adminData.user_pass);
     clickButtonToAccept('Weiter');
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
@@ -64,7 +64,7 @@ describe('Usermanagement (user-tab)', () => {
     clickButtonToAccept('Löschen');
   });
 
-  it.skip('user with admin credentials can create a Bereichsgruppe', () => {
+  it('user with admin credentials can create a Bereichsgruppe', () => {
     insertCredentials(adminData.user_name, adminData.user_pass);
     clickButtonToAccept('Weiter');
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
@@ -79,7 +79,7 @@ describe('Usermanagement (user-tab)', () => {
     clickButtonToAccept('Anlegen');
   });
 
-  it.skip('user with admin credentials can assign a Bereichsgruppe', () => {
+  it('user with admin credentials can assign a Bereichsgruppe', () => {
     grantPrivilegeOn('user', 'Mathematik Primär Bereichsgruppe');
   });
 

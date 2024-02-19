@@ -1,4 +1,4 @@
-import { userData, Metadata1 } from '../../support/config/userdata';
+import { userData, Metadata1 } from '../../../support/config/userdata';
 
 function getNotationDeep(notation: string): number {
   return (notation.split('.')).length - 1;

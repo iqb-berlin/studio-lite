@@ -2,7 +2,7 @@ import Chainable = Cypress.Chainable;
 import { adminData, userData } from './config/userdata';
 
 export const visitLoginPage = (): Chainable => cy.url()
-  .then(url => {
+  .then(() => {
     cy.visit(<string>Cypress.config().baseUrl);
   });
 
@@ -28,7 +28,7 @@ export const loginAdmin = ():void => {
   cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
 };
 export const clickButtonToAccept = (text: string):Chainable => cy.url()
-  .then(url => {
+  .then(() => {
     cy.get('button')
       .contains(text)
       .should('exist')
@@ -123,3 +123,4 @@ export const grantPrivilegeOn = (user:string, group: string):void => {
   cy.get(`label:contains(${user})`).prev().click();
   cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
 };
+
