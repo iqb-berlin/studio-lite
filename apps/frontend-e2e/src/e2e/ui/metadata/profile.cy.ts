@@ -1,4 +1,6 @@
-import { checkProfil, clickButtonToAccept, login, logout, visitLoginPage } from '../../../support/util';
+import {
+  checkProfil, clickButtonToAccept, login, logout, visitLoginPage
+} from '../../../support/util';
 import { adminData } from '../../../support/config/userdata';
 
 describe('Load metadata profile', () => {
@@ -55,7 +57,7 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     searchProfiles.forEach(searchProfile => {
-      checkProfil(searchProfile)
+      checkProfil(searchProfile);
     });
     clickButtonToAccept('Speichern');
   });
