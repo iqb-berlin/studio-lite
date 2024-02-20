@@ -6,7 +6,7 @@ export const visitLoginPage = (): Chainable => cy.url()
     cy.visit(<string>Cypress.config().baseUrl);
   });
 
-export const insertCredentials = (username: string, password = ''): void => {
+export const login = (username: string, password = ''): void => {
   // cy.get("#mat-input-0") gut
   cy.get('input[placeholder="Anmeldename"]')
     .should('exist')
@@ -19,14 +19,41 @@ export const insertCredentials = (username: string, password = ''): void => {
       .clear()
       .type(password);
   }
-};
-export const loginAdmin = ():void => {
-  insertCredentials(userData.user_name, userData.user_pass);
-  cy.intercept('/api/login').as('asLogin');
+  cy.intercept('POST', '/api/login').as('responseLogin');
   clickButtonToAccept('Weiter');
-  cy.wait('@asLogin');
-  cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
+  cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
+  // cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
 };
+
+export const createGroupArea = (areaName:string):void => {
+  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    .should('exist')
+    .click();
+  cy.get('span:contains("Bereichsgruppen")')
+    .eq(0)
+    .click();
+  cy.get('mat-icon').contains('add').click();
+  cy.get('input[placeholder="Name"]')
+    .type(areaName);
+  clickButtonToAccept('Anlegen');
+};
+
+export const deleteGroupArea = (areaName:string):void => {
+  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    .should('exist')
+    .click();
+  cy.get('span:contains("Bereichsgruppen")')
+    .eq(0)
+    .click();
+  cy.get('mat-table')
+    .contains(areaName)
+    .click();
+  cy.get('mat-icon')
+    .contains('delete')
+    .click();
+  clickButtonToAccept('Löschen');
+};
+
 export const clickButtonToAccept = (text: string):Chainable => cy.url()
   .then(() => {
     cy.get('button')
@@ -36,8 +63,8 @@ export const clickButtonToAccept = (text: string):Chainable => cy.url()
   });
 
 export const logout = () => {
-  // TODO selector
-  cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
+  cy.get('mat-icon:contains("account_box")')
+    .click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
@@ -66,24 +93,6 @@ export const changePassword = (newPass:string, oldPass:string):void => {
   clickButtonToAccept('Speichern');
 };
 
-export const prepareAdminTest = ():void => {
-  insertCredentials(adminData.user_name, adminData.user_pass);
-  clickButtonToAccept('Weiter');
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
-    .click();
-  cy.get('mat-icon').contains('add').click();
-  cy.get('input[placeholder="Login-Name"]')
-    .should('exist')
-    .clear()
-    .type('bbb');
-  cy.get('input[placeholder="Kennwort"]')
-    .should('exist')
-    .clear()
-    .type('ccc');
-  clickButtonToAccept('Anlegen');
-};
-
 export const createNewUser = (name: string, pass: string):void => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
@@ -107,9 +116,7 @@ export const createNewUser = (name: string, pass: string):void => {
     .type(`${pass}`);
   clickButtonToAccept('Anlegen');
 };
-export const grantPrivilegeOn = (user:string, group: string):void => {
-  insertCredentials(adminData.user_name, adminData.user_pass);
-  clickButtonToAccept('Weiter');
+export const grantRemovePrivilegeOn = (user:string, group: string):void => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -124,3 +131,33 @@ export const grantPrivilegeOn = (user:string, group: string):void => {
   cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
 };
 
+export const checkProfil = (profil: string):void => {
+  cy.get('mat-panel-title')
+    .contains(profil)
+    .parent()
+    .next()
+    .click();
+  cy.get('label:contains("Aufgabe")')
+    .contains(profil)
+    .prev()
+    .click();
+  cy.get('label:contains("Item")')
+    .contains(profil)
+    .prev()
+    .click();
+};
+
+export const addModule = ():void => {
+  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    .should('exist')
+    .click();
+  cy.get('span:contains("Module")')
+    .eq(0)
+    .click();
+  cy.get('mat-icon:contains("cloud_upload")')
+    .should('exist')
+    .click();
+  // TODO
+  // cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
+  // cy.fixture('iqb-editor-aspect-2.4.0-beta.1.html').selectFile('@myFixture');
+};

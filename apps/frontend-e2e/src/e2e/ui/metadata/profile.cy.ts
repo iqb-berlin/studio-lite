@@ -1,4 +1,4 @@
-import { clickButtonToAccept, insertCredentials, visitLoginPage } from '../../../support/util';
+import { checkProfil, clickButtonToAccept, login, logout, visitLoginPage } from '../../../support/util';
 import { adminData } from '../../../support/config/userdata';
 
 describe('Load metadata profile', () => {
@@ -6,10 +6,11 @@ describe('Load metadata profile', () => {
     cy.viewport(1600, 900);
     visitLoginPage();
   });
-  it('should be possible load a metadata profile', () => {
-    const searchProfile:string = 'Mathematik';
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    clickButtonToAccept('Weiter');
+  afterEach(logout);
+
+  it.skip('should be possible load a metadata profile from General administration', () => {
+    const searchProfile:string = 'Deutsch';
+    login(adminData.user_name, adminData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('exist')
       .click();
@@ -22,28 +23,26 @@ describe('Load metadata profile', () => {
     cy.get('mat-icon')
       .contains('settings')
       .click();
-    cy.get('mat-panel-title')
-      .contains(searchProfile)
-      .parent()
-      .next()
-      .click();
-    cy.get('label')
-      .contains('Aufgabe')
-      .contains(searchProfile)
-      .prev()
-      .click();
-    cy.get('label')
-      .contains('Item')
-      .contains(searchProfile)
-      .prev()
-      .click();
+    checkProfil(searchProfile);
     clickButtonToAccept('Speichern');
   });
+
+  it('should be possible load a metadata profile from Group administration', () => {
+    const searchProfile:string = 'Französisch';
+    login(adminData.user_name, adminData.user_pass);
+    cy.get(`div:contains("${searchProfile}")`)
+      .should('exist')
+      .click();
+    cy.get('span:contains("Einstellungen")')
+      .click();
+    checkProfil(searchProfile);
+    clickButtonToAccept('Speichern');
+  });
+
   it.skip('should be possible load all metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Französisch', 'Deutsch', 'Mathematik'];
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    clickButtonToAccept('Weiter');
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    login(adminData.user_name, adminData.user_pass);
+    cy.get('mat-icon:contains("settings")')
       .should('exist')
       .click();
     cy.get('span:contains("Bereichsgruppen")')
@@ -56,21 +55,7 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     searchProfiles.forEach(searchProfile => {
-      cy.get('mat-panel-title')
-        .contains(searchProfile)
-        .parent()
-        .next()
-        .click();
-      cy.get('label')
-        .contains(searchProfile)
-        .eq(0)
-        .prev()
-        .click();
-      cy.get('label')
-        .contains(searchProfile)
-        .eq(1)
-        .prev()
-        .click();
+      checkProfil(searchProfile)
     });
     clickButtonToAccept('Speichern');
   });

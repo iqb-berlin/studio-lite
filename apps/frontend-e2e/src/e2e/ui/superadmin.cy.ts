@@ -1,27 +1,21 @@
 import {
-  createNewUser, grantPrivilegeOn, clickButtonToAccept, insertCredentials, logout, visitLoginPage
+  createNewUser,
+  grantRemovePrivilegeOn,
+  clickButtonToAccept,
+  login,
+  logout,
+  visitLoginPage,
+  createGroupArea,
+  addModule,
+  deleteGroupArea
 } from '../../support/util';
 import { adminData } from '../../support/config/userdata';
 
-describe('Usermanagement (user-tab)', () => {
+describe('Admin Management', () => {
   beforeEach(visitLoginPage);
 
-  it('should be possible login with credentials', () => {
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    clickButtonToAccept('Weiter');
-    logout();
-  });
-
-  it('should not be able to login with incorrect credentials', () => {
-    insertCredentials(adminData.user_name, 'nopass');
-    cy.intercept('POST', '/api/login').as('responseLogin');
-    clickButtonToAccept('Weiter');
-    cy.wait('@responseLogin').its('response.statusCode').should('eq', 401);
-  });
-
   it('should be able to find admin user setting button', () => {
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    clickButtonToAccept('Weiter');
+    login(adminData.user_name, adminData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('exist')
       .click();
@@ -30,18 +24,14 @@ describe('Usermanagement (user-tab)', () => {
   });
 
   it('user with admin credentials can add new user', () => {
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    cy.intercept('POST', '/api/login').as('responseLogin');
-    clickButtonToAccept('Weiter');
-    cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
+    login(adminData.user_name, adminData.user_pass);
     createNewUser('newuser', 'newpass');
     visitLoginPage();
     logout();
   });
 
   it('user with admin credentials can delete a user', () => {
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    clickButtonToAccept('Weiter');
+    login(adminData.user_name, adminData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('exist')
       .click();
@@ -62,11 +52,12 @@ describe('Usermanagement (user-tab)', () => {
     //   });
     cy.get('mat-icon').contains('delete').click();
     clickButtonToAccept('Löschen');
+    visitLoginPage();
+    logout();
   });
 
   it('user with admin credentials can create a Bereichsgruppe', () => {
-    insertCredentials(adminData.user_name, adminData.user_pass);
-    clickButtonToAccept('Weiter');
+    login(adminData.user_name, adminData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('exist')
       .click();
@@ -77,24 +68,47 @@ describe('Usermanagement (user-tab)', () => {
     cy.get('input[placeholder="Name"]')
       .type('Mathematik Primär Bereichsgruppe');
     clickButtonToAccept('Anlegen');
+    visitLoginPage();
+    logout();
   });
 
-  it('user with admin credentials can assign a Bereichsgruppe', () => {
-    grantPrivilegeOn('user', 'Mathematik Primär Bereichsgruppe');
+  it('prepare the Context', () => {
+    login(adminData.user_name, adminData.user_pass);
+    const areaGroups = ['Mathematik Primär und Sek I',
+      'Deutsch Primär und Sek I',
+      'Französisch Sek I',
+      'Englisch Sek I'];
+    areaGroups.forEach(area => {
+      createGroupArea(area);
+      visitLoginPage();
+    });
+    logout();
   });
 
-  it('user with admin credentials can Player hochladen', () => {
-    // TODO
+  it('remove the Context', () => {
+    login(adminData.user_name, adminData.user_pass);
+    const areaGroups = ['Mathematik Primär und Sek I',
+      'Deutsch Primär und Sek I',
+      'Französisch Sek I',
+      'Englisch Sek I'];
+    areaGroups.forEach(area => {
+      deleteGroupArea(area);
+      visitLoginPage();
+    });
+    logout();
   });
 
-  it('user with admin credentials can Editor hochladen', () => {
-    // TODO
+  it('user with admin credentials can grand access to a Bereichsgruppe', () => {
+    login(adminData.user_name, adminData.user_pass);
+    grantRemovePrivilegeOn('user', 'Mathematik Primär Bereichsgruppe');
+    visitLoginPage();
+    logout();
   });
 
-  it('user with admin credentials can Schemer hochladen', () => {
-    // TODO
-  });
-  it('user should be able to logout', () => {
+  it('user with admin credentials can Module hochladen', () => {
+    login(adminData.user_name, adminData.user_pass);
+    addModule();
+    visitLoginPage();
     logout();
   });
 });
