@@ -21,6 +21,7 @@ import { PageNavigationComponent } from './components/page-navigation/page-navig
 import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { ProfilesComponent } from './components/profiles/profiles.component';
+import { IncludePipe } from './pipes/include.pipe';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { ProfilesComponent } from './components/profiles/profiles.component';
     PageNavigationComponent,
     UnitMetaDataComponent,
     WrappedIconComponent,
-    ProfilesComponent
+    ProfilesComponent,
+    IncludePipe
   ],
   imports: [
     CommonModule,
@@ -58,7 +60,10 @@ import { ProfilesComponent } from './components/profiles/profiles.component';
     PageNavigationComponent,
     UnitMetaDataComponent,
     WrappedIconComponent,
-    ProfilesComponent
+    ProfilesComponent,
+    MatDialogModule,
+    MatButtonModule,
+    IncludePipe
   ]
 })
 export class SharedModule {}

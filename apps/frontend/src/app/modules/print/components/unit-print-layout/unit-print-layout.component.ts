@@ -6,6 +6,7 @@ import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../../workspace/services/backend.service';
 import { AppService } from '../../../../services/app.service';
+import { PrintOption } from '../../models/print-options.interface';
 
 @Component({
   selector: 'studio-lite-unit-print-layout',
@@ -15,6 +16,7 @@ import { AppService } from '../../../../services/app.service';
 export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;
   @Input() workspaceId!: number;
+  @Input() printOptions!: PrintOption[];
 
   @Output() heightChange: EventEmitter<number> = new EventEmitter<number>();
   playerHeight: number = 1700;
