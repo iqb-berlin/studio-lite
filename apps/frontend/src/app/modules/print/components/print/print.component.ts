@@ -2,6 +2,7 @@ import {
   Component, ElementRef, OnInit, ViewChild
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { PrintOption } from '../../models/print-options.interface';
 
 @Component({
   selector: 'studio-lite-print',
@@ -11,6 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 export class PrintComponent implements OnInit {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
   unitIds!: number[];
+  printOptions!: PrintOption[];
   workspaceId!: number;
 
   constructor(private route: ActivatedRoute) {}
@@ -18,6 +20,7 @@ export class PrintComponent implements OnInit {
   ngOnInit() {
     this.route.queryParamMap
       .subscribe(params => {
+        this.printOptions = params.getAll('printOptions') as PrintOption[];
         this.unitIds = params.getAll('unitIds').map(unitId => Number(unitId));
         this.workspaceId = Number(params.get('workspaceId'));
       });

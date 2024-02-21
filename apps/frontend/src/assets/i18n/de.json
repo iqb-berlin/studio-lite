@@ -627,6 +627,12 @@
     "login": "Login"
   },
   "print": {
+    "printOptions": "Druckoptionen",
+    "printProperties": "Eigenschaften drucken",
+    "printComments":  "Kommentare drucken",
+    "printCoding":  "Kodierung drucken",
+    "printPreview": "Vorschau(Player) drucken",
+    "print": "Drucken",
     "description": "Beschreibung/Notizen",
     "transcript": "Transkript",
     "reference": "Copyright/Quellen",

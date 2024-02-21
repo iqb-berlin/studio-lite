@@ -4,6 +4,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../../environments/environment';
 import { PageData } from '../../models/page-data.interface';
 import { Progress } from '../../models/types';
@@ -35,6 +40,11 @@ describe('PreviewBarComponent', () => {
         PagingModeSelectionComponent
       ],
       imports: [
+        MatButtonModule,
+        MatIconModule,
+        MatSelectModule,
+        FormsModule,
+        MatDialogModule,
         MatTooltipModule,
         HttpClientModule,
         TranslateModule.forRoot()

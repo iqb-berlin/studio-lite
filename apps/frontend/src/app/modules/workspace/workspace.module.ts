@@ -82,6 +82,7 @@ import { UnitPropertiesComponent } from './components/unit-properties/unit-prope
 import { MetadataModule } from '../metadata/metadata.module';
 import { GetStateColorPipe } from './pipes/get-state-color.pipe';
 import { ShowMetadataComponent } from './components/show-metadata/show-metadata.component';
+import { PrintUnitsDialogComponent } from './components/print-units-dialog/print-units-dialog.component';
 
 @NgModule({
   imports: [
@@ -169,7 +170,8 @@ import { ShowMetadataComponent } from './components/show-metadata/show-metadata.
     StatusIndicationComponent,
     UnitGroupsComponent,
     UnitPropertiesComponent,
-    ShowMetadataComponent
+    ShowMetadataComponent,
+    PrintUnitsDialogComponent
   ],
   exports: [
     WorkspaceComponent,
@@ -182,5 +184,4 @@ import { ShowMetadataComponent } from './components/show-metadata/show-metadata.
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
   ]
 })
-export class WorkspaceModule {
-}
+export class WorkspaceModule {}

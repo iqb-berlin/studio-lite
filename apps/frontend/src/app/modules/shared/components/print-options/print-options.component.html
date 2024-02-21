@@ -1,0 +1,8 @@
+<ng-container *ngFor="let option of printOptions ">
+  <div>
+    <mat-checkbox [(ngModel)]="option.value"
+                  (ngModelChange)="printOptionsChange.emit(printOptions)">
+      {{ 'print.' + option.key | translate }}
+    </mat-checkbox>
+  </div>
+</ng-container>

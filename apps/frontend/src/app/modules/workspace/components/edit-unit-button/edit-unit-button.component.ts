@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
@@ -24,11 +23,11 @@ import { BackendService as AppBackendService } from '../../../../services/backen
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
 import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
 import { MetadataService } from '../../../metadata/services/metadata.service';
+import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -164,7 +163,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
-        if (result !== false) {
+        if (result) {
           this.appService.dataLoading = true;
           this.backendService.downloadUnits(
             this.workspaceService.selectedWorkspaceId,
@@ -195,45 +194,27 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   }
 
   printUnits(): void {
-    this.printUnitDialog()
-      .then((unitsToPrint: number[] | boolean) => {
-        if (Array.isArray(unitsToPrint) && unitsToPrint.length) {
-          const url = this.router
-            .serializeUrl(this.router
-              .createUrlTree(['/print'], {
-                queryParams: {
-                  unitIds: unitsToPrint,
-                  workspaceId: this.workspaceService.selectedWorkspaceId
-                }
-              }));
-          window.open(`#${url}`, '_blank');
-        }
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      const dialogRef = this.selectUnitDialog.open(PrintUnitsDialogComponent, {
+        width: '1000px'
       });
-  }
 
-  private async printUnitDialog(): Promise<number[] | boolean> {
-    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-      width: '500px',
-      height: '700px',
-      data: <SelectUnitData>{
-        title: this.translate.instant('workspace.print-units'),
-        buttonLabel: this.translate.instant('workspace.print'),
-        fromOtherWorkspacesToo: false,
-        multiple: true
-      }
-    });
-    return lastValueFrom(dialogRef.afterClosed()
-      .pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            const dialogComponent = dialogRef.componentInstance;
-            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-              return dialogComponent.selectedUnitIds;
-            }
+      dialogRef.afterClosed()
+        .subscribe(result => {
+          if (result) {
+            const url = this.router
+              .serializeUrl(this.router
+                .createUrlTree(['/print'], {
+                  queryParams: {
+                    printOptions: result.printOptions,
+                    unitIds: result.unitIds,
+                    workspaceId: this.workspaceService.selectedWorkspaceId
+                  }
+                }));
+            window.open(`#${url}`, '_blank');
           }
-          return false;
-        })
-      ));
+        });
+    }
   }
 
   showMetadata(): void {
