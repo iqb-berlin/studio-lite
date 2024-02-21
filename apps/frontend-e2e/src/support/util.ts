@@ -1,5 +1,4 @@
 import Chainable = Cypress.Chainable;
-import { adminData, userData } from './config/userdata';
 
 export const visitLoginPage = (): Chainable => cy.url()
   .then(() => {
@@ -23,7 +22,6 @@ export const login = (username: string, password = ''): void => {
   clickButtonToAccept('Weiter');
   cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
   // cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
-
 };
 
 export const createGroupArea = (areaName:string):void => {
