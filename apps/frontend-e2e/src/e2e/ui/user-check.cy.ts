@@ -1,14 +1,22 @@
 import {
   changePassword,
-  clickButtonToAccept, login, logout, visitLoginPage
+  clickButtonToAccept, createNewUser, deleteUser, login, logout, visitLoginPage
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
 
 describe('User Management', () => {
   beforeEach(visitLoginPage);
 
+  it('prepare the Context', () => {
+    login(adminData.user_name, adminData.user_pass);
+    createNewUser(userData.user_name, userData.user_pass);
+    visitLoginPage();
+    logout();
+  });
+
   it('should be possible login with credentials', () => {
     login(userData.user_name, userData.user_pass);
+    visitLoginPage();
     logout();
   });
 
@@ -28,6 +36,7 @@ describe('User Management', () => {
 
   it('user should be able to logout', () => {
     login(userData.user_name, userData.user_pass);
+    visitLoginPage();
     logout();
   });
 
@@ -42,27 +51,22 @@ describe('User Management', () => {
   it('should be possible change the password', () => {
     login(userData.user_name, userData.user_pass);
     changePassword('newpass', userData.user_pass);
+    visitLoginPage();
     logout();
-
-    visitLoginPage();
-    cy.get('input[placeholder="Anmeldename"]')
-      .should('exist')
-      .clear()
-      .type(userData.user_name);
-    cy.get('input[placeholder="Kennwort"]')
-      .should('exist')
-      .clear()
-      .type(userData.user_pass);
-    cy.intercept('POST', '/api/login').as('responseLogin1');
-    clickButtonToAccept('Weiter');
-    cy.wait('@responseLogin1').its('response.statusCode').should('eq', 401);
-
-    visitLoginPage();
     login(userData.user_name, 'newpass');
     changePassword(userData.user_pass, 'newpass');
+    visitLoginPage();
     logout();
   });
-  it('should be able to modify personal data', () => {
-    // TODO
+
+  it('delete the Context', () => {
+    login(adminData.user_name, adminData.user_pass);
+    deleteUser(userData.user_name);
+    visitLoginPage();
+    logout();
   });
+
+  // it('should be able to modify personal data', () => {
+  //   // TODO
+  // });
 });

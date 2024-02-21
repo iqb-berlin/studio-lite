@@ -23,6 +23,7 @@ export const login = (username: string, password = ''): void => {
   clickButtonToAccept('Weiter');
   cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
   // cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
+
 };
 
 export const createGroupArea = (areaName:string):void => {
@@ -116,6 +117,21 @@ export const createNewUser = (name: string, pass: string):void => {
     .type(`${pass}`);
   clickButtonToAccept('Anlegen');
 };
+
+export const deleteUser = (user: string):void => {
+  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    .should('exist')
+    .click();
+  cy.get('mat-table')
+    .contains(`${user}`)
+    .should('exist')
+    .click();
+  cy.get('mat-icon')
+    .contains('delete')
+    .click();
+  clickButtonToAccept('Löschen');
+};
+
 export const grantRemovePrivilegeOn = (user:string, group: string):void => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
@@ -147,17 +163,17 @@ export const checkProfil = (profil: string):void => {
     .click();
 };
 
-export const addModule = ():void => {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
-    .click();
-  cy.get('span:contains("Module")')
-    .eq(0)
-    .click();
-  cy.get('mat-icon:contains("cloud_upload")')
-    .should('exist')
-    .click();
-  // TODO
-  // cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
-  // cy.fixture('iqb-editor-aspect-2.4.0-beta.1.html').selectFile('@myFixture');
-};
+// export const addModule = ():void => {
+//   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+//     .should('exist')
+//     .click();
+//   cy.get('span:contains("Module")')
+//     .eq(0)
+//     .click();
+//   cy.get('mat-icon:contains("cloud_upload")')
+//     .should('exist')
+//     .click();
+//   // TODO
+//   // cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
+//   // cy.fixture('iqb-editor-aspect-2.4.0-beta.1.html').selectFile('@myFixture');
+// };

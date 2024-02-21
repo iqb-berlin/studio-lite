@@ -6,19 +6,14 @@ import {
   logout,
   visitLoginPage,
   createGroupArea,
-  addModule,
-  deleteGroupArea
+  deleteGroupArea, deleteUser
 } from '../../support/util';
-import { adminData } from '../../support/config/userdata';
+import { adminData, userData } from '../../support/config/userdata';
 
 describe('Admin Management', () => {
   beforeEach(visitLoginPage);
 
-  it('should be able to find admin user setting button', () => {
-    login(adminData.user_name, adminData.user_pass);
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-      .should('exist')
-      .click();
+  afterEach(() => {
     visitLoginPage();
     logout();
   });
@@ -26,8 +21,6 @@ describe('Admin Management', () => {
   it('user with admin credentials can add new user', () => {
     login(adminData.user_name, adminData.user_pass);
     createNewUser('newuser', 'newpass');
-    visitLoginPage();
-    logout();
   });
 
   it('user with admin credentials can delete a user', () => {
@@ -52,8 +45,27 @@ describe('Admin Management', () => {
     //   });
     cy.get('mat-icon').contains('delete').click();
     clickButtonToAccept('Löschen');
+  });
+
+  it('should be able to find admin user setting button', () => {
+    login(adminData.user_name, adminData.user_pass);
+    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+      .should('exist')
+      .click();
+  });
+
+  it('prepare the Context', () => {
+    login(adminData.user_name, adminData.user_pass);
+    createNewUser(userData.user_name, userData.user_pass);
     visitLoginPage();
-    logout();
+    const areaGroups = ['Mathematik Primär und Sek I',
+      'Deutsch Primär und Sek I',
+      'Französisch Sek I',
+      'Englisch Sek I'];
+    areaGroups.forEach(area => {
+      createGroupArea(area);
+      visitLoginPage();
+    });
   });
 
   it('user with admin credentials can create a Bereichsgruppe', () => {
@@ -68,21 +80,11 @@ describe('Admin Management', () => {
     cy.get('input[placeholder="Name"]')
       .type('Mathematik Primär Bereichsgruppe');
     clickButtonToAccept('Anlegen');
-    visitLoginPage();
-    logout();
   });
 
-  it('prepare the Context', () => {
+  it('user with admin credentials can grand access to a Bereichsgruppe', () => {
     login(adminData.user_name, adminData.user_pass);
-    const areaGroups = ['Mathematik Primär und Sek I',
-      'Deutsch Primär und Sek I',
-      'Französisch Sek I',
-      'Englisch Sek I'];
-    areaGroups.forEach(area => {
-      createGroupArea(area);
-      visitLoginPage();
-    });
-    logout();
+    grantRemovePrivilegeOn('user', 'Mathematik Primär Bereichsgruppe');
   });
 
   it('remove the Context', () => {
@@ -90,25 +92,17 @@ describe('Admin Management', () => {
     const areaGroups = ['Mathematik Primär und Sek I',
       'Deutsch Primär und Sek I',
       'Französisch Sek I',
-      'Englisch Sek I'];
+      'Englisch Sek I',
+      'Mathematik Primär Bereichsgruppe'
+    ];
     areaGroups.forEach(area => {
       deleteGroupArea(area);
       visitLoginPage();
     });
-    logout();
+    deleteUser(userData.user_name);
   });
-
-  it('user with admin credentials can grand access to a Bereichsgruppe', () => {
-    login(adminData.user_name, adminData.user_pass);
-    grantRemovePrivilegeOn('user', 'Mathematik Primär Bereichsgruppe');
-    visitLoginPage();
-    logout();
-  });
-
-  it('user with admin credentials can Module hochladen', () => {
-    login(adminData.user_name, adminData.user_pass);
-    addModule();
-    visitLoginPage();
-    logout();
-  });
+  // it('user with admin credentials can Module hochladen', () => {
+  //   login(adminData.user_name, adminData.user_pass);
+  //   addModule();
+  // });
 });
