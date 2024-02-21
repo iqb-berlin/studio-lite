@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
@@ -24,12 +23,11 @@ import { BackendService as AppBackendService } from '../../../../services/backen
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
 import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
 import { MetadataService } from '../../../metadata/services/metadata.service';
-import { PrintUnitsDialogComponent } from "../print-units-dialog/print-units-dialog.component";
+import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',

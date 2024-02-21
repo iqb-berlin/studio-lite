@@ -8,7 +8,7 @@ import { PrintOptions } from '../../../print/models/print-options.interface';
   templateUrl: './print-options.component.html',
   styleUrls: ['./print-options.component.scss']
 })
-export class PrintOptionsComponent implements OnInit{
+export class PrintOptionsComponent implements OnInit {
   printOptions: PrintOptions[] = [
     { key: 'printProperties', value: true },
     { key: 'printComments', value: true },
