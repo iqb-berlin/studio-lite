@@ -1,0 +1,29 @@
+<div class="fx-column-start-stretch">
+  <h1 mat-dialog-title>{{ 'workspace.print-units' | translate }}</h1>
+  <mat-dialog-content class="fx-row-start-stretch dialog-content">
+    <studio-lite-select-unit-list #unitSelectionTable
+                                  class="fx-flex-row-50"
+                                  [filter]="data && data.units ? data.units : []"
+                                  [initialSelection]="data && data.units ? data.units : []"
+                                  [workspace]="workspaceService.selectedWorkspaceId"
+                                  (selectionChanged)="unitPrintSettings.unitIds = $event">
+    </studio-lite-select-unit-list>
+    <div class="fx-flex-row-50 settings">
+      <h3>{{'print.printOptions' | translate}}</h3>
+      <studio-lite-print-options #printOptions
+        (printOptionsChange)="setPrintSettings($event)">
+      </studio-lite-print-options>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+      <button mat-raised-button color="primary"
+              type="submit"
+              [mat-dialog-close]="unitPrintSettings"
+              [disabled]="!unitPrintSettings.unitIds.length">
+        {{'workspace.print' | translate}}</button>
+      <button mat-raised-button [mat-dialog-close]="false">
+        {{'dialogs.cancel' | translate}}
+      </button>
+  </mat-dialog-actions>
+</div>
+

@@ -22,6 +22,7 @@ import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { ProfilesComponent } from './components/profiles/profiles.component';
 import { IncludePipe } from './pipes/include.pipe';
+import { PrintOptionsComponent } from "./components/print-options/print-options.component";
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { IncludePipe } from './pipes/include.pipe';
     UnitMetaDataComponent,
     WrappedIconComponent,
     ProfilesComponent,
+    PrintOptionsComponent,
     IncludePipe
   ],
   imports: [
@@ -63,6 +65,7 @@ import { IncludePipe } from './pipes/include.pipe';
     ProfilesComponent,
     MatDialogModule,
     MatButtonModule,
+    PrintOptionsComponent,
     IncludePipe
   ]
 })
