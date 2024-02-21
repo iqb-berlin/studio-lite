@@ -33,6 +33,7 @@ import { ProfileFormComponent } from './components/profile-form/profile-form.com
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
 import { SharedModule } from '../shared/shared.module';
 import { TableViewComponent } from './components/table-view/table-view.component';
+import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-items/metadata-readonly-items.component';
 
 export function formlyValidationConfig(translate: TranslateService) {
   return {
@@ -117,16 +118,17 @@ export function formlyValidationConfig(translate: TranslateService) {
     ItemComponent,
     ProfileFormComponent,
     NestedTreeComponent,
-    TableViewComponent
+    TableViewComponent,
+    MetadataReadonlyItemsComponent
   ],
-  providers: [{
-    provide: FORMLY_CONFIG, multi: true, useFactory: formlyValidationConfig, deps: [TranslateService]
-  }],
-  exports: [
-    MetadataComponent,
-    ProfileFormComponent,
-    ItemsComponent
-  ]
+  providers: [
+    {
+      provide: FORMLY_CONFIG,
+      multi: true,
+      useFactory: formlyValidationConfig,
+      deps: [TranslateService]
+    }
+  ],
+  exports: [MetadataComponent, ProfileFormComponent, ItemsComponent]
 })
-export class MetadataModule {
-}
+export class MetadataModule {}
