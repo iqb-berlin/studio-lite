@@ -4,7 +4,8 @@
           matTooltipPosition="below"
           [disabled]="!changed"
           (click)="discardChanges.emit()" >
-    <studio-lite-wrapped-icon icon="close"></studio-lite-wrapped-icon>
+    {{'workspace.reject' | translate}}
+    <mat-icon class="big-icon">close</mat-icon>
   </button>
   <button mat-raised-button
           [matTooltip]="'workspace.save-changes' | translate"

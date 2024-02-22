@@ -8,9 +8,9 @@
 
 <mat-menu #menuNew>
   <button mat-menu-item
-          (click)="hiddenFileInput.click()">
-    <mat-icon>input</mat-icon>
-    {{'workspace.import-files' | translate}}
+          (click)="addUnit()">
+    <mat-icon>add</mat-icon>
+    {{'workspace.new-empty-unit' | translate}}
   </button>
   <button mat-menu-item
           (click)="addUnitFromExisting()">
@@ -18,9 +18,9 @@
     {{'workspace.from-existing' | translate}}
   </button>
   <button mat-menu-item
-          (click)="addUnit()">
-    <mat-icon>add</mat-icon>
-    {{'workspace.new-empty-unit' | translate}}
+          (click)="hiddenFileInput.click()">
+    <mat-icon>input</mat-icon>
+    {{'workspace.import-files' | translate}}
   </button>
 </mat-menu>
 
