@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'studio-lite-unit-metadata',
-  templateUrl: './unit-meta-data.component.html',
-  styleUrls: ['./unit-meta-data.component.scss']
+  selector: 'studio-lite-unit-properties',
+  templateUrl: './unit-properties.component.html',
+  styleUrls: ['./unit-properties.component.scss']
 })
-export class UnitMetaDataComponent {
+export class UnitPropertiesComponent {
   @Input() name!: string | undefined | null;
   @Input() key!: string | undefined | null;
   @Input() description!: string | undefined | null;

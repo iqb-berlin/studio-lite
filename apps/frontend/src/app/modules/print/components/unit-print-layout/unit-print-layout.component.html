@@ -1,5 +1,5 @@
 <div class="fx-column-start-stretch">
-  <studio-lite-unit-metadata
+  <studio-lite-unit-properties
     [name] = "unitProperties ? unitProperties.name : ''"
     [key] = "unitProperties ? unitProperties.key : ''"
     [groupName] = "unitProperties && (printOptions | include : 'printProperties' ) ?
@@ -21,7 +21,7 @@
                               unitProperties.lastChangedMetadata : null"
     [lastChangedScheme] = "unitProperties && (printOptions | include : 'printProperties') ?
                             unitProperties.lastChangedScheme : null">
-  </studio-lite-unit-metadata>
+  </studio-lite-unit-properties>
 
   <studio-lite-print-metadata *ngIf="(printOptions | include : 'printMetadata')"
                               [metadata] = "unitProperties && unitProperties.metadata || null">
