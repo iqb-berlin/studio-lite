@@ -1,6 +1,5 @@
 <div class="fx-column-start-stretch">
-  <h1 mat-dialog-title>{{'workspace.reviews' | translate}}</h1>
-  <mat-dialog-content>
+  <h1 mat-dialog-title>{{'workspace.review-admin' | translate}}</h1>
     <div class="fx-row-start-stretch fx-gap-20">
 
       <div class="fx-column-end-stretch fx-flex-row-30 review-list-area">
@@ -77,7 +76,6 @@
         </studio-lite-save-changes>
       </div>
     </div>
-  </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
@@ -85,7 +83,7 @@
               color="primary"
               [mat-dialog-close]="false"
               [disabled]="changed">
-        {{'dialogs.close' | translate}}
+        {{'cancel' | translate}}
       </button>
     </div>
   </mat-dialog-actions>

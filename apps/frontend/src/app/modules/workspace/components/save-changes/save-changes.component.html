@@ -1,13 +1,5 @@
 <div class="fx-row-end-end fx-gap-5 changes-container">
   <button mat-raised-button
-          [matTooltip]="'workspace.reject-changes-label' | translate"
-          matTooltipPosition="below"
-          [disabled]="!changed"
-          (click)="discardChanges.emit()" >
-    {{'workspace.reject' | translate}}
-    <mat-icon class="big-icon">close</mat-icon>
-  </button>
-  <button mat-raised-button
           [matTooltip]="'workspace.save-changes' | translate"
           [disabled]="!changed"
           matTooltipPosition="below"
@@ -15,4 +7,13 @@
     {{'workspace.save' | translate}}
     <mat-icon class="big-icon">save</mat-icon>
   </button>
+  <button mat-raised-button
+          [matTooltip]="'workspace.reject-changes-label' | translate"
+          matTooltipPosition="below"
+          [disabled]="!changed"
+          (click)="discardChanges.emit()" >
+    {{'workspace.reject' | translate}}
+    <mat-icon class="big-icon">close</mat-icon>
+  </button>
+
 </div>

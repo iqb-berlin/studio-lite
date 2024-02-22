@@ -1,9 +1,11 @@
 {
   "next": "Weiter",
   "back": "Zurück",
+  "continue": "Fortsetzen",
   "save": "Speichern",
   "move": "Verschieben",
   "create": "Anlegen",
+  "construct": "Erstellen",
   "delete": "Löschen",
   "excel-download": "Herunterladen als Excel-Datei",
   "download": "Herunterladen",
@@ -47,8 +49,8 @@
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
     },
     "dialog": {
-      "title": "Aufgabe(n) als Datei speichern",
-      "ok-button-label": "Download"
+      "title": "Aufgabe(n) als Datei herunterladen",
+      "ok-button-label": "Herunterladen"
     },
     "booklet-config": {
       "paging-mode": {
@@ -399,16 +401,18 @@
     "reviews": "Aufgabenfolgen",
     "review-admin": "Aufgabenfolgen verwalten",
     "reject-unit-changes": "Aufgabenänderungen verwerfen",
-    "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?",
+    "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen.",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
     "print": "Drucken",
+    "print-preview": "Druckvorschau",
+    "print-preview-units": "Druckvorschau von Aufgaben erstellen",
     "print-units": "Aufgabe(n) drucken",
     "print-review": "Aufgabenfolge drucken",
     "metadata": "Metadaten",
-    "show-metadata": "Metadaten anzeigen",
+    "show-metadata": "Metadaten von Aufgaben anzeigen",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",
@@ -426,7 +430,7 @@
     "review": "Aufgabenfolge",
     "new-review-name": "Name der Aufgabenfolge",
     "review-not-added": "Konnte neue Aufgabenfolge nicht anlegen",
-    "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
+    "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht.",
     "review-not-deleted": "Konnte Aufgabenfolge nicht löschen",
     "error": "Fehler",
     "review-show-codes": "Zeige Kodierung",
@@ -436,7 +440,7 @@
     "unit-selected": "Eine Aufgabe ausgewählt.",
     "units-selected": "Aufgaben ausgewählt.",
     "reject-changes": "Verwerfen der Änderungen",
-    "reject-review-continue": "Die Änderungen an der Aufgabenfolge werden verworfen. Fortsetzen?",
+    "reject-review-continue": "Die Änderungen an der Aufgabenfolge werden verworfen.",
     "reject": "Verwerfen",
     "select-review": "Bitte Aufgabenfolge wählen bzw. neu anlegen",
     "review-saved": "Aufgabenfolge gespeichert",
