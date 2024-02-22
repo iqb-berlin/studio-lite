@@ -4,42 +4,42 @@
 <table class="metadata">
   <tr *ngIf="groupName">
     <td class="cell left-cell">{{'print.group-name' | translate}}</td>
-    <td class="cell">{{groupName}}</td>
+    <td class="cell right-cell">{{groupName}}</td>
   </tr>
   <tr *ngIf="description">
     <td class="cell left-cell">{{'print.description' | translate}}</td>
-    <td class="cell">{{description}}</td>
+    <td class="cell right-cell">{{description}}</td>
   </tr>
   <tr *ngIf="transcript">
     <td class="cell left-cell">{{'print.transcript' | translate}}</td>
-    <td class="cell">{{transcript}}</td>
+    <td class="cell right-cell">{{transcript}}</td>
   </tr>
   <tr *ngIf="reference">
     <td class="cell left-cell">{{'print.reference' | translate}}</td>
-    <td class="cell">{{reference}}</td>
+    <td class="cell right-cell">{{reference}}</td>
   </tr>
   <tr *ngIf="lastChangedDefinition">
     <td class="cell left-cell">{{'print.last-changed-definition' | translate}}</td>
-    <td class="cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
+    <td class="cell right-cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
   </tr>
   <tr *ngIf="lastChangedMetadata">
     <td class="cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
-    <td class="cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
+    <td class="cell right-cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
   </tr>
   <tr *ngIf="lastChangedScheme">
     <td class="cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
-    <td class="cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
+    <td class="cell right-cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
   </tr>
   <tr *ngIf="player">
     <td class="cell left-cell">{{'print.player' | translate}}</td>
-    <td class="cell">{{player}}</td>
+    <td class="cell right-cell">{{player}}</td>
   </tr>
   <tr *ngIf="editor">
     <td class="cell left-cell">{{'print.editor' | translate}}</td>
-    <td class="cell">{{editor}}</td>
+    <td class="cell right-cell">{{editor}}</td>
   </tr>
   <tr *ngIf="schemer">
     <td class="cell left-cell">{{'print.schemer' | translate}}</td>
-    <td class="cell">{{schemer}}</td>
+    <td class="cell right-cell">{{schemer}}</td>
   </tr>
 </table>
