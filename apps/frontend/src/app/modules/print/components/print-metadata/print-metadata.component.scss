@@ -1,0 +1,12 @@
+.items {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.unit-profile {
+  display: block;
+  max-width: 60%;
+}

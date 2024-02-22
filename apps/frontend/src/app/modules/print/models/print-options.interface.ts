@@ -1,4 +1,4 @@
-export type PrintOption = 'printProperties' | 'printComments' |
+export type PrintOption = 'printProperties' | 'printMetadata' | 'printComments' |
 'printCoding' | 'printPreview';
 
 export interface PrintOptions {

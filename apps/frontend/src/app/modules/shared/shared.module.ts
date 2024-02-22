@@ -23,6 +23,9 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
 import { ProfilesComponent } from './components/profiles/profiles.component';
 import { IncludePipe } from './pipes/include.pipe';
 import { PrintOptionsComponent } from './components/print-options/print-options.component';
+import { MetadataProfileEntriesComponent }
+  from './components/metadata-profile-entries/metadata-profile-entries.component';
+import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-items/metadata-readonly-items.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +38,9 @@ import { PrintOptionsComponent } from './components/print-options/print-options.
     WrappedIconComponent,
     ProfilesComponent,
     PrintOptionsComponent,
-    IncludePipe
+    IncludePipe,
+    MetadataProfileEntriesComponent,
+    MetadataReadonlyItemsComponent
   ],
   imports: [
     CommonModule,
@@ -66,7 +71,9 @@ import { PrintOptionsComponent } from './components/print-options/print-options.
     MatDialogModule,
     MatButtonModule,
     PrintOptionsComponent,
-    IncludePipe
+    IncludePipe,
+    MetadataProfileEntriesComponent,
+    MetadataReadonlyItemsComponent
   ]
 })
 export class SharedModule {}

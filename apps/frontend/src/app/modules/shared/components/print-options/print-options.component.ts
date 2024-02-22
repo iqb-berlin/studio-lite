@@ -11,6 +11,7 @@ import { PrintOptions } from '../../../print/models/print-options.interface';
 export class PrintOptionsComponent implements OnInit {
   printOptions: PrintOptions[] = [
     { key: 'printProperties', value: true },
+    { key: 'printMetadata', value: true },
     { key: 'printComments', value: true },
     { key: 'printCoding', value: true },
     { key: 'printPreview', value: true }

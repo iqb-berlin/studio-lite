@@ -108,7 +108,7 @@ export class BackendService {
     );
   }
 
-  getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
+  getUnitProperties(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
     if (workspaceId > 0 && unitId > 0) {
       return this.http
         .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)

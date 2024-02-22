@@ -238,7 +238,9 @@
     "items-read-only-view": "Items nur lesbar anzeigen",
     "items-editable-view": "Items bearbeitbar anzeigen",
     "items": "Metadaten Items",
-    "units": "Metadaten Aufgaben"
+    "units": "Metadaten Aufgaben",
+    "unit-title": "Metadaten (Aufgabe)",
+    "items-title": "Metadaten (Items)"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
@@ -658,6 +660,7 @@
   },
   "print": {
     "printOptions": "Druckoptionen",
+    "printMetadata": "Metadaten drucken",
     "printProperties": "Eigenschaften drucken",
     "printComments":  "Kommentare drucken",
     "printCoding":  "Kodierung drucken",
