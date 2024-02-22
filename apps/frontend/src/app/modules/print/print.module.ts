@@ -17,7 +17,6 @@ import { UnitPrintCodingComponent } from './components/unit-print-coding/unit-pr
 import { UnitPrintCodeComponent } from './components/unit-print-code/unit-print-code.component';
 import { SharedModule } from '../shared/shared.module';
 import { PrintMetadataComponent } from './components/print-metadata/print-metadata.component';
-import { MetadataTableComponent } from './components/metadata-table/metadata-table.component';
 import { PrintOptionsDialogComponent } from './components/print-options-dialog/print-options-dialog.component';
 
 @NgModule({
@@ -29,7 +28,6 @@ import { PrintOptionsDialogComponent } from './components/print-options-dialog/p
     UnitPrintCodingComponent,
     UnitPrintCodeComponent,
     PrintMetadataComponent,
-    MetadataTableComponent,
     PrintOptionsDialogComponent
   ],
   imports: [

@@ -118,7 +118,7 @@ export class WorkspaceService {
   async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
     if (this.unitMetadataStore) return this.unitMetadataStore;
     const selectedUnitId = this.selectedUnit$.getValue();
-    return lastValueFrom(this.backendService.getUnitMetadata(this.selectedWorkspaceId, selectedUnitId)
+    return lastValueFrom(this.backendService.getUnitProperties(this.selectedWorkspaceId, selectedUnitId)
       .pipe(
         map(unitData => {
           this.lastChangedMetadata = undefined;
