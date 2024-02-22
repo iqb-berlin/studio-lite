@@ -362,6 +362,30 @@
   "application": {
     "wait-message": "Bitte warten"
   },
+
+  "coding": {
+    "result": "Kodierergebnis",
+    "variable": "Variable",
+    "value": "Wert",
+    "state": "Status",
+    "code": "Code",
+    "score": "Bewertung"
+  },
+
+  "status-label" : {
+    "NO_CODING": "Keine Kodierung vorhanden",
+    "INVALID": "Ungültiger Antwortwert",
+    "CODING_INCOMPLETE": "Kodierung unvollständig",
+    "CODING_ERROR": "Kodierfehler",
+    "CODING_COMPLETE": "Ein Code wurde zugewiesen",
+    "SOURCE_MISSING": "Mindestens eine der Quellvariablen fehlt oder besitzt ungültigen Status",
+    "DERIVE_ERROR": "Fehler bei der Ableitung",
+    "VALUE_DERIVED": "Wert erfolgreich ermittelt",
+    "UNSET": "Neue Variable",
+    "NOT_REACHED": "Noch keine Interaktion möglich",
+    "DISPLAYED": "Wurde angezeigt",
+    "VALUE_CHANGED": "Wert geändert"
+  },
   "workspace": {
     "routes": {
       "properties": "Eigenschaften",
@@ -508,6 +532,7 @@
     "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
     "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
     "coding-scheme-not-loaded": "Konnte Antwortschema nicht laden",
+    "coding-check": "Kodierung prüfen",
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
