@@ -1,5 +1,5 @@
 <div class="fx-column-start-stretch">
-  <h1 mat-dialog-title>{{ 'workspace.print-units' | translate }}</h1>
+  <h1 mat-dialog-title>{{ 'workspace.print-preview-units' | translate }}</h1>
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <studio-lite-select-unit-list #unitSelectionTable
                                   class="fx-flex-row-50"
@@ -20,7 +20,7 @@
               type="submit"
               [mat-dialog-close]="unitPrintSettings"
               [disabled]="!unitPrintSettings.unitIds.length">
-        {{'workspace.print' | translate}}</button>
+        {{'construct' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}
       </button>

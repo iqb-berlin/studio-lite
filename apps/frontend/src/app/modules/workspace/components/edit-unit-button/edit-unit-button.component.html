@@ -8,22 +8,30 @@
 
 <mat-menu #menuOther>
   <button *ngIf="workspaceService.isWorkspaceGroupAdmin"
+          [matTooltip]="'workspace-settings.title' | translate"
+          matTooltipPosition="right"
           mat-menu-item
           (click)="settings()">
     <mat-icon>settings</mat-icon>
     {{ 'workspace.unit-settings' | translate }}
   </button>
   <button mat-menu-item
+          [matTooltip]="'workspace.manage-unit-groups' | translate"
+          matTooltipPosition="right"
           (click)="manageGroups()">
     <mat-icon>format_align_right</mat-icon>
     {{ 'workspace.manage-groups' | translate }}
   </button>
   <button mat-menu-item
+          [matTooltip]="'workspace.review-admin' | translate"
+          matTooltipPosition="right"
           (click)="reviews()">
     <mat-icon>slideshow</mat-icon>
     {{ 'workspace.reviews' | translate }}
   </button>
   <button mat-menu-item
+          [matTooltip]="'workspace.user-list' | translate"
+          matTooltipPosition="right"
           (click)="userList()">
     <mat-icon>people_alt</mat-icon>
     {{ 'workspace.unit-users' | translate }}
@@ -37,18 +45,18 @@
     {{ 'workspace.export' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'metadata.show' | translate"
+          [matTooltip]="'workspace.show-metadata' | translate"
           matTooltipPosition="right"
           (click)="showMetadata()">
     <mat-icon>description</mat-icon>
     {{ 'workspace.metadata' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.print' | translate"
+          [matTooltip]="'workspace.print-preview-units' | translate"
           matTooltipPosition="right"
           (click)="printUnits()">
     <mat-icon>print</mat-icon>
-    {{ 'workspace.print' | translate }}
+    {{ 'workspace.print-preview' | translate }}
   </button>
   <button mat-menu-item
           [matTooltip]="'workspace.move-unit' | translate"

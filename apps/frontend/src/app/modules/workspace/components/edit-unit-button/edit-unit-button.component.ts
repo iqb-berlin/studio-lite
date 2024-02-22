@@ -57,6 +57,15 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     super();
   }
 
+  userListTitle: string = '';
+  ngOnInit(): void {
+    this.userListTitle = this.workspaceService.selectedWorkspaceName ?
+      this.translate
+        .instant('workspace.user-list', { workspace: this.workspaceService.selectedWorkspaceName }) :
+      this.translate
+        .instant('workspace.user-list-no-selection');
+  }
+
   settings(): void {
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
       width: '700px',
@@ -159,7 +168,10 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   exportUnit(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '1000px'
+        width: '1000px',
+        data: {
+
+        }
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
@@ -244,8 +256,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
           width: '800px',
           data: {
             title: this.translate
-              .instant('workspace.user-list',
-                { workspace: this.workspaceService.selectedWorkspaceName }),
+              .instant('workspace.user-list', { workspace: this.workspaceService.selectedWorkspaceName }),
             users: dataResponse
           }
         });
