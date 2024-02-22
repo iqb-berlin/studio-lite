@@ -24,7 +24,7 @@ export const login = (username: string, password = ''): void => {
   // cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
 };
 
-export const createGroupArea = (areaName:string):void => {
+export const createGroupArea = (group:string):void => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -33,7 +33,23 @@ export const createGroupArea = (areaName:string):void => {
     .click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Name"]')
-    .type(areaName);
+    .type(group);
+  clickButtonToAccept('Anlegen');
+};
+
+export const createAreaForGroupFromAdmin = (area:string, group:string):void => {
+  cy.get(`div>div>div>div:contains("${group}")`)
+    .eq(0)
+    .next()
+    .click();
+  cy.get('span:contains("Arbeitsbereiche")')
+    .eq(0)
+    .click();
+  cy.get('mat-icon')
+    .contains('add')
+    .click();
+  cy.get('input[placeholder="Bitte Namen eingeben"]')
+    .type(area);
   clickButtonToAccept('Anlegen');
 };
 
@@ -130,7 +146,7 @@ export const deleteUser = (user: string):void => {
   clickButtonToAccept('Löschen');
 };
 
-export const grantRemovePrivilegeOn = (user:string, group: string):void => {
+export const grantRemovePrivilegeOnGroup = (user:string, group: string):void => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -145,20 +161,31 @@ export const grantRemovePrivilegeOn = (user:string, group: string):void => {
   cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
 };
 
-export const checkProfil = (profil: string):void => {
-  cy.get('mat-panel-title')
-    .contains(profil)
-    .parent()
-    .next()
+export const grantRemovePrivilegeOnArea = (user:string, area: string):void => {
+  cy.get('mat-table')
+    .contains(`${area}`)
+    .should('exist')
     .click();
-  cy.get('label:contains("Aufgabe")')
-    .contains(profil)
-    .prev()
+  cy.get(`label.mdc-label:contains(${user})`).click();
+  cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+};
+
+export const visitArea = (area: string) => {
+  visitLoginPage();
+  cy.get(`a:contains("${area}")`).click();
+};
+/*
+  Related to UNIT
+ */
+
+export const addUnit = (kurzname: string) => {
+  cy.get('mat-icon:contains("add")')
     .click();
-  cy.get('label:contains("Item")')
-    .contains(profil)
-    .prev()
+  cy.get('button > span:contains("Neu (leer)")')
     .click();
+  cy.get('input[ng-reflect-placeholder="Kurzname"]')
+    .type(kurzname);
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 };
 
 // export const addModule = ():void => {

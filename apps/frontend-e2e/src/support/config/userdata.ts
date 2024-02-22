@@ -27,3 +27,11 @@ export type Metadata1 = {
   Aktuelle_Gruppe:string;
   Aktueller_Link:string;
 };
+
+export type TypeUnitTest = {
+  kurzName : string;
+};
+
+export type TypeItemTest = {
+  idItem : string ;
+};

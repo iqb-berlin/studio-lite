@@ -1,7 +1,8 @@
 import {
-  checkProfil, clickButtonToAccept, login, logout, visitLoginPage
+  clickButtonToAccept, login, logout, visitLoginPage
 } from '../../../support/util';
 import { adminData } from '../../../support/config/userdata';
+import { checkProfil } from '../../../support/metadata-util';
 
 describe('Load metadata profile', () => {
   beforeEach(() => {

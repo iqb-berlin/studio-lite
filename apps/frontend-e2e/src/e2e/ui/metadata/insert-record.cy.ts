@@ -1,4 +1,18 @@
-import { userData, Metadata1 } from '../../../support/config/userdata';
+import {
+  addUnit,
+  createAreaForGroupFromAdmin,
+  createGroupArea,
+  grantRemovePrivilegeOnArea,
+  login, visitArea,
+  visitLoginPage
+} from 'apps/frontend-e2e/src/support/util';
+import { adminData, Metadata1, userData } from '../../../support/config/userdata';
+import {
+  selectProfilForArea,
+  selectProfilForAreaFromGroup,
+  selectProfilForGroupFromAdmin
+} from '../../../support/metadata-util';
+import { iqbProfil } from '../../../support/config/iqbProfil';
 
 function getNotationDeep(notation: string): number {
   return (notation.split('.')).length - 1;
@@ -178,38 +192,52 @@ function deleteOneRecord(record: Metadata1) {
 }
 
 describe('metadata', () => {
+  const area = 'Mathematik I';
+  const group = 'Bista I ';
   beforeEach(() => {
     cy.viewport(1600, 900);
   });
 
-  /*   afterEach(function(){
-     cy.get('a > .mat-mdc-tooltip-trigger').click();
-     cy.get('.mdc-button__label').click();
-     cy.get('[studiolitelogout=""] > .mat-mdc-menu-item').click();
-     cy.get('.mat-mdc-dialog-actions').contains('Abmelden').click();
-   }); */
+  it('prepare context', () => {
+    visitLoginPage();
+    login(adminData.user_name, adminData.user_pass);
+    createGroupArea(group);
+    visitLoginPage();
+    createAreaForGroupFromAdmin(area, group);
+    grantRemovePrivilegeOnArea(adminData.user_name, area);
+    visitLoginPage();
+    selectProfilForGroupFromAdmin(group, iqbProfil.mathematikPrimar);
+  });
 
-  it('insert', () => {
-    cy.visit('https://studio.iqb.hu-berlin.de/');
-    cy.get('#mat-input-0').type(userData.user_name);
-    cy.get('#mat-input-1').type(userData.user_pass);
-    cy.get('button > .mdc-button__label').click();
-    cy.wait(400);
-    // cy.intercept('GET', '/#/a/13').as('accessZone');
-    cy.contains('Probe Dezember').click();
-    // cy.visit('https://studio.iqb.hu-berlin.de/#/a/13');
-    // cy.pause();
+  it('select a profil for an area from area', () => {
+    visitLoginPage();
+    cy.contains(area).click();
+    selectProfilForArea(iqbProfil.mathematikPrimar);
+  });
 
+  it.skip('select a profil for an area from group', () => {
+    visitLoginPage();
+    selectProfilForAreaFromGroup(iqbProfil.mathematikPrimar, area, group);
+  });
+
+  it('enter in an area', () => {
+    visitArea(area);
+  });
+
+  it('create a new Unit', () => {
+    addUnit('M1_001');
+  });
+
+  it.skip('go Arbeitsbereich', () => {
     cy.fixture('record').then(record => {
       record.forEach((r: Metadata1) => {
         insertOneRecord(r);
       });
     });
-
     cy.wait(400);
   });
 
-  it.only('delete', () => {
+  it.skip('delete', () => {
     cy.visit('https://studio.iqb.hu-berlin.de/');
     cy.get('#mat-input-0').type(userData.user_name);
     cy.get('#mat-input-1').type(userData.user_pass);

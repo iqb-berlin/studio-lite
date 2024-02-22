@@ -1,12 +1,12 @@
 import {
   createNewUser,
-  grantRemovePrivilegeOn,
+  grantRemovePrivilegeOnGroup,
   clickButtonToAccept,
   login,
   logout,
   visitLoginPage,
   createGroupArea,
-  deleteGroupArea, deleteUser
+  deleteGroupArea, deleteUser, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
 
@@ -70,21 +70,18 @@ describe('Admin Management', () => {
 
   it('user with admin credentials can create a Bereichsgruppe', () => {
     login(adminData.user_name, adminData.user_pass);
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-      .should('exist')
-      .click();
-    cy.get('span:contains("Bereichsgruppen")')
-      .eq(0)
-      .click();
-    cy.get('mat-icon').contains('add').click();
-    cy.get('input[placeholder="Name"]')
-      .type('Mathematik Primär Bereichsgruppe');
-    clickButtonToAccept('Anlegen');
+    createGroupArea('Mathematik Primär Bereichsgruppe');
+  });
+
+  it('user can create a Arbeitsbereich within its Bereichsgruppe', () => {
+    login(adminData.user_name, adminData.user_pass);
+    createAreaForGroupFromAdmin('Mathematik I', 'Mathematik Primär Bereichsgruppe');
+    grantRemovePrivilegeOnArea(adminData.user_name, 'Mathematik I');
   });
 
   it('user with admin credentials can grand access to a Bereichsgruppe', () => {
     login(adminData.user_name, adminData.user_pass);
-    grantRemovePrivilegeOn('user', 'Mathematik Primär Bereichsgruppe');
+    grantRemovePrivilegeOnGroup(adminData.user_name, 'Mathematik Primär Bereichsgruppe');
   });
 
   it('remove the Context', () => {
