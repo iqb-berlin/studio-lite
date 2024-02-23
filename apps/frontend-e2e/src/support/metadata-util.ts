@@ -1,6 +1,7 @@
+import { response } from 'express';
 import { clickButtonToAccept, login } from './util';
 import { adminData } from './config/userdata';
-import { iqbProfil } from './config/iqbProfil';
+import { iqbProfil, registryProfile } from './config/iqbProfil';
 
 export const selectProfilForGroupFromAdmin = (group:string, profil:iqbProfil) => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
@@ -46,18 +47,14 @@ export const selectProfilForAreaFromGroup = (profil:iqbProfil, area:string, grou
     .contains('settings')
     .click();
   cy.get('mat-select').eq(0).click();
-  cy.get(`span:contains(${iqbProfil.mathematikPrimar})`)
+  cy.get(`span:contains(${iqbProfil.MA})`)
     .contains('Aufgabe')
     .click();
   cy.get('mat-select').eq(1).click();
-  cy.get(`span:contains(${iqbProfil.mathematikPrimar})`)
+  cy.get(`span:contains(${iqbProfil.MA})`)
     .contains('Item')
     .click();
   clickButtonToAccept('Speichern');
-};
-
-export const readStructure = ():void => {
-
 };
 
 export const checkProfil = (profil: string):void => {
@@ -74,4 +71,39 @@ export const checkProfil = (profil: string):void => {
     .contains(profil)
     .prev()
     .click();
+};
+
+export const getStructure = (profile: string):Map<string, string> => {
+  const unitMap = new Map<string, string>();
+  cy.request({
+    method: 'GET',
+    url: registryProfile.get(profile)
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+  }).then(response => {
+    expect(response).property('status').to.equal(200);
+    const body = JSON.parse(response.body);
+    cy.log(typeof body);
+
+    // for (const group of body.groups) {
+    //   for (const entry of group.entries) {
+    //     unitMap.set(entry.label[0].value, entry.type);
+    //   }
+    // }
+
+    body.groups.forEach(group => group.entries.forEach(entry => unitMap.set(entry.label[0].value, entry.type)));
+    // cy.log(response.body);
+    cy.log(body.groups[0].entries[0].label[0].value);
+    cy.log(body.groups[0].entries[0].type);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key of unitMap.keys()) {
+      cy.log(key);
+    }
+    // TODO
+    return unitMap;
+    // cy.log(unitMap.keys().next());
+  });
+  return unitMap;
+};
+
+export const getItemStructure = (profil:string) => {
 };

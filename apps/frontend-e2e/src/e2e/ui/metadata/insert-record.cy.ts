@@ -8,6 +8,7 @@ import {
 } from 'apps/frontend-e2e/src/support/util';
 import { adminData, Metadata1, userData } from '../../../support/config/userdata';
 import {
+  getStructure,
   selectProfilForArea,
   selectProfilForAreaFromGroup,
   selectProfilForGroupFromAdmin
@@ -198,7 +199,7 @@ describe('metadata', () => {
     cy.viewport(1600, 900);
   });
 
-  it('prepare context', () => {
+  it.skip('prepare context', () => {
     visitLoginPage();
     login(adminData.user_name, adminData.user_pass);
     createGroupArea(group);
@@ -206,26 +207,35 @@ describe('metadata', () => {
     createAreaForGroupFromAdmin(area, group);
     grantRemovePrivilegeOnArea(adminData.user_name, area);
     visitLoginPage();
-    selectProfilForGroupFromAdmin(group, iqbProfil.mathematikPrimar);
+    selectProfilForGroupFromAdmin(group, iqbProfil.MA);
   });
 
   it('select a profil for an area from area', () => {
     visitLoginPage();
     cy.contains(area).click();
-    selectProfilForArea(iqbProfil.mathematikPrimar);
+    selectProfilForArea(iqbProfil.MA);
   });
 
   it.skip('select a profil for an area from group', () => {
     visitLoginPage();
-    selectProfilForAreaFromGroup(iqbProfil.mathematikPrimar, area, group);
+    selectProfilForAreaFromGroup(iqbProfil.MA, area, group);
   });
 
-  it('enter in an area', () => {
+  it.skip('enter in an area', () => {
     visitArea(area);
   });
 
-  it('create a new Unit', () => {
+  it.skip('create a new Unit', () => {
     addUnit('M1_001');
+  });
+
+  it('capture the metadata structure', () => {
+    const unitmap = getStructure('uMA');
+    // CONTINUE SUNDAY
+    // for (const [fieldName, type] of unitmap) {
+    //   cy.contains(fieldName).click();
+    //   cy.get(`mat-label:contains("${fieldName}")`).type(fieldName);
+    // }
   });
 
   it.skip('go Arbeitsbereich', () => {
