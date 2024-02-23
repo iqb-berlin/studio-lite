@@ -57,7 +57,8 @@ export class PreviewBarComponent {
           queryParams: {
             printOptions: printOptions,
             unitIds: [this.unitId],
-            workspaceId: this.workspaceService.selectedWorkspaceId
+            workspaceId: this.workspaceService.selectedWorkspaceId,
+            workspaceGroupId: this.workspaceService.groupId
           }
         }));
     window.open(`#${url}`, '_blank');

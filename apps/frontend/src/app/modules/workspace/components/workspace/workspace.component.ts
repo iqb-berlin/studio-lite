@@ -99,7 +99,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private initWorkspace(workspace: WorkspaceFullDto): void {
     this.workspaceService.selectedWorkspaceName = `${workspace.groupName}: ${workspace.name}`;
-    this.workspaceService.groupId = workspace.groupId;
+    this.workspaceService.groupId = workspace.groupId || 0;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
     this.workspaceService.setWorkspaceGroupStates();
 

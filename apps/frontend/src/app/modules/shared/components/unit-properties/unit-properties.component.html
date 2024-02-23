@@ -2,6 +2,10 @@
 <h3 *ngIf="name">{{name}}</h3>
 
 <table class="metadata">
+  <tr *ngIf="stateLabel">
+    <td class="cell left-cell">{{'print.stateLabel' | translate}}</td>
+    <td class="cell right-cell">{{stateLabel}}</td>
+  </tr>
   <tr *ngIf="groupName">
     <td class="cell left-cell">{{'print.group-name' | translate}}</td>
     <td class="cell right-cell">{{groupName}}</td>

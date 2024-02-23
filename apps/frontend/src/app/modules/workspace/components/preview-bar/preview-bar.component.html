@@ -20,15 +20,6 @@
                                      class="paging-mode-selection-container">
   </studio-lite-paging-mode-selection>
 
-<!--  <a *ngIf="unitId"-->
-<!--     mat-icon-button-->
-<!--     [attr.aria-label]="'workspace.print' | translate"-->
-<!--     [routerLink]="['/print']"-->
-<!--     [queryParams]="{workspaceId: workspaceService.selectedWorkspaceId, unitIds: [unitId]}"-->
-<!--     target="_blank"-->
-<!--     [matTooltip]="'workspace.print' | translate">-->
-<!--    <mat-icon>print</mat-icon>-->
-<!--  </a>-->
   <button mat-icon-button *ngIf="unitId"
           [matTooltip]="'workspace.print' | translate"
           (click)="showPrintOptions()">

@@ -14,6 +14,7 @@ export class PrintComponent implements OnInit {
   unitIds!: number[];
   printOptions!: PrintOption[];
   workspaceId!: number;
+  workspaceGroupId!: number;
 
   constructor(private route: ActivatedRoute) {}
 
@@ -23,6 +24,7 @@ export class PrintComponent implements OnInit {
         this.printOptions = params.getAll('printOptions') as PrintOption[];
         this.unitIds = params.getAll('unitIds').map(unitId => Number(unitId));
         this.workspaceId = Number(params.get('workspaceId'));
+        this.workspaceGroupId = Number(params.get('workspaceGroupId'));
       });
   }
 

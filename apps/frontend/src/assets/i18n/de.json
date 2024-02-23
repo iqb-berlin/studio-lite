@@ -659,6 +659,7 @@
     "login": "Login"
   },
   "print": {
+    "stateLabel": "Status",
     "printOptions": "Druckoptionen",
     "printMetadata": "Metadaten drucken",
     "printProperties": "Eigenschaften drucken",

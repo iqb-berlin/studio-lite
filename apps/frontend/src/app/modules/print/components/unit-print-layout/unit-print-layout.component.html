@@ -1,7 +1,11 @@
 <div class="fx-column-start-stretch">
-  <studio-lite-unit-properties class="properties"
+  <studio-lite-unit-properties
+    class="properties"
+    [workspaceGroupId]="workspaceGroupId"
     [name] = "unitProperties ? unitProperties.name : ''"
     [key] = "unitProperties ? unitProperties.key : ''"
+    [state] = "unitProperties && (printOptions | include : 'printProperties' ) ?
+                  unitProperties.state : ''"
     [groupName] = "unitProperties && (printOptions | include : 'printProperties' ) ?
                     unitProperties.groupName : ''"
     [description]="unitProperties && (printOptions | include : 'printProperties' ) ?

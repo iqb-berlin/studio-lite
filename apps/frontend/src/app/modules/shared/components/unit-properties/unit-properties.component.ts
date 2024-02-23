@@ -1,13 +1,19 @@
-import { Component, Input } from '@angular/core';
+import {
+  Component, Input, OnChanges, SimpleChanges
+} from '@angular/core';
+import { BackendService } from '../../../workspace/services/backend.service';
+import { State } from '../../../admin/models/state.type';
 
 @Component({
   selector: 'studio-lite-unit-properties',
   templateUrl: './unit-properties.component.html',
   styleUrls: ['./unit-properties.component.scss']
 })
-export class UnitPropertiesComponent {
+export class UnitPropertiesComponent implements OnChanges {
+  @Input() workspaceGroupId!: number;
   @Input() name!: string | undefined | null;
   @Input() key!: string | undefined | null;
+  @Input() state!: string | undefined | null;
   @Input() description!: string | undefined | null;
   @Input() transcript!: string | undefined | null;
   @Input() reference!: string | undefined | null;
@@ -18,4 +24,28 @@ export class UnitPropertiesComponent {
   @Input() lastChangedDefinition!: Date | undefined | null;
   @Input() lastChangedMetadata!: Date | undefined | null;
   @Input() lastChangedScheme!: Date | undefined | null;
+
+  states: State[] = [];
+  stateLabel: string = '';
+
+  constructor(private backendService: BackendService) {
+  }
+
+  ngOnChanges(changes:SimpleChanges): void {
+    const stateChange = 'state';
+    const workspaceGroupIdChange = 'workspaceGroupId';
+    if ((changes[stateChange] || changes[workspaceGroupIdChange]) && this.workspaceGroupId && this.state) {
+      if (this.workspaceGroupId && this.state) {
+        this.backendService.getWorkspaceGroupStates(this.workspaceGroupId)
+          .subscribe(res => {
+            if (res.settings) {
+              const state = parseInt((this.state as string), 10);
+              const states = res.settings.states || [];
+              this.stateLabel = states
+                .find(s => s.id === state)?.label || '';
+            }
+          });
+      }
+    }
+  }
 }

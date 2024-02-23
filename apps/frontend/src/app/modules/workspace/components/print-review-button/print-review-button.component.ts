@@ -12,6 +12,7 @@ import {
 })
 export class PrintReviewButtonComponent {
   @Input() workspaceId!: number;
+  @Input() workspaceGroupId!: number;
   @Input() units!: number[];
   @Input() selectedReviewId!: number;
 
@@ -38,7 +39,8 @@ export class PrintReviewButtonComponent {
           queryParams: {
             printOptions: printOptions,
             unitIds: this.units,
-            workspaceId: this.workspaceId
+            workspaceId: this.workspaceId,
+            workspaceGroupId: this.workspaceGroupId
           }
         }));
     window.open(`#${url}`, '_blank');

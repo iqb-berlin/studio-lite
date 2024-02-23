@@ -19,8 +19,10 @@ describe('UnitPrintLayoutComponent', () => {
     }
   }
 
-  @Component({ selector: 'studio-lite-unit-metadata', template: '' })
+  @Component({ selector: 'studio-lite-unit-properties', template: '' })
   class MockUnitMetaDataComponent {
+    @Input() workspaceGroupId!: number;
+    @Input() state!: string | undefined | null;
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
     @Input() description!: string | undefined | null;
