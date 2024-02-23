@@ -220,7 +220,8 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
                   queryParams: {
                     printOptions: result.printOptions,
                     unitIds: result.unitIds,
-                    workspaceId: this.workspaceService.selectedWorkspaceId
+                    workspaceId: this.workspaceService.selectedWorkspaceId,
+                    workspaceGroupId: this.workspaceService.groupId
                   }
                 }));
             window.open(`#${url}`, '_blank');

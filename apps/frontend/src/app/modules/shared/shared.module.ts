@@ -18,7 +18,7 @@ import { EditWorkspaceSettingsComponent } from './components/edit-workspace-sett
 import { InputTextComponent } from './components/input-text/input-text.component';
 import { SearchFilterComponent } from './components/search-filter/search-filter.component';
 import { PageNavigationComponent } from './components/page-navigation/page-navigation.component';
-import { UnitMetaDataComponent } from './components/unit-metadata/unit-meta-data.component';
+import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { ProfilesComponent } from './components/profiles/profiles.component';
 import { IncludePipe } from './pipes/include.pipe';
@@ -34,7 +34,7 @@ import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-i
     InputTextComponent,
     SearchFilterComponent,
     PageNavigationComponent,
-    UnitMetaDataComponent,
+    UnitPropertiesComponent,
     WrappedIconComponent,
     ProfilesComponent,
     PrintOptionsComponent,
@@ -65,7 +65,7 @@ import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-i
     InputTextComponent,
     SearchFilterComponent,
     PageNavigationComponent,
-    UnitMetaDataComponent,
+    UnitPropertiesComponent,
     WrappedIconComponent,
     ProfilesComponent,
     MatDialogModule,

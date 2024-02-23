@@ -16,6 +16,7 @@ import { PrintOption } from '../../models/print-options.interface';
 export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;
   @Input() workspaceId!: number;
+  @Input() workspaceGroupId!: number;
   @Input() printOptions!: PrintOption[];
 
   @Output() heightChange: EventEmitter<number> = new EventEmitter<number>();

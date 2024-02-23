@@ -20,7 +20,7 @@ import { State } from '../../admin/models/state.type';
   providedIn: 'root'
 })
 export class WorkspaceService {
-  groupId!: number | undefined;
+  groupId!: number;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
