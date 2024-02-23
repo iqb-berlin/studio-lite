@@ -32,38 +32,34 @@ export class ProfilesComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.readCsv();
     this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
-    this.profilesSelected = this.fetchedProfiles;
+    this.profilesSelected = this.fetchedProfiles || [];
   }
 
   async readCsv() {
     try {
-      if (this.wsgAdminService.profileStores.length) {
-        this.ProfileStoreWithProfilesCollection = this.wsgAdminService.profileStores;
-      } else {
-        const profileRegistryResponse = await fetch(this.PROFILE_REGISTRY);
-        if (profileRegistryResponse.ok) {
-          this.isLoading = true;
-          const profileRegistry = await profileRegistryResponse.text();
-          this.csvToProfileURLs(profileRegistry, '"');
-          // eslint-disable-next-line no-restricted-syntax
-          for await (const url of this.storesURLs) {
-            const response = await fetch(url);
-            if (response.ok) {
-              const store = await response.json();
-              if (store) {
-                const ProfilesStore = new MDProfileStore(store);
-                const profiles:MDProfile[] = [];
-                // eslint-disable-next-line no-restricted-syntax
-                for await (const profile of ProfilesStore.profiles) {
-                  const afterWith = (url.slice(0, url.lastIndexOf('/')));
-                  const pro = await this.getProfile(`${afterWith}/${profile}`);
-                  profiles.push(pro as MDProfile);
-                }
-                this.ProfileStoreWithProfilesCollection.push({
-                  profileStore: ProfilesStore,
-                  profiles: profiles
-                });
+      const profileRegistryResponse = await fetch(this.PROFILE_REGISTRY);
+      if (profileRegistryResponse.ok) {
+        this.isLoading = true;
+        const profileRegistry = await profileRegistryResponse.text();
+        this.csvToProfileURLs(profileRegistry, '"');
+        // eslint-disable-next-line no-restricted-syntax
+        for await (const url of this.storesURLs) {
+          const response = await fetch(url);
+          if (response.ok) {
+            const store = await response.json();
+            if (store) {
+              const ProfilesStore = new MDProfileStore(store);
+              const profiles:MDProfile[] = [];
+              // eslint-disable-next-line no-restricted-syntax
+              for await (const profile of ProfilesStore.profiles) {
+                const afterWith = (url.slice(0, url.lastIndexOf('/')));
+                const pro = await this.getProfile(`${afterWith}/${profile}`);
+                profiles.push(pro as MDProfile);
               }
+              this.ProfileStoreWithProfilesCollection.push({
+                profileStore: ProfilesStore,
+                profiles: profiles
+              });
             }
           }
           this.wsgAdminService.profileStores = this.ProfileStoreWithProfilesCollection;
@@ -82,7 +78,7 @@ export class ProfilesComponent implements OnInit {
       .split('\n')
       .map(item => item.split(splitter));
     const storesArray = rest.map(e => e.filter(el => (el !== ',' && el !== '')));
-    const storesURLs:any = [];
+    const storesURLs: any = [];
     storesArray.forEach(store => {
       const sanitizedURL = store[2].replace(',', '');
       storesURLs.push(sanitizedURL);
