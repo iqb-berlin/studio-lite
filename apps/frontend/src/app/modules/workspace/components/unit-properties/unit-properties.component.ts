@@ -157,6 +157,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         name: '',
         description: '',
         group: '',
+        reference: '',
+        transcript: '',
         state: ''
       }, { emitEvent: false });
       this.unitForm.disable();
