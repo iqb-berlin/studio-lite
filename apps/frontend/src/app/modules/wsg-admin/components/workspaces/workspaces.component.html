@@ -1,6 +1,7 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="fx-flex-row-50 fx-column-start-stretch object-list">
     <studio-lite-workspace-menu
+      [isWorkspaceGroupAdmin]="isWorkspaceGroupAdmin"
       [selectedWorkspaceId]="selectedWorkspaceId"
       [selectedRows]="tableSelectionRow.selected"
       [checkedRows]="tableSelectionCheckbox.selected"

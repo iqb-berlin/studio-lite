@@ -31,6 +31,7 @@ export class WorkspacesComponent implements OnInit {
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
   workspaceUsers = new UserToCheckCollection([]);
+  isWorkspaceGroupAdmin = false;
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -51,6 +52,7 @@ export class WorkspacesComponent implements OnInit {
           this.selectedWorkspaceId = 0;
         }
         this.updateUserList();
+        this.isWorkspaceGroupAdmin = this.appService.isWorkspaceGroupAdmin(this.selectedWorkspaceId);
       }
     );
   }
