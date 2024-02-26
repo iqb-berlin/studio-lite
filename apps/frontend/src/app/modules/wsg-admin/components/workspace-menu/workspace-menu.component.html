@@ -5,25 +5,25 @@
     <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [disabled]="selectedWorkspaceId === 0 && checkedRows.length === 0"
+          [disabled]="!selectedWorkspaceId && checkedRows.length === 0"
           [matTooltip]="'wsg-admin.delete-selected-workspaces' | translate"
           (click)="deleteObject()">
     <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [disabled]="selectedWorkspaceId === 0 && checkedRows.length !== 1"
+          [disabled]="!selectedWorkspaceId && checkedRows.length !== 1"
           [matTooltip]="'wsg-admin.rename-workspace' | translate"
           (click)="renameObject()">
     <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [disabled]="selectedWorkspaceId === 0 && checkedRows.length === 0"
+          [disabled]="!selectedWorkspaceId && checkedRows.length === 0"
           [matTooltip]="'wsg-admin.move-selected-workspaces' | translate"
           (click)="moveObject()">
     <studio-lite-wrapped-icon icon="subdirectory_arrow_right"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [disabled]="selectedWorkspaceId === 0 && checkedRows.length !== 1"
+          [disabled]="!selectedWorkspaceId && checkedRows.length !== 1"
           [matTooltip]="'wsg-admin.change-workspace-settings' | translate"
           (click)="changeObject()">
     <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
