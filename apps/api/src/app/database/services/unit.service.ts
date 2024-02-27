@@ -241,9 +241,9 @@ export class UnitService {
 
   async findOnesDefinition(unitId: number): Promise<UnitDefinitionDto> {
     const unit = await this.unitsRepository.findOne({
-      where: { id: unitId },
-      select: ['definitionId', 'variables']
+      where: { id: unitId }
     });
+    this.logger.log(`Retrieving unit definition for unit with id ${unitId} and workspaceId ${unit.workspaceId}`);
     const returnUnit: UnitDefinitionDto = {
       variables: unit.variables, definition: ''
     };
