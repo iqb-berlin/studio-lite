@@ -535,6 +535,8 @@
     "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
     "coding-scheme-not-loaded": "Konnte Antwortschema nicht laden",
     "coding-check": "Kodierung prüfen",
+    "coding-report": "Kodierbericht",
+    "show-coding-report": "Kodierbericht von Aufgaben anzeigen",
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
