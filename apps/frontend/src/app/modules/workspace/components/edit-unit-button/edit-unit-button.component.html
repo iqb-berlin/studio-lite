@@ -52,6 +52,13 @@
     {{ 'workspace.metadata' | translate }}
   </button>
   <button mat-menu-item
+          [matTooltip]="'workspace.show-coding-report' | translate"
+          matTooltipPosition="right"
+          (click)="showCodingReport()">
+    <mat-icon>description</mat-icon>
+    {{ 'workspace.coding-report' | translate }}
+  </button>
+  <button mat-menu-item
           [matTooltip]="'workspace.print-preview-units' | translate"
           matTooltipPosition="right"
           (click)="printUnits()">
