@@ -545,6 +545,12 @@
     "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher."
   },
+  "unit-properties": {
+    "title": "Aufgaben-Eigenschaften",
+    "modules": "Verona-Module",
+    "deprecated": "Veraltet",
+    "settings": "Einstellungen"
+  },
   "presentation-progress": {
     "label": "P",
     "description": "Status: Vollständigkeit der Präsentation"

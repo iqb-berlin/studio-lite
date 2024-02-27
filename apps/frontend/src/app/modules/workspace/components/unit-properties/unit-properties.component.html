@@ -6,14 +6,14 @@
           <mat-card>
             <mat-card-header>
               <mat-card-title>
-                Aufgaben-Eigenschaften
+                {{'unit-properties.title' | translate}}
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <mat-expansion-panel [expanded]="true">
                 <mat-expansion-panel-header>
                   <mat-panel-title>
-                    Einstellungen
+                    {{'unit-properties.settings' | translate}}
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <div class="fx-column-start-stretch">
@@ -80,7 +80,7 @@
               <mat-expansion-panel>
                 <mat-expansion-panel-header>
                   <mat-panel-title>
-                    Verona-Module
+                    {{'unit-properties.modules' | translate}}
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <div class="fx-column-start-stretch">
@@ -152,30 +152,43 @@
                   </div>
                 </div>
               </mat-expansion-panel>
-              <mat-expansion-panel>
+              <mat-expansion-panel *ngIf="initialTranscript || initialReference">
                 <mat-expansion-panel-header>
                   <mat-panel-title>
-                    Veraltet
+                    {{'unit-properties.deprecated' | translate}}
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <div class="fx-column-start-stretch">
-
-                  <mat-form-field>
-                    <mat-label>{{'workspace.transcript' | translate}}</mat-label>
-                    <textarea readonly
-                              matInput
-                              formControlName="transcript"
-                              cdkTextareaAutosize
-                              cdkAutosizeMinRows="6"></textarea>
-                  </mat-form-field>
-                  <mat-form-field>
-                    <mat-label>{{'workspace.reference' | translate}}</mat-label>
-                    <textarea readonly
-                              matInput
-                              formControlName="reference"
-                              cdkTextareaAutosize
-                              cdkAutosizeMinRows="6"></textarea>
-                  </mat-form-field>
+                  <div *ngIf="initialTranscript"
+                       class="fx-row-space-between-start fx-gap-10">
+                    <mat-form-field class="fx-flex-fill">
+                      <mat-label>{{'workspace.transcript' | translate}}</mat-label>
+                      <textarea readonly
+                                matInput
+                                formControlName="transcript"
+                                cdkTextareaAutosize
+                                cdkAutosizeMinRows="6"></textarea>
+                    </mat-form-field>
+                    <button mat-raised-button
+                            (click)="deleteDeprecatedProperty('transcript')">
+                      {{'delete' | translate}}
+                    </button>
+                  </div>
+                  <div *ngIf="initialReference"
+                            class="fx-row-space-between-start fx-gap-10">
+                    <mat-form-field class="fx-flex-fill">
+                      <mat-label>{{'workspace.reference' | translate}}</mat-label>
+                      <textarea readonly
+                                matInput
+                                formControlName="reference"
+                                cdkTextareaAutosize
+                                cdkAutosizeMinRows="6"></textarea>
+                    </mat-form-field>
+                    <button mat-raised-button
+                            (click)="deleteDeprecatedProperty('reference')">
+                      {{'delete' | translate}}
+                    </button>
+                  </div>
                 </div>
               </mat-expansion-panel>
             </mat-card-content>
