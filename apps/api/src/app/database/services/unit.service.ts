@@ -129,7 +129,7 @@ export class UnitService {
       order: { key: 'ASC' },
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference',
+        'player', 'description', 'transcript', 'reference', 'scheme', 'variables',
         'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });

@@ -28,6 +28,7 @@ import { ShowMetadataComponent } from '../show-metadata/show-metadata.component'
 import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
+import { CodingReportComponent } from '../coding-report/coding-report.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -52,7 +53,8 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     private groupDialog: MatDialog,
     private reviewsDialog: MatDialog,
     private showMetadataDialog: MatDialog,
-    private metadataService: MetadataService
+    private metadataService: MetadataService,
+    private codingReportDialog: MatDialog
   ) {
     super();
   }
@@ -246,6 +248,16 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
             });
           }
         });
+      });
+    }
+  }
+
+  showCodingReport(): void {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      this.codingReportDialog.open(CodingReportComponent, {
+        width: '80%',
+        minHeight: '50%',
+        autoFocus: false
       });
     }
   }
