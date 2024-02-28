@@ -8,12 +8,13 @@ import {
 } from 'apps/frontend-e2e/src/support/util';
 import { adminData, Metadata1, userData } from '../../../support/config/userdata';
 import {
+  getItem,
   getStructure,
   selectProfilForArea,
   selectProfilForAreaFromGroup,
   selectProfilForGroupFromAdmin
 } from '../../../support/metadata-util';
-import { iqbProfil } from '../../../support/config/iqbProfil';
+import { IqbProfil, IqbProfilExamples } from '../../../support/config/iqbProfil';
 
 function getNotationDeep(notation: string): number {
   return (notation.split('.')).length - 1;
@@ -192,9 +193,9 @@ function deleteOneRecord(record: Metadata1) {
   cy.contains('Speichern').click();
 }
 
-describe('metadata', () => {
-  const area = 'Mathematik I';
-  const group = 'Bista I ';
+describe('add metadata with one item', () => {
+  const area = 'Fach';
+  const group = 'Gruppe';
   beforeEach(() => {
     cy.viewport(1600, 900);
   });
@@ -207,63 +208,46 @@ describe('metadata', () => {
     createAreaForGroupFromAdmin(area, group);
     grantRemovePrivilegeOnArea(adminData.user_name, area);
     visitLoginPage();
-    selectProfilForGroupFromAdmin(group, iqbProfil.MA);
+    selectProfilForGroupFromAdmin(group, IqbProfil.DE);
   });
 
-  it('select a profil for an area from area', () => {
+  it.skip('select a profil for an area from area', () => {
     visitLoginPage();
     cy.contains(area).click();
-    selectProfilForArea(iqbProfil.MA);
+    selectProfilForArea(IqbProfil.DE);
   });
 
   it.skip('select a profil for an area from group', () => {
     visitLoginPage();
-    selectProfilForAreaFromGroup(iqbProfil.MA, area, group);
+    selectProfilForAreaFromGroup(IqbProfil.DE, area, group);
   });
 
-  it.skip('enter in an area', () => {
+  it('enter in an area', () => {
     visitArea(area);
   });
 
   it.skip('create a new Unit', () => {
     addUnit('M1_001');
+    addUnit('D1_001');
+    addUnit('D1_002');
   });
 
-  it('capture the metadata structure', () => {
-    const unitmap = getStructure('uMA');
-    // CONTINUE SUNDAY
-    // for (const [fieldName, type] of unitmap) {
-    //   cy.contains(fieldName).click();
-    //   cy.get(`mat-label:contains("${fieldName}")`).type(fieldName);
-    // }
+  it.skip('add metadata', () => {
+    cy.contains('M1_001').click();
+    getStructure('uMA',false);
+    getItem('iMA',false);
+    cy.contains('Speichern').click();
   });
 
-  it.skip('go Arbeitsbereich', () => {
-    cy.fixture('record').then(record => {
-      record.forEach((r: Metadata1) => {
-        insertOneRecord(r);
-      });
-    });
-    cy.wait(400);
+  it('add metadata with more than one element', () => {
+    cy.contains('D1_001').click();
+    getStructure('uDE',false);
+    getItem('iDE', false);
+    getItem('iDE',true);
+    cy.contains('Speichern').click();
   });
 
-  it.skip('delete', () => {
-    cy.visit('https://studio.iqb.hu-berlin.de/');
-    cy.get('#mat-input-0').type(userData.user_name);
-    cy.get('#mat-input-1').type(userData.user_pass);
-    cy.get('button > .mdc-button__label').click();
-    cy.wait(400);
-    // cy.intercept('GET', '/#/a/13').as('accessZone');
-    cy.contains('Probe Dezember').click();
-    // cy.visit('https://studio.iqb.hu-berlin.de/#/a/13');
-    // cy.pause();
+  it('delete the data', () => {
 
-    cy.fixture('record').then(record => {
-      record.forEach((r: Metadata1) => {
-        deleteOneRecord(r);
-      });
-    });
-
-    cy.wait(400);
   });
 });
