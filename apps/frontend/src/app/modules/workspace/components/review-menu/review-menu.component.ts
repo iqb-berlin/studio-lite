@@ -13,6 +13,7 @@ export class ReviewMenuComponent {
   @Input() changed!: boolean;
   @Input() units!: number[];
   @Input() workspaceId!: number;
+  @Input() workspaceGroupId!: number;
   @Input() link!: string;
   @Input() passwordLength!: number;
   @Input() bookletConfigSettings!: BookletConfigDto | undefined;

@@ -40,6 +40,12 @@ export class UnitMetadataDto {
   @ApiProperty()
     schemeType?: string;
 
+  @ApiProperty()
+    scheme?: string;
+
+  @ApiProperty()
+    variables?: any;
+
   @ApiProperty({
     type: 'string',
     format: 'date-time'

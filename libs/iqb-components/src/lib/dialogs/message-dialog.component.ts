@@ -18,7 +18,7 @@ export enum MessageType {
     <mat-dialog-content>
       {{ messageData.content }}
     </mat-dialog-content>
-    <mat-dialog-actions>
+    <mat-dialog-actions align="end">
       <button mat-raised-button [mat-dialog-close]="false">{{ messageData.closeButtonLabel }}</button>
     </mat-dialog-actions>
   `,

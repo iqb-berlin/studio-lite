@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>{{'print.printOptions' | translate}}</h2>
+<mat-dialog-content>
+  <studio-lite-print-options #options>
+  </studio-lite-print-options>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          cdkFocusInitial
+          color="primary"
+          [mat-dialog-close]="options.printOptions">
+    {{'print.print' | translate}}
+  </button>
+  <button mat-raised-button
+          (click)="cancel()">
+    {{'cancel' | translate}}</button>
+</mat-dialog-actions>

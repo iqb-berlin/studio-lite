@@ -13,7 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
       </p>
     </mat-dialog-content>
 
-    <mat-dialog-actions>
+    <mat-dialog-actions align="end">
       <button mat-raised-button color="primary" [mat-dialog-close]="true">
         {{ confirmData.confirmButtonLabel }}
       </button>

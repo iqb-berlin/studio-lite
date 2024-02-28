@@ -9,7 +9,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { ShowCodingProblemsDialogComponent } from '@iqb/ngx-coding-components';
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -25,6 +25,7 @@ import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscr
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' }
 })
+
 export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
@@ -99,8 +100,9 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                 this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
               }
               if (msgData.unitState) {
-                // TODO: elementCodes are specific for aspect
-                this.responses = JSON.parse(msgData.unitState.dataParts.elementCodes);
+                this.responses = Object.values(msgData.unitState.dataParts)
+                  .map((dp: unknown) => JSON.parse(dp as string))
+                  .flat();
                 this.setPresentationStatus(msgData.unitState.presentationProgress);
                 this.setResponsesStatus(msgData.unitState.responseProgress);
               }
@@ -426,35 +428,33 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
   }
 
   checkCoding() {
-    let codingScheme: any;
-    const SchemeData = this.workspaceService.unitSchemeStore?.getData();
-    if (this.workspaceService.codingScheme) {
+    let codingScheme: CodingScheme;
+    if (Object.keys(this.workspaceService.codingScheme || {}).length > 0) {
       codingScheme = this.workspaceService.codingScheme.variableCodings;
       this.workspaceService.codingSchemer = new CodingScheme(this.workspaceService.codingScheme.variableCodings);
+      if (this.responses) {
+        const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
+        this.showCodingResults(newResponses);
+      }
     } else {
       this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
         .subscribe(schemeData => {
-          if (schemeData) {
+          if (schemeData && Object.keys(schemeData.scheme).length > 0) {
             codingScheme = JSON.parse(schemeData.scheme);
+            this.workspaceService.codingSchemer = new CodingScheme(codingScheme?.variableCodings);
+            if (this.responses) {
+              const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
+              this.showCodingResults(newResponses);
+            }
           }
-          this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
         });
-    }
-    // TODO: Wait for subscription: this.workspaceService.codingSchemer is undefined
-    this.workspaceService.codingSchemer?.code(this.responses);
-    const unitDefData = this.workspaceService.unitDefinitionStore?.getData();
-    if (unitDefData?.variables) {
-      const validation = this.workspaceService.codingSchemer?.validate(unitDefData.variables);
-      if (validation) this.openCodingProblemsDialog(validation);
-      console.log('validate', validation, unitDefData?.variables);
     }
   }
 
-  private openCodingProblemsDialog(validation: any): void {
+  private showCodingResults(responses: Response[]): void {
     this.dialog
-      .open(ShowCodingProblemsDialogComponent, {
-        data: validation,
-        width: '400px'
+      .open(ShowCodingResultsComponent, {
+        data: responses
       })
       .afterClosed()
       .pipe(

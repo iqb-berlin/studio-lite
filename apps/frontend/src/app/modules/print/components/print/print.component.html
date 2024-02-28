@@ -2,8 +2,10 @@
   <div *ngFor="let unitId of unitIds"
        class="page-break-after">
     <studio-lite-unit-print-layout
+      [printOptions]="printOptions"
       [unitId]="unitId"
       [workspaceId]="workspaceId"
+      [workspaceGroupId]="workspaceGroupId"
       (heightChange)="addToScrollPosition($event)">
     </studio-lite-unit-print-layout>
   </div>

@@ -22,6 +22,7 @@ describe('WorkspacesComponent', () => {
   @Component({ selector: 'studio-lite-workspace-menu', template: '' })
   class MockWorkspaceMenuComponent {
     @Input() selectedWorkspaceId!: number;
+    @Input() isWorkspaceGroupAdmin!: boolean;
     @Input() selectedRows!: WorkspaceInListDto[];
     @Input() checkedRows!: WorkspaceInListDto[];
   }

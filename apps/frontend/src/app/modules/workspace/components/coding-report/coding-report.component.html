@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>{{ 'workspace.coding-report' | translate }}</h2>
+  <mat-dialog-content>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <table *ngIf="!isLoading" mat-table [dataSource]="tableData" matSort>
+      <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
+        <th mat-header-cell *matHeaderCellDef > {{ column }}</th>
+        <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+      </ng-container>
+      <tr mat-header-row  *matHeaderRowDef="displayedColumns;sticky:true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end" >
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="">
+      {{ 'close' | translate }}
+    </button>
+  </mat-dialog-actions>
+
+

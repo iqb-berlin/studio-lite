@@ -119,14 +119,14 @@ export function formlyValidationConfig(translate: TranslateService) {
     NestedTreeComponent,
     TableViewComponent
   ],
-  providers: [{
-    provide: FORMLY_CONFIG, multi: true, useFactory: formlyValidationConfig, deps: [TranslateService]
-  }],
-  exports: [
-    MetadataComponent,
-    ProfileFormComponent,
-    ItemsComponent
-  ]
+  providers: [
+    {
+      provide: FORMLY_CONFIG,
+      multi: true,
+      useFactory: formlyValidationConfig,
+      deps: [TranslateService]
+    }
+  ],
+  exports: [MetadataComponent, ProfileFormComponent, ItemsComponent]
 })
-export class MetadataModule {
-}
+export class MetadataModule {}

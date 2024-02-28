@@ -1,0 +1,17 @@
+<div *ngFor="let item of items" class="item">
+  <h4 class="item-id">{{ item.id || 'metadata.without-id' | translate }}</h4>
+  <div class="fx-row-space-between-start">
+    <span class="item-key">Wichtung</span>
+    <span class="item-value">{{ item.weighting || '-' }}</span>
+  </div>
+  <div class="fx-row-space-between-start">
+    <span class="item-key">Variablen Id</span>
+    <span class="item-value">{{ item.variableId || '-' }}</span>
+  </div>
+  <div class="fx-row-space-between-start">
+    <span class="item-key">Notiz</span>
+    <div class="item-value">{{ item.description || '-' }}</div>
+  </div>
+  <studio-lite-metadata-profile-entries [profiles]="item.profiles">
+  </studio-lite-metadata-profile-entries>
+</div>

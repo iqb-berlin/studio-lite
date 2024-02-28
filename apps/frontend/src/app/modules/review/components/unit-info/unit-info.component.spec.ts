@@ -13,7 +13,7 @@ describe('UnitInfoComponent', () => {
   let component: UnitInfoComponent;
   let fixture: ComponentFixture<UnitInfoComponent>;
 
-  @Component({ selector: 'studio-lite-unit-metadata', template: '' })
+  @Component({ selector: 'studio-lite-unit-properties', template: '' })
   class MockUnitMetaDataComponent {
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
