@@ -51,6 +51,7 @@
     <mat-icon>description</mat-icon>
     {{ 'workspace.metadata' | translate }}
   </button>
+
   <button mat-menu-item
           [matTooltip]="'workspace.show-coding-report' | translate"
           matTooltipPosition="right"
@@ -59,12 +60,20 @@
     {{ 'workspace.coding-report' | translate }}
   </button>
   <button mat-menu-item
+                    [matTooltip]="'workspace.export-coding-book' | translate"
+                    matTooltipPosition="right"
+                    (click)="exportCodingBook()">
+  <mat-icon>menu_book</mat-icon>
+  {{ 'workspace.coding-book' | translate }}
+</button>
+  <button mat-menu-item
           [matTooltip]="'workspace.print-preview-units' | translate"
           matTooltipPosition="right"
           (click)="printUnits()">
     <mat-icon>print</mat-icon>
     {{ 'workspace.print-preview' | translate }}
   </button>
+
   <button mat-menu-item
           [matTooltip]="'workspace.move-unit' | translate"
           matTooltipPosition="right"

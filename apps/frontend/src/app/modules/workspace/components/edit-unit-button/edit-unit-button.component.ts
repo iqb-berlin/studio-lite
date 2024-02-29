@@ -29,6 +29,8 @@ import { TableViewComponent } from '../../../metadata/components/table-view/tabl
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 import { CodingReportComponent } from '../coding-report/coding-report.component';
+// eslint-disable-next-line import/no-cycle
+import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -249,6 +251,16 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
             });
           }
         });
+      });
+    }
+  }
+
+  exportCodingBook():void {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      this.selectUnitDialog.open(ExportCodingBookComponent, {
+        width: '800px',
+        minHeight: '50%',
+        autoFocus: false
       });
     }
   }
