@@ -1,7 +1,7 @@
 import {
-  clickButtonToAccept, login, logout, visitLoginPage
+  clickButtonToAccept, createGroupArea, createNewUser, deleteGroupArea, deleteUser, login, logout, visitLoginPage
 } from '../../../support/util';
-import { adminData } from '../../../support/config/userdata';
+import { adminData, userData } from '../../../support/config/userdata';
 import { checkProfil } from '../../../support/metadata-util';
 
 describe('Load metadata profile', () => {
@@ -9,9 +9,26 @@ describe('Load metadata profile', () => {
     cy.viewport(1600, 900);
     visitLoginPage();
   });
-  afterEach(logout);
+  afterEach(()=>{
+    visitLoginPage()
+    logout();
+  });
 
-  it.skip('should be possible load a metadata profile from General administration', () => {
+  it('user admin prepare the Context', () => {
+    login(adminData.user_name, adminData.user_pass);
+    createNewUser(userData.user_name, userData.user_pass);
+    visitLoginPage();
+    const areaGroups = ['Mathematik Primär und Sek I',
+      'Deutsch Primär und Sek I',
+      'Französisch Sek I',
+      'Englisch Sek I'];
+    areaGroups.forEach(area => {
+      createGroupArea(area);
+      visitLoginPage();
+    });
+  });
+
+  it('should be possible load a metadata profile from General administration', () => {
     const searchProfile:string = 'Deutsch';
     login(adminData.user_name, adminData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
@@ -33,19 +50,20 @@ describe('Load metadata profile', () => {
   it('should be possible load a metadata profile from Group administration', () => {
     const searchProfile:string = 'Französisch';
     login(adminData.user_name, adminData.user_pass);
-    cy.get(`div:contains("${searchProfile}")`)
-      .should('exist')
+    cy.get(`div>div>div:contains("${searchProfile}")`)
+      .next()
       .click();
     cy.get('span:contains("Einstellungen")')
+      .eq(0)
       .click();
     checkProfil(searchProfile);
-    clickButtonToAccept('Speichern');
   });
 
-  it.skip('should be possible load all metadata profile', () => {
+  it('should be possible load all metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Französisch', 'Deutsch', 'Mathematik'];
     login(adminData.user_name, adminData.user_pass);
     cy.get('mat-icon:contains("settings")')
+      .eq(0)
       .should('exist')
       .click();
     cy.get('span:contains("Bereichsgruppen")')
@@ -61,5 +79,20 @@ describe('Load metadata profile', () => {
       checkProfil(searchProfile);
     });
     clickButtonToAccept('Speichern');
+  });
+
+  it('remove the Context', () => {
+    cy.pause();
+    login(adminData.user_name, adminData.user_pass);
+    const areaGroups = ['Mathematik Primär und Sek I',
+      'Deutsch Primär und Sek I',
+      'Französisch Sek I',
+      'Englisch Sek I',
+      'Mathematik Primär Bereichsgruppe'
+    ];
+    areaGroups.forEach(area => {
+      deleteGroupArea(area);
+      visitLoginPage();
+    });
   });
 });

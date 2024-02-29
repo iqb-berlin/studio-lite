@@ -50,6 +50,7 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
   }
 }
 
+
 export const selectProfilForGroupFromAdmin = (group:string, profil:IqbProfil) => {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
@@ -80,6 +81,7 @@ export const selectProfilForArea = (profil:IqbProfil) => {
 };
 
 export const selectProfilForAreaFromGroup = (profil:IqbProfil, area:string, group:string) => {
+  //no funciona
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()
@@ -94,11 +96,11 @@ export const selectProfilForAreaFromGroup = (profil:IqbProfil, area:string, grou
     .contains('settings')
     .click();
   cy.get('mat-select').eq(0).click();
-  cy.get(`span:contains(${IqbProfil.MA})`)
+  cy.get(`span:contains(${IqbProfil.DE})`)
     .contains('Aufgabe')
     .click();
   cy.get('mat-select').eq(1).click();
-  cy.get(`span:contains(${IqbProfil.MA})`)
+  cy.get(`span:contains(${IqbProfil.DE})`)
     .contains('Item')
     .click();
   clickButtonToAccept('Speichern');

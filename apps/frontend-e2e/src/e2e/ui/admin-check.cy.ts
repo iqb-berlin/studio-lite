@@ -6,7 +6,7 @@ import {
   logout,
   visitLoginPage,
   createGroupArea,
-  deleteGroupArea, deleteUser, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea
+  deleteGroupArea, deleteUser, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea, addModule
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
 
@@ -32,17 +32,6 @@ describe('Admin Management', () => {
       .contains('newuser')
       .should('exist')
       .click();
-    // TODO Check also that the column name ist Login-Name
-    // cy.contains('mat-table mat-header-cell', 'Login-Name')
-    //   .invoke('index')
-    //   .should('be.a', 'number')
-    //   .then(columnIndex => {
-    //     cy.contains('mat-row mat-cell', 'ccc')
-    //       .find('mat-column mat-cell')
-    //       .invoke('index')
-    //       .eq(columnIndex)
-    //       .click();
-    //   });
     cy.get('mat-icon').contains('delete').click();
     clickButtonToAccept('Löschen');
   });
@@ -52,20 +41,6 @@ describe('Admin Management', () => {
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('exist')
       .click();
-  });
-
-  it('prepare the Context', () => {
-    login(adminData.user_name, adminData.user_pass);
-    createNewUser(userData.user_name, userData.user_pass);
-    visitLoginPage();
-    const areaGroups = ['Mathematik Primär und Sek I',
-      'Deutsch Primär und Sek I',
-      'Französisch Sek I',
-      'Englisch Sek I'];
-    areaGroups.forEach(area => {
-      createGroupArea(area);
-      visitLoginPage();
-    });
   });
 
   it('user with admin credentials can create a Bereichsgruppe', () => {
@@ -85,21 +60,13 @@ describe('Admin Management', () => {
   });
 
   it('remove the Context', () => {
+    cy.pause();
     login(adminData.user_name, adminData.user_pass);
-    const areaGroups = ['Mathematik Primär und Sek I',
-      'Deutsch Primär und Sek I',
-      'Französisch Sek I',
-      'Englisch Sek I',
-      'Mathematik Primär Bereichsgruppe'
-    ];
-    areaGroups.forEach(area => {
-      deleteGroupArea(area);
-      visitLoginPage();
-    });
-    deleteUser(userData.user_name);
+    deleteGroupArea('Mathematik Primär Bereichsgruppe');
+    visitLoginPage();
   });
-  // it('user with admin credentials can Module hochladen', () => {
-  //   login(adminData.user_name, adminData.user_pass);
-  //   addModule();
-  // });
+  it.skip('user with admin credentials can Module hochladen', () => {
+     login(adminData.user_name, adminData.user_pass);
+     addModule();
+  });
 });

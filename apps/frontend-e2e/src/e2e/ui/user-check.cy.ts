@@ -60,6 +60,7 @@ describe('User Management', () => {
   });
 
   it('delete the Context', () => {
+    cy.pause();
     login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
     visitLoginPage();

@@ -1,9 +1,9 @@
 import {
   addUnit,
   createAreaForGroupFromAdmin,
-  createGroupArea,
+  createGroupArea, deleteGroupArea, deleteUnit,
   grantRemovePrivilegeOnArea,
-  login, visitArea,
+  login, logout, visitArea,
   visitLoginPage
 } from 'apps/frontend-e2e/src/support/util';
 import { adminData, Metadata1, userData } from '../../../support/config/userdata';
@@ -194,14 +194,14 @@ function deleteOneRecord(record: Metadata1) {
 }
 
 describe('add metadata with one item', () => {
-  const area = 'Fach';
-  const group = 'Gruppe';
+  const area = 'Deutsch I';
+  const group = 'Bista I';
   beforeEach(() => {
     cy.viewport(1600, 900);
+    visitLoginPage();
   });
 
-  it.skip('prepare context', () => {
-    visitLoginPage();
+  it('prepare context', () => {
     login(adminData.user_name, adminData.user_pass);
     createGroupArea(group);
     visitLoginPage();
@@ -211,13 +211,13 @@ describe('add metadata with one item', () => {
     selectProfilForGroupFromAdmin(group, IqbProfil.DE);
   });
 
-  it.skip('select a profil for an area from area', () => {
+  it('select a profil for an area', () => {
     visitLoginPage();
     cy.contains(area).click();
     selectProfilForArea(IqbProfil.DE);
   });
 
-  it.skip('select a profil for an area from group', () => {
+  it('select a profil for an area from group', () => {
     visitLoginPage();
     selectProfilForAreaFromGroup(IqbProfil.DE, area, group);
   });
@@ -226,8 +226,7 @@ describe('add metadata with one item', () => {
     visitArea(area);
   });
 
-  it.skip('create a new Unit', () => {
-    addUnit('M1_001');
+  it('create a new Unit', () => {
     addUnit('D1_001');
     addUnit('D1_002');
   });
@@ -248,6 +247,13 @@ describe('add metadata with one item', () => {
   });
 
   it('delete the data', () => {
-
+    visitArea(area);
+    cy.get('studio-lite-unit-table mat-table mat-row').contains('D1_001').click();
+    deleteUnit('D1_001');
+    cy.get('studio-lite-unit-table mat-table mat-row').contains('D1_002').click();
+    deleteUnit('D1_002');
+    visitLoginPage();
+    deleteGroupArea(group);
+    logout();
   });
 });

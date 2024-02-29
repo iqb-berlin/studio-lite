@@ -177,6 +177,11 @@ export const visitArea = (area: string) => {
 /*
   Related to UNIT
  */
+export const  deleteUnit = (kurzname: string) => {
+  cy.get('mat-icon:contains("delete")').eq(0)
+    .click();
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Löschen")').click();
+}
 
 export const addUnit = (kurzname: string) => {
   cy.get('mat-icon:contains("add")')
@@ -188,17 +193,23 @@ export const addUnit = (kurzname: string) => {
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 };
 
-// export const addModule = ():void => {
-//   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-//     .should('exist')
-//     .click();
-//   cy.get('span:contains("Module")')
-//     .eq(0)
-//     .click();
-//   cy.get('mat-icon:contains("cloud_upload")')
-//     .should('exist')
-//     .click();
-//   // TODO
-//   // cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
-//   // cy.fixture('iqb-editor-aspect-2.4.0-beta.1.html').selectFile('@myFixture');
-// };
+export const addModule = ():void => {
+  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    .should('exist')
+    .click();
+  cy.get('span:contains("Module")')
+    .eq(0)
+    .click();
+  //cy.get('mat-icon:contains("cloud_upload")').should('exist').click();
+  cy.get('mat-icon:contains("cloud_upload")')
+    .selectFile('apps/frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html')
+    .click();
+  //cy.fixture('iqb-schemer-1.5.0.html').selectFile('@myFixture');
+  // TODO
+  //  cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
+  // cy.fixture('iqb-schemer-1.5.0.html').selectFile('@myFixture');
+  // cy.get('mat-icon:contains("cloud_upload")')
+  //  .invoke('show')
+  //  .selectFile('apps/frontendcypress/fixtures/iqb-schemer-1.5.0.html')
+  //  .click();
+};
