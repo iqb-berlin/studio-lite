@@ -64,3 +64,5 @@ auth.constants.ts
 database.constants.ts
 docker.env
 apps/api/ormconfig.json
+
+.nx/cache

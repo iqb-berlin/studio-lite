@@ -1,5 +1,4 @@
 {
-  "npmScope": "studio-lite",
   "affected": {
     "defaultBase": "main"
   },
@@ -12,14 +11,6 @@
       "devDependencies": "*"
     },
     ".eslintrc.json": "*"
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e", "compodoc"]
-      }
-    }
   },
   "generators": {
     "@nx/angular:application": {
@@ -40,7 +31,20 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "test": {
+      "cache": true
+    },
+    "e2e": {
+      "cache": true
+    },
+    "compodoc": {
+      "cache": true
     }
   }
 }
