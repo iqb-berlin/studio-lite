@@ -9,8 +9,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/iqb-components"],
       "options": {
-        "jestConfig": "libs/iqb-components/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/iqb-components/jest.config.ts"
       }
     },
     "lint": {

@@ -60,22 +60,22 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "browserTarget": "frontend:build:production"
+          "buildTarget": "frontend:build:production"
         },
         "development": {
-          "browserTarget": "frontend:build:development"
+          "buildTarget": "frontend:build:development"
         }
       },
       "options": {
         "proxyConfig": "apps/frontend/proxy.conf.json",
-        "browserTarget": "frontend:build:development"
+        "buildTarget": "frontend:build:development"
       },
       "defaultConfiguration": "development"
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "browserTarget": "frontend:build"
+        "buildTarget": "frontend:build"
       }
     },
     "lint": {
@@ -91,8 +91,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/frontend"],
       "options": {
-        "jestConfig": "apps/frontend/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/frontend/jest.config.ts"
       }
     },
     "compodoc": {

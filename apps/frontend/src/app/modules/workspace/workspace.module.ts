@@ -120,8 +120,7 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    SplitterModule,
-    NgxCodingComponentsModule
+    SplitterModule
   ],
   declarations: [
     TestConfigComponent,
