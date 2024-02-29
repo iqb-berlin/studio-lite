@@ -108,6 +108,17 @@ export class BackendService {
     );
   }
 
+  getCodingBook(workspaceId: number): Observable<any> {
+    if (workspaceId > 0) {
+      return this.http
+        .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book`)
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
+  }
+
   getUnitProperties(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
     if (workspaceId > 0 && unitId > 0) {
       return this.http

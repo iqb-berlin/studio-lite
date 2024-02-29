@@ -21,6 +21,17 @@ export class DownloadController {
   ) {
   }
 
+  @Get('docx/workspaces/:workspace_group_id/coding-book')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.xlsx"')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @ApiTags('download')
+  async downloadXlsxCodingBook(@WorkspaceGroupId() workspaceGroupId: number) {
+    const file = await XlsxDownloadWorkspacesClass.getWorkspaceCodingBook(workspaceGroupId);
+    return '';
+  }
+
   @Get('xlsx/workspaces/:workspace_group_id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()

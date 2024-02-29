@@ -1,6 +1,9 @@
 import * as Excel from 'exceljs';
+import * as fs from 'fs';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
+
+const HTMLtoDOCX = require('html-to-docx');
 
 interface WorkspaceData {
   id: number;
@@ -98,6 +101,19 @@ export class XlsxDownloadWorkspacesClass {
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);
     return await wb.xlsx.writeBuffer() as Buffer;
+  }
+
+  static async getWorkspaceCodingBook(workspaceGroupId:number): Promise<void> {
+    const filePath = './example.docx';
+    const htmlString = '';
+    const fileBuffer = await HTMLtoDOCX(htmlString);
+    fs.writeFile(filePath, fileBuffer, error => {
+      if (error) {
+        console.log('Docx file creation failed');
+        return;
+      }
+      console.log('Docx file created successfully');
+    });
   }
 
   static async getWorkspaceReport(
