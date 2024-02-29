@@ -54,6 +54,7 @@ import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
 import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
+// eslint-disable-next-line import/no-cycle
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
 import { UnitsAreaComponent } from './components/units-area/units-area.component';
 import { SplitterModule } from '../splitter/splitter.module';
@@ -177,7 +178,8 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     WorkspaceComponent,
     UnitCommentsComponent,
     UnitGroupComponent,
-    UnitTableComponent
+    UnitTableComponent,
+    SelectUnitListComponent
   ],
   providers: [
     UnitRoutingCanDeactivateGuard,
