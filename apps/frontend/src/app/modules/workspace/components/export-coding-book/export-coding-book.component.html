@@ -3,20 +3,20 @@
 
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <div class="fx-row-space-between-stretch">
-    <studio-lite-select-unit-list #unitSelectionTable
-                                  [filter]="data && data.units ? data.units : []"
-                                  [initialSelection]="data && data.units ? data.units : []"
-                                  [workspace]="workspaceService.selectedWorkspaceId"
-                                  (selectionChanged)="unitList = $event">
-    </studio-lite-select-unit-list>
-    <div id="zone">
-      Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.
-      <section class="example-section fx-column-start-start">
-        <h4>Kodiertypen</h4>
-        <mat-checkbox class="example-margin" [(ngModel)]="includeManualCoding">nur manuell</mat-checkbox>
-        <mat-checkbox class="example-margin" [(ngModel)]="includeClosedCoding">geschlossen</mat-checkbox>
-      </section>
-    </div>
+      <studio-lite-select-unit-list #unitSelectionTable
+                                    [filter]="data && data.units ? data.units : []"
+                                    [initialSelection]="data && data.units ? data.units : []"
+                                    [workspace]="workspaceService.selectedWorkspaceId"
+                                    (selectionChanged)="unitList = $event">
+      </studio-lite-select-unit-list>
+      <div>
+        Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.
+        <section class="example-section fx-column-start-start">
+          <h4>Kodiertypen</h4>
+          <mat-checkbox class="example-margin" [(ngModel)]="includeManualCoding">nur manuell</mat-checkbox>
+          <mat-checkbox class="example-margin" [(ngModel)]="includeClosedCoding">geschlossen</mat-checkbox>
+        </section>
+      </div>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">

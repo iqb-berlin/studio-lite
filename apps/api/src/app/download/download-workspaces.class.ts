@@ -1,8 +1,11 @@
 import * as Excel from 'exceljs';
-import * as fs from 'fs';
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { CodeData, CodingScheme, VariableCodingData } from '@iqb/responses';
+import { Buffer } from 'exceljs';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
 const HTMLtoDOCX = require('html-to-docx');
 
 interface WorkspaceData {
@@ -17,7 +20,7 @@ interface WorkspaceData {
   schemers: { [key: string]: number };
 }
 
-export class XlsxDownloadWorkspacesClass {
+export class DownloadWorkspacesClass {
   static setUnitsItemsDataRows(units: any[]): any {
     const allUnits: any[] = [];
     units.forEach((unit: any) => {
@@ -103,16 +106,37 @@ export class XlsxDownloadWorkspacesClass {
     return await wb.xlsx.writeBuffer() as Buffer;
   }
 
-  static async getWorkspaceCodingBook(workspaceGroupId:number): Promise<void> {
-    const filePath = './example.docx';
-    const htmlString = '';
-    const fileBuffer = await HTMLtoDOCX(htmlString);
-    fs.writeFile(filePath, fileBuffer, error => {
-      if (error) {
-        console.log('Docx file creation failed');
-        return;
-      }
-      console.log('Docx file created successfully');
+  static async getWorkspaceCodingBook(workspaceGroupId:number, unitService: UnitService, hasManualCoding, hasClosedResponses): Promise<Buffer> {
+    let docHtml = '';
+    let unitsHtml = '';
+    const units = await unitService.findAllWithMetadata(workspaceGroupId);
+    units.forEach((unit: UnitMetadataDto) => {
+      const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
+      const parsedScheme :any = JSON.parse(unit.scheme);
+      let variablesHtml = '';
+      parsedScheme.variableCodings.forEach((variableCoding: VariableCodingData) => {
+        const variableHeaderHtml = `<h3>${variableCoding.id} ${variableCoding.label} ${variableCoding.page}</h3>`;
+        let codesHtml = '';
+        if (variableCoding.codes) {
+          variableCoding.codes.forEach((code: CodeData) => {
+            codesHtml += `<tr><td>${code.id}</td><td>${code.score}</td><td>${code.label}</td><td>${code.manualInstruction}</td></tr>`;
+          });
+        }
+        const variableCodesTableHtml = `<table><tr><th style="border-bottom:1px solid black;width:200px; padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none" >Code</th><th style="border-bottom:1px solid black; width:200px; padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none">Score</th><th style="border-bottom:1px solid black; width:200px; padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none">Label</th><th style="border-bottom:1px solid black; width:200px; padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none" >manuelle Instruktion</th></tr>${codesHtml}</table>`;
+        variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;
+      });
+      unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
+    });
+    docHtml = `<!DOCTYPE html><html lang="en"><body>${unitsHtml}</body></body></html>`;
+    return new Promise(resolve => {
+      resolve(HTMLtoDOCX(docHtml, null, {
+        title: 'IQB-Studio Kodierbuch ',
+        // table: { row: { cantSplit: true } },
+        footer: true,
+        pageNumber: true,
+        lang: 'de-DE',
+        'font-size': '12pt'
+      }));
     });
   }
 
