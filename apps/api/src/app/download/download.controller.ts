@@ -28,11 +28,12 @@ export class DownloadController {
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
   @ApiTags('download')
 
-  async downloadXlsxCodingBook(@WorkspaceGroupId() workspaceGroupId: number,
-    @Query('hasManualCoding') hasManualCoding: number,
-    @Query('hasClosedResponses') hasClosedResponses: number) {
+  async downloadCodingBook(@WorkspaceGroupId() workspaceGroupId: number,
+    @Query('exportFormat')exportFormat: 'json' | 'docx',
+    @Query('hasManualCoding') hasManualCoding: boolean,
+    @Query('hasClosedResponses') hasClosedResponses: boolean) {
     const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(workspaceGroupId, this.unitService, hasManualCoding, hasClosedResponses);
+      .getWorkspaceCodingBook(workspaceGroupId, this.unitService, exportFormat, hasManualCoding, hasClosedResponses);
     return new StreamableFile(file as Buffer);
   }
 

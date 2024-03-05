@@ -12,9 +12,14 @@
       <div>
         Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.
         <section class="example-section fx-column-start-start">
-          <h4>Kodiertypen</h4>
+          <h4>zusätzliche Kodiertypen auswählen </h4>
           <mat-checkbox class="example-margin" [(ngModel)]="includeManualCoding">nur manuell</mat-checkbox>
           <mat-checkbox class="example-margin" [(ngModel)]="includeClosedCoding">geschlossen</mat-checkbox>
+          <h4>Exportformat</h4>
+          <mat-radio-group [(ngModel)]="exportFormat" aria-label="Exportformat">
+            <mat-radio-button value="json">JSON</mat-radio-button>
+            <mat-radio-button value="docx">DOCX</mat-radio-button>
+          </mat-radio-group>
         </section>
       </div>
     </div>

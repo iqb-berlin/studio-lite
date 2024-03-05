@@ -108,11 +108,11 @@ export class BackendService {
     );
   }
 
-  getCodingBook(workspaceId: number, hasManualCoding:boolean, hasClosedResponses:boolean): Observable<Blob | null> {
+  getCodingBook(workspaceId: number, exportFormat: 'json' | 'docx', hasManualCoding:boolean, hasClosedResponses:boolean): Observable<Blob | null> {
     if (workspaceId > 0) {
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book`, {
-          params: new HttpParams().set('manualCoding', hasManualCoding).set('closedResponses', hasClosedResponses),
+          params: new HttpParams().set('manualCoding', hasManualCoding).set('hasClosedResponses', hasClosedResponses),
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },
