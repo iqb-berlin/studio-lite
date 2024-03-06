@@ -3,13 +3,12 @@ import {
   Controller, Delete, Get, Param, Patch, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags
-} from '@nestjs/swagger';
+  ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
+} from "@nestjs/swagger";
 import {
 
   WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGroupService } from '../database/services/workspace-group.service';
 import { WorkspaceGroupId } from '../admin/workspace-group.decorator';
@@ -28,7 +27,7 @@ export class WorkspaceGroupsController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-group retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Workspace-group not found.' })
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('workspace group')
   async findOne(@WorkspaceGroupId() id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
@@ -44,7 +43,7 @@ export class WorkspaceGroupsController {
 
   @Delete(':state_id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'State removed from workspace group successfully.' })
   @ApiNotFoundResponse({ description: 'Workspace group not found.' })
