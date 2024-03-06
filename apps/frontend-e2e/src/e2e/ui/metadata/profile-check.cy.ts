@@ -84,11 +84,12 @@ describe('Load metadata profile', () => {
   it('remove the Context', () => {
     cy.pause();
     login(adminData.user_name, adminData.user_pass);
+    deleteUser(userData.user_name);
+    visitLoginPage();
     const areaGroups = ['Mathematik Primär und Sek I',
       'Deutsch Primär und Sek I',
       'Französisch Sek I',
-      'Englisch Sek I',
-      'Mathematik Primär Bereichsgruppe'
+      'Englisch Sek I'
     ];
     areaGroups.forEach(area => {
       deleteGroupArea(area);

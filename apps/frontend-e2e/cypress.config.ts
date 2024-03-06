@@ -25,4 +25,5 @@ export default defineConfig({
      * */
     testIsolation: false
   }
+
 });

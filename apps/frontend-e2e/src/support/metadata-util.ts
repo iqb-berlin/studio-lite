@@ -1,9 +1,7 @@
-import { response } from 'express';
-import { clickButtonToAccept, login } from './util';
-import { adminData } from './config/userdata';
+import { clickButtonToAccept } from './util';
 import { IqbProfil, IqbProfilExamples, RegistryProfile} from './config/iqbProfil';
 
-function getCheckBoxByName(name: string, level:number = 1, additionalText: string = '') {
+function getCheckBoxByName(name: string) {
   cy.log(typeof name);
   if (typeof name!=="undefined") {
     cy.get('mat-tree-node>div>span').contains(name).prev().then(($actualElem) => {
@@ -81,7 +79,7 @@ export const selectProfilForArea = (profil:IqbProfil) => {
 };
 
 export const selectProfilForAreaFromGroup = (profil:IqbProfil, area:string, group:string) => {
-  //no funciona
+  // TODO do not work  6.1.2, but should work in 6.2
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()
@@ -96,11 +94,11 @@ export const selectProfilForAreaFromGroup = (profil:IqbProfil, area:string, grou
     .contains('settings')
     .click();
   cy.get('mat-select').eq(0).click();
-  cy.get(`span:contains(${IqbProfil.DE})`)
+  cy.get(`span:contains(${profil})`)
     .contains('Aufgabe')
     .click();
   cy.get('mat-select').eq(1).click();
-  cy.get(`span:contains(${IqbProfil.DE})`)
+  cy.get(`span:contains(${profil})`)
     .contains('Item')
     .click();
   clickButtonToAccept('Speichern');
@@ -131,6 +129,7 @@ export const getStructure = (profile: string, moreThanOne: boolean): void => {
     let unitMap = new Map<string, string>();
     expect(response).property('status').to.equal(200);
     const body = JSON.parse(response.body);
+    // @ts-ignore
     body.groups.forEach(group => group.entries.forEach(entry => unitMap.set(entry.label[0].value, entry.type)));
     for (const key of unitMap.keys()) cy.log(key);
     unitMap.forEach((type:string, fieldName:string) => {
@@ -164,7 +163,7 @@ export const getStructure = (profile: string, moreThanOne: boolean): void => {
 
 export const getItem = (profile:string, moreThanOne: boolean) => {
   cy.get('.add-button > .mdc-button__label').click();
-  if (moreThanOne === true){
+  if (moreThanOne){
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
     cy.get('mat-label:contains("Item ID *")').eq(-1).type(IqbProfilExamples.get(profile).get('Item ID'));
     cy.get('mat-label:contains("Wichtung")').eq(-1).type(IqbProfilExamples.get(profile).get('Wichtung'));

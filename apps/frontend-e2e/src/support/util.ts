@@ -178,17 +178,21 @@ export const visitArea = (area: string) => {
   Related to UNIT
  */
 export const  deleteUnit = (kurzname: string) => {
+  cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
   cy.get('mat-icon:contains("delete")').eq(0)
     .click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Löschen")').click();
 }
 
 export const addUnit = (kurzname: string) => {
-  cy.get('mat-icon:contains("add")')
+  cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]')
+    .should('exist')
     .click();
   cy.get('button > span:contains("Neu (leer)")')
+    .should('exist')
     .click();
   cy.get('input[ng-reflect-placeholder="Kurzname"]')
+    .should('exist')
     .type(kurzname);
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 };
