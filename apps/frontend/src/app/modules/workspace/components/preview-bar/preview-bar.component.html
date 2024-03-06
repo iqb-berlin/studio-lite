@@ -10,10 +10,9 @@
             (click)="navigationDenied.emit()">
       {{'workspace.validate' | translate}}
     </button>
-<!--    <button mat-raised-button-->
-<!--            (click)="checkCoding.emit()">-->
-<!--      Codierprüfung-->
-<!--    </button>-->
+    <button mat-raised-button (click)="checkCoding.emit()">
+      {{ 'workspace.coding-check' | translate }}
+    </button>
     <p>{{ playerName }}</p>
   </div>
 
@@ -21,15 +20,12 @@
                                      class="paging-mode-selection-container">
   </studio-lite-paging-mode-selection>
 
-  <a *ngIf="unitId"
-     mat-icon-button
-     [attr.aria-label]="'workspace.print' | translate"
-     [routerLink]="['/print']"
-     [queryParams]="{workspaceId: workspaceService.selectedWorkspaceId, unitIds: [unitId]}"
-     target="_blank"
-     [matTooltip]="'workspace.print' | translate">
+  <button mat-icon-button *ngIf="unitId"
+          [matTooltip]="'workspace.print' | translate"
+          (click)="showPrintOptions()">
     <mat-icon>print</mat-icon>
-  </a>
+  </button>
+
   <studio-lite-page-navigation [pageList]="pageList"
                                (gotoPage)="gotoPage.emit($event)">
   </studio-lite-page-navigation>

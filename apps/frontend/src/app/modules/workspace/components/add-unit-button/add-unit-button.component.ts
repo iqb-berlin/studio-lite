@@ -146,7 +146,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
         height: '700px',
         data: <SelectUnitData>{
           title: this.translateService.instant('workspace.new-copy-unit'),
-          buttonLabel: this.translateService.instant('next'),
+          buttonLabel: this.translateService.instant('continue'),
           fromOtherWorkspacesToo: true,
           multiple: false,
           selectedUnitId: this.selectedUnitId

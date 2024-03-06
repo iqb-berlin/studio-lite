@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PrintComponent } from './components/print/print.component';
 import { PrintRoutingModule } from './print-routing.module';
 import { UnitPrintLayoutComponent } from './components/unit-print-layout/unit-print-layout.component';
@@ -16,7 +17,7 @@ import { UnitPrintCodingComponent } from './components/unit-print-coding/unit-pr
 import { UnitPrintCodeComponent } from './components/unit-print-code/unit-print-code.component';
 import { SharedModule } from '../shared/shared.module';
 import { PrintMetadataComponent } from './components/print-metadata/print-metadata.component';
-import { MetadataTableComponent } from './components/metadata-table/metadata-table.component';
+import { PrintOptionsDialogComponent } from './components/print-options-dialog/print-options-dialog.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,7 @@ import { MetadataTableComponent } from './components/metadata-table/metadata-tab
     UnitPrintCodingComponent,
     UnitPrintCodeComponent,
     PrintMetadataComponent,
-    MetadataTableComponent
+    PrintOptionsDialogComponent
   ],
   imports: [
     CommonModule,
@@ -37,6 +38,7 @@ import { MetadataTableComponent } from './components/metadata-table/metadata-tab
     FormsModule,
     MatInputModule,
     MatFormFieldModule,
+    MatCheckboxModule,
     MatTableModule,
     MatIconModule,
     CommentsModule

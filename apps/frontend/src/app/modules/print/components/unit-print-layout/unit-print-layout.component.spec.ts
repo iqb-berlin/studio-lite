@@ -1,6 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input } from '@angular/core';
+import {
+  Component, Input, Pipe, PipeTransform
+} from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { UnitPrintLayoutComponent } from './unit-print-layout.component';
 import { environment } from '../../../../../environments/environment';
@@ -9,8 +11,18 @@ describe('UnitPrintLayoutComponent', () => {
   let component: UnitPrintLayoutComponent;
   let fixture: ComponentFixture<UnitPrintLayoutComponent>;
 
-  @Component({ selector: 'studio-lite-unit-metadata', template: '' })
+  @Pipe({ name: 'include' })
+  class MockIncludePipe implements PipeTransform {
+    // eslint-disable-next-line class-methods-use-this
+    transform(): boolean {
+      return true;
+    }
+  }
+
+  @Component({ selector: 'studio-lite-unit-properties', template: '' })
   class MockUnitMetaDataComponent {
+    @Input() workspaceGroupId!: number;
+    @Input() state!: string | undefined | null;
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
     @Input() description!: string | undefined | null;
@@ -49,7 +61,8 @@ describe('UnitPrintLayoutComponent', () => {
         MockUnitPrintMetaDateComponent,
         MockUnitMetaDataComponent,
         MockUnitPrintCommentsComponent,
-        MockUnitPrintCodingComponent
+        MockUnitPrintCodingComponent,
+        MockIncludePipe
       ],
       imports: [
         HttpClientModule

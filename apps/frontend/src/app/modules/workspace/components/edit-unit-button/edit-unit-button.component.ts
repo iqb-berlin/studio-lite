@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom, map } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
@@ -24,11 +23,12 @@ import { BackendService as AppBackendService } from '../../../../services/backen
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
 import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
 import { MetadataService } from '../../../metadata/services/metadata.service';
+import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
+import { CodingReportComponent } from '../coding-report/coding-report.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -53,9 +53,19 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     private groupDialog: MatDialog,
     private reviewsDialog: MatDialog,
     private showMetadataDialog: MatDialog,
-    private metadataService: MetadataService
+    private metadataService: MetadataService,
+    private codingReportDialog: MatDialog
   ) {
     super();
+  }
+
+  userListTitle: string = '';
+  ngOnInit(): void {
+    this.userListTitle = this.workspaceService.selectedWorkspaceName ?
+      this.translate
+        .instant('workspace.user-list', { workspace: this.workspaceService.selectedWorkspaceName }) :
+      this.translate
+        .instant('workspace.user-list-no-selection');
   }
 
   settings(): void {
@@ -160,11 +170,14 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   exportUnit(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       const dialogRef = this.selectUnitDialog.open(ExportUnitComponent, {
-        width: '1000px'
+        width: '1000px',
+        data: {
+
+        }
       });
 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
-        if (result !== false) {
+        if (result) {
           this.appService.dataLoading = true;
           this.backendService.downloadUnits(
             this.workspaceService.selectedWorkspaceId,
@@ -195,45 +208,28 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   }
 
   printUnits(): void {
-    this.printUnitDialog()
-      .then((unitsToPrint: number[] | boolean) => {
-        if (Array.isArray(unitsToPrint) && unitsToPrint.length) {
-          const url = this.router
-            .serializeUrl(this.router
-              .createUrlTree(['/print'], {
-                queryParams: {
-                  unitIds: unitsToPrint,
-                  workspaceId: this.workspaceService.selectedWorkspaceId
-                }
-              }));
-          window.open(`#${url}`, '_blank');
-        }
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      const dialogRef = this.selectUnitDialog.open(PrintUnitsDialogComponent, {
+        width: '1000px'
       });
-  }
 
-  private async printUnitDialog(): Promise<number[] | boolean> {
-    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-      width: '500px',
-      height: '700px',
-      data: <SelectUnitData>{
-        title: this.translate.instant('workspace.print-units'),
-        buttonLabel: this.translate.instant('workspace.print'),
-        fromOtherWorkspacesToo: false,
-        multiple: true
-      }
-    });
-    return lastValueFrom(dialogRef.afterClosed()
-      .pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            const dialogComponent = dialogRef.componentInstance;
-            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-              return dialogComponent.selectedUnitIds;
-            }
+      dialogRef.afterClosed()
+        .subscribe(result => {
+          if (result) {
+            const url = this.router
+              .serializeUrl(this.router
+                .createUrlTree(['/print'], {
+                  queryParams: {
+                    printOptions: result.printOptions,
+                    unitIds: result.unitIds,
+                    workspaceId: this.workspaceService.selectedWorkspaceId,
+                    workspaceGroupId: this.workspaceService.groupId
+                  }
+                }));
+            window.open(`#${url}`, '_blank');
           }
-          return false;
-        })
-      ));
+        });
+    }
   }
 
   showMetadata(): void {
@@ -256,6 +252,16 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     }
   }
 
+  showCodingReport(): void {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      this.codingReportDialog.open(CodingReportComponent, {
+        width: '80%',
+        minHeight: '50%',
+        autoFocus: false
+      });
+    }
+  }
+
   userList(): void {
     this.backendService.getUsersList(this.workspaceService.selectedWorkspaceId).subscribe(dataResponse => {
       if (dataResponse !== false) {
@@ -263,8 +269,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
           width: '800px',
           data: {
             title: this.translate
-              .instant('workspace.user-list',
-                { workspace: this.workspaceService.selectedWorkspaceName }),
+              .instant('workspace.user-list', { workspace: this.workspaceService.selectedWorkspaceName }),
             users: dataResponse
           }
         });

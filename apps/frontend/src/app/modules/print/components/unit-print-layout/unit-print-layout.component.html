@@ -1,33 +1,48 @@
 <div class="fx-column-start-stretch">
-  <studio-lite-unit-metadata
-    [name] = "unitMetadata ? unitMetadata.name : ''"
-    [key] = "unitMetadata ? unitMetadata.key : ''"
-    [groupName] = "unitMetadata ? unitMetadata.groupName : ''"
-    [description]="unitMetadata ? unitMetadata.description: ''"
-    [reference]="unitMetadata ? unitMetadata.reference: ''"
-    [transcript]="unitMetadata ? unitMetadata.transcript: ''"
-    [player] = "playerId"
-    [editor] = "unitMetadata ? unitMetadata.editor : ''"
-    [schemer] = "unitMetadata ? unitMetadata.schemer : ''"
-    [lastChangedDefinition] = "unitMetadata ? unitMetadata.lastChangedDefinition : null"
-    [lastChangedMetadata] = "unitMetadata ? unitMetadata.lastChangedMetadata : null"
-    [lastChangedScheme] = "unitMetadata ? unitMetadata.lastChangedScheme : null">
-  </studio-lite-unit-metadata>
+  <studio-lite-unit-properties
+    class="properties"
+    [workspaceGroupId]="workspaceGroupId"
+    [name] = "unitProperties ? unitProperties.name : ''"
+    [key] = "unitProperties ? unitProperties.key : ''"
+    [state] = "unitProperties && (printOptions | include : 'printProperties' ) ?
+                  unitProperties.state : ''"
+    [groupName] = "unitProperties && (printOptions | include : 'printProperties' ) ?
+                    unitProperties.groupName : ''"
+    [description]="unitProperties && (printOptions | include : 'printProperties' ) ?
+                    unitProperties.description: ''"
+    [reference]="unitProperties && (printOptions | include : 'printProperties' ) ?
+                  unitProperties.reference: ''"
+    [transcript]="unitProperties && (printOptions | include : 'printProperties' ) ?
+                    unitProperties.transcript: ''"
+    [player] = "(printOptions | include : 'printProperties') ? playerId : ''"
+    [editor] = "unitProperties && (printOptions | include : 'printProperties') ?
+                  unitProperties.editor : ''"
+    [schemer] = "unitProperties && (printOptions | include : 'printProperties') ?
+                  unitProperties.schemer : ''"
+    [lastChangedDefinition] = "unitProperties && (printOptions | include : 'printProperties' ) ?
+                                unitProperties.lastChangedDefinition : null"
+    [lastChangedMetadata] = "unitProperties && (printOptions | include : 'printProperties') ?
+                              unitProperties.lastChangedMetadata : null"
+    [lastChangedScheme] = "unitProperties && (printOptions | include : 'printProperties') ?
+                            unitProperties.lastChangedScheme : null">
+  </studio-lite-unit-properties>
 
-  <!--  <studio-lite-print-metadata [metadata] = "unitMetadata && unitMetadata.metadata ? unitMetadata.metadata : null">-->
-  <!--  </studio-lite-print-metadata>-->
+  <studio-lite-print-metadata *ngIf="(printOptions | include : 'printMetadata')"
+                              [metadata] = "unitProperties && unitProperties.metadata || null">
+  </studio-lite-print-metadata>
 
-
-  <studio-lite-unit-print-comments [unitId]="unitId"
+  <studio-lite-unit-print-comments *ngIf="printOptions | include : 'printComments'"
+                                   [unitId]="unitId"
                                    [workspaceId]="workspaceId">
   </studio-lite-unit-print-comments>
 
-  <studio-lite-unit-print-coding [unitId]="unitId"
+  <studio-lite-unit-print-coding *ngIf="printOptions | include : 'printCoding'"
+                                 [unitId]="unitId"
                                  [workspaceId]="workspaceId">
   </studio-lite-unit-print-coding>
 
 
-  <div *ngIf="playerId">
+  <div *ngIf="playerId && (printOptions | include : 'printPreview')" >
     <studio-lite-unit-print-player *ngIf="playerId"
                                    [iFrameHeight]="playerHeight"
                                    [playerId]="playerId"

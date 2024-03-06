@@ -21,7 +21,11 @@ describe('NestedTreeNodeComponent', () => {
       providers: [
         {
           provide: MAT_DIALOG_DATA,
-          useValue: {}
+          useValue: {
+            value: null,
+            props: {},
+            vocabularies: []
+          }
         }
       ]
 

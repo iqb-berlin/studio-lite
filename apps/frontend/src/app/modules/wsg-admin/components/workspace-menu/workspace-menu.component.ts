@@ -23,6 +23,7 @@ export class WorkspaceMenuComponent {
   @Input() selectedWorkspaceId!: number;
   @Input() selectedRows!: WorkspaceInListDto[];
   @Input() checkedRows!: WorkspaceInListDto[];
+  @Input() isWorkspaceGroupAdmin!: boolean;
 
   @Output() workspaceAdded: EventEmitter<string> = new EventEmitter<string>();
   @Output() workspaceRenamed: EventEmitter<{ selection: WorkspaceInListDto[], name: string }> =
@@ -110,7 +111,7 @@ export class WorkspaceMenuComponent {
             data: {
               title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
               content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
-              warning: this.translateService.instant('move-workspaces-warning'),
+              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
               workspaceGroups: this.workspaceGroupsByUser,
               okButtonLabel: this.translateService.instant('close')
             }

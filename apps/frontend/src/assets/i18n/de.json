@@ -1,9 +1,11 @@
 {
   "next": "Weiter",
   "back": "Zurück",
+  "continue": "Fortsetzen",
   "save": "Speichern",
   "move": "Verschieben",
   "create": "Anlegen",
+  "construct": "Erstellen",
   "delete": "Löschen",
   "excel-download": "Herunterladen als Excel-Datei",
   "download": "Herunterladen",
@@ -47,8 +49,8 @@
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
     },
     "dialog": {
-      "title": "Aufgabe(n) als Datei speichern",
-      "ok-button-label": "Download"
+      "title": "Aufgabe(n) als Datei herunterladen",
+      "ok-button-label": "Herunterladen"
     },
     "booklet-config": {
       "paging-mode": {
@@ -236,7 +238,9 @@
     "items-read-only-view": "Items nur lesbar anzeigen",
     "items-editable-view": "Items bearbeitbar anzeigen",
     "items": "Metadaten Items",
-    "units": "Metadaten Aufgaben"
+    "units": "Metadaten Aufgaben",
+    "unit-title": "Metadaten (Aufgabe)",
+    "items-title": "Metadaten (Items)"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
@@ -360,6 +364,30 @@
   "application": {
     "wait-message": "Bitte warten"
   },
+
+  "coding": {
+    "result": "Kodierergebnis",
+    "variable": "Variable",
+    "value": "Wert",
+    "state": "Status",
+    "code": "Code",
+    "score": "Bewertung"
+  },
+
+  "status-label" : {
+    "NO_CODING": "Keine Kodierung vorhanden",
+    "INVALID": "Ungültiger Antwortwert",
+    "CODING_INCOMPLETE": "Kodierung unvollständig",
+    "CODING_ERROR": "Kodierfehler",
+    "CODING_COMPLETE": "Ein Code wurde zugewiesen",
+    "SOURCE_MISSING": "Mindestens eine der Quellvariablen fehlt oder besitzt ungültigen Status",
+    "DERIVE_ERROR": "Fehler bei der Ableitung",
+    "VALUE_DERIVED": "Wert erfolgreich ermittelt",
+    "UNSET": "Neue Variable",
+    "NOT_REACHED": "Noch keine Interaktion möglich",
+    "DISPLAYED": "Wurde angezeigt",
+    "VALUE_CHANGED": "Wert geändert"
+  },
   "workspace": {
     "routes": {
       "properties": "Eigenschaften",
@@ -381,9 +409,9 @@
     "update-units": "Aufgabenliste aktualisieren",
     "add-units": "Aufgabe(n) hinzufügen",
     "delete-units": "Aufgabe(n) löschen",
-    "import-files": "Import von Datei(en)",
+    "import-files": "Import von Aufgabe(n)",
     "from-existing": "Neu von vorhandener Aufgabe",
-    "new-empty-unit": "Neu (leer)",
+    "new-empty-unit": "Neue Aufgabe",
     "more-unit-tasks": "Weitere Funktionen...",
     "download-unit": "Aufgaben als Datei herunterladen",
     "export": "Export",
@@ -397,17 +425,20 @@
     "unit-settings": "Einstellungen",
     "unit-users": "Nutzer:innen",
     "reviews": "Aufgabenfolgen",
+    "review-admin": "Aufgabenfolgen verwalten",
     "reject-unit-changes": "Aufgabenänderungen verwerfen",
-    "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen. Fortsetzen?",
+    "reject-unit-continue": "Die Änderungen an der Aufgabe werden verworfen.",
     "save-unit": "Aufgabe speichern",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
     "print": "Drucken",
+    "print-preview": "Druckvorschau",
+    "print-preview-units": "Druckvorschau von Aufgaben erstellen",
     "print-units": "Aufgabe(n) drucken",
     "print-review": "Aufgabenfolge drucken",
     "metadata": "Metadaten",
-    "show-metadata": "Metadaten anzeigen",
+    "show-metadata": "Metadaten von Aufgaben anzeigen",
     "delete-review": "Aufgabenfolge löschen",
     "add-review": "Aufgabenfolge hinzufügen",
     "start-review": "Aufgabenfolge starten",
@@ -425,7 +456,7 @@
     "review": "Aufgabenfolge",
     "new-review-name": "Name der Aufgabenfolge",
     "review-not-added": "Konnte neue Aufgabenfolge nicht anlegen",
-    "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht. Fortsetzen?",
+    "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht.",
     "review-not-deleted": "Konnte Aufgabenfolge nicht löschen",
     "error": "Fehler",
     "review-show-codes": "Zeige Kodierung",
@@ -435,7 +466,7 @@
     "unit-selected": "Eine Aufgabe ausgewählt.",
     "units-selected": "Aufgaben ausgewählt.",
     "reject-changes": "Verwerfen der Änderungen",
-    "reject-review-continue": "Die Änderungen an der Aufgabenfolge werden verworfen. Fortsetzen?",
+    "reject-review-continue": "Die Änderungen an der Aufgabenfolge werden verworfen.",
     "reject": "Verwerfen",
     "select-review": "Bitte Aufgabenfolge wählen bzw. neu anlegen",
     "review-saved": "Aufgabenfolge gespeichert",
@@ -447,12 +478,12 @@
     "unit-added": "Aufgabe hinzugefügt",
     "unit-not-added": "Konnte Aufgabe nicht hinzufügen",
     "new-unit": "Neue Aufgabe",
-    "new-copy-unit": "Neue Aufgabe (Kopie)",
+    "new-copy-unit": "Neu von vorhandener Aufgabe",
     "new-group": "Neue Gruppe",
     "new-unit-group": "Neue Aufgabengruppe",
     "delete-group": "Gruppe löschen",
     "delete-unit-group": "Aufgabengruppe löschen",
-    "confirm-delete-unit-group": "Die aktuell ausgewählte Gruppe \"{{group}}\" wird gelöscht. Alle Aufgaben bleiben erhalten. Fortsetzen?",
+    "confirm-delete-unit-group": "Die aktuell ausgewählte Gruppe \"{{group}}\" wird gelöscht. Alle Aufgaben bleiben erhalten.",
     "add-group": "Gruppe hinzufügen",
     "rename-group": "Gruppe umbenennen",
     "rename-unit-group": "Aufgabengruppe umbenennen",
@@ -475,7 +506,7 @@
     "unit-moved-or-copied": "Aufgabe(n) {{action}}",
     "unit-not-moved-or-copied": "Konnte Aufgabe(n) nicht {{action}}",
     "no-units": "Dieser Arbeitsbereich enthält keine Units!",
-    "user-list": "Liste der Nutzer:innen für \"{{workspace}}\"",
+    "user-list": "Liste der Nutzer:innen",
     "unit-saved": "Änderungen an Aufgabedaten gespeichert",
     "unit-not-saved": "Konnte Aufgabendaten nicht speichern",
     "description": "Beschreibung/Notizen",
@@ -503,6 +534,9 @@
     "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
     "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
     "coding-scheme-not-loaded": "Konnte Antwortschema nicht laden",
+    "coding-check": "Kodierung prüfen",
+    "coding-report": "Kodierbericht",
+    "show-coding-report": "Kodierbericht von Aufgaben anzeigen",
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
@@ -512,6 +546,12 @@
     "validate": "Validieren",
     "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher."
+  },
+  "unit-properties": {
+    "title": "Aufgaben-Eigenschaften",
+    "modules": "Verona-Module",
+    "deprecated": "Veraltet",
+    "settings": "Einstellungen"
   },
   "presentation-progress": {
     "label": "P",
@@ -627,6 +667,14 @@
     "login": "Login"
   },
   "print": {
+    "stateLabel": "Status",
+    "printOptions": "Druckoptionen",
+    "printMetadata": "Metadaten drucken",
+    "printProperties": "Eigenschaften drucken",
+    "printComments":  "Kommentare drucken",
+    "printCoding":  "Kodierung drucken",
+    "printPreview": "Vorschau(Player) drucken",
+    "print": "Drucken",
     "description": "Beschreibung/Notizen",
     "transcript": "Transkript",
     "reference": "Copyright/Quellen",

@@ -41,6 +41,9 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   selectedStateId = '0';
   selectedStateColor = '';
 
+  initialTranscript = '';
+  initialReference = '';
+
   constructor(
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
@@ -157,10 +160,14 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         name: '',
         description: '',
         group: '',
+        reference: '',
+        transcript: '',
         state: ''
       }, { emitEvent: false });
       this.unitForm.disable();
     }
+    this.initialTranscript = this.unitForm.get('transcript')?.value;
+    this.initialReference = this.unitForm.get('reference')?.value;
   }
 
   // metadata
@@ -237,5 +244,12 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
+  }
+
+  deleteDeprecatedProperty(property: 'transcript' | 'reference'): void {
+    const propertyControl = this.unitForm.get(property);
+    if (propertyControl) {
+      propertyControl.setValue('');
+    }
   }
 }
