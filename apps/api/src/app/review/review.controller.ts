@@ -3,13 +3,12 @@ import {
   Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
+  ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
 } from "@nestjs/swagger";
 import {
   CreateUnitCommentDto,
   ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
-import { ApiUnauthorizedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReviewService } from '../database/services/review.service';
 import { UnitService } from '../database/services/unit.service';
