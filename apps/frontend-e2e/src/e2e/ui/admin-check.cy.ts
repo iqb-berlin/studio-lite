@@ -6,9 +6,9 @@ import {
   logout,
   visitLoginPage,
   createGroupArea,
-  deleteGroupArea, deleteUser, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea, addModule
+  deleteGroupArea, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea, addModule
 } from '../../support/util';
-import { adminData, userData } from '../../support/config/userdata';
+import { adminData } from '../../support/config/userdata';
 
 describe('Admin Management', () => {
   beforeEach(visitLoginPage);

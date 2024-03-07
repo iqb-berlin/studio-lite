@@ -2,7 +2,7 @@ import {
   clickButtonToAccept, createGroupArea, createNewUser, deleteGroupArea, deleteUser, login, logout, visitLoginPage
 } from '../../../support/util';
 import { adminData, userData } from '../../../support/config/userdata';
-import { checkProfil } from '../../../support/metadata-util';
+import { checkProfile } from '../../../support/metadata-util';
 
 describe('Load metadata profile', () => {
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('Load metadata profile', () => {
     cy.get('mat-icon')
       .contains('settings')
       .click();
-    checkProfil(searchProfile);
+    checkProfile(searchProfile);
     clickButtonToAccept('Speichern');
   });
 
@@ -56,7 +56,7 @@ describe('Load metadata profile', () => {
     cy.get('span:contains("Einstellungen")')
       .eq(0)
       .click();
-    checkProfil(searchProfile);
+    checkProfile(searchProfile);
   });
 
   it('should be possible load all metadata profile', () => {
@@ -76,7 +76,7 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     searchProfiles.forEach(searchProfile => {
-      checkProfil(searchProfile);
+      checkProfile(searchProfile);
     });
     clickButtonToAccept('Speichern');
   });

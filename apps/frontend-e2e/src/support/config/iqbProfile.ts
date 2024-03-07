@@ -1,10 +1,10 @@
-export enum IqbProfil {
+export enum IqbProfile {
   MA = 'Mathematik Primar',
   DE = 'Deutsch Primar',
   EN = 'Englisch Sek I',
   FR = 'Französisch Sek I'
 }
-export const IqbProfilExamples = new Map <string, any>([
+export const IqbProfileExamples = new Map <string, any>([
   ['uMA', new Map<string, string>([['Entwickler:in', 'Elsa Mignon'], ['Leitidee', 'Größen und Messen'], ['Aufgabenzeit', '1:30'], ['Stimuluszeit', '1:00'], ['Quellenangaben', 'Es war einmal Mathe']])],
   ['uDE', new Map<string, string>([['Entwickler:in', 'Elsa Magna'], ['Kompetenzbereich', 'Schreiben'], ['Aufgabenzeit', '2:30'], ['Quellenangaben', 'Es war einmal Deutsch'], ['Textsorte', 'expositorisch'], ['Wortanzahl', '100'], ['Stimuluszeit', '2:00'], ['Hörsequenz Transkript', 'Die Gesichte vom...']])],
   ['uEN', new Map<string, string>([['Textniveau (GeR)', 'A1'], ['Lexiko-Grammatik', 'einzelne komplexe Elemente'], ['Abstraktionsgrad', 'einzelne abstrakte Elemente'], ['Thematischer Vertrautheitsgrad', 'weitestgehend vertraut'], ['Textsorte', 'Bookstagram'], ['Andere Textsorte', 'Homy'], ['Thema', 'Berufsorientierung'], ['Anderes Thema', 'Homyy'], ['Länge des verwendeten Audioauszugs', '3:30'], ['Wortanzahl', '150'], ['Aufgabenzeit', '4:00'], ['Vermerk / Zitation', 'DOIEnglisch'], ['Transkript Original', 'Englisch Transkript Original'], ['Anzahl der Sprecher*innen', '5'], ['Sprechtempo', 'schnell'], ['Variante', 'Walisisch'], ['Nebengeäausche', 'auch erschwerend'], ['Transkript zur Aufgabe', 'Englisch transkript']])],

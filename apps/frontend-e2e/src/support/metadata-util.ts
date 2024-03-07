@@ -1,5 +1,5 @@
 import { clickButtonToAccept } from './util';
-import { IqbProfil, IqbProfilExamples, RegistryProfile} from './config/iqbProfil';
+import { IqbProfile, IqbProfileExamples, RegistryProfile} from './config/iqbProfile';
 
 function getCheckBoxByName(name: string) {
   cy.log(typeof name);
@@ -44,12 +44,11 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
         .type(secAuf);
     }
   }else{
-    cy.get(`mat-label:contains("${propName}")`).type(IqbProfilExamples.get(profile).get(propName));
+    cy.get(`mat-label:contains("${propName}")`).type(IqbProfileExamples.get(profile).get(propName));
   }
 }
 
-
-export const selectProfilForGroupFromAdmin = (group:string, profil:IqbProfil) => {
+export function selectProfileForGroupFromAdmin (group:string, profile:IqbProfile) {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -62,24 +61,35 @@ export const selectProfilForGroupFromAdmin = (group:string, profil:IqbProfil) =>
   cy.get('mat-icon')
     .contains('settings')
     .click();
-  checkProfil(profil);
+  checkProfile(profile);
   clickButtonToAccept('Speichern');
-};
+}
 
-export const selectProfilForArea = (profil:IqbProfil) => {
+export function selectProfileForGroup (group:string, profile:IqbProfile) {
+  cy.get(`div>div>div>div:contains("${group}")`)
+    .eq(0)
+    .next()
+    .click();
+  cy.get('span:contains("Einstellungen")')
+    .eq(0)
+    .click();
+  checkProfile(profile);
+  cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+}
+
+export function selectProfileForArea(profile:IqbProfile){
   cy.get('mat-icon:contains("menu")')
     .click();
   cy.get('span:contains("Einstellungen")')
     .click();
   cy.get('svg').eq(2).click();
-  cy.get('mat-option>span').contains(profil).click();
+  cy.get('mat-option>span').contains(profile).click();
   cy.get('svg').eq(3).click();
-  cy.get('mat-option>span').contains(profil).click();
+  cy.get('mat-option>span').contains(profile).click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-};
+}
 
-export const selectProfilForAreaFromGroup = (profil:IqbProfil, area:string, group:string) => {
-  // TODO do not work  6.1.2, but should work in 6.2
+export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, group:string){
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()
@@ -94,33 +104,36 @@ export const selectProfilForAreaFromGroup = (profil:IqbProfil, area:string, grou
     .contains('settings')
     .click();
   cy.get('mat-select').eq(0).click();
-  cy.get(`span:contains(${profil})`)
+  cy.get(`span:contains(${profile})`)
     .contains('Aufgabe')
     .click();
   cy.get('mat-select').eq(1).click();
-  cy.get(`span:contains(${profil})`)
+  cy.get(`span:contains(${profile})`)
     .contains('Item')
     .click();
   clickButtonToAccept('Speichern');
-};
+}
 
-export const checkProfil = (profil: string):void => {
-  cy.get('mat-panel-title')
-    .contains(profil)
-    .parent()
-    .next()
-    .click();
-  cy.get('label:contains("Aufgabe")')
-    .contains(profil)
-    .prev()
-    .click();
-  cy.get('label:contains("Item")')
-    .contains(profil)
-    .prev()
-    .click();
-};
+export function checkProfile (profile: string):void {
+  cy.intercept('https://raw.githubusercontent.com/iqb-vocabs/p60/master/item.json').as('loaded');
+  cy.wait('@loaded', {timeout: 10000}).then(() =>{
+    cy.get('mat-panel-title')
+      .contains(profile)
+      .parent()
+      .next()
+      .click();
+    cy.get('label:contains("Aufgabe")')
+      .contains(profile)
+      .prev()
+      .click();
+    cy.get('label:contains("Item")')
+      .contains(profile)
+      .prev()
+      .click();
+  });
+}
 
-export const getStructure = (profile: string, moreThanOne: boolean): void => {
+export function getStructure (profile: string, moreThanOne: boolean): void {
   cy.request({
     method: 'GET',
     url: RegistryProfile.get(profile)
@@ -133,11 +146,11 @@ export const getStructure = (profile: string, moreThanOne: boolean): void => {
     body.groups.forEach(group => group.entries.forEach(entry => unitMap.set(entry.label[0].value, entry.type)));
     for (const key of unitMap.keys()) cy.log(key);
     unitMap.forEach((type:string, fieldName:string) => {
-      cy.log(IqbProfilExamples.get(profile).get(fieldName));
-      if (IqbProfilExamples.get(profile).get(fieldName)!=("undefined"&&"")){
+      cy.log(IqbProfileExamples.get(profile).get(fieldName));
+      if (IqbProfileExamples.get(profile).get(fieldName)!=("undefined"&&"")){
         switch (type) {
           case 'number': {
-            getTimeNumber(IqbProfilExamples.get(profile).get(fieldName), fieldName, profile, moreThanOne);
+            getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile, moreThanOne);
             break;
           }
           case 'vocabulary': {
@@ -145,36 +158,35 @@ export const getStructure = (profile: string, moreThanOne: boolean): void => {
               cy.get(`mat-label:contains("${fieldName}")`).eq(-1).click();
             else
               cy.get(`mat-label:contains("${fieldName}")`).click();
-            getCheckBoxByName(IqbProfilExamples.get(profile).get(fieldName));
+            getCheckBoxByName(IqbProfileExamples.get(profile).get(fieldName));
             break;
           }
           default: {
             if (moreThanOne)
-              cy.get(`mat-label:contains("${fieldName}")`).eq(-1).type(IqbProfilExamples.get(profile).get(fieldName));
+              cy.get(`mat-label:contains("${fieldName}")`).eq(-1).type(IqbProfileExamples.get(profile).get(fieldName));
             else
-              cy.get(`mat-label:contains("${fieldName}")`).type(IqbProfilExamples.get(profile).get(fieldName));
+              cy.get(`mat-label:contains("${fieldName}")`).type(IqbProfileExamples.get(profile).get(fieldName));
             break;
           }
         }
       }
     });
   });
-};
+}
 
-export const getItem = (profile:string, moreThanOne: boolean) => {
+export function getItem (profile:string, moreThanOne: boolean) {
   cy.get('.add-button > .mdc-button__label').click();
   if (moreThanOne){
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
-    cy.get('mat-label:contains("Item ID *")').eq(-1).type(IqbProfilExamples.get(profile).get('Item ID'));
-    cy.get('mat-label:contains("Wichtung")').eq(-1).type(IqbProfilExamples.get(profile).get('Wichtung'));
-    cy.get('mat-label:contains("Notiz")').eq(-1).type(IqbProfilExamples.get(profile).get('Notiz'));
+    cy.get('mat-label:contains("Item ID *")').eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
+    cy.get('mat-label:contains("Wichtung")').eq(-1).type(IqbProfileExamples.get(profile).get('Wichtung'));
+    cy.get('mat-label:contains("Notiz")').eq(-1).type(IqbProfileExamples.get(profile).get('Notiz'));
     getStructure(profile, moreThanOne);
   }else {
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
-    cy.get('mat-label:contains("Item ID *")').type(IqbProfilExamples.get(profile).get('Item ID'));
-    cy.get('mat-label:contains("Wichtung")').type(IqbProfilExamples.get(profile).get('Wichtung'));
-    cy.get('mat-label:contains("Notiz")').eq(1).type(IqbProfilExamples.get(profile).get('Notiz'));
+    cy.get('mat-label:contains("Item ID *")').type(IqbProfileExamples.get(profile).get('Item ID'));
+    cy.get('mat-label:contains("Wichtung")').type(IqbProfileExamples.get(profile).get('Wichtung'));
+    cy.get('mat-label:contains("Notiz")').eq(1).type(IqbProfileExamples.get(profile).get('Notiz'));
     getStructure(profile, moreThanOne);
-    //cy.get('span.mat-expansion-indicator').click();
   }
-};
+}

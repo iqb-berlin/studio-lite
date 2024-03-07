@@ -1,12 +1,6 @@
 import Chainable = Cypress.Chainable;
 
-export const visitLoginPage = (): Chainable => cy.url()
-  .then(() => {
-    cy.visit(<string>Cypress.config().baseUrl);
-  });
-
-export const login = (username: string, password = ''): void => {
-  // cy.get("#mat-input-0") gut
+export function login(username: string, password = '') {
   cy.get('input[placeholder="Anmeldename"]')
     .should('exist')
     .clear()
@@ -21,10 +15,9 @@ export const login = (username: string, password = ''): void => {
   cy.intercept('POST', '/api/login').as('responseLogin');
   clickButtonToAccept('Weiter');
   cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
-  // cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
-};
+}
 
-export const createGroupArea = (group:string):void => {
+export function createGroupArea(group:string):void{
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -35,9 +28,9 @@ export const createGroupArea = (group:string):void => {
   cy.get('input[placeholder="Name"]')
     .type(group);
   clickButtonToAccept('Anlegen');
-};
+}
 
-export const createAreaForGroupFromAdmin = (area:string, group:string):void => {
+export function createAreaForGroupFromAdmin(area:string, group:string):void {
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()
@@ -51,9 +44,9 @@ export const createAreaForGroupFromAdmin = (area:string, group:string):void => {
   cy.get('input[placeholder="Bitte Namen eingeben"]')
     .type(area);
   clickButtonToAccept('Anlegen');
-};
+}
 
-export const deleteGroupArea = (areaName:string):void => {
+export function deleteGroupArea(areaName:string):void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -67,17 +60,11 @@ export const deleteGroupArea = (areaName:string):void => {
     .contains('delete')
     .click();
   clickButtonToAccept('Löschen');
-};
+}
 
-export const clickButtonToAccept = (text: string):Chainable => cy.url()
-  .then(() => {
-    cy.get('button')
-      .contains(text)
-      .should('exist')
-      .click();
-  });
 
-export const logout = () => {
+
+export function logout() {
   cy.get('mat-icon:contains("account_box")')
     .click();
   cy.get('span:contains("Abmelden")')
@@ -86,9 +73,9 @@ export const logout = () => {
   // TODO  dont use systematically wait
   cy.wait(400);
   clickButtonToAccept('Abmelden');
-};
+}
 
-export const changePassword = (newPass:string, oldPass:string):void => {
+export function changePassword(newPass:string, oldPass:string):void {
   cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
   cy.get('span:contains("Kennwort ändern")')
     .should('exist')
@@ -106,9 +93,9 @@ export const changePassword = (newPass:string, oldPass:string):void => {
     .should('exist')
     .type(newPass);
   clickButtonToAccept('Speichern');
-};
+}
 
-export const createNewUser = (name: string, pass: string):void => {
+export function createNewUser(name: string, pass: string):void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -130,9 +117,9 @@ export const createNewUser = (name: string, pass: string):void => {
     .clear()
     .type(`${pass}`);
   clickButtonToAccept('Anlegen');
-};
+}
 
-export const deleteUser = (user: string):void => {
+export function deleteUser(user: string):void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -144,9 +131,9 @@ export const deleteUser = (user: string):void => {
     .contains('delete')
     .click();
   clickButtonToAccept('Löschen');
-};
+}
 
-export const grantRemovePrivilegeOnGroup = (user:string, group: string):void => {
+export function grantRemovePrivilegeOnGroup(user:string, group: string):void{
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -159,45 +146,45 @@ export const grantRemovePrivilegeOnGroup = (user:string, group: string):void => 
     .click();
   cy.get(`label:contains(${user})`).prev().click();
   cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
-};
+}
 
-export const grantRemovePrivilegeOnArea = (user:string, area: string):void => {
+export function grantRemovePrivilegeOnArea(user:string, area: string):void {
   cy.get('mat-table')
     .contains(`${area}`)
     .should('exist')
     .click();
   cy.get(`label.mdc-label:contains(${user})`).click();
   cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
-};
+}
 
-export const visitArea = (area: string) => {
+export function visitArea (area: string){
   visitLoginPage();
   cy.get(`a:contains("${area}")`).click();
-};
+}
 /*
   Related to UNIT
  */
-export const  deleteUnit = (kurzname: string) => {
+export function deleteUnit(kurzname: string){
   cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
   cy.get('mat-icon:contains("delete")').eq(0)
     .click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Löschen")').click();
 }
 
-export const addUnit = (kurzname: string) => {
+export function addUnit(kurzname: string){
   cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]')
     .should('exist')
     .click();
-  cy.get('button > span:contains("Neu (leer)")')
+  cy.get('button > span:contains("Neue Aufgabe")')
     .should('exist')
     .click();
   cy.get('input[ng-reflect-placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-};
+}
 
-export const addModule = ():void => {
+export function addModule():void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -216,4 +203,16 @@ export const addModule = ():void => {
   //  .invoke('show')
   //  .selectFile('apps/frontendcypress/fixtures/iqb-schemer-1.5.0.html')
   //  .click();
-};
+}
+export const visitLoginPage = (): Chainable => cy.url()
+  .then(() => {
+    cy.visit(<string>Cypress.config().baseUrl);
+  });
+
+export const clickButtonToAccept = (text: string):Chainable => cy.url()
+  .then(() => {
+    cy.get('button')
+      .contains(text)
+      .should('exist')
+      .click();
+  });

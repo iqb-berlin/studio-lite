@@ -10,13 +10,13 @@ import { adminData } from '../../../support/config/userdata';
 import {
   getItem,
   getStructure,
-  selectProfilForArea,
-  selectProfilForAreaFromGroup,
-  selectProfilForGroupFromAdmin
+  selectProfileForArea,
+  selectProfileForAreaFromGroup,
+  selectProfileForGroupFromAdmin, selectProfileForGroup
 } from '../../../support/metadata-util';
-import { IqbProfil } from '../../../support/config/iqbProfil';
+import { IqbProfile } from '../../../support/config/iqbProfile';
 
-describe('add metadata with one item', () => {
+describe('Metadata Management', () => {
   const area = 'Deutsch I';
   const math_area = 'Mathematik I'
   const group = 'Bista I';
@@ -40,27 +40,35 @@ describe('add metadata with one item', () => {
     visitLoginPage();
     createAreaForGroupFromAdmin(math_area, group);
     grantRemovePrivilegeOnArea(adminData.user_name, math_area);
+  });
+  it('choose profiles from the administration ', () => {
     visitLoginPage();
-    selectProfilForGroupFromAdmin(group, IqbProfil.DE);
+    selectProfileForGroupFromAdmin(group, IqbProfile.DE);
     visitLoginPage();
-    selectProfilForGroupFromAdmin(group, IqbProfil.MA);
+    selectProfileForGroupFromAdmin(group, IqbProfile.MA);
   });
 
-  it('select a profil for an area', () => {
+  it.skip('choose profiles from the group ', () => {
+    visitLoginPage();
+    selectProfileForGroup(group, IqbProfile.DE);
+    visitLoginPage();
+    selectProfileForGroup(group, IqbProfile.MA);
+  });
+  //Execute only one of the two test: the previous oder this, not both together
+  it('choose a profil for an area from a group', () => {
+    visitLoginPage();
+    selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
+    visitLoginPage();
+    selectProfileForAreaFromGroup(IqbProfile.MA, math_area, group);
+  });
+
+  it.skip('choose a profile for an area', () => {
     visitLoginPage();
     cy.contains(area).click();
-    selectProfilForArea(IqbProfil.DE);
+    selectProfileForArea(IqbProfile.DE);
     visitLoginPage();
     cy.contains(math_area).click();
-    selectProfilForArea(IqbProfil.MA);
-  });
-
-  //Execute only one of the two test: the previous oder this, not both together
-  it.skip('choose a profil for an area from a group', () => {
-    visitLoginPage();
-    selectProfilForAreaFromGroup(IqbProfil.DE, area, group);
-    visitLoginPage();
-    selectProfilForAreaFromGroup(IqbProfil.MA, area, group);
+    selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {
