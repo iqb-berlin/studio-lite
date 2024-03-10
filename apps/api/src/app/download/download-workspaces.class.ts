@@ -1,10 +1,8 @@
 import * as Excel from 'exceljs';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import {
-  CodeData, ToTextFactory, CodingRule, RuleSet, VariableCodingData
+  CodeData, CodingRule, RuleSet, VariableCodingData, ToTextFactory
 } from '@iqb/responses';
-
-import { Buffer as excelBuffer } from 'exceljs';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
 
@@ -21,6 +19,13 @@ interface WorkspaceData {
   editors: { [key: string]: number };
   players: { [key: string]: number };
   schemers: { [key: string]: number };
+}
+
+interface CodingBook {
+  key: string;
+  name: string;
+  variables: any;
+
 }
 
 export class DownloadWorkspacesClass {
@@ -109,56 +114,83 @@ export class DownloadWorkspacesClass {
     return await wb.xlsx.writeBuffer() as Buffer;
   }
 
-  static async getWorkspaceCodingBook(workspaceGroupId:number, unitService: UnitService, exportFormat:'json' | 'docx', hasManualCoding, hasClosedResponses:boolean): Promise<Buffer> {
-    const codingBook = [];
-    if (exportFormat === 'docx') {
-      let docHtml = '';
-      let unitsHtml = '';
-      const units = await unitService.findAllWithMetadata(workspaceGroupId);
-      units.forEach((unit: UnitMetadataDto) => {
-        const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
-        const parsedScheme: any = JSON.parse(unit.scheme);
-        let variablesHtml = '';
-        if (parsedScheme?.variableCodings) {
-          // ToTextFactory.codeAsText(parsedScheme?.variableCodings);
-          parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
-            const variableHeaderHtml = `<h3>${variableCoding.id} ${variableCoding.label} ${variableCoding.page}</h3>${variableCoding.manualInstruction}`;
-            let codesHtml = '';
-            let closedCoding = false;
-            let manualCodingOnly = false;
-            let hasRules = false;
-            if (variableCoding.codes.length > 0) {
-              variableCoding.codes.forEach((code: CodeData) => {
-                const hasManualInstruction = code.manualInstruction.length > 0;
-                code.ruleSets.forEach((ruleSet: RuleSet) => {
-                  if (hasManualInstruction && ruleSet.rules.length === 0) manualCodingOnly = true;
-                  hasRules = ruleSet.rules.length > 0;
-                  ruleSet.rules.forEach((rule: CodingRule) => {
-                    if (rule.method === 'ELSE') {
-                      closedCoding = true;
-                    }
-                  });
+  static async getWorkspaceCodingBook(workspaceGroupId:number,
+                                      unitService: UnitService,
+                                      exportFormat:'json' | 'docx',
+                                      hasOnlyManualCodings:boolean,
+                                      hasClosedCodings:boolean): Promise<Buffer> {
+    const codingBook: CodingBook[] = [];
+    let docHtml = '';
+    let unitsHtml = '';
+    const units = await unitService.findAllWithMetadata(workspaceGroupId);
+    units.forEach((unit: UnitMetadataDto) => {
+      const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
+      const parsedScheme: any = JSON.parse(unit.scheme);
+      let variablesHtml = '';
+      let bookVariables = [];
+      if (parsedScheme?.variableCodings) {
+        parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
+          const variableHeaderHtml = `<h3>${variableCoding.id} ${variableCoding.label} ${variableCoding.page}</h3>${variableCoding.manualInstruction}`;
+          let codesHtml = '';
+          let codes = [];
+          let closedCodingVar = false;
+          let onlyManualCodingVar = false;
+          let hasRules = false;
+          if (variableCoding.codes.length > 0) {
+            variableCoding.codes.forEach((code: CodeData) => {
+              const codeAsText = ToTextFactory.codeAsText(code);
+              const hasManualInstruction = code.manualInstruction.length > 0;
+              code.ruleSets.forEach((ruleSet: RuleSet) => {
+                if (hasManualInstruction && ruleSet.rules.length === 0) onlyManualCodingVar = true;
+                hasRules = ruleSet.rules.length > 0;
+                ruleSet.rules.forEach((rule: CodingRule) => {
+                  if (rule.method === 'ELSE') {
+                    closedCodingVar = true;
+                  }
                 });
-                codesHtml += `<tr><td>${code.id}</td><td>${code.score}</td><td>${code.label}</td><td style="width:500px">${code.manualInstruction}</td></tr>`;
               });
-            }
-            const variableCodesTableHtml = `<table><tr><th style="border-bottom:1px solid black;padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none" >Code</th><th style="border-bottom:1px solid black; padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none">Score</th><th style="border-bottom:1px solid black; padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none">Label</th><th style="border-bottom:1px solid black;padding:5px 11px 5px 11px; background-color:#d9d9d9; border-top:none; border-right:1px solid black; border-left:none;width:500px" >manuelle Instruktion</th></tr>${codesHtml}</table>`;
-            if (variableCoding.codes.length > 0 && closedCoding === hasClosedResponses) {
-              variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;
-            }
-          });
-        }
-        if (variablesHtml) unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
+              const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td style="width:500px">${code.manualInstruction}</td><td style="width:500px">${codeAsText.ruleSetDescriptions}</td></tr>`;
+              if (onlyManualCodingVar && hasOnlyManualCodings) {
+                codesHtml += codeHtml;
+                codes = [...codes, codeAsText];
+              }
+              if ((closedCodingVar && hasClosedCodings) === true)  {
+                codesHtml += codeHtml;
+                codes = [...codes, codeAsText];
+              }
+              if ((hasRules && !closedCodingVar) === true) {
+                codesHtml += codeHtml;
+                codes = [...codes, codeAsText];
+              }
+            });
+          }
+          const variableCodesTableHtml = `<table><tr><th>Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">manuelle Instruktion</th><th style="background-color:#d9d9d9">Regelbeschreibung</th></tr>${codesHtml}</table>`;
+          if (codesHtml.length > 0 && (hasClosedCodings === true && closedCodingVar)) {
+            bookVariables = [...bookVariables, {
+              id: variableCoding.id,
+              label: variableCoding.label,
+              page: variableCoding.page,
+              manualInstruction: variableCoding.manualInstruction,
+              codes: codes
+            }];
+            variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;
+          }
+        });
+      }
+      if (variablesHtml) {
         codingBook.push(
           {
             key: unit.key,
             name: unit.name,
-            scheme: unit.scheme,
-            variables: unit.variables
+            variables: bookVariables
           }
         );
-      });
-      docHtml = `<!DOCTYPE html><html lang="en"><body>${unitsHtml}</body></body></html>`;
+        unitsHtml += `${unitHeaderHtml}${variablesHtml}<div class="page-break" style="page-break-after: always;"></div>`;
+      }
+    });
+    docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
+
+    if (exportFormat === 'docx') {
       return new Promise(resolve => {
         resolve(HTMLtoDOCX(docHtml, null, {
           title: 'IQB-Studio Kodierbuch ',
@@ -173,7 +205,7 @@ export class DownloadWorkspacesClass {
     }
 
     return new Promise(resolve => {
-      const data = JSON.stringify('sssss');
+      const data = JSON.stringify(codingBook);
       resolve(Buffer.from(data, 'utf-8'));
     });
   }

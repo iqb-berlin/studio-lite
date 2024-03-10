@@ -29,9 +29,9 @@ export class DownloadController {
   @ApiTags('download')
 
   async downloadCodingBook(@WorkspaceGroupId() workspaceGroupId: number,
-    @Query('exportFormat')exportFormat: 'json' | 'docx',
-    @Query('hasManualCoding') hasManualCoding: boolean,
-    @Query('hasClosedResponses') hasClosedResponses: boolean) {
+    @Query('format')exportFormat: 'json' | 'docx',
+    @Query('onlyManual') hasManualCoding: boolean,
+    @Query('closed') hasClosedResponses: boolean) {
     const file = await DownloadWorkspacesClass
       .getWorkspaceCodingBook(workspaceGroupId, this.unitService, exportFormat, hasManualCoding, hasClosedResponses);
     return new StreamableFile(file as Buffer);
