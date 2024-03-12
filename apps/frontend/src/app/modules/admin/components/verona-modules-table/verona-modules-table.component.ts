@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 @Component({
   selector: 'studio-lite-verona-modules-table',
@@ -45,10 +46,10 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  isAllSelected(): boolean {
+  private isAllSelected(): boolean {
     const numSelected = this.tableSelectionCheckboxes.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
+    return IsAllSelectedPipe.isAllSelected(numSelected, numRows);
   }
 
   masterToggleSelection(): void {
