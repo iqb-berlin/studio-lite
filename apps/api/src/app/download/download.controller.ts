@@ -29,13 +29,18 @@ export class DownloadController {
   @ApiTags('download')
 
   async downloadCodingBook(
-    @WorkspaceGroupId() workspaceGroupId: number,
+  @WorkspaceGroupId() workspaceGroupId: number,
     @Param('unitList') unitList: string,
     @Query('format')exportFormat: 'json' | 'docx',
-    @Query('onlyManual') hasManualCoding: boolean,
-    @Query('closed') hasClosedResponses: boolean) {
+    @Query('onlyManual') hasManualCoding: string,
+    @Query('closed') hasClosedResponses: string) {
     const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(workspaceGroupId, this.unitService, exportFormat, hasManualCoding, hasClosedResponses, unitList);
+      .getWorkspaceCodingBook(workspaceGroupId,
+        this.unitService,
+        exportFormat,
+        hasManualCoding,
+        hasClosedResponses,
+        unitList);
     return new StreamableFile(file as Buffer);
   }
 
