@@ -21,19 +21,21 @@ export class DownloadController {
   ) {
   }
 
-  @Get('docx/workspaces/:workspace_group_id/coding-book')
+  @Get('docx/workspaces/:workspace_group_id/coding-book/:unitList')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
   @ApiTags('download')
 
-  async downloadCodingBook(@WorkspaceGroupId() workspaceGroupId: number,
+  async downloadCodingBook(
+    @WorkspaceGroupId() workspaceGroupId: number,
+    @Param('unitList') unitList: string,
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('onlyManual') hasManualCoding: boolean,
     @Query('closed') hasClosedResponses: boolean) {
     const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(workspaceGroupId, this.unitService, exportFormat, hasManualCoding, hasClosedResponses);
+      .getWorkspaceCodingBook(workspaceGroupId, this.unitService, exportFormat, hasManualCoding, hasClosedResponses, unitList);
     return new StreamableFile(file as Buffer);
   }
 

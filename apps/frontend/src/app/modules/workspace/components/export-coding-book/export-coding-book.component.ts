@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SharedModule } from '../../../shared/shared.module';
 // eslint-disable-next-line import/no-cycle
@@ -24,7 +25,9 @@ const datePipe = new DatePipe('de-DE');
     forwardRef(() => WorkspaceModule),
     MatCheckboxModule,
     FormsModule,
-    MatRadioModule
+    MatRadioModule,
+    MatSelectModule,
+    WorkspaceModule
   ],
   styleUrls: ['export-coding-book.component.scss']
 })
@@ -44,7 +47,11 @@ export class ExportCodingBookComponent {
 
   exportCodingBook() {
     this.backendService
-      .getCodingBook(this.workspaceService.selectedWorkspaceId, this.exportFormat, this.includeManualCoding, this.includeClosedCoding)
+      .getCodingBook(this.workspaceService.selectedWorkspaceId,
+        this.exportFormat,
+        this.includeManualCoding,
+        this.includeClosedCoding,
+        this.unitList)
       .subscribe(data => {
         if (data) {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');

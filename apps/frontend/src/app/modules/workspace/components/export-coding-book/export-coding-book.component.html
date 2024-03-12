@@ -9,12 +9,14 @@
                                     [workspace]="workspaceService.selectedWorkspaceId"
                                     (selectionChanged)="unitList = $event">
       </studio-lite-select-unit-list>
-      <div>
-        Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.
+      <div class="settings">
+        {{ 'workspace.export-warning-no-coding-vars' | translate }}
         <section class="example-section fx-column-start-start">
-          <h4>zusätzliche Kodiertypen auswählen </h4>
+          <h4>{{ 'workspace.select-additional-coding-types' | translate }} </h4>
           <mat-checkbox class="example-margin" [(ngModel)]="includeManualCoding">nur manuell</mat-checkbox>
           <mat-checkbox class="example-margin" [(ngModel)]="includeClosedCoding">geschlossen</mat-checkbox>
+          <h4>{{ 'workspace.coding-missing-profiles' | translate }}</h4>
+          <mat-select></mat-select>
           <h4>Exportformat</h4>
           <mat-radio-group [(ngModel)]="exportFormat" aria-label="Exportformat">
             <mat-radio-button value="json">JSON</mat-radio-button>

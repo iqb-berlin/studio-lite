@@ -118,19 +118,24 @@ export class DownloadWorkspacesClass {
                                       unitService: UnitService,
                                       exportFormat:'json' | 'docx',
                                       hasOnlyManualCodings:boolean,
-                                      hasClosedCodings:boolean): Promise<Buffer> {
+                                      hasClosedCodings:boolean,
+                                      unitList:string): Promise<Buffer> {
     const codingBook: CodingBook[] = [];
     let docHtml = '';
     let unitsHtml = '';
     const units = await unitService.findAllWithMetadata(workspaceGroupId);
-    units.forEach((unit: UnitMetadataDto) => {
+    const selectedUnits =
+        units.filter(unit => unitList.split(',')
+          .map((u:string) => parseInt(u, 10))
+          .includes(unit.id));
+    selectedUnits.forEach((unit: UnitMetadataDto) => {
       const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
       const parsedScheme: any = JSON.parse(unit.scheme);
       let variablesHtml = '';
       let bookVariables = [];
       if (parsedScheme?.variableCodings) {
         parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
-          const variableHeaderHtml = `<h3>${variableCoding.id} ${variableCoding.label} ${variableCoding.page}</h3>${variableCoding.manualInstruction}`;
+          const variableHeaderHtml = `<h3>${variableCoding.id}</h3><p>${variableCoding.label}   ${variableCoding.page}</p><p>${variableCoding.manualInstruction}</p>`;
           let codesHtml = '';
           let codes = [];
           let closedCodingVar = false;
@@ -149,28 +154,40 @@ export class DownloadWorkspacesClass {
                   }
                 });
               });
-              const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td style="width:500px">${code.manualInstruction}</td><td style="width:500px">${codeAsText.ruleSetDescriptions}</td></tr>`;
-              if (onlyManualCodingVar && hasOnlyManualCodings) {
-                codesHtml += codeHtml;
-                codes = [...codes, codeAsText];
-              }
-              if ((closedCodingVar && hasClosedCodings) === true)  {
-                codesHtml += codeHtml;
-                codes = [...codes, codeAsText];
-              }
-              if ((hasRules && !closedCodingVar) === true) {
-                codesHtml += codeHtml;
-                codes = [...codes, codeAsText];
-              }
+              let rulesDescription = '';
+              codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+                rulesDescription += `<p>${ruleSetDescription}</p>`;
+              });
+              const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td>${rulesDescription}${code.manualInstruction}</td></tr>`;
+              /* if (onlyManualCodingVar && hasOnlyManualCodings) {
+                  codesHtml += codeHtml;
+                  codes = [...codes, codeAsText];
+                }
+                if ((closedCodingVar && hasClosedCodings) === true)  {
+                  codesHtml += codeHtml;
+                  codes = [...codes, codeAsText];
+                }
+                if ((hasRules && !closedCodingVar) === true) {
+                  codesHtml += codeHtml;
+                  codes = [...codes, codeAsText];
+                } */
+              codesHtml += codeHtml;
+              const codeInfo = {
+                id: code.id,
+                label: codeAsText.label,
+                score: codeAsText.score,
+                scoreLabel: codeAsText.scoreLabel,
+                description: `${rulesDescription}${code.manualInstruction}`
+              };
+              codes = [...codes, codeInfo];
             });
           }
-          const variableCodesTableHtml = `<table><tr><th>Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">manuelle Instruktion</th><th style="background-color:#d9d9d9">Regelbeschreibung</th></tr>${codesHtml}</table>`;
-          if (codesHtml.length > 0 && (hasClosedCodings === true && closedCodingVar)) {
+          const variableCodesTableHtml = `<table><tr><th style="background-color:#d9d9d9">Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">Beschreibung</th></tr>${codesHtml}</table>`;
+          if (codesHtml.length > 0) {
             bookVariables = [...bookVariables, {
               id: variableCoding.id,
               label: variableCoding.label,
-              page: variableCoding.page,
-              manualInstruction: variableCoding.manualInstruction,
+              generalInstruction: variableCoding.manualInstruction,
               codes: codes
             }];
             variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;

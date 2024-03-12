@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
@@ -242,7 +242,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       }).afterClosed().subscribe(res => {
         this.metadataService.createMetadataReport().subscribe((units: any) => {
           if (res) {
-            const selectedUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
+            const selectedUnits = units.filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
             this.showMetadataDialog.open(TableViewComponent, {
               width: '80%',
               height: '80%',
