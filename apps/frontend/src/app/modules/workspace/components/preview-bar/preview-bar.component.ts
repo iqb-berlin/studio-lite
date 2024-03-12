@@ -47,14 +47,17 @@ export class PreviewBarComponent {
     });
   }
 
-  openPrintView(options: { key: string; value: boolean }[]): void {
+  openPrintView(options: { key: string; value: boolean | number }[]): void {
     const printOptions = options
-      .filter((option: { key: string; value: boolean }) => option.value)
-      .map((option: { key: string; value: boolean }) => option.key);
+      .filter((option: { key: string; value: boolean | number }) => option.value === true)
+      .map((option: { key: string; value: boolean | number }) => option.key);
+    const printPreviewHeight = options
+      .find(option => option.key === 'printPreviewHeight')?.value || 0;
     const url = this.router
       .serializeUrl(this.router
         .createUrlTree(['/print'], {
           queryParams: {
+            printPreviewHeight: printPreviewHeight,
             printOptions: printOptions,
             unitIds: [this.unitId],
             workspaceId: this.workspaceService.selectedWorkspaceId,
