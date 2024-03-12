@@ -220,6 +220,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
               .serializeUrl(this.router
                 .createUrlTree(['/print'], {
                   queryParams: {
+                    printPreviewHeight: result.printPreviewHeight,
                     printOptions: result.printOptions,
                     unitIds: result.unitIds,
                     workspaceId: this.workspaceService.selectedWorkspaceId,

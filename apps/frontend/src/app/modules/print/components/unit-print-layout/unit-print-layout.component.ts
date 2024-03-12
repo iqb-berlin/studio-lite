@@ -17,10 +17,10 @@ export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;
   @Input() workspaceId!: number;
   @Input() workspaceGroupId!: number;
+  @Input() printPreviewHeight!: number;
   @Input() printOptions!: PrintOption[];
 
   @Output() heightChange: EventEmitter<number> = new EventEmitter<number>();
-  playerHeight: number = 1700;
   message = '';
   unitProperties!: UnitMetadataDto;
   playerId: string = '';
@@ -54,7 +54,7 @@ export class UnitPrintLayoutComponent implements OnInit {
   }
 
   playerHeightChange(height: number) {
-    this.heightChange.emit(height - this.playerHeight);
-    this.playerHeight = height;
+    this.heightChange.emit(height - this.printPreviewHeight);
+    this.printPreviewHeight = height;
   }
 }

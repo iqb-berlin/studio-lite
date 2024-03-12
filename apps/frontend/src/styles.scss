@@ -13,8 +13,6 @@ body {
   margin: 0;
   font-family: Roboto,Helvetica Neue Light,Helvetica Neue,Helvetica,Arial,Lucida Grande,sans-serif;
   background: var(--st-body-background);
-
-  /* background-color: rgb(210, 229, 238); */
 }
 
 @page {
@@ -32,6 +30,9 @@ body {
   html, body {
     width: 210mm;
     height: 297mm;
+  }
+  studio-lite-unit-print-layout {
+    padding: 20px 40px;
   }
   .hide-on-print {
     display: none !important;

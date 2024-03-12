@@ -44,7 +44,7 @@
 
   <div *ngIf="playerId && (printOptions | include : 'printPreview')" >
     <studio-lite-unit-print-player *ngIf="playerId"
-                                   [iFrameHeight]="playerHeight"
+                                   [iFrameHeight]="printPreviewHeight"
                                    [playerId]="playerId"
                                    [unitId]="unitId"
                                    [workspaceId]="workspaceId">
@@ -59,7 +59,7 @@
                type="number"
                min="0"
                step="10"
-               [ngModel]="playerHeight"
+               [ngModel]="printPreviewHeight"
                (ngModelChange)="playerHeightChange($event)">
       </mat-form-field>
     </div>

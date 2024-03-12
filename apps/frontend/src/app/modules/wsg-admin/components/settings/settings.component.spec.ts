@@ -9,13 +9,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceSettingsComponent } from './settings.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { StatesComponent } from '../states/states.component';
 import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
 
-describe('UsersComponent', () => {
+describe('SettingsComponent', () => {
   let component: WorkspaceSettingsComponent;
   let fixture: ComponentFixture<WorkspaceSettingsComponent>;
 
@@ -42,6 +44,8 @@ describe('UsersComponent', () => {
         MatListModule,
         MatIconModule,
         MatTooltipModule,
+        MatFormFieldModule,
+        MatProgressSpinnerModule,
         TranslateModule.forRoot()
       ],
       providers: [
