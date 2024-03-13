@@ -26,6 +26,7 @@ import { PrintOptionsComponent } from './components/print-options/print-options.
 import { MetadataProfileEntriesComponent }
   from './components/metadata-profile-entries/metadata-profile-entries.component';
 import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-items/metadata-readonly-items.component';
+import { IsActivePrintOption } from './pipes/isActivePrintOption.pipe';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-i
     PrintOptionsComponent,
     IncludePipe,
     MetadataProfileEntriesComponent,
-    MetadataReadonlyItemsComponent
+    MetadataReadonlyItemsComponent,
+    IsActivePrintOption
   ],
   imports: [
     CommonModule,

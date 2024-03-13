@@ -1,8 +1,20 @@
 <ng-container *ngFor="let option of printOptions ">
   <div>
-    <mat-checkbox [(ngModel)]="option.value"
-                  (ngModelChange)="printOptionsChange.emit(printOptions)">
+    <mat-checkbox *ngIf="option.key !== 'printPreviewHeight'"
+                  [(ngModel)]="option.value"
+                  (ngModelChange)="setPrintOptions(printOptions)">
       {{ 'print.' + option.key | translate }}
     </mat-checkbox>
+    <mat-form-field *ngIf="option.key === 'printPreviewHeight'"
+      appearance="fill">
+      <mat-label>{{ 'print.printPreviewHeight' | translate }}</mat-label>
+      <input matInput
+             type="number"
+             min="0"
+             step="10"
+             [disabled]="!(printOptions | isActivePrintOption : 'printPreview')"
+             [(ngModel)]="option.value"
+             (ngModelChange)="setPrintOptions(printOptions)">
+    </mat-form-field>
   </div>
 </ng-container>
