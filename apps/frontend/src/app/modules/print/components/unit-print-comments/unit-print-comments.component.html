@@ -1,9 +1,10 @@
 <ng-container *ngIf="comments | async; let unitComments">
   <h3 *ngIf="unitComments && !unitComments.length">{{'print.no-comments' | translate}}</h3>
   <h3 *ngIf="unitComments && unitComments.length">{{'print.comments' | translate}}</h3>
-  <div *ngFor="let comment of unitComments; let first = first">
+  <div *ngFor="let comment of unitComments; let first = first"
+       class="comment">
     <hr *ngIf="!comment.parentId && !first">
-    <h4>
+    <h4 class="comment-user">
       <mat-icon *ngIf="comment.parentId">subdirectory_arrow_right</mat-icon>
       {{comment.userName}}
       <span class="comment-date">{{comment.changedAt | date : 'dd.MM.yyyy HH:mm' }}</span>

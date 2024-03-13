@@ -12,6 +12,7 @@ import { PrintOption } from '../../models/print-options.interface';
 export class PrintComponent implements OnInit {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
   unitIds!: number[];
+  printPreviewHeight!: number;
   printOptions!: PrintOption[];
   workspaceId!: number;
   workspaceGroupId!: number;
@@ -21,6 +22,7 @@ export class PrintComponent implements OnInit {
   ngOnInit() {
     this.route.queryParamMap
       .subscribe(params => {
+        this.printPreviewHeight = Number(params.get('printPreviewHeight'));
         this.printOptions = params.getAll('printOptions') as PrintOption[];
         this.unitIds = params.getAll('unitIds').map(unitId => Number(unitId));
         this.workspaceId = Number(params.get('workspaceId'));

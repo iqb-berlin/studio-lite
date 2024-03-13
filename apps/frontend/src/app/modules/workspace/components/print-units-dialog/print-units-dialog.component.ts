@@ -10,9 +10,11 @@ import { PrintOption, PrintOptions } from '../../../print/models/print-options.i
 })
 export class PrintUnitsDialogComponent {
   unitPrintSettings: {
+    printPreviewHeight: number;
     unitIds: number[];
     printOptions: PrintOption[];
   } = {
+      printPreviewHeight: 0,
       unitIds: [],
       printOptions: []
     };
@@ -25,7 +27,9 @@ export class PrintUnitsDialogComponent {
 
   setPrintSettings(printOptions: PrintOptions[]) {
     this.unitPrintSettings.printOptions = printOptions
-      .filter(option => option.value)
+      .filter(option => option.value === true)
       .map(option => option.key);
+    this.unitPrintSettings.printPreviewHeight = printOptions
+      .find(option => option.key === 'printPreviewHeight')?.value as number || 0;
   }
 }

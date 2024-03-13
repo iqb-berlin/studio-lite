@@ -14,12 +14,18 @@ export class PrintOptionsComponent implements OnInit {
     { key: 'printMetadata', value: true },
     { key: 'printComments', value: true },
     { key: 'printCoding', value: true },
-    { key: 'printPreview', value: true }
+    { key: 'printPreview', value: true },
+    { key: 'printPreviewHeight', value: 1000 }
   ];
 
   @Output() printOptionsChange: EventEmitter<PrintOptions[]> = new EventEmitter<PrintOptions[]>();
 
   ngOnInit(): void {
+    this.printOptionsChange.emit(this.printOptions);
+  }
+
+  setPrintOptions(printOptions: PrintOptions[]): void {
+    this.printOptions = printOptions.map(_ => _);
     this.printOptionsChange.emit(this.printOptions);
   }
 }
