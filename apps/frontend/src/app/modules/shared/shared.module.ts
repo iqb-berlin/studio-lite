@@ -30,6 +30,7 @@ import { IsActivePrintOption } from './pipes/isActivePrintOption.pipe';
 import { IsSelectedPipe } from './pipes/isSelected.pipe';
 import { IsAllSelectedPipe } from './pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from './pipes/hasSelectionValue.pipe';
+import { IsSelectedIdPipe } from './pipes/isSelectedId.pipe';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,8 @@ import { HasSelectionValuePipe } from './pipes/hasSelectionValue.pipe';
     MetadataReadonlyItemsComponent,
     IsSelectedPipe,
     IsAllSelectedPipe,
-    HasSelectionValuePipe
+    HasSelectionValuePipe,
+    IsSelectedIdPipe
   ],
   imports: [
     CommonModule,
@@ -85,7 +87,8 @@ import { HasSelectionValuePipe } from './pipes/hasSelectionValue.pipe';
     MetadataReadonlyItemsComponent,
     IsSelectedPipe,
     IsAllSelectedPipe,
-    HasSelectionValuePipe
+    HasSelectionValuePipe,
+    IsSelectedIdPipe
   ]
 })
 export class SharedModule {}
