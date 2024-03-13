@@ -542,6 +542,7 @@
     "coding-book": "Codebook",
     "coding-missing-profiles": "Missings-Profil",
     "coding": "Kodierung",
+    "select-missings-profile": "Profil auswählen...",
     "reports": "Berichte",
     "select-additional-coding-types": "zusätzliche Kodiertypen auswählen" ,
     "export-warning-no-coding-vars":"Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.",

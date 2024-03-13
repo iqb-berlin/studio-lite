@@ -1,10 +1,12 @@
-import { Component, forwardRef, Inject } from '@angular/core';
+import {
+  Component, forwardRef, Inject, OnInit
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver-es';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgForOf } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -27,12 +29,13 @@ const datePipe = new DatePipe('de-DE');
     FormsModule,
     MatRadioModule,
     MatSelectModule,
-    WorkspaceModule
+    WorkspaceModule,
+    NgForOf
   ],
   styleUrls: ['export-coding-book.component.scss']
 })
 
-export class ExportCodingBookComponent {
+export class ExportCodingBookComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService,
@@ -43,7 +46,13 @@ export class ExportCodingBookComponent {
   includeManualCoding = true;
   includeClosedCoding = true;
   exportFormat: 'docx' | 'json' = 'docx';
+  missingsProfiles = [''];
   unitList: number[] = [];
+  selectedMissingsProfile!:string;
+
+  ngOnInit() {
+    this.backendService.getMissingsProfiles(this.workspaceService.selectedWorkspaceId);
+  }
 
   exportCodingBook() {
     this.backendService

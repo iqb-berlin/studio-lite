@@ -11,6 +11,9 @@ import {
   UnitMetadataDto,
   UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
+import {
+  MissingsProfilesDto
+} from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +27,14 @@ export class BackendService {
   getWorkspaceGroupStates(workspaceGroupId: number):Observable<WorkspaceGroupFullDto> {
     return this.http
       .get<WorkspaceGroupFullDto>(`${this.serverUrl}workspace-groups/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => [])
+      );
+  }
+
+  getMissingsProfiles(workspaceGroupId: number):Observable<MissingsProfilesDto> {
+    return this.http
+      .get<MissingsProfilesDto>(`${this.serverUrl}workspace/${workspaceGroupId}/missings-profiles`)
       .pipe(
         catchError(() => [])
       );

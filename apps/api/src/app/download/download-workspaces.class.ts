@@ -178,7 +178,8 @@ export class DownloadWorkspacesClass {
                 id: variableCoding.id,
                 label: variableCoding.label,
                 generalInstruction: variableCoding.manualInstruction,
-                codes: codes
+                codes: codes,
+                missings: []
               }];
               variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;
             }
