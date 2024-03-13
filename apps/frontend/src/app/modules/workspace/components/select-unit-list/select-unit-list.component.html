@@ -18,15 +18,15 @@
     <ng-container matColumnDef="selectCheckbox">
       <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
         <mat-checkbox (change)="$event ? masterToggle() : null"
-                      [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
-                      [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()">
+                      [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
+                      [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)">
         </mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
         <mat-checkbox (click)="$event.stopPropagation()"
-                      [disabled]="disabledUnits.indexOf(row.id) >= 0"
-                      (change)="$event ? tableSelectionCheckbox.toggle(row) : null"
-                      [checked]="tableSelectionCheckbox.isSelected(row)">
+                      [disabled]="disabledUnits | include : row.id"
+                      (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
+                      [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length">
         </mat-checkbox>
       </mat-cell>
     </ng-container>
@@ -34,7 +34,7 @@
     <ng-container matColumnDef="key">
       <mat-header-cell *matHeaderCellDef mat-sort-header="key">{{'workspace.unit' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
-                [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
+                [class.disabled-element]="disabledUnits | include : element.id">
         {{element.key}}{{element.name ? ' - ' + element.name : ''}}
       </mat-cell>
     </ng-container>
@@ -42,7 +42,7 @@
     <ng-container matColumnDef="groupName">
       <mat-header-cell *matHeaderCellDef mat-sort-header="groupName">{{'workspace.group' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
-                [class]="(disabledUnits.indexOf(element.id) >= 0) ? 'disabled-element' : ''">
+                [class.disabled-element]="disabledUnits | include : element.id">
         {{element.groupName}}
       </mat-cell>
     </ng-container>
