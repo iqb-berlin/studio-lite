@@ -1,6 +1,13 @@
 import * as Excel from 'exceljs';
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import {
+  CodeData, CodingRule, RuleSet, VariableCodingData, ToTextFactory
+} from '@iqb/responses';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
+const HTMLtoDOCX = require('html-to-docx');
 
 interface WorkspaceData {
   id: number;
@@ -14,7 +21,14 @@ interface WorkspaceData {
   schemers: { [key: string]: number };
 }
 
-export class XlsxDownloadWorkspacesClass {
+interface CodingBook {
+  key: string;
+  name: string;
+  variables: any;
+
+}
+
+export class DownloadWorkspacesClass {
   static setUnitsItemsDataRows(units: any[]): any {
     const allUnits: any[] = [];
     units.forEach((unit: any) => {
@@ -98,6 +112,111 @@ export class XlsxDownloadWorkspacesClass {
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);
     return await wb.xlsx.writeBuffer() as Buffer;
+  }
+
+  static async getWorkspaceCodingBook(workspaceGroupId:number,
+                                      unitService: UnitService,
+                                      exportFormat:'json' | 'docx',
+                                      hasOnlyManualCodings:string,
+                                      hasClosedCodings:string,
+                                      unitList:string): Promise<Buffer> {
+    const codingBook: CodingBook[] = [];
+    let docHtml = '';
+    let unitsHtml = '';
+    const units = await unitService.findAllWithMetadata(workspaceGroupId);
+    const selectedUnits =
+        units.filter(unit => unitList.split(',')
+          .map((u:string) => parseInt(u, 10))
+          .includes(unit.id));
+    selectedUnits.forEach((unit: UnitMetadataDto) => {
+      const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
+      const parsedScheme: any = JSON.parse(unit.scheme);
+      let variablesHtml = '';
+      let bookVariables = [];
+      if (parsedScheme?.variableCodings) {
+        parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
+          const variableHeaderHtml = `<h3>${variableCoding.id}</h3><p>${variableCoding.label}   ${variableCoding.page}</p><p>${variableCoding.manualInstruction}</p>`;
+          let codesHtml = '';
+          let codes = [];
+          let closedCodingVar:boolean;
+          let onlyManualCodingVar:boolean;
+          let hasRules = false;
+          if (variableCoding.codes.length > 0) {
+            variableCoding.codes.forEach((code: CodeData) => {
+              const codeAsText = ToTextFactory.codeAsText(code);
+              const hasManualInstruction = code.manualInstruction.length > 0;
+              code.ruleSets.forEach((ruleSet: RuleSet) => {
+                onlyManualCodingVar = (hasManualInstruction && ruleSet.rules.length === 0);
+                hasRules = ruleSet.rules.length > 0;
+                ruleSet.rules.forEach((rule: CodingRule) => {
+                  if (rule.method === 'ELSE') {
+                    closedCodingVar = true;
+                  }
+                });
+              });
+              let rulesDescription = '';
+              codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+                rulesDescription += `<p>${ruleSetDescription}</p>`;
+              });
+              const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td>${rulesDescription}${code.manualInstruction}</td></tr>`;
+
+              codesHtml += codeHtml;
+              const codeInfo = {
+                id: code.id,
+                label: codeAsText.label,
+                score: codeAsText.score,
+                scoreLabel: codeAsText.scoreLabel,
+                description: `${rulesDescription}${code.manualInstruction}`
+              };
+              codes = [...codes, codeInfo];
+            });
+          }
+          const variableCodesTableHtml = `<table><tr><th style="background-color:#d9d9d9">Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">Beschreibung</th></tr>${codesHtml}</table>`;
+          if (codesHtml.length > 0) {
+            if ((closedCodingVar && hasClosedCodings) || (onlyManualCodingVar && hasOnlyManualCodings) || (hasRules && !closedCodingVar)) {
+              bookVariables = [...bookVariables, {
+                id: variableCoding.id,
+                label: variableCoding.label,
+                generalInstruction: variableCoding.manualInstruction,
+                codes: codes,
+                missings: []
+              }];
+              variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;
+            }
+          }
+        });
+      }
+      if (variablesHtml) {
+        codingBook.push(
+          {
+            key: unit.key,
+            name: unit.name,
+            variables: bookVariables
+          }
+        );
+        unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
+      }
+    });
+    docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
+
+    if (exportFormat === 'docx') {
+      return new Promise(resolve => {
+        resolve(HTMLtoDOCX(docHtml, null, {
+          title: 'IQB-Studio Kodierbuch ',
+          table: { row: { cantSplit: true } },
+          footer: true,
+          pageNumber: true,
+          lang: 'de-DE',
+          orientation: 'landscape',
+          'font-size': '12pt'
+        }));
+      });
+    }
+
+    return new Promise(resolve => {
+      const data = JSON.stringify(codingBook);
+      resolve(Buffer.from(data, 'utf-8'));
+    });
   }
 
   static async getWorkspaceReport(

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
@@ -29,6 +29,8 @@ import { TableViewComponent } from '../../../metadata/components/table-view/tabl
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 import { CodingReportComponent } from '../coding-report/coding-report.component';
+// eslint-disable-next-line import/no-cycle
+import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -240,7 +242,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       }).afterClosed().subscribe(res => {
         this.metadataService.createMetadataReport().subscribe((units: any) => {
           if (res) {
-            const selectedUnits = units.filter((unit: any) => res.selectedUnits.includes(unit.id));
+            const selectedUnits = units.filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
             this.showMetadataDialog.open(TableViewComponent, {
               width: '80%',
               height: '80%',
@@ -249,6 +251,16 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
             });
           }
         });
+      });
+    }
+  }
+
+  exportCodingBook():void {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
+      this.selectUnitDialog.open(ExportCodingBookComponent, {
+        width: '800px',
+        minHeight: '50%',
+        autoFocus: false
       });
     }
   }
