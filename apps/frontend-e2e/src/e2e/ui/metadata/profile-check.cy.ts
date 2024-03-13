@@ -9,8 +9,8 @@ describe('Load metadata profile', () => {
     cy.viewport(1600, 900);
     visitLoginPage();
   });
-  afterEach(()=>{
-    visitLoginPage()
+  afterEach(() => {
+    visitLoginPage();
     logout();
   });
 

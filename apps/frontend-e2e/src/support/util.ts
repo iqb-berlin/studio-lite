@@ -17,7 +17,7 @@ export function login(username: string, password = '') {
   cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
 }
 
-export function createGroupArea(group:string):void{
+export function createGroupArea(group:string):void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -46,7 +46,7 @@ export function createAreaForGroupFromAdmin(area:string, group:string):void {
   clickButtonToAccept('Anlegen');
 }
 
-export function deleteGroupArea(areaName:string):void {
+export function deleteGroupArea(areaName: string):void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -61,8 +61,6 @@ export function deleteGroupArea(areaName:string):void {
     .click();
   clickButtonToAccept('Löschen');
 }
-
-
 
 export function logout() {
   cy.get('mat-icon:contains("account_box")')
@@ -133,7 +131,7 @@ export function deleteUser(user: string):void {
   clickButtonToAccept('Löschen');
 }
 
-export function grantRemovePrivilegeOnGroup(user:string, group: string):void{
+export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
   cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     .should('exist')
     .click();
@@ -157,21 +155,19 @@ export function grantRemovePrivilegeOnArea(user:string, area: string):void {
   cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
 }
 
-export function visitArea (area: string){
+export function visitArea(area: string):void {
   visitLoginPage();
   cy.get(`a:contains("${area}")`).click();
 }
-/*
-  Related to UNIT
- */
-export function deleteUnit(kurzname: string){
+
+export function deleteUnit(kurzname: string):void {
   cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
   cy.get('mat-icon:contains("delete")').eq(0)
     .click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Löschen")').click();
 }
 
-export function addUnit(kurzname: string){
+export function addUnit(kurzname: string):void {
   cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]')
     .should('exist')
     .click();
@@ -191,18 +187,11 @@ export function addModule():void {
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
-  //cy.get('mat-icon:contains("cloud_upload")').should('exist').click();
   cy.get('mat-icon:contains("cloud_upload")')
     .selectFile('apps/frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html')
     .click();
-  //cy.fixture('iqb-schemer-1.5.0.html').selectFile('@myFixture');
-  // TODO
+  //  TODO
   //  cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
-  // cy.fixture('iqb-schemer-1.5.0.html').selectFile('@myFixture');
-  // cy.get('mat-icon:contains("cloud_upload")')
-  //  .invoke('show')
-  //  .selectFile('apps/frontendcypress/fixtures/iqb-schemer-1.5.0.html')
-  //  .click();
 }
 export const visitLoginPage = (): Chainable => cy.url()
   .then(() => {

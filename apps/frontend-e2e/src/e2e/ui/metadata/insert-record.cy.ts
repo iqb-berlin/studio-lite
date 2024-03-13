@@ -18,17 +18,16 @@ import { IqbProfile } from '../../../support/config/iqbProfile';
 
 describe('Metadata Management', () => {
   const area = 'Deutsch I';
-  const math_area = 'Mathematik I'
+  const mathArea = 'Mathematik I';
   const group = 'Bista I';
 
   beforeEach(() => {
     cy.viewport(1600, 900);
     visitLoginPage();
   });
-  afterEach(()=>{
-    visitLoginPage()
+  afterEach(() => {
+    visitLoginPage();
   });
-
 
   it('prepare context', () => {
     visitLoginPage();
@@ -38,8 +37,8 @@ describe('Metadata Management', () => {
     createAreaForGroupFromAdmin(area, group);
     grantRemovePrivilegeOnArea(adminData.user_name, area);
     visitLoginPage();
-    createAreaForGroupFromAdmin(math_area, group);
-    grantRemovePrivilegeOnArea(adminData.user_name, math_area);
+    createAreaForGroupFromAdmin(mathArea, group);
+    grantRemovePrivilegeOnArea(adminData.user_name, mathArea);
   });
   it('choose profiles from the administration ', () => {
     visitLoginPage();
@@ -54,12 +53,12 @@ describe('Metadata Management', () => {
     visitLoginPage();
     selectProfileForGroup(group, IqbProfile.MA);
   });
-  //Execute only one of the two test: the previous oder this, not both together
+  // Execute only one of the two test: the previous oder this, not both together
   it('choose a profil for an area from a group', () => {
     visitLoginPage();
     selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
     visitLoginPage();
-    selectProfileForAreaFromGroup(IqbProfile.MA, math_area, group);
+    selectProfileForAreaFromGroup(IqbProfile.MA, mathArea, group);
   });
 
   it.skip('choose a profile for an area', () => {
@@ -67,13 +66,13 @@ describe('Metadata Management', () => {
     cy.contains(area).click();
     selectProfileForArea(IqbProfile.DE);
     visitLoginPage();
-    cy.contains(math_area).click();
+    cy.contains(mathArea).click();
     selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {
     visitLoginPage();
-    visitArea(math_area)
+    visitArea(mathArea);
     addUnit('M1_001');
   });
 
@@ -87,19 +86,19 @@ describe('Metadata Management', () => {
   });
 
   it('add metadata', () => {
-    visitArea(math_area);
+    visitArea(mathArea);
     cy.contains('M1_001').should('exist').click();
-    getStructure('uMA',false);
-    getItem('iMA',false);
+    getStructure('uMA', false);
+    getItem('iMA', false);
     cy.contains('Speichern').click();
   });
 
   it('add metadata with more than one element', () => {
     visitArea(area);
     cy.contains('D1_001').should('exist').click();
-    getStructure('uDE',false);
+    getStructure('uDE', false);
     getItem('iDE', false);
-    getItem('iDE',true);
+    getItem('iDE', true);
     cy.contains('Speichern').click();
   });
 
@@ -108,7 +107,7 @@ describe('Metadata Management', () => {
     deleteUnit('D1_001');
     deleteUnit('D1_002');
     visitLoginPage();
-    visitArea(math_area);
+    visitArea(mathArea);
     deleteUnit('M1_001');
     visitLoginPage();
     deleteGroupArea(group);
