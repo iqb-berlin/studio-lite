@@ -20,14 +20,14 @@ import { State } from '../../admin/models/state.type';
   providedIn: 'root'
 })
 export class WorkspaceService {
+  private unitMetadataStore: UnitMetadataStore | undefined;
+  private unitDefinitionStore: UnitDefinitionStore | undefined;
+  private unitSchemeStore: UnitSchemeStore | undefined;
   groupId!: number;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
   workspaceSettings: WorkspaceSettingsDto;
-  unitMetadataStore: UnitMetadataStore | undefined;
-  unitDefinitionStore: UnitDefinitionStore | undefined;
-  unitSchemeStore: UnitSchemeStore | undefined;
   unitList: { [key: string]: UnitInListDto[] } = {};
   isWorkspaceGroupAdmin = false;
   lastChangedMetadata?: Date;
@@ -82,6 +82,26 @@ export class WorkspaceService {
   setUnitDefinitionStore(unitDefinitionStore: UnitDefinitionStore): void {
     this.unitDefinitionStore = unitDefinitionStore;
     this.unitDefinitionStoreChanged.emit();
+  }
+
+  getUnitDefinitionStore(): UnitDefinitionStore | undefined {
+    return this.unitDefinitionStore;
+  }
+
+  setUnitSchemeStore(unitSchemeStore: UnitSchemeStore): void {
+    this.unitSchemeStore = unitSchemeStore;
+  }
+
+  getUnitSchemeStore(): UnitSchemeStore | undefined {
+    return this.unitSchemeStore;
+  }
+
+  setUnitMetadataStore(unitMetadataStore: UnitMetadataStore): void {
+    this.unitMetadataStore = unitMetadataStore;
+  }
+
+  getUnitMetadataStore(): UnitMetadataStore | undefined {
+    return this.unitMetadataStore;
   }
 
   // TODO: Remove usage fom unit-save-button template!

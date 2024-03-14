@@ -70,7 +70,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             if (msgData.sessionId === this.sessionId) {
               if (this.editorApiVersion > 1) {
                 if (msgData.unitDefinition) {
-                  this.workspaceService.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
+                  this.workspaceService.getUnitDefinitionStore()?.setData(msgData.variables, msgData.unitDefinition);
                 // } else { TODO: find solution for voeGetDefinitionRequest
                 //   this.postMessageTarget.postMessage({
                 //     type: 'voeGetDefinitionRequest',
@@ -88,7 +88,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
 
           case 'vo.FromAuthoringModule.DataTransfer':
             if (msgData.sessionId === this.sessionId) {
-              this.workspaceService.unitDefinitionStore?.setData(msgData.variables, msgData.unitDefinition);
+              this.workspaceService.getUnitDefinitionStore()?.setData(msgData.variables, msgData.unitDefinition);
             }
             break;
 
@@ -112,23 +112,24 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
 
   async sendUnitDataToEditor() {
     const unitId = this.workspaceService.selectedUnit$.getValue();
-    if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
-      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    if (unitId && unitId > 0 && unitMetadataStore) {
+      const unitMetadata = unitMetadataStore.getData();
       if (Object.keys(this.moduleService.editors).length === 0) await this.moduleService.loadList();
       const editorId = unitMetadata.editor ?
         VeronaModuleFactory.getBestMatch(unitMetadata.editor, Object.keys(this.moduleService.editors)) : '';
       if (editorId) {
         if ((editorId === this.lastEditorId) && this.postMessageTarget) {
-          if (this.workspaceService.unitDefinitionStore) {
-            this.postUnitDef(this.workspaceService.unitDefinitionStore);
+          let unitDefinitionStore = this.workspaceService.getUnitDefinitionStore();
+          if (unitDefinitionStore) {
+            this.postUnitDef(unitDefinitionStore);
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId).subscribe(
               ued => {
                 if (ued) {
-                  this.workspaceService.setUnitDefinitionStore(new UnitDefinitionStore(unitId, ued));
-                  if (this.workspaceService.unitDefinitionStore) {
-                    this.postUnitDef(this.workspaceService.unitDefinitionStore);
-                  }
+                  unitDefinitionStore = new UnitDefinitionStore(unitId, ued);
+                  this.workspaceService.setUnitDefinitionStore(unitDefinitionStore);
+                  this.postUnitDef(unitDefinitionStore);
                 } else {
                   this.snackBar.open(
                     this.translateService.instant('workspace.unit-definition-not-loaded'),
