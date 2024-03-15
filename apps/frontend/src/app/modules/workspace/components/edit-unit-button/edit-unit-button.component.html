@@ -44,19 +44,9 @@
     <mat-icon>get_app</mat-icon>
     {{ 'workspace.export' | translate }}
   </button>
-  <button mat-menu-item
-          [matTooltip]="'workspace.show-metadata' | translate"
-          matTooltipPosition="right"
-          (click)="showMetadata()">
+  <button mat-menu-item [matMenuTriggerFor]="reports">
     <mat-icon>description</mat-icon>
-    {{ 'workspace.metadata' | translate }}
-  </button>
-  <button mat-menu-item
-          [matTooltip]="'workspace.show-coding-report' | translate"
-          matTooltipPosition="right"
-          (click)="showCodingReport()">
-    <mat-icon>description</mat-icon>
-    {{ 'workspace.coding-report' | translate }}
+    {{ 'workspace.reports' | translate }}
   </button>
   <button mat-menu-item
           [matTooltip]="'workspace.print-preview-units' | translate"
@@ -65,6 +55,7 @@
     <mat-icon>print</mat-icon>
     {{ 'workspace.print-preview' | translate }}
   </button>
+  <mat-divider></mat-divider>
   <button mat-menu-item
           [matTooltip]="'workspace.move-unit' | translate"
           matTooltipPosition="right"
@@ -78,5 +69,29 @@
           (click)="moveOrCopyUnit(false)">
     <mat-icon>content_copy</mat-icon>
     {{ 'workspace.copy-to' | translate }}
+  </button>
+</mat-menu>
+
+<mat-menu #reports>
+  <button mat-menu-item
+          [matTooltip]="'workspace.show-metadata' | translate"
+          matTooltipPosition="right"
+          (click)="showMetadata()">
+    <mat-icon>description</mat-icon>
+    {{ 'workspace.metadata' | translate }}
+  </button>
+  <button mat-menu-item
+          [matTooltip]="'workspace.show-coding-report' | translate"
+          matTooltipPosition="right"
+          (click)="showCodingReport()">
+    <mat-icon>description</mat-icon>
+    {{ 'workspace.coding' | translate }}
+  </button>
+  <button mat-menu-item
+          [matTooltip]="'workspace.export-coding-book' | translate"
+          matTooltipPosition="right"
+          (click)="exportCodingBook()">
+    <mat-icon>description</mat-icon>
+    {{ 'workspace.coding-book' | translate }}
   </button>
 </mat-menu>

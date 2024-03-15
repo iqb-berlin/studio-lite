@@ -5,6 +5,7 @@
   "save": "Speichern",
   "move": "Verschieben",
   "create": "Anlegen",
+  "export": "Exportieren",
   "construct": "Erstellen",
   "delete": "Löschen",
   "excel-download": "Herunterladen als Excel-Datei",
@@ -338,12 +339,13 @@
     "units-count": "Anzahl der Aufgaben"
   },
   "workspace-settings": {
-    "modules": "Module",
+    "modules": "Verona Module",
     "title": "Einstellungen für den Arbeitsbereich",
     "default-player": "Voreingestellter Player",
     "default-editor": "Voreingestellter Editor",
     "default-schemer": "Voreingestellter Schemer",
-    "only-stable-modules": "Nur Module zur Auswahl anzeigen, die als \"stabil\" markiert sind (keine Beta-Versionen)."
+    "only-stable-modules": "Nur Module zur Auswahl anzeigen, die als \"stabil\" markiert sind (keine Beta-Versionen).",
+    "coding": "Kodierung"
   },
   "modules": {
     "title": "Admin: Verona-Module",
@@ -536,7 +538,15 @@
     "coding-scheme-not-loaded": "Konnte Antwortschema nicht laden",
     "coding-check": "Kodierung prüfen",
     "coding-report": "Kodierbericht",
-    "show-coding-report": "Kodierbericht von Aufgaben anzeigen",
+    "export-coding-book": "Codebook exportieren",
+    "coding-book": "Codebook",
+    "coding-missing-profiles": "Missings-Profil",
+    "coding": "Kodierung",
+    "select-missings-profile": "Profil auswählen...",
+    "reports": "Berichte",
+    "select-additional-coding-types": "zusätzliche Kodiertypen auswählen" ,
+    "export-warning-no-coding-vars":"Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.",
+    "show-coding-report": "Kodierung von Aufgaben anzeigen",
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",

@@ -11,6 +11,9 @@ import {
   UnitMetadataDto,
   UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
+import {
+  MissingsProfilesDto
+} from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +27,14 @@ export class BackendService {
   getWorkspaceGroupStates(workspaceGroupId: number):Observable<WorkspaceGroupFullDto> {
     return this.http
       .get<WorkspaceGroupFullDto>(`${this.serverUrl}workspace-groups/${workspaceGroupId}`)
+      .pipe(
+        catchError(() => [])
+      );
+  }
+
+  getMissingsProfiles(workspaceGroupId: number):Observable<MissingsProfilesDto> {
+    return this.http
+      .get<MissingsProfilesDto>(`${this.serverUrl}workspace/${workspaceGroupId}/missings-profiles`)
       .pipe(
         catchError(() => [])
       );
@@ -106,6 +117,26 @@ export class BackendService {
         return -1;
       })
     );
+  }
+
+  getCodingBook(workspaceId: number, exportFormat: 'json' | 'docx', hasManualCoding:boolean, hasClosedResponses:boolean, unitList:number[]): Observable<Blob | null> {
+    if (workspaceId > 0) {
+      return this.http
+        .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
+          params: new HttpParams()
+            .set('onlyManual', hasManualCoding)
+            .set('closed', hasClosedResponses)
+            .set('format', exportFormat),
+          headers: {
+            Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          },
+          responseType: 'blob'
+        })
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
   }
 
   getUnitProperties(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
