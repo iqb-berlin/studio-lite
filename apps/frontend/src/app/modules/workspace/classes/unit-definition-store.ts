@@ -41,10 +41,11 @@ export class UnitDefinitionStore {
 
   applyChanges() {
     this.originalData = this.getData();
-    this.changedData = <UnitDefinitionDto>{};
+    this.restore();
   }
 
   restore() {
     this.changedData = <UnitDefinitionDto>{};
+    this.dataChange.emit();
   }
 }
