@@ -38,7 +38,10 @@ export class WorkspaceService {
   codingSchemer: any;
   codingScheme: any;
   @Output() onCommentsUpdated = new EventEmitter<void>();
-  @Output() unitDefinitionStoreChanged = new EventEmitter<void>();
+  @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
+  @Output() unitMetadataStoreChanged = new EventEmitter<UnitMetadataStore | undefined>();
+  @Output() unitSchemeStoreChanged = new EventEmitter<UnitSchemeStore | undefined>();
+  @Output() unitPropertiesChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(
     private backendService: BackendService,
@@ -71,40 +74,41 @@ export class WorkspaceService {
   }
 
   resetUnitData(): void {
-    this.unitMetadataStore = undefined;
     this.lastChangedMetadata = undefined;
-    this.unitDefinitionStore = undefined;
-    this.lastChangedDefinition = undefined;
-    this.unitSchemeStore = undefined;
     this.lastChangedScheme = undefined;
+    this.lastChangedDefinition = undefined;
+    this.setUnitSchemeStore(undefined);
+    this.setUnitMetadataStore(undefined);
+    this.setUnitDefinitionStore(undefined);
   }
 
-  setUnitDefinitionStore(unitDefinitionStore: UnitDefinitionStore): void {
+  setUnitDefinitionStore(unitDefinitionStore: UnitDefinitionStore | undefined): void {
     this.unitDefinitionStore = unitDefinitionStore;
-    this.unitDefinitionStoreChanged.emit();
+    this.unitDefinitionStoreChanged.emit(unitDefinitionStore);
   }
 
   getUnitDefinitionStore(): UnitDefinitionStore | undefined {
     return this.unitDefinitionStore;
   }
 
-  setUnitSchemeStore(unitSchemeStore: UnitSchemeStore): void {
+  setUnitSchemeStore(unitSchemeStore: UnitSchemeStore | undefined): void {
     this.unitSchemeStore = unitSchemeStore;
+    this.unitSchemeStoreChanged.emit(unitSchemeStore);
   }
 
   getUnitSchemeStore(): UnitSchemeStore | undefined {
     return this.unitSchemeStore;
   }
 
-  setUnitMetadataStore(unitMetadataStore: UnitMetadataStore): void {
+  setUnitMetadataStore(unitMetadataStore: UnitMetadataStore | undefined): void {
     this.unitMetadataStore = unitMetadataStore;
+    this.unitMetadataStoreChanged.emit(unitMetadataStore);
   }
 
   getUnitMetadataStore(): UnitMetadataStore | undefined {
     return this.unitMetadataStore;
   }
 
-  // TODO: Remove usage fom unit-save-button template!
   isChanged(): boolean {
     return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
       (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||
@@ -158,9 +162,9 @@ export class WorkspaceService {
               unitData.lastChangedScheme = new Date(unitData.lastChangedScheme);
               this.lastChangedScheme = new Date(unitData.lastChangedScheme);
             }
-            this.unitMetadataStore = new UnitMetadataStore(unitData);
+            this.setUnitMetadataStore(new UnitMetadataStore(unitData));
           } else {
-            this.unitMetadataStore = new UnitMetadataStore(<UnitMetadataDto>{ id: selectedUnitId });
+            this.setUnitMetadataStore(new UnitMetadataStore(<UnitMetadataDto>{ id: selectedUnitId }));
           }
           return this.unitMetadataStore;
         })

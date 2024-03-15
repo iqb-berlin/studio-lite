@@ -1,6 +1,8 @@
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
+import { EventEmitter } from '@angular/core';
 
 export class UnitSchemeStore {
+  dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitSchemeDto;
   private changedData: UnitSchemeDto;
   private unitId: number;
@@ -16,6 +18,7 @@ export class UnitSchemeStore {
       scheme: newScheme,
       schemeType: newSchemeType
     };
+    this.dataChange.emit();
   }
 
   isChanged(): boolean {
@@ -32,10 +35,11 @@ export class UnitSchemeStore {
 
   applyChanges() {
     this.originalData = this.getData();
-    this.changedData = <UnitSchemeDto>{};
+    this.restore();
   }
 
   restore() {
     this.changedData = <UnitSchemeDto>{};
+    this.dataChange.emit();
   }
 }
