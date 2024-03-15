@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
@@ -24,7 +24,9 @@ export class UnitSaveButtonComponent {
 
   ngOnInit() {
     // eslint-disable-next-line no-return-assign
-    this.workspaceService.isValidFormKey.asObservable().subscribe(isValid => this.isValidFormKey = isValid);
+    this.workspaceService.isValidFormKey.asObservable()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(isValid => { this.isValidFormKey = isValid; });
   }
 
   discardChanges(): void {
@@ -40,9 +42,9 @@ export class UnitSaveButtonComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        if (this.workspaceService.unitMetadataStore) this.workspaceService.unitMetadataStore.restore();
-        if (this.workspaceService.unitDefinitionStore) this.workspaceService.unitDefinitionStore.restore();
-        if (this.workspaceService.unitSchemeStore) this.workspaceService.unitSchemeStore.restore();
+        if (this.workspaceService.getUnitMetadataStore()) this.workspaceService.getUnitMetadataStore()?.restore();
+        if (this.workspaceService.getUnitDefinitionStore()) this.workspaceService.getUnitDefinitionStore()?.restore();
+        if (this.workspaceService.getUnitSchemeStore()) this.workspaceService.getUnitSchemeStore()?.restore();
         const unitId = this.workspaceService.selectedUnit$.getValue();
         this.workspaceService.selectedUnit$.next(unitId);
       }

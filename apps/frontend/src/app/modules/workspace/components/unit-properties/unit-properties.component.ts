@@ -93,8 +93,9 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
 
   private setupForm() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-    if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
-      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    if (selectedUnitId > 0 && unitMetadataStore) {
+      const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || '0';
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
@@ -114,19 +115,19 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
       if (this.editorSelector) {
         this.editorSelector.value = unitMetadata.editor || '';
         this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.unitMetadataStore?.setEditor(selectedValue);
+          this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
         });
       }
       if (this.playerSelector) {
         this.playerSelector.value = unitMetadata.player || '';
         this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.unitMetadataStore?.setPlayer(selectedValue);
+          this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
         });
       }
       if (this.schemerSelector) {
         this.schemerSelector.value = unitMetadata.schemer || '';
         this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.unitMetadataStore?.setSchemer(selectedValue);
+          this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
         });
       }
       this.selectedStateColor = unitMetadata.state || '0';
@@ -138,7 +139,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
         // eslint-disable-next-line @typescript-eslint/dot-notation
         this.workspaceService.isValidFormKey.next(isValidFormKey);
-        this.workspaceService.unitMetadataStore?.setBasicData(
+        this.workspaceService.getUnitMetadataStore()?.setBasicData(
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,
           this.unitForm.get('description')?.value,
@@ -175,19 +176,20 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   private loadMetaData() {
     this.workspaceSettings = this.workspaceService.workspaceSettings;
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-    if (selectedUnitId > 0 && this.workspaceService.unitMetadataStore) {
-      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    if (selectedUnitId > 0 && unitMetadataStore) {
+      const unitMetadata = unitMetadataStore.getData();
       this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
     }
   }
 
   private initItemLoader(): void {
     const unitId = this.workspaceService.selectedUnit$.getValue();
-    if (!this.workspaceService.unitSchemeStore) {
+    if (!this.workspaceService.getUnitSchemeStore()) {
       this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
         .subscribe(ues => {
           if (ues) {
-            this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);
+            this.workspaceService.setUnitSchemeStore(new UnitSchemeStore(unitId, ues));
             this.variablesLoader.next(this.getItems());
           }
         });
@@ -197,7 +199,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   private addSubscriptionForUnitDefinitionChanges(): void {
-    if (this.workspaceService.unitDefinitionStore) {
+    if (this.workspaceService.getUnitDefinitionStore()) {
       this.subscribeUnitDefinitionChanges();
     } else {
       this.workspaceService.unitDefinitionStoreChanged
@@ -209,7 +211,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   private subscribeUnitDefinitionChanges() {
-    this.workspaceService.unitDefinitionStore?.dataChange
+    this.workspaceService.getUnitDefinitionStore()?.dataChange
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.variablesLoader.next(this.getItems());
@@ -217,10 +219,10 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   private getItems(): string[] {
-    const data = this.workspaceService.unitSchemeStore?.getData();
+    const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitSchemeVariables;
+      const variables = this.workspaceService.getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
       const variableIds = variables.map((variable: any) => variable.id);
       const scheme = JSON.parse(data.scheme);
       const variableCodings = scheme?.variableCodings || [];
@@ -232,7 +234,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   }
 
   onMetadataChange(metadata: any): void {
-    this.workspaceService.unitMetadataStore?.setMetadata(metadata);
+    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
   }
 
   ngOnDestroy(): void {

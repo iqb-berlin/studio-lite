@@ -11,7 +11,7 @@ export abstract class SubscribeUnitDefinitionChangesDirective {
   abstract message: string;
 
   addSubscriptionForUnitDefinitionChanges(): void {
-    if (this.workspaceService.unitDefinitionStore) {
+    if (this.workspaceService.getUnitDefinitionStore()) {
       this.subscribeUnitDefinitionChanges();
     } else {
       this.workspaceService.unitDefinitionStoreChanged
@@ -23,7 +23,7 @@ export abstract class SubscribeUnitDefinitionChangesDirective {
   }
 
   private subscribeUnitDefinitionChanges() {
-    this.workspaceService.unitDefinitionStore?.dataChange
+    this.workspaceService.getUnitDefinitionStore()?.dataChange
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.message = '';
