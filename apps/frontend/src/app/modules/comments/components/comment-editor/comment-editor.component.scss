@@ -52,7 +52,7 @@
   overflow: auto;
   outline: transparent none 0;
   p {
-    word-break: break-all;
+    overflow-wrap: anywhere;
   }
   p strong {
     letter-spacing: 0.04em !important;
