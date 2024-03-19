@@ -114,10 +114,11 @@ export class UnitMetadataStore {
 
   applyChanges(): void {
     this.originalData = this.getData();
-    this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
+    this.restore();
   }
 
   restore(): void {
     this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
+    this.dataChange.emit();
   }
 }

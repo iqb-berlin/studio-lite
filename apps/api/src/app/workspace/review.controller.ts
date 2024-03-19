@@ -2,14 +2,13 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags
-} from '@nestjs/swagger';
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags
+} from "@nestjs/swagger";
 import {
   ReviewInListDto,
   ReviewFullDto,
   CreateReviewDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGuard } from './workspace.guard';
 import { WorkspaceId } from './workspace.decorator';
@@ -24,7 +23,7 @@ export class ReviewController {
   @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [ReviewInListDto]
   })
@@ -49,7 +48,7 @@ export class ReviewController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
   @ApiTags('workspace reviews')
   async patchOnesUnits(
@@ -62,7 +61,7 @@ export class ReviewController {
   @Post()
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new review in database',
     type: Number

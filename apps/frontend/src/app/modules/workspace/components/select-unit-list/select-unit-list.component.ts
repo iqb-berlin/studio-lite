@@ -16,7 +16,7 @@ import { BackendService } from '../../services/backend.service';
 export class SelectUnitListComponent implements OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'key', 'groupName'];
-  tableSelectionCheckbox = new SelectionModel <UnitInListDto>(true, []);
+  tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(true, []);
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
 
@@ -32,7 +32,7 @@ export class SelectUnitListComponent implements OnDestroy {
   // TODO: move to ngChanges
   @Input('workspace')
   set workspaceId(value: number) {
-    this.tableSelectionCheckbox.clear();
+    this.tableSelectionCheckboxes.clear();
     this.backendService.getUnitList(value)
       .subscribe(units => {
         this.setObjectsDatasource(units);
@@ -58,7 +58,7 @@ export class SelectUnitListComponent implements OnDestroy {
 
     this.objectsDatasource.sort = this.sort;
     this.objectsDatasource.data.forEach(row => {
-      if (row.id === this.selectedUnitId) this.tableSelectionCheckbox.select(row);
+      if (row.id === this.selectedUnitId) this.tableSelectionCheckboxes.select(row);
     });
   }
 
@@ -73,48 +73,48 @@ export class SelectUnitListComponent implements OnDestroy {
   @Input('multiple')
   set multiple(value: boolean) {
     this.multipleSelection = value;
-    this.tableSelectionCheckbox = new SelectionModel <UnitInListDto>(value, []);
+    this.tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(value, []);
   }
 
   @Input('disabled')
   set disabled(value: number[]) {
     this.disabledUnits = value;
     this.objectsDatasource.data.forEach(ud => {
-      if (this.disabledUnits.indexOf(ud.id) >= 0) this.tableSelectionCheckbox.deselect(ud);
+      if (this.disabledUnits.indexOf(ud.id) >= 0) this.tableSelectionCheckboxes.deselect(ud);
     });
   }
 
   @Output() selectionChanged = new EventEmitter<number[]>();
 
   get selectionCount(): number {
-    return this.tableSelectionCheckbox.selected.length;
+    return this.tableSelectionCheckboxes.selected.length;
   }
 
   get selectedUnitIds(): number[] {
-    return this.tableSelectionCheckbox.selected.map(ud => ud.id);
+    return this.tableSelectionCheckboxes.selected.map(ud => ud.id);
   }
 
   // TODO move to ngChanges
   @Input('selectedUnitIds')
   set selectedUnitIds(newUnits: number[]) {
     if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
-    this.tableSelectionCheckbox.clear();
+    this.tableSelectionCheckboxes.clear();
     this.objectsDatasource.data.forEach(row => {
-      if (newUnits.includes(row.id)) this.tableSelectionCheckbox.select(row);
+      if (newUnits.includes(row.id)) this.tableSelectionCheckboxes.select(row);
     });
-    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed.subscribe(() => {
+    this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {
       this.selectionChanged.emit(this.selectedUnitIds);
     });
   }
 
   get selectedUnitKey(): string {
-    const selectedUnits = this.tableSelectionCheckbox.selected;
+    const selectedUnits = this.tableSelectionCheckboxes.selected;
     if (selectedUnits.length > 0) return selectedUnits[0].key;
     return '';
   }
 
   get selectedUnitName(): string {
-    const selectedUnits = this.tableSelectionCheckbox.selected;
+    const selectedUnits = this.tableSelectionCheckboxes.selected;
     if (selectedUnits.length > 0 && selectedUnits[0].name) return selectedUnits[0].name;
     return '';
   }
@@ -122,21 +122,20 @@ export class SelectUnitListComponent implements OnDestroy {
   @ViewChild(MatSort) sort = new MatSort();
 
   constructor(private backendService: BackendService) {
-    this.selectionChangedSubscription = this.tableSelectionCheckbox.changed
+    this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed
       .subscribe(() => this.selectionChanged.emit(this.selectedUnitIds));
   }
 
-  // TODO: Don't use method for binding
-  isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckbox.selected.length;
+  private isAllSelected(): boolean {
+    const numSelected = this.tableSelectionCheckboxes.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
     return numSelected === numRows;
   }
 
   masterToggle(): void {
     this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckbox.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
+      this.tableSelectionCheckboxes.clear() :
+      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
   }
 
   ngOnDestroy(): void {

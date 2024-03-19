@@ -1,6 +1,6 @@
 <div class="fx-row-start-start">
   <button mat-button
-          [disabled]="!workspaceService.isChanged()"
+          [disabled]="!storesDataChanged"
           [matTooltip]="'workspace.reject-unit-changes' | translate"
           matTooltipPosition="above"
           (click)="discardChanges()">
@@ -8,7 +8,7 @@
   </button>
 
   <button mat-button
-          [disabled]="!workspaceService.isChanged() || !isValidFormKey"
+          [disabled]="!storesDataChanged || !isValidFormKey"
           [matTooltip]="'workspace.save-unit' | translate"
           matTooltipPosition="above"
           (click)="saveUnitData()">

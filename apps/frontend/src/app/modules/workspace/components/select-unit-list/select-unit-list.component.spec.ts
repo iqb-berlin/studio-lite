@@ -11,6 +11,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { SelectUnitListComponent } from './select-unit-list.component';
+import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
+import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 describe('SelectUnitListComponent', () => {
   let component: SelectUnitListComponent;
@@ -25,7 +27,9 @@ describe('SelectUnitListComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         SelectUnitListComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        HasSelectionValuePipe,
+        IsAllSelectedPipe
       ],
       imports: [
         HttpClientModule,

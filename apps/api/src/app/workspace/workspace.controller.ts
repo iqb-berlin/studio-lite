@@ -7,7 +7,6 @@ import {
 import {
   WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -33,7 +32,7 @@ export class WorkspaceController {
   @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: WorkspaceFullDto
   })
@@ -45,7 +44,7 @@ export class WorkspaceController {
   @Get('users')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: WorkspaceFullDto
   })
@@ -57,7 +56,7 @@ export class WorkspaceController {
   @Get('groups')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [String]
   })
@@ -69,7 +68,7 @@ export class WorkspaceController {
   @Post('group')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   // todo: declare body parameter {body: 'xxx'} or parse body as string
   async addUnitGroup(@WorkspaceId() workspaceId: number,
@@ -80,7 +79,7 @@ export class WorkspaceController {
   @Patch('group/:name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({
     name: 'name',
     type: 'String',
@@ -98,7 +97,7 @@ export class WorkspaceController {
   @Patch('group/:name/units')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({
     name: 'name',
     type: 'String',
@@ -116,7 +115,7 @@ export class WorkspaceController {
   @Delete('group/:name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({
     name: 'name',
     type: 'String',
@@ -130,7 +129,7 @@ export class WorkspaceController {
   @Post('upload')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @UseInterceptors(FilesInterceptor('files'))
   @ApiTags('workspace')
   @ApiCreatedResponse({
@@ -143,7 +142,7 @@ export class WorkspaceController {
   @Get('download/:settings')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @Header('Content-Disposition', 'attachment; filename="studio-export-units.zip"')
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/zip')
@@ -163,7 +162,7 @@ export class WorkspaceController {
   @Patch('settings')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
     @Body() workspaceSetting: WorkspaceSettingsDto) {
@@ -173,7 +172,7 @@ export class WorkspaceController {
   @Patch('rename/:name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchName(@WorkspaceId() workspaceId: number, @Param('name') newName: string) {
     return this.workspaceService.patchName(workspaceId, newName);

@@ -15,6 +15,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
+import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -43,7 +45,9 @@ describe('UsersComponent', () => {
         UsersComponent,
         MockUsersMenuComponent,
         MockSearchFilterComponent,
-        WrappedIconComponent
+        WrappedIconComponent,
+        HasSelectionValuePipe,
+        IsAllSelectedPipe
       ],
       imports: [
         MatSnackBarModule,

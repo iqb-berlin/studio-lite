@@ -1,8 +1,7 @@
 import {
   Controller, Get, Header, Param, Query, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
+import { ApiBearerAuth, ApiParam, ApiTags } from "@nestjs/swagger";
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -73,7 +72,7 @@ export class DownloadController {
   @Get('xlsx/unit-metadata-items/:workspace_id/:columns')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-unit-metadata-items-report.xlsx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @ApiTags('download')
@@ -86,7 +85,7 @@ export class DownloadController {
   @Get('xlsx/unit-metadata/:workspace_id/:columns')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-unit-metadata-report.xlsx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @ApiTags('download')

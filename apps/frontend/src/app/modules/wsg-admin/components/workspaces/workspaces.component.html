@@ -4,7 +4,7 @@
       [isWorkspaceGroupAdmin]="isWorkspaceGroupAdmin"
       [selectedWorkspaceId]="selectedWorkspaceId"
       [selectedRows]="tableSelectionRow.selected"
-      [checkedRows]="tableSelectionCheckbox.selected"
+      [checkedRows]="tableSelectionCheckboxes.selected"
       (workspaceAdded)="addWorkspace($event)"
       (workspaceRenamed)="renameWorkspace($event)"
       (workspaceChanged)="changeWorkspace($event)"
@@ -26,16 +26,16 @@
         <ng-container matColumnDef="selectCheckbox">
           <mat-header-cell *matHeaderCellDef
                            class="fx-flex-row-fix-70">
-            <mat-checkbox [checked]="tableSelectionCheckbox.hasValue() && isAllSelected()"
-                          [indeterminate]="tableSelectionCheckbox.hasValue() && !isAllSelected()"
+            <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
+                          [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
                           (change)="$event ? masterToggle() : null">
             </mat-checkbox>
           </mat-header-cell>
           <mat-cell *matCellDef="let row"
                     class="fx-flex-row-fix-70">
-            <mat-checkbox [checked]="tableSelectionCheckbox.isSelected(row)"
+            <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
                           (click)="$event.stopPropagation()"
-                          (change)="$event ? tableSelectionCheckbox.toggle(row) : null">
+                          (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
             </mat-checkbox>
           </mat-cell>
         </ng-container>
@@ -60,7 +60,7 @@
 
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"
-                 [class.selected]="tableSelectionRow.isSelected(row)"
+                 [class.selected] = "row | isSelectedId: selectedWorkspaceId"
                  (click)="toggleRowSelection(row)">
           </mat-row>
       </mat-table>

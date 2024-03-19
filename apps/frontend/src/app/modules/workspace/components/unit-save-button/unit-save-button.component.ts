@@ -3,8 +3,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UnitDefinitionStore } from '../../classes/unit-definition-store';
+import { UnitMetadataStore } from '../../classes/unit-metadata-store';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 
 @Component({
   selector: 'studio-lite-unit-save-button',
@@ -19,12 +22,76 @@ export class UnitSaveButtonComponent {
     private snackBar: MatSnackBar
   ) {}
 
+  private unitDefinitionChangeSubscription!: Subscription | null;
+  private unitMetadataChangeSubscription!: Subscription | null;
+  private unitSchemeChangeSubscription!: Subscription | null;
   private ngUnsubscribe = new Subject<void>();
   isValidFormKey = true;
+  storesDataChanged: boolean = false;
 
   ngOnInit() {
-    // eslint-disable-next-line no-return-assign
-    this.workspaceService.isValidFormKey.asObservable().subscribe(isValid => this.isValidFormKey = isValid);
+    this.workspaceService.unitPropertiesChange
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(isValid => {
+        this.isValidFormKey = isValid;
+      });
+
+    this.workspaceService.unitDefinitionStoreChanged
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(store => this.setUnitDefinitionChangeSubscription(store));
+    this.workspaceService.unitMetadataStoreChanged
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(store => this.setUnitMetadataChangeSubscription(store));
+    this.workspaceService.unitSchemeStoreChanged
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(store => this.setUnitSchemeChangeSubscription(store));
+  }
+
+  private setUnitDefinitionChangeSubscription(store: UnitDefinitionStore | undefined) {
+    if (store) {
+      if (this.unitDefinitionChangeSubscription) this.unitDefinitionChangeSubscription.unsubscribe();
+      this.unitDefinitionChangeSubscription = store.dataChange
+        .subscribe(() => this.setStoresDataChanged());
+    } else {
+      this.setStoresDataChanged();
+      if (this.unitDefinitionChangeSubscription) {
+        this.unitDefinitionChangeSubscription.unsubscribe();
+        this.unitDefinitionChangeSubscription = null;
+      }
+    }
+  }
+
+  private setUnitSchemeChangeSubscription(store: UnitSchemeStore | undefined) {
+    if (store) {
+      if (this.unitSchemeChangeSubscription) this.unitSchemeChangeSubscription.unsubscribe();
+      this.unitSchemeChangeSubscription = store.dataChange
+        .subscribe(() => this.setStoresDataChanged());
+    } else {
+      this.setStoresDataChanged();
+      if (this.unitSchemeChangeSubscription) {
+        this.unitSchemeChangeSubscription.unsubscribe();
+        this.unitSchemeChangeSubscription = null;
+      }
+    }
+  }
+
+  private setUnitMetadataChangeSubscription(store: UnitMetadataStore | undefined) {
+    if (store) {
+      // console.log('setUnitMetadataChangeSubscription', !!this.unitMetadataChangeSubscription);
+      if (this.unitMetadataChangeSubscription) this.unitMetadataChangeSubscription.unsubscribe();
+      this.unitMetadataChangeSubscription = store.dataChange
+        .subscribe(() => this.setStoresDataChanged());
+    } else {
+      this.setStoresDataChanged();
+      if (this.unitMetadataChangeSubscription) {
+        this.unitMetadataChangeSubscription.unsubscribe();
+        this.unitMetadataChangeSubscription = null;
+      }
+    }
+  }
+
+  private setStoresDataChanged(): void {
+    setTimeout(() => { this.storesDataChanged = this.workspaceService.isChanged(); });
   }
 
   discardChanges(): void {
@@ -40,9 +107,9 @@ export class UnitSaveButtonComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== false) {
-        if (this.workspaceService.unitMetadataStore) this.workspaceService.unitMetadataStore.restore();
-        if (this.workspaceService.unitDefinitionStore) this.workspaceService.unitDefinitionStore.restore();
-        if (this.workspaceService.unitSchemeStore) this.workspaceService.unitSchemeStore.restore();
+        if (this.workspaceService.getUnitMetadataStore()) this.workspaceService.getUnitMetadataStore()?.restore();
+        if (this.workspaceService.getUnitDefinitionStore()) this.workspaceService.getUnitDefinitionStore()?.restore();
+        if (this.workspaceService.getUnitSchemeStore()) this.workspaceService.getUnitSchemeStore()?.restore();
         const unitId = this.workspaceService.selectedUnit$.getValue();
         this.workspaceService.selectedUnit$.next(unitId);
       }
@@ -69,5 +136,8 @@ export class UnitSaveButtonComponent {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+    if (this.unitDefinitionChangeSubscription) this.unitDefinitionChangeSubscription.unsubscribe();
+    if (this.unitMetadataChangeSubscription) this.unitMetadataChangeSubscription.unsubscribe();
+    if (this.unitSchemeChangeSubscription) this.unitSchemeChangeSubscription.unsubscribe();
   }
 }

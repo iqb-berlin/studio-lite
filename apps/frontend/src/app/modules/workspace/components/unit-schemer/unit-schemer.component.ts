@@ -55,7 +55,7 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
             if (msgData.sessionId === this.sessionId) {
               if (msgData.codingScheme) {
                 this.workspaceService.codingScheme = JSON.parse(msgData.codingScheme);
-                this.workspaceService.unitSchemeStore?.setData(msgData.codingScheme, msgData.codingSchemeType);
+                this.workspaceService.getUnitSchemeStore()?.setData(msgData.codingScheme, msgData.codingSchemeType);
                 // } else { TODO: find solution for vosGetSchemeRequest
                 //   this.postMessageTarget.postMessage({
                 //     type: 'vosGetSchemeRequest',
@@ -85,21 +85,24 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   async sendUnitData() {
     const unitId = this.workspaceService.selectedUnit$.getValue();
-    if (unitId && unitId > 0 && this.workspaceService.unitMetadataStore) {
-      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    if (unitId && unitId > 0 && unitMetadataStore) {
+      const unitMetadata = unitMetadataStore.getData();
       if (Object.keys(this.moduleService.schemers).length === 0) await this.moduleService.loadList();
       const schemerId = unitMetadata.schemer ?
         VeronaModuleFactory.getBestMatch(unitMetadata.schemer, Object.keys(this.moduleService.schemers)) : '';
       if (schemerId) {
         if ((schemerId === this.lastSchemerId) && this.postMessageTarget) {
-          if (this.workspaceService.unitSchemeStore) {
-            this.postUnitScheme(this.workspaceService.unitSchemeStore);
+          let unitSchemeStore = this.workspaceService.getUnitSchemeStore();
+          if (unitSchemeStore) {
+            this.postUnitScheme(unitSchemeStore);
           } else {
             this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId).subscribe(
               ues => {
                 if (ues) {
-                  this.workspaceService.unitSchemeStore = new UnitSchemeStore(unitId, ues);
-                  this.postUnitScheme(this.workspaceService.unitSchemeStore);
+                  unitSchemeStore = new UnitSchemeStore(unitId, ues);
+                  this.workspaceService.setUnitSchemeStore(unitSchemeStore);
+                  this.postUnitScheme(unitSchemeStore);
                 } else {
                   this.snackBar.open(
                     this.translateService.instant('workspace.coding-scheme-not-loaded'),
@@ -125,7 +128,8 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   private postUnitScheme(unitSchemeStore: UnitSchemeStore): void {
     const unitScheme = unitSchemeStore.getData();
-    const variables = this.workspaceService.unitDefinitionStore?.getData().variables || unitScheme.variables;
+    const variables = this.workspaceService.getUnitDefinitionStore()?.getData()
+      .variables || unitScheme.variables;
     if (this.postMessageTarget) {
       this.postMessageTarget.postMessage({
         type: 'vosStartCommand',

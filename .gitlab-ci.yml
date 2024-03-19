@@ -19,7 +19,7 @@ stages:
   - build-images
   - scan-images
 
-image: node:18.17-bookworm-slim
+image: node:20.11.1-bookworm-slim
 
 variables:
   REGISTRY: "$CI_REGISTRY"

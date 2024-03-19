@@ -9,7 +9,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+//import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -185,24 +185,25 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.setResponsesStatus('none');
     this.setPageList([], '');
     this.unitId = this.workspaceService.selectedUnit$.getValue();
-    if (this.unitId && this.workspaceService.unitMetadataStore) {
-      const unitMetadata = this.workspaceService.unitMetadataStore.getData();
+    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    if (this.unitId && unitMetadataStore) {
+      const unitMetadata = unitMetadataStore.getData();
       if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
       const playerId = unitMetadata.player ?
         VeronaModuleFactory.getBestMatch(unitMetadata.player, Object.keys(this.moduleService.players)) : '';
       if (playerId) {
         if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
-          if (this.workspaceService.unitDefinitionStore) {
-            this.postUnitDef(this.workspaceService.unitDefinitionStore);
+          let unitDefinitionStore = this.workspaceService.getUnitDefinitionStore();
+          if (unitDefinitionStore) {
+            this.postUnitDef(unitDefinitionStore);
           } else {
             this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, this.unitId)
               .subscribe(
                 ued => {
                   if (ued) {
-                    this.workspaceService.setUnitDefinitionStore(new UnitDefinitionStore(this.unitId, ued));
-                    if (this.workspaceService.unitDefinitionStore) {
-                      this.postUnitDef(this.workspaceService.unitDefinitionStore);
-                    }
+                    unitDefinitionStore = new UnitDefinitionStore(this.unitId, ued);
+                    this.workspaceService.setUnitDefinitionStore(unitDefinitionStore);
+                    this.postUnitDef(unitDefinitionStore);
                   } else {
                     this.snackBar.open(
                       this.translateService.instant('workspace.unit-definition-not-loaded'),
@@ -451,16 +452,17 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     }
   }
 
+  //TODO Implement ShowCodingResultsComponent
   private showCodingResults(responses: Response[]): void {
-    this.dialog
-      .open(ShowCodingResultsComponent, {
-        data: responses
-      })
-      .afterClosed()
-      .pipe(
-        takeUntil(this.ngUnsubscribe)
-      ).subscribe(() => {
-      });
+    // this.dialog
+    //   .open(ShowCodingResultsComponent, {
+    //     data: responses
+    //   })
+    //   .afterClosed()
+    //   .pipe(
+    //     takeUntil(this.ngUnsubscribe)
+    //   ).subscribe(() => {
+    //   });
   }
 
   ngOnDestroy(): void {

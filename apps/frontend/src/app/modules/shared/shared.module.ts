@@ -27,6 +27,10 @@ import { MetadataProfileEntriesComponent }
   from './components/metadata-profile-entries/metadata-profile-entries.component';
 import { MetadataReadonlyItemsComponent } from './components/metadata-readonly-items/metadata-readonly-items.component';
 import { IsActivePrintOption } from './pipes/isActivePrintOption.pipe';
+import { IsSelectedPipe } from './pipes/isSelected.pipe';
+import { IsAllSelectedPipe } from './pipes/isAllSelected.pipe';
+import { HasSelectionValuePipe } from './pipes/hasSelectionValue.pipe';
+import { IsSelectedIdPipe } from './pipes/isSelectedId.pipe';
 
 @NgModule({
   declarations: [
@@ -42,7 +46,12 @@ import { IsActivePrintOption } from './pipes/isActivePrintOption.pipe';
     IncludePipe,
     MetadataProfileEntriesComponent,
     MetadataReadonlyItemsComponent,
-    IsActivePrintOption
+    IsActivePrintOption,
+    MetadataReadonlyItemsComponent,
+    IsSelectedPipe,
+    IsAllSelectedPipe,
+    HasSelectionValuePipe,
+    IsSelectedIdPipe
   ],
   imports: [
     CommonModule,
@@ -75,7 +84,11 @@ import { IsActivePrintOption } from './pipes/isActivePrintOption.pipe';
     PrintOptionsComponent,
     IncludePipe,
     MetadataProfileEntriesComponent,
-    MetadataReadonlyItemsComponent
+    MetadataReadonlyItemsComponent,
+    IsSelectedPipe,
+    IsAllSelectedPipe,
+    HasSelectionValuePipe,
+    IsSelectedIdPipe
   ]
 })
 export class SharedModule {}

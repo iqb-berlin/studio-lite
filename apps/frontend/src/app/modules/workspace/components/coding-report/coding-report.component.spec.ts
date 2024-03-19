@@ -14,9 +14,6 @@ describe('CodingReportComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        CodingReportComponent
-      ],
       imports: [
         MatDialogModule,
         HttpClientModule,

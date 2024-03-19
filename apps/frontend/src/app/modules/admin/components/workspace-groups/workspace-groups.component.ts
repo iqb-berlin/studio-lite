@@ -30,7 +30,7 @@ export type Profile = {
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
   displayedColumns = ['selectCheckbox', 'name'];
-  tableSelectionCheckbox = new SelectionModel<WorkspaceGroupInListDto>(true, []);
+  tableSelectionCheckboxes = new SelectionModel<WorkspaceGroupInListDto>(true, []);
   tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
   workspaceUsers = new UserToCheckCollection([]);
@@ -221,7 +221,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.getWorkspaceGroupList().subscribe(groups => {
       this.setObjectsDatasource(groups);
-      this.tableSelectionCheckbox.clear();
+      this.tableSelectionCheckboxes.clear();
       this.tableSelectionRow.clear();
       this.appService.dataLoading = false;
     });
@@ -246,16 +246,16 @@ export class WorkspaceGroupsComponent implements OnInit {
     });
   }
 
-  isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckbox.selected.length;
+  private isAllSelected(): boolean {
+    const numSelected = this.tableSelectionCheckboxes.selected.length;
     const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
     return numSelected === numRows;
   }
 
   masterToggle(): void {
     this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckbox.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckbox.select(row));
+      this.tableSelectionCheckboxes.clear() :
+      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
   }
 
   toggleRowSelection(row: UserInListDto): void {

@@ -3,10 +3,22 @@
 
 $iqb-primary: mat.define-palette(mat.$cyan-palette, 900);
 $iqb-accent: mat.define-palette(mat.$light-green-palette, A200);
-$iqb-app-theme: mat.define-light-theme($iqb-primary, $iqb-accent);
+$iqb-warn: mat.define-palette(mat.$red-palette, 900);
+$iqb-app-theme: mat.define-light-theme((
+  color: (
+    primary: $iqb-primary,
+    accent: $iqb-accent,
+    warn: $iqb-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
 @include mat.all-component-themes($iqb-app-theme);
+
+
 
 :root {
   --primary: #{mat.get-color-from-palette($iqb-primary)};
   --accent: #{mat.get-color-from-palette($iqb-accent)};
+  --warn: #{mat.get-color-from-palette(mat.$red-palette)};
 }
