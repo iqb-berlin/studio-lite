@@ -8,14 +8,13 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
-} from '@nestjs/swagger';
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
+} from "@nestjs/swagger";
 import {
   CreateWorkspaceGroupDto, UserInListDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 import { IsAdminGuard } from '../is-admin.guard';
@@ -46,7 +45,7 @@ export class WorkspaceGroupsController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace-group retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace-group not found.' })
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('admin workspaces')
   async findOne(@WorkspaceGroupId() id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
@@ -55,7 +54,7 @@ export class WorkspaceGroupsController {
   @Get(':workspace_group_id/workspaces')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Admin workspaces by workspace-group retrieved successfully.' })
   @ApiTags('wsg-admin workspaces')
   async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
@@ -94,7 +93,7 @@ export class WorkspaceGroupsController {
   }
 
   @Get(':workspace_group_id/admins')
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'List of admins for workspace-group retrieved successfully.' })
@@ -104,7 +103,7 @@ export class WorkspaceGroupsController {
   }
 
   @Patch(':workspace_group_id/admins')
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin workspaces')

@@ -2,14 +2,12 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
-import { ApiUnauthorizedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { UnitService } from '../database/services/unit.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGuard } from './workspace.guard';
@@ -30,7 +28,7 @@ export class UnitsController {
   @Get('units')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [UnitInListDto]
   })
@@ -49,7 +47,7 @@ export class UnitsController {
   @Get('units/metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [UnitMetadataDto]
   })
@@ -61,7 +59,7 @@ export class UnitsController {
   @Get(':id/metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: UnitMetadataDto
   })
@@ -75,7 +73,7 @@ export class UnitsController {
   @Get(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: UnitDefinitionDto
   })
@@ -89,7 +87,7 @@ export class UnitsController {
   @Get(':id/scheme')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: UnitSchemeDto
   })
@@ -103,7 +101,7 @@ export class UnitsController {
   @Get(':id/comments')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiTags('workspace unit')
   async findOnesComments(@Param('id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
@@ -113,7 +111,7 @@ export class UnitsController {
   @Get(':id/comments/last-seen')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
   @ApiTags('workspace unit')
   async findLastSeenTimestamp(@Req() request, @Param('id', ParseIntPipe) unitId: number): Promise<Date> {
@@ -123,7 +121,7 @@ export class UnitsController {
   @Patch(':id/comments')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
   @ApiTags('workspace unit')
   async patchOnesUnitUserLastSeen(
@@ -136,7 +134,7 @@ export class UnitsController {
   @Post(':id/comments')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new comment in database',
     type: Number
@@ -149,7 +147,7 @@ export class UnitsController {
   @Patch(':unit_id/comments/:id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
   @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
@@ -162,7 +160,7 @@ export class UnitsController {
   @Delete(':unit_id/comments/:id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
   @ApiUnauthorizedResponse({ description: 'Not authorized to delete comment.' })
@@ -174,7 +172,7 @@ export class UnitsController {
   @Patch(':id/metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchMetadata(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitMetadataDto: UnitMetadataDto) {
@@ -184,7 +182,7 @@ export class UnitsController {
   @Patch(':ids/moveto/:target')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchWorkspace(@Param('ids') ids: string,
     @Param('target', ParseIntPipe) targetWorkspaceId: number) {
@@ -196,7 +194,7 @@ export class UnitsController {
   @Patch(':ids/copyto/:target')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async copy(@Param('ids') ids: string,
     @Param('target', ParseIntPipe) targetWorkspaceId: number) {
@@ -208,7 +206,7 @@ export class UnitsController {
   @Patch(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
@@ -218,7 +216,7 @@ export class UnitsController {
   @Patch(':id/scheme')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchScheme(@Param('id', ParseIntPipe) unitId: number,
     @Body() unitSchemeDto: UnitSchemeDto) {
@@ -228,7 +226,7 @@ export class UnitsController {
   @Post('units')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new unit in database',
     type: Number
@@ -253,7 +251,7 @@ export class UnitsController {
   @Delete(':id/state')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiImplicitParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitState(@Param('id', ParseIntPipe) unitId: number) {
     return this.unitService.removeUnitState(unitId);

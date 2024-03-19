@@ -16,6 +16,8 @@ import { UntypedFormGroup } from '@angular/forms';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
+import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;
@@ -44,7 +46,9 @@ describe('WorkspaceGroupsComponent', () => {
         WorkspaceGroupsComponent,
         MockWorkspaceGroupsMenuComponent,
         MockSearchFilterComponent,
-        WrappedIconComponent
+        WrappedIconComponent,
+        HasSelectionValuePipe,
+        IsAllSelectedPipe
       ],
       imports: [
         MatDialogModule,

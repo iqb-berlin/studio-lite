@@ -2,12 +2,11 @@ import {
   Body, Controller, Delete, Get, Param, Patch, Post, Req, Request, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
-} from '@nestjs/swagger';
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
+} from "@nestjs/swagger";
 import {
   WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { UsersService } from '../../database/services/users.service';
@@ -74,7 +73,7 @@ export class WorkspacesController {
 
   // TODO: Sollen hier mehrere Workspaces gelöscht werden? Sollte über Query gelöst werden.
   @Delete(':ids/:workspace_group_id')
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
@@ -93,7 +92,7 @@ export class WorkspacesController {
   }
 
   @Patch(':ids/:workspace_group_id')
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
@@ -109,7 +108,7 @@ export class WorkspacesController {
   }
 
   @Post(':workspace_group_id')
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({

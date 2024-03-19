@@ -2,12 +2,12 @@ import {
   Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiMethodNotAllowedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiMethodNotAllowedResponse, ApiNotFoundResponse, ApiOkResponse,
+  ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { UsersService } from '../../database/services/users.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
@@ -76,7 +76,7 @@ export class UsersController {
   }
 
   @Patch(':id/workspaces/:workspace_group_id')
-  @ApiImplicitParam({ name: 'workspace_group_id', type: Number })
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin user workspaces updated successfully.' })

@@ -9,7 +9,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+//import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -452,16 +452,17 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     }
   }
 
+  //TODO Implement ShowCodingResultsComponent
   private showCodingResults(responses: Response[]): void {
-    this.dialog
-      .open(ShowCodingResultsComponent, {
-        data: responses
-      })
-      .afterClosed()
-      .pipe(
-        takeUntil(this.ngUnsubscribe)
-      ).subscribe(() => {
-      });
+    // this.dialog
+    //   .open(ShowCodingResultsComponent, {
+    //     data: responses
+    //   })
+    //   .afterClosed()
+    //   .pipe(
+    //     takeUntil(this.ngUnsubscribe)
+    //   ).subscribe(() => {
+    //   });
   }
 
   ngOnDestroy(): void {

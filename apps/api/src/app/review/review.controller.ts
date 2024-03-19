@@ -3,14 +3,12 @@ import {
   Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
-} from '@nestjs/swagger';
+  ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
+} from "@nestjs/swagger";
 import {
   CreateUnitCommentDto,
   ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
-import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
-import { ApiUnauthorizedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReviewService } from '../database/services/review.service';
 import { UnitService } from '../database/services/unit.service';
@@ -30,7 +28,7 @@ export class ReviewController {
   @ApiCreatedResponse({
     type: ReviewFullDto
   })
-  @ApiImplicitParam({ name: 'review_id', type: Number })
+  @ApiParam({ name: 'review_id', type: Number })
   @ApiTags('review')
   async findOne(
     @Param('review_id', ParseIntPipe) reviewId: number
@@ -44,7 +42,7 @@ export class ReviewController {
   @ApiCreatedResponse({
     type: UnitMetadataDto
   })
-  @ApiImplicitParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: Number })
   @ApiTags('review')
   async getUnitMetadata(
     @Param('id', ParseIntPipe) unitId: number
@@ -58,7 +56,7 @@ export class ReviewController {
   @ApiCreatedResponse({
     type: UnitDefinitionDto
   })
-  @ApiImplicitParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: Number })
   @ApiTags('review')
   async getUnitDefinition(
     @Param('id', ParseIntPipe) unitId: number

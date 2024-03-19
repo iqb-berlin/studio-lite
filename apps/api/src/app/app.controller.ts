@@ -7,9 +7,6 @@ import {
 } from '@nestjs/swagger';
 import {
   AuthDataDto,
-  ChangePasswordDto,
-  CreateUserDto,
-  MyDataDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
@@ -22,6 +19,9 @@ import { ReviewId, UserId, UserName } from './auth/user.decorator';
 import { ReviewService } from './database/services/review.service';
 import { AppVersionGuard } from './app-version.guard';
 import { VeronaModulesService } from './database/services/verona-modules.service';
+import { CreateUserDto }from '@studio-lite-lib/api-dto';
+import { MyDataDto }from '@studio-lite-lib/api-dto';
+import { ChangePasswordDto }from '@studio-lite-lib/api-dto';
 
 @Controller()
 export class AppController {
