@@ -17,6 +17,17 @@ describe('Admin Management', () => {
     visitLoginPage();
     logout();
   });
+  it.skip('Create the superadmin', () => {
+    cy.get('input[placeholder="Anmeldename"]')
+      .should('exist')
+      .clear()
+      .type(adminData.user_name);
+    cy.get('input[placeholder="Kennwort"]')
+      .should('exist')
+      .clear()
+      .type(adminData.user_pass);
+    clickButtonToAccept('Weiter');
+  });
 
   it('user with admin credentials can add new user', () => {
     login(adminData.user_name, adminData.user_pass);
