@@ -3,6 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../environments/environment';
 import { UnitPreviewComponent } from './unit-preview.component';
 import { PageData } from '../../models/page-data.interface';
@@ -33,6 +34,7 @@ describe('UnitPreviewComponent', () => {
         PagingModeSelectionComponent
       ],
       imports: [
+        CommonModule,
         HttpClientModule,
         MatSnackBarModule,
         TranslateModule.forRoot()

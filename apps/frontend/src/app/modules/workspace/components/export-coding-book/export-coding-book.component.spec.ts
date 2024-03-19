@@ -27,7 +27,6 @@ describe('ExportCodingBookComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ExportCodingBookComponent,
         MockSelectUnitListComponent
       ],
       imports: [
