@@ -78,6 +78,6 @@ describe('Admin Management', () => {
   });
   it.skip('user with admin credentials can Module hochladen', () => {
     login(adminData.user_name, adminData.user_pass);
-    addModule();
+    // TODO
   });
 });
