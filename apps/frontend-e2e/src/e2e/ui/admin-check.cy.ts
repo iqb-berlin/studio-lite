@@ -6,7 +6,7 @@ import {
   logout,
   visitLoginPage,
   createGroupArea,
-  deleteGroupArea, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea, addModule
+  deleteGroupArea, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea, addFirstUser, deleteFirstUser, addModule
 } from '../../support/util';
 import { adminData } from '../../support/config/userdata';
 
@@ -17,19 +17,9 @@ describe('Admin Management', () => {
     visitLoginPage();
     logout();
   });
-  it.skip('Create the superadmin', () => {
-    cy.get('input[placeholder="Anmeldename"]')
-      .should('exist')
-      .clear()
-      .type(adminData.user_name);
-    cy.get('input[placeholder="Kennwort"]')
-      .should('exist')
-      .clear()
-      .type(adminData.user_pass);
-    clickButtonToAccept('Weiter');
-  });
 
   it('user with admin credentials can add new user', () => {
+    addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser('newuser', 'newpass');
   });
@@ -71,13 +61,14 @@ describe('Admin Management', () => {
   });
 
   it('remove the Context', () => {
-    cy.pause();
     login(adminData.user_name, adminData.user_pass);
     deleteGroupArea('Mathematik Primär Bereichsgruppe');
     visitLoginPage();
+    deleteFirstUser();
   });
   it.skip('user with admin credentials can Module hochladen', () => {
     login(adminData.user_name, adminData.user_pass);
     // TODO
+    addModule();
   });
 });

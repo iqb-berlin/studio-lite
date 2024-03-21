@@ -1,4 +1,30 @@
 import Chainable = Cypress.Chainable;
+import { adminData } from './config/userdata';
+
+export function addFirstUser() {
+  cy.get('input[placeholder="Anmeldename"]')
+    .should('exist')
+    .clear()
+    .type(adminData.user_name);
+  cy.get('input[placeholder="Kennwort"]')
+    .should('exist')
+    .clear()
+    .type(adminData.user_pass);
+  clickButtonToAccept('Weiter');
+  cy.wait(400);
+  visitLoginPage();
+  cy.get('mat-icon:contains("account_box")')
+    .click();
+  cy.get('span:contains("Abmelden")')
+    .should('exist')
+    .click();
+  cy.wait(400);
+  clickButtonToAccept('Abmelden');
+}
+
+export function deleteFirstUser() {
+  deleteUser(adminData.user_name);
+}
 
 export function login(username: string, password = '') {
   cy.get('input[placeholder="Anmeldename"]')
@@ -193,6 +219,7 @@ export function addModule():void {
   //  TODO
   //  cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
 }
+
 export const visitLoginPage = (): Chainable => cy.url()
   .then(() => {
     cy.visit(<string>Cypress.config().baseUrl);

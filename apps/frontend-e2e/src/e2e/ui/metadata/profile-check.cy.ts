@@ -1,5 +1,14 @@
 import {
-  clickButtonToAccept, createGroupArea, createNewUser, deleteGroupArea, deleteUser, login, logout, visitLoginPage
+  addFirstUser,
+  clickButtonToAccept,
+  createGroupArea,
+  createNewUser,
+  deleteFirstUser,
+  deleteGroupArea,
+  deleteUser,
+  login,
+  logout,
+  visitLoginPage
 } from '../../../support/util';
 import { adminData, userData } from '../../../support/config/userdata';
 import { checkProfile } from '../../../support/metadata-util';
@@ -15,6 +24,7 @@ describe('Load metadata profile', () => {
   });
 
   it('user admin prepare the Context', () => {
+    addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser(userData.user_name, userData.user_pass);
     visitLoginPage();
@@ -95,5 +105,6 @@ describe('Load metadata profile', () => {
       deleteGroupArea(area);
       visitLoginPage();
     });
+    deleteFirstUser();
   });
 });

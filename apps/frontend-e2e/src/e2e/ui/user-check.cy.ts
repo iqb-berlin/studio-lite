@@ -1,6 +1,7 @@
 import {
+  addFirstUser,
   changePassword,
-  clickButtonToAccept, createNewUser, deleteUser, login, logout, visitLoginPage
+  clickButtonToAccept, createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
 
@@ -8,6 +9,7 @@ describe('User Management', () => {
   beforeEach(visitLoginPage);
 
   it('prepare the Context', () => {
+    addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser(userData.user_name, userData.user_pass);
     visitLoginPage();
@@ -60,11 +62,11 @@ describe('User Management', () => {
   });
 
   it('delete the Context', () => {
-    cy.pause();
     login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
     visitLoginPage();
     logout();
+    deleteFirstUser();
   });
 
   // it('should be able to modify personal data', () => {

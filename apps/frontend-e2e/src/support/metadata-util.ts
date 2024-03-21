@@ -144,8 +144,9 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
     const unitMap = new Map<string, string>();
     expect(response).property('status').to.equal(200);
     const body = JSON.parse(response.body);
-    // eslint-disable-next-line max-len
-    body.groups.forEach((group: any) => group.entries.forEach((entry:any) => unitMap.set(entry.label[0].value, entry.type)));
+    // eslint-disable-next-line
+    body.groups.forEach((group: any) => group.entries.forEach((entry:any) => unitMap
+      .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type:string, fieldName:string) => {
       cy.log(IqbProfileExamples.get(profile).get(fieldName));
       if (IqbProfileExamples.get(profile).get(fieldName) !== ('undefined' && '')) {
