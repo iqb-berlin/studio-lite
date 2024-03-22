@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
-} from "@nestjs/swagger";
+} from '@nestjs/swagger';
 import {
 
   WorkspaceGroupFullDto

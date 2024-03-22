@@ -7,9 +7,7 @@ describe('SplitterGutterComponent', () => {
   let fixture: ComponentFixture<SplitterGutterComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [SplitterGutterComponent]
-    }).compileComponents();
+    await TestBed.configureTestingModule({}).compileComponents();
 
     fixture = TestBed.createComponent(SplitterGutterComponent);
     component = fixture.componentInstance;

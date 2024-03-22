@@ -11,7 +11,6 @@ describe('UnitEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitEditorComponent],
       imports: [
         HttpClientModule,
         MatSnackBarModule,

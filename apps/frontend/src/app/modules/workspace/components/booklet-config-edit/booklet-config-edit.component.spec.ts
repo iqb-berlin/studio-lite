@@ -12,7 +12,6 @@ describe('ReviewConfigEditComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [BookletConfigEditComponent],
       imports: [
         FormsModule,
         MatSelectModule,

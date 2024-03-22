@@ -7,7 +7,6 @@ describe('MetadataReadonlyItemsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MetadataReadonlyItemsComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MetadataReadonlyItemsComponent);

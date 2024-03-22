@@ -11,9 +11,6 @@ describe('UnitPrintCommentsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        UnitPrintCommentsComponent
-      ],
       imports: [
         HttpClientModule,
         TranslateModule.forRoot(),

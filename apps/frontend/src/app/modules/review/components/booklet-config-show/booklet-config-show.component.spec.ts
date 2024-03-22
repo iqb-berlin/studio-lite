@@ -8,9 +8,6 @@ describe('BookletConfigShowComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        BookletConfigShowComponent
-      ],
       imports: [
         TranslateModule.forRoot()
       ]

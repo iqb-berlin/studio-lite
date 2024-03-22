@@ -3,8 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
 import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
+import { HttpClientModule } from '@angular/common/http';
+import { createMock } from '@golevelup/ts-jest';
 import { UserWorkspacesAreaComponent } from './user-workspaces-area.component';
-import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../../../../api/src/app/auth/service/auth.service';
 
 describe('UserWorkspacesAreaComponent', () => {
   let component: UserWorkspacesAreaComponent;
@@ -31,16 +34,23 @@ describe('UserWorkspacesAreaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UserWorkspacesAreaComponent,
         MockUserMenuComponent,
         MockUserWorkspacesGroupsComponent,
         MockAreaTitleComponent,
-        MockWarningComponent,
-        WrappedIconComponent
+        MockWarningComponent
       ],
       imports: [
-        TranslateModule.forRoot()
-      ]
+        TranslateModule.forRoot(),
+        HttpClientModule
+      ],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: createMock<AuthService>()
+        }, {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserWorkspacesAreaComponent);

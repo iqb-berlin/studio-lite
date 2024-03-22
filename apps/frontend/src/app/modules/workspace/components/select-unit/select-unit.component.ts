@@ -15,7 +15,6 @@ import { MatFormField } from '@angular/material/form-field';
 import { NgIf, NgFor } from '@angular/common';
 import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
-import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 
@@ -53,7 +52,6 @@ export class SelectUnitComponent implements OnInit {
 
   constructor(
     private fb: UntypedFormBuilder,
-    private backendService: BackendService,
     private appService: AppService,
     public ds: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: SelectUnitData

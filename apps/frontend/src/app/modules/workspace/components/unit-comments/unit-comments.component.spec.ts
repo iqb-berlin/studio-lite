@@ -10,7 +10,6 @@ describe('UnitCommentsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitCommentsComponent],
       imports: [
         RouterTestingModule,
         HttpClientModule

@@ -49,7 +49,6 @@ describe('UnitCommentsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        CommentsComponent,
         MockRootCommentsPipe,
         MockCommentEditorComponent,
         MockCommentComponent

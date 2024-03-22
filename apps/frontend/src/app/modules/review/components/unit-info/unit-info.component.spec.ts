@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { UnitInfoComponent } from './unit-info.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UnitInfoComponent', () => {
   let component: UnitInfoComponent;
@@ -42,11 +41,9 @@ describe('UnitInfoComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitInfoComponent,
         MockUnitMetaDataComponent,
         MockUnitInfoComments,
-        MockUnitInfoCoding,
-        WrappedIconComponent
+        MockUnitInfoCoding
       ],
       imports: [
         TranslateModule.forRoot(),

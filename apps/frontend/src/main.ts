@@ -35,6 +35,7 @@ import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
 
+// eslint-disable-next-line no-bitwise
 const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
 
 export function createTranslateLoader(http: HttpClient) {

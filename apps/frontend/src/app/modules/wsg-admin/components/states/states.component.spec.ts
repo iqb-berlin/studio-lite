@@ -12,7 +12,6 @@ import { Component, Input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../../../../../environments/environment';
 import { StatesComponent } from './states.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('StatesComponent', () => {
   let component: StatesComponent;
@@ -26,10 +25,7 @@ describe('StatesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        StatesComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent
-      ],
+        MockSearchFilterComponent],
       imports: [
         MatDialogModule,
         MatTableModule,

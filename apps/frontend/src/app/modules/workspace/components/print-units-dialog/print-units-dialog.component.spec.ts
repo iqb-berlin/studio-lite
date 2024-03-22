@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { Component, Input } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { PrintUnitsDialogComponent } from './print-units-dialog.component';
 
@@ -30,12 +31,12 @@ describe('PrintUnitsDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        PrintUnitsDialogComponent,
         MockSelectUnitListComponent,
         MockPrintOptionsComponent
       ],
       imports: [
         MatDialogModule,
+        NoopAnimationsModule,
         HttpClientModule,
         MatSelectModule,
         TranslateModule.forRoot()

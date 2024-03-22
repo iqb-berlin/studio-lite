@@ -1,5 +1,5 @@
 import {
-  Component, forwardRef, Inject, OnInit
+  Component, Inject, OnInit
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
@@ -23,7 +23,7 @@ const datePipe = new DatePipe('de-DE');
   imports: [
     TranslateModule,
     MatDialogModule,
-    forwardRef(() => WorkspaceModule),
+    WorkspaceModule,
     MatCheckboxModule,
     FormsModule,
     MatRadioModule,

@@ -10,7 +10,6 @@ describe('UnitPrintPlayerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitPrintPlayerComponent],
       imports: [
         HttpClientModule
       ],

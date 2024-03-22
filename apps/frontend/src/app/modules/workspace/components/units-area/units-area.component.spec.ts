@@ -7,6 +7,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
+import { TranslateModule } from '@ngx-translate/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { UnitsAreaComponent } from './units-area.component';
 
@@ -46,7 +48,6 @@ describe('UnitsAreaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitsAreaComponent,
         MockUnitSaveButtonComponent,
         MockUnitSelectionComponent,
         MockAddUnitButtonComponent,
@@ -59,7 +60,9 @@ describe('UnitsAreaComponent', () => {
         HttpClientModule,
         MatSnackBarModule,
         MatDialogModule,
-        MatIconModule
+        MatIconModule,
+        TranslateModule.forRoot(),
+        NoopAnimationsModule
       ],
       providers: [{
         provide: 'SERVER_URL',

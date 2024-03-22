@@ -23,7 +23,6 @@ describe('PrintOptionsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        PrintOptionsComponent,
         MockIsActivePrintOptionPipe
       ],
       imports: [

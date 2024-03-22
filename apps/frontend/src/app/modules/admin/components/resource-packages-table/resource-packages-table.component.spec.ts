@@ -14,7 +14,6 @@ describe('ResourcePackagesTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ResourcePackagesTableComponent],
       imports: [
         TranslateModule.forRoot(),
         MatTableModule,

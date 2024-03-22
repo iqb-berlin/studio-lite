@@ -10,7 +10,6 @@ describe('UnitPropertiesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitPropertiesComponent],
       imports: [
         HttpClientModule,
         TranslateModule.forRoot()

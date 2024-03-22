@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { Component } from '@angular/core';
@@ -15,7 +16,6 @@ describe('UnitInfoCodingComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitInfoCodingComponent,
         MockUnitInfoLoader
       ],
       imports: [
@@ -37,3 +37,32 @@ describe('UnitInfoCodingComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+// Mock the IntersectionObserver, see https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+export class IntersectionObserver {
+  root = null;
+  rootMargin = '';
+  thresholds = [];
+
+  // eslint-disable-next-line class-methods-use-this
+  disconnect() {
+    return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  observe() {
+    return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  takeRecords() {
+    return [];
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  unobserve() {
+    return null;
+  }
+}
+window.IntersectionObserver = IntersectionObserver;
+global.IntersectionObserver = IntersectionObserver;

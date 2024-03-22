@@ -14,7 +14,6 @@ describe('CommentDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CommentDialogComponent],
       imports: [
         TranslateModule.forRoot(),
         NoopAnimationsModule,

@@ -9,9 +9,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -25,11 +25,10 @@ describe('UsersComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UsersComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent
+        MockSearchFilterComponent
       ],
       imports: [
+        NoopAnimationsModule,
         MatDialogModule,
         MatTableModule,
         MatCheckboxModule,

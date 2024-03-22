@@ -11,7 +11,6 @@ describe('NestedTreeNodeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [NestedTreeComponent],
       imports: [
         MatCheckboxModule,
         MatDialogModule,

@@ -7,6 +7,7 @@ import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
 import { UnitSelectionComponent } from './unit-selection.component';
+import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 @Component({ selector: 'studio-lite-unit-table', template: '' })
 class MockUnitTableComponent {
@@ -34,7 +35,6 @@ describe('UnitSelectionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitSelectionComponent,
         MockUnitTableComponent,
         MockSearchFilterComponent,
         MockUnitGroupsComponent
@@ -42,7 +42,9 @@ describe('UnitSelectionComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         RouterTestingModule,
-        HttpClientModule
+        HttpClientModule,
+        SelectUnitDirective
+
       ],
       providers: [{
         provide: 'SERVER_URL',

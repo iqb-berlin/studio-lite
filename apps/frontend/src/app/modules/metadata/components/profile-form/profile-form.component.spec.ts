@@ -11,7 +11,6 @@ describe('ProfileFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ProfileFormComponent],
       imports: [
         HttpClientModule,
         ReactiveFormsModule,

@@ -4,8 +4,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { SafeUrl } from '@angular/platform-browser';
+import { RouterTestingModule } from '@angular/router/testing';
+import { createMock } from '@golevelup/ts-jest';
 import { environment } from '../../../environments/environment';
 import { HomeComponent } from './home.component';
+import { AuthService } from '../../../../../api/src/app/auth/service/auth.service';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -30,15 +33,19 @@ describe('HomeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        HomeComponent,
         MockAppInfoComponent,
         MockLoginComponent
       ],
       imports: [
+        RouterTestingModule,
         HttpClientModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        {
+          provide: AuthService,
+          useValue: createMock<AuthService>()
+        },
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

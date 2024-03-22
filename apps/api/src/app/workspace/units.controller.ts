@@ -2,6 +2,7 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
+  // eslint-disable-next-line max-len
   ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {

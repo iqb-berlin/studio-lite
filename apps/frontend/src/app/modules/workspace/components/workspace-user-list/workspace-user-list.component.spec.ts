@@ -9,7 +9,6 @@ describe('WorkspaceUserListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [WorkspaceUserListComponent],
       imports: [
         MatDialogModule,
         TranslateModule.forRoot()

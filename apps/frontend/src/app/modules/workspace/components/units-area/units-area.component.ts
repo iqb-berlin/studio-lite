@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
-// eslint-disable-next-line import/no-cycle
 import { EditUnitButtonComponent } from '../edit-unit-button/edit-unit-button.component';
 import { DeleteUnitButtonComponent } from '../delete-unit-button/delete-unit-button.component';
 import { AddUnitButtonComponent } from '../add-unit-button/add-unit-button.component';

@@ -6,7 +6,6 @@ describe('DataLoadingAsTextPipe', () => {
   beforeEach(() => {
     TestBed
       .configureTestingModule({
-        declarations: [DataLoadingAsTextPipe],
         imports: [
           TranslateModule.forRoot()
         ]

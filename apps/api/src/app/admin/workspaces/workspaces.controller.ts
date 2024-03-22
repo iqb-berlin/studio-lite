@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
-} from "@nestjs/swagger";
+} from '@nestjs/swagger';
 import {
   WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
