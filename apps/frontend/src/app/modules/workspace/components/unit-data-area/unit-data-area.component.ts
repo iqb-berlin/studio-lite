@@ -17,6 +17,7 @@ import { WorkspaceService } from '../../services/workspace.service';
   templateUrl: './unit-data-area.component.html',
   styleUrls: ['./unit-data-area.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatTabNav, NgFor, MatTabLink, RouterLinkActive, RouterLink, NgIf, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
 })
 export class UnitDataAreaComponent {

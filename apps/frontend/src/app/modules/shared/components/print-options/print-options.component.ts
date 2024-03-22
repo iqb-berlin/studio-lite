@@ -15,6 +15,7 @@ import { PrintOptions } from '../../../print/models/print-options.interface';
   templateUrl: './print-options.component.html',
   styleUrls: ['./print-options.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgFor, NgIf, MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
 })
 export class PrintOptionsComponent implements OnInit {

@@ -10,6 +10,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
+  // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -30,6 +31,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   templateUrl: './reviews.component.html',
   styleUrls: ['./reviews.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
+// eslint-disable-next-line import/no-cycle
 import { EditUnitButtonComponent } from '../edit-unit-button/edit-unit-button.component';
 import { DeleteUnitButtonComponent } from '../delete-unit-button/delete-unit-button.component';
 import { AddUnitButtonComponent } from '../add-unit-button/add-unit-button.component';
@@ -17,6 +18,7 @@ import { UnitSaveButtonComponent } from '../unit-save-button/unit-save-button.co
   templateUrl: './units-area.component.html',
   styleUrls: ['./units-area.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [UnitSaveButtonComponent, UpdateUnitsButtonComponent, UnitSelectionComponent, AddUnitButtonComponent, DeleteUnitButtonComponent, EditUnitButtonComponent, AsyncPipe]
 })
 export class UnitsAreaComponent implements OnInit, OnDestroy {

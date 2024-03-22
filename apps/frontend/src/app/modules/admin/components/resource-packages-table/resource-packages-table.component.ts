@@ -2,6 +2,7 @@ import {
   Component, Inject, Input, OnChanges, QueryList, SimpleChanges, ViewChild, ViewChildren
 } from '@angular/core';
 import {
+  // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell
 } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -17,6 +18,7 @@ import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
   templateUrl: './resource-packages-table.component.html',
   styleUrls: ['./resource-packages-table.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgIf, MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, NgFor, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
 })
 export class ResourcePackagesTableComponent implements OnChanges {

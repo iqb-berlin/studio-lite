@@ -28,6 +28,7 @@ import {
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+// eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
@@ -44,6 +45,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   templateUrl: './edit-unit-button.component.html',
   styleUrls: ['./edit-unit-button.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, NgIf, MatMenuItem, MatIcon, MatDivider, TranslateModule]
 })
 export class EditUnitButtonComponent extends SelectUnitDirective {

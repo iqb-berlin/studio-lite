@@ -1,4 +1,5 @@
 import {
+  // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
@@ -37,6 +38,7 @@ const datePipe = new DatePipe('de-DE');
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [WorkspaceMenuComponent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, TranslateModule]
 })
 export class WorkspacesComponent implements OnInit {

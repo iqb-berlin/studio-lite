@@ -23,6 +23,7 @@ import { CommentBadgeComponent } from '../comment-badge/comment-badge.component'
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [CommentBadgeComponent, NgIf, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, MomentFromNowPipe]
 })
 export class CommentComponent implements OnInit {

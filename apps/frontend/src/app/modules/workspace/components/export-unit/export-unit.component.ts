@@ -17,6 +17,7 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
   templateUrl: './export-unit.component.html',
   styleUrls: ['export-unit.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, TestConfigComponent, BookletConfigEditComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ExportUnitComponent {

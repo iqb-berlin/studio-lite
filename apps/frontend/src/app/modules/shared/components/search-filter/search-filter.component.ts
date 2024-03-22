@@ -13,6 +13,7 @@ import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
   templateUrl: './search-filter.component.html',
   styleUrls: ['./search-filter.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatFormField, MatLabel, MatInput, MatIconButton, MatSuffix, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class SearchFilterComponent {

@@ -23,6 +23,7 @@ import { AppService } from '../../../../services/app.service';
   templateUrl: './move-unit.component.html',
   styleUrls: ['./move-unit.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, NgFor, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

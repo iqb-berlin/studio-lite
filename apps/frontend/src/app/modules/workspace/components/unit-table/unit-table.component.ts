@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import {
+  // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
@@ -18,6 +19,7 @@ import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
   templateUrl: './unit-table.component.html',
   styleUrls: ['./unit-table.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatTooltip, NgIf, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, TranslateModule, HasNewCommentsPipe, GetStateColorPipe]
 })
 export class UnitTableComponent implements AfterViewInit, OnChanges {

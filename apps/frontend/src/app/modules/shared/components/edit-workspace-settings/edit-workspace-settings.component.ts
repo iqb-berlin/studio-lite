@@ -36,6 +36,7 @@ type SelectedRow = {
   templateUrl: './edit-workspace-settings.component.html',
   styleUrls: ['./edit-workspace-settings.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, NgIf, MatError, MatSelect, NgFor, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class EditWorkspaceSettingsComponent implements OnInit {

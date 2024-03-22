@@ -63,6 +63,7 @@ export class ExportCodingBookComponent implements OnInit {
       .subscribe(data => {
         if (data) {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+          // eslint-disable-next-line max-len
           saveAs(data, `${thisDate} Kodierbuch ${this.workspaceService.selectedWorkspaceName}${(this.exportFormat === 'json') ? '.json' : '.docx'}`);
         }
       });

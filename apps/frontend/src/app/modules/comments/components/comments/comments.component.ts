@@ -23,6 +23,7 @@ import { CommentComponent } from '../comment/comment.component';
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgIf, MatProgressSpinner, NgFor, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
 })
 export class CommentsComponent implements OnInit {

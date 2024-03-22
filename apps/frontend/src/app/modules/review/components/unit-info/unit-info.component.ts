@@ -22,6 +22,7 @@ const PanelWidthOffset = 40;
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatIcon, NgIf, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {

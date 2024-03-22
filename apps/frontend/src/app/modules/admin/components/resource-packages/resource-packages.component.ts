@@ -1,6 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { BehaviorSubject, Observable, switchMap } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';

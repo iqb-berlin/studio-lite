@@ -32,6 +32,7 @@ export interface SelectUnitData {
   templateUrl: './select-unit.component.html',
   styleUrls: ['./select-unit.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, NgFor, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SelectUnitComponent implements OnInit {

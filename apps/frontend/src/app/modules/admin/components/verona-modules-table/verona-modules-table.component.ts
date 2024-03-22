@@ -2,6 +2,7 @@ import {
   Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 import {
+  // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -13,18 +14,19 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatAnchor } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { NgIf, DatePipe } from '@angular/common';
+import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
-import { BytesPipe } from '../../../../../../../../libs/iqb-components/src/lib/pipes/bytes.pipe';
 
 @Component({
   selector: 'studio-lite-verona-modules-table',
   templateUrl: './verona-modules-table.component.html',
   styleUrls: ['./verona-modules-table.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgIf, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {

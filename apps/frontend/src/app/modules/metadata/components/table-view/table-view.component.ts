@@ -12,6 +12,7 @@ import { MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import {
+  // eslint-disable-next-line max-len
   MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { MetadataService } from '../../services/metadata.service';
@@ -45,6 +46,7 @@ type Unit = {
   templateUrl: './table-view.component.html',
   styleUrls: ['./table-view.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, NgFor, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

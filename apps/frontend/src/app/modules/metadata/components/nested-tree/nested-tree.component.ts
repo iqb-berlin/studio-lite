@@ -131,6 +131,7 @@ export class ChecklistDatabase {
   styleUrls: ['./nested-tree.component.scss'],
   providers: [ChecklistDatabase],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, NgIf, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

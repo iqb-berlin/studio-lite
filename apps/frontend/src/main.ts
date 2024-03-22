@@ -46,6 +46,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
+    // eslint-disable-next-line max-len
     importProvidersFrom(AuthModule, ApplicationModule, BrowserModule, MatButtonModule, MatFormFieldModule, MatMenuModule, MatToolbarModule, MatIconModule, MatInputModule, MatTooltipModule, MatDialogModule, MatCardModule, MatIconModule, MatTabsModule, MatTableModule, ReactiveFormsModule, MatProgressSpinnerModule, MatSnackBarModule, RouterModule, ReactiveFormsModule, AppRoutingModule, IqbComponentsModule.forRoot(), TranslateModule.forRoot({
       defaultLanguage: 'de',
       loader: {

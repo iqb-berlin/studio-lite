@@ -34,6 +34,7 @@ import { ModuleService } from '../../../shared/services/module.service';
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MatInput, NgIf, MatError, MatSelect, MatOption, NgFor, NewGroupButtonComponent, CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe, TranslateModule]
 })
 

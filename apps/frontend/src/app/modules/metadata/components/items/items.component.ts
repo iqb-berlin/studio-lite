@@ -11,6 +11,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { NgIf, NgFor } from '@angular/common';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
+// eslint-disable-next-line max-len
 import { MetadataReadonlyItemsComponent } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
 
 @Component({
@@ -18,6 +19,7 @@ import { MetadataReadonlyItemsComponent } from '../../../shared/components/metad
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgIf, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ItemComponent, MatIcon, MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
 })
 

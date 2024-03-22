@@ -1,4 +1,5 @@
 import {
+  // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
@@ -27,6 +28,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule]
 })
 export class UsersComponent implements OnInit {

@@ -24,6 +24,7 @@ import { WorkspaceService } from '../../services/workspace.service';
   templateUrl: './new-unit.component.html',
   styleUrls: ['./new-unit.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, NgIf, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, NgFor, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class NewUnitComponent {

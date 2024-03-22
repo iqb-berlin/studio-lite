@@ -22,6 +22,7 @@ export interface InputTextData {
   templateUrl: './input-text.component.html',
   styleUrls: ['./input-text.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class InputTextComponent {

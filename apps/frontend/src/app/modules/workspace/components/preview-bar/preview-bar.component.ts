@@ -24,6 +24,7 @@ import { StatusIndicationComponent } from '../status-indication/status-indicatio
   templateUrl: './preview-bar.component.html',
   styleUrls: ['./preview-bar.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [StatusIndicationComponent, MatButton, MatTooltip, NgIf, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })
 export class PreviewBarComponent {

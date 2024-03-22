@@ -25,6 +25,7 @@ export interface MoveComponentData {
   templateUrl: './move-workspace.component.html',
   styleUrls: ['./move-workspace.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, FormsModule, NgIf, MatFormField, MatLabel, MatSelect, NgFor, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
 })
 

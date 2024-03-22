@@ -18,6 +18,7 @@ export interface WorkspaceUserListData {
   templateUrl: './workspace-user-list.component.html',
   styleUrls: ['./workspace-user-list.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, NgIf, UserListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class WorkspaceUserListComponent {

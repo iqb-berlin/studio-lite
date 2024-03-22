@@ -20,6 +20,7 @@ import { State } from '../../../admin/models/state.type';
   templateUrl: './states.component.html',
   styleUrls: ['./states.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [NgIf, MatProgressSpinner, MatButton, NgFor, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
 })
 export class StatesComponent implements OnInit {

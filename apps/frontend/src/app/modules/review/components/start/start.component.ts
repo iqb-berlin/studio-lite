@@ -12,6 +12,7 @@ import { BookletConfigShowComponent } from '../booklet-config-show/booklet-confi
   templateUrl: './start.component.html',
   styleUrls: ['./start.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, BookletConfigShowComponent, MatFabAnchor, MatTooltip, TranslateModule]
 })
 

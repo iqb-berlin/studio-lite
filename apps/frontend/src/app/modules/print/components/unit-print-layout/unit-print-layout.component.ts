@@ -24,6 +24,7 @@ import { UnitPropertiesComponent } from '../../../shared/components/unit-propert
   templateUrl: './unit-print-layout.component.html',
   styleUrls: ['./unit-print-layout.component.scss'],
   standalone: true,
+  // eslint-disable-next-line max-len
   imports: [UnitPropertiesComponent, NgIf, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
 })
 export class UnitPrintLayoutComponent implements OnInit {
