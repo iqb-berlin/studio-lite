@@ -12,11 +12,16 @@ import { UnitPage } from '../../models/unit-page.interface';
 import { PageData } from '../../../workspace/models/page-data.interface';
 import { UnitData } from '../../models/unit-data.class';
 import { BackendService } from '../../services/backend.service';
+import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { UnitInfoComponent } from '../unit-info/unit-info.component';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-units',
-  templateUrl: './units.component.html',
-  styleUrls: ['./units.component.scss']
+    selector: 'studio-lite-units',
+    templateUrl: './units.component.html',
+    styleUrls: ['./units.component.scss'],
+    standalone: true,
+    imports: [NgIf, UnitInfoComponent, PageNavigationComponent]
 })
 export class UnitsComponent implements OnInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

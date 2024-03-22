@@ -20,28 +20,26 @@ import { PrintMetadataComponent } from './components/print-metadata/print-metada
 import { PrintOptionsDialogComponent } from './components/print-options-dialog/print-options-dialog.component';
 
 @NgModule({
-  declarations: [
-    PrintComponent,
-    UnitPrintLayoutComponent,
-    UnitPrintPlayerComponent,
-    UnitPrintCommentsComponent,
-    UnitPrintCodingComponent,
-    UnitPrintCodeComponent,
-    PrintMetadataComponent,
-    PrintOptionsDialogComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    PrintRoutingModule,
-    TranslateModule,
-    FormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatTableModule,
-    MatIconModule,
-    CommentsModule
-  ]
+    imports: [
+        CommonModule,
+        SharedModule,
+        PrintRoutingModule,
+        TranslateModule,
+        FormsModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatTableModule,
+        MatIconModule,
+        CommentsModule,
+        PrintComponent,
+        UnitPrintLayoutComponent,
+        UnitPrintPlayerComponent,
+        UnitPrintCommentsComponent,
+        UnitPrintCodingComponent,
+        UnitPrintCodeComponent,
+        PrintMetadataComponent,
+        PrintOptionsDialogComponent
+    ]
 })
 export class PrintModule {}

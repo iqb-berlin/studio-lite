@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 @Pipe({
-  name: 'dataLoadingAsText'
+    name: 'dataLoadingAsText',
+    standalone: true
 })
 export class DataLoadingAsTextPipe implements PipeTransform {
   constructor(private translateService: TranslateService) {}

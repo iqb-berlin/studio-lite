@@ -2,11 +2,16 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { ReviewConfigDto } from '@studio-lite-lib/api-dto';
+import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
-  selector: 'studio-lite-review-config-edit',
-  templateUrl: './review-config-edit.component.html',
-  styleUrls: ['./review-config-edit.component.scss']
+    selector: 'studio-lite-review-config-edit',
+    templateUrl: './review-config-edit.component.html',
+    styleUrls: ['./review-config-edit.component.scss'],
+    standalone: true,
+    imports: [MatCheckbox, FormsModule, TranslateModule]
 })
 
 export class ReviewConfigEditComponent {

@@ -2,11 +2,15 @@ import {
   AfterViewInit, Component, ContentChildren, QueryList
 } from '@angular/core';
 import { SplitterPaneComponent } from '../splitter-pane/splitter-pane.component';
+import { SplitterGutterComponent } from '../splitter-gutter/splitter-gutter.component';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-splitter',
-  templateUrl: './splitter.component.html',
-  styleUrls: ['./splitter.component.scss']
+    selector: 'studio-lite-splitter',
+    templateUrl: './splitter.component.html',
+    styleUrls: ['./splitter.component.scss'],
+    standalone: true,
+    imports: [NgFor, NgIf, SplitterGutterComponent]
 })
 export class SplitterComponent implements AfterViewInit {
   @ContentChildren(SplitterPaneComponent) panes!: QueryList<SplitterPaneComponent>;

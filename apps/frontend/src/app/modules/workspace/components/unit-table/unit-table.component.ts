@@ -2,14 +2,21 @@ import {
   AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild
 } from '@angular/core';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { State } from '../../../admin/models/state.type';
+import { GetStateColorPipe } from '../../pipes/get-state-color.pipe';
+import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
+import { TranslateModule } from '@ngx-translate/core';
+import { NgIf } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'studio-lite-unit-table',
-  templateUrl: './unit-table.component.html',
-  styleUrls: ['./unit-table.component.scss']
+    selector: 'studio-lite-unit-table',
+    templateUrl: './unit-table.component.html',
+    styleUrls: ['./unit-table.component.scss'],
+    standalone: true,
+    imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatTooltip, NgIf, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, TranslateModule, HasNewCommentsPipe, GetStateColorPipe]
 })
 export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSort) sortTable!: MatSort;

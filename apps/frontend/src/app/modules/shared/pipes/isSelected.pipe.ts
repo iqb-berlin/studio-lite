@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 
 @Pipe({
-  name: 'isSelected'
+    name: 'isSelected',
+    standalone: true
 })
 export class IsSelectedPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-explicit-any

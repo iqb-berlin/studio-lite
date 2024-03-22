@@ -2,12 +2,15 @@ import {
   Component,
   Inject, OnInit, ViewChild
 } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { saveAs } from 'file-saver-es';
-import { DatePipe } from '@angular/common';
-import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+import { DatePipe, NgFor } from '@angular/common';
+import { MatTabChangeEvent, MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { MetadataService } from '../../services/metadata.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -34,9 +37,11 @@ type Unit = {
   lastChangedMetadata: Date
 };
 @Component({
-  selector: 'studio-lite-table-view',
-  templateUrl: './table-view.component.html',
-  styleUrls: ['./table-view.component.scss']
+    selector: 'studio-lite-table-view',
+    templateUrl: './table-view.component.html',
+    styleUrls: ['./table-view.component.scss'],
+    standalone: true,
+    imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, NgFor, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class TableViewComponent implements OnInit {

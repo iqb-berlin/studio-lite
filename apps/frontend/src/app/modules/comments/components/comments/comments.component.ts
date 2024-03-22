@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
   switchMap, Subject, takeUntil, of, Observable
 } from 'rxjs';
@@ -10,11 +10,20 @@ import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { Comment } from '../../models/comment.interface';
+import { RepliesPipe } from '../../pipes/replies.pipe';
+import { RootCommentsPipe } from '../../pipes/root-comments.pipe';
+import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
+import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
+import { CommentComponent } from '../comment/comment.component';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-comments',
-  templateUrl: './comments.component.html',
-  styleUrls: ['./comments.component.scss']
+    selector: 'studio-lite-comments',
+    templateUrl: './comments.component.html',
+    styleUrls: ['./comments.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatProgressSpinner, NgFor, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
 })
 export class CommentsComponent implements OnInit {
   @Input() userId!: number;

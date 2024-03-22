@@ -19,11 +19,15 @@ import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
+import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
+import { NgIf } from '@angular/common';
 
 @Component({
-  templateUrl: './unit-preview.component.html',
-  styleUrls: ['./unit-preview.component.scss'],
-  host: { class: 'unit-preview' }
+    templateUrl: './unit-preview.component.html',
+    styleUrls: ['./unit-preview.component.scss'],
+    host: { class: 'unit-preview' },
+    standalone: true,
+    imports: [NgIf, PreviewBarComponent]
 })
 
 export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {

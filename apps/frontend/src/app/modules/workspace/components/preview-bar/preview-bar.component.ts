@@ -10,11 +10,21 @@ import { Progress } from '../../models/types';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { MatIcon } from '@angular/material/icon';
+import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mode-selection.component';
+import { NgIf } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { StatusIndicationComponent } from '../status-indication/status-indication.component';
 
 @Component({
-  selector: 'studio-lite-preview-bar',
-  templateUrl: './preview-bar.component.html',
-  styleUrls: ['./preview-bar.component.scss']
+    selector: 'studio-lite-preview-bar',
+    templateUrl: './preview-bar.component.html',
+    styleUrls: ['./preview-bar.component.scss'],
+    standalone: true,
+    imports: [StatusIndicationComponent, MatButton, MatTooltip, NgIf, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];

@@ -1,11 +1,19 @@
 import { Component, Inject } from '@angular/core';
 import { BookletConfigDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { WorkspaceService } from '../../services/workspace.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
+import { TestConfigComponent } from '../test-config/test-config.component';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 @Component({
-  templateUrl: './export-unit.component.html',
-  styleUrls: ['export-unit.component.scss']
+    templateUrl: './export-unit.component.html',
+    styleUrls: ['export-unit.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, TestConfigComponent, BookletConfigEditComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {

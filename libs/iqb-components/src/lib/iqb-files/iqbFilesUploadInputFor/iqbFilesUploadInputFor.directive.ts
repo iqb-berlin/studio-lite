@@ -4,7 +4,8 @@ import {
 import { IqbFilesUploadQueueComponent } from '@studio-lite-lib/iqb-components';
 
 @Directive({
-  selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]'
+    selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]',
+    standalone: true
 })
 export class IqbFilesUploadInputForDirective {
   private _queue!: IqbFilesUploadQueueComponent;

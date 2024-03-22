@@ -2,16 +2,25 @@ import {
   Component, EventEmitter, Output, OnInit
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { State } from '../../../admin/models/state.type';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { DeleteStateComponent } from '../delete-state/delete-state.component';
 import { BackendService } from '../../services/backend.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatError } from '@angular/material/form-field';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-states',
-  templateUrl: './states.component.html',
-  styleUrls: ['./states.component.scss']
+    selector: 'studio-lite-states',
+    templateUrl: './states.component.html',
+    styleUrls: ['./states.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatProgressSpinner, MatButton, NgFor, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
 })
 export class StatesComponent implements OnInit {
   states: State[] = [];

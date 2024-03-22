@@ -4,11 +4,17 @@ import { MatDialog } from '@angular/material/dialog';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'studio-lite-print-review-button',
-  templateUrl: './print-review-button.component.html',
-  styleUrls: ['./print-review-button.component.scss']
+    selector: 'studio-lite-print-review-button',
+    templateUrl: './print-review-button.component.html',
+    styleUrls: ['./print-review-button.component.scss'],
+    standalone: true,
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class PrintReviewButtonComponent {
   @Input() workspaceId!: number;

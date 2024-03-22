@@ -1,19 +1,29 @@
 import {
   Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
+import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
+import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
+import { TranslateModule } from '@ngx-translate/core';
+import { BytesPipe } from '../../../../../../../../libs/iqb-components/src/lib/pipes/bytes.pipe';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatAnchor } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgIf, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-verona-modules-table',
-  templateUrl: './verona-modules-table.component.html',
-  styleUrls: ['./verona-modules-table.component.scss']
+    selector: 'studio-lite-verona-modules-table',
+    templateUrl: './verona-modules-table.component.html',
+    styleUrls: ['./verona-modules-table.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: 'editor' | 'player' | 'schemer';

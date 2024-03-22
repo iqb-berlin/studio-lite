@@ -1,16 +1,21 @@
 import {
   Component, Inject, Input, OnChanges, QueryList, SimpleChanges, ViewChild, ViewChildren
 } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell } from '@angular/material/table';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject } from 'rxjs';
+import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
+import { TranslateModule } from '@ngx-translate/core';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-resource-packages-table',
-  templateUrl: './resource-packages-table.component.html',
-  styleUrls: ['./resource-packages-table.component.scss']
+    selector: 'studio-lite-resource-packages-table',
+    templateUrl: './resource-packages-table.component.html',
+    styleUrls: ['./resource-packages-table.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, NgFor, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
 })
 export class ResourcePackagesTableComponent implements OnChanges {
   resourcePackageProperties: string[] = ['name', 'createdAt'];

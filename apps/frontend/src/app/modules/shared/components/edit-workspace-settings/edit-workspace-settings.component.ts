@@ -1,15 +1,21 @@
 import {
   Component, Inject, OnInit
 } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { MatCheckboxChange } from '@angular/material/checkbox';
-import { MatSelectChange } from '@angular/material/select';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { MatSelectChange, MatSelect } from '@angular/material/select';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';
 import { State } from '../../../admin/models/state.type';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatOption } from '@angular/material/core';
+import { NgIf, NgFor } from '@angular/common';
+import { SelectModuleComponent } from '../select-module/select-module.component';
+import { MatLabel, MatError } from '@angular/material/form-field';
 
 type Profile = {
   id:string,
@@ -24,9 +30,11 @@ type SelectedRow = {
 };
 
 @Component({
-  selector: 'studio-lite-edit-workspace-settings',
-  templateUrl: './edit-workspace-settings.component.html',
-  styleUrls: ['./edit-workspace-settings.component.scss']
+    selector: 'studio-lite-edit-workspace-settings',
+    templateUrl: './edit-workspace-settings.component.html',
+    styleUrls: ['./edit-workspace-settings.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, NgIf, MatError, MatSelect, NgFor, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class EditWorkspaceSettingsComponent implements OnInit {
   constructor(

@@ -31,51 +31,49 @@ import { StatesComponent } from './components/states/states.component';
 import { DeleteStateComponent } from './components/delete-state/delete-state.component';
 
 @NgModule({
-  declarations: [
-    WorkspacesComponent,
-    UsersComponent,
-    WsgAdminComponent,
-    WorkspaceMenuComponent,
-    WorkspaceSettingsComponent,
-    StatesComponent,
-    DeleteStateComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    MatIconModule,
-    MatTableModule,
-    MatCheckboxModule,
-    MatSortModule,
-    MatTooltipModule,
-    MatButtonModule,
-    FormsModule,
-    MatDialogModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatTabsModule,
-    WsgAdminRoutingModule,
-    TranslateModule,
-    MatOptionModule,
-    MatSelectModule,
-    MatExpansionModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule
-  ],
-  providers: [
-    BackendService,
-    [
-      {
-        provide: MAT_DATE_LOCALE,
-        useValue: 'de-DE'
-      },
-      {
-        provide: HTTP_INTERCEPTORS,
-        useClass: AuthInterceptor,
-        multi: true
-      }
+    imports: [
+        CommonModule,
+        SharedModule,
+        MatIconModule,
+        MatTableModule,
+        MatCheckboxModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatButtonModule,
+        FormsModule,
+        MatDialogModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        RouterModule,
+        MatTabsModule,
+        WsgAdminRoutingModule,
+        TranslateModule,
+        MatOptionModule,
+        MatSelectModule,
+        MatExpansionModule,
+        MatProgressSpinnerModule,
+        MatFormFieldModule,
+        WorkspacesComponent,
+        UsersComponent,
+        WsgAdminComponent,
+        WorkspaceMenuComponent,
+        WorkspaceSettingsComponent,
+        StatesComponent,
+        DeleteStateComponent
+    ],
+    providers: [
+        BackendService,
+        [
+            {
+                provide: MAT_DATE_LOCALE,
+                useValue: 'de-DE'
+            },
+            {
+                provide: HTTP_INTERCEPTORS,
+                useClass: AuthInterceptor,
+                multi: true
+            }
+        ]
     ]
-  ]
 })
 export class WsgAdminModule {}

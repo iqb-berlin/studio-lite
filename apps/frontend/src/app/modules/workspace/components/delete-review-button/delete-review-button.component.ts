@@ -4,14 +4,19 @@ import {
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'studio-lite-delete-review-button',
-  templateUrl: './delete-review-button.component.html',
-  styleUrls: ['./delete-review-button.component.scss']
+    selector: 'studio-lite-delete-review-button',
+    templateUrl: './delete-review-button.component.html',
+    styleUrls: ['./delete-review-button.component.scss'],
+    standalone: true,
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class DeleteReviewButtonComponent {
   @Input() selectedReviewId!: number;

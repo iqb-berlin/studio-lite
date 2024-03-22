@@ -8,7 +8,8 @@ import { AppService } from '../services/app.service';
 import { AuthService } from '../modules/auth/service/auth.service';
 
 @Directive({
-  selector: '[studioLiteChangePassword]'
+    selector: '[studioLiteChangePassword]',
+    standalone: true
 })
 export class ChangePasswordDirective {
   constructor(

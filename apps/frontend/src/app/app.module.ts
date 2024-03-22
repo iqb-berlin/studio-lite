@@ -71,94 +71,92 @@ export function createTranslateLoader(http: HttpClient) {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    AboutComponent,
-    ChangePasswordComponent,
-    RequestMessageComponent,
-    EditMyDataComponent,
-    UserWorkspacesGroupsComponent,
-    LoginComponent,
-    UserMenuComponent,
-    AccountActionComponent,
-    ChangePasswordDirective,
-    EditMyDataDirective,
-    LogoutDirective,
-    UserWorkspacesAreaComponent,
-    WarningComponent,
-    AreaTitleComponent,
-    AppInfoComponent,
-    UserReviewsAreaComponent,
-    UserIssuesComponent,
-    UserIssuesPipe,
-    DataLoadingIsNumberPipe,
-    DataLoadingAsTextPipe,
-    IsInArrayPipe,
-    MoveWorkspaceComponent,
-    LoginAlternativeWarningComponent
-  ],
-  imports: [
-    AuthModule,
-    ApplicationModule,
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatMenuModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatInputModule,
-    MatTooltipModule,
-    MatDialogModule,
-    MatCardModule,
-    MatIconModule,
-    MatTabsModule,
-    MatTableModule,
-    ReactiveFormsModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    RouterModule,
-    ReactiveFormsModule,
-    HttpClientModule,
-    AppRoutingModule,
-    IqbComponentsModule.forRoot(),
-    TranslateModule.forRoot({
-      defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient]
-      }
-    }),
-    MatCheckboxModule,
-    MatSelectModule,
-    FormsModule,
-    SharedModule
-  ],
-  providers: [
-    BackendService,
-    MatDialog,
-    {
-      provide: LocationStrategy,
-      useClass: HashLocationStrategy
-    },
-    {
-      provide: MAT_DATE_LOCALE,
-      useValue: 'de'
-    },
-    {
-      provide: DateAdapter,
-      useClass: DateFnsAdapter,
-      useValue: [MAT_DATE_LOCALE]
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
-  ],
-  bootstrap: [AppComponent]
+    declarations: [AppComponent],
+    imports: [
+        AuthModule,
+        ApplicationModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatMenuModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatInputModule,
+        MatTooltipModule,
+        MatDialogModule,
+        MatCardModule,
+        MatIconModule,
+        MatTabsModule,
+        MatTableModule,
+        ReactiveFormsModule,
+        MatProgressSpinnerModule,
+        MatSnackBarModule,
+        RouterModule,
+        ReactiveFormsModule,
+        HttpClientModule,
+        AppRoutingModule,
+        IqbComponentsModule.forRoot(),
+        TranslateModule.forRoot({
+            defaultLanguage: 'de',
+            loader: {
+                provide: TranslateLoader,
+                useFactory: createTranslateLoader,
+                deps: [HttpClient]
+            }
+        }),
+        MatCheckboxModule,
+        MatSelectModule,
+        FormsModule,
+        SharedModule,
+        HomeComponent,
+        AboutComponent,
+        ChangePasswordComponent,
+        RequestMessageComponent,
+        EditMyDataComponent,
+        UserWorkspacesGroupsComponent,
+        LoginComponent,
+        UserMenuComponent,
+        AccountActionComponent,
+        ChangePasswordDirective,
+        EditMyDataDirective,
+        LogoutDirective,
+        UserWorkspacesAreaComponent,
+        WarningComponent,
+        AreaTitleComponent,
+        AppInfoComponent,
+        UserReviewsAreaComponent,
+        UserIssuesComponent,
+        UserIssuesPipe,
+        DataLoadingIsNumberPipe,
+        DataLoadingAsTextPipe,
+        IsInArrayPipe,
+        MoveWorkspaceComponent,
+        LoginAlternativeWarningComponent
+    ],
+    providers: [
+        BackendService,
+        MatDialog,
+        {
+            provide: LocationStrategy,
+            useClass: HashLocationStrategy
+        },
+        {
+            provide: MAT_DATE_LOCALE,
+            useValue: 'de'
+        },
+        {
+            provide: DateAdapter,
+            useClass: DateFnsAdapter,
+            useValue: [MAT_DATE_LOCALE]
+        },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptor,
+            multi: true
+        }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule {
 }

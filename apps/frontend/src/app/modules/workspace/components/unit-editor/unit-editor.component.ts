@@ -10,12 +10,15 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-unit-editor',
-  templateUrl: './unit-editor.component.html',
-  styleUrls: ['./unit-editor.component.scss'],
-  host: { class: 'unit-editor' }
+    selector: 'studio-lite-unit-editor',
+    templateUrl: './unit-editor.component.html',
+    styleUrls: ['./unit-editor.component.scss'],
+    host: { class: 'unit-editor' },
+    standalone: true,
+    imports: [NgIf]
 })
 
 export class UnitEditorComponent implements AfterViewInit, OnDestroy {

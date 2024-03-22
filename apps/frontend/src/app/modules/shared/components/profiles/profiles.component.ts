@@ -1,17 +1,26 @@
 import {
   Component, OnInit, Output, EventEmitter, Input
 } from '@angular/core';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MDProfileStore, MDProfile } from '@iqb/metadata';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../../admin/components/workspace-groups/workspace-groups.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatError } from '@angular/material/form-field';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { FormsModule } from '@angular/forms';
+import { MatDialogTitle } from '@angular/material/dialog';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgIf, NgFor } from '@angular/common';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
 @Component({
-  selector: 'studio-lite-profiles',
-  templateUrl: './profiles.component.html',
-  styleUrls: ['./profiles.component.scss']
+    selector: 'studio-lite-profiles',
+    templateUrl: './profiles.component.html',
+    styleUrls: ['./profiles.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
 })
 export class ProfilesComponent implements OnInit {
   isLoading: boolean = false;

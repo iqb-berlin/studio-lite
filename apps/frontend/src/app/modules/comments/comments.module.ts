@@ -34,51 +34,49 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
-  imports: [
-    SharedModule,
-    CommonModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    MatButtonModule,
-    TranslateModule,
-    MatDialogModule,
-    A11yModule,
-    MatSelectModule,
-    MatMenuModule,
-    MatTooltipModule,
-    NgxTiptapModule,
-    FormsModule,
-    MatInputModule,
-    MatProgressSpinnerModule
-  ],
-  declarations: [
-    CommentsComponent,
-    CommentComponent,
-    CommentEditorComponent,
-    SafeResourceHTMLPipe,
-    IsEditingPipe,
-    IsReplyingPipe,
-    DeleteDialogComponent,
-    RootCommentsPipe,
-    RepliesPipe,
-    ScrollCommentIntoViewDirective,
-    ScrollEditorIntoViewDirective,
-    CommentBadgeComponent,
-    MomentFromNowPipe,
-    IsCommentCommittablePipe
-  ],
-  exports: [CommentsComponent],
-  providers: [
-    BackendService,
-    [
-      { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-      {
-        provide: HTTP_INTERCEPTORS,
-        useClass: AuthInterceptor,
-        multi: true
-      }
+    imports: [
+        SharedModule,
+        CommonModule,
+        ReactiveFormsModule,
+        MatIconModule,
+        MatButtonModule,
+        TranslateModule,
+        MatDialogModule,
+        A11yModule,
+        MatSelectModule,
+        MatMenuModule,
+        MatTooltipModule,
+        NgxTiptapModule,
+        FormsModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
+        CommentsComponent,
+        CommentComponent,
+        CommentEditorComponent,
+        SafeResourceHTMLPipe,
+        IsEditingPipe,
+        IsReplyingPipe,
+        DeleteDialogComponent,
+        RootCommentsPipe,
+        RepliesPipe,
+        ScrollCommentIntoViewDirective,
+        ScrollEditorIntoViewDirective,
+        CommentBadgeComponent,
+        MomentFromNowPipe,
+        IsCommentCommittablePipe
+    ],
+    exports: [CommentsComponent],
+    providers: [
+        BackendService,
+        [
+            { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+            {
+                provide: HTTP_INTERCEPTORS,
+                useClass: AuthInterceptor,
+                multi: true
+            }
+        ]
     ]
-  ]
 })
 export class CommentsModule {}
 export { Comment };

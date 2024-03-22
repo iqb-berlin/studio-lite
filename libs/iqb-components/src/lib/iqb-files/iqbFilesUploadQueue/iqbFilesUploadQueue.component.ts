@@ -4,14 +4,18 @@ import {
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { IqbFilesUploadComponent } from '../iqbFilesUpload/iqbFilesUpload.component';
 import { UploadStatus } from '../iqb-files-classes';
+import { MatButton } from '@angular/material/button';
+import { NgFor, NgIf } from '@angular/common';
 
 /**
  * A material design file upload queue component.
  */
 @Component({
-  selector: 'iqb-files-upload-queue',
-  templateUrl: 'iqbFilesUploadQueue.component.html',
-  exportAs: 'iqbFilesUploadQueue'
+    selector: 'iqb-files-upload-queue',
+    templateUrl: 'iqbFilesUploadQueue.component.html',
+    exportAs: 'iqbFilesUploadQueue',
+    standalone: true,
+    imports: [NgFor, IqbFilesUploadComponent, NgIf, MatButton]
 })
 export class IqbFilesUploadQueueComponent implements OnDestroy {
   @ViewChildren(IqbFilesUploadComponent) fileUploads: QueryList<IqbFilesUploadComponent> | undefined;
