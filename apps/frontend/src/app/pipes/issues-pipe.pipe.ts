@@ -3,7 +3,8 @@ import { ReviewDto, WorkspaceDto } from '@studio-lite-lib/api-dto';
 import { UserIssue } from '../models/user-issue.interface';
 
 @Pipe({
-  name: 'userIssues'
+    name: 'userIssues',
+    standalone: true
 })
 export class UserIssuesPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

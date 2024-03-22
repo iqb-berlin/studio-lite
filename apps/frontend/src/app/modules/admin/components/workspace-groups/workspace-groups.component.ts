@@ -1,19 +1,29 @@
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {
   ViewChild, Component, OnInit
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort } from '@angular/material/sort';
-import { UntypedFormGroup } from '@angular/forms';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { UntypedFormGroup, FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UserInListDto, CreateWorkspaceGroupDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgIf, NgFor } from '@angular/common';
 import { saveAs } from 'file-saver-es';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
+import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
+import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
+import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
+import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -23,9 +33,11 @@ export type Profile = {
 };
 
 @Component({
-  selector: 'studio-lite-workspace-groups',
-  templateUrl: './workspace-groups.component.html',
-  styleUrls: ['./workspace-groups.component.scss']
+    selector: 'studio-lite-workspace-groups',
+    templateUrl: './workspace-groups.component.html',
+    styleUrls: ['./workspace-groups.component.scss'],
+    standalone: true,
+    imports: [WorkspaceGroupsMenuComponent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();

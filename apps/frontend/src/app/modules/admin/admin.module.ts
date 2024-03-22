@@ -51,68 +51,66 @@ import {
 } from './components/edit-workspace-group-settings/edit-workspace-group-settings.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    AdminRoutingModule,
-    IqbComponentsModule,
-    MatTableModule,
-    MatTabsModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatSortModule,
-    ReactiveFormsModule,
-    MatProgressSpinnerModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatCardModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatToolbarModule,
-    MatSnackBarModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatBadgeModule,
-    MatChipsModule,
-    FormsModule,
-    TranslateModule,
-    HttpClientModule,
-    SharedModule,
-    MatExpansionModule
-  ],
-  exports: [AdminComponent],
-  declarations: [
-    WorkspaceGroupsComponent,
-    UsersComponent,
-    AdminComponent,
-    EditWorkspaceGroupComponent,
-    EditUserComponent,
-    VeronaModulesComponent,
-    VeronaModulesTableComponent,
-    SettingsComponent,
-    EditWorkspaceGroupComponent,
-    AppConfigComponent,
-    AppLogoComponent,
-    UnitExportConfigComponent,
-    ResourcePackagesComponent,
-    ResourcePackagesTableComponent,
-    TableDataSourcePipe,
-    SafeUrlPipe,
-    ToTimePipe,
-    UsersMenuComponent,
-    WorkspaceGroupsMenuComponent,
-    EditWorkspaceGroupSettingsComponent
-  ],
-  providers: [
-    BackendService,
-    [
-      {
-        provide: HTTP_INTERCEPTORS,
-        useClass: AuthInterceptor,
-        multi: true
-      }
+    imports: [
+        CommonModule,
+        AdminRoutingModule,
+        IqbComponentsModule,
+        MatTableModule,
+        MatTabsModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatSortModule,
+        ReactiveFormsModule,
+        MatProgressSpinnerModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatCardModule,
+        MatTooltipModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatToolbarModule,
+        MatSnackBarModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        MatBadgeModule,
+        MatChipsModule,
+        FormsModule,
+        TranslateModule,
+        HttpClientModule,
+        SharedModule,
+        MatExpansionModule,
+        WorkspaceGroupsComponent,
+        UsersComponent,
+        AdminComponent,
+        EditWorkspaceGroupComponent,
+        EditUserComponent,
+        VeronaModulesComponent,
+        VeronaModulesTableComponent,
+        SettingsComponent,
+        EditWorkspaceGroupComponent,
+        AppConfigComponent,
+        AppLogoComponent,
+        UnitExportConfigComponent,
+        ResourcePackagesComponent,
+        ResourcePackagesTableComponent,
+        TableDataSourcePipe,
+        SafeUrlPipe,
+        ToTimePipe,
+        UsersMenuComponent,
+        WorkspaceGroupsMenuComponent,
+        EditWorkspaceGroupSettingsComponent
+    ],
+    exports: [AdminComponent],
+    providers: [
+        BackendService,
+        [
+            {
+                provide: HTTP_INTERCEPTORS,
+                useClass: AuthInterceptor,
+                multi: true
+            }
+        ]
     ]
-  ]
 })
 export class AdminModule {}

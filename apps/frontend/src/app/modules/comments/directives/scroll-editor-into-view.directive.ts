@@ -3,7 +3,8 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[studioLiteScrollEditorIntoView]'
+    selector: '[studioLiteScrollEditorIntoView]',
+    standalone: true
 })
 export class ScrollEditorIntoViewDirective implements OnInit {
   @Input() isVisible!: boolean;

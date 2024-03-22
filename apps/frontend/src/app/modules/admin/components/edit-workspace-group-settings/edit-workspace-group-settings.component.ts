@@ -1,10 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
 import { State } from '../../models/state.type';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
 
 type Profile = {
   id: string,
@@ -12,9 +15,11 @@ type Profile = {
 };
 
 @Component({
-  selector: 'studio-lite-edit-workspace-group',
-  templateUrl: './edit-workspace-group-settings.component.html',
-  styleUrls: ['./edit-workspace-group-settings.component.scss']
+    selector: 'studio-lite-edit-workspace-group',
+    templateUrl: './edit-workspace-group-settings.component.html',
+    styleUrls: ['./edit-workspace-group-settings.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, ProfilesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class EditWorkspaceGroupSettingsComponent implements OnInit {

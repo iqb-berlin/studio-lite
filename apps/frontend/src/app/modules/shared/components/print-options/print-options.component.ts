@@ -2,11 +2,20 @@ import {
   Component, EventEmitter, OnInit, Output
 } from '@angular/core';
 import { PrintOptions } from '../../../print/models/print-options.interface';
+import { IsActivePrintOption } from '../../pipes/isActivePrintOption.pipe';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'studio-lite-print-options',
-  templateUrl: './print-options.component.html',
-  styleUrls: ['./print-options.component.scss']
+    selector: 'studio-lite-print-options',
+    templateUrl: './print-options.component.html',
+    styleUrls: ['./print-options.component.scss'],
+    standalone: true,
+    imports: [NgFor, NgIf, MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
 })
 export class PrintOptionsComponent implements OnInit {
   printOptions: PrintOptions[] = [

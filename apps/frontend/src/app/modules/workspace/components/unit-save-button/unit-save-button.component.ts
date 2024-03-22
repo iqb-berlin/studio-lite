@@ -2,17 +2,23 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
+import { MatIcon } from '@angular/material/icon';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'studio-lite-unit-save-button',
-  templateUrl: './unit-save-button.component.html',
-  styleUrls: ['./unit-save-button.component.scss']
+    selector: 'studio-lite-unit-save-button',
+    templateUrl: './unit-save-button.component.html',
+    styleUrls: ['./unit-save-button.component.scss'],
+    standalone: true,
+    imports: [MatButton, MatTooltip, WrappedIconComponent, MatIcon, TranslateModule]
 })
 export class UnitSaveButtonComponent {
   constructor(

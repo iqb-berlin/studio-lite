@@ -7,11 +7,17 @@ import { ExportUnitComponent } from '../export-unit/export-unit.component';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'studio-lite-export-review-button',
-  templateUrl: './export-review-button.component.html',
-  styleUrls: ['./export-review-button.component.scss']
+    selector: 'studio-lite-export-review-button',
+    templateUrl: './export-review-button.component.html',
+    styleUrls: ['./export-review-button.component.scss'],
+    standalone: true,
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class ExportReviewButtonComponent {
   @Input() bookletConfigSettings!: BookletConfigDto | undefined;

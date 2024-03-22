@@ -3,13 +3,18 @@ import {
 } from '@angular/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'studio-lite-group-menu',
-  templateUrl: './group-menu.component.html',
-  styleUrls: ['./group-menu.component.scss']
+    selector: 'studio-lite-group-menu',
+    templateUrl: './group-menu.component.html',
+    styleUrls: ['./group-menu.component.scss'],
+    standalone: true,
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class GroupMenuComponent {
   @Input() selectedGroup!: string;

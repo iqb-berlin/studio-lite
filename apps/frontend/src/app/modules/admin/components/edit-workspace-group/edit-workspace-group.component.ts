@@ -1,12 +1,18 @@
 import { Component, Inject } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
 
 @Component({
-  selector: 'studio-lite-edit-workspace-group',
-  templateUrl: './edit-workspace-group.component.html',
-  styleUrls: ['./edit-workspace-group.component.scss']
+    selector: 'studio-lite-edit-workspace-group',
+    templateUrl: './edit-workspace-group.component.html',
+    styleUrls: ['./edit-workspace-group.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class EditWorkspaceGroupComponent {
   editWorkspaceGroupForm: UntypedFormGroup;

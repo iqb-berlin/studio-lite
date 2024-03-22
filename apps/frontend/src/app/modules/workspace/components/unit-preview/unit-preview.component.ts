@@ -9,7 +9,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-//import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -19,11 +19,15 @@ import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
+import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
+import { NgIf } from '@angular/common';
 
 @Component({
-  templateUrl: './unit-preview.component.html',
-  styleUrls: ['./unit-preview.component.scss'],
-  host: { class: 'unit-preview' }
+    templateUrl: './unit-preview.component.html',
+    styleUrls: ['./unit-preview.component.scss'],
+    host: { class: 'unit-preview' },
+    standalone: true,
+    imports: [NgIf, PreviewBarComponent]
 })
 
 export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
@@ -452,17 +456,16 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     }
   }
 
-  //TODO Implement ShowCodingResultsComponent
   private showCodingResults(responses: Response[]): void {
-    // this.dialog
-    //   .open(ShowCodingResultsComponent, {
-    //     data: responses
-    //   })
-    //   .afterClosed()
-    //   .pipe(
-    //     takeUntil(this.ngUnsubscribe)
-    //   ).subscribe(() => {
-    //   });
+    this.dialog
+      .open(ShowCodingResultsComponent, {
+        data: responses
+      })
+      .afterClosed()
+      .pipe(
+        takeUntil(this.ngUnsubscribe)
+      ).subscribe(() => {
+      });
   }
 
   ngOnDestroy(): void {

@@ -5,15 +5,12 @@ import { SplitterPaneComponent } from './components/splitter-pane/splitter-pane.
 import { SplitterGutterComponent } from './components/splitter-gutter/splitter-gutter.component';
 
 @NgModule({
-  declarations: [
-    SplitterComponent,
-    SplitterPaneComponent,
-    SplitterGutterComponent
-  ],
-  imports: [CommonModule],
-  exports: [
-    SplitterComponent,
-    SplitterPaneComponent
-  ]
+    imports: [CommonModule, SplitterComponent,
+        SplitterPaneComponent,
+        SplitterGutterComponent],
+    exports: [
+        SplitterComponent,
+        SplitterPaneComponent
+    ]
 })
 export class SplitterModule {}

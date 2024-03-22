@@ -7,12 +7,19 @@ import {
 } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { UploadStatus } from '../iqb-files-classes';
+import { BytesPipe } from '../../pipes/bytes.pipe';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { NgIf } from '@angular/common';
+import { MatCard } from '@angular/material/card';
 
 @Component({
-  selector: 'iqb-files-upload',
-  templateUrl: './iqbFilesUpload.component.html',
-  exportAs: 'iqbFilesUpload',
-  styleUrls: ['../iqb-files.scss']
+    selector: 'iqb-files-upload',
+    templateUrl: './iqbFilesUpload.component.html',
+    exportAs: 'iqbFilesUpload',
+    styleUrls: ['../iqb-files.scss'],
+    standalone: true,
+    imports: [MatCard, NgIf, MatProgressBar, MatIcon, BytesPipe]
 })
 
 export class IqbFilesUploadComponent implements OnInit {
