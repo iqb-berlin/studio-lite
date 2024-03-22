@@ -164,8 +164,8 @@ export function deleteUser(user: string):void {
 }
 
 export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
-  // eslint-disable-next-line max-len
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
     .eq(0)
     .click();
   cy.get('span:contains("Bereichsgruppen")')
