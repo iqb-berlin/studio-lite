@@ -4,19 +4,19 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
-import { WorkspaceService } from '../../services/workspace.service';
-import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
+import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 
 @Component({
-    selector: 'studio-lite-new-group-button',
-    templateUrl: './new-group-button.component.html',
-    styleUrls: ['./new-group-button.component.scss'],
-    standalone: true,
-    imports: [MatIconButton, MatTooltip, MatIcon, TranslateModule]
+  selector: 'studio-lite-new-group-button',
+  templateUrl: './new-group-button.component.html',
+  styleUrls: ['./new-group-button.component.scss'],
+  standalone: true,
+  imports: [MatIconButton, MatTooltip, MatIcon, TranslateModule]
 })
 export class NewGroupButtonComponent {
   constructor(

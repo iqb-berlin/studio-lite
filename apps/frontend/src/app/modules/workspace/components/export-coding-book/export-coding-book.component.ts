@@ -10,7 +10,7 @@ import { DatePipe, NgForOf } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
-import { SharedModule } from '../../../shared/shared.module';
+
 // eslint-disable-next-line import/no-cycle
 import { WorkspaceModule } from '../../workspace.module';
 import { BackendService } from '../../services/backend.service';
@@ -23,7 +23,6 @@ const datePipe = new DatePipe('de-DE');
   imports: [
     TranslateModule,
     MatDialogModule,
-    SharedModule,
     forwardRef(() => WorkspaceModule),
     MatCheckboxModule,
     FormsModule,

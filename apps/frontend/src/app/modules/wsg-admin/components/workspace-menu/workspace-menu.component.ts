@@ -5,6 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 import { BackendService } from '../../services/backend.service';
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
@@ -14,15 +16,13 @@ import {
   EditWorkspaceSettingsComponent
 } from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-workspace-menu',
-    templateUrl: './workspace-menu.component.html',
-    styleUrls: ['./workspace-menu.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-workspace-menu',
+  templateUrl: './workspace-menu.component.html',
+  styleUrls: ['./workspace-menu.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceMenuComponent {
   @Input() selectedWorkspaceId!: number;

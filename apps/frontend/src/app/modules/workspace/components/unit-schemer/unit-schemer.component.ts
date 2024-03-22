@@ -5,21 +5,21 @@ import { Subject, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
+import { NgIf } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
-import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'studio-lite-unit-schemer',
-    templateUrl: './unit-schemer.component.html',
-    styleUrls: ['./unit-schemer.component.scss'],
-    host: { class: 'unit-schemer' },
-    standalone: true,
-    imports: [NgIf]
+  selector: 'studio-lite-unit-schemer',
+  templateUrl: './unit-schemer.component.html',
+  styleUrls: ['./unit-schemer.component.scss'],
+  host: { class: 'unit-schemer' },
+  standalone: true,
+  imports: [NgIf]
 })
 export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

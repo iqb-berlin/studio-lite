@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'isInArray',
-    standalone: true
+  name: 'isInArray',
+  standalone: true
 })
 export class IsInArrayPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

@@ -1,7 +1,9 @@
 import {
   Component, OnDestroy, OnInit
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -9,25 +11,26 @@ import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
 import { CreateUserDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { NgIf } from '@angular/common';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { AuthService } from '../../modules/auth/service/auth.service';
 import { LoginAlternativeWarningComponent } from '../login-alternative-warning/login-alternative-warning.component';
-import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
 import { WarningComponent } from '../warning/warning.component';
 import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
 @Component({
-    selector: 'studio-lite-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    standalone: true,
-    imports: [AreaTitleComponent, NgIf, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
+  selector: 'studio-lite-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [AreaTitleComponent, NgIf, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: UntypedFormGroup;

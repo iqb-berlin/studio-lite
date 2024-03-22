@@ -6,22 +6,22 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { NgIf } from '@angular/common';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { NgIf } from '@angular/common';
 import { UnitDataAreaComponent } from '../unit-data-area/unit-data-area.component';
 import { UnitsAreaComponent } from '../units-area/units-area.component';
 import { SplitterPaneComponent } from '../../../splitter/components/splitter-pane/splitter-pane.component';
 import { SplitterComponent } from '../../../splitter/components/splitter/splitter.component';
 
 @Component({
-    selector: 'studio-lite-workspace',
-    templateUrl: './workspace.component.html',
-    styleUrls: ['./workspace.component.scss'],
-    standalone: true,
-    imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent, NgIf]
+  selector: 'studio-lite-workspace',
+  templateUrl: './workspace.component.html',
+  styleUrls: ['./workspace.component.scss'],
+  standalone: true,
+  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent, NgIf]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';

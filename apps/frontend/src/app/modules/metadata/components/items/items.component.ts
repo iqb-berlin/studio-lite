@@ -5,20 +5,20 @@ import {
   BehaviorSubject, Subject, takeUntil
 } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-import { MetadataReadonlyItemsComponent } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
 import { MatIcon } from '@angular/material/icon';
-import { ItemComponent } from '../item/item.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { NgIf, NgFor } from '@angular/common';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { ItemComponent } from '../item/item.component';
+import { MetadataReadonlyItemsComponent } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
 
 @Component({
-    selector: 'studio-lite-items',
-    templateUrl: './items.component.html',
-    styleUrls: ['./items.component.scss'],
-    standalone: true,
-    imports: [NgIf, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ItemComponent, MatIcon, MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
+  selector: 'studio-lite-items',
+  templateUrl: './items.component.html',
+  styleUrls: ['./items.component.scss'],
+  standalone: true,
+  imports: [NgIf, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ItemComponent, MatIcon, MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
 })
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {

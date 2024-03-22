@@ -10,8 +10,8 @@ import { AppService } from '../services/app.service';
 import { AuthService } from '../modules/auth/service/auth.service';
 
 @Directive({
-    selector: '[studioLiteEditMyData]',
-    standalone: true
+  selector: '[studioLiteEditMyData]',
+  standalone: true
 })
 export class EditMyDataDirective {
   constructor(

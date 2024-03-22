@@ -20,9 +20,9 @@ export class AuthService {
     return this.keycloakService.getToken();
   }
 
-  //TODO: remove this Promise?
+  // TODO: remove this Promise?
   isLoggedIn(): Promise<boolean> {
-    return new Promise((resolve, reject) => { resolve(this.keycloakService.isLoggedIn()); })
+    return new Promise((resolve, reject) => { resolve(this.keycloakService.isLoggedIn()); });
   }
 
   loadUserProfile(): Promise<KeycloakProfile> {

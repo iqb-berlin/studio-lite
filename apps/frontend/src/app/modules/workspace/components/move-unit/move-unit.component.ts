@@ -1,25 +1,29 @@
-import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import {
   Component, Inject, OnInit, ViewChild
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AppService } from '../../../../services/app.service';
-import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
-import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
-import { MoveUnitData } from '../../models/move-unit-data.interface';
+import {
+  UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatFormField } from '@angular/material/form-field';
 import { NgIf, NgFor } from '@angular/common';
+import { MoveUnitData } from '../../models/move-unit-data.interface';
+import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { AppService } from '../../../../services/app.service';
 
 @Component({
-    selector: 'studio-lite-move-unit',
-    templateUrl: './move-unit.component.html',
-    styleUrls: ['./move-unit.component.scss'],
-    standalone: true,
-    imports: [MatDialogTitle, NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, NgFor, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-move-unit',
+  templateUrl: './move-unit.component.html',
+  styleUrls: ['./move-unit.component.scss'],
+  standalone: true,
+  imports: [MatDialogTitle, NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, NgFor, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class MoveUnitComponent implements OnInit {

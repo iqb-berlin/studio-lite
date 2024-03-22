@@ -3,8 +3,8 @@ import { WorkspaceService } from '../services/workspace.service';
 import { State } from '../../admin/models/state.type';
 
 @Pipe({
-    name: 'getStateColor',
-    standalone: true
+  name: 'getStateColor',
+  standalone: true
 })
 export class GetStateColorPipe implements PipeTransform {
   constructor(

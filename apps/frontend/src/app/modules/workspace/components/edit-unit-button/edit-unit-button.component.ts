@@ -7,6 +7,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { NgIf } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatButton } from '@angular/material/button';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
@@ -31,20 +37,14 @@ import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dia
 import { CodingReportComponent } from '../coding-report/coding-report.component';
 // eslint-disable-next-line import/no-cycle
 import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
-import { MatDivider } from '@angular/material/divider';
-import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-edit-unit-button',
-    templateUrl: './edit-unit-button.component.html',
-    styleUrls: ['./edit-unit-button.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, NgIf, MatMenuItem, MatIcon, MatDivider, TranslateModule]
+  selector: 'studio-lite-edit-unit-button',
+  templateUrl: './edit-unit-button.component.html',
+  styleUrls: ['./edit-unit-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, NgIf, MatMenuItem, MatIcon, MatDivider, TranslateModule]
 })
 export class EditUnitButtonComponent extends SelectUnitDirective {
   constructor(

@@ -4,11 +4,11 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'studio-lite-unit-print-code',
-    templateUrl: './unit-print-code.component.html',
-    styleUrls: ['./unit-print-code.component.scss'],
-    standalone: true,
-    imports: [NgIf, TranslateModule]
+  selector: 'studio-lite-unit-print-code',
+  templateUrl: './unit-print-code.component.html',
+  styleUrls: ['./unit-print-code.component.scss'],
+  standalone: true,
+  imports: [NgIf, TranslateModule]
 })
 export class UnitPrintCodeComponent {
   @Input() codeData!: CodeData;

@@ -6,11 +6,11 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'studio-lite-unit-info-loader',
-    templateUrl: './unit-info-loader.component.html',
-    styleUrls: ['./unit-info-loader.component.scss'],
-    standalone: true,
-    imports: [NgIf, MatProgressSpinner]
+  selector: 'studio-lite-unit-info-loader',
+  templateUrl: './unit-info-loader.component.html',
+  styleUrls: ['./unit-info-loader.component.scss'],
+  standalone: true,
+  imports: [NgIf, MatProgressSpinner]
 })
 export class UnitInfoLoaderComponent implements AfterViewInit, OnDestroy {
   @Output() onEnter = new EventEmitter();

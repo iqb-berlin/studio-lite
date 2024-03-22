@@ -1,18 +1,18 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
-import { ReviewService } from '../../services/review.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
+import { ReviewService } from '../../services/review.service';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-add-comment-button',
-    templateUrl: './add-comment-button.component.html',
-    styleUrls: ['./add-comment-button.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-add-comment-button',
+  templateUrl: './add-comment-button.component.html',
+  styleUrls: ['./add-comment-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class AddCommentButtonComponent {
   @Input() showOthersComments!: boolean;

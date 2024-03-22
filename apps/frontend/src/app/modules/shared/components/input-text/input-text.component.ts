@@ -1,6 +1,10 @@
-import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  UntypedFormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
@@ -14,11 +18,11 @@ export interface InputTextData {
 }
 
 @Component({
-    selector: 'studio-lite-input-text',
-    templateUrl: './input-text.component.html',
-    styleUrls: ['./input-text.component.scss'],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-input-text',
+  templateUrl: './input-text.component.html',
+  styleUrls: ['./input-text.component.scss'],
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class InputTextComponent {
   textInputForm: UntypedFormGroup;

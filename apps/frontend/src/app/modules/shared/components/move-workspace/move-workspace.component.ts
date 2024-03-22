@@ -1,7 +1,8 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
-import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
@@ -9,6 +10,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 
 export interface MoveComponentData {
   title: string,
@@ -20,10 +22,10 @@ export interface MoveComponentData {
   selectedRows: WorkspaceInListDto[]
 }
 @Component({
-    templateUrl: './move-workspace.component.html',
-    styleUrls: ['./move-workspace.component.scss'],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, FormsModule, NgIf, MatFormField, MatLabel, MatSelect, NgFor, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
+  templateUrl: './move-workspace.component.html',
+  styleUrls: ['./move-workspace.component.scss'],
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, NgIf, MatFormField, MatLabel, MatSelect, NgFor, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class MoveWorkspaceComponent {

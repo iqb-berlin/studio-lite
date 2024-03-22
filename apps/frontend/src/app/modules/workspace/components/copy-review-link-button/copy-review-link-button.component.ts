@@ -2,16 +2,16 @@ import { Component, Input } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-copy-review-link-button',
-    templateUrl: './copy-review-link-button.component.html',
-    styleUrls: ['./copy-review-link-button.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-copy-review-link-button',
+  templateUrl: './copy-review-link-button.component.html',
+  styleUrls: ['./copy-review-link-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class CopyReviewLinkButtonComponent {
   @Input() link!: string;

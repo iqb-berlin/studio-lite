@@ -1,16 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { VariableCodingData } from '@iqb/responses';
-import { BackendService } from '../../../workspace/services/backend.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 import { NgIf, NgFor } from '@angular/common';
+import { BackendService } from '../../../workspace/services/backend.service';
+import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 
 @Component({
-    selector: 'studio-lite-unit-print-coding',
-    templateUrl: './unit-print-coding.component.html',
-    styleUrls: ['./unit-print-coding.component.scss'],
-    standalone: true,
-    imports: [NgIf, NgFor, UnitPrintCodeComponent, TranslateModule]
+  selector: 'studio-lite-unit-print-coding',
+  templateUrl: './unit-print-coding.component.html',
+  styleUrls: ['./unit-print-coding.component.scss'],
+  standalone: true,
+  imports: [NgIf, NgFor, UnitPrintCodeComponent, TranslateModule]
 })
 export class UnitPrintCodingComponent implements OnInit {
   @Input() unitId!: number;

@@ -4,17 +4,21 @@ import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   Component, Inject, Injectable, OnInit
 } from '@angular/core';
-import { MatTreeFlatDataSource, MatTreeFlattener, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding } from '@angular/material/tree';
-import { BehaviorSubject } from 'rxjs';
-import { MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import {
-  DialogData, VocabFlatNode, VocabNode, Vocabulary
-} from '../../models/types';
+  MatTreeFlatDataSource, MatTreeFlattener, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding
+} from '@angular/material/tree';
+import { BehaviorSubject } from 'rxjs';
+import {
+  MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { NgIf } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconButton, MatButton } from '@angular/material/button';
+import {
+  DialogData, VocabFlatNode, VocabNode, Vocabulary
+} from '../../models/types';
 
 @Injectable()
 export class ChecklistDatabase {
@@ -122,12 +126,12 @@ export class ChecklistDatabase {
 }
 
 @Component({
-    selector: 'studio-lite-nested-tree',
-    templateUrl: './nested-tree.component.html',
-    styleUrls: ['./nested-tree.component.scss'],
-    providers: [ChecklistDatabase],
-    standalone: true,
-    imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, NgIf, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-nested-tree',
+  templateUrl: './nested-tree.component.html',
+  styleUrls: ['./nested-tree.component.scss'],
+  providers: [ChecklistDatabase],
+  standalone: true,
+  imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, NgIf, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class NestedTreeComponent implements OnInit {

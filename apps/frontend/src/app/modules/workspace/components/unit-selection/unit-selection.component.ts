@@ -10,21 +10,21 @@ import { Subject, takeUntil } from 'rxjs';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Sort } from '@angular/material/sort';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { NgFor, KeyValuePipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { BackendService } from '../../services/backend.service';
 import { UnitTableComponent } from '../unit-table/unit-table.component';
 import { UnitGroupComponent } from '../unit-group/unit-group.component';
-import { NgFor, KeyValuePipe } from '@angular/common';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
 
 @Component({
-    selector: 'studio-lite-unit-selection',
-    templateUrl: './unit-selection.component.html',
-    styleUrls: ['./unit-selection.component.scss'],
-    standalone: true,
-    imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, NgFor, UnitGroupComponent, KeyValuePipe, TranslateModule]
+  selector: 'studio-lite-unit-selection',
+  templateUrl: './unit-selection.component.html',
+  styleUrls: ['./unit-selection.component.scss'],
+  standalone: true,
+  imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, NgFor, UnitGroupComponent, KeyValuePipe, TranslateModule]
 })
 export class UnitSelectionComponent extends SelectUnitDirective
   implements OnInit, OnDestroy {

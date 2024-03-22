@@ -1,16 +1,18 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { AppService } from '../../services/app.service';
 import { RouterLink } from '@angular/router';
 import { MatAnchor } from '@angular/material/button';
-import { MatCard, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import {
+  MatCard, MatCardTitle, MatCardContent, MatCardActions
+} from '@angular/material/card';
+import { AppService } from '../../services/app.service';
 
 @Component({
-    selector: 'studio-lite-about',
-    templateUrl: './about.component.html',
-    styleUrls: ['about.component.scss'],
-    standalone: true,
-    imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule]
+  selector: 'studio-lite-about',
+  templateUrl: './about.component.html',
+  styleUrls: ['about.component.scss'],
+  standalone: true,
+  imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule]
 })
 
 export class AboutComponent implements OnInit {

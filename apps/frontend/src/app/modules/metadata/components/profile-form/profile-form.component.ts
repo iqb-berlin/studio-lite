@@ -13,11 +13,11 @@ import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
-    selector: 'studio-lite-profile-form',
-    templateUrl: './profile-form.component.html',
-    styleUrls: ['./profile-form.component.scss'],
-    standalone: true,
-    imports: [FormsModule, ReactiveFormsModule, FormlyModule]
+  selector: 'studio-lite-profile-form',
+  templateUrl: './profile-form.component.html',
+  styleUrls: ['./profile-form.component.scss'],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   constructor(public metadataService: MetadataService, public backendService:BackendService) {}

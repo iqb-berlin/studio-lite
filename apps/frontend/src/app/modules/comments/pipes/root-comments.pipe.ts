@@ -2,9 +2,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Comment } from '../models/comment.interface';
 
 @Pipe({
-    name: 'rootComments',
-    pure: false,
-    standalone: true
+  name: 'rootComments',
+  pure: false,
+  standalone: true
 })
 export class RootCommentsPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
