@@ -212,9 +212,12 @@ export function addUnit(kurzname: string):void {
   cy.get('button > span:contains("Neue Aufgabe")')
     .should('exist')
     .click();
-  cy.get('input[ng-reflect-placeholder="Kurzname"]')
+  cy.get('.mat-focused > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix')
     .should('exist')
     .type(kurzname);
+  // cy.get('input[ng-reflect-placeholder="Kurzname"]')
+  //   .should('exist')
+  //   .type(kurzname);
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
 

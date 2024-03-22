@@ -51,7 +51,8 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 }
 
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon >' +
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+    'studio-lite-wrapped-icon >' +
     ' .center-icon > .mat-icon')
     .eq(0)
     .click();

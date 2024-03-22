@@ -82,7 +82,7 @@ describe('Admin Management', () => {
     login(adminData.user_name, adminData.user_pass);
     // TODO
     addModule();
+    visitLoginPage();
+    logout();
   });
-  visitLoginPage();
-  logout();
 });
