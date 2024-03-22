@@ -75,8 +75,8 @@ export function createAreaForGroupFromAdmin(area:string, group:string):void {
 }
 
 export function deleteGroupArea(areaName: string):void {
-  // eslint-disable-next-line max-len
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > ' +
+    '.center-icon > .mat-icon')
     .eq(0)
     .click();
   // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]').should('exist').click();
@@ -206,9 +206,9 @@ export function deleteUnit(kurzname: string):void {
 }
 
 export function addUnit(kurzname: string):void {
-  cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]')
-    .should('exist')
-    .click();
+  cy.get('studio-lite-add-unit-button.unit-crud-button > .mat-mdc-tooltip-trigger > ' +
+    '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').should('exist').click();
+  // cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]').should('exist').click();
   cy.get('button > span:contains("Neue Aufgabe")')
     .should('exist')
     .click();
@@ -219,8 +219,8 @@ export function addUnit(kurzname: string):void {
 }
 
 export function addModule():void {
-  // eslint-disable-next-line max-len
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
     .eq(0)
     .click();
   cy.get('span:contains("Module")')

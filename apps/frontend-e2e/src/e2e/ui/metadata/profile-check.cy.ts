@@ -38,7 +38,8 @@ describe('Load metadata profile', () => {
   it('should be possible load a metadata profile from General administration', () => {
     const searchProfile:string = 'Deutsch';
     login(adminData.user_name, adminData.user_pass);
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    cy.get('mat-icon:contains("setting")')
+      .eq(0)
       .should('exist')
       .click();
     cy.get('span:contains("Bereichsgruppen")')

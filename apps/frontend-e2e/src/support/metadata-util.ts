@@ -51,8 +51,9 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 }
 
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon >' +
+    ' .center-icon > .mat-icon')
+    .eq(0)
     .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
