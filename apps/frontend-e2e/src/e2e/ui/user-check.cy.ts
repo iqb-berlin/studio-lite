@@ -65,8 +65,9 @@ describe('User Management', () => {
     login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
     visitLoginPage();
-    logout();
     deleteFirstUser();
+    visitLoginPage();
+    logout();
   });
 
   // it('should be able to modify personal data', () => {

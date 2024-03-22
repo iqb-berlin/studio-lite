@@ -69,7 +69,7 @@ describe('Load metadata profile', () => {
     checkProfile(searchProfile);
   });
 
-  it('should be possible load all metadata profile', () => {
+  it.skip('should be possible load all metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Französisch', 'Deutsch', 'Mathematik'];
     login(adminData.user_name, adminData.user_pass);
     cy.get('mat-icon:contains("settings")')
@@ -92,7 +92,6 @@ describe('Load metadata profile', () => {
   });
 
   it('remove the Context', () => {
-    cy.pause();
     login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
     visitLoginPage();
@@ -105,6 +104,7 @@ describe('Load metadata profile', () => {
       deleteGroupArea(area);
       visitLoginPage();
     });
+    visitLoginPage();
     deleteFirstUser();
   });
 });

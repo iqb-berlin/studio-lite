@@ -115,6 +115,7 @@ describe('Metadata Management', () => {
     deleteGroupArea(group);
     visitLoginPage();
     deleteFirstUser();
+    visitLoginPage();
     logout();
   });
 });
