@@ -18,10 +18,6 @@ describe('Load metadata profile', () => {
     cy.viewport(1600, 900);
     visitLoginPage();
   });
-  afterEach(() => {
-    visitLoginPage();
-    logout();
-  });
 
   it('user admin prepare the Context', () => {
     addFirstUser();
@@ -36,6 +32,7 @@ describe('Load metadata profile', () => {
       createGroupArea(area);
       visitLoginPage();
     });
+    logout();
   });
 
   it('should be possible load a metadata profile from General administration', () => {
@@ -55,6 +52,8 @@ describe('Load metadata profile', () => {
       .click();
     checkProfile(searchProfile);
     clickButtonToAccept('Speichern');
+    visitLoginPage();
+    logout();
   });
 
   it('should be possible load a metadata profile from Group administration', () => {
@@ -67,6 +66,8 @@ describe('Load metadata profile', () => {
       .eq(0)
       .click();
     checkProfile(searchProfile);
+    visitLoginPage();
+    logout();
   });
 
   it.skip('should be possible load all metadata profile', () => {
@@ -89,6 +90,8 @@ describe('Load metadata profile', () => {
       checkProfile(searchProfile);
     });
     clickButtonToAccept('Speichern');
+    visitLoginPage();
+    logout();
   });
 
   it('remove the Context', () => {
@@ -106,5 +109,7 @@ describe('Load metadata profile', () => {
     });
     visitLoginPage();
     deleteFirstUser();
+    visitLoginPage();
+    logout();
   });
 });

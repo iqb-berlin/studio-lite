@@ -46,6 +46,7 @@ export function createGroupArea(group:string):void {
   // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
 
   cy.get('mat-icon:contains("setting")')
+    .eq(0)
     .should('exist')
     .click();
   cy.get('span:contains("Bereichsgruppen")')
@@ -74,9 +75,11 @@ export function createAreaForGroupFromAdmin(area:string, group:string):void {
 }
 
 export function deleteGroupArea(areaName: string):void {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
+  // eslint-disable-next-line max-len
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    .eq(0)
     .click();
+  // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]').should('exist').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -106,7 +109,7 @@ export function changePassword(newPass:string, oldPass:string):void {
     .should('exist')
     .click();
   // TODO  dont use systematically wait
-  cy.wait(400);
+  // cy.wait(400);
   cy.get('mat-label:contains("Altes Kennwort")')
     .should('exist')
     .type(oldPass);
@@ -121,8 +124,9 @@ export function changePassword(newPass:string, oldPass:string):void {
 }
 
 export function createNewUser(name: string, pass: string):void {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
+  // eslint-disable-next-line max-len
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    .eq(0)
     .click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
@@ -145,8 +149,9 @@ export function createNewUser(name: string, pass: string):void {
 }
 
 export function deleteUser(user: string):void {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
+  // eslint-disable-next-line max-len
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    .eq(0)
     .click();
   cy.get('mat-table')
     .contains(`${user}`)
@@ -159,8 +164,9 @@ export function deleteUser(user: string):void {
 }
 
 export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
+  // eslint-disable-next-line max-len
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    .eq(0)
     .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
@@ -170,7 +176,10 @@ export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
     .should('exist')
     .click();
   cy.get(`label:contains(${user})`).prev().click();
-  cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+
+  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+  cy.get('.fx-row-space-between-center > .mat-mdc-tooltip-trigger > ' +
+    '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
 }
 
 export function grantRemovePrivilegeOnArea(user:string, area: string):void {
@@ -179,7 +188,9 @@ export function grantRemovePrivilegeOnArea(user:string, area: string):void {
     .should('exist')
     .click();
   cy.get(`label.mdc-label:contains(${user})`).click();
-  cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+  cy.get('.fx-row-space-between-center > .mat-mdc-tooltip-trigger > ' +
+    '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
 }
 
 export function visitArea(area: string):void {
@@ -208,8 +219,9 @@ export function addUnit(kurzname: string):void {
 }
 
 export function addModule():void {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    .should('exist')
+  // eslint-disable-next-line max-len
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    .eq(0)
     .click();
   cy.get('span:contains("Module")')
     .eq(0)

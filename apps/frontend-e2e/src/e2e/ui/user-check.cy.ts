@@ -6,7 +6,10 @@ import {
 import { adminData, userData } from '../../support/config/userdata';
 
 describe('User Management', () => {
-  beforeEach(visitLoginPage);
+  beforeEach(() => {
+    cy.viewport(1600, 900);
+    visitLoginPage();
+  });
 
   it('prepare the Context', () => {
     addFirstUser();
