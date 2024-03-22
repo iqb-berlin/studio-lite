@@ -1,4 +1,3 @@
-import Chainable = Cypress.Chainable;
 import { adminData } from './config/userdata';
 
 export function addFirstUser() {
@@ -44,7 +43,9 @@ export function login(username: string, password = '') {
 }
 
 export function createGroupArea(group:string):void {
-  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+  // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+
+  cy.get('mat-icon:contains("setting")')
     .should('exist')
     .click();
   cy.get('span:contains("Bereichsgruppen")')
@@ -89,7 +90,7 @@ export function deleteGroupArea(areaName: string):void {
 }
 
 export function logout() {
-  cy.get('mat-icon:contains("account_box")')
+  cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
     .click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
@@ -220,15 +221,13 @@ export function addModule():void {
   //  cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
 }
 
-export const visitLoginPage = (): Chainable => cy.url()
-  .then(() => {
-    cy.visit(<string>Cypress.config().baseUrl);
-  });
+export function visitLoginPage():void {
+  cy.visit(<string>Cypress.config().baseUrl);
+}
 
-export const clickButtonToAccept = (text: string):Chainable => cy.url()
-  .then(() => {
-    cy.get('button')
-      .contains(text)
-      .should('exist')
-      .click();
-  });
+export function clickButtonToAccept(text: string):void {
+  cy.get('button')
+    .contains(text)
+    .should('exist')
+    .click();
+}
