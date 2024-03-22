@@ -11,6 +11,7 @@ import { SettingService } from '../database/services/setting.service';
 export class UnitDownloadClass {
   // TODO: Devide into submethods
   static async get(
+    workspaceId: number,
     unitService: UnitService,
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
@@ -29,7 +30,7 @@ export class UnitDownloadClass {
       }
     }
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
-      const unitMetadata = await unitService.findOnesMetadata(unitId);
+      const unitMetadata = await unitService.findOnesMetadata(unitId, workspaceId);
       const unitXml = XmlBuilder.create({ version: '1.0' }, {
         Unit: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
