@@ -14,15 +14,7 @@ import { NgForOf, NgIf } from '@angular/common';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BackendService } from '../../services/backend.service';
-import { WorkspaceService } from '../../services/workspace.service';
-
-export type UnitDataRow = {
-  Aufgabe: string | undefined,
-  Variable: string,
-  Item: string,
-  Validierung: string,
-  Kodiertyp: string,
-};
+import { CodingReportDto } from '../../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Component({
   selector: 'coding-report',
@@ -49,8 +41,8 @@ export class CodingReportComponent implements OnInit {
   ) {
   }
 
-  displayedColumns: string[] = ['Aufgabe', 'Variable', 'Item', 'Validierung', 'Kodiertyp'];
-  tableData: Record<string, string | undefined>[] = [];
+  displayedColumns: string[] = ['unit', 'variable', 'item', 'validation', 'codingType'];
+  dataSource!: MatTableDataSource<CodingReportDto>;
   isLoading = false;
 
   ngOnInit(): void {
@@ -117,5 +109,17 @@ export class CodingReportComponent implements OnInit {
         }
         this.isLoading = false;
       });
+    this.backendService.getCodingReport(this.workspaceService.selectedWorkspaceId).subscribe((codingReport: CodingReportDto[]) => {
+      this.unitDataRows = codingReport;
+      if (this.codedVariablesOnly) {
+        const filteredRows = codingReport
+          .filter((row: CodingReportDto) => row.codingType !== 'keine Regeln');
+        this.dataSource = new MatTableDataSource(filteredRows);
+      } else {
+        this.dataSource = new MatTableDataSource(codingReport);
+      }
+      this.isLoading = false;
+    });
+  }
   }
 }

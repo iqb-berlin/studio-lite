@@ -557,6 +557,14 @@
     "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher."
   },
+
+  "coding-report": {
+    "unit": "Aufgabe",
+    "variable": "Variable",
+    "item": "Item",
+    "validation": "Validierung",
+    "codingType": "Kodiertyp"
+  },
   "unit-properties": {
     "title": "Aufgaben-Eigenschaften",
     "modules": "Verona-Module",
