@@ -7,6 +7,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { NgIf } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatButton } from '@angular/material/button';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
@@ -22,6 +28,7 @@ import {
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+// eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
@@ -31,20 +38,15 @@ import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dia
 import { CodingReportComponent } from '../coding-report/coding-report.component';
 // eslint-disable-next-line import/no-cycle
 import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
-import { MatDivider } from '@angular/material/divider';
-import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-edit-unit-button',
-    templateUrl: './edit-unit-button.component.html',
-    styleUrls: ['./edit-unit-button.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, NgIf, MatMenuItem, MatIcon, MatDivider, TranslateModule]
+  selector: 'studio-lite-edit-unit-button',
+  templateUrl: './edit-unit-button.component.html',
+  styleUrls: ['./edit-unit-button.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, NgIf, MatMenuItem, MatIcon, MatDivider, TranslateModule]
 })
 export class EditUnitButtonComponent extends SelectUnitDirective {
   constructor(
@@ -249,7 +251,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         width: '600px'
       }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport().subscribe((units: any) => {
+        this.metadataService.createMetadataReport().subscribe((units:any) => {
           if (res) {
             const selectedUnits = units.filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
             this.showMetadataDialog.open(TableViewComponent, {
@@ -278,7 +280,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.codingReportDialog.open(CodingReportComponent, {
         width: '80%',
-        minHeight: '50%',
+        minHeight: '80%',
         autoFocus: false
       });
     }

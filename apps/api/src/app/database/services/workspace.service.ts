@@ -8,6 +8,9 @@ import {
   WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto, UnitMetadataDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
+import {
+  CodeData, CodingRule, CodingScheme, CodingSchemeProblem, RuleSet, VariableCodingData
+} from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -23,7 +26,6 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
-import { CodeData, CodingRule, CodingScheme, CodingSchemeProblem, RuleSet, VariableCodingData } from '@iqb/responses';
 import { CodingReportDto } from '../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable()
@@ -205,9 +207,9 @@ export class WorkspaceService {
   }
 
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
-    let unitDataRows:CodingReportDto[] = [];
+    const unitDataRows:CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithMetadata(id);
-    if(unitListWithMetadata) {
+    if (unitListWithMetadata) {
       unitListWithMetadata?.forEach((unit: UnitMetadataDto) => {
         const parsedUnitScheme = JSON.parse(unit.scheme as string);
         let codingType:string;
@@ -215,7 +217,7 @@ export class WorkspaceService {
           const schemer = new CodingScheme(parsedUnitScheme.variableCodings);
           const validation = schemer.validate(unit.variables);
           let validationResultText: string;
-          parsedUnitScheme.variableCodings?.forEach((codingVariable: VariableCodingData, varIndex: number) => {
+          parsedUnitScheme.variableCodings?.forEach((codingVariable: VariableCodingData) => {
             const validationResult = validation
               .find((v: CodingSchemeProblem) => v.variableId === codingVariable.id);
             if (validationResult) {
@@ -253,7 +255,7 @@ export class WorkspaceService {
               codingType = 'keine Regeln';
             }
             unitDataRows.push({
-              unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}`  || '-',
+              unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
               variable: codingVariable.id || '–',
               item: foundItem?.id || '–',
               validation: validationResultText,
@@ -264,7 +266,7 @@ export class WorkspaceService {
       });
       return unitDataRows as CodingReportDto[];
     }
-    else return [];
+    return [];
   }
 
   // TODO: id als Parameter
