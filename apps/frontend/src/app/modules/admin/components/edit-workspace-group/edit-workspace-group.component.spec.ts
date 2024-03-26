@@ -12,9 +12,6 @@ describe('EditWorkspaceGroupComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        EditWorkspaceGroupComponent
-      ],
       imports: [
         MatInputModule,
         ReactiveFormsModule,

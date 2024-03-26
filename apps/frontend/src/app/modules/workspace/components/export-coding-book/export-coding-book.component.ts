@@ -1,5 +1,5 @@
 import {
-  Component, forwardRef, Inject, OnInit
+  Component, Inject, OnInit
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
@@ -10,7 +10,7 @@ import { DatePipe, NgForOf } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
-import { SharedModule } from '../../../shared/shared.module';
+
 // eslint-disable-next-line import/no-cycle
 import { WorkspaceModule } from '../../workspace.module';
 import { BackendService } from '../../services/backend.service';
@@ -23,8 +23,7 @@ const datePipe = new DatePipe('de-DE');
   imports: [
     TranslateModule,
     MatDialogModule,
-    SharedModule,
-    forwardRef(() => WorkspaceModule),
+    WorkspaceModule,
     MatCheckboxModule,
     FormsModule,
     MatRadioModule,
@@ -64,6 +63,7 @@ export class ExportCodingBookComponent implements OnInit {
       .subscribe(data => {
         if (data) {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+          // eslint-disable-next-line max-len
           saveAs(data, `${thisDate} Kodierbuch ${this.workspaceService.selectedWorkspaceName}${(this.exportFormat === 'json') ? '.json' : '.docx'}`);
         }
       });

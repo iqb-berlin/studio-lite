@@ -3,10 +3,12 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitComponent } from './select-unit.component';
+import { environment } from '../../../../../environments/environment';
 
 describe('SelectUnitComponent', () => {
   let component: SelectUnitComponent;
@@ -27,12 +29,13 @@ describe('SelectUnitComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        SelectUnitComponent,
         MockSelectUnitListComponent
       ],
       imports: [
         ReactiveFormsModule,
         MatDialogModule,
+        HttpClientModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
@@ -46,8 +49,8 @@ describe('SelectUnitComponent', () => {
           }
         },
         {
-          provide: BackendService,
-          useValue: {}
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
         },
         {
           provide: AppService,

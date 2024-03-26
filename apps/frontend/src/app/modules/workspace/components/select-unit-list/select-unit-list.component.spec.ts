@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HttpClientModule } from '@angular/common/http';
@@ -11,8 +11,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { SelectUnitListComponent } from './select-unit-list.component';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 describe('SelectUnitListComponent', () => {
   let component: SelectUnitListComponent;
@@ -26,10 +24,7 @@ describe('SelectUnitListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        SelectUnitListComponent,
-        MockSearchFilterComponent,
-        HasSelectionValuePipe,
-        IsAllSelectedPipe
+        MockSearchFilterComponent
       ],
       imports: [
         HttpClientModule,
@@ -37,7 +32,7 @@ describe('SelectUnitListComponent', () => {
         MatTableModule,
         MatIconModule,
         MatCheckboxModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         MatInputModule,
         MatFormFieldModule,
         TranslateModule.forRoot()

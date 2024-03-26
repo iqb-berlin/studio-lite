@@ -2,20 +2,23 @@ import {
   Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
-import { ActivatedRoute, Router, RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
-import { WorkspaceService } from '../../services/workspace.service';
-import { NamedRouterLinkPipe } from '../../pipes/named-router-link.pipe';
+import {
+  ActivatedRoute, Router, RouterLinkActive, RouterLink, RouterOutlet
+} from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconAnchor } from '@angular/material/button';
 import { NgFor, NgIf, AsyncPipe } from '@angular/common';
+import { NamedRouterLinkPipe } from '../../pipes/named-router-link.pipe';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
-    selector: 'studio-lite-unit-data-area',
-    templateUrl: './unit-data-area.component.html',
-    styleUrls: ['./unit-data-area.component.scss'],
-    standalone: true,
-    imports: [MatTabNav, NgFor, MatTabLink, RouterLinkActive, RouterLink, NgIf, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
+  selector: 'studio-lite-unit-data-area',
+  templateUrl: './unit-data-area.component.html',
+  styleUrls: ['./unit-data-area.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatTabNav, NgFor, MatTabLink, RouterLinkActive, RouterLink, NgIf, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
 })
 export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;

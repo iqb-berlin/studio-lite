@@ -17,7 +17,6 @@ describe('TestConfigComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TestConfigComponent],
       imports: [
         NoopAnimationsModule,
         MatSelectModule,

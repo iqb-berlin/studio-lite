@@ -6,9 +6,7 @@ describe('MetadataProfileEntriesComponent', () => {
   let fixture: ComponentFixture<MetadataProfileEntriesComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [MetadataProfileEntriesComponent]
-    }).compileComponents();
+    await TestBed.configureTestingModule({}).compileComponents();
 
     fixture = TestBed.createComponent(MetadataProfileEntriesComponent);
     component = fixture.componentInstance;

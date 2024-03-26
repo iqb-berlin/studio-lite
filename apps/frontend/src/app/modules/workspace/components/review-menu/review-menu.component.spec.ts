@@ -2,7 +2,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
+import { HttpClientModule } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
 import { ReviewMenuComponent } from './review-menu.component';
+import { environment } from '../../../../../environments/environment';
 
 describe('ReviewMenuComponent', () => {
   let component: ReviewMenuComponent;
@@ -53,13 +56,22 @@ describe('ReviewMenuComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ReviewMenuComponent,
         MockAddReviewButtonComponent,
         MockDeleteReviewButtonComponent,
         MockStartReviewButtonComponent,
         MockPrintReviewButtonComponent,
         MockCopyReviewLinkButtonComponent,
         MockExportReviewButtonComponent
+      ],
+      imports: [
+        HttpClientModule,
+        TranslateModule.forRoot()
+      ],
+      providers: [
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
       ]
     }).compileComponents();
 

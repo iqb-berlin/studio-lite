@@ -1,19 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import { TranslateService } from '@ngx-translate/core';
-import { Router, RouterState } from '@angular/router';
-import { registerLocaleData } from '@angular/common';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import {
+  Router, RouterState, RouterLink, RouterOutlet
+} from '@angular/router';
+import { registerLocaleData, NgIf, NgFor } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { de } from 'date-fns/locale';
 import { setDefaultOptions } from 'date-fns';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AppService, standardLogo } from './services/app.service';
 import { BackendService } from './services/backend.service';
 import { AppConfig } from './models/app-config.class';
+import { IsInArrayPipe } from './pipes/is-in-array.pipe';
+import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
+import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [NgIf, MatProgressSpinner, MatButton, NgFor, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
 })
 
 export class AppComponent implements OnInit {

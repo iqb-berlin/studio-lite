@@ -8,11 +8,11 @@ import { MatIconButton } from '@angular/material/button';
 import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'studio-lite-unit-groups',
-    templateUrl: './unit-groups.component.html',
-    styleUrls: ['./unit-groups.component.scss'],
-    standalone: true,
-    imports: [NgIf, MatIconButton, MatIcon, TranslateModule]
+  selector: 'studio-lite-unit-groups',
+  templateUrl: './unit-groups.component.html',
+  styleUrls: ['./unit-groups.component.scss'],
+  standalone: true,
+  imports: [NgIf, MatIconButton, MatIcon, TranslateModule]
 })
 export class UnitGroupsComponent {
   @Input() expandedGroups !: number;

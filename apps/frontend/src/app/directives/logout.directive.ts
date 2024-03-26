@@ -7,8 +7,8 @@ import { BackendService } from '../services/backend.service';
 import { AuthService } from '../modules/auth/service/auth.service';
 
 @Directive({
-    selector: '[studioLiteLogout]',
-    standalone: true
+  selector: '[studioLiteLogout]',
+  standalone: true
 })
 export class LogoutDirective {
   constructor(

@@ -4,27 +4,28 @@ import {
 import { Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { NgIf } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { PageData } from '../../models/page-data.interface';
 import { WorkspaceService } from '../../services/workspace.service';
 import { Progress } from '../../models/types';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
-import { TranslateModule } from '@ngx-translate/core';
 import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
-import { MatIcon } from '@angular/material/icon';
 import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mode-selection.component';
-import { NgIf } from '@angular/common';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { StatusIndicationComponent } from '../status-indication/status-indication.component';
 
 @Component({
-    selector: 'studio-lite-preview-bar',
-    templateUrl: './preview-bar.component.html',
-    styleUrls: ['./preview-bar.component.scss'],
-    standalone: true,
-    imports: [StatusIndicationComponent, MatButton, MatTooltip, NgIf, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
+  selector: 'studio-lite-preview-bar',
+  templateUrl: './preview-bar.component.html',
+  styleUrls: ['./preview-bar.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [StatusIndicationComponent, MatButton, MatTooltip, NgIf, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];

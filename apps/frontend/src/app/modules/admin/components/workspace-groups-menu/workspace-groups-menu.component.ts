@@ -6,22 +6,23 @@ import { UntypedFormGroup } from '@angular/forms';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 import { EditWorkspaceGroupComponent } from '../edit-workspace-group/edit-workspace-group.component';
+// eslint-disable-next-line import/no-cycle
 import {
   EditWorkspaceGroupSettingsComponent
 } from '../edit-workspace-group-settings/edit-workspace-group-settings.component';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-workspace-groups-menu',
-    templateUrl: './workspace-groups-menu.component.html',
-    styleUrls: ['./workspace-groups-menu.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-workspace-groups-menu',
+  templateUrl: './workspace-groups-menu.component.html',
+  styleUrls: ['./workspace-groups-menu.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceGroupsMenuComponent {
   @Input() selectedWorkspaceGroupId!: number;

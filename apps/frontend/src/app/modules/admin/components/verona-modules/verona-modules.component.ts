@@ -3,25 +3,26 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import {
+  IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, ConfirmDialogComponent, ConfirmDialogData
+} from '@studio-lite-lib/iqb-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
-import { IqbFilesUploadQueueComponent } from '../../../../../../../../libs/iqb-components/src/lib/iqb-files/iqbFilesUploadQueue/iqbFilesUploadQueue.component';
-import { IqbFilesUploadInputForDirective } from '../../../../../../../../libs/iqb-components/src/lib/iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-verona-modules',
-    templateUrl: './verona-modules.component.html',
-    styleUrls: ['./verona-modules.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
+  selector: 'studio-lite-verona-modules',
+  templateUrl: './verona-modules.component.html',
+  styleUrls: ['./verona-modules.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
 })
 export class VeronaModulesComponent implements OnInit {
   @ViewChildren(VeronaModulesTableComponent) moduleTables!: QueryList<VeronaModulesTableComponent>;

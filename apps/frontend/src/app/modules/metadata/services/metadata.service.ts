@@ -105,6 +105,7 @@ export class MetadataService {
   downloadItemsMetadataReport(columns:string[]): Observable<Blob> {
     const joinedString = columns.join(',');
     return this.http.get(
+      // eslint-disable-next-line max-len
       `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${encodeURIComponent(joinedString)}}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -116,6 +117,7 @@ export class MetadataService {
   downloadUnitsMetadataReport(columns:string[]): Observable<Blob> {
     const joinedString = columns.join(',');
     return this.http.get(
+      // eslint-disable-next-line max-len
       `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${encodeURIComponent(joinedString)}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

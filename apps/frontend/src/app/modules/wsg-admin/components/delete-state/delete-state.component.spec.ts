@@ -11,7 +11,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
 import { DeleteStateComponent } from './delete-state.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UsersComponent', () => {
   let component: DeleteStateComponent;
@@ -24,11 +23,7 @@ describe('UsersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        DeleteStateComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent
-      ],
+      declarations: [MockSearchFilterComponent],
       imports: [
         MatDialogModule,
         MatTableModule,

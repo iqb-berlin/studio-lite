@@ -1,4 +1,7 @@
-import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import {
+  // eslint-disable-next-line max-len
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+} from '@angular/material/table';
 import {
   ViewChild, Component, OnInit
 } from '@angular/core';
@@ -10,6 +13,9 @@ import { UserInListDto, CreateWorkspaceGroupDto, WorkspaceGroupInListDto } from 
 import { DatePipe, NgIf, NgFor } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
@@ -19,10 +25,8 @@ import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.p
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+// eslint-disable-next-line import/no-cycle
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 
 const datePipe = new DatePipe('de-DE');
@@ -33,11 +37,12 @@ export type Profile = {
 };
 
 @Component({
-    selector: 'studio-lite-workspace-groups',
-    templateUrl: './workspace-groups.component.html',
-    styleUrls: ['./workspace-groups.component.scss'],
-    standalone: true,
-    imports: [WorkspaceGroupsMenuComponent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
+  selector: 'studio-lite-workspace-groups',
+  templateUrl: './workspace-groups.component.html',
+  styleUrls: ['./workspace-groups.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [WorkspaceGroupsMenuComponent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();

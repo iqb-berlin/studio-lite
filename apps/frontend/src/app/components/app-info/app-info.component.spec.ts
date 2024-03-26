@@ -16,7 +16,6 @@ describe('AppInfoComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        AppInfoComponent,
         MockAreaTitleComponent
       ],
       imports: [

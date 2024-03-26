@@ -12,9 +12,6 @@ describe('WsgAdminComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        WsgAdminComponent
-      ],
       imports: [
         MatTabsModule,
         RouterTestingModule,

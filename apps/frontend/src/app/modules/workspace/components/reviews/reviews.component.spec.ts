@@ -8,6 +8,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReviewsComponent } from './reviews.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -60,7 +61,6 @@ describe('ReviewsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ReviewsComponent,
         MockReviewMenuComponent,
         MockSelectUnitListComponent,
         MockReviewConfigComponent,
@@ -73,6 +73,7 @@ describe('ReviewsComponent', () => {
         MatDialogModule,
         MatSnackBarModule,
         HttpClientModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [

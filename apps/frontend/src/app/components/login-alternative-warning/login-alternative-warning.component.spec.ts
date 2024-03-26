@@ -12,7 +12,6 @@ describe('LoginAlternativeWarningComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LoginAlternativeWarningComponent],
       providers: [
         {
           provide: 'SERVER_URL',

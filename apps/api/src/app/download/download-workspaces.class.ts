@@ -24,24 +24,24 @@ interface WorkspaceData {
 interface CodingBook {
   key: string;
   name: string;
-  variables: any;
+  variables;
 
 }
 
 export class DownloadWorkspacesClass {
-  static setUnitsItemsDataRows(units: any[]): any {
-    const allUnits: any[] = [];
-    units.forEach((unit: any) => {
+  static setUnitsItemsDataRows(units) {
+    const allUnits = [];
+    units.forEach(unit => {
       const totalValues: Record<string, string>[] = [];
       if (unit.metadata.items) {
-        unit.metadata.items.forEach((item: any, i: number) => {
-          const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
+        unit.metadata.items.forEach((item, i: number) => {
+          const activeProfile = item.profiles?.find(profile => profile.isCurrent);
           if (activeProfile) {
             const values: Record<string, string> = {};
-            activeProfile.entries.forEach((entry: any) => {
+            activeProfile.entries.forEach(entry => {
               if (entry.valueAsText.length > 1) {
-                const textValues: any[] = [];
-                entry.valueAsText.forEach((textValue: any) => {
+                const textValues = [];
+                entry.valueAsText.forEach(textValue => {
                   textValues.push(`${textValue.value || ''}`);
                 });
                 values[entry.label[0].value] = textValues.join('<br>');
@@ -65,16 +65,16 @@ export class DownloadWorkspacesClass {
     return allUnits.flat();
   }
 
-  static setUnitsDataRows(units: any): any {
+  static setUnitsDataRows(units) {
     const totalValues: Record<string, string>[] = [];
-    units.forEach((unit: any) => {
-      const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
+    units.forEach(unit => {
+      const activeProfile = unit.metadata.profiles?.find(profile => profile.isCurrent);
       if (activeProfile) {
         const values: Record<string, string> = {};
-        activeProfile.entries.forEach((entry: any) => {
+        activeProfile.entries.forEach(entry => {
           if (entry.valueAsText.length > 1) {
-            const textValues: any[] = [];
-            entry.valueAsText.forEach((textValue: any) => {
+            const textValues = [];
+            entry.valueAsText.forEach(textValue => {
               textValues.push(textValue.value || '');
             });
             values[entry.label[0].value] = textValues.join(', ');
@@ -130,11 +130,12 @@ export class DownloadWorkspacesClass {
           .includes(unit.id));
     selectedUnits.forEach((unit: UnitMetadataDto) => {
       const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
-      const parsedScheme: any = JSON.parse(unit.scheme);
+      const parsedScheme = JSON.parse(unit.scheme);
       let variablesHtml = '';
       let bookVariables = [];
       if (parsedScheme?.variableCodings) {
         parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
+          // eslint-disable-next-line max-len
           const variableHeaderHtml = `<h3>${variableCoding.id}</h3><p>${variableCoding.label}   ${variableCoding.page}</p><p>${variableCoding.manualInstruction}</p>`;
           let codesHtml = '';
           let codes = [];
@@ -158,6 +159,7 @@ export class DownloadWorkspacesClass {
               codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
                 rulesDescription += `<p>${ruleSetDescription}</p>`;
               });
+              // eslint-disable-next-line max-len
               const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td>${rulesDescription}${code.manualInstruction}</td></tr>`;
 
               codesHtml += codeHtml;
@@ -171,9 +173,12 @@ export class DownloadWorkspacesClass {
               codes = [...codes, codeInfo];
             });
           }
+          // eslint-disable-next-line max-len
           const variableCodesTableHtml = `<table><tr><th style="background-color:#d9d9d9">Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">Beschreibung</th></tr>${codesHtml}</table>`;
           if (codesHtml.length > 0) {
-            if ((closedCodingVar && hasClosedCodings) || (onlyManualCodingVar && hasOnlyManualCodings) || (hasRules && !closedCodingVar)) {
+            if ((closedCodingVar && hasClosedCodings) ||
+              (onlyManualCodingVar && hasOnlyManualCodings) ||
+              (hasRules && !closedCodingVar)) {
               bookVariables = [...bookVariables, {
                 id: variableCoding.id,
                 label: variableCoding.label,
@@ -197,6 +202,7 @@ export class DownloadWorkspacesClass {
         unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
       }
     });
+    // eslint-disable-next-line max-len
     docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
 
     if (exportFormat === 'docx') {

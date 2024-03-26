@@ -10,7 +10,6 @@ describe('RequestMessageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RequestMessageComponent],
       imports: [
         MatDialogModule,
         MatIconModule,

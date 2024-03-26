@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { PrintReviewButtonComponent } from './print-review-button.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { environment } from '../../../../../environments/environment';
 
 describe('PrintReviewButtonComponent', () => {
@@ -15,10 +14,6 @@ describe('PrintReviewButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        PrintReviewButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,

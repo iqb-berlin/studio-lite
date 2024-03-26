@@ -57,7 +57,6 @@ describe('UnitPrintLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitPrintLayoutComponent,
         MockUnitPrintMetaDateComponent,
         MockUnitMetaDataComponent,
         MockUnitPrintCommentsComponent,

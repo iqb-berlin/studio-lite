@@ -31,7 +31,7 @@ import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { ProfileFormComponent } from './components/profile-form/profile-form.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { TableViewComponent } from './components/table-view/table-view.component';
 
 export function formlyValidationConfig(translate: TranslateService) {
@@ -48,83 +48,82 @@ export function formlyValidationConfig(translate: TranslateService) {
 }
 
 @NgModule({
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        TranslateModule,
-        MatDialogModule,
-        MatCheckboxModule,
-        MatSlideToggleModule,
-        MatIconModule,
-        MatButtonModule,
-        MatInputModule,
-        TextFieldModule,
-        MatTreeModule,
-        FormlyModule,
-        MatCardModule,
-        MatChipsModule,
-        MatExpansionModule,
-        MatFormFieldModule,
-        MatTableModule,
-        MatIconModule,
-        MatTabsModule,
-        MatDialogModule,
-        FormlyMatToggleModule,
-        FormlyModule.forRoot({
-            wrappers: [
-                {
-                    name: 'panel',
-                    component: FormlyWrapperPanel
-                }
-            ],
-            types: [
-                {
-                    name: 'chips',
-                    wrappers: ['form-field'],
-                    component: FormlyChipsComponent,
-                    defaultOptions: {
-                        defaultValue: []
-                    }
-                },
-                {
-                    name: 'formlyToggle',
-                    wrappers: ['form-field'],
-                    component: FormlyToggleComponent,
-                    defaultOptions: {
-                        defaultValue: false
-                    }
-                },
-                {
-                    name: 'duration',
-                    component: FormlyDurationComponent
-                }
-            ]
-        }),
-        FormlyMaterialModule,
-        MatProgressSpinnerModule,
-        MatListModule,
-        SharedModule,
-        MatTooltipModule,
-        FormlyChipsComponent,
-        MetadataComponent,
-        FormlyWrapperPanel,
-        FormlyToggleComponent,
-        FormlyDurationComponent,
-        ItemsComponent,
-        ItemComponent,
-        ProfileFormComponent,
-        NestedTreeComponent,
-        TableViewComponent
-    ],
-    providers: [
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    MatDialogModule,
+    MatCheckboxModule,
+    MatSlideToggleModule,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    TextFieldModule,
+    MatTreeModule,
+    FormlyModule,
+    MatCardModule,
+    MatChipsModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatTableModule,
+    MatIconModule,
+    MatTabsModule,
+    MatDialogModule,
+    FormlyMatToggleModule,
+    FormlyModule.forRoot({
+      wrappers: [
         {
-            provide: FORMLY_CONFIG,
-            multi: true,
-            useFactory: formlyValidationConfig,
-            deps: [TranslateService]
+          name: 'panel',
+          component: FormlyWrapperPanel
         }
-    ],
-    exports: [MetadataComponent, ProfileFormComponent, ItemsComponent]
+      ],
+      types: [
+        {
+          name: 'chips',
+          wrappers: ['form-field'],
+          component: FormlyChipsComponent,
+          defaultOptions: {
+            defaultValue: []
+          }
+        },
+        {
+          name: 'formlyToggle',
+          wrappers: ['form-field'],
+          component: FormlyToggleComponent,
+          defaultOptions: {
+            defaultValue: false
+          }
+        },
+        {
+          name: 'duration',
+          component: FormlyDurationComponent
+        }
+      ]
+    }),
+    FormlyMaterialModule,
+    MatProgressSpinnerModule,
+    MatListModule,
+    MatTooltipModule,
+    FormlyChipsComponent,
+    MetadataComponent,
+    FormlyWrapperPanel,
+    FormlyToggleComponent,
+    FormlyDurationComponent,
+    ItemsComponent,
+    ItemComponent,
+    ProfileFormComponent,
+    NestedTreeComponent,
+    TableViewComponent
+  ],
+  providers: [
+    {
+      provide: FORMLY_CONFIG,
+      multi: true,
+      useFactory: formlyValidationConfig,
+      deps: [TranslateService]
+    }
+  ],
+  exports: [MetadataComponent, ProfileFormComponent, ItemsComponent]
 })
 export class MetadataModule {}

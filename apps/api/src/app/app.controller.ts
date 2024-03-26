@@ -9,6 +9,7 @@ import {
   AuthDataDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
+  // eslint-disable-next-line import/no-duplicates, import/order
 } from '@studio-lite-lib/api-dto';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/service/auth.service';
@@ -19,9 +20,12 @@ import { ReviewId, UserId, UserName } from './auth/user.decorator';
 import { ReviewService } from './database/services/review.service';
 import { AppVersionGuard } from './app-version.guard';
 import { VeronaModulesService } from './database/services/verona-modules.service';
-import { CreateUserDto }from '@studio-lite-lib/api-dto';
-import { MyDataDto }from '@studio-lite-lib/api-dto';
-import { ChangePasswordDto }from '@studio-lite-lib/api-dto';
+// eslint-disable-next-line import/no-duplicates, import/order
+import { CreateUserDto } from '@studio-lite-lib/api-dto';
+// eslint-disable-next-line import/no-duplicates, import/order
+import { MyDataDto } from '@studio-lite-lib/api-dto';
+// eslint-disable-next-line import/no-duplicates, import/order
+import { ChangePasswordDto } from '@studio-lite-lib/api-dto';
 
 @Controller()
 export class AppController {

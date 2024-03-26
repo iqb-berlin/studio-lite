@@ -6,7 +6,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ExportReviewButtonComponent } from './export-review-button.component';
 import { environment } from '../../../../../environments/environment';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('ExportReviewButtonComponent', () => {
   let component: ExportReviewButtonComponent;
@@ -14,10 +13,6 @@ describe('ExportReviewButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        ExportReviewButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         TranslateModule.forRoot(),
         MatTooltipModule,

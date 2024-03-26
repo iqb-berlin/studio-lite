@@ -1,7 +1,7 @@
 import {
   Controller, Get, Header, Param, Query, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';

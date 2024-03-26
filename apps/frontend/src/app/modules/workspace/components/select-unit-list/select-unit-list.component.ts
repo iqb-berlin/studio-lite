@@ -1,27 +1,31 @@
 import {
   Component, EventEmitter, Input, OnDestroy, Output, ViewChild
 } from '@angular/core';
-import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import {
+  // eslint-disable-next-line max-len
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+} from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
-import { BackendService } from '../../services/backend.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgIf } from '@angular/common';
+import { BackendService } from '../../services/backend.service';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
-import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'studio-lite-select-unit-list',
-    templateUrl: './select-unit-list.component.html',
-    styleUrls: ['select-unit-list.component.scss'],
-    standalone: true,
-    imports: [NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule]
+  selector: 'studio-lite-select-unit-list',
+  templateUrl: './select-unit-list.component.html',
+  styleUrls: ['select-unit-list.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule]
 })
 export class SelectUnitListComponent implements OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();

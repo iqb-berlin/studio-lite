@@ -28,6 +28,7 @@ import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
+// eslint-disable-next-line import/no-cycle
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { NewUnitComponent } from './components/new-unit/new-unit.component';
@@ -56,7 +57,7 @@ import { DeleteUnitButtonComponent } from './components/delete-unit-button/delet
 // eslint-disable-next-line import/no-cycle
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
 import { UnitsAreaComponent } from './components/units-area/units-area.component';
-import { SplitterModule } from '../splitter/splitter.module';
+
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
@@ -75,7 +76,7 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
 import { GroupMenuComponent } from './components/group-menu/group-menu.component';
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
@@ -85,101 +86,99 @@ import { ShowMetadataComponent } from './components/show-metadata/show-metadata.
 import { PrintUnitsDialogComponent } from './components/print-units-dialog/print-units-dialog.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SharedModule,
-        MetadataModule,
-        MatIconModule,
-        MatTooltipModule,
-        MatExpansionModule,
-        WorkspaceRoutingModule,
-        ReactiveFormsModule,
-        MatSelectModule,
-        MatListModule,
-        MatSlideToggleModule,
-        MatButtonToggleModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatSortModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        HttpClientModule,
-        MatProgressSpinnerModule,
-        MatInputModule,
-        MatCardModule,
-        MatSnackBarModule,
-        MatTableModule,
-        MatCheckboxModule,
-        MatRippleModule,
-        FormsModule,
-        MatTabsModule,
-        IqbComponentsModule,
-        MatProgressBarModule,
-        TranslateModule,
-        CommentsModule,
-        MatBadgeModule,
-        SplitterModule,
-        TestConfigComponent,
-        WorkspaceComponent,
-        NewUnitComponent,
-        SelectUnitComponent,
-        MoveUnitComponent,
-        UnitEditorComponent,
-        SaveOrDiscardComponent,
-        UnitPreviewComponent,
-        ExportUnitComponent,
-        UnitSchemerComponent,
-        SelectUnitListComponent,
-        UserListComponent,
-        WorkspaceUserListComponent,
-        PagingModeSelectionComponent,
-        UnitCommentsComponent,
-        GroupManageComponent,
-        ReviewsComponent,
-        ReviewConfigEditComponent,
-        BookletConfigEditComponent,
-        UnitSelectionComponent,
-        UnitSaveButtonComponent,
-        UnitDataAreaComponent,
-        AddUnitButtonComponent,
-        DeleteUnitButtonComponent,
-        EditUnitButtonComponent,
-        UnitsAreaComponent,
-        UnitTableComponent,
-        UnitGroupComponent,
-        UpdateUnitsButtonComponent,
-        HasNewCommentsPipe,
-        NamedRouterLinkPipe,
-        GetStateColorPipe,
-        PrintReviewButtonComponent,
-        DeleteReviewButtonComponent,
-        AddReviewButtonComponent,
-        StartReviewButtonComponent,
-        CopyReviewLinkButtonComponent,
-        ReviewMenuComponent,
-        SaveChangesComponent,
-        ReviewConfigComponent,
-        ExportReviewButtonComponent,
-        NewGroupButtonComponent,
-        GroupMenuComponent,
-        PreviewBarComponent,
-        StatusIndicationComponent,
-        UnitGroupsComponent,
-        UnitPropertiesComponent,
-        ShowMetadataComponent,
-        PrintUnitsDialogComponent
-    ],
-    exports: [
-        WorkspaceComponent,
-        UnitCommentsComponent,
-        UnitGroupComponent,
-        UnitTableComponent,
-        SelectUnitListComponent
-    ],
-    providers: [
-        UnitRoutingCanDeactivateGuard,
-        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
-    ]
+  imports: [
+    CommonModule,
+    MetadataModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatExpansionModule,
+    WorkspaceRoutingModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatListModule,
+    MatSlideToggleModule,
+    MatButtonToggleModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatSortModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    HttpClientModule,
+    MatProgressSpinnerModule,
+    MatInputModule,
+    MatCardModule,
+    MatSnackBarModule,
+    MatTableModule,
+    MatCheckboxModule,
+    MatRippleModule,
+    FormsModule,
+    MatTabsModule,
+    IqbComponentsModule,
+    MatProgressBarModule,
+    TranslateModule,
+    CommentsModule,
+    MatBadgeModule,
+    TestConfigComponent,
+    WorkspaceComponent,
+    NewUnitComponent,
+    SelectUnitComponent,
+    MoveUnitComponent,
+    UnitEditorComponent,
+    SaveOrDiscardComponent,
+    UnitPreviewComponent,
+    ExportUnitComponent,
+    UnitSchemerComponent,
+    SelectUnitListComponent,
+    UserListComponent,
+    WorkspaceUserListComponent,
+    PagingModeSelectionComponent,
+    UnitCommentsComponent,
+    GroupManageComponent,
+    ReviewsComponent,
+    ReviewConfigEditComponent,
+    BookletConfigEditComponent,
+    UnitSelectionComponent,
+    UnitSaveButtonComponent,
+    UnitDataAreaComponent,
+    AddUnitButtonComponent,
+    DeleteUnitButtonComponent,
+    EditUnitButtonComponent,
+    UnitsAreaComponent,
+    UnitTableComponent,
+    UnitGroupComponent,
+    UpdateUnitsButtonComponent,
+    HasNewCommentsPipe,
+    NamedRouterLinkPipe,
+    GetStateColorPipe,
+    PrintReviewButtonComponent,
+    DeleteReviewButtonComponent,
+    AddReviewButtonComponent,
+    StartReviewButtonComponent,
+    CopyReviewLinkButtonComponent,
+    ReviewMenuComponent,
+    SaveChangesComponent,
+    ReviewConfigComponent,
+    ExportReviewButtonComponent,
+    NewGroupButtonComponent,
+    GroupMenuComponent,
+    PreviewBarComponent,
+    StatusIndicationComponent,
+    UnitGroupsComponent,
+    UnitPropertiesComponent,
+    ShowMetadataComponent,
+    PrintUnitsDialogComponent
+  ],
+  exports: [
+    WorkspaceComponent,
+    UnitCommentsComponent,
+    UnitGroupComponent,
+    UnitTableComponent,
+    SelectUnitListComponent
+  ],
+  providers: [
+    UnitRoutingCanDeactivateGuard,
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
+  ]
 })
 export class WorkspaceModule {}

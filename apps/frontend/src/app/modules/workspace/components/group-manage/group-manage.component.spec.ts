@@ -9,6 +9,7 @@ import { Component, Input } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { GroupManageComponent } from './group-manage.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -45,7 +46,6 @@ describe('GroupManageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        GroupManageComponent,
         MockGroupMenuComponent,
         MockSelectUnitListComponent,
         MockSearchFilterComponent,
@@ -53,6 +53,7 @@ describe('GroupManageComponent', () => {
       ],
       imports: [
         HttpClientModule,
+        NoopAnimationsModule,
         MatSnackBarModule,
         MatDialogModule,
         MatTableModule,

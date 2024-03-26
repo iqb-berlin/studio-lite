@@ -4,21 +4,22 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+// eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-delete-unit-button',
-    templateUrl: './delete-unit-button.component.html',
-    styleUrls: ['./delete-unit-button.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-delete-unit-button',
+  templateUrl: './delete-unit-button.component.html',
+  styleUrls: ['./delete-unit-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class DeleteUnitButtonComponent extends SelectUnitDirective {
   @Input() selectedUnitId!: number;

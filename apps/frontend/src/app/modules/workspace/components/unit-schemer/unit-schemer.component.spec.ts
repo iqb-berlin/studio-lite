@@ -11,7 +11,6 @@ describe('UnitSchemerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitSchemerComponent],
       imports: [
         HttpClientModule,
         MatSnackBarModule,

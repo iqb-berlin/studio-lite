@@ -2,28 +2,29 @@ import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { Subject } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { NgIf, NgFor } from '@angular/common';
 import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
 import { Comment } from '../../models/comment.interface';
 import { MomentFromNowPipe } from '../../pipes/moment-from-now.pipe';
 import { IsReplyingPipe } from '../../pipes/is-replying.pipe';
 import { IsEditingPipe } from '../../pipes/is-editing.pipe';
 import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
-import { TranslateModule } from '@ngx-translate/core';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
 import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-into-view.directive';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
-import { NgIf, NgFor } from '@angular/common';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';
 
 @Component({
-    selector: 'studio-lite-comment',
-    templateUrl: './comment.component.html',
-    styleUrls: ['./comment.component.scss'],
-    standalone: true,
-    imports: [CommentBadgeComponent, NgIf, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, MomentFromNowPipe]
+  selector: 'studio-lite-comment',
+  templateUrl: './comment.component.html',
+  styleUrls: ['./comment.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [CommentBadgeComponent, NgIf, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, MomentFromNowPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

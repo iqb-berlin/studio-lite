@@ -5,27 +5,33 @@ import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import {
+  // eslint-disable-next-line max-len
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+} from '@angular/material/table';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatBadge } from '@angular/material/badge';
+import { NgIf } from '@angular/common';
+import {
+  MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
 import { Group } from '../../models/group.interface';
-import { TranslateModule } from '@ngx-translate/core';
-import { MatButton } from '@angular/material/button';
 import { SaveChangesComponent } from '../save-changes/save-changes.component';
 import { GroupMenuComponent } from '../group-menu/group-menu.component';
-import { MatBadge } from '@angular/material/badge';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
-import { NgIf } from '@angular/common';
-import { MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 
 @Component({
-    selector: 'studio-lite-group-manage',
-    templateUrl: './group-manage.component.html',
-    styleUrls: ['./group-manage.component.scss'],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-group-manage',
+  templateUrl: './group-manage.component.html',
+  styleUrls: ['./group-manage.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GroupManageComponent implements OnInit {

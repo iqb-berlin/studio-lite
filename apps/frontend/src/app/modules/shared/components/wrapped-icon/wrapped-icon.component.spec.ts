@@ -8,9 +8,6 @@ describe('WrappedIconComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        WrappedIconComponent
-      ],
       imports: [
         MatIconModule
       ]

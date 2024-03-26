@@ -7,9 +7,7 @@ describe('UserIssuesComponent', () => {
   let fixture: ComponentFixture<UserIssuesComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [UserIssuesComponent]
-    }).compileComponents();
+    await TestBed.configureTestingModule({}).compileComponents();
 
     fixture = TestBed.createComponent(UserIssuesComponent);
     component = fixture.componentInstance;

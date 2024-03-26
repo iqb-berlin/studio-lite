@@ -13,11 +13,9 @@ import {
 } from '@angular/core';
 import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;
@@ -43,12 +41,8 @@ describe('WorkspaceGroupsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        WorkspaceGroupsComponent,
         MockWorkspaceGroupsMenuComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent,
-        HasSelectionValuePipe,
-        IsAllSelectedPipe
+        MockSearchFilterComponent
       ],
       imports: [
         MatDialogModule,
@@ -58,6 +52,7 @@ describe('WorkspaceGroupsComponent', () => {
         MatIconModule,
         MatTableModule,
         HttpClientModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [

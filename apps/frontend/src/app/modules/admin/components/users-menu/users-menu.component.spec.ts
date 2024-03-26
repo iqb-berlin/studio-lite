@@ -4,7 +4,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UsersMenuComponent } from './users-menu.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('UsersMenuComponent', () => {
   let component: UsersMenuComponent;
@@ -12,10 +11,6 @@ describe('UsersMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        UsersMenuComponent,
-        WrappedIconComponent
-      ],
       imports: [
         MatDialogModule,
         MatIconModule,

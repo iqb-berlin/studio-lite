@@ -10,22 +10,23 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Image } from '@tiptap/extension-image';
-import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogContent } from '@angular/material/dialog';
 import { NgxTiptapModule } from 'ngx-tiptap';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
 
 @Component({
-    selector: 'studio-lite-comment-editor',
-    templateUrl: './comment-editor.component.html',
-    styleUrls: ['./comment-editor.component.scss'],
-    standalone: true,
-    imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, NgxTiptapModule, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
+  selector: 'studio-lite-comment-editor',
+  templateUrl: './comment-editor.component.html',
+  styleUrls: ['./comment-editor.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, NgxTiptapModule, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
 })
 export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;

@@ -32,7 +32,6 @@ describe('AppConfigComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        AppConfigComponent,
         MockToTimePipe],
       imports: [
         TranslateModule.forRoot(),

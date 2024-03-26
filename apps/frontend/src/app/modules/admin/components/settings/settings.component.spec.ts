@@ -4,7 +4,12 @@ import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { HttpClientModule } from '@angular/common/http';
+import {MatNativeDateModule} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SettingsComponent } from './settings.component';
+import { environment } from '../../../../../environments/environment';
 
 describe('SettingsComponent', () => {
   let component: SettingsComponent;
@@ -22,7 +27,6 @@ describe('SettingsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        SettingsComponent,
         MockAppConfigComponent,
         MockAppLogoComponent,
         MockUnitExportComponent
@@ -30,8 +34,18 @@ describe('SettingsComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         MatFormFieldModule,
-        MatInputModule
-
+        MatInputModule,
+        HttpClientModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        NoopAnimationsModule
+      ],
+      providers: [
+        MatDatepickerModule,
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
       ]
     }).compileComponents();
 

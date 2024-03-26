@@ -11,7 +11,6 @@ describe('UnitDataAreaComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitDataAreaComponent],
       imports: [
         RouterTestingModule,
         HttpClientModule,
