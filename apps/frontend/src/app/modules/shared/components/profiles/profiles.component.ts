@@ -88,7 +88,7 @@ export class ProfilesComponent implements OnInit {
       .split('\n')
       .map(item => item.split(splitter));
     const storesArray = rest.map(e => e.filter(el => (el !== ',' && el !== '')));
-    const storesURLs: any = [];
+    const storesURLs: string[] = [];
     storesArray.forEach(store => {
       const sanitizedURL = store[2].replace(',', '');
       storesURLs.push(sanitizedURL);
