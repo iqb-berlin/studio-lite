@@ -14,6 +14,7 @@ import {
 import {
   MissingsProfilesDto
 } from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
+import { CodingReportDto } from '../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -354,5 +355,9 @@ export class BackendService {
       result += v.toString(16).padStart(2, '0');
     });
     return result;
+  }
+
+  getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
+    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspace/${workspaceId}/coding-report`);
   }
 }
