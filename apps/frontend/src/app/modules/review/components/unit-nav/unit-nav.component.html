@@ -1,5 +1,5 @@
 <div class="unit-nav fx-row-end-center">
-  @if (reviewService.bookletConfig?.controllerDesign === '2018') {
+  @if (reviewService.bookletConfig.controllerDesign === '2018') {
     <a mat-fab
       [matTooltip]="'back' | translate"
       [disabled]="reviewService.currentUnitSequenceId < 0"
@@ -7,7 +7,7 @@
       <i class="material-icons">chevron_left</i>
     </a>
   }
-  @if (reviewService.bookletConfig?.controllerDesign !== '2018') {
+  @if (reviewService.bookletConfig.controllerDesign !== '2018') {
     <a mat-flat-button
       [matTooltip]="'back' | translate"
       [disabled]="reviewService.currentUnitSequenceId < 0"
@@ -15,7 +15,7 @@
       <i class="material-icons">chevron_left</i>
     </a>
   }
-  @if (reviewService.bookletConfig?.unitNaviButtons !== 'ARROWS_ONLY') {
+  @if (reviewService.bookletConfig.unitNaviButtons !== 'ARROWS_ONLY') {
     <mat-selection-list
       #unitList
       hideSingleSelectionIndicator
@@ -61,7 +61,7 @@
     </mat-selection-list>
   }
 
-  @if (reviewService.bookletConfig?.controllerDesign === '2018') {
+  @if (reviewService.bookletConfig.controllerDesign === '2018') {
     <a mat-fab
       [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
       (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
@@ -69,7 +69,7 @@
       <i class="material-icons">chevron_right</i>
     </a>
   }
-  @if (reviewService.bookletConfig?.controllerDesign !== '2018') {
+  @if (reviewService.bookletConfig.controllerDesign !== '2018') {
     <a mat-flat-button
       [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
       (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"

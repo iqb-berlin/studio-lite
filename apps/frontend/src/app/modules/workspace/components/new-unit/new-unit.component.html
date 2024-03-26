@@ -10,7 +10,7 @@
         formControlName="key"
         [placeholder]="'workspace.unit-key' | translate"
         [value]="data.key" >
-      @if (newUnitForm.controls['key']?.invalid) {
+      @if (newUnitForm.controls['key'].invalid) {
         <mat-error>
           {{'workspace.invalid-unit-key' | translate}}
         </mat-error>

@@ -1,18 +1,18 @@
 <div [class.with-header]="reviewService.bookletConfig.unitScreenHeader !== 'OFF'"
   [class.with-title]="reviewService.bookletConfig.unitTitle === 'ON'">
-  @if (reviewService.bookletConfig?.unitTitle === 'ON') {
+  @if (reviewService.bookletConfig.unitTitle === 'ON') {
     <div
       class="unit-title fx-column-center-center">
       <p>{{reviewService.pageHeaderText}}</p>
     </div>
   }
-  @if (reviewService.bookletConfig?.unitScreenHeader !== 'OFF') {
+  @if (reviewService.bookletConfig.unitScreenHeader !== 'OFF') {
     <div
       class="header fx-row-space-between-center">
       <div>
         <h1>{{reviewService.screenHeaderText}}</h1>
       </div>
-      @if (reviewService.bookletConfig?.unitNaviButtons !== 'OFF') {
+      @if (reviewService.bookletConfig.unitNaviButtons !== 'OFF') {
         <studio-lite-unit-nav>
         </studio-lite-unit-nav>
       }

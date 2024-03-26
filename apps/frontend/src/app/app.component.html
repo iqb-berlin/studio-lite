@@ -45,12 +45,12 @@
 </div>
 
 <div class="page-title hide-on-print fx-row-space-between-center">
-  @if (!appService.appConfig?.hideTitlesOnPage) {
+  @if (!appService.appConfig.hideTitlesOnPage) {
     <div>
       {{ appService.appConfig.appTitle }}
     </div>
   }
-  @if (appService.appConfig?.pageTitle && !appService.appConfig.hideTitlesOnPage) {
+  @if (appService.appConfig.pageTitle && !appService.appConfig.hideTitlesOnPage) {
     <div>
       {{ appService.appConfig.pageTitle }}
     </div>
