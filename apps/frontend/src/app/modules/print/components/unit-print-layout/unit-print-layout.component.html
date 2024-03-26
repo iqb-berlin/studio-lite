@@ -5,9 +5,9 @@
     [name] = "unitProperties ? unitProperties.name : ''"
     [key] = "unitProperties ? unitProperties.key : ''"
     [state] = "unitProperties && (printOptions | include : 'printProperties' ) ?
-                  unitProperties.state : ''"
+    unitProperties.state : ''"
     [groupName] = "unitProperties && (printOptions | include : 'printProperties' ) ?
-                    unitProperties.groupName : ''"
+    unitProperties.groupName : ''"
     [description]="unitProperties && (printOptions | include : 'printProperties' ) ?
                     unitProperties.description: ''"
     [reference]="unitProperties && (printOptions | include : 'printProperties' ) ?
@@ -16,55 +16,63 @@
                     unitProperties.transcript: ''"
     [player] = "(printOptions | include : 'printProperties') ? playerId : ''"
     [editor] = "unitProperties && (printOptions | include : 'printProperties') ?
-                  unitProperties.editor : ''"
+    unitProperties.editor : ''"
     [schemer] = "unitProperties && (printOptions | include : 'printProperties') ?
-                  unitProperties.schemer : ''"
+    unitProperties.schemer : ''"
     [lastChangedDefinition] = "unitProperties && (printOptions | include : 'printProperties' ) ?
-                                unitProperties.lastChangedDefinition : null"
+    unitProperties.lastChangedDefinition : null"
     [lastChangedMetadata] = "unitProperties && (printOptions | include : 'printProperties') ?
-                              unitProperties.lastChangedMetadata : null"
+    unitProperties.lastChangedMetadata : null"
     [lastChangedScheme] = "unitProperties && (printOptions | include : 'printProperties') ?
-                            unitProperties.lastChangedScheme : null">
+    unitProperties.lastChangedScheme : null">
   </studio-lite-unit-properties>
 
-  <studio-lite-print-metadata *ngIf="(printOptions | include : 'printMetadata')"
-                              [metadata] = "unitProperties && unitProperties.metadata || null">
-  </studio-lite-print-metadata>
+  @if ((printOptions | include : 'printMetadata')) {
+    <studio-lite-print-metadata
+      [metadata] = "unitProperties && unitProperties.metadata || null">
+    </studio-lite-print-metadata>
+  }
 
-  <studio-lite-unit-print-comments *ngIf="printOptions | include : 'printComments'"
-                                   [unitId]="unitId"
-                                   [workspaceId]="workspaceId">
-  </studio-lite-unit-print-comments>
+  @if (printOptions | include : 'printComments') {
+    <studio-lite-unit-print-comments
+      [unitId]="unitId"
+      [workspaceId]="workspaceId">
+    </studio-lite-unit-print-comments>
+  }
 
-  <studio-lite-unit-print-coding *ngIf="printOptions | include : 'printCoding'"
-                                 [unitId]="unitId"
-                                 [workspaceId]="workspaceId">
-  </studio-lite-unit-print-coding>
+  @if (printOptions | include : 'printCoding') {
+    <studio-lite-unit-print-coding
+      [unitId]="unitId"
+      [workspaceId]="workspaceId">
+    </studio-lite-unit-print-coding>
+  }
 
 
-  <div *ngIf="playerId && (printOptions | include : 'printPreview')" >
-    <studio-lite-unit-print-player *ngIf="playerId"
-                                   [iFrameHeight]="printPreviewHeight"
-                                   [playerId]="playerId"
-                                   [unitId]="unitId"
-                                   [workspaceId]="workspaceId">
-    </studio-lite-unit-print-player>
-
-    <div class="fx-row-space-around-center change-player-height-container">
-      <mat-form-field
-        class="hide-on-print"
-        appearance="fill">
-        <mat-label>{{ 'print.change-player-height' | translate }}</mat-label>
-        <input matInput
-               type="number"
-               min="0"
-               step="10"
-               [ngModel]="printPreviewHeight"
-               (ngModelChange)="playerHeightChange($event)">
-      </mat-form-field>
+  @if (playerId && (printOptions | include : 'printPreview')) {
+    <div >
+      @if (playerId) {
+        <studio-lite-unit-print-player
+          [iFrameHeight]="printPreviewHeight"
+          [playerId]="playerId"
+          [unitId]="unitId"
+          [workspaceId]="workspaceId">
+        </studio-lite-unit-print-player>
+      }
+      <div class="fx-row-space-around-center change-player-height-container">
+        <mat-form-field
+          class="hide-on-print"
+          appearance="fill">
+          <mat-label>{{ 'print.change-player-height' | translate }}</mat-label>
+          <input matInput
+            type="number"
+            min="0"
+            step="10"
+            [ngModel]="printPreviewHeight"
+            (ngModelChange)="playerHeightChange($event)">
+        </mat-form-field>
+      </div>
     </div>
-
-  </div>
+  }
 </div>
 
 

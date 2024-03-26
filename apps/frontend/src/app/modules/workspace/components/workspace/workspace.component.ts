@@ -6,7 +6,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { NgIf } from '@angular/common';
+
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -23,7 +23,7 @@ import { RoutingHelperService } from '../../services/routing-helper.service';
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss'],
   standalone: true,
-  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent, NgIf]
+  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';

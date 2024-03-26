@@ -1,32 +1,49 @@
-<div *ngIf="pageList.length"
-     class="page-nav fx-row-space-between-center">
-  <div class="page-nav-prompt">
-    {{'workspace.page-selection' | translate}}
-  </div>
-
-  <div *ngFor="let p of pageList">
-    <button *ngIf="p.type === '#previous'"
-            class="fx-row-center-center"
-            [disabled]="p.disabled"
-            (click)="gotoPage.emit({ action: p.type })">
-      <studio-lite-wrapped-icon icon="chevron_left"></studio-lite-wrapped-icon>
-    </button>
-    <button *ngIf="p.type === '#next'"
-            class="fx-row-center-center"
-            [disabled]="p.disabled"
-            (click)="gotoPage.emit({ action: p.type })">
-      <studio-lite-wrapped-icon icon="chevron_right"></studio-lite-wrapped-icon>
-    </button>
-    <div *ngIf="p.type === '#goto'"
-         class="fx-column-start-stretch">
-      <div *ngIf="!p.disabled" class="page-nav-enabled"></div>
-      <div *ngIf="p.disabled" class="page-nav-disabled"></div>
-      <button [disabled]="p.disabled"
-              (click)="gotoPage.emit({ action: p.type, index: p.index })">
-        {{ p.index }}
-      </button>
-      <div *ngIf="!p.disabled" class="page-nav-enabled"></div>
-      <div *ngIf="p.disabled" class="page-nav-disabled"></div>
+@if (pageList.length) {
+  <div
+    class="page-nav fx-row-space-between-center">
+    <div class="page-nav-prompt">
+      {{'workspace.page-selection' | translate}}
     </div>
+    @for (p of pageList; track p) {
+      <div>
+        @if (p.type === '#previous') {
+          <button
+            class="fx-row-center-center"
+            [disabled]="p.disabled"
+            (click)="gotoPage.emit({ action: p.type })">
+            <studio-lite-wrapped-icon icon="chevron_left"></studio-lite-wrapped-icon>
+          </button>
+        }
+        @if (p.type === '#next') {
+          <button
+            class="fx-row-center-center"
+            [disabled]="p.disabled"
+            (click)="gotoPage.emit({ action: p.type })">
+            <studio-lite-wrapped-icon icon="chevron_right"></studio-lite-wrapped-icon>
+          </button>
+        }
+        @if (p.type === '#goto') {
+          <div
+            class="fx-column-start-stretch">
+            @if (!p.disabled) {
+              <div class="page-nav-enabled"></div>
+            }
+            @if (p.disabled) {
+              <div class="page-nav-disabled"></div>
+            }
+            <button [disabled]="p.disabled"
+              (click)="gotoPage.emit({ action: p.type, index: p.index })">
+              {{ p.index }}
+            </button>
+            @if (!p.disabled) {
+              <div class="page-nav-enabled"></div>
+            }
+            @if (p.disabled) {
+              <div class="page-nav-disabled"></div>
+            }
+          </div>
+        }
+      </div>
+    }
   </div>
-</div>
+}

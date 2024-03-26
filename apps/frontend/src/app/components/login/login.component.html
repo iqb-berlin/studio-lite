@@ -2,49 +2,58 @@
   <studio-lite-area-title
     [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
   </studio-lite-area-title>
-  <button type="button" mat-icon-button
-          matTooltip="{{'login.alternative' | translate}}"
-          [matTooltipPosition]="'above'"
-          [matTooltipShowDelay]="300"
-          *ngIf="!loggedInKeycloak"
-          (click)="loginKeycloak()">
-    <studio-lite-wrapped-icon icon="call_made"></studio-lite-wrapped-icon>
-  </button>
-  <studio-lite-warning *ngIf="appService.globalWarning"
-                       [warnMessage]="appService.globalWarning">
-  </studio-lite-warning>
-  <studio-lite-warning *ngIf="!appService.appConfig.hasUsers"
-                       [warnMessage]="'home.no-user' | translate">
-  </studio-lite-warning>
+  @if (!loggedInKeycloak) {
+    <button type="button" mat-icon-button
+      matTooltip="{{'login.alternative' | translate}}"
+      [matTooltipPosition]="'above'"
+      [matTooltipShowDelay]="300"
+      (click)="loginKeycloak()">
+      <studio-lite-wrapped-icon icon="call_made"></studio-lite-wrapped-icon>
+    </button>
+  }
+  @if (appService.globalWarning) {
+    <studio-lite-warning
+      [warnMessage]="appService.globalWarning">
+    </studio-lite-warning>
+  }
+  @if (!appService.appConfig.hasUsers) {
+    <studio-lite-warning
+      [warnMessage]="'home.no-user' | translate">
+    </studio-lite-warning>
+  }
 </div>
 <form class="fx-column-start-stretch"
-      [formGroup]="loginForm"
-      (ngSubmit)="login()">
+  [formGroup]="loginForm"
+  (ngSubmit)="login()">
   <div class="fx-column-start-stretch">
     <mat-form-field [class.invisible]="loginNamePreset">
       <input matInput formControlName="name"
-             [placeholder]="'home.user-name' | translate"
-             (keyup.enter)="pw.focus()">
+        [placeholder]="'home.user-name' | translate"
+        (keyup.enter)="pw.focus()">
     </mat-form-field>
-    <p *ngIf="loginNamePreset">
-      {{ 'home.login-with-preset' | translate }}
-    </p>
+    @if (loginNamePreset) {
+      <p>
+        {{ 'home.login-with-preset' | translate }}
+      </p>
+    }
     <mat-form-field>
       <input matInput #pw
-             type="password"
-             formControlName="pw"
-             [placeholder]="'home.password' | translate"
-             (keyup.enter)="login()">
+        type="password"
+        formControlName="pw"
+        [placeholder]="'home.password' | translate"
+        (keyup.enter)="login()">
     </mat-form-field>
   </div>
-  <p *ngIf="errorMessage"
-     class="error-message">
-    {{ errorMessage }}
-  </p>
+  @if (errorMessage) {
+    <p
+      class="error-message">
+      {{ errorMessage }}
+    </p>
+  }
   <button mat-raised-button
-          type="submit"
-          [disabled]="loginForm.invalid"
-          color="primary">{{ 'next' | translate }}
+    type="submit"
+    [disabled]="loginForm.invalid"
+    color="primary">{{ 'next' | translate }}
   </button>
 </form>
 

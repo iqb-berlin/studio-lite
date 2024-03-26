@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
-import { NgIf } from '@angular/common';
+
 import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -18,7 +18,7 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
   styleUrls: ['./unit-editor.component.scss'],
   host: { class: 'unit-editor' },
   standalone: true,
-  imports: [NgIf]
+  imports: []
 })
 
 export class UnitEditorComponent implements AfterViewInit, OnDestroy {

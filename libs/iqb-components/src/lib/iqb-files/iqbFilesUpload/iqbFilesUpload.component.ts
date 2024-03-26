@@ -10,7 +10,7 @@ import { UploadStatus } from '../iqb-files-classes';
 import { BytesPipe } from '../../pipes/bytes.pipe';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { NgIf } from '@angular/common';
+
 import { MatCard } from '@angular/material/card';
 
 @Component({
@@ -19,7 +19,7 @@ import { MatCard } from '@angular/material/card';
     exportAs: 'iqbFilesUpload',
     styleUrls: ['../iqb-files.scss'],
     standalone: true,
-    imports: [MatCard, NgIf, MatProgressBar, MatIcon, BytesPipe]
+    imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
 })
 
 export class IqbFilesUploadComponent implements OnInit {

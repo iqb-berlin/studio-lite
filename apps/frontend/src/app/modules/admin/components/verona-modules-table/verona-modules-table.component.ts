@@ -13,7 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatAnchor } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { NgIf, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
@@ -27,7 +27,7 @@ import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
   styleUrls: ['./verona-modules-table.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: 'editor' | 'player' | 'schemer';

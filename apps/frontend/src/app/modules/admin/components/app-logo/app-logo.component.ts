@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { NgIf } from '@angular/common';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
@@ -20,7 +20,7 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
   styleUrls: ['./app-logo.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, NgIf, MatFormField, MatLabel, MatInput, TranslateModule]
+  imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, MatFormField, MatLabel, MatInput, TranslateModule]
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {

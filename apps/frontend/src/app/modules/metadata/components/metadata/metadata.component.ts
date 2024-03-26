@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
-import { NgIf } from '@angular/common';
+
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { ItemsComponent } from '../items/items.component';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
@@ -12,7 +12,7 @@ import { ProfileFormComponent } from '../profile-form/profile-form.component';
   templateUrl: './metadata.component.html',
   styleUrls: ['./metadata.component.scss'],
   standalone: true,
-  imports: [MatCard, MatCardContent, NgIf, ProfileFormComponent, ItemsComponent]
+  imports: [MatCard, MatCardContent, ProfileFormComponent, ItemsComponent]
 })
 export class MetadataComponent implements OnInit, OnDestroy {
   @Output() metadataChange: EventEmitter<any> = new EventEmitter();

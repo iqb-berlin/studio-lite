@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver-es';
-import { DatePipe, NgForOf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -28,9 +28,8 @@ const datePipe = new DatePipe('de-DE');
     FormsModule,
     MatRadioModule,
     MatSelectModule,
-    WorkspaceModule,
-    NgForOf
-  ],
+    WorkspaceModule
+],
   styleUrls: ['export-coding-book.component.scss']
 })
 

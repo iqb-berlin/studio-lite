@@ -1,13 +1,25 @@
 <mat-card>
-    <span class="file-info">{{file.name}} ({{file.size | bytes}})</span>
-    <section *ngIf="status<=1" class="example-section">
-        <mat-progress-bar class="example-margin" [value]="progressPercentage"></mat-progress-bar>
-        <a *ngIf="status === 0"><mat-icon class="action" (click)="upload()">file_upload</mat-icon></a>
-        <mat-icon class="action" (click)="remove()">cancel</mat-icon>
+  <span class="file-info">{{file.name}} ({{file.size | bytes}})</span>
+  @if (status<=1) {
+    <section class="example-section">
+      <mat-progress-bar class="example-margin" [value]="progressPercentage"></mat-progress-bar>
+      @if (status === 0) {
+        <a><mat-icon class="action" (click)="upload()">file_upload</mat-icon></a>
+      }
+      <mat-icon class="action" (click)="remove()">cancel</mat-icon>
     </section>
-    <span *ngIf="status === 1" class="file-info">{{progressPercentage}} %</span><br/>
-    <span *ngIf="status !== 1">
-      <span *ngIf="status === 3" class="file-info-error">{{statustext}}</span>
-      <span *ngIf="status !== 3" class="file-info">{{statustext}}</span>
-    </span>
-</mat-card>
+  }
+  @if (status === 1) {
+    <span class="file-info">{{progressPercentage}} %</span>
+    }<br/>
+    @if (status !== 1) {
+      <span>
+        @if (status === 3) {
+          <span class="file-info-error">{{statustext}}</span>
+        }
+        @if (status !== 3) {
+          <span class="file-info">{{statustext}}</span>
+        }
+      </span>
+    }
+  </mat-card>

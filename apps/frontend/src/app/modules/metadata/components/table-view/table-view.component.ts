@@ -6,7 +6,7 @@ import {
   MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
 import { saveAs } from 'file-saver-es';
-import { DatePipe, NgFor } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatTabChangeEvent, MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { TranslateModule } from '@ngx-translate/core';
@@ -47,7 +47,7 @@ type Unit = {
   styleUrls: ['./table-view.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, NgFor, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class TableViewComponent implements OnInit {

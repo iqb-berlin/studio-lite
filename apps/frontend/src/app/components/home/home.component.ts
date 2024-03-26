@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import { NgIf } from '@angular/common';
+
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../services/app.service';
 import { AppConfig } from '../../models/app-config.class';
@@ -17,7 +17,7 @@ import { LoginComponent } from '../login/login.component';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   standalone: true,
-  imports: [NgIf, LoginComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent]
+  imports: [LoginComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent]
 })
 export class HomeComponent implements OnInit {
   constructor(

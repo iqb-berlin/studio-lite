@@ -3,7 +3,7 @@ import {
   ActivatedRoute, RouterLinkActive, RouterLink, RouterOutlet
 } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { NgFor } from '@angular/common';
+
 import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { BackendService } from '../../services/backend.service';
@@ -14,7 +14,7 @@ import { AppService } from '../../../../services/app.service';
   templateUrl: './wsg-admin.component.html',
   styleUrls: ['./wsg-admin.component.scss'],
   standalone: true,
-  imports: [MatTabNav, NgFor, MatTabLink, RouterLinkActive, RouterLink, MatTabNavPanel, RouterOutlet, TranslateModule]
+  imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatTabNavPanel, RouterOutlet, TranslateModule]
 })
 export class WsgAdminComponent implements OnInit {
   navLinks: string[] = ['users', 'workspaces', 'settings'];

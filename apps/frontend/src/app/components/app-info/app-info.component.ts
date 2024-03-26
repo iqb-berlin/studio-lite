@@ -3,7 +3,7 @@ import { SafeUrl } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { MatAnchor } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   templateUrl: './app-info.component.html',
   styleUrls: ['./app-info.component.scss'],
   standalone: true,
-  imports: [AreaTitleComponent, NgIf, MatAnchor, RouterLink, TranslateModule]
+  imports: [AreaTitleComponent, MatAnchor, RouterLink, TranslateModule]
 })
 export class AppInfoComponent {
   @Input() appTitle!: string;

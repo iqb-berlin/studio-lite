@@ -10,11 +10,11 @@
           {{'workspace-settings.default-editor' | translate}}
         </mat-label>
         <studio-lite-select-module class="fx-flex-row-60"
-                           moduleType="editor"
-                           [modules]="this.moduleService.editors"
-                           [value]="dialogData.defaultEditor"
-                           (selectionChanged)="selectModule('editor', $event)"
-                           [stableOnly]="false">
+          moduleType="editor"
+          [modules]="this.moduleService.editors"
+          [value]="dialogData.defaultEditor"
+          (selectionChanged)="selectModule('editor', $event)"
+          [stableOnly]="false">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -22,11 +22,11 @@
           {{'workspace-settings.default-player' | translate}}
         </mat-label>
         <studio-lite-select-module class="fx-flex-row-60"
-                           moduleType="player"
-                           [modules]="this.moduleService.players"
-                           [value]="dialogData.defaultPlayer"
-                           [stableOnly]="false"
-                           (selectionChanged)="selectModule('player', $event)">
+          moduleType="player"
+          [modules]="this.moduleService.players"
+          [value]="dialogData.defaultPlayer"
+          [stableOnly]="false"
+          (selectionChanged)="selectModule('player', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -34,17 +34,17 @@
           {{'workspace-settings.default-schemer' | translate}}
         </mat-label>
         <studio-lite-select-module class="fx-flex-row-60"
-                           moduleType="schemer"
-                           [modules]="this.moduleService.schemers"
-                           [value]="dialogData.defaultSchemer"
-                           [stableOnly]="false"
-                           (selectionChanged)="selectModule('schemer', $event)">
+          moduleType="schemer"
+          [modules]="this.moduleService.schemers"
+          [value]="dialogData.defaultSchemer"
+          [stableOnly]="false"
+          (selectionChanged)="selectModule('schemer', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
         <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="$event ? setStableChecked($event) : null"
-                      [checked]="dialogData.stableModulesOnly">
+          (change)="$event ? setStableChecked($event) : null"
+          [checked]="dialogData.stableModulesOnly">
         </mat-checkbox>
         <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
@@ -52,24 +52,32 @@
         <h4>{{'metadata.metadata' | translate }}</h4>
         <div class="fx-column-start-start">
           <mat-label>{{'metadata.unit-profile' | translate }}</mat-label>
-          <mat-error *ngIf="unitMDProfiles.length === 0">{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
+          @if (unitMDProfiles.length === 0) {
+            <mat-error>{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
+          }
           <mat-select  class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
-              <mat-option *ngFor="let unitMDProfile of unitMDProfiles" [value]="unitMDProfile.id">
+            @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
+              <mat-option [value]="unitMDProfile.id">
                 {{unitMDProfile.label }}
               </mat-option>
+            }
           </mat-select>
         </div>
         <div class="fx-column-start-start">
           <mat-label>{{'metadata.item-profile' | translate }}</mat-label>
-          <mat-error *ngIf="itemMDProfiles.length === 0">{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
+          @if (itemMDProfiles.length === 0) {
+            <mat-error>{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
+          }
           <mat-select class="select-profile"
-                      placeholder="{{'metadata.select-profile' | translate }}"
-                      [(value)]="selectedItemMDProfile"
-                      (click)="$event.stopPropagation()"
-                      (selectionChange)="selectItemMDProfile($event)" >
-            <mat-option *ngFor="let itemMDProfile of itemMDProfiles" [value]="itemMDProfile.id">
-              {{itemMDProfile.label}}
-            </mat-option>
+            placeholder="{{'metadata.select-profile' | translate }}"
+            [(value)]="selectedItemMDProfile"
+            (click)="$event.stopPropagation()"
+            (selectionChange)="selectItemMDProfile($event)" >
+            @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
+              <mat-option [value]="itemMDProfile.id">
+                {{itemMDProfile.label}}
+              </mat-option>
+            }
           </mat-select>
         </div>
       </div>
@@ -77,14 +85,14 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-raised-button
-            color="primary"
-            type="submit"
-            (click)="addData()"
-            [mat-dialog-close]="dialogData">
+      color="primary"
+      type="submit"
+      (click)="addData()"
+      [mat-dialog-close]="dialogData">
       {{'save' | translate}}
     </button>
     <button mat-raised-button
-            [mat-dialog-close]="false">
+      [mat-dialog-close]="false">
       {{'cancel' | translate}}
     </button>
   </mat-dialog-actions>

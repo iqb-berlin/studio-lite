@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import { NgForOf, NgIf } from '@angular/common';
+
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioButton } from '@angular/material/radio';
@@ -28,16 +28,14 @@ import { CodingReportDto } from '../../../../../../../../libs/api-dto/src/lib/dt
     MatButtonModule,
     MatTableModule,
     MatTabsModule,
-    NgForOf,
     MatSortModule,
     MatProgressSpinnerModule,
-    NgIf,
     MatRadioButton,
     MatSlideToggle,
     MatFormField,
     MatInput,
     MatLabel
-  ]
+]
 })
 
 export class CodingReportComponent implements OnInit {

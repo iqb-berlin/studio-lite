@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { UserWorkspacesGroupsComponent } from '../user-workspaces-groups/user-workspaces-groups.component';
 import { WarningComponent } from '../warning/warning.component';
 import { UserMenuComponent } from '../user-menu/user-menu.component';
@@ -17,7 +17,7 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   styleUrls: ['./user-workspaces-area.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [AreaTitleComponent, NgIf, MatButton, RouterLink, MatTooltip, WrappedIconComponent, UserMenuComponent, WarningComponent, UserWorkspacesGroupsComponent, TranslateModule]
+  imports: [AreaTitleComponent, MatButton, RouterLink, MatTooltip, WrappedIconComponent, UserMenuComponent, WarningComponent, UserWorkspacesGroupsComponent, TranslateModule]
 })
 export class UserWorkspacesAreaComponent {
   @Input() workspaceGroups!: WorkspaceGroupDto[];

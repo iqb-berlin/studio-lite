@@ -7,7 +7,7 @@ import {
   switchMap, Subject, takeUntil, of, Observable
 } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { NgIf, NgFor } from '@angular/common';
+
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
@@ -24,7 +24,7 @@ import { CommentComponent } from '../comment/comment.component';
   styleUrls: ['./comments.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, MatProgressSpinner, NgFor, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
 })
 export class CommentsComponent implements OnInit {
   @Input() userId!: number;

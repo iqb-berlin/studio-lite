@@ -1,11 +1,13 @@
 <div class="comments-container">
-  <studio-lite-comments *ngIf="userId && unitId && workspaceId"
-    [style.height.%]="100"
-    [userName]="userName"
-    [userId]="userId"
-    [unitId]="unitId"
-    [workspaceId]="workspaceId"
-    [adminMode]="workspaceService.isWorkspaceGroupAdmin"
-    (onCommentsUpdated)="workspaceService.onCommentsUpdated.emit()">
-  </studio-lite-comments>
+  @if (userId && unitId && workspaceId) {
+    <studio-lite-comments
+      [style.height.%]="100"
+      [userName]="userName"
+      [userId]="userId"
+      [unitId]="unitId"
+      [workspaceId]="workspaceId"
+      [adminMode]="workspaceService.isWorkspaceGroupAdmin"
+      (onCommentsUpdated)="workspaceService.onCommentsUpdated.emit()">
+    </studio-lite-comments>
+  }
 </div>

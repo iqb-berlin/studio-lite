@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { NgIf, NgFor } from '@angular/common';
+
 import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
 import { Comment } from '../../models/comment.interface';
 import { MomentFromNowPipe } from '../../pipes/moment-from-now.pipe';
@@ -24,7 +24,7 @@ import { CommentBadgeComponent } from '../comment-badge/comment-badge.component'
   styleUrls: ['./comment.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, NgIf, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, NgFor, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, MomentFromNowPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, MomentFromNowPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

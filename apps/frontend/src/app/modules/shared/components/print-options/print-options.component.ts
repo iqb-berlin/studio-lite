@@ -6,7 +6,7 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { NgFor, NgIf } from '@angular/common';
+
 import { IsActivePrintOption } from '../../pipes/isActivePrintOption.pipe';
 import { PrintOptions } from '../../../print/models/print-options.interface';
 
@@ -16,7 +16,7 @@ import { PrintOptions } from '../../../print/models/print-options.interface';
   styleUrls: ['./print-options.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgFor, NgIf, MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
+  imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
 })
 export class PrintOptionsComponent implements OnInit {
   printOptions: PrintOptions[] = [
