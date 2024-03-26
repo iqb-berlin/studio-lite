@@ -12,7 +12,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatBadge } from '@angular/material/badge';
-import { NgIf } from '@angular/common';
+
 import {
   MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
@@ -31,7 +31,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   styleUrls: ['./group-manage.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GroupManageComponent implements OnInit {

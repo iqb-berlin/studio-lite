@@ -6,14 +6,14 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatBadge } from '@angular/material/badge';
-import { NgIf } from '@angular/common';
+
 
 @Component({
   selector: 'studio-lite-unit-group',
   templateUrl: './unit-group.component.html',
   styleUrls: ['./unit-group.component.scss'],
   standalone: true,
-  imports: [NgIf, MatBadge, MatIconButton, MatIcon, TranslateModule]
+  imports: [MatBadge, MatIconButton, MatIcon, TranslateModule]
 })
 export class UnitGroupComponent implements OnInit {
   @Input() title!: string;

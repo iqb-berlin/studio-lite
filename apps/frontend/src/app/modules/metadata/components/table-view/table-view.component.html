@@ -2,33 +2,37 @@
   <mat-dialog-content>
     <mat-tab-group animationDuration="0ms" #tabGroup (selectedTabChange)="tabChanged($event)">
       <mat-tab label="{{ 'metadata.units' | translate }}">
-          <table mat-table [dataSource]="tableData">
-            <ng-container [matColumnDef]="column" *ngFor="let column of columnsToDisplay">
+        <table mat-table [dataSource]="tableData">
+          @for (column of columnsToDisplay; track column) {
+            <ng-container [matColumnDef]="column">
               <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
               <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
             </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-          </table>
+          }
+          <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+        </table>
       </mat-tab>
       <mat-tab label="{{ 'metadata.items' | translate }}">
-          <table mat-table [dataSource]="tableData">
-            <ng-container [matColumnDef]="column" *ngFor="let column of columnsToDisplay">
+        <table mat-table [dataSource]="tableData">
+          @for (column of columnsToDisplay; track column) {
+            <ng-container [matColumnDef]="column">
               <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
               <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
             </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-          </table>
+          }
+          <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+        </table>
       </mat-tab>
     </mat-tab-group>
   </mat-dialog-content>
   <mat-dialog-actions align="end" >
     <button mat-raised-button  (click)="downloadMetadata()">{{'download' | translate}}</button>
     <button mat-raised-button
-            color="primary"
-            type="submit"
-            [mat-dialog-close]="">
+      color="primary"
+      type="submit"
+      [mat-dialog-close]="">
       {{ 'close' | translate }}
     </button>
   </mat-dialog-actions>

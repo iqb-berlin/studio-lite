@@ -1,16 +1,20 @@
-<h3 *ngIf="metadata && (unitProfiles || items)">{{'print.metadata' | translate}}</h3>
-<h3 *ngIf="!metadata || (!unitProfiles && !items)">{{'print.no-metadata' | translate}}</h3>
+@if (metadata && (unitProfiles || items)) {
+  <h3>{{'print.metadata' | translate}}</h3>
+}
+@if (!metadata || (!unitProfiles && !items)) {
+  <h3>{{'print.no-metadata' | translate}}</h3>
+}
 
-<ng-container *ngIf="unitProfiles">
+@if (unitProfiles) {
   <h4>{{'metadata.unit-title' | translate}}</h4>
   <studio-lite-metadata-profile-entries class='unit-profile'
-                                        [profiles]="unitProfiles">
+    [profiles]="unitProfiles">
   </studio-lite-metadata-profile-entries>
-</ng-container>
+}
 
-<ng-container *ngIf="items">
+@if (items) {
   <h4>{{'metadata.items-title' | translate}}</h4>
   <studio-lite-metadata-readonly-items class='items'
-                                       [items]="items">
+    [items]="items">
   </studio-lite-metadata-readonly-items>
-</ng-container>
+}

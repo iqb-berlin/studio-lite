@@ -9,7 +9,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatButton } from '@angular/material/button';
@@ -46,7 +46,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   styleUrls: ['./edit-unit-button.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, NgIf, MatMenuItem, MatIcon, MatDivider, TranslateModule]
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider, TranslateModule]
 })
 export class EditUnitButtonComponent extends SelectUnitDirective {
   constructor(

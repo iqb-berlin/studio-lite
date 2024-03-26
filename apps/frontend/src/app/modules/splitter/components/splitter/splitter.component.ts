@@ -1,7 +1,7 @@
 import {
   AfterViewInit, Component, ContentChildren, QueryList
 } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+
 import { SplitterPaneComponent } from '../splitter-pane/splitter-pane.component';
 import { SplitterGutterComponent } from '../splitter-gutter/splitter-gutter.component';
 
@@ -10,7 +10,7 @@ import { SplitterGutterComponent } from '../splitter-gutter/splitter-gutter.comp
   templateUrl: './splitter.component.html',
   styleUrls: ['./splitter.component.scss'],
   standalone: true,
-  imports: [NgFor, NgIf, SplitterGutterComponent]
+  imports: [SplitterGutterComponent]
 })
 export class SplitterComponent implements AfterViewInit {
   @ContentChildren(SplitterPaneComponent) panes!: QueryList<SplitterPaneComponent>;

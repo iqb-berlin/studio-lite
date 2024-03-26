@@ -10,7 +10,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatFormField } from '@angular/material/form-field';
-import { NgIf, NgFor } from '@angular/common';
+
 import { VeronaModuleClass } from '../../models/verona-module.class';
 
 @Component({
@@ -18,7 +18,7 @@ import { VeronaModuleClass } from '../../models/verona-module.class';
   templateUrl: './select-module.component.html',
   styleUrls: ['./select-module.component.scss'],
   standalone: true,
-  imports: [NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, NgFor, MatOption, TranslateModule]
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, TranslateModule]
 })
 export class SelectModuleComponent implements OnDestroy {
   private allModules: VeronaModuleClass[] = [];

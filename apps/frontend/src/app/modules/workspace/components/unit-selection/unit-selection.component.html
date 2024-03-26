@@ -1,29 +1,28 @@
-  <div class="selection-header">
-    <studio-lite-unit-groups #unitGroups
-                             [groupsInfo]=groupsInfo
-                             [expandedGroups]=expandedGroups
-                             [numberOfGroups]=numberOfGroups>
-        <studio-lite-search-filter
-          #filterInput
-          [title]="'search-filter.filter-units' | translate">
-        </studio-lite-search-filter>
-        <div>
-          <studio-lite-unit-table
-            [hasSortHeader]="true"
-            [unitList]="[]"
-            (sortChange)="sortUnitTables($event)">
-          </studio-lite-unit-table>
-        </div>
+<div class="selection-header">
+  <studio-lite-unit-groups #unitGroups
+    [groupsInfo]=groupsInfo
+    [expandedGroups]=expandedGroups
+    [numberOfGroups]=numberOfGroups>
+    <studio-lite-search-filter
+      #filterInput
+      [title]="'search-filter.filter-units' | translate">
+    </studio-lite-search-filter>
+    <div>
+      <studio-lite-unit-table
+        [hasSortHeader]="true"
+        [unitList]="[]"
+        (sortChange)="sortUnitTables($event)">
+      </studio-lite-unit-table>
+    </div>
 
 
+    @for (unitGroup of unitList | keyvalue; track unitGroup) {
       <studio-lite-unit-group
-        *ngFor="let unitGroup of unitList | keyvalue;"
         class="unit-group"
         [count]="unitGroup.value.length"
         [title]="unitGroup.key"
         [expandAll]="unitGroups.expandAll"
         (expandedChange) = onExpandedChange($event)>
-
         <studio-lite-unit-table
           [hasSortHeader]="false"
           [unitList]="unitGroup.value"
@@ -33,5 +32,6 @@
           (selectUnit)="selectUnit($event)">
         </studio-lite-unit-table>
       </studio-lite-unit-group>
-    </studio-lite-unit-groups>
-  </div>
+    }
+  </studio-lite-unit-groups>
+</div>

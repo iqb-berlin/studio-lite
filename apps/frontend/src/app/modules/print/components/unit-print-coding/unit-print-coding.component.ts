@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { VariableCodingData } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgIf, NgFor } from '@angular/common';
+
 import { BackendService } from '../../../workspace/services/backend.service';
 import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 
@@ -10,7 +10,7 @@ import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.compo
   templateUrl: './unit-print-coding.component.html',
   styleUrls: ['./unit-print-coding.component.scss'],
   standalone: true,
-  imports: [NgIf, NgFor, UnitPrintCodeComponent, TranslateModule]
+  imports: [UnitPrintCodeComponent, TranslateModule]
 })
 export class UnitPrintCodingComponent implements OnInit {
   @Input() unitId!: number;

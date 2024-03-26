@@ -8,7 +8,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconAnchor } from '@angular/material/button';
-import { NgFor, NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { NamedRouterLinkPipe } from '../../pipes/named-router-link.pipe';
 import { WorkspaceService } from '../../services/workspace.service';
 
@@ -18,7 +18,7 @@ import { WorkspaceService } from '../../services/workspace.service';
   styleUrls: ['./unit-data-area.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatTabNav, NgFor, MatTabLink, RouterLinkActive, RouterLink, NgIf, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
+  imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
 })
 export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;

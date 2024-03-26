@@ -10,7 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Sort } from '@angular/material/sort';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { NgFor, KeyValuePipe } from '@angular/common';
+import { KeyValuePipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
 // eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
@@ -26,7 +26,7 @@ import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
   styleUrls: ['./unit-selection.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, NgFor, UnitGroupComponent, KeyValuePipe, TranslateModule]
+  imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, UnitGroupComponent, KeyValuePipe, TranslateModule]
 })
 export class UnitSelectionComponent extends SelectUnitDirective
   implements OnInit, OnDestroy {

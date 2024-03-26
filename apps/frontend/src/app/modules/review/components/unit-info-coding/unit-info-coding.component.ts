@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { VariableCodingData } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgIf, NgFor } from '@angular/common';
+
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
@@ -17,7 +17,7 @@ interface CodingSchemeDto {
   templateUrl: './unit-info-coding.component.html',
   styleUrls: ['./unit-info-coding.component.scss'],
   standalone: true,
-  imports: [UnitInfoLoaderComponent, NgIf, NgFor, TranslateModule]
+  imports: [UnitInfoLoaderComponent, TranslateModule]
 })
 export class UnitInfoCodingComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;

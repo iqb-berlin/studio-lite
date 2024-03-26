@@ -4,7 +4,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
   Router, RouterState, RouterLink, RouterOutlet
 } from '@angular/router';
-import { registerLocaleData, NgIf, NgFor } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { de } from 'date-fns/locale';
 import { setDefaultOptions } from 'date-fns';
@@ -25,7 +25,7 @@ import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
   styleUrls: ['./app.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, MatProgressSpinner, MatButton, NgFor, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
+  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
 })
 
 export class AppComponent implements OnInit {

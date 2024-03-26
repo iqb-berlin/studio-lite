@@ -15,7 +15,7 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { AuthService } from '../../modules/auth/service/auth.service';
@@ -30,7 +30,7 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   styleUrls: ['./login.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [AreaTitleComponent, NgIf, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
+  imports: [AreaTitleComponent, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: UntypedFormGroup;

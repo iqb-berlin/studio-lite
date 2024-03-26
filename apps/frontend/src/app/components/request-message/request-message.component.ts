@@ -5,7 +5,7 @@ import { Component, Inject } from '@angular/core';
 import { RequestReportDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { NgFor } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 
 @Component({
@@ -14,7 +14,7 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./request-message.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatIcon, MatDialogContent, NgFor, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatIcon, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class RequestMessageComponent {
   messageType: 'error' | 'warning' | 'info' = 'info';

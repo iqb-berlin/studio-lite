@@ -5,7 +5,7 @@ import { Subject, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
-import { NgIf } from '@angular/common';
+
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -19,7 +19,7 @@ import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscr
   styleUrls: ['./unit-schemer.component.scss'],
   host: { class: 'unit-schemer' },
   standalone: true,
-  imports: [NgIf]
+  imports: []
 })
 export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

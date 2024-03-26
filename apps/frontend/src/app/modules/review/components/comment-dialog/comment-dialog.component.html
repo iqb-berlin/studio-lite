@@ -1,30 +1,34 @@
 <div class="fx-column-start-stretch full-height" >
   <div class="fx-row-space-between-center">
     <h1 mat-dialog-title>{{'review.comment' | translate}}</h1>
-    <mat-form-field *ngIf="!this.appService.authData.userId">
-      <mat-label>{{'review.comment-name' | translate}}</mat-label>
-      <input matInput
-             [placeholder]="'review.enter-comment-name' | translate"
-             [(ngModel)]="userName"
-             (ngModelChange)="storeUserName()">
-    </mat-form-field>
+    @if (!this.appService.authData.userId) {
+      <mat-form-field>
+        <mat-label>{{'review.comment-name' | translate}}</mat-label>
+        <input matInput
+          [placeholder]="'review.enter-comment-name' | translate"
+          [(ngModel)]="userName"
+          (ngModelChange)="storeUserName()">
+      </mat-form-field>
+    }
   </div>
   <mat-dialog-content class="fx-flex-fill">
-    <studio-lite-comments *ngIf="parametersValid()"
-                          [style.height.%]="100"
-                          [userName]="userName"
-                          [userId]="this.appService.authData.userId"
-                          [unitId]="this.reviewService.unitDbId"
-                          [workspaceId]="0"
-                          [newCommentOnly]="!reviewService.reviewConfig.showOthersComments"
-                          [reviewId]="this.reviewService.reviewId"
-                          (onCommentsUpdated)="close()">
-    </studio-lite-comments>
+    @if (parametersValid()) {
+      <studio-lite-comments
+        [style.height.%]="100"
+        [userName]="userName"
+        [userId]="this.appService.authData.userId"
+        [unitId]="this.reviewService.unitDbId"
+        [workspaceId]="0"
+        [newCommentOnly]="!reviewService.reviewConfig.showOthersComments"
+        [reviewId]="this.reviewService.reviewId"
+        (onCommentsUpdated)="close()">
+      </studio-lite-comments>
+    }
   </mat-dialog-content>
   <div class="fx-row-space-around-center">
     <mat-dialog-actions align="end">
       <button mat-raised-button
-              [mat-dialog-close]="false">
+        [mat-dialog-close]="false">
         {{'dialogs.close' | translate }}
       </button>
     </mat-dialog-actions>

@@ -9,7 +9,7 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatError } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { NgIf, NgFor } from '@angular/common';
+
 import { BackendService } from '../../services/backend.service';
 import { DeleteStateComponent } from '../delete-state/delete-state.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
@@ -21,7 +21,7 @@ import { State } from '../../../admin/models/state.type';
   styleUrls: ['./states.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, MatProgressSpinner, MatButton, NgFor, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
+  imports: [MatProgressSpinner, MatButton, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
 })
 export class StatesComponent implements OnInit {
   states: State[] = [];

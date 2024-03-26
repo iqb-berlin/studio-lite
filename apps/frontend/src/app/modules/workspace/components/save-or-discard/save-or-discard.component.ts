@@ -3,7 +3,7 @@ import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgIf } from '@angular/common';
+
 import { MatButton } from '@angular/material/button';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ConfirmDialogData } from '../../models/confirm-dialog.interface';
@@ -13,7 +13,7 @@ import { ConfirmDialogData } from '../../models/confirm-dialog.interface';
   templateUrl: './save-or-discard.component.html',
   styleUrls: ['./save-or-discard.component.scss'],
   standalone: true,
-  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, NgIf, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SaveOrDiscardComponent {
   constructor(public workspaceService: WorkspaceService,

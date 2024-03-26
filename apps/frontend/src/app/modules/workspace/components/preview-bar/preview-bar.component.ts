@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { PageData } from '../../models/page-data.interface';
@@ -25,7 +25,7 @@ import { StatusIndicationComponent } from '../status-indication/status-indicatio
   styleUrls: ['./preview-bar.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [StatusIndicationComponent, MatButton, MatTooltip, NgIf, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
+  imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];

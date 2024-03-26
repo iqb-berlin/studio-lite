@@ -6,7 +6,7 @@ import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
@@ -23,7 +23,7 @@ const PanelWidthOffset = 40;
   styleUrls: ['./unit-info.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatIcon, NgIf, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
+  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;

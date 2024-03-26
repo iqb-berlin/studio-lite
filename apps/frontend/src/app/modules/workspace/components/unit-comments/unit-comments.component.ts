@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { NgIf } from '@angular/common';
+
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { CommentsComponent } from '../../../comments/components/comments/comments.component';
@@ -9,7 +9,7 @@ import { CommentsComponent } from '../../../comments/components/comments/comment
   templateUrl: './unit-comments.component.html',
   styleUrls: ['./unit-comments.component.scss'],
   standalone: true,
-  imports: [NgIf, CommentsComponent]
+  imports: [CommentsComponent]
 })
 export class UnitCommentsComponent implements OnDestroy {
   userName: string = '';

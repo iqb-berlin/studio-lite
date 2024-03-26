@@ -2,16 +2,16 @@
 
 <mat-dialog-content class="fx-column-start-stretch">
   <form [formGroup]="editUserForm"
-        class="fx-column-start-stretch">
+    class="fx-column-start-stretch">
     <p>
       {{'admin.user-name-hint' | translate}}
     </p>
     <mat-form-field>
       <input matInput
-             formControlName="name"
-             type="text"
-             [placeholder]="'user.login-name' | translate"
-             [value]="data.name"/>
+        formControlName="name"
+        type="text"
+        [placeholder]="'user.login-name' | translate"
+        [value]="data.name"/>
     </mat-form-field>
     <mat-form-field>
       <input
@@ -23,39 +23,43 @@
     </mat-form-field>
     <mat-form-field>
       <input matInput
-             formControlName="firstName"
-             type="text"
-             [placeholder]="'user.first-name' | translate"
-             [value]="data.firstName"/>
+        formControlName="firstName"
+        type="text"
+        [placeholder]="'user.first-name' | translate"
+        [value]="data.firstName"/>
     </mat-form-field>
     <mat-form-field>
       <input matInput
-             formControlName="email"
-             type="text"
-             [placeholder]="'user.email' | translate"
-             [value]="data.email"/>
+        formControlName="email"
+        type="text"
+        [placeholder]="'user.email' | translate"
+        [value]="data.email"/>
     </mat-form-field>
-    <div *ngIf="data.emailApproved"
-         class="consent fx-row-start-center">
-      <mat-icon>check_circle_outline</mat-icon>
-      {{'admin.email-approved' | translate}}
-    </div>
-    <div *ngIf="!data.emailApproved"
-         class="consent fx-row-start-center">
-      <mat-icon>highlight_off</mat-icon>
-      {{'admin.email-not-approved' | translate}}
-    </div>
+    @if (data.emailApproved) {
+      <div
+        class="consent fx-row-start-center">
+        <mat-icon>check_circle_outline</mat-icon>
+        {{'admin.email-approved' | translate}}
+      </div>
+    }
+    @if (!data.emailApproved) {
+      <div
+        class="consent fx-row-start-center">
+        <mat-icon>highlight_off</mat-icon>
+        {{'admin.email-not-approved' | translate}}
+      </div>
+    }
     <mat-form-field>
       <mat-label>Notiz</mat-label>
       <input matInput
-             formControlName="description"
-             type="text"
-             [placeholder]="'user.note' | translate"
-             [value]="data.description"/>
+        formControlName="description"
+        type="text"
+        [placeholder]="'user.note' | translate"
+        [value]="data.description"/>
     </mat-form-field>
     <mat-checkbox formControlName="isAdmin"
-                  [value]="data.isAdmin ? 'true' : 'false'"
-                  class="consent">
+      [value]="data.isAdmin ? 'true' : 'false'"
+      class="consent">
       {{'user.admin' | translate}}
     </mat-checkbox>
     <div>
@@ -63,23 +67,23 @@
     </div>
     <mat-form-field>
       <input matInput
-             formControlName="password"
-             type="password"
-             autocomplete="new-password"
-             [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"/>
+        formControlName="password"
+        type="password"
+        autocomplete="new-password"
+        [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"/>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="primary"
-          type="submit"
-          [mat-dialog-close]="editUserForm"
-          [disabled]="editUserForm.invalid">
+    type="submit"
+    [mat-dialog-close]="editUserForm"
+    [disabled]="editUserForm.invalid">
     {{(data.newUser ? 'create' : 'save') | translate}}
   </button>
   <button mat-raised-button
-          [mat-dialog-close]="false">
+    [mat-dialog-close]="false">
     {{'cancel' | translate}}
   </button>
 </mat-dialog-actions>

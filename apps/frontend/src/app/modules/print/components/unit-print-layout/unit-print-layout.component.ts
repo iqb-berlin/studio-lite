@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { NgIf } from '@angular/common';
+
 import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../../workspace/services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -25,7 +25,7 @@ import { UnitPropertiesComponent } from '../../../shared/components/unit-propert
   styleUrls: ['./unit-print-layout.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [UnitPropertiesComponent, NgIf, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
+  imports: [UnitPropertiesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
 })
 export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;

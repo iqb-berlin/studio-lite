@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { LogoutDirective } from '../../directives/logout.directive';
 import { UserIssuesComponent } from '../user-issues/user-issues.component';
 import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
@@ -18,7 +18,7 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   styleUrls: ['./user-reviews-area.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [AreaTitleComponent, NgIf, MatButton, LogoutDirective, MatTooltip, MatIcon, UserIssuesComponent, TranslateModule, UserIssuesPipe]
+  imports: [AreaTitleComponent, MatButton, LogoutDirective, MatTooltip, MatIcon, UserIssuesComponent, TranslateModule, UserIssuesPipe]
 })
 export class UserReviewsAreaComponent {
   @Input() reviews!: ReviewDto[];

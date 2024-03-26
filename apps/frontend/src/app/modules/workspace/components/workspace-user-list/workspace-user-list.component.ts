@@ -5,7 +5,7 @@ import { Component, Inject } from '@angular/core';
 import { UsersInWorkspaceDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { UserListComponent } from '../user-list/user-list.component';
 
 export interface WorkspaceUserListData {
@@ -19,7 +19,7 @@ export interface WorkspaceUserListData {
   styleUrls: ['./workspace-user-list.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, NgIf, UserListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, UserListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class WorkspaceUserListComponent {
   title: string;

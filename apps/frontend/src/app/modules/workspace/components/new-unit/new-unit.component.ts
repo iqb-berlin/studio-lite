@@ -15,7 +15,7 @@ import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatError } from '@angular/material/form-field';
-import { NgIf, NgFor } from '@angular/common';
+
 import { NewUnitData } from '../../models/new-unit.interface';
 import { WorkspaceService } from '../../services/workspace.service';
 
@@ -25,7 +25,7 @@ import { WorkspaceService } from '../../services/workspace.service';
   styleUrls: ['./new-unit.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, NgIf, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, NgFor, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class NewUnitComponent {
   newUnitForm: UntypedFormGroup;

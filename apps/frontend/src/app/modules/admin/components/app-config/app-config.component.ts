@@ -12,7 +12,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { NgIf, NgFor } from '@angular/common';
+
 import { ToTimePipe } from '../../pipes/to-time.pipe';
 import { AppConfig } from '../../../../models/app-config.class';
 import { defaultAppConfig } from '../../../../services/app.service';
@@ -25,7 +25,7 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
   styleUrls: ['./app-config.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, NgFor, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {

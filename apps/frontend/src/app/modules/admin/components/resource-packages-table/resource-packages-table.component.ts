@@ -10,7 +10,7 @@ import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 
 @Component({
@@ -19,7 +19,7 @@ import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
   styleUrls: ['./resource-packages-table.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, NgFor, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
+  imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
 })
 export class ResourcePackagesTableComponent implements OnChanges {
   resourcePackageProperties: string[] = ['name', 'createdAt'];
