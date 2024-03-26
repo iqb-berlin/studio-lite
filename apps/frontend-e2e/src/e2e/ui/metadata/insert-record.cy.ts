@@ -1,7 +1,8 @@
 import {
+  addFirstUser,
   addUnit,
   createAreaForGroupFromAdmin,
-  createGroupArea, deleteGroupArea, deleteUnit,
+  createGroupArea, deleteFirstUser, deleteGroupArea, deleteUnit,
   grantRemovePrivilegeOnArea,
   login, logout, visitArea,
   visitLoginPage
@@ -30,6 +31,7 @@ describe('Metadata Management', () => {
   });
 
   it('prepare context', () => {
+    addFirstUser();
     visitLoginPage();
     login(adminData.user_name, adminData.user_pass);
     createGroupArea(group);
@@ -111,6 +113,8 @@ describe('Metadata Management', () => {
     deleteUnit('M1_001');
     visitLoginPage();
     deleteGroupArea(group);
+    visitLoginPage();
+    deleteFirstUser();
     visitLoginPage();
     logout();
   });
