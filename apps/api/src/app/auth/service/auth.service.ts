@@ -23,7 +23,7 @@ export class AuthService {
     return this.reviewService.getReviewByKeyAndPassword(reviewKey, pass);
   }
 
-  async login(user) {
+  async login(user: { id: number, name: string, reviewId: number }): Promise<string> {
     this.logger.log(user.id ?
       `User with id '${user.id}' is logging in.` :
       `Review with id '${user.reviewId}' is logging in.`);
@@ -65,7 +65,7 @@ export class AuthService {
   }
 
   async isAdminUser(userId: number): Promise<boolean> {
-    return userId && this.usersService.getUserIsAdmin(userId);
+    return !!userId && this.usersService.getUserIsAdmin(userId);
   }
 
   async isWorkspaceGroupAdmin(userId: number, workspaceGroupId?: number): Promise<boolean> {
@@ -76,10 +76,5 @@ export class AuthService {
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     return this.usersService.canAccessWorkSpace(userId, workspaceId);
-  }
-
-  async canAccessReview(userId: number, reviewIdInToken: number, reviewIdToCheck: number): Promise<boolean> {
-    if (reviewIdInToken === reviewIdToCheck) return true;
-    return this.usersService.canAccessReview(userId, reviewIdToCheck);
   }
 }
