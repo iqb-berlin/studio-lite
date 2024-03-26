@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
@@ -43,8 +43,10 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.settings = this.wsgAdminService.selectedWorkspaceGroupSettings;
-    this.backendService.getWorkspaceGroupProfiles(this.data.wsg?.id).subscribe(res => {
-      this.fetchedProfiles = res.settings?.profiles || [];
+    this.backendService.getWorkspaceGroupById(this.data.wsg?.id).subscribe(res => {
+      this.fetchedProfiles = (
+        res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
+      ) || [];
       this.formData.profilesSelected = this.fetchedProfiles;
     });
   }

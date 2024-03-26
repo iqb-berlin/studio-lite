@@ -29,11 +29,11 @@ export class BackendService {
       );
   }
 
-  getWorkspaceGroupProfiles(workspaceGroupId: number):Observable<any> {
+  getWorkspaceGroupById(workspaceGroupId: number):Observable<boolean | WorkspaceGroupFullDto> {
     return this.http
-      .get(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`)
+      .get<WorkspaceGroupFullDto>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(false))
       );
   }
 
