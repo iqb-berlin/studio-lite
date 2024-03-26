@@ -251,7 +251,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         width: '600px'
       }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport().subscribe((units: any) => {
+        this.metadataService.createMetadataReport().subscribe((units:any) => {
           if (res) {
             const selectedUnits = units.filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
             this.showMetadataDialog.open(TableViewComponent, {
@@ -280,7 +280,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.codingReportDialog.open(CodingReportComponent, {
         width: '80%',
-        minHeight: '50%',
+        minHeight: '80%',
         autoFocus: false
       });
     }
