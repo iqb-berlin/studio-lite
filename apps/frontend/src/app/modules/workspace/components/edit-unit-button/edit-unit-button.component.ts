@@ -249,17 +249,19 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         width: '600px'
       }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport().subscribe((units:any) => {
-          if (res) {
-            const selectedUnits = units.filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
-            this.showMetadataDialog.open(TableViewComponent, {
-              width: '80%',
-              height: '80%',
-              data: { units: selectedUnits },
-              autoFocus: false
-            });
-          }
-        });
+        this.metadataService.createMetadataReport()
+          .subscribe((units: UnitMetadataDto[] | boolean) => {
+            if (res) {
+              const selectedUnits = (units as UnitMetadataDto[])
+                .filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
+              this.showMetadataDialog.open(TableViewComponent, {
+                width: '80%',
+                height: '80%',
+                data: { units: selectedUnits },
+                autoFocus: false
+              });
+            }
+          });
       });
     }
   }

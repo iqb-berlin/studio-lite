@@ -4,6 +4,7 @@ import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 
@@ -126,9 +127,9 @@ export class MetadataService {
       });
   }
 
-  createMetadataReport(): Observable<boolean | unknown> {
-    return this.http.get(
-      `${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
+  createMetadataReport(): Observable<boolean | UnitMetadataDto[]> {
+    return this.http
+      .get<UnitMetadataDto[]>(`${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
       .pipe(
         catchError(() => of(false)),
         map(report => report)
