@@ -9,7 +9,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { AddUnitButtonComponent } from './add-unit-button.component';
-import { SelectUnitDirective } from '../../directives/select-unit.directive';
 
 describe('AddUnitButtonComponent', () => {
   let component: AddUnitButtonComponent;
@@ -25,8 +24,7 @@ describe('AddUnitButtonComponent', () => {
         MatSnackBarModule,
         MatDialogModule,
         MatIconModule,
-        MatMenuModule,
-        SelectUnitDirective
+        MatMenuModule
       ],
       providers: [{
         provide: 'SERVER_URL',
