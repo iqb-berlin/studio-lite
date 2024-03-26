@@ -10,10 +10,8 @@ import { DatePipe, NgForOf } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
-
-// eslint-disable-next-line import/no-cycle
-import { WorkspaceModule } from '../../workspace.module';
 import { BackendService } from '../../services/backend.service';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -23,12 +21,11 @@ const datePipe = new DatePipe('de-DE');
   imports: [
     TranslateModule,
     MatDialogModule,
-    WorkspaceModule,
     MatCheckboxModule,
     FormsModule,
     MatRadioModule,
     MatSelectModule,
-    WorkspaceModule,
+    SelectUnitListComponent,
     NgForOf
   ],
   styleUrls: ['export-coding-book.component.scss']
