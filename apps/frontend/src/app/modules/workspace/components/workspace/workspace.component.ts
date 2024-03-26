@@ -1,5 +1,5 @@
 import {
-  ActivatedRoute, DefaultUrlSerializer, NavigationEnd, Router
+  ActivatedRoute, NavigationEnd, Router
 } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -16,6 +16,7 @@ import { UnitDataAreaComponent } from '../unit-data-area/unit-data-area.componen
 import { UnitsAreaComponent } from '../units-area/units-area.component';
 import { SplitterPaneComponent } from '../../../splitter/components/splitter-pane/splitter-pane.component';
 import { SplitterComponent } from '../../../splitter/components/splitter/splitter.component';
+import { RoutingHelperService } from '../../services/routing-helper.service';
 
 @Component({
   selector: 'studio-lite-workspace',
@@ -91,18 +92,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private openSecondaryOutlet(url: string): void {
-    const secondaryOutletTab = WorkspaceComponent
+    const secondaryOutletTab = RoutingHelperService
       .getSecondaryOutlet(url, this.routingOutlet, this.secondaryRoutingOutlet);
     this.pinnedNavTab = secondaryOutletTab ? [{ name: secondaryOutletTab, duplicable: true }] : [];
-  }
-
-  static getSecondaryOutlet(url: string,
-                            primaryRoutingOutlet: string,
-                            secondaryRoutingOutlet: string): string | null {
-    const serializer = new DefaultUrlSerializer();
-    const urlTree = serializer.parse(url);
-    return urlTree
-      .root.children[primaryRoutingOutlet]?.children[secondaryRoutingOutlet]?.segments[0]?.path || null;
   }
 
   private initWorkspace(workspace: WorkspaceFullDto): void {
