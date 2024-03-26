@@ -8,7 +8,7 @@ import {
   UserFullDto,
   UserInListDto,
   WorkspaceGroupFullDto, WorkspaceGroupInListDto,
-  UnitExportConfigDto, WorkspaceGroupSettingsDto
+  UnitExportConfigDto, WorkspaceGroupSettingsDto, WorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -37,11 +37,11 @@ export class BackendService {
       );
   }
 
-  getWorkspaceProfile(workspaceId: number):Observable<any> {
+  getWorkspaceById(workspaceId: number):Observable<boolean | WorkspaceFullDto> {
     return this.http
-      .get(`${this.serverUrl}workspace/${workspaceId}`)
+      .get<WorkspaceFullDto>(`${this.serverUrl}workspace/${workspaceId}`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(false))
       );
   }
 
