@@ -9,7 +9,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { EditWorkspaceGroupComponent } from '../edit-workspace-group/edit-workspace-group.component';
-// eslint-disable-next-line import/no-cycle
 import {
   EditWorkspaceGroupSettingsComponent
 } from '../edit-workspace-group-settings/edit-workspace-group-settings.component';

@@ -12,7 +12,6 @@ import { Sort } from '@angular/material/sort';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { NgFor, KeyValuePipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
-// eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { BackendService } from '../../services/backend.service';
 import { UnitTableComponent } from '../unit-table/unit-table.component';

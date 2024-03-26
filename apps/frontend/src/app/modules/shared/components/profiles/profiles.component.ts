@@ -10,9 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { NgIf, NgFor } from '@angular/common';
-// eslint-disable-next-line import/no-cycle
-import { Profile } from '../../../admin/components/workspace-groups/workspace-groups.component';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { Profile } from '../../models/profile.type';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 

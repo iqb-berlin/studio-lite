@@ -9,13 +9,8 @@ import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-gro
 import { BackendService } from '../../services/backend.service';
 import { State } from '../../models/state.type';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-// eslint-disable-next-line import/no-cycle
 import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
-
-type Profile = {
-  id: string,
-  label: string
-};
+import { Profile } from '../../../shared/models/profile.type';
 
 @Component({
   selector: 'studio-lite-edit-workspace-group',
