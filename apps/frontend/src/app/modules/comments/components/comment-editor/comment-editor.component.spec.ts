@@ -78,7 +78,9 @@ describe('CommentEditorComponent', () => {
         NgxTiptapModule
       ]
     }).compileComponents();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).ClipboardEvent = ClipboardEventMock;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).DragEvent = DragEventMock;
     fixture = TestBed.createComponent(CommentEditorComponent);
     component = fixture.componentInstance;
