@@ -86,7 +86,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
           const unitMDProfile = (
             res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.unitMDProfile
           ) || '';
-          if (unitMDProfile) this.selectedItemMDProfile = unitMDProfile;
+          if (unitMDProfile) this.selectedUnitMDProfile = unitMDProfile;
         });
     }
   }
