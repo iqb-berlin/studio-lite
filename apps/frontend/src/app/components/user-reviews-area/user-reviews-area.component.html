@@ -2,16 +2,18 @@
   <studio-lite-area-title
     [title]="'home.select-review' | translate">
   </studio-lite-area-title>
-  <button *ngIf="isReviewUser"
-          mat-button
-          [matTooltip]="'home.logout' | translate"
-          studioLiteLogout>
-    <mat-icon>logout</mat-icon>
-  </button>
+  @if (isReviewUser) {
+    <button
+      mat-button
+      [matTooltip]="'home.logout' | translate"
+      studioLiteLogout>
+      <mat-icon>logout</mat-icon>
+    </button>
+  }
 </div>
 
 <div class="fx-column-start-stretch"
-     [style.overflow-y]="'auto'">
+  [style.overflow-y]="'auto'">
   <studio-lite-user-issues
     class="fx-column-start-stretch"
     layout="big"

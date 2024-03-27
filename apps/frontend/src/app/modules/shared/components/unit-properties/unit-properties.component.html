@@ -1,49 +1,73 @@
 <h2>{{key}}</h2>
-<h3 *ngIf="name">{{name}}</h3>
+@if (name) {
+  <h3>{{name}}</h3>
+}
 
 <table class="metadata">
-  <tr *ngIf="stateLabel">
-    <td class="cell left-cell">{{'print.stateLabel' | translate}}</td>
-    <td class="cell right-cell">{{stateLabel}}</td>
-  </tr>
-  <tr *ngIf="groupName">
-    <td class="cell left-cell">{{'print.group-name' | translate}}</td>
-    <td class="cell right-cell">{{groupName}}</td>
-  </tr>
-  <tr *ngIf="description">
-    <td class="cell left-cell">{{'print.description' | translate}}</td>
-    <td class="cell right-cell">{{description}}</td>
-  </tr>
-  <tr *ngIf="transcript">
-    <td class="cell left-cell">{{'print.transcript' | translate}}</td>
-    <td class="cell right-cell">{{transcript}}</td>
-  </tr>
-  <tr *ngIf="reference">
-    <td class="cell left-cell">{{'print.reference' | translate}}</td>
-    <td class="cell right-cell">{{reference}}</td>
-  </tr>
-  <tr *ngIf="lastChangedDefinition">
-    <td class="cell left-cell">{{'print.last-changed-definition' | translate}}</td>
-    <td class="cell right-cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
-  </tr>
-  <tr *ngIf="lastChangedMetadata">
-    <td class="cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
-    <td class="cell right-cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
-  </tr>
-  <tr *ngIf="lastChangedScheme">
-    <td class="cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
-    <td class="cell right-cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
-  </tr>
-  <tr *ngIf="player">
-    <td class="cell left-cell">{{'print.player' | translate}}</td>
-    <td class="cell right-cell">{{player}}</td>
-  </tr>
-  <tr *ngIf="editor">
-    <td class="cell left-cell">{{'print.editor' | translate}}</td>
-    <td class="cell right-cell">{{editor}}</td>
-  </tr>
-  <tr *ngIf="schemer">
-    <td class="cell left-cell">{{'print.schemer' | translate}}</td>
-    <td class="cell right-cell">{{schemer}}</td>
-  </tr>
+  @if (stateLabel) {
+    <tr>
+      <td class="cell left-cell">{{'print.stateLabel' | translate}}</td>
+      <td class="cell right-cell">{{stateLabel}}</td>
+    </tr>
+  }
+  @if (groupName) {
+    <tr>
+      <td class="cell left-cell">{{'print.group-name' | translate}}</td>
+      <td class="cell right-cell">{{groupName}}</td>
+    </tr>
+  }
+  @if (description) {
+    <tr>
+      <td class="cell left-cell">{{'print.description' | translate}}</td>
+      <td class="cell right-cell">{{description}}</td>
+    </tr>
+  }
+  @if (transcript) {
+    <tr>
+      <td class="cell left-cell">{{'print.transcript' | translate}}</td>
+      <td class="cell right-cell">{{transcript}}</td>
+    </tr>
+  }
+  @if (reference) {
+    <tr>
+      <td class="cell left-cell">{{'print.reference' | translate}}</td>
+      <td class="cell right-cell">{{reference}}</td>
+    </tr>
+  }
+  @if (lastChangedDefinition) {
+    <tr>
+      <td class="cell left-cell">{{'print.last-changed-definition' | translate}}</td>
+      <td class="cell right-cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
+    </tr>
+  }
+  @if (lastChangedMetadata) {
+    <tr>
+      <td class="cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
+      <td class="cell right-cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
+    </tr>
+  }
+  @if (lastChangedScheme) {
+    <tr>
+      <td class="cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
+      <td class="cell right-cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
+    </tr>
+  }
+  @if (player) {
+    <tr>
+      <td class="cell left-cell">{{'print.player' | translate}}</td>
+      <td class="cell right-cell">{{player}}</td>
+    </tr>
+  }
+  @if (editor) {
+    <tr>
+      <td class="cell left-cell">{{'print.editor' | translate}}</td>
+      <td class="cell right-cell">{{editor}}</td>
+    </tr>
+  }
+  @if (schemer) {
+    <tr>
+      <td class="cell left-cell">{{'print.schemer' | translate}}</td>
+      <td class="cell right-cell">{{schemer}}</td>
+    </tr>
+  }
 </table>

@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { NgIf, NgFor } from '@angular/common';
+
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
@@ -29,7 +29,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   styleUrls: ['./users.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule]
+  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);

@@ -10,7 +10,7 @@ import { MatSelectChange, MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatLabel, MatError } from '@angular/material/form-field';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -37,7 +37,7 @@ type SelectedRow = {
   styleUrls: ['./edit-workspace-settings.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, NgIf, MatError, MatSelect, NgFor, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class EditWorkspaceSettingsComponent implements OnInit {
   constructor(

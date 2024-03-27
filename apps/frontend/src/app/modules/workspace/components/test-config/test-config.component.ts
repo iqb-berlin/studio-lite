@@ -5,7 +5,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { NgIf } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { BackendService } from '../../services/backend.service';
@@ -17,7 +17,7 @@ import { ModuleService } from '../../../shared/services/module.service';
   templateUrl: './test-config.component.html',
   styleUrls: ['./test-config.component.scss'],
   standalone: true,
-  imports: [MatCheckbox, FormsModule, NgIf, MatFormField, MatLabel, MatInput, TranslateModule]
+  imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule]
 })
 export class TestConfigComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];

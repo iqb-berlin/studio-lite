@@ -15,7 +15,7 @@ import {
 } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../../services/app.service';
@@ -32,7 +32,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   styleUrls: ['./reviews.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {

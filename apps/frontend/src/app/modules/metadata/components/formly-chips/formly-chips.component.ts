@@ -5,7 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FieldTypeConfig } from '@ngx-formly/core';
 import { MatIcon } from '@angular/material/icon';
-import { NgFor } from '@angular/common';
+
 import {
   MatChipGrid, MatChipRow, MatChipRemove, MatChipInput
 } from '@angular/material/chips';
@@ -18,7 +18,7 @@ import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
   templateUrl: './formly-chips.component.html',
   styleUrls: ['./formly-chips.component.scss'],
   standalone: true,
-  imports: [MatChipGrid, NgFor, MatChipRow, MatChipRemove, MatIcon, FormsModule, MatChipInput, ReactiveFormsModule]
+  imports: [MatChipGrid, MatChipRow, MatChipRemove, MatIcon, FormsModule, MatChipInput, ReactiveFormsModule]
 })
 export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements OnDestroy {
   private ngUnsubscribe = new Subject<void>();

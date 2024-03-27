@@ -1,46 +1,48 @@
 <button mat-button
-        [style.width.%]="100"
-        [matMenuTriggerFor]="menuOther"
-        [matTooltip]="'workspace.more-unit-tasks' | translate"
-        matTooltipPosition="above">
+  [style.width.%]="100"
+  [matMenuTriggerFor]="menuOther"
+  [matTooltip]="'workspace.more-unit-tasks' | translate"
+  matTooltipPosition="above">
   <studio-lite-wrapped-icon icon="menu"></studio-lite-wrapped-icon>
 </button>
 
 <mat-menu #menuOther>
-  <button *ngIf="workspaceService.isWorkspaceGroupAdmin"
-          [matTooltip]="'workspace-settings.title' | translate"
-          matTooltipPosition="right"
-          mat-menu-item
-          (click)="settings()">
-    <mat-icon>settings</mat-icon>
-    {{ 'workspace.unit-settings' | translate }}
-  </button>
+  @if (workspaceService.isWorkspaceGroupAdmin) {
+    <button
+      [matTooltip]="'workspace-settings.title' | translate"
+      matTooltipPosition="right"
+      mat-menu-item
+      (click)="settings()">
+      <mat-icon>settings</mat-icon>
+      {{ 'workspace.unit-settings' | translate }}
+    </button>
+  }
   <button mat-menu-item
-          [matTooltip]="'workspace.manage-unit-groups' | translate"
-          matTooltipPosition="right"
-          (click)="manageGroups()">
+    [matTooltip]="'workspace.manage-unit-groups' | translate"
+    matTooltipPosition="right"
+    (click)="manageGroups()">
     <mat-icon>format_align_right</mat-icon>
     {{ 'workspace.manage-groups' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.review-admin' | translate"
-          matTooltipPosition="right"
-          (click)="reviews()">
+    [matTooltip]="'workspace.review-admin' | translate"
+    matTooltipPosition="right"
+    (click)="reviews()">
     <mat-icon>slideshow</mat-icon>
     {{ 'workspace.reviews' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.user-list' | translate"
-          matTooltipPosition="right"
-          (click)="userList()">
+    [matTooltip]="'workspace.user-list' | translate"
+    matTooltipPosition="right"
+    (click)="userList()">
     <mat-icon>people_alt</mat-icon>
     {{ 'workspace.unit-users' | translate }}
   </button>
   <mat-divider></mat-divider>
   <button mat-menu-item
-          [matTooltip]="'workspace.download-unit' | translate"
-          matTooltipPosition="right"
-          (click)="exportUnit()">
+    [matTooltip]="'workspace.download-unit' | translate"
+    matTooltipPosition="right"
+    (click)="exportUnit()">
     <mat-icon>get_app</mat-icon>
     {{ 'workspace.export' | translate }}
   </button>
@@ -49,24 +51,24 @@
     {{ 'workspace.reports' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.print-preview-units' | translate"
-          matTooltipPosition="right"
-          (click)="printUnits()">
+    [matTooltip]="'workspace.print-preview-units' | translate"
+    matTooltipPosition="right"
+    (click)="printUnits()">
     <mat-icon>print</mat-icon>
     {{ 'workspace.print-preview' | translate }}
   </button>
   <mat-divider></mat-divider>
   <button mat-menu-item
-          [matTooltip]="'workspace.move-unit' | translate"
-          matTooltipPosition="right"
-          (click)="moveOrCopyUnit(true)">
+    [matTooltip]="'workspace.move-unit' | translate"
+    matTooltipPosition="right"
+    (click)="moveOrCopyUnit(true)">
     <mat-icon>swap_horiz</mat-icon>
     {{ 'workspace.move-to' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.copy-unit' | translate"
-          matTooltipPosition="right"
-          (click)="moveOrCopyUnit(false)">
+    [matTooltip]="'workspace.copy-unit' | translate"
+    matTooltipPosition="right"
+    (click)="moveOrCopyUnit(false)">
     <mat-icon>content_copy</mat-icon>
     {{ 'workspace.copy-to' | translate }}
   </button>
@@ -74,23 +76,23 @@
 
 <mat-menu #reports>
   <button mat-menu-item
-          [matTooltip]="'workspace.show-metadata' | translate"
-          matTooltipPosition="right"
-          (click)="showMetadata()">
+    [matTooltip]="'workspace.show-metadata' | translate"
+    matTooltipPosition="right"
+    (click)="showMetadata()">
     <mat-icon>description</mat-icon>
     {{ 'workspace.metadata' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.show-coding-report' | translate"
-          matTooltipPosition="right"
-          (click)="showCodingReport()">
+    [matTooltip]="'workspace.show-coding-report' | translate"
+    matTooltipPosition="right"
+    (click)="showCodingReport()">
     <mat-icon>description</mat-icon>
     {{ 'workspace.coding' | translate }}
   </button>
   <button mat-menu-item
-          [matTooltip]="'workspace.export-coding-book' | translate"
-          matTooltipPosition="right"
-          (click)="exportCodingBook()">
+    [matTooltip]="'workspace.export-coding-book' | translate"
+    matTooltipPosition="right"
+    (click)="exportCodingBook()">
     <mat-icon>description</mat-icon>
     {{ 'workspace.coding-book' | translate }}
   </button>

@@ -8,7 +8,7 @@ import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 
@@ -26,7 +26,7 @@ export interface MoveComponentData {
   styleUrls: ['./move-workspace.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, NgIf, MatFormField, MatLabel, MatSelect, NgFor, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class MoveWorkspaceComponent {

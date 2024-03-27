@@ -1,7 +1,9 @@
 <div class="duration-container">
   <div class="fx-row-start-start">
     <mat-form-field class="time-input">
-      <mat-label *ngIf="props.label">  </mat-label>
+      @if (props.label) {
+        <mat-label>  </mat-label>
+      }
       <input
         type="number"
         matInput
@@ -12,7 +14,9 @@
     </mat-form-field>
     <div class="duration-separator">:</div>
     <mat-form-field class="time-input">
-      <mat-label *ngIf="props.label">  </mat-label>
+      @if (props.label) {
+        <mat-label>  </mat-label>
+      }
       <input
         type="number"
         matInput
@@ -22,9 +26,11 @@
         (ngModelChange)="durationChange()"/>
     </mat-form-field>
   </div>
-  <div *ngIf="props.label"
-       class="label">
-    {{props.label}}
-  </div>
+  @if (props.label) {
+    <div
+      class="label">
+      {{props.label}}
+    </div>
+  }
 </div>
 

@@ -3,37 +3,39 @@
   <div class="fx-row-start-stretch fx-gap-20 select-review-area">
 
     <div class="fx-column-end-stretch fx-flex-row-30 review-list-area">
-      <studio-lite-search-filter *ngIf="reviews.length"
-                                 [title]="'search-filter.filter-reviews' | translate"
-        (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
-      </studio-lite-search-filter>
+      @if (reviews.length) {
+        <studio-lite-search-filter
+          [title]="'search-filter.filter-reviews' | translate"
+          (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+        </studio-lite-search-filter>
+      }
 
-      <mat-table *ngIf="reviews.length"
-                 class="reviews fx-flex-fill"
-                 matSortDisableClear
-                 matSortActive="name"
-                 matSortDirection="asc"
-                 matSort
-                 [dataSource]="objectsDatasource">
-
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef
-                           mat-sort-header="name">
-            {{'workspace.review' | translate}}
-          </mat-header-cell>
-          <mat-cell *matCellDef="let element">
-            {{element.name}}
-          </mat-cell>
-        </ng-container>
-
-        <mat-header-row class='review-sort'
-                        *matHeaderRowDef="displayedColumns; sticky: true">
-        </mat-header-row>
-        <mat-row class='review-row'
-                 *matRowDef="let row; columns: displayedColumns;"
-                 [class.selected]="selectedReviewId===row.id"
-                 (click)="selectReview(row.id)"></mat-row>
-      </mat-table>
+      @if (reviews.length) {
+        <mat-table
+          class="reviews fx-flex-fill"
+          matSortDisableClear
+          matSortActive="name"
+          matSortDirection="asc"
+          matSort
+          [dataSource]="objectsDatasource">
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef
+              mat-sort-header="name">
+              {{'workspace.review' | translate}}
+            </mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              {{element.name}}
+            </mat-cell>
+          </ng-container>
+          <mat-header-row class='review-sort'
+            *matHeaderRowDef="displayedColumns; sticky: true">
+          </mat-header-row>
+          <mat-row class='review-row'
+            *matRowDef="let row; columns: displayedColumns;"
+            [class.selected]="selectedReviewId===row.id"
+          (click)="selectReview(row.id)"></mat-row>
+        </mat-table>
+      }
 
       <studio-lite-review-menu
         [selectedReviewId]="selectedReviewId"
@@ -49,31 +51,31 @@
     </div>
 
     <div class="fx-column-start-stretch fx-flex-row-70"
-         [class.review-changed]="changed"
-         [class.review-not-changed]="!changed">
+      [class.review-changed]="changed"
+      [class.review-not-changed]="!changed">
       <div class="fx-row-start-stretch fx-flex-fill fx-gap-20 review-changes-area">
         <div class="fx-flex-row-50">
           <div [hidden]="selectedReviewId">{{'workspace.select-review' | translate}}</div>
           <studio-lite-select-unit-list [hidden]="!selectedReviewId"
-                                        [selectedUnitIds]="reviewDataToChange.units ? reviewDataToChange.units : []"
-                                        [workspace]="workspaceService.selectedWorkspaceId"
-                                        (selectionChanged)="unitSelectionChanged($event)">
+            [selectedUnitIds]="reviewDataToChange.units ? reviewDataToChange.units : []"
+            [workspace]="workspaceService.selectedWorkspaceId"
+            (selectionChanged)="unitSelectionChanged($event)">
           </studio-lite-select-unit-list>
         </div>
         <studio-lite-review-config class="fx-flex-row-50 settings"
-                                   [selectedReviewId]="selectedReviewId"
-                                   [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
-                                   [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
-                                   [(name)]="reviewDataToChange.name"
-                                   [(password)]="reviewDataToChange.password"
-                                   (reviewChange)="changed = detectChanges()"
-                                   (bookletConfigSettingsChange)="bookletConfigSettingsChange($event)"
-                                   (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">
+          [selectedReviewId]="selectedReviewId"
+          [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
+          [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
+          [(name)]="reviewDataToChange.name"
+          [(password)]="reviewDataToChange.password"
+          (reviewChange)="changed = detectChanges()"
+          (bookletConfigSettingsChange)="bookletConfigSettingsChange($event)"
+          (reviewConfigSettingsChange)="reviewConfigSettingsChange($event)">
         </studio-lite-review-config>
       </div>
       <studio-lite-save-changes [changed]="changed"
-                                (discardChanges)="discardChanges()"
-                                (saveChanges)="saveChanges()">
+        (discardChanges)="discardChanges()"
+        (saveChanges)="saveChanges()">
       </studio-lite-save-changes>
     </div>
   </div>
@@ -81,9 +83,9 @@
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
       <button mat-raised-button
-              color="primary"
-              [mat-dialog-close]="false"
-              [disabled]="changed">
+        color="primary"
+        [mat-dialog-close]="false"
+        [disabled]="changed">
         {{'cancel' | translate}}
       </button>
     </div>

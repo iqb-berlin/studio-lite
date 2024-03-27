@@ -1,27 +1,32 @@
-  <h1 mat-dialog-title>{{typedData.title}}</h1>
-  <mat-dialog-content>
-    <form class="fx-column-start-stretch">
-      <p>{{ typedData.content }}</p>
-      <p>{{ typedData.warning }}</p>
-      <mat-form-field *ngIf="typedData.workspaceGroups && typedData.workspaceGroups.length">
+<h1 mat-dialog-title>{{typedData.title}}</h1>
+<mat-dialog-content>
+  <form class="fx-column-start-stretch">
+    <p>{{ typedData.content }}</p>
+    <p>{{ typedData.warning }}</p>
+    @if (typedData.workspaceGroups && typedData.workspaceGroups.length) {
+      <mat-form-field>
         <mat-label>{{'wsg-admin.select-workspace-group' | translate}}</mat-label>
         <mat-select [(value)]="selectedValue" >
-          <mat-option *ngFor="let wsg of typedData.workspaceGroups" [value]="wsg.id">{{wsg.name}}</mat-option>
+          @for (wsg of typedData.workspaceGroups; track wsg) {
+            <mat-option [value]="wsg.id">{{wsg.name}}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
-    </form>
-  </mat-dialog-content>
+    }
+  </form>
+</mat-dialog-content>
 
-  <mat-dialog-actions align="end" [ngClass]="{'center': typedData.workspaceGroups && !typedData.workspaceGroups.length}">
-    <button mat-raised-button
-            color="primary"
-            type="submit"
-            [mat-dialog-close]="selectedValue">
-      {{typedData.okButtonLabel}}
+<mat-dialog-actions align="end" [ngClass]="{'center': typedData.workspaceGroups && !typedData.workspaceGroups.length}">
+  <button mat-raised-button
+    color="primary"
+    type="submit"
+    [mat-dialog-close]="selectedValue">
+    {{typedData.okButtonLabel}}
     </button >
-    <button mat-raised-button
-            *ngIf="typedData.workspaceGroups && typedData.workspaceGroups.length"
-            [mat-dialog-close]="false">
-      {{'cancel' | translate}}
-    </button>
+    @if (typedData.workspaceGroups && typedData.workspaceGroups.length) {
+      <button mat-raised-button
+        [mat-dialog-close]="false">
+        {{'cancel' | translate}}
+      </button>
+    }
   </mat-dialog-actions>

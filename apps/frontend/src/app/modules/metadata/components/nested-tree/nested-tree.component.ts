@@ -13,7 +13,7 @@ import {
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
+
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import {
@@ -132,7 +132,7 @@ export class ChecklistDatabase {
   providers: [ChecklistDatabase],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, NgIf, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class NestedTreeComponent implements OnInit {

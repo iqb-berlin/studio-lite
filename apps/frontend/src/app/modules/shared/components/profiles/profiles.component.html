@@ -1,27 +1,37 @@
-<mat-spinner class="spinner" *ngIf="isLoading"></mat-spinner>
-<div class="container" *ngIf="!isLoading && !isError">
+@if (isLoading) {
+  <mat-spinner class="spinner"></mat-spinner>
+}
+@if (!isLoading && !isError) {
+  <div class="container">
     <h4 mat-dialog-title>{{'metadata.assign-metadata-profiles' | translate}}</h4>
     <form class="fx-column-start-stretch scroll-area" >
-      <div *ngFor="let collection of ProfileStoreWithProfilesCollection" class="profile-stores">
-        <mat-expansion-panel class="profile-store mat-elevation-z0">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              {{collection.profileStore.title}}
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div *ngFor="let profile of collection.profiles">
-            <mat-checkbox
-                    [id]="profile.id"
-                    [checked]="isChecked(profile.id)"
-                    (change)="changeSelection($event)"
-                    [name]="profile.label">
-              {{profile.label}}
-            </mat-checkbox>
-          </div>
-        </mat-expansion-panel>
-      </div>
+      @for (collection of ProfileStoreWithProfilesCollection; track collection) {
+        <div class="profile-stores">
+          <mat-expansion-panel class="profile-store mat-elevation-z0">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{collection.profileStore.title}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            @for (profile of collection.profiles; track profile) {
+              <div>
+                <mat-checkbox
+                  [id]="profile.id"
+                  [checked]="isChecked(profile.id)"
+                  (change)="changeSelection($event)"
+                  [name]="profile.label">
+                  {{profile.label}}
+                </mat-checkbox>
+              </div>
+            }
+          </mat-expansion-panel>
+        </div>
+      }
     </form>
-</div>
-<mat-error *ngIf="isError">
+  </div>
+}
+@if (isError) {
+  <mat-error>
     {{'metadata.error-fetching-metadata-profiles' | translate}}
-</mat-error>
+  </mat-error>
+}

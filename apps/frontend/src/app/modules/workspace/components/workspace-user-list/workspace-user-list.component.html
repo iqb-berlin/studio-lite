@@ -1,34 +1,42 @@
 <h1 mat-dialog-title>{{title}}</h1>
 <mat-dialog-content>
-  <div *ngIf="userList.users.length">
-    <studio-lite-user-list
-      [users]="userList.users">
-    </studio-lite-user-list>
-  </div>
-  <div *ngIf="!userList.users.length"
-       class="data-text">
-    {{'workspace.no-regular-users' | translate}}
-  </div>
-  <div *ngIf="userList.workspaceGroupAdmins.length">
-    <div class="data-text">
-      {{'workspace.workspace-group-admins' | translate}}
+  @if (userList.users.length) {
+    <div>
+      <studio-lite-user-list
+        [users]="userList.users">
+      </studio-lite-user-list>
     </div>
-    <studio-lite-user-list [users]="userList.workspaceGroupAdmins">
-    </studio-lite-user-list>
-  </div>
-  <div *ngIf="userList.admins.length">
-    <div class="data-text">
-      {{'workspace.workspace-admins' | translate}}
+  }
+  @if (!userList.users.length) {
+    <div
+      class="data-text">
+      {{'workspace.no-regular-users' | translate}}
     </div>
-    <studio-lite-user-list
-      [users]="userList.admins">
-    </studio-lite-user-list>
-  </div>
+  }
+  @if (userList.workspaceGroupAdmins.length) {
+    <div>
+      <div class="data-text">
+        {{'workspace.workspace-group-admins' | translate}}
+      </div>
+      <studio-lite-user-list [users]="userList.workspaceGroupAdmins">
+      </studio-lite-user-list>
+    </div>
+  }
+  @if (userList.admins.length) {
+    <div>
+      <div class="data-text">
+        {{'workspace.workspace-admins' | translate}}
+      </div>
+      <studio-lite-user-list
+        [users]="userList.admins">
+      </studio-lite-user-list>
+    </div>
+  }
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button  mat-raised-button
-           color="primary"
-          [mat-dialog-close]="false">
+    color="primary"
+    [mat-dialog-close]="false">
     {{'close' | translate}}
   </button>
 </mat-dialog-actions>

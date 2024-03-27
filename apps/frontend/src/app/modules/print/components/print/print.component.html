@@ -1,13 +1,15 @@
 <div #scrollContainer class="padding-container screen-scroll-container">
-  <div *ngFor="let unitId of unitIds"
-       class="page-break-after">
-    <studio-lite-unit-print-layout
-      [printPreviewHeight] = printPreviewHeight
-      [printOptions]="printOptions"
-      [unitId]="unitId"
-      [workspaceId]="workspaceId"
-      [workspaceGroupId]="workspaceGroupId"
-      (heightChange)="addToScrollPosition($event)">
-    </studio-lite-unit-print-layout>
-  </div>
+  @for (unitId of unitIds; track unitId) {
+    <div
+      class="page-break-after">
+      <studio-lite-unit-print-layout
+        [printPreviewHeight] = printPreviewHeight
+        [printOptions]="printOptions"
+        [unitId]="unitId"
+        [workspaceId]="workspaceId"
+        [workspaceGroupId]="workspaceGroupId"
+        (heightChange)="addToScrollPosition($event)">
+      </studio-lite-unit-print-layout>
+    </div>
+  }
 </div>

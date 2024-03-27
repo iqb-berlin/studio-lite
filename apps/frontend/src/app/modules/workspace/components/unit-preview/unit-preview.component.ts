@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
-import { NgIf } from '@angular/common';
+
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -27,7 +27,7 @@ import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' },
   standalone: true,
-  imports: [NgIf, PreviewBarComponent]
+  imports: [PreviewBarComponent]
 })
 
 export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
