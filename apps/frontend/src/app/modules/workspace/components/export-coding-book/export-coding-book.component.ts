@@ -9,8 +9,8 @@ import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
 import { WorkspaceService } from '../../services/workspace.service';
-
 // eslint-disable-next-line import/no-cycle
 import { WorkspaceModule } from '../../workspace.module';
 import { BackendService } from '../../services/backend.service';
@@ -28,8 +28,9 @@ const datePipe = new DatePipe('de-DE');
     FormsModule,
     MatRadioModule,
     MatSelectModule,
-    WorkspaceModule
-],
+    WorkspaceModule,
+    MatButton
+  ],
   styleUrls: ['export-coding-book.component.scss']
 })
 
@@ -41,8 +42,10 @@ export class ExportCodingBookComponent implements OnInit {
   ) {
   }
 
-  includeManualCoding = true;
+  includeOnlyManualCoding = true;
   includeClosedCoding = true;
+  includeDerivedVariables = true;
+  includeGeneralInstructions = true;
   exportFormat: 'docx' | 'json' = 'docx';
   missingsProfiles = [''];
   unitList: number[] = [];
@@ -56,7 +59,7 @@ export class ExportCodingBookComponent implements OnInit {
     this.backendService
       .getCodingBook(this.workspaceService.selectedWorkspaceId,
         this.exportFormat,
-        this.includeManualCoding,
+        this.includeOnlyManualCoding,
         this.includeClosedCoding,
         this.unitList)
       .subscribe(data => {
