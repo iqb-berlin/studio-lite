@@ -12,7 +12,7 @@ export class GetStateColorPipe implements PipeTransform {
   ) {}
 
   // eslint-disable-next-line class-methods-use-this
-  transform(id: string, property:string, states: State[]): any {
+  transform(id: string, property: 'label' | 'color', states: State[]): string {
     if (states) {
       const filteredState = states
         .filter((state: State) => Number(id) === state.id);

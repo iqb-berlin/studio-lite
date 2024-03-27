@@ -28,7 +28,6 @@ import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CommentsModule } from '../comments/comments.module';
-// eslint-disable-next-line import/no-cycle
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { NewUnitComponent } from './components/new-unit/new-unit.component';
@@ -54,10 +53,8 @@ import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
 import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
-// eslint-disable-next-line import/no-cycle
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
 import { UnitsAreaComponent } from './components/units-area/units-area.component';
-
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';

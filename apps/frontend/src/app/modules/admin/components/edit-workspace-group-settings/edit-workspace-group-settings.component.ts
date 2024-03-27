@@ -2,20 +2,15 @@ import { Component, Inject, OnInit } from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
 import { State } from '../../models/state.type';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-// eslint-disable-next-line import/no-cycle
 import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
-
-type Profile = {
-  id: string,
-  label: string
-};
+import { Profile } from '../../../shared/models/profile.type';
 
 @Component({
   selector: 'studio-lite-edit-workspace-group',
@@ -48,8 +43,10 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.settings = this.wsgAdminService.selectedWorkspaceGroupSettings;
-    this.backendService.getWorkspaceGroupProfiles(this.data.wsg?.id).subscribe(res => {
-      this.fetchedProfiles = res.settings?.profiles || [];
+    this.backendService.getWorkspaceGroupById(this.data.wsg?.id).subscribe(res => {
+      this.fetchedProfiles = (
+        res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
+      ) || [];
       this.formData.profilesSelected = this.fetchedProfiles;
     });
   }

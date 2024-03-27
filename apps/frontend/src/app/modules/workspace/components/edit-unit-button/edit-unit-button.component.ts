@@ -28,7 +28,6 @@ import {
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-// eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
@@ -36,7 +35,6 @@ import { TableViewComponent } from '../../../metadata/components/table-view/tabl
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 import { CodingReportComponent } from '../coding-report/coding-report.component';
-// eslint-disable-next-line import/no-cycle
 import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
@@ -251,17 +249,19 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         width: '600px'
       }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport().subscribe((units:any) => {
-          if (res) {
-            const selectedUnits = units.filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
-            this.showMetadataDialog.open(TableViewComponent, {
-              width: '80%',
-              height: '80%',
-              data: { units: selectedUnits },
-              autoFocus: false
-            });
-          }
-        });
+        this.metadataService.createMetadataReport()
+          .subscribe((units: UnitMetadataDto[] | boolean) => {
+            if (res) {
+              const selectedUnits = (units as UnitMetadataDto[])
+                .filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
+              this.showMetadataDialog.open(TableViewComponent, {
+                width: '80%',
+                height: '80%',
+                data: { units: selectedUnits },
+                autoFocus: false
+              });
+            }
+          });
       });
     }
   }

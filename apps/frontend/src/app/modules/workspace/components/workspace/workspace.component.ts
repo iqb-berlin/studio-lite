@@ -12,7 +12,6 @@ import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDataAreaComponent } from '../unit-data-area/unit-data-area.component';
-// eslint-disable-next-line import/no-cycle
 import { UnitsAreaComponent } from '../units-area/units-area.component';
 import { SplitterPaneComponent } from '../../../splitter/components/splitter-pane/splitter-pane.component';
 import { SplitterComponent } from '../../../splitter/components/splitter/splitter.component';

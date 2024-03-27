@@ -1,18 +1,25 @@
 import {
-  // eslint-disable-next-line max-len
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+  MatTableDataSource
 } from '@angular/material/table';
-import {
-  ViewChild, Component, OnInit
-} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { UntypedFormGroup, FormsModule } from '@angular/forms';
+import { FormsModule, UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { UserInListDto, CreateWorkspaceGroupDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
-import { DatePipe } from '@angular/common';
+import { CreateWorkspaceGroupDto, UserInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
 import { saveAs } from 'file-saver-es';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -26,15 +33,10 @@ import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
-// eslint-disable-next-line import/no-cycle
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
+import { Profile } from '../../../shared/models/profile.type';
 
 const datePipe = new DatePipe('de-DE');
-
-export type Profile = {
-  id: string,
-  label: string
-};
 
 @Component({
   selector: 'studio-lite-workspace-groups',
@@ -42,7 +44,7 @@ export type Profile = {
   styleUrls: ['./workspace-groups.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
+  imports: [WorkspaceGroupsMenuComponent, NgIf, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, NgFor, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();

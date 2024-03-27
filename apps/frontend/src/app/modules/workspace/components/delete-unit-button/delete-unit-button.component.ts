@@ -10,7 +10,6 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-// eslint-disable-next-line import/no-cycle
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 

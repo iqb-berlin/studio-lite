@@ -9,10 +9,9 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import { FormsModule } from '@angular/forms';
 import { MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-
-// eslint-disable-next-line import/no-cycle
-import { Profile } from '../../../admin/components/workspace-groups/workspace-groups.component';
+import { NgIf, NgFor } from '@angular/common';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { Profile } from '../../models/profile.type';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
@@ -22,7 +21,7 @@ export type CoreProfile = Omit<MDProfile, 'groups'>;
   styleUrls: ['./profiles.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, MatDialogTitle, FormsModule, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
+  imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
 })
 export class ProfilesComponent implements OnInit {
   isLoading: boolean = false;
@@ -89,7 +88,7 @@ export class ProfilesComponent implements OnInit {
       .split('\n')
       .map(item => item.split(splitter));
     const storesArray = rest.map(e => e.filter(el => (el !== ',' && el !== '')));
-    const storesURLs: any = [];
+    const storesURLs: string[] = [];
     storesArray.forEach(store => {
       const sanitizedURL = store[2].replace(',', '');
       storesURLs.push(sanitizedURL);
