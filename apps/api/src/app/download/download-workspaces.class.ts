@@ -1,13 +1,14 @@
 import * as Excel from 'exceljs';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataDto, CodebookUnit } from '@studio-lite-lib/api-dto';
 import {
   CodeData, CodingRule, RuleSet, VariableCodingData, ToTextFactory
 } from '@iqb/responses';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
+import { DownloadDocx } from './downloadDocx.class';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
-const HTMLtoDOCX = require('html-to-docx');
+//const HTMLtoDOCX = require('html-to-docx');
 
 interface WorkspaceData {
   id: number;
@@ -21,27 +22,21 @@ interface WorkspaceData {
   schemers: { [key: string]: number };
 }
 
-interface CodingBook {
-  key: string;
-  name: string;
-  variables;
-
-}
 
 export class DownloadWorkspacesClass {
-  static setUnitsItemsDataRows(units) {
-    const allUnits = [];
-    units.forEach(unit => {
+  static setUnitsItemsDataRows(units: any[]): any {
+    const allUnits: any[] = [];
+    units.forEach((unit: any) => {
       const totalValues: Record<string, string>[] = [];
       if (unit.metadata.items) {
-        unit.metadata.items.forEach((item, i: number) => {
-          const activeProfile = item.profiles?.find(profile => profile.isCurrent);
+        unit.metadata.items.forEach((item: any, i: number) => {
+          const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
           if (activeProfile) {
             const values: Record<string, string> = {};
-            activeProfile.entries.forEach(entry => {
+            activeProfile.entries.forEach((entry: any) => {
               if (entry.valueAsText.length > 1) {
-                const textValues = [];
-                entry.valueAsText.forEach(textValue => {
+                const textValues: any[] = [];
+                entry.valueAsText.forEach((textValue: any) => {
                   textValues.push(`${textValue.value || ''}`);
                 });
                 values[entry.label[0].value] = textValues.join('<br>');
@@ -65,16 +60,16 @@ export class DownloadWorkspacesClass {
     return allUnits.flat();
   }
 
-  static setUnitsDataRows(units) {
+  static setUnitsDataRows(units: any): any {
     const totalValues: Record<string, string>[] = [];
-    units.forEach(unit => {
-      const activeProfile = unit.metadata.profiles?.find(profile => profile.isCurrent);
+    units.forEach((unit: any) => {
+      const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
       if (activeProfile) {
         const values: Record<string, string> = {};
-        activeProfile.entries.forEach(entry => {
+        activeProfile.entries.forEach((entry: any) => {
           if (entry.valueAsText.length > 1) {
-            const textValues = [];
-            entry.valueAsText.forEach(textValue => {
+            const textValues: any[] = [];
+            entry.valueAsText.forEach((textValue: any) => {
               textValues.push(textValue.value || '');
             });
             values[entry.label[0].value] = textValues.join(', ');
@@ -120,22 +115,21 @@ export class DownloadWorkspacesClass {
                                       hasOnlyManualCodings:string,
                                       hasClosedCodings:string,
                                       unitList:string): Promise<Buffer> {
-    const codingBook: CodingBook[] = [];
-    let docHtml = '';
-    let unitsHtml = '';
+    const codingBook: CodebookUnit[] = [];
+    //let docHtml = '';
+    //let unitsHtml = '';
     const units = await unitService.findAllWithMetadata(workspaceGroupId);
     const selectedUnits =
-        units.filter(unit => unitList.split(',')
-          .map((u:string) => parseInt(u, 10))
-          .includes(unit.id));
+      units.filter(unit => unitList.split(',')
+        .map((u:string) => parseInt(u, 10))
+        .includes(unit.id));
     selectedUnits.forEach((unit: UnitMetadataDto) => {
       const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
-      const parsedScheme = JSON.parse(unit.scheme);
+      const parsedScheme: any = JSON.parse(unit.scheme);
       let variablesHtml = '';
       let bookVariables = [];
       if (parsedScheme?.variableCodings) {
         parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
-          // eslint-disable-next-line max-len
           const variableHeaderHtml = `<h3>${variableCoding.id}</h3><p>${variableCoding.label}   ${variableCoding.page}</p><p>${variableCoding.manualInstruction}</p>`;
           let codesHtml = '';
           let codes = [];
@@ -159,12 +153,11 @@ export class DownloadWorkspacesClass {
               codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
                 rulesDescription += `<p>${ruleSetDescription}</p>`;
               });
-              // eslint-disable-next-line max-len
               const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td>${rulesDescription}${code.manualInstruction}</td></tr>`;
 
               codesHtml += codeHtml;
               const codeInfo = {
-                id: code.id,
+                id: `${code.id}`,
                 label: codeAsText.label,
                 score: codeAsText.score,
                 scoreLabel: codeAsText.scoreLabel,
@@ -173,12 +166,9 @@ export class DownloadWorkspacesClass {
               codes = [...codes, codeInfo];
             });
           }
-          // eslint-disable-next-line max-len
           const variableCodesTableHtml = `<table><tr><th style="background-color:#d9d9d9">Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">Beschreibung</th></tr>${codesHtml}</table>`;
           if (codesHtml.length > 0) {
-            if ((closedCodingVar && hasClosedCodings) ||
-              (onlyManualCodingVar && hasOnlyManualCodings) ||
-              (hasRules && !closedCodingVar)) {
+            if ((closedCodingVar && hasClosedCodings) || (onlyManualCodingVar && hasOnlyManualCodings) || (hasRules && !closedCodingVar)) {
               bookVariables = [...bookVariables, {
                 id: variableCoding.id,
                 label: variableCoding.label,
@@ -199,23 +189,25 @@ export class DownloadWorkspacesClass {
             variables: bookVariables
           }
         );
-        unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
+        //unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
       }
     });
-    // eslint-disable-next-line max-len
-    docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
+    //docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
 
     if (exportFormat === 'docx') {
       return new Promise(resolve => {
-        resolve(HTMLtoDOCX(docHtml, null, {
-          title: 'IQB-Studio Kodierbuch ',
-          table: { row: { cantSplit: true } },
-          footer: true,
-          pageNumber: true,
-          lang: 'de-DE',
-          orientation: 'landscape',
-          'font-size': '12pt'
-        }));
+        resolve(
+          /*  HTMLtoDOCX(docHtml, null, {
+             title: 'IQB-Studio Kodierbuch ',
+             table: { row: { cantSplit: true } },
+             footer: true,
+             pageNumber: true,
+             lang: 'de-DE',
+             orientation: 'landscape',
+             'font-size': '12pt'
+           }) */
+          DownloadDocx.getCodebook(codingBook)
+        );
       });
     }
 

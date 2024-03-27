@@ -11,10 +11,8 @@ import {
   UnitMetadataDto,
   UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
-import {
-  MissingsProfilesDto
-} from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
 import { CodingReportDto } from '../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
+import { MissingsProfilesDto } from '../../../../../../../libs/api-dto/src/lib/dto/coding/coding-dto';
 
 @Injectable({
   providedIn: 'root'
