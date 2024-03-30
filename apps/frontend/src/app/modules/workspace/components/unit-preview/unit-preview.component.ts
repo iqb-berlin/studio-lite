@@ -9,6 +9,8 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -19,7 +21,7 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
-import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+
 @Component({
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
@@ -430,8 +432,21 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.hasFocus = status;
   }
 
-  checkCoding() {
+  async checkCoding() {
     let codingScheme: CodingScheme;
+    const data = await new Promise<UnitSchemeDto | undefined>(resolve => {
+      resolve(this.workspaceService.getUnitSchemeStore()?.getData());
+    });
+    if (data && !this.workspaceService.isChanged()) {
+      codingScheme = JSON.parse(data.scheme);
+      this.workspaceService.codingScheme = codingScheme;
+      this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
+      const varsWithCodes = codingScheme.variableCodings
+        .filter(vc => vc.codes.length > 0)
+        .map(vc => vc.id);
+      const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
+      this.showCodingResults(newResponses, varsWithCodes);
+    } else {
       this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
         .subscribe(schemeData => {
           if (schemeData) {
@@ -445,21 +460,28 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
           const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
           this.showCodingResults(newResponses, varsWithCodes);
         });
-
+    }
   }
 
   private showCodingResults(responses: Response[], varsWithCodes:string[]): void {
-    this.dialog
-      .open(ShowCodingResultsComponent, {
-        data: { responses: responses, varsWithCodes: varsWithCodes },
-        height:'80%',
-        width: '60%'
-      })
-      .afterClosed()
-      .pipe(
-        takeUntil(this.ngUnsubscribe)
-      ).subscribe(() => {
-      });
+    if (this.workspaceService.isChanged()) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.save-unit-before-check'),
+        this.translateService.instant('workspace.error'),
+        { duration: 3000 });
+    } else {
+      this.dialog
+        .open(ShowCodingResultsComponent, {
+          data: { responses: responses, varsWithCodes: varsWithCodes },
+          height: '80%',
+          width: '60%'
+        })
+        .afterClosed()
+        .pipe(
+          takeUntil(this.ngUnsubscribe)
+        ).subscribe(() => {
+        });
+    }
   }
 
   ngOnDestroy(): void {
