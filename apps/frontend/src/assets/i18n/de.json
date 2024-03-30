@@ -16,6 +16,7 @@
   "warning": "Warnung",
   "error": "Fehler",
   "confirm": "Bestätigen",
+  "filter-by": "Filtern nach...",
   "hour": "Uhr",
   "unit-patch": {
     "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
@@ -368,12 +369,15 @@
   },
 
   "coding": {
+    "id": "Variablen Id",
     "result": "Kodierergebnis",
     "variable": "Variable",
     "value": "Wert",
     "state": "Status",
+    "status": "Status",
     "code": "Code",
-    "score": "Bewertung"
+    "score": "Bewertung",
+    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen"
   },
 
   "status-label" : {
@@ -447,6 +451,7 @@
     "copy-link-to-clipboard": "Kopiere Link in Zwischenablage",
     "link-copied": "Link in die Zwischenablage kopiert",
     "save-changes": "Änderungen speichern",
+    "save-unit-before-check": "Aufgaben Änderungen erst speichern",
     "export-review": "Aufgabenfolge exportieren",
     "review-password": "Kennwort",
     "review-name": "Name",
