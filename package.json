@@ -41,7 +41,7 @@
     "@golevelup/ts-jest": "^0.3.4",
     "@iqb/metadata": "^0.4.2",
     "@iqb/ngx-coding-components": "^1.4.1",
-    "@iqb/responses": "^1.0.0",
+    "@iqb/responses": "1.1.1",
     "@iqb/validate-md-profile": "^0.4.0",
     "@nestjs/cli": "^9.3.0",
     "@nestjs/common": "10.1.3",
