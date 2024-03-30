@@ -9,8 +9,6 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
-
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -21,7 +19,7 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
-
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 @Component({
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
@@ -434,32 +432,28 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   checkCoding() {
     let codingScheme: CodingScheme;
-    if (Object.keys(this.workspaceService.codingScheme || {}).length > 0) {
-      codingScheme = this.workspaceService.codingScheme.variableCodings;
-      this.workspaceService.codingSchemer = new CodingScheme(this.workspaceService.codingScheme.variableCodings);
-      if (this.responses) {
-        const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
-        this.showCodingResults(newResponses);
-      }
-    } else {
       this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
         .subscribe(schemeData => {
-          if (schemeData && Object.keys(schemeData.scheme).length > 0) {
+          if (schemeData) {
             codingScheme = JSON.parse(schemeData.scheme);
-            this.workspaceService.codingSchemer = new CodingScheme(codingScheme?.variableCodings);
-            if (this.responses) {
-              const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
-              this.showCodingResults(newResponses);
-            }
+            this.workspaceService.codingScheme = codingScheme;
+            this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
           }
+          const varsWithCodes = codingScheme.variableCodings
+            .filter(vc => vc.codes.length > 0)
+            .map(vc => vc.id);
+          const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
+          this.showCodingResults(newResponses, varsWithCodes);
         });
-    }
+
   }
 
-  private showCodingResults(responses: Response[]): void {
+  private showCodingResults(responses: Response[], varsWithCodes:string[]): void {
     this.dialog
       .open(ShowCodingResultsComponent, {
-        data: responses
+        data: { responses: responses, varsWithCodes: varsWithCodes },
+        height:'80%',
+        width: '60%'
       })
       .afterClosed()
       .pipe(
