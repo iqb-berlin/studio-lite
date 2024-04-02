@@ -550,7 +550,7 @@
     "select-missings-profile": "Profil auswählen...",
     "reports": "Berichte",
     "select-additional-coding-types": "zusätzliche Kodiertypen auswählen" ,
-    "export-warning-no-coding-vars":"Nicht kodierte Variablen werden im Kodierbuch nicht exportiert.",
+    "export-warning-no-coding-vars":"Variablen ohne Codes werden nicht mit dem Codebook exportiert.",
     "show-coding-report": "Kodierung von Aufgaben anzeigen",
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",

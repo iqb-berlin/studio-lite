@@ -2,6 +2,7 @@ import {
   Controller, Get, Header, Param, Query, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,6 +11,7 @@ import { DownloadWorkspacesClass } from './download-workspaces.class';
 import { UnitService } from '../database/services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { IsAdminGuard } from '../admin/is-admin.guard';
+import { WorkspaceGuard } from '../workspace/workspace.guard';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
@@ -21,7 +23,7 @@ export class DownloadController {
   }
 
   @Get('docx/workspaces/:workspace_group_id/coding-book/:unitList')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -31,14 +33,23 @@ export class DownloadController {
   @WorkspaceGroupId() workspaceGroupId: number,
     @Param('unitList') unitList: string,
     @Query('format')exportFormat: 'json' | 'docx',
-    @Query('onlyManual') hasManualCoding: string,
-    @Query('closed') hasClosedResponses: string) {
+    @Query('onlyManual') hasOnlyManualCoding: string,
+    @Query('generalInstructions') hasGeneralInstructions: string,
+    @Query('derived') hasDerivedVars: string,
+    @Query('closed') hasClosedVars: string) {
+    const options:CodeBookContentSetting = {
+      exportFormat,
+      hasOnlyManualCoding: hasOnlyManualCoding,
+      hasGeneralInstructions: hasGeneralInstructions,
+      hasDerivedVars: hasDerivedVars,
+      hasClosedVars: hasClosedVars
+    };
+
     const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(workspaceGroupId,
+      .getWorkspaceCodingBook(
+        workspaceGroupId,
         this.unitService,
-        exportFormat,
-        hasManualCoding,
-        hasClosedResponses,
+        options,
         unitList);
     return new StreamableFile(file as Buffer);
   }

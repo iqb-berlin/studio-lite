@@ -66,8 +66,7 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesMetadata(
-    @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Param('id', ParseIntPipe) unitId: number
+    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitMetadataDto> {
     return this.unitService.findOnesMetadata(unitId, workspaceId);
   }
