@@ -2,6 +2,7 @@ import {
   Controller, Get, Header, Param, Query, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -32,14 +33,23 @@ export class DownloadController {
   @WorkspaceGroupId() workspaceGroupId: number,
     @Param('unitList') unitList: string,
     @Query('format')exportFormat: 'json' | 'docx',
-    @Query('onlyManual') hasManualCoding: string,
-    @Query('closed') hasClosedResponses: string) {
+    @Query('onlyManual') hasOnlyManualCoding: string,
+    @Query('generalInstructions') hasGeneralInstructions: string,
+    @Query('derived') hasDerivedVars: string,
+    @Query('closed') hasClosedVars: string) {
+    const options:CodeBookContentSetting = {
+      exportFormat,
+      hasOnlyManualCoding: hasOnlyManualCoding,
+      hasGeneralInstructions: hasGeneralInstructions,
+      hasDerivedVars: hasDerivedVars,
+      hasClosedVars: hasClosedVars
+    };
+
     const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(workspaceGroupId,
+      .getWorkspaceCodingBook(
+        workspaceGroupId,
         this.unitService,
-        exportFormat,
-        hasManualCoding,
-        hasClosedResponses,
+        options,
         unitList);
     return new StreamableFile(file as Buffer);
   }

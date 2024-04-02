@@ -3,6 +3,7 @@ import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
+  CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
   RequestReportDto, ReviewFullDto, ReviewInListDto, ReviewSettingsDto,
@@ -120,17 +121,25 @@ export class BackendService {
     );
   }
 
-  getCodingBook(workspaceId: number, exportFormat: 'json' | 'docx',
-                hasManualCoding:boolean,
-                hasClosedResponses:boolean,
+  getCodingBook(workspaceId: number, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
+      const {
+        exportFormat,
+        hasOnlyManualCoding,
+        hasGeneralInstructions,
+        hasDerivedVars,
+        hasClosedVars
+      } = contentOptions;
+
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
           params: new HttpParams()
-            .set('onlyManual', hasManualCoding)
-            .set('closed', hasClosedResponses)
-            .set('format', exportFormat),
+            .set('format', exportFormat)
+            .set('generalInstructions', hasGeneralInstructions)
+            .set('onlyManual', hasOnlyManualCoding)
+            .set('closed', hasClosedVars)
+            .set('derived', hasDerivedVars),
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },
