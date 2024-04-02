@@ -8,7 +8,6 @@ describe('UnitPrintCodeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitPrintCodeComponent],
       imports: [
         TranslateModule.forRoot()
       ]

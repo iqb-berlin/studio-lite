@@ -11,9 +11,6 @@ describe('SelectModuleComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        SelectModuleComponent
-      ],
       imports: [
         FormsModule,
         ReactiveFormsModule,

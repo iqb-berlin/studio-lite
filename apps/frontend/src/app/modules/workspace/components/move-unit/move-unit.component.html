@@ -1,34 +1,38 @@
 <div class="fx-column-start-stretch full-height">
   <h1 mat-dialog-title>{{ data.title }}</h1>
-  <form *ngIf="selectForm"
-        [formGroup]="selectForm"
-        class="fx-column-start-stretch">
-    <mat-form-field>
-      <mat-select formControlName="wsSelector"
-                  [placeholder]="'workspace.target-workspace' | translate">
-        <mat-option *ngFor="let workspace of workspaceList"
-                    [value]="workspace.id">
-          {{workspace.groupName}}: {{workspace.name}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </form>
+  @if (selectForm) {
+    <form
+      [formGroup]="selectForm"
+      class="fx-column-start-stretch">
+      <mat-form-field>
+        <mat-select formControlName="wsSelector"
+          [placeholder]="'workspace.target-workspace' | translate">
+          @for (workspace of workspaceList; track workspace) {
+            <mat-option
+              [value]="workspace.id">
+              {{workspace.groupName}}: {{workspace.name}}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </form>
+  }
   <mat-dialog-content>
     <studio-lite-select-unit-list #unitSelectionTable
-                                  [workspace]="data.currentWorkspaceId">
+      [workspace]="data.currentWorkspaceId">
     </studio-lite-select-unit-list>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <button mat-raised-button
-            color="primary"
-            type="submit"
-            [mat-dialog-close]="true"
-            [disabled]="!unitSelectionTable.selectionCount || selectForm.invalid">
+      color="primary"
+      type="submit"
+      [mat-dialog-close]="true"
+      [disabled]="!unitSelectionTable.selectionCount || selectForm.invalid">
       {{data.buttonLabel}}
     </button>
     <button mat-raised-button
-            [mat-dialog-close]="false">
+      [mat-dialog-close]="false">
       {{'cancel' | translate}}
     </button>
   </mat-dialog-actions>

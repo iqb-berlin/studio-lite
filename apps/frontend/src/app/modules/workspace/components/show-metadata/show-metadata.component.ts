@@ -1,15 +1,18 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
-import { WorkspaceService } from '../../services/workspace.service';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 @Component({
-    templateUrl: './show-metadata.component.html',
-    styleUrls: ['show-metadata.component.scss'],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  templateUrl: './show-metadata.component.html',
+  styleUrls: ['show-metadata.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class ShowMetadataComponent {

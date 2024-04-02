@@ -25,7 +25,6 @@ describe('ReviewComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ReviewComponent,
         MockUnitNav,
         MockAddCommentButton
       ],

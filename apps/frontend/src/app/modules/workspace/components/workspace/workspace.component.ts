@@ -1,27 +1,28 @@
 import {
-  ActivatedRoute, DefaultUrlSerializer, NavigationEnd, Router
+  ActivatedRoute, NavigationEnd, Router
 } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { NgIf } from '@angular/common';
 import { UnitDataAreaComponent } from '../unit-data-area/unit-data-area.component';
 import { UnitsAreaComponent } from '../units-area/units-area.component';
 import { SplitterPaneComponent } from '../../../splitter/components/splitter-pane/splitter-pane.component';
 import { SplitterComponent } from '../../../splitter/components/splitter/splitter.component';
+import { RoutingHelperService } from '../../services/routing-helper.service';
 
 @Component({
-    selector: 'studio-lite-workspace',
-    templateUrl: './workspace.component.html',
-    styleUrls: ['./workspace.component.scss'],
-    standalone: true,
-    imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent, NgIf]
+  selector: 'studio-lite-workspace',
+  templateUrl: './workspace.component.html',
+  styleUrls: ['./workspace.component.scss'],
+  standalone: true,
+  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
@@ -90,18 +91,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private openSecondaryOutlet(url: string): void {
-    const secondaryOutletTab = WorkspaceComponent
+    const secondaryOutletTab = RoutingHelperService
       .getSecondaryOutlet(url, this.routingOutlet, this.secondaryRoutingOutlet);
     this.pinnedNavTab = secondaryOutletTab ? [{ name: secondaryOutletTab, duplicable: true }] : [];
-  }
-
-  static getSecondaryOutlet(url: string,
-                            primaryRoutingOutlet: string,
-                            secondaryRoutingOutlet: string): string | null {
-    const serializer = new DefaultUrlSerializer();
-    const urlTree = serializer.parse(url);
-    return urlTree
-      .root.children[primaryRoutingOutlet]?.children[secondaryRoutingOutlet]?.segments[0]?.path || null;
   }
 
   private initWorkspace(workspace: WorkspaceFullDto): void {

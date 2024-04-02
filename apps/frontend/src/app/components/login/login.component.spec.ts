@@ -15,7 +15,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../modules/auth/service/auth.service';
-import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -42,10 +41,8 @@ describe('LoginComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        LoginComponent,
         MockWarningComponent,
-        MockAreaTitleComponent,
-        WrappedIconComponent
+        MockAreaTitleComponent
       ],
       imports: [
         ReactiveFormsModule,

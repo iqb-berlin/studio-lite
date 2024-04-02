@@ -43,7 +43,6 @@ describe('ExportUnitComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ExportUnitComponent,
         MockSelectUnitListComponent,
         MockTestConfigComponent,
         MockBookletConfigComponent

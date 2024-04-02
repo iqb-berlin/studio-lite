@@ -10,7 +10,6 @@ describe('UnitGroupsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitGroupsComponent],
       imports: [
         RouterTestingModule,
         HttpClientModule

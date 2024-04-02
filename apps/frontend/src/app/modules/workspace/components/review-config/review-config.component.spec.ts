@@ -29,7 +29,6 @@ describe('ReviewConfigComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ReviewConfigComponent,
         MockBookletConfigEditComponent,
         MockReviewConfigEditComponent
       ],

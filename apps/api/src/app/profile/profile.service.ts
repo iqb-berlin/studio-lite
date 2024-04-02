@@ -9,7 +9,7 @@ export class ProfileService {
   private baseUrlProfile = 'https://raw.githubusercontent.com/iqb-vocabs';
 
   async saveVocabs(vocabs): Promise<boolean> {
-    vocabs.forEach((vocab: any) => {
+    vocabs.forEach(vocab => {
       const url = vocab.url.replace(this.baseUrlVocabs, '').replace(/\//g, '');
       if (Object.keys(vocab.data).length !== 0) {
         const content = JSON.stringify(vocab.data);
@@ -22,7 +22,7 @@ export class ProfileService {
     return true;
   }
 
-  async getVocab(id:string): Promise<any> {
+  async getVocab(id:string): Promise<unknown> {
     const filenames = await fs.promises.readdir(this.vocabsPath);
     let searchedFile:string;
     filenames.forEach(filename => {
@@ -37,7 +37,7 @@ export class ProfileService {
     return {};
   }
 
-  async saveProfile(profile): Promise<any> {
+  async saveProfile(profile): Promise<void> {
     const url = profile.id.replace(this.baseUrlProfile, '').replace(/\//g, '');
     if (Object.keys(profile).length !== 0) {
       const content = JSON.stringify(profile);
@@ -48,7 +48,7 @@ export class ProfileService {
     }
   }
 
-  async getProfile(id:string): Promise<any> {
+  async getProfile(id:string): Promise<unknown> {
     const filenames = await fs.promises.readdir(this.profilesPath);
     let searchedFile:string;
     filenames.forEach(filename => {

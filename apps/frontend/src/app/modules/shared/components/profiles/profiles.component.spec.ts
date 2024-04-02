@@ -13,7 +13,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../../../../../environments/environment';
 import { ProfilesComponent } from './profiles.component';
-import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 describe('ProfilesComponent', () => {
   let component: ProfilesComponent;
@@ -27,9 +26,7 @@ describe('ProfilesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ProfilesComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent
+        MockSearchFilterComponent
       ],
       imports: [
         MatDialogModule,

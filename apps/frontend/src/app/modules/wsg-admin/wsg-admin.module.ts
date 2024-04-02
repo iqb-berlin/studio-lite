@@ -24,56 +24,55 @@ import { WorkspacesComponent } from './components/workspaces/workspaces.componen
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { BackendService } from './services/backend.service';
 import { WsgAdminRoutingModule } from './wsg-admin-routing.module';
-import { SharedModule } from '../shared/shared.module';
+
 import { WorkspaceMenuComponent } from './components/workspace-menu/workspace-menu.component';
 import { WorkspaceSettingsComponent } from './components/settings/settings.component';
 import { StatesComponent } from './components/states/states.component';
 import { DeleteStateComponent } from './components/delete-state/delete-state.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SharedModule,
-        MatIconModule,
-        MatTableModule,
-        MatCheckboxModule,
-        MatSortModule,
-        MatTooltipModule,
-        MatButtonModule,
-        FormsModule,
-        MatDialogModule,
-        MatInputModule,
-        ReactiveFormsModule,
-        RouterModule,
-        MatTabsModule,
-        WsgAdminRoutingModule,
-        TranslateModule,
-        MatOptionModule,
-        MatSelectModule,
-        MatExpansionModule,
-        MatProgressSpinnerModule,
-        MatFormFieldModule,
-        WorkspacesComponent,
-        UsersComponent,
-        WsgAdminComponent,
-        WorkspaceMenuComponent,
-        WorkspaceSettingsComponent,
-        StatesComponent,
-        DeleteStateComponent
-    ],
-    providers: [
-        BackendService,
-        [
-            {
-                provide: MAT_DATE_LOCALE,
-                useValue: 'de-DE'
-            },
-            {
-                provide: HTTP_INTERCEPTORS,
-                useClass: AuthInterceptor,
-                multi: true
-            }
-        ]
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTableModule,
+    MatCheckboxModule,
+    MatSortModule,
+    MatTooltipModule,
+    MatButtonModule,
+    FormsModule,
+    MatDialogModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatTabsModule,
+    WsgAdminRoutingModule,
+    TranslateModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    WorkspacesComponent,
+    UsersComponent,
+    WsgAdminComponent,
+    WorkspaceMenuComponent,
+    WorkspaceSettingsComponent,
+    StatesComponent,
+    DeleteStateComponent
+  ],
+  providers: [
+    BackendService,
+    [
+      {
+        provide: MAT_DATE_LOCALE,
+        useValue: 'de-DE'
+      },
+      {
+        provide: HTTP_INTERCEPTORS,
+        useClass: AuthInterceptor,
+        multi: true
+      }
     ]
+  ]
 })
 export class WsgAdminModule {}

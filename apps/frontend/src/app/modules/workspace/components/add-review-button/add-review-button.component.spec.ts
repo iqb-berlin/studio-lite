@@ -8,7 +8,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { AddReviewButtonComponent } from './add-review-button.component';
 import { environment } from '../../../../../environments/environment';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('AddReviewButtonComponent', () => {
   let component: AddReviewButtonComponent;
@@ -16,10 +15,6 @@ describe('AddReviewButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        AddReviewButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,

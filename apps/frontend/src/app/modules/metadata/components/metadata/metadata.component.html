@@ -2,15 +2,17 @@
   <div class="fx-flex-row-50">
     <mat-card>
       <mat-card-content>
-        <studio-lite-profile-form *ngIf="unitMDProfile && metadata"
-                                  [profileUrl]="unitMDProfile"
-                                  [metadataKey]="'profiles'"
-                                  [metadata]="metadata"
-                                  [language]="language"
-                                  [formlyWrapper]="'panel'"
-                                  [panelExpanded]="true"
-                                  (metadataChange)="onMetadataChange($event)">
-        </studio-lite-profile-form>
+        @if (unitMDProfile && metadata) {
+          <studio-lite-profile-form
+            [profileUrl]="unitMDProfile"
+            [metadataKey]="'profiles'"
+            [metadata]="metadata"
+            [language]="language"
+            [formlyWrapper]="'panel'"
+            [panelExpanded]="true"
+            (metadataChange)="onMetadataChange($event)">
+          </studio-lite-profile-form>
+        }
       </mat-card-content>
     </mat-card>
   </div>
@@ -18,16 +20,18 @@
   <div class="fx-flex-row-50">
     <mat-card>
       <mat-card-content>
-        <studio-lite-items *ngIf="itemMDProfile && metadata"
-                           class="fx-flex-row-50"
-                           [profileUrl]="itemMDProfile"
-                           [metadataKey]="'items'"
-                           [metadata]="metadata"
-                           [language]="language"
-                           [variablesLoader]="variablesLoader"
-                           (metadataChange)="onMetadataChange($event)">
-        </studio-lite-items>
-    </mat-card-content>
+        @if (itemMDProfile && metadata) {
+          <studio-lite-items
+            class="fx-flex-row-50"
+            [profileUrl]="itemMDProfile"
+            [metadataKey]="'items'"
+            [metadata]="metadata"
+            [language]="language"
+            [variablesLoader]="variablesLoader"
+            (metadataChange)="onMetadataChange($event)">
+          </studio-lite-items>
+        }
+      </mat-card-content>
     </mat-card>
   </div>
 </div>

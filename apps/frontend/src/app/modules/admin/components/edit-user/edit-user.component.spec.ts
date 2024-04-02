@@ -16,9 +16,6 @@ describe('EditUserComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        EditUserComponent
-      ],
       imports: [
         MatInputModule,
         MatIconModule,

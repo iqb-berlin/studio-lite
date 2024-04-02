@@ -111,9 +111,12 @@ export class UnitService {
     return newUnit.id;
   }
 
-  async findOnesMetadata(unitId: number): Promise<UnitMetadataDto> {
+  async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitMetadataDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
-    return this.unitsRepository.findOne({
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId }
+    });
+    const unit = await this.unitsRepository.findOne({
       where: { id: unitId },
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
@@ -121,10 +124,18 @@ export class UnitService {
         'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });
+    unit.metadata = UnitService.setCurrentProfiles(
+      workspace.settings?.unitMDProfile,
+      workspace.settings?.itemMDProfile,
+      unit.metadata);
+    return unit;
   }
 
   async findAllWithMetadata(workspaceId: number): Promise<UnitMetadataDto[]> {
-    return this.unitsRepository.find({
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId }
+    });
+    const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
       select: [
@@ -133,6 +144,40 @@ export class UnitService {
         'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
       ]
     });
+    return Promise.all(units
+      .map(async unit => ({
+        ...unit,
+        metadata: UnitService.setCurrentProfiles(
+          workspace.settings?.unitMDProfile,
+          workspace.settings?.itemMDProfile,
+          unit.metadata)
+      })));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static setCurrentProfiles(unitProfile: string, itemProfile: string, metadata: any): any {
+    if (metadata.profiles) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      metadata.profiles = metadata.profiles.map((profile: any) => UnitService.setCurrentProfile(unitProfile, profile));
+    }
+    if (metadata.items) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      metadata.items.forEach((item: any) => {
+        if (item.profiles) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          item.profiles = item.profiles.map((profile: any) => UnitService.setCurrentProfile(itemProfile, profile));
+        }
+      });
+    }
+    return metadata;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static setCurrentProfile(profileId: string, profile: any): any {
+    return {
+      ...profile,
+      isCurrent: profile.profileId === profileId
+    };
   }
 
   async patchMetadata(unitId: number, newData: UnitMetadataDto): Promise<void> {

@@ -14,6 +14,7 @@ import {
 import {
   MissingsProfilesDto
 } from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
+import { CodingReportDto } from '../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -119,7 +120,10 @@ export class BackendService {
     );
   }
 
-  getCodingBook(workspaceId: number, exportFormat: 'json' | 'docx', hasManualCoding:boolean, hasClosedResponses:boolean, unitList:number[]): Observable<Blob | null> {
+  getCodingBook(workspaceId: number, exportFormat: 'json' | 'docx',
+                hasManualCoding:boolean,
+                hasClosedResponses:boolean,
+                unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
@@ -354,5 +358,9 @@ export class BackendService {
       result += v.toString(16).padStart(2, '0');
     });
     return result;
+  }
+
+  getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
+    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspace/${workspaceId}/coding-report`);
   }
 }

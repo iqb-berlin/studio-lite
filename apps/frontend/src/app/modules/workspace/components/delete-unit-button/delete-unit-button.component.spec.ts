@@ -8,7 +8,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { DeleteUnitButtonComponent } from './delete-unit-button.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('DeleteUnitButtonComponent', () => {
   let component: DeleteUnitButtonComponent;
@@ -16,10 +15,6 @@ describe('DeleteUnitButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        DeleteUnitButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         TranslateModule.forRoot(),
         MatTooltipModule,

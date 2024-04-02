@@ -2,6 +2,7 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
+  // eslint-disable-next-line max-len
   ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
@@ -65,9 +66,10 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async findOnesMetadata(
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitMetadataDto> {
-    return this.unitService.findOnesMetadata(unitId);
+    return this.unitService.findOnesMetadata(unitId, workspaceId);
   }
 
   @Get(':id/definition')

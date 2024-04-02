@@ -2,22 +2,22 @@ import {
   Component, Input, ViewChild
 } from '@angular/core';
 import { VariableCodingData } from '@iqb/responses';
+import { TranslateModule } from '@ngx-translate/core';
+
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
-import { TranslateModule } from '@ngx-translate/core';
-import { NgIf, NgFor } from '@angular/common';
 
 interface CodingSchemeDto {
   variableCodings: VariableCodingData[];
 }
 
 @Component({
-    selector: 'studio-lite-unit-info-coding',
-    templateUrl: './unit-info-coding.component.html',
-    styleUrls: ['./unit-info-coding.component.scss'],
-    standalone: true,
-    imports: [UnitInfoLoaderComponent, NgIf, NgFor, TranslateModule]
+  selector: 'studio-lite-unit-info-coding',
+  templateUrl: './unit-info-coding.component.html',
+  styleUrls: ['./unit-info-coding.component.scss'],
+  standalone: true,
+  imports: [UnitInfoLoaderComponent, TranslateModule]
 })
 export class UnitInfoCodingComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;

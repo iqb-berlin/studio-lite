@@ -1,18 +1,20 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="fx-flex-row-50 fx-column-start-stretch object-list">
 
-    <studio-lite-search-filter *ngIf="objectsDatasource.data.length"
-                               [title]="'search-filter.filter-users' | translate"
-                               (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
-    </studio-lite-search-filter>
+    @if (objectsDatasource.data.length) {
+      <studio-lite-search-filter
+        [title]="'search-filter.filter-users' | translate"
+        (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+      </studio-lite-search-filter>
+    }
 
     <mat-table class="scroll-area"
-               [dataSource]="objectsDatasource"
-               matSortDisableClear
-               matSort>
+      [dataSource]="objectsDatasource"
+      matSortDisableClear
+      matSort>
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef
-                         mat-sort-header="name">
+          mat-sort-header="name">
           {{'user.login-name' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
@@ -22,69 +24,75 @@
 
       <ng-container matColumnDef="displayName">
         <mat-header-cell *matHeaderCellDef
-                         mat-sort-header="lastName">
+          mat-sort-header="lastName">
           {{'user.full-name' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let row"
-                  class="secondary-cell">
+          class="secondary-cell">
           {{row.lastName ? row.lastName : row.name}}{{row.firstName ? (', ' + row.firstName) : ''}}
         </mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="email">
         <mat-header-cell *matHeaderCellDef
-                         mat-sort-header="email">
+          mat-sort-header="email">
           {{'user.email' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let row"
-                  class="secondary-cell">
+          class="secondary-cell">
           {{row.email ? row.email : 'user.no-email' | translate}}
         </mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="description">
         <mat-header-cell *matHeaderCellDef
-                         mat-sort-header="description">
+          mat-sort-header="description">
           {{'user.note' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let row"
-                  class="secondary-cell">
+          class="secondary-cell">
           {{row.description}}
         </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"
-               [class.selected] = "row | isSelectedId: selectedUser"
-               (click)="toggleRowSelection(row)">
+        [class.selected] = "row | isSelectedId: selectedUser"
+        (click)="toggleRowSelection(row)">
       </mat-row>
     </mat-table>
   </div>
 
   <div class="fx-flex-row-40 object-list">
     <div class="fx-row-space-between-center">
-      <div *ngIf="!selectedUser">
-        {{'access-rights.hint' | translate}}
-      </div>
-      <div *ngIf="selectedUser" >
-        {{'access-rights.for-user' | translate: {user: tableSelectionRow.selected[0].name } }}
-      </div>
+      @if (!selectedUser) {
+        <div>
+          {{'access-rights.hint' | translate}}
+        </div>
+      }
+      @if (selectedUser) {
+        <div >
+          {{'access-rights.for-user' | translate: {user: tableSelectionRow.selected[0].name } }}
+        </div>
+      }
       <button mat-raised-button
-              [matTooltip]="'save' | translate"
-              matTooltipPosition="above"
-              [disabled]="!userWorkspaces.hasChanged"
-              (click)="saveWorkspaces()">
+        [matTooltip]="'save' | translate"
+        matTooltipPosition="above"
+        [disabled]="!userWorkspaces.hasChanged"
+        (click)="saveWorkspaces()">
         <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
       </button>
     </div>
 
     <div class="scroll-area fx-column-start-stretch">
-      <mat-checkbox *ngFor="let ws of userWorkspaces.entries"
-                    [(ngModel)]="ws.isChecked"
-                    [disabled]="!selectedUser"
-                    (change)="userWorkspaces.updateHasChanged()">
-      {{ws.name}}
-      </mat-checkbox>
+      @for (ws of userWorkspaces.entries; track ws) {
+        <mat-checkbox
+          [(ngModel)]="ws.isChecked"
+          [disabled]="!selectedUser"
+          (change)="userWorkspaces.updateHasChanged()">
+          {{ws.name}}
+        </mat-checkbox>
+      }
     </div>
   </div>
 </div>

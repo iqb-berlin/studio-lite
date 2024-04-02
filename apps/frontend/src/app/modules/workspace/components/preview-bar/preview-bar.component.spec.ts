@@ -13,7 +13,6 @@ import { environment } from '../../../../../environments/environment';
 import { PageData } from '../../models/page-data.interface';
 import { Progress } from '../../models/types';
 import { PreviewBarComponent } from './preview-bar.component';
-import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mode-selection.component';
 
 describe('PreviewBarComponent', () => {
   let component: PreviewBarComponent;
@@ -34,10 +33,8 @@ describe('PreviewBarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        PreviewBarComponent,
         MockStatusIndicationComponent,
-        MockPageNavigationComponent,
-        PagingModeSelectionComponent
+        MockPageNavigationComponent
       ],
       imports: [
         MatButtonModule,

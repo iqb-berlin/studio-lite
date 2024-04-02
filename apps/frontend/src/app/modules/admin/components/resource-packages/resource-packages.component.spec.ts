@@ -10,9 +10,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { ResourcePackagesComponent } from './resource-packages.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('ResourcePackageComponent', () => {
   let component: ResourcePackagesComponent;
@@ -35,17 +35,16 @@ describe('ResourcePackageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ResourcePackagesComponent,
         MockTableDataSourcePipe,
-        MockIqbFilesUploadInputForDirective,
-        WrappedIconComponent
+        MockIqbFilesUploadInputForDirective
       ],
       imports: [
         TranslateModule.forRoot(),
         HttpClientModule,
         MatTooltipModule,
         MatSnackBarModule,
-        MatIconModule
+        MatIconModule,
+        NoopAnimationsModule
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [{

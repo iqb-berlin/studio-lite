@@ -2,12 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { FieldTypeConfig, FormlyFieldProps } from '@ngx-formly/core/public_api';
 import { Subject, takeUntil } from 'rxjs';
-import { Duration } from '../../models/duration.interface';
-import { DurationService } from '../../services/duration.service';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { DurationService } from '../../services/duration.service';
+import { Duration } from '../../models/duration.interface';
 
 interface FormlyDurationProps extends FormlyFieldProps {
   minValue?: number;
@@ -15,11 +15,11 @@ interface FormlyDurationProps extends FormlyFieldProps {
 }
 
 @Component({
-    selector: 'studio-lite-formly-duration',
-    templateUrl: './formly-duration.component.html',
-    styleUrls: ['./formly-duration.component.scss'],
-    standalone: true,
-    imports: [MatFormField, NgIf, MatLabel, FormsModule, MatInput]
+  selector: 'studio-lite-formly-duration',
+  templateUrl: './formly-duration.component.html',
+  styleUrls: ['./formly-duration.component.scss'],
+  standalone: true,
+  imports: [MatFormField, MatLabel, FormsModule, MatInput]
 })
 export class FormlyDurationComponent
   extends FieldType<FieldTypeConfig<FormlyDurationProps>> implements OnInit, OnDestroy {

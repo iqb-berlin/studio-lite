@@ -14,89 +14,91 @@
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
-    <ng-container *ngIf="objectsDatasource.data.length">
+    @if (objectsDatasource.data.length) {
       <studio-lite-search-filter [title]="'search-filter.filter-workspaces' | translate"
-                                 (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+        (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
       </studio-lite-search-filter>
-
       <mat-table [dataSource]="objectsDatasource"
-                 matSort
-                 matSortDisableClear
-                 class="scroll-area">
+        matSort
+        matSortDisableClear
+        class="scroll-area">
         <ng-container matColumnDef="selectCheckbox">
           <mat-header-cell *matHeaderCellDef
-                           class="fx-flex-row-fix-70">
+            class="fx-flex-row-fix-70">
             <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-                          [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-                          (change)="$event ? masterToggle() : null">
+              [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
+              (change)="$event ? masterToggle() : null">
             </mat-checkbox>
           </mat-header-cell>
           <mat-cell *matCellDef="let row"
-                    class="fx-flex-row-fix-70">
+            class="fx-flex-row-fix-70">
             <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
-                          (click)="$event.stopPropagation()"
-                          (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
+              (click)="$event.stopPropagation()"
+              (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
             </mat-checkbox>
           </mat-cell>
         </ng-container>
-
         <ng-container matColumnDef="name">
           <mat-header-cell *matHeaderCellDef
-                           mat-sort-header="name">{{'wsg-admin.name' | translate}}
+            mat-sort-header="name">{{'wsg-admin.name' | translate}}
           </mat-header-cell>
           <mat-cell *matCellDef="let element">
             {{element.name}}
           </mat-cell>
         </ng-container>
-
         <ng-container matColumnDef="unitsCount">
           <mat-header-cell *matHeaderCellDef
-                           mat-sort-header="unitsCount">{{'wsg-admin.units-count' | translate}}
+            mat-sort-header="unitsCount">{{'wsg-admin.units-count' | translate}}
           </mat-header-cell>
           <mat-cell *matCellDef="let element">
             {{element.unitsCount}}
           </mat-cell>
         </ng-container>
-
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"
-                 [class.selected] = "row | isSelectedId: selectedWorkspaceId"
-                 (click)="toggleRowSelection(row)">
-          </mat-row>
+          [class.selected] = "row | isSelectedId: selectedWorkspaceId"
+          (click)="toggleRowSelection(row)">
+        </mat-row>
       </mat-table>
-    </ng-container>
+    }
   </div>
 
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
     <div class="fx-row-space-between-center">
-      <div *ngIf="!selectedWorkspaceId">
-        {{'wsg-admin.hint' | translate}}
-      </div>
-      <div *ngIf="selectedWorkspaceId">
-        {{'wsg-admin.access-for-workspace' | translate: { workspace: tableSelectionRow.selected[0].name } }}
-      </div>
+      @if (!selectedWorkspaceId) {
+        <div>
+          {{'wsg-admin.hint' | translate}}
+        </div>
+      }
+      @if (selectedWorkspaceId) {
+        <div>
+          {{'wsg-admin.access-for-workspace' | translate: { workspace: tableSelectionRow.selected[0].name } }}
+        </div>
+      }
       <button mat-raised-button
-              [matTooltip]="'save' | translate"
-              matTooltipPosition="above"
-              [disabled]="!workspaceUsers.hasChanged"
-              (click)="saveUsers()">
+        [matTooltip]="'save' | translate"
+        matTooltipPosition="above"
+        [disabled]="!workspaceUsers.hasChanged"
+        (click)="saveUsers()">
         <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
       </button>
     </div>
 
     <div class="scroll-area fx-column-start-stretch">
-      <div *ngFor="let u of workspaceUsers.entries"
-           class="fx-row-start-stretch">
-        <mat-checkbox class="fx-flex-fill"
-                      [disabled]="!selectedWorkspaceId"
-                      (change)="workspaceUsers.updateHasChanged()"
-                      [(ngModel)]="u.isChecked">
-          {{u.displayName}} ({{u.name}})
-        </mat-checkbox>
+      @for (u of workspaceUsers.entries; track u) {
+        <div
+          class="fx-row-start-stretch">
+          <mat-checkbox class="fx-flex-fill"
+            [disabled]="!selectedWorkspaceId"
+            (change)="workspaceUsers.updateHasChanged()"
+            [(ngModel)]="u.isChecked">
+            {{u.displayName}} ({{u.name}})
+          </mat-checkbox>
           <div class="fx-flex-fill secondary-text">
             {{u.description}}
           </div>
-      </div>
+        </div>
+      }
     </div>
   </div>
 </div>

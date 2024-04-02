@@ -13,9 +13,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceSettingsComponent } from './settings.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { StatesComponent } from '../states/states.component';
-import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
 
 describe('SettingsComponent', () => {
   let component: WorkspaceSettingsComponent;
@@ -29,11 +26,7 @@ describe('SettingsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        WorkspaceSettingsComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent,
-        ProfilesComponent,
-        StatesComponent
+        MockSearchFilterComponent
       ],
       imports: [
         MatDialogModule,

@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { StartReviewButtonComponent } from './start-review-button.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('StartReviewButtonComponent', () => {
   let component: StartReviewButtonComponent;
@@ -12,10 +11,6 @@ describe('StartReviewButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        StartReviewButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         MatIconModule,
         MatTooltipModule,

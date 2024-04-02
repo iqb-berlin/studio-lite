@@ -4,19 +4,19 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
 import { BackendService } from '../../services/backend.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'studio-lite-add-review-button',
-    templateUrl: './add-review-button.component.html',
-    styleUrls: ['./add-review-button.component.scss'],
-    standalone: true,
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-add-review-button',
+  templateUrl: './add-review-button.component.html',
+  styleUrls: ['./add-review-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class AddReviewButtonComponent extends CheckForChangesDirective {
   @Input() selectedReviewId!: number;

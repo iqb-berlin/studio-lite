@@ -8,7 +8,6 @@ describe('PrintMetadataComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PrintMetadataComponent],
       imports: [
         TranslateModule.forRoot()
       ]

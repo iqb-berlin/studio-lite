@@ -10,7 +10,6 @@ describe('ReviewConfigEditComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ReviewConfigEditComponent],
       imports: [
         FormsModule,
         MatCheckboxModule,

@@ -1,15 +1,16 @@
 <div class="page-body">
   <div class="admin-background">
     <nav mat-tab-nav-bar mat-stretch-tabs="false"
-         [tabPanel]="tabPanel">
-      <a mat-tab-link
-         *ngFor="let link of navLinks"
-         [routerLink]="link"
-         routerLinkActive="active-link"
-         #rla="routerLinkActive"
-         [active]="rla.isActive">
-        {{'wsg-admin.' + link | translate}}
-      </a>
+      [tabPanel]="tabPanel">
+      @for (link of navLinks; track link) {
+        <a mat-tab-link
+          [routerLink]="link"
+          routerLinkActive="active-link"
+          #rla="routerLinkActive"
+          [active]="rla.isActive">
+          {{'wsg-admin.' + link | translate}}
+        </a>
+      }
     </nav>
     <mat-tab-nav-panel #tabPanel>
       <router-outlet></router-outlet>

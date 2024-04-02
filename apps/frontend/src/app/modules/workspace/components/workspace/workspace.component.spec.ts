@@ -5,6 +5,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { WorkspaceComponent } from './workspace.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -52,7 +53,6 @@ describe('WorkspaceComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        WorkspaceComponent,
         MockStudioLiteSplitterComponent,
         MockStudioLiteSplitterPaneComponent,
         MockStudioLiteUnitsAreaComponent,
@@ -62,6 +62,7 @@ describe('WorkspaceComponent', () => {
         HttpClientModule,
         RouterTestingModule,
         MatSnackBarModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [{

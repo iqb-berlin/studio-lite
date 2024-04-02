@@ -2,15 +2,20 @@ import {
   Component,
   Inject, OnInit, ViewChild
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { saveAs } from 'file-saver-es';
-import { DatePipe, NgFor } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatTabChangeEvent, MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
-import { MetadataService } from '../../services/metadata.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import {
+  // eslint-disable-next-line max-len
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+} from '@angular/material/table';
+import { MetadataService } from '../../services/metadata.service';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -37,11 +42,12 @@ type Unit = {
   lastChangedMetadata: Date
 };
 @Component({
-    selector: 'studio-lite-table-view',
-    templateUrl: './table-view.component.html',
-    styleUrls: ['./table-view.component.scss'],
-    standalone: true,
-    imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, NgFor, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-table-view',
+  templateUrl: './table-view.component.html',
+  styleUrls: ['./table-view.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class TableViewComponent implements OnInit {

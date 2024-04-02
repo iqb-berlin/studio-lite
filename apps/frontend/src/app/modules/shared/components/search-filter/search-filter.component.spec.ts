@@ -6,7 +6,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SearchFilterComponent } from './search-filter.component';
-import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 describe('SearchFilterComponent', () => {
   let component: SearchFilterComponent;
@@ -14,7 +13,6 @@ describe('SearchFilterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SearchFilterComponent, WrappedIconComponent],
       imports: [
         MatTooltipModule,
         MatIconModule,

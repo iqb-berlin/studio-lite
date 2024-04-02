@@ -14,7 +14,6 @@ describe('NewGroupButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [NewGroupButtonComponent],
       imports: [
         TranslateModule.forRoot(),
         MatTooltipModule,

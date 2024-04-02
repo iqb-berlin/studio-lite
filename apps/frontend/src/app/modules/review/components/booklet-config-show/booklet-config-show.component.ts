@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgIf } from '@angular/common';
+
 
 const bookletConfigDefault = {
   pagingMode: '',
@@ -15,11 +15,11 @@ const bookletConfigDefault = {
 };
 
 @Component({
-    selector: 'studio-lite-booklet-config-show',
-    templateUrl: './booklet-config-show.component.html',
-    styleUrls: ['./booklet-config-show.component.scss'],
-    standalone: true,
-    imports: [NgIf, TranslateModule]
+  selector: 'studio-lite-booklet-config-show',
+  templateUrl: './booklet-config-show.component.html',
+  styleUrls: ['./booklet-config-show.component.scss'],
+  standalone: true,
+  imports: [TranslateModule]
 })
 export class BookletConfigShowComponent {
   bookletConfig: BookletConfigDto = bookletConfigDefault;

@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'isAllSelected',
-    standalone: true
+  name: 'isAllSelected',
+  standalone: true
 })
 export class IsAllSelectedPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

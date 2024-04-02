@@ -12,12 +12,12 @@ interface FormlyToggleProps extends FormlyFieldProps {
 }
 
 @Component({
-    selector: 'studio-lite-formly-toggle',
-    templateUrl: './formly-toggle.component.html',
-    styleUrls: ['./formly-toggle.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [MatSlideToggle, FormsModule, ReactiveFormsModule, FormlyModule]
+  selector: 'studio-lite-formly-toggle',
+  templateUrl: './formly-toggle.component.html',
+  styleUrls: ['./formly-toggle.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [MatSlideToggle, FormsModule, ReactiveFormsModule, FormlyModule]
 })
 
 export class FormlyToggleComponent extends FieldType<FieldTypeConfig<FormlyToggleProps>> {

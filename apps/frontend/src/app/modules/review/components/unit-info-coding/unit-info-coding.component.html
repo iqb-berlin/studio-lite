@@ -1,19 +1,27 @@
 <div class="fx-column-start-stretch">
   <div class="unit-info-coding-header">{{'review.coding' | translate}}</div>
   <studio-lite-unit-info-loader #loader
-                                (onEnter)="updateContent()">
+    (onEnter)="updateContent()">
   </studio-lite-unit-info-loader>
-  <div *ngIf="allVariables.length === 0">
-    {{ (loader?.spinnerOn ? 'review.loading-coding-information' : 'review.no-coding-information') | translate }}
-  </div>
-  <div class="unit-info-coding-content" *ngFor="let c of allVariables">
-    <div class="fx-row-space-between-stretch">
-      <h4>{{c.id}}</h4>
-      <h4>{{c.sourceType === 'BASE' ? 'B' : 'A'}}</h4>
+  @if (allVariables.length === 0) {
+    <div>
+      {{ (loader?.spinnerOn ? 'review.loading-coding-information' : 'review.no-coding-information') | translate }}
     </div>
-    <div *ngIf="c.label">{{c.label}}</div>
-    <div *ngIf="c.manualInstruction"
-         [innerHTML]="c.manualInstruction">
+  }
+  @for (c of allVariables; track c) {
+    <div class="unit-info-coding-content">
+      <div class="fx-row-space-between-stretch">
+        <h4>{{c.id}}</h4>
+        <h4>{{c.sourceType === 'BASE' ? 'B' : 'A'}}</h4>
+      </div>
+      @if (c.label) {
+        <div>{{c.label}}</div>
+      }
+      @if (c.manualInstruction) {
+        <div
+          [innerHTML]="c.manualInstruction">
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

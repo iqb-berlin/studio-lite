@@ -8,7 +8,6 @@ import { environment } from '../../../../../environments/environment';
 import { UnitPreviewComponent } from './unit-preview.component';
 import { PageData } from '../../models/page-data.interface';
 import { Progress } from '../../models/types';
-import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mode-selection.component';
 
 describe('UnitPreviewComponent', () => {
   let component: UnitPreviewComponent;
@@ -29,10 +28,7 @@ describe('UnitPreviewComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitPreviewComponent,
-        MockPreviewBarComponent,
-        PagingModeSelectionComponent
-      ],
+        MockPreviewBarComponent],
       imports: [
         CommonModule,
         HttpClientModule,

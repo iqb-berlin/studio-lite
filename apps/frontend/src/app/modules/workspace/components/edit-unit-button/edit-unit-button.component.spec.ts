@@ -10,7 +10,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../../../../../environments/environment';
 import { EditUnitButtonComponent } from './edit-unit-button.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('EditUnitButtonComponent', () => {
   let component: EditUnitButtonComponent;
@@ -18,10 +17,6 @@ describe('EditUnitButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        EditUnitButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         MatTooltipModule,
         RouterTestingModule,

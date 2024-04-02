@@ -1,73 +1,80 @@
 <div class="unit-nav fx-row-end-center">
-  <a mat-fab
-     *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
-     [matTooltip]="'back' | translate"
-     [disabled]="reviewService.currentUnitSequenceId < 0"
-     (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)">
-    <i class="material-icons">chevron_left</i>
-  </a>
-  <a mat-flat-button
-     *ngIf="reviewService.bookletConfig?.controllerDesign !== '2018'"
-     [matTooltip]="'back' | translate"
-     [disabled]="reviewService.currentUnitSequenceId < 0"
-     (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)">
-    <i class="material-icons">chevron_left</i>
-  </a>
-  <mat-selection-list *ngIf="reviewService.bookletConfig?.unitNaviButtons !== 'ARROWS_ONLY'"
-                      #unitList
-                      hideSingleSelectionIndicator
-                      [multiple]="false"
-                      class="unit-list fx-wrap"
-                      role="menubar"
-                      (selectionChange)="reviewService.setUnitNavigationRequest(unitList.selectedOptions.selected[0].value)">
-    <div class="fx-row-start-center"
-         [class.unit-nav-item-selected]="reviewService.currentUnitSequenceId < 0"
-         [class.unit-nav-item]="reviewService.currentUnitSequenceId >= 0"
-         (click)="reviewService.setUnitNavigationRequest(-1)">
-      <mat-list-option
-        value="-1"
-        [selected]="reviewService.currentUnitSequenceId === -1"
-        role="menuitem">
-      </mat-list-option>
-    </div>
-    <div *ngFor="let u of reviewService.units"
-         class="fx-row-start-center fx-flex-fill"
-         [class.unit-nav-item-selected]="u.sequenceId === reviewService.currentUnitSequenceId"
-         [class.unit-nav-item]="u.sequenceId !== reviewService.currentUnitSequenceId"
-         (click)="reviewService.setUnitNavigationRequest(u.sequenceId)">
-      <mat-list-option
+  @if (reviewService.bookletConfig.controllerDesign === '2018') {
+    <a mat-fab
+      [matTooltip]="'back' | translate"
+      [disabled]="reviewService.currentUnitSequenceId < 0"
+      (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)">
+      <i class="material-icons">chevron_left</i>
+    </a>
+  }
+  @if (reviewService.bookletConfig.controllerDesign !== '2018') {
+    <a mat-flat-button
+      [matTooltip]="'back' | translate"
+      [disabled]="reviewService.currentUnitSequenceId < 0"
+      (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId - 1)">
+      <i class="material-icons">chevron_left</i>
+    </a>
+  }
+  @if (reviewService.bookletConfig.unitNaviButtons !== 'ARROWS_ONLY') {
+    <mat-selection-list
+      #unitList
+      hideSingleSelectionIndicator
+      [multiple]="false"
+      class="unit-list fx-wrap"
+      role="menubar"
+      (selectionChange)="reviewService.setUnitNavigationRequest(unitList.selectedOptions.selected[0].value)">
+      <div class="fx-row-start-center"
+        [class.unit-nav-item-selected]="reviewService.currentUnitSequenceId < 0"
+        [class.unit-nav-item]="reviewService.currentUnitSequenceId >= 0"
+        (click)="reviewService.setUnitNavigationRequest(-1)">
+        <mat-list-option
+          value="-1"
+          [selected]="reviewService.currentUnitSequenceId === -1"
+          role="menuitem">
+        </mat-list-option>
+      </div>
+      @for (u of reviewService.units; track u) {
+        <div
+          class="fx-row-start-center fx-flex-fill"
+          [class.unit-nav-item-selected]="u.sequenceId === reviewService.currentUnitSequenceId"
+          [class.unit-nav-item]="u.sequenceId !== reviewService.currentUnitSequenceId"
+          (click)="reviewService.setUnitNavigationRequest(u.sequenceId)">
+          <mat-list-option
+            [value]="u.sequenceId.toString()"
+            [selected]="u.sequenceId === reviewService.currentUnitSequenceId"
+            role="menuitem"
+            [attr.aria-label]="u.name">
+            {{u.sequenceId + 1}}
+          </mat-list-option>
+        </div>
+      }
+      <div class="fx-row-start-center fx-flex-fill"
+        [class.unit-nav-item-selected]="reviewService.currentUnitSequenceId >= reviewService.units.length"
+        [class.unit-nav-item]="reviewService.currentUnitSequenceId < reviewService.units.length"
+        (click)="reviewService.setUnitNavigationRequest(reviewService.units.length)">
+        <mat-list-option
+          [value]="reviewService.units.length"
+          [selected]="reviewService.currentUnitSequenceId >= reviewService.units.length"
+          role="menuitem">
+        </mat-list-option>
+      </div>
+    </mat-selection-list>
+  }
 
-        [value]="u.sequenceId.toString()"
-        [selected]="u.sequenceId === reviewService.currentUnitSequenceId"
-        role="menuitem"
-        [attr.aria-label]="u.name">
-        {{u.sequenceId + 1}}
-      </mat-list-option>
-    </div>
-    <div class="fx-row-start-center fx-flex-fill"
-         [class.unit-nav-item-selected]="reviewService.currentUnitSequenceId >= reviewService.units.length"
-         [class.unit-nav-item]="reviewService.currentUnitSequenceId < reviewService.units.length"
-         (click)="reviewService.setUnitNavigationRequest(reviewService.units.length)">
-      <mat-list-option
-        [value]="reviewService.units.length"
-        [selected]="reviewService.currentUnitSequenceId >= reviewService.units.length"
-        role="menuitem">
-      </mat-list-option>
-    </div>
-  </mat-selection-list>
-
-  <a mat-fab
-     *ngIf="reviewService.bookletConfig?.controllerDesign === '2018'"
-     [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
-     (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
-     [matTooltip]="'next' | translate">
-    <i class="material-icons">chevron_right</i>
-  </a>
-  <a mat-flat-button
-     *ngIf="reviewService.bookletConfig?.controllerDesign !== '2018'"
-     [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
-     (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
-     [matTooltip]="'next' | translate">
-    <i class="material-icons">chevron_right</i>
-  </a>
+  @if (reviewService.bookletConfig.controllerDesign === '2018') {
+    <a mat-fab
+      [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
+      (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
+      [matTooltip]="'next' | translate">
+      <i class="material-icons">chevron_right</i>
+    </a>
+  }
+  @if (reviewService.bookletConfig.controllerDesign !== '2018') {
+    <a mat-flat-button
+      [disabled]="reviewService.currentUnitSequenceId > reviewService.units.length"
+      (click)="reviewService.setUnitNavigationRequest(reviewService.currentUnitSequenceId + 1)"
+      [matTooltip]="'next' | translate">
+      <i class="material-icons">chevron_right</i>
+    </a>
+  }
 </div>

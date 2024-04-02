@@ -6,9 +6,7 @@ describe('UnitInfoLoaderComponent', () => {
   let fixture: ComponentFixture<UnitInfoLoaderComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [UnitInfoLoaderComponent]
-    }).compileComponents();
+    await TestBed.configureTestingModule({}).compileComponents();
 
     const mockIntersectionObserver = jest.fn();
     mockIntersectionObserver.mockReturnValue({

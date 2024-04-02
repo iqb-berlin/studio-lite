@@ -12,9 +12,6 @@ describe('TableViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        TableViewComponent
-      ],
       providers: [
         {
           provide: 'SERVER_URL',

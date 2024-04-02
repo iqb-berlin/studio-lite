@@ -14,7 +14,6 @@ describe('MoveWorkspaceComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MoveWorkspaceComponent],
       imports: [
         TranslateModule.forRoot(),
         MatDialogModule,

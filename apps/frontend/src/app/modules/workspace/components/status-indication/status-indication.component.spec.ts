@@ -9,7 +9,6 @@ describe('StatusIndicationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [StatusIndicationComponent],
       imports: [
         MatTooltipModule,
         TranslateModule.forRoot()

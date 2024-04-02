@@ -28,41 +28,39 @@ import { UnitInfoLoaderComponent } from './components/unit-info-loader/unit-info
 import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';
 import { UnitNavComponent } from './components/unit-nav/unit-nav.component';
 import { AddCommentButtonComponent } from './components/add-comment-button/add-comment-button.component';
-import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        ReviewRoutingModule,
-        SharedModule,
-        CommentsModule,
-        MatButtonModule,
-        MatTooltipModule,
-        MatListModule,
-        MatIconModule,
-        MatSidenavModule,
-        MatButtonToggleModule,
-        MatProgressSpinnerModule,
-        MatExpansionModule,
-        MatDialogModule,
-        TranslateModule,
-        MatFormFieldModule,
-        FormsModule,
-        MatInputModule,
-        ReviewComponent,
-        StartComponent,
-        FinishComponent,
-        UnitsComponent,
-        UnitInfoComponent,
-        UnitInfoCodingComponent,
-        UnitInfoCommentsComponent,
-        UnitInfoLoaderComponent,
-        CommentDialogComponent,
-        BookletConfigShowComponent,
-        UnitNavComponent,
-        AddCommentButtonComponent
-    ],
-    providers: [{ provide: MAT_DATE_LOCALE, useValue: 'de-DE' }],
-    exports: [ReviewComponent]
+  imports: [
+    CommonModule,
+    ReviewRoutingModule,
+    CommentsModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatListModule,
+    MatIconModule,
+    MatSidenavModule,
+    MatButtonToggleModule,
+    MatProgressSpinnerModule,
+    MatExpansionModule,
+    MatDialogModule,
+    TranslateModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatInputModule,
+    ReviewComponent,
+    StartComponent,
+    FinishComponent,
+    UnitsComponent,
+    UnitInfoComponent,
+    UnitInfoCodingComponent,
+    UnitInfoCommentsComponent,
+    UnitInfoLoaderComponent,
+    CommentDialogComponent,
+    BookletConfigShowComponent,
+    UnitNavComponent,
+    AddCommentButtonComponent
+  ],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'de-DE' }],
+  exports: [ReviewComponent]
 })
 export class ReviewModule {}

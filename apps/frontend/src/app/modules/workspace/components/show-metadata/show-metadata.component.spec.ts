@@ -27,7 +27,6 @@ describe('ShowMetadataComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        ShowMetadataComponent,
         MockSelectUnitListComponent
       ],
       imports: [

@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
-} from "@nestjs/swagger";
+} from '@nestjs/swagger';
 import {
   CreateUnitCommentDto,
   ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto, UpdateUnitCommentDto
@@ -42,12 +42,14 @@ export class ReviewController {
   @ApiCreatedResponse({
     type: UnitMetadataDto
   })
+  @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review')
   async getUnitMetadata(
-    @Param('id', ParseIntPipe) unitId: number
+    @Param('review_id', ParseIntPipe) reviewId: number,
+      @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitMetadataDto> {
-    return this.unitService.findOnesMetadata(unitId);
+    return this.reviewService.findUnitMetadata(unitId, reviewId);
   }
 
   @Get(':id/definition')

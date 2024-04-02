@@ -3,26 +3,36 @@
     {{'modules.no-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
   </p>
 </div>
-<form *ngIf="hasListEntries" [formGroup]="moduleForm">
-  <span class="smaller-font" *ngIf="isEmpty">
-    {{'modules.not-defined-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
-  </span>
-  <span class="smaller-font" *ngIf="!isValid">
-    {{'modules.not-valid-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
-  </span>
-  <span class="smaller-font" *ngIf="moduleSubstitute">
-    {{'modules.replaced' | translate: { selectedModuleId, moduleSubstitute } }}
-  </span>
-  <div class="fx-column-start-stretch">
-    <mat-form-field>
-      <mat-select
-        [placeholder]="'modules.'+moduleType+'-name' | translate"
-        formControlName="moduleSelector">
-        <mat-option *ngFor="let m of moduleList"
-                    [value]="m.key">
-          {{m.metadata.name}} {{m.metadata.version}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-</form>
+@if (hasListEntries) {
+  <form [formGroup]="moduleForm">
+    @if (isEmpty) {
+      <span class="smaller-font">
+        {{'modules.not-defined-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
+      </span>
+    }
+    @if (!isValid) {
+      <span class="smaller-font">
+        {{'modules.not-valid-module-type' | translate: { module: 'modules.'+moduleType+'-name' | translate } }}
+      </span>
+    }
+    @if (moduleSubstitute) {
+      <span class="smaller-font">
+        {{'modules.replaced' | translate: { selectedModuleId, moduleSubstitute } }}
+      </span>
+    }
+    <div class="fx-column-start-stretch">
+      <mat-form-field>
+        <mat-select
+          [placeholder]="'modules.'+moduleType+'-name' | translate"
+          formControlName="moduleSelector">
+          @for (m of moduleList; track m) {
+            <mat-option
+              [value]="m.key">
+              {{m.metadata.name}} {{m.metadata.version}}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+}

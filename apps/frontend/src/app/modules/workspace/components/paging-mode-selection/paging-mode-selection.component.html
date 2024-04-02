@@ -2,8 +2,10 @@
   {{'unit-preview.paging-selection-mode.label' | translate}}
 </label>
 <select [ngModel]="previewService.pagingMode.value"
-        (ngModelChange)="previewService.setPagingMode($event)">
-  <option *ngFor="let mode of pagingModes" [value]="mode">
-    {{'unit-preview.paging-selection-mode.' + mode | translate}}
-  </option>
+  (ngModelChange)="previewService.setPagingMode($event)">
+  @for (mode of pagingModes; track mode) {
+    <option [value]="mode">
+      {{'unit-preview.paging-selection-mode.' + mode | translate}}
+    </option>
+  }
 </select>

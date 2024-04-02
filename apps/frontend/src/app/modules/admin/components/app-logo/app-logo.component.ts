@@ -1,23 +1,26 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { BackendService as WriteBackendService } from '../../services/backend.service';
-import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { NgIf } from '@angular/common';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { BackendService as ReadBackendService } from '../../../../services/backend.service';
+import { BackendService as WriteBackendService } from '../../services/backend.service';
 
 @Component({
-    selector: 'studio-lite-app-logo',
-    templateUrl: './app-logo.component.html',
-    styleUrls: ['./app-logo.component.scss'],
-    standalone: true,
-    imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, NgIf, MatFormField, MatLabel, MatInput, TranslateModule]
+  selector: 'studio-lite-app-logo',
+  templateUrl: './app-logo.component.html',
+  styleUrls: ['./app-logo.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, MatFormField, MatLabel, MatInput, TranslateModule]
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {

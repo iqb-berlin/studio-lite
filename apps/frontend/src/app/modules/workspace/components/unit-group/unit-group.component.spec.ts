@@ -10,7 +10,6 @@ describe('UnitGroupComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitGroupComponent],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule

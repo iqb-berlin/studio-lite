@@ -15,31 +15,30 @@ import { UnitPrintCommentsComponent } from './components/unit-print-comments/uni
 import { CommentsModule } from '../comments/comments.module';
 import { UnitPrintCodingComponent } from './components/unit-print-coding/unit-print-coding.component';
 import { UnitPrintCodeComponent } from './components/unit-print-code/unit-print-code.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { PrintMetadataComponent } from './components/print-metadata/print-metadata.component';
 import { PrintOptionsDialogComponent } from './components/print-options-dialog/print-options-dialog.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SharedModule,
-        PrintRoutingModule,
-        TranslateModule,
-        FormsModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatCheckboxModule,
-        MatTableModule,
-        MatIconModule,
-        CommentsModule,
-        PrintComponent,
-        UnitPrintLayoutComponent,
-        UnitPrintPlayerComponent,
-        UnitPrintCommentsComponent,
-        UnitPrintCodingComponent,
-        UnitPrintCodeComponent,
-        PrintMetadataComponent,
-        PrintOptionsDialogComponent
-    ]
+  imports: [
+    CommonModule,
+    PrintRoutingModule,
+    TranslateModule,
+    FormsModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    MatTableModule,
+    MatIconModule,
+    CommentsModule,
+    PrintComponent,
+    UnitPrintLayoutComponent,
+    UnitPrintPlayerComponent,
+    UnitPrintCommentsComponent,
+    UnitPrintCodingComponent,
+    UnitPrintCodeComponent,
+    PrintMetadataComponent,
+    PrintOptionsDialogComponent
+  ]
 })
 export class PrintModule {}

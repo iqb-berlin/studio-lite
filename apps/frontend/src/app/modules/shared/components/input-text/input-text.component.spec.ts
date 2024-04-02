@@ -13,7 +13,6 @@ describe('InputTextComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [InputTextComponent],
       imports: [
         MatFormFieldModule,
         MatInputModule,

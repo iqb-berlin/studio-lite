@@ -7,7 +7,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { NgxTiptapModule } from 'ngx-tiptap';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommentEditorComponent } from './comment-editor.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('CommentEditorComponent', () => {
   let component: CommentEditorComponent;
@@ -69,9 +68,7 @@ describe('CommentEditorComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        CommentEditorComponent,
-        MockIsCommentCommittablePipe,
-        WrappedIconComponent
+        MockIsCommentCommittablePipe
       ],
       imports: [
         TranslateModule.forRoot(),
@@ -81,7 +78,9 @@ describe('CommentEditorComponent', () => {
         NgxTiptapModule
       ]
     }).compileComponents();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).ClipboardEvent = ClipboardEventMock;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).DragEvent = DragEventMock;
     fixture = TestBed.createComponent(CommentEditorComponent);
     component = fixture.componentInstance;

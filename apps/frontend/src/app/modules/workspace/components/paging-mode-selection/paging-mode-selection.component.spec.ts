@@ -9,7 +9,6 @@ describe('PagingModeSelectionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PagingModeSelectionComponent],
       imports: [
         FormsModule,
         TranslateModule.forRoot()
