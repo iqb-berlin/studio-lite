@@ -51,6 +51,7 @@ export class ExportCodingBookComponent implements OnInit {
   }
 
   exportCodingBook() {
+    this.appService.dataLoading = true;
     this.backendService
       .getCodingBook(this.workspaceService.selectedWorkspaceId,
         this.contentOptions,
@@ -59,7 +60,8 @@ export class ExportCodingBookComponent implements OnInit {
         if (data) {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           // eslint-disable-next-line max-len
-          saveAs(data, `${thisDate} Kodierbuch ${this.workspaceService.selectedWorkspaceName}${(this.exportFormat === 'json') ? '.json' : '.docx'}`);
+          saveAs(data, `${thisDate} Kodierbuch ${this.workspaceService.selectedWorkspaceName}${(this.contentOptions.exportFormat === 'json') ? '.json' : '.docx'}`);
+          this.appService.dataLoading = false;
         }
       });
   }
