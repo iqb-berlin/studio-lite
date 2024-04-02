@@ -1,1 +1,1 @@
-export const getAppTitle = () => cy.get('.area-title');
+export const getAppTitle = () => cy.get('.page-title > div');
