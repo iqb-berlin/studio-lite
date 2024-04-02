@@ -21,10 +21,20 @@ interface WorkspaceData {
   schemers: { [key: string]: number };
 }
 
-interface CodingBook {
-  key: string;
-  name: string;
-  variables;
+interface BookVariable {
+  id: string;
+  label: string;
+  generalInstruction: string;
+  codes: CodeInfo[];
+  missings: Missing[];
+}
+
+interface CodeInfo {
+  id: string;
+  label: string;
+  score: string;
+  scoreLabel: string;
+  description: string;
 
 }
 
