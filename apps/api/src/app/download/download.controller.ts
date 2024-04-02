@@ -10,6 +10,7 @@ import { DownloadWorkspacesClass } from './download-workspaces.class';
 import { UnitService } from '../database/services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { IsAdminGuard } from '../admin/is-admin.guard';
+import { WorkspaceGuard } from '../workspace/workspace.guard';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
@@ -21,7 +22,7 @@ export class DownloadController {
   }
 
   @Get('docx/workspaces/:workspace_group_id/coding-book/:unitList')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
