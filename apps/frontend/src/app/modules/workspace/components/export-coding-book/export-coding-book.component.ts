@@ -53,9 +53,7 @@ export class ExportCodingBookComponent implements OnInit {
   exportCodingBook() {
     this.backendService
       .getCodingBook(this.workspaceService.selectedWorkspaceId,
-        this.exportFormat,
-        this.includeManualCoding,
-        this.includeClosedCoding,
+        this.contentOptions,
         this.unitList)
       .subscribe(data => {
         if (data) {
