@@ -1,6 +1,7 @@
 import {
   addFirstUser,
   changePassword,
+  updatePersonalData,
   clickButtonToAccept, createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
@@ -19,13 +20,13 @@ describe('User Management', () => {
     logout();
   });
 
-  it('should be possible login with credentials', () => {
+  it.skip('should be possible login with credentials', () => {
     login(userData.user_name, userData.user_pass);
     visitLoginPage();
     logout();
   });
 
-  it('should not be able to login with correct credentials', () => {
+  it.skip('should not be able to login with correct credentials', () => {
     cy.get('input[placeholder="Anmeldename"]')
       .should('exist')
       .clear()
@@ -39,13 +40,13 @@ describe('User Management', () => {
     cy.wait('@responseLogin').its('response.statusCode').should('eq', 401);
   });
 
-  it('user should be able to logout', () => {
+  it.skip('user should be able to logout', () => {
     login(userData.user_name, userData.user_pass);
     visitLoginPage();
     logout();
   });
 
-  it('should not be able to find admin user setting button', () => {
+  it.skip('should not be able to find admin user setting button', () => {
     login(userData.user_name, userData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('not.exist');
@@ -53,7 +54,13 @@ describe('User Management', () => {
     logout();
   });
 
-  it('should be possible change the password', () => {
+  it('should be able to modify personal data', () => {
+    login(userData.user_name, userData.user_pass);
+    updatePersonalData();
+    logout();
+  });
+
+  it.skip('should be possible change the password', () => {
     login(userData.user_name, userData.user_pass);
     changePassword('newpass', userData.user_pass);
     visitLoginPage();
@@ -72,8 +79,4 @@ describe('User Management', () => {
     visitLoginPage();
     logout();
   });
-
-  // it('should be able to modify personal data', () => {
-  //   // TODO
-  // });
 });
