@@ -49,6 +49,7 @@ export class ExportCodingBookComponent implements OnInit {
   unitList: number[] = [];
   selectedMissingsProfile!:string;
   missingsProfiles = [''];
+  workspaceChanges = this.workspaceService.isChanged();
 
   ngOnInit() {
     this.backendService.getMissingsProfiles(this.workspaceService.selectedWorkspaceId);

@@ -31,8 +31,12 @@
             <mat-radio-button value="json">JSON</mat-radio-button>
             <mat-radio-button value="docx">DOCX</mat-radio-button>
           </mat-radio-group>
+          @if(workspaceChanges) {
+            <mat-error> Änderungen im Arbeitsbereich müssen erst noch gespeichert werden! </mat-error>
+          }
         </section>
       </div>
+
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
@@ -40,7 +44,7 @@
     <button mat-raised-button color="primary"
       type="submit"
       (click)="exportCodingBook()"
-      [disabled]="unitList.length === 0"
+      [disabled]="unitList.length === 0 || workspaceChanges"
       [mat-dialog-close]="{selectedUnits:unitList}"
       >
       {{ 'export' | translate }}
