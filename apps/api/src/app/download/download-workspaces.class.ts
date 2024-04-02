@@ -191,16 +191,23 @@ export class DownloadWorkspacesClass {
           }
         });
       }
-      if (variablesHtml) {
-        codingBook.push(
-          {
-            key: unit.key,
-            name: unit.name,
-            variables: bookVariables
-          }
-        );
-        unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
-      }
+      const sortedBookVariables = bookVariables.sort((a, b) => {
+        if (a.id < b.id) {
+          return -1;
+        }
+        if (a.id > b.id) {
+          return 1;
+        }
+        return 0;
+      });
+
+      codebook.push(
+        {
+          key: unit.key,
+          name: unit.name,
+          variables: sortedBookVariables
+        }
+      );
     });
     // eslint-disable-next-line max-len
     docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
