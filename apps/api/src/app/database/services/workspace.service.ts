@@ -227,6 +227,7 @@ export class WorkspaceService {
             } else {
               validationResultText = 'OK';
             }
+            /* eslint-disable  @typescript-eslint/no-explicit-any */
             const foundItem = unit.metadata.items?.find((item: any) => item.variableId === codingVariable.id);
             let closedCoding = false;
             let manualCodingOnly = false;
