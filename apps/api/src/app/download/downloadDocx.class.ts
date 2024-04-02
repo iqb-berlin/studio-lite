@@ -3,13 +3,15 @@ import {
   Document,
   HeadingLevel,
   ImageRun,
+  NumberFormat,
   Packer,
   Paragraph,
   Table,
   TableCell,
   TableRow,
   TextRun,
-  WidthType
+  Footer,
+  WidthType, PageNumber
 } from 'docx';
 
 import { CodeBookContentSetting, CodebookDto } from '@studio-lite-lib/api-dto';
@@ -173,16 +175,49 @@ export class DownloadDocx {
             ]);
         }
       });
+      const date = new Date().toLocaleDateString();
       const doc = new Document({
         background: {
           color: '000000'
         },
-        sections: [{
-          children: [
-            ...units
-
-          ]
-        }]
+        sections: [
+          {
+            properties: {
+              page: {
+                pageNumbers: {
+                  start: 1,
+                  formatType: NumberFormat.DECIMAL
+                }
+              }
+            },
+            footers: {
+              default: new Footer({
+                children: [
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                      new TextRun('IQB-Studio Codebook '),
+                      new TextRun(date)
+                    ]
+                  }),
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                      new TextRun({
+                        children: [' Seite ', PageNumber.CURRENT]
+                      }),
+                      new TextRun({
+                        children: [' von ', PageNumber.TOTAL_PAGES]
+                      })
+                    ]
+                  })
+                ]
+              })
+            },
+            children: [
+              ...units
+            ]
+          }]
       });
       const b64string = await Packer.toBase64String(doc);
       return Buffer.from(b64string, 'base64');
