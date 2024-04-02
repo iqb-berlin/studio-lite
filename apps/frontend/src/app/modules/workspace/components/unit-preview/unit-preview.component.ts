@@ -440,6 +440,13 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     if (data && !this.workspaceService.isChanged()) {
       codingScheme = JSON.parse(data.scheme);
       this.workspaceService.codingScheme = codingScheme;
+      if (codingScheme === null) {
+        this.snackBar.open(
+          this.translateService.instant('workspace.coding-check-error'),
+          this.translateService.instant('workspace.error'),
+          { duration: 3000 });
+        return;
+      }
       this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
@@ -451,6 +458,13 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         .subscribe(schemeData => {
           if (schemeData) {
             codingScheme = JSON.parse(schemeData.scheme);
+            if (codingScheme === null) {
+              this.snackBar.open(
+                this.translateService.instant('workspace.coding-check-error'),
+                this.translateService.instant('workspace.error'),
+                { duration: 3000 });
+              return;
+            }
             this.workspaceService.codingScheme = codingScheme;
             this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
           }

@@ -230,13 +230,13 @@ export class WorkspaceService {
             /* eslint-disable  @typescript-eslint/no-explicit-any */
             const foundItem = unit.metadata.items?.find((item: any) => item.variableId === codingVariable.id);
             let closedCoding = false;
-            let manualCodingOnly = false;
+            let manualCodingOnly = true;
             let hasRules = false;
             if (codingVariable.codes?.length > 0) {
               codingVariable.codes.forEach((code: CodeData) => {
-                const hasManualInstruction = code.manualInstruction.length > 0;
+                if (code.manualInstruction.length === 0)manualCodingOnly = false;
                 code.ruleSets.forEach((ruleSet: RuleSet) => {
-                  if (hasManualInstruction && ruleSet.rules.length === 0) manualCodingOnly = true;
+                  if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) manualCodingOnly = false;
                   hasRules = ruleSet.rules.length > 0;
                   ruleSet.rules.forEach((rule: CodingRule) => {
                     if (rule.method === 'ELSE') {

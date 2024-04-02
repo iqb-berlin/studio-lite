@@ -540,6 +540,7 @@
     "schemer-not-loaded": "Der Editor für das Antwortschema \"{{id}}\" konnte nicht geladen werden.",
     "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
     "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
+    "coding-check-error": "Kodierung erst anlegen und verändern!",
     "coding-scheme-not-loaded": "Konnte Antwortschema nicht laden",
     "coding-check": "Kodierung prüfen",
     "coding-report": "Kodierbericht",
