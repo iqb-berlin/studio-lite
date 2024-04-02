@@ -123,6 +123,26 @@ export function changePassword(newPass:string, oldPass:string):void {
   clickButtonToAccept('Speichern');
 }
 
+export function updatePersonalData():void {
+  cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
+  cy.get('span:contains("Nutzerdaten ändern")')
+    .should('exist')
+    .click();
+  cy.get('input[placeholder="Nachname"]')
+    .should('exist')
+    .clear()
+    .type('Müller');
+  cy.get('input[placeholder="Vorname"]')
+    .should('exist')
+    .clear()
+    .type('Adam');
+  cy.get('input[placeholder="E-Mail"]')
+    .should('exist')
+    .clear()
+    .type('adam.muller@iqb.hu-berlin.de');
+  clickButtonToAccept('Speichern');
+}
+
 export function createNewUser(name: string, pass: string):void {
   // eslint-disable-next-line max-len
   cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
