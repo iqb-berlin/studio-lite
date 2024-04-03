@@ -1,17 +1,31 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
-import { BackendService as WriteBackendService } from '../../services/backend.service';
-import { BackendService as ReadBackendService } from '../../../../services/backend.service';
-import { defaultAppConfig } from '../../../../services/app.service';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+
+import { ToTimePipe } from '../../pipes/to-time.pipe';
 import { AppConfig } from '../../../../models/app-config.class';
+import { defaultAppConfig } from '../../../../services/app.service';
+import { BackendService as ReadBackendService } from '../../../../services/backend.service';
+import { BackendService as WriteBackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-app-config',
   templateUrl: './app-config.component.html',
-  styleUrls: ['./app-config.component.scss']
+  styleUrls: ['./app-config.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {

@@ -12,7 +12,6 @@ describe('SaveOrDiscardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SaveOrDiscardComponent],
       imports: [
         MatDialogModule,
         TranslateModule.forRoot(),

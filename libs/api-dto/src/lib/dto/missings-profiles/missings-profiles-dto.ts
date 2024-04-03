@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MissingsProfilesDto {
@@ -8,5 +9,13 @@ export class MissingsProfilesDto {
     label?: string;
 
   @ApiProperty()
-    missings?: any;
+    missings?: Missing;
+}
+
+export class Missing {
+  @ApiProperty()
+    id!: string;
+
+  @ApiProperty()
+    label!: string;
 }

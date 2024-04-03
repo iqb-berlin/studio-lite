@@ -22,9 +22,7 @@ describe('UnitsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        UnitsComponent,
-        MockPageNavigationComponent
+      declarations: [MockPageNavigationComponent
       ],
       imports: [
         TranslateModule.forRoot(),

@@ -1,10 +1,22 @@
 import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import {
+  MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 
 @Component({
   selector: 'studio-lite-change-password',
   templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.scss']
+  styleUrls: ['./change-password.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [FormsModule, ReactiveFormsModule, MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ChangePasswordComponent {
   changePasswordForm: UntypedFormGroup;

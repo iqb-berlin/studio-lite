@@ -21,9 +21,6 @@ describe('NewUnitComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        NewUnitComponent
-      ],
       imports: [
         MatFormFieldModule,
         MatInputModule,

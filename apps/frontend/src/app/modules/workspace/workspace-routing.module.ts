@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+// eslint-disable-next-line import/no-cycle
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';

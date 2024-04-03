@@ -2,11 +2,23 @@ import {
   Component, Input
 } from '@angular/core';
 import { ReviewDto } from '@studio-lite-lib/api-dto';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+
+import { LogoutDirective } from '../../directives/logout.directive';
+import { UserIssuesComponent } from '../user-issues/user-issues.component';
+import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
+import { AreaTitleComponent } from '../area-title/area-title.component';
 
 @Component({
   selector: 'studio-lite-user-reviews-area',
   templateUrl: './user-reviews-area.component.html',
-  styleUrls: ['./user-reviews-area.component.scss']
+  styleUrls: ['./user-reviews-area.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [AreaTitleComponent, MatButton, LogoutDirective, MatTooltip, MatIcon, UserIssuesComponent, TranslateModule, UserIssuesPipe]
 })
 export class UserReviewsAreaComponent {
   @Input() reviews!: ReviewDto[];

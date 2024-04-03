@@ -3,7 +3,8 @@ import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { MatTableDataSource } from '@angular/material/table';
 
 @Pipe({
-  name: 'tableDataSource'
+  name: 'tableDataSource',
+  standalone: true
 })
 export class TableDataSourcePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../services/workspace.service';
 import { BackendService } from '../services/backend.service';
-import { WorkspaceComponent } from '../components/workspace/workspace.component';
+import { RoutingHelperService } from '../services/routing-helper.service';
 
 @Directive()
 export abstract class SelectUnitDirective {
@@ -42,7 +42,7 @@ export abstract class SelectUnitDirective {
     if (unitId) {
       const selectedTab = this.selectedRouterLink;
       const routeSuffix = selectedTab >= 0 ? `/${this.navLinks[selectedTab]}` : '';
-      const secondaryOutletTab = WorkspaceComponent.getSecondaryOutlet(
+      const secondaryOutletTab = RoutingHelperService.getSecondaryOutlet(
         this.router.routerState.snapshot.url,
         this.routingOutlet,
         this.secondaryRoutingOutlet

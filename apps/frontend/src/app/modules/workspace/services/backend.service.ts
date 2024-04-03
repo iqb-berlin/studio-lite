@@ -3,6 +3,7 @@ import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
+  CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
   RequestReportDto, ReviewFullDto, ReviewInListDto, ReviewSettingsDto,
@@ -14,6 +15,7 @@ import {
 import {
   MissingsProfilesDto
 } from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
+import { CodingReportDto } from '../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -119,14 +121,25 @@ export class BackendService {
     );
   }
 
-  getCodingBook(workspaceId: number, exportFormat: 'json' | 'docx', hasManualCoding:boolean, hasClosedResponses:boolean, unitList:number[]): Observable<Blob | null> {
+  getCodingBook(workspaceId: number, contentOptions: CodeBookContentSetting,
+                unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
+      const {
+        exportFormat,
+        hasOnlyManualCoding,
+        hasGeneralInstructions,
+        hasDerivedVars,
+        hasClosedVars
+      } = contentOptions;
+
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
           params: new HttpParams()
-            .set('onlyManual', hasManualCoding)
-            .set('closed', hasClosedResponses)
-            .set('format', exportFormat),
+            .set('format', exportFormat)
+            .set('generalInstructions', hasGeneralInstructions)
+            .set('onlyManual', hasOnlyManualCoding)
+            .set('closed', hasClosedVars)
+            .set('derived', hasDerivedVars),
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },
@@ -354,5 +367,9 @@ export class BackendService {
       result += v.toString(16).padStart(2, '0');
     });
     return result;
+  }
+
+  getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
+    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspace/${workspaceId}/coding-report`);
   }
 }

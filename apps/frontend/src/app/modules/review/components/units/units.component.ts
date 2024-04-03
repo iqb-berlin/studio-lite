@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
+
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
@@ -12,11 +13,15 @@ import { UnitPage } from '../../models/unit-page.interface';
 import { PageData } from '../../../workspace/models/page-data.interface';
 import { UnitData } from '../../models/unit-data.class';
 import { BackendService } from '../../services/backend.service';
+import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { UnitInfoComponent } from '../unit-info/unit-info.component';
 
 @Component({
   selector: 'studio-lite-units',
   templateUrl: './units.component.html',
-  styleUrls: ['./units.component.scss']
+  styleUrls: ['./units.component.scss'],
+  standalone: true,
+  imports: [UnitInfoComponent, PageNavigationComponent]
 })
 export class UnitsComponent implements OnInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

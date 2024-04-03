@@ -18,6 +18,7 @@ import { VeronaModulesService } from '../database/services/verona-modules.servic
 import { SettingService } from '../database/services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { UsersService } from '../database/services/users.service';
+import { CodingReportDto } from '../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -126,6 +127,18 @@ export class WorkspaceController {
     return this.workspaceService.removeGroup(workspaceId, Buffer.from(groupName, 'hex').toString());
   }
 
+  @Get('coding-report')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiCreatedResponse({
+    type: [String]
+  })
+  @ApiTags('workspace')
+  async getCodingReport(@WorkspaceId() workspaceId: number): Promise<CodingReportDto[]> {
+    return this.workspaceService.getCodingReport(workspaceId);
+  }
+
   @Post('upload')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
@@ -151,6 +164,7 @@ export class WorkspaceController {
     @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
     const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
     const file = await UnitDownloadClass.get(
+      workspaceId,
       this.unitService,
       this.veronaModuleService,
       this.settingService,

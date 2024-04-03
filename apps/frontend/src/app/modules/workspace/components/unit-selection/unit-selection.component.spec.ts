@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { UnitSelectionComponent } from './unit-selection.component';
 
@@ -34,7 +35,6 @@ describe('UnitSelectionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitSelectionComponent,
         MockUnitTableComponent,
         MockSearchFilterComponent,
         MockUnitGroupsComponent
@@ -42,7 +42,8 @@ describe('UnitSelectionComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         RouterTestingModule,
-        HttpClientModule
+        HttpClientModule,
+        NoopAnimationsModule
       ],
       providers: [{
         provide: 'SERVER_URL',

@@ -5,7 +5,8 @@ import {
 @Component({
   selector: 'studio-lite-splitter-gutter',
   templateUrl: './splitter-gutter.component.html',
-  styleUrls: ['./splitter-gutter.component.scss']
+  styleUrls: ['./splitter-gutter.component.scss'],
+  standalone: true
 })
 export class SplitterGutterComponent {
   pointerPressed: boolean = false;

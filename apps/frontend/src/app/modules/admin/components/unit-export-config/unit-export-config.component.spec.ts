@@ -17,7 +17,6 @@ describe('UnitExportConfigComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitExportConfigComponent],
       imports: [
         TranslateModule.forRoot(),
         ReactiveFormsModule,

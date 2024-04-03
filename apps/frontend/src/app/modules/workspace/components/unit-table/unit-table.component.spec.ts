@@ -9,7 +9,6 @@ describe('UnitTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitTableComponent],
       imports: [
         MatTableModule
       ]

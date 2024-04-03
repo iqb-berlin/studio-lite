@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { GroupMenuComponent } from './group-menu.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('GroupMenuComponent', () => {
   let component: GroupMenuComponent;
@@ -12,10 +11,6 @@ describe('GroupMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        GroupMenuComponent,
-        WrappedIconComponent
-      ],
       imports: [
         MatDialogModule,
         MatIconModule,

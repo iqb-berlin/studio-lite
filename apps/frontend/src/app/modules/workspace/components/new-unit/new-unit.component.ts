@@ -1,15 +1,31 @@
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import {
   Component, ElementRef, Inject, ViewChild
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { WorkspaceService } from '../../services/workspace.service';
+import {
+  UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatError } from '@angular/material/form-field';
+
 import { NewUnitData } from '../../models/new-unit.interface';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   selector: 'studio-lite-new-unit',
   templateUrl: './new-unit.component.html',
-  styleUrls: ['./new-unit.component.scss']
+  styleUrls: ['./new-unit.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class NewUnitComponent {
   newUnitForm: UntypedFormGroup;

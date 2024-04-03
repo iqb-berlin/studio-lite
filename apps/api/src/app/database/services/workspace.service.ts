@@ -5,9 +5,12 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto
+  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto, UnitMetadataDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
+import {
+  CodeData, CodingRule, CodingScheme, CodingSchemeProblem, RuleSet, VariableCodingData
+} from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -23,6 +26,7 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
+import { CodingReportDto } from '../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable()
 export class WorkspaceService {
@@ -200,6 +204,80 @@ export class WorkspaceService {
       workspaceToUpdate.settings = settings;
       await this.workspacesRepository.save(workspaceToUpdate);
     }
+  }
+
+  async getCodingReport(id: number): Promise<CodingReportDto[]> {
+    const unitDataRows:CodingReportDto[] = [];
+    const unitListWithMetadata = await this.unitService.findAllWithMetadata(id);
+    if (unitListWithMetadata) {
+      unitListWithMetadata?.forEach((unit: UnitMetadataDto) => {
+        if (unit.scheme && unit.scheme !== 'undefined' && unit.schemer.split('@')[1] >= '1.5') {
+          const parsedUnitScheme = JSON.parse(unit.scheme as string);
+          let codingType:string;
+          if (parsedUnitScheme) {
+            const schemer = new CodingScheme(parsedUnitScheme.variableCodings);
+            const validation = schemer.validate(unit.variables);
+            let validationResultText: string;
+            parsedUnitScheme.variableCodings?.forEach((codingVariable: VariableCodingData) => {
+              const validationResult = validation
+                .find((v: CodingSchemeProblem) => v.variableId === codingVariable.id);
+              if (validationResult) {
+                if (validationResult.breaking) {
+                  validationResultText = 'Fehler';
+                } else validationResultText = 'Warnung';
+              } else {
+                validationResultText = 'OK';
+              }
+              /* eslint-disable  @typescript-eslint/no-explicit-any */
+              const foundItem = unit.metadata.items?.find((item: any) => item.variableId === codingVariable.id);
+              let closedCoding = false;
+              let manualCodingOnly = true;
+              let hasRules = false;
+              if (codingVariable.codes?.length > 0) {
+                codingVariable.codes.forEach((code: CodeData) => {
+                  if (code.manualInstruction.length === 0)manualCodingOnly = false;
+                  code.ruleSets.forEach((ruleSet: RuleSet) => {
+                    if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) manualCodingOnly = false;
+                    hasRules = ruleSet.rules.length > 0;
+                    ruleSet.rules.forEach((rule: CodingRule) => {
+                      if (rule.method === 'ELSE') {
+                        closedCoding = true;
+                      }
+                    });
+                  });
+                });
+              }
+              if (closedCoding) {
+                codingType = 'geschlossen';
+              } else if (manualCodingOnly) {
+                codingType = 'manuell';
+              } else if (hasRules) {
+                codingType = 'regelbasiert';
+              } else {
+                codingType = 'keine Regeln';
+              }
+              unitDataRows.push({
+                unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+                variable: codingVariable.id || '–',
+                item: foundItem?.id || '–',
+                validation: validationResultText,
+                codingType: codingType
+              });
+            });
+          }
+        } else {
+          unitDataRows.push({
+            unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+            variable: '',
+            item: '',
+            validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+            codingType: ''
+          });
+        }
+      });
+      return unitDataRows as CodingReportDto[];
+    }
+    return [];
   }
 
   // TODO: id als Parameter

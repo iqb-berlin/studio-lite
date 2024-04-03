@@ -31,13 +31,13 @@ export class ProfileController {
 
   @Post('vocabs')
   @ApiBearerAuth()
-  async saveVocab(@Body() vocabs:any) {
+  async saveVocab(@Body() vocabs) {
     return this.profileService.saveVocabs(vocabs);
   }
 
   @Post()
   @ApiBearerAuth()
-  async saveProfile(@Body() profile:any) {
+  async saveProfile(@Body() profile) {
     return this.profileService.saveProfile(profile);
   }
 }

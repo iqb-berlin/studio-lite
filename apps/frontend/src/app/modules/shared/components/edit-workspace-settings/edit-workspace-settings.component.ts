@@ -1,15 +1,23 @@
 import {
   Component, Inject, OnInit
 } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { MatCheckboxChange } from '@angular/material/checkbox';
-import { MatSelectChange } from '@angular/material/select';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
+import { WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { MatSelectChange, MatSelect } from '@angular/material/select';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatOption } from '@angular/material/core';
+
+import { MatLabel, MatError } from '@angular/material/form-field';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';
 import { State } from '../../../admin/models/state.type';
+import { SelectModuleComponent } from '../select-module/select-module.component';
 
 type Profile = {
   id:string,
@@ -26,7 +34,10 @@ type SelectedRow = {
 @Component({
   selector: 'studio-lite-edit-workspace-settings',
   templateUrl: './edit-workspace-settings.component.html',
-  styleUrls: ['./edit-workspace-settings.component.scss']
+  styleUrls: ['./edit-workspace-settings.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class EditWorkspaceSettingsComponent implements OnInit {
   constructor(
@@ -53,16 +64,30 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     this.selectionChanged = this.dialogData.states as State[];
     const workspaceGroupId = this.data.selectedRow?.groupId || this.workspaceService.groupId;
     if (workspaceGroupId) {
-      this.backendService.getWorkspaceGroupProfiles(workspaceGroupId).subscribe(res => {
-        this.unitMDProfiles = res.settings.profiles
-          ?.filter((profile:Profile) => profile.id.split('/').pop() !== 'item.json') || [];
-        this.itemMDProfiles = res.settings.profiles
-          ?.filter((profile:Profile) => profile.id.split('/').pop() === 'item.json') || [];
-      });
-      this.backendService.getWorkspaceProfile(this.data.selectedRow.id).subscribe(res => {
-        if (res.settings?.itemMDProfile) this.selectedItemMDProfile = res.settings.itemMDProfile;
-        if (res.settings?.unitMDProfile) this.selectedUnitMDProfile = res.settings.unitMDProfile;
-      });
+      this.backendService.getWorkspaceGroupById(workspaceGroupId)
+        .subscribe((res => {
+          this.unitMDProfiles = (
+            res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
+              ?.filter((profile: Profile) => profile.id.split('/')
+                .pop() !== 'item.json')
+          ) || [];
+          this.itemMDProfiles = (
+            res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
+              ?.filter((profile: Profile) => profile.id.split('/')
+                .pop() === 'item.json')
+          ) || [];
+        }));
+      this.backendService.getWorkspaceById(this.data.selectedRow.id)
+        .subscribe(res => {
+          const itemMDProfile = (
+            res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.itemMDProfile
+          ) || '';
+          if (itemMDProfile) this.selectedItemMDProfile = itemMDProfile;
+          const unitMDProfile = (
+            res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.unitMDProfile
+          ) || '';
+          if (unitMDProfile) this.selectedUnitMDProfile = unitMDProfile;
+        });
     }
   }
 

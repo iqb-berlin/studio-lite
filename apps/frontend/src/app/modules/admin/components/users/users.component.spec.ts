@@ -12,11 +12,9 @@ import { MatTableModule } from '@angular/material/table';
 import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
@@ -42,12 +40,8 @@ describe('UsersComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UsersComponent,
         MockUsersMenuComponent,
-        MockSearchFilterComponent,
-        WrappedIconComponent,
-        HasSelectionValuePipe,
-        IsAllSelectedPipe
+        MockSearchFilterComponent
       ],
       imports: [
         MatSnackBarModule,
@@ -56,6 +50,7 @@ describe('UsersComponent', () => {
         MatIconModule,
         MatTableModule,
         HttpClientModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [

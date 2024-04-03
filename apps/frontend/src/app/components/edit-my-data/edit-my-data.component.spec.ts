@@ -14,9 +14,6 @@ describe('EditMyDataComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        EditMyDataComponent
-      ],
       imports: [
         NoopAnimationsModule,
         ReactiveFormsModule,

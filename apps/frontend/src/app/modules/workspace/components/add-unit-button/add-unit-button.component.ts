@@ -5,7 +5,11 @@ import { UntypedFormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatButton } from '@angular/material/button';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { NewUnitComponent } from '../new-unit/new-unit.component';
@@ -17,11 +21,14 @@ import {
 } from '../../../../components/request-message/request-message.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { NewUnitData } from '../../models/new-unit.interface';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-add-unit-button',
   templateUrl: './add-unit-button.component.html',
-  styleUrls: ['./add-unit-button.component.scss']
+  styleUrls: ['./add-unit-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, TranslateModule]
 })
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   private uploadSubscription: Subscription | null = null;

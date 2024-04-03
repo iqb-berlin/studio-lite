@@ -1,11 +1,15 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
+import { CommentsComponent } from '../../../comments/components/comments/comments.component';
 
 @Component({
   templateUrl: './unit-comments.component.html',
-  styleUrls: ['./unit-comments.component.scss']
+  styleUrls: ['./unit-comments.component.scss'],
+  standalone: true,
+  imports: [CommentsComponent]
 })
 export class UnitCommentsComponent implements OnDestroy {
   userName: string = '';

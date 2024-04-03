@@ -35,7 +35,6 @@ describe('MoveUnitComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        MoveUnitComponent,
         MockSelectUnitListComponent,
         MockSearchFilterComponent
       ],

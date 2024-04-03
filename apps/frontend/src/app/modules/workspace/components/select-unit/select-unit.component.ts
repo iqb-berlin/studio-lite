@@ -1,13 +1,22 @@
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import {
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { WorkspaceService } from '../../services/workspace.service';
-import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../services/backend.service';
-import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import {
+  UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatFormField } from '@angular/material/form-field';
+
 import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { AppService } from '../../../../services/app.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 export interface SelectUnitData {
   title: string;
@@ -20,7 +29,10 @@ export interface SelectUnitData {
 @Component({
   selector: 'studio-lite-select-unit',
   templateUrl: './select-unit.component.html',
-  styleUrls: ['./select-unit.component.scss']
+  styleUrls: ['./select-unit.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SelectUnitComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;
@@ -40,7 +52,6 @@ export class SelectUnitComponent implements OnInit {
 
   constructor(
     private fb: UntypedFormBuilder,
-    private backendService: BackendService,
     private appService: AppService,
     public ds: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: SelectUnitData

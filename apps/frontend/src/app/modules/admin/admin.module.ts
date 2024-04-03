@@ -44,7 +44,7 @@ import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
 import { ToTimePipe } from './pipes/to-time.pipe';
 import { UsersMenuComponent } from './components/users-menu/users-menu.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu/workspace-groups-menu.component';
 import {
   EditWorkspaceGroupSettingsComponent
@@ -78,11 +78,7 @@ import {
     FormsModule,
     TranslateModule,
     HttpClientModule,
-    SharedModule,
-    MatExpansionModule
-  ],
-  exports: [AdminComponent],
-  declarations: [
+    MatExpansionModule,
     WorkspaceGroupsComponent,
     UsersComponent,
     AdminComponent,
@@ -104,6 +100,7 @@ import {
     WorkspaceGroupsMenuComponent,
     EditWorkspaceGroupSettingsComponent
   ],
+  exports: [AdminComponent],
   providers: [
     BackendService,
     [

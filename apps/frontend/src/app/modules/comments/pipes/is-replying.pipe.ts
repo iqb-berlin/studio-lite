@@ -3,7 +3,8 @@ import { ActiveComment, ActiveCommentType } from '../models/active-comment.inter
 import { Comment } from '../models/comment.interface';
 
 @Pipe({
-  name: 'isReplying'
+  name: 'isReplying',
+  standalone: true
 })
 export class IsReplyingPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

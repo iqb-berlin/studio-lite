@@ -2,11 +2,15 @@ import {
   AfterViewInit,
   Component, ElementRef, EventEmitter, Input, OnDestroy, Output
 } from '@angular/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+
 
 @Component({
   selector: 'studio-lite-unit-info-loader',
   templateUrl: './unit-info-loader.component.html',
-  styleUrls: ['./unit-info-loader.component.scss']
+  styleUrls: ['./unit-info-loader.component.scss'],
+  standalone: true,
+  imports: [MatProgressSpinner]
 })
 export class UnitInfoLoaderComponent implements AfterViewInit, OnDestroy {
   @Output() onEnter = new EventEmitter();

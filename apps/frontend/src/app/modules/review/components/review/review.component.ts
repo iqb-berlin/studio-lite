@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
+
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
+import { AddCommentButtonComponent } from '../add-comment-button/add-comment-button.component';
+import { UnitNavComponent } from '../unit-nav/unit-nav.component';
 
 @Component({
   selector: 'studio-lite-review',
   templateUrl: './review.component.html',
-  styleUrls: ['./review.component.scss']
+  styleUrls: ['./review.component.scss'],
+  standalone: true,
+  imports: [UnitNavComponent, AddCommentButtonComponent, RouterOutlet]
 })
 export class ReviewComponent {
   constructor(

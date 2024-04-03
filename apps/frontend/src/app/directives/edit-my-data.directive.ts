@@ -10,7 +10,8 @@ import { AppService } from '../services/app.service';
 import { AuthService } from '../modules/auth/service/auth.service';
 
 @Directive({
-  selector: '[studioLiteEditMyData]'
+  selector: '[studioLiteEditMyData]',
+  standalone: true
 })
 export class EditMyDataDirective {
   constructor(
@@ -55,6 +56,7 @@ export class EditMyDataDirective {
                 if (newFirstName !== myData.firstName) changedData.firstName = newFirstName;
                 if (newLastName !== myData.lastName) changedData.lastName = newLastName;
                 if (newEmail !== myData.email) changedData.email = newEmail;
+                // eslint-disable-next-line max-len
                 if (newEmailApproval !== myData.emailPublishApproved) changedData.emailPublishApproved = newEmailApproval;
                 this.appService.dataLoading = true;
                 this.backendService.setMyData(changedData).subscribe(

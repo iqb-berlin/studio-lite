@@ -1,7 +1,7 @@
 <div class="comment fx-row-start-stretch">
 
   <studio-lite-comment-badge [userName]="comment.userName"
-                             [ownComment]="ownComment">
+    [ownComment]="ownComment">
   </studio-lite-comment-badge>
 
   <div class="fx-column-start-stretch">
@@ -13,75 +13,84 @@
 
     <div class="fx-row-start-stretch fx-wrap">
       <div>
-        <div *ngIf="!(activeComment | isEditing: comment)"
-             class="comment-html"
-             [class.own-comment]="ownComment"
-             [innerHTML]="comment.body| safeResourceHTML">
-        </div>
+        @if (!(activeComment | isEditing: comment)) {
+          <div
+            class="comment-html"
+            [class.own-comment]="ownComment"
+            [innerHTML]="comment.body| safeResourceHTML">
+          </div>
+        }
 
-        <studio-lite-comment-editor
-          *ngIf="activeComment | isEditing: comment"
-          studioLiteScrollEditorIntoView [isVisible] = "activeComment | isEditing: comment"
-          submitLabel="comment-editor.edit"
-          [initialHTML]="comment.body"
-          (handleSubmit)="updateComment.emit({ text: $event, commentId: comment.id })"
-          (handleCancel)="setActiveComment.emit(null)">
-        </studio-lite-comment-editor>
+        @if (activeComment | isEditing: comment) {
+          <studio-lite-comment-editor
+            studioLiteScrollEditorIntoView [isVisible] = "activeComment | isEditing: comment"
+            submitLabel="comment-editor.edit"
+            [initialHTML]="comment.body"
+            (handleSubmit)="updateComment.emit({ text: $event, commentId: comment.id })"
+            (handleCancel)="setActiveComment.emit(null)">
+          </studio-lite-comment-editor>
+        }
 
-        <studio-lite-comment-editor
-          *ngIf="activeComment | isReplying: comment"
-          studioLiteScrollEditorIntoView [isVisible] = "activeComment | isReplying: comment"
-          submitLabel="comment-editor.reply"
-          (handleCancel)="setActiveComment.emit(null)"
-          (handleSubmit)="addComment.emit({ text: $event, parentId: replyId })">
-        </studio-lite-comment-editor>
+        @if (activeComment | isReplying: comment) {
+          <studio-lite-comment-editor
+            studioLiteScrollEditorIntoView [isVisible] = "activeComment | isReplying: comment"
+            submitLabel="comment-editor.reply"
+            (handleCancel)="setActiveComment.emit(null)"
+            (handleSubmit)="addComment.emit({ text: $event, parentId: replyId })">
+          </studio-lite-comment-editor>
+        }
       </div>
 
       <div class="fx-flex-row-fix-150">
         <button mat-icon-button
-                class="comment-action"
-                matTooltip = "{{'comment.reply' | translate}}"
-                [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-                (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
+          class="comment-action"
+          matTooltip = "{{'comment.reply' | translate}}"
+          [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
+          (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
           <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
         </button>
-        <button *ngIf="ownComment"
-                mat-icon-button
-                class="comment-action"
-                matTooltip = "{{'comment.edit' | translate}}"
-                [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-                (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
-          <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
-        </button>
-        <button *ngIf="ownComment || adminMode"
-                mat-icon-button
-                class="comment-action"
-                matTooltip = "{{'comment.delete' | translate}}"
-                [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-                (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
-          <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
-        </button>
+        @if (ownComment) {
+          <button
+            mat-icon-button
+            class="comment-action"
+            matTooltip = "{{'comment.edit' | translate}}"
+            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
+            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
+            <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
+          </button>
+        }
+        @if (ownComment || adminMode) {
+          <button
+            mat-icon-button
+            class="comment-action"
+            matTooltip = "{{'comment.delete' | translate}}"
+            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
+            (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
+            <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
+          </button>
+        }
       </div>
     </div>
 
-    <ng-container *ngIf="replies.length">
-      <studio-lite-comment
-        *ngFor="let reply of replies"
-        [comment]="reply"
-        [activeComment]="activeComment"
-        [parentId]="comment.id"
-        [replies]="[]"
-        [userId]="userId"
-        [adminMode]="adminMode"
-        [latestCommentId]="latestCommentId"
-        (setActiveComment)="setActiveComment.emit($event)"
-        (updateComment)="updateComment.emit($event)"
-        (deleteComment)="deleteComment.emit($event)"
-        (addComment)="addComment.emit($event)"
-        studioLiteScrollCommentIntoView
-        [id]="reply.id"
-        [scrollTargetId]="latestCommentId">
-      </studio-lite-comment>
-    </ng-container>
+    @if (replies.length) {
+      @for (reply of replies; track reply) {
+        <studio-lite-comment
+          [comment]="reply"
+          [activeComment]="activeComment"
+          [parentId]="comment.id"
+          [replies]="[]"
+          [userId]="userId"
+          [adminMode]="adminMode"
+          [latestCommentId]="latestCommentId"
+          (setActiveComment)="setActiveComment.emit($event)"
+          (updateComment)="updateComment.emit($event)"
+          (deleteComment)="deleteComment.emit($event)"
+          (addComment)="addComment.emit($event)"
+          studioLiteScrollCommentIntoView
+          [id]="reply.id"
+          [scrollTargetId]="latestCommentId">
+        </studio-lite-comment>
+      }
+    }
   </div>
 </div>

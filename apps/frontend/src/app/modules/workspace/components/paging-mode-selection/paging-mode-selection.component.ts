@@ -1,11 +1,16 @@
 import { Component } from '@angular/core';
-import { PreviewService } from '../../services/preview.service';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { FormsModule } from '@angular/forms';
 import { PagingMode } from '../../models/types';
+import { PreviewService } from '../../services/preview.service';
 
 @Component({
   selector: 'studio-lite-paging-mode-selection',
   templateUrl: './paging-mode-selection.component.html',
-  styleUrls: ['./paging-mode-selection.component.scss']
+  styleUrls: ['./paging-mode-selection.component.scss'],
+  standalone: true,
+  imports: [FormsModule, TranslateModule]
 })
 export class PagingModeSelectionComponent {
   pagingModes: PagingMode[] = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];

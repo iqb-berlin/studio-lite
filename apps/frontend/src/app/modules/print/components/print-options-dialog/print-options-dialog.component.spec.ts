@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PrintOptionsDialogComponent } from './print-options-dialog.component';
 import { PrintOptions } from '../../models/print-options.interface';
 
@@ -16,12 +17,11 @@ describe('PrintOptionsDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        PrintOptionsDialogComponent,
-        MockPrintOptionsComponent
+      declarations: [MockPrintOptionsComponent
       ],
       imports: [
         MatDialogModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [

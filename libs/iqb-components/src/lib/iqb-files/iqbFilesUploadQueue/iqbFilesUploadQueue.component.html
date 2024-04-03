@@ -1,17 +1,19 @@
-<iqb-files-upload
-  [file]="file"
-  [id]="i"
-  *ngFor="let file of files; let i = index"
-  [httpUrl]="httpUrl"
-  [fileAlias]="fileAlias"
-  [tokenName]="tokenName"
-  [token]="token"
-  [folderName]="folderName"
-  [folder]="folder"
-
-  (removeFileRequestEvent)="removeFile($event)"
-  (statusChangedEvent)="analyseStatus()">
-</iqb-files-upload>
+@for (file of files; track file; let i = $index) {
+  <iqb-files-upload
+    [file]="file"
+    [id]="i"
+    [httpUrl]="httpUrl"
+    [fileAlias]="fileAlias"
+    [tokenName]="tokenName"
+    [token]="token"
+    [folderName]="folderName"
+    [folder]="folder"
+    (removeFileRequestEvent)="removeFile($event)"
+    (statusChangedEvent)="analyseStatus()">
+  </iqb-files-upload>
+}
 <br/>
-<button mat-raised-button color="primary" *ngIf="files.length > 0" [disabled]="disableClearButton"
+@if (files.length > 0) {
+  <button mat-raised-button color="primary" [disabled]="disableClearButton"
   (click)="removeAll()">OK</button>
+}

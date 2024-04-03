@@ -8,7 +8,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { environment } from '../../../../../environments/environment';
 import { DeleteReviewButtonComponent } from './delete-review-button.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 describe('DeleteReviewButtonComponent', () => {
   let component: DeleteReviewButtonComponent;
@@ -16,10 +15,6 @@ describe('DeleteReviewButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        DeleteReviewButtonComponent,
-        WrappedIconComponent
-      ],
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,

@@ -1,10 +1,15 @@
 import { Component, Input } from '@angular/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { RouterLink } from '@angular/router';
+
 import { UserIssue } from '../../models/user-issue.interface';
 
 @Component({
   selector: 'studio-lite-user-issues',
   templateUrl: './user-issues.component.html',
-  styleUrls: ['./user-issues.component.scss']
+  styleUrls: ['./user-issues.component.scss'],
+  standalone: true,
+  imports: [RouterLink, MatTooltip]
 })
 export class UserIssuesComponent {
   @Input() issues!: UserIssue[];

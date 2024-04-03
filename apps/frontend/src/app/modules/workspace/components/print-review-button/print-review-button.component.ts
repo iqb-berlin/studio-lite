@@ -1,6 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
@@ -8,7 +12,9 @@ import {
 @Component({
   selector: 'studio-lite-print-review-button',
   templateUrl: './print-review-button.component.html',
-  styleUrls: ['./print-review-button.component.scss']
+  styleUrls: ['./print-review-button.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class PrintReviewButtonComponent {
   @Input() workspaceId!: number;

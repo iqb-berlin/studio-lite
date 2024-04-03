@@ -31,7 +31,7 @@ import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { ProfileFormComponent } from './components/profile-form/profile-form.component';
 import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { TableViewComponent } from './components/table-view/table-view.component';
 
 export function formlyValidationConfig(translate: TranslateService) {
@@ -104,10 +104,7 @@ export function formlyValidationConfig(translate: TranslateService) {
     FormlyMaterialModule,
     MatProgressSpinnerModule,
     MatListModule,
-    SharedModule,
-    MatTooltipModule
-  ],
-  declarations: [
+    MatTooltipModule,
     FormlyChipsComponent,
     MetadataComponent,
     FormlyWrapperPanel,

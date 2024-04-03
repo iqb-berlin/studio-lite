@@ -1,14 +1,19 @@
 import {
   Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { FormlyFieldConfig } from '@ngx-formly/core';
-import { TranslateService } from '@ngx-translate/core';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { ProfileFormComponent } from '../profile-form/profile-form.component';
 
 @Component({
   selector: 'studio-lite-item',
   templateUrl: './item.component.html',
-  styleUrls: ['./item.component.scss']
+  styleUrls: ['./item.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule]
 })
 export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }

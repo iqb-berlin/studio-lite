@@ -1,55 +1,65 @@
 <div class="fx-row-end-center">
-  <button type="button" mat-icon-button
-          matTooltip="{{'metadata.items-read-only-view' | translate}}"
-          [matTooltipPosition]="'above'"
-          [matTooltipShowDelay]="300"
-          (click)="togglePresentation()"
-          *ngIf="!isTextOnlyView">
-    <studio-lite-wrapped-icon icon="visibility"></studio-lite-wrapped-icon>
-  </button>
+  @if (!isTextOnlyView) {
+    <button type="button" mat-icon-button
+      matTooltip="{{'metadata.items-read-only-view' | translate}}"
+      [matTooltipPosition]="'above'"
+      [matTooltipShowDelay]="300"
+      (click)="togglePresentation()"
+      >
+      <studio-lite-wrapped-icon icon="visibility"></studio-lite-wrapped-icon>
+    </button>
+  }
 
-  <button type="button" mat-icon-button
-          matTooltip="{{'metadata.items-editable-view' | translate}}"
-          [matTooltipPosition]="'above'"
-          [matTooltipShowDelay]="300"
-          (click)="togglePresentation()"
-          *ngIf="isTextOnlyView">
-    <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
-  </button>
+  @if (isTextOnlyView) {
+    <button type="button" mat-icon-button
+      matTooltip="{{'metadata.items-editable-view' | translate}}"
+      [matTooltipPosition]="'above'"
+      [matTooltipShowDelay]="300"
+      (click)="togglePresentation()"
+      >
+      <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
+    </button>
+  }
 
 </div>
-<div *ngIf="!isTextOnlyView">
-  <div *ngFor="let item of items; let i = index">
-    <div class="fx-row-space-between-start">
-      <studio-lite-item
-        [variables]="variables"
-        [itemIndex]="i"
-        [metadata]="metadata[metadataKey]"
-        [language]="language"
-        [profileUrl]="profileUrl"
-        (metadataChange)="onMetadataChange($event)">
-      </studio-lite-item>
-      <button mat-icon-button
-              color="primary"
-              type="button"
-              (click)="remove(i)">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </div>
+@if (!isTextOnlyView) {
+  <div>
+    @for (item of items; track item; let i = $index) {
+      <div>
+        <div class="fx-row-space-between-start">
+          <studio-lite-item
+            [variables]="variables"
+            [itemIndex]="i"
+            [metadata]="metadata[metadataKey]"
+            [language]="language"
+            [profileUrl]="profileUrl"
+            (metadataChange)="onMetadataChange($event)">
+          </studio-lite-item>
+          <button mat-icon-button
+            color="primary"
+            type="button"
+            (click)="remove(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+    <button mat-fab extended
+      color="primary"
+      type="button"
+      class="add-button"
+      (click)="add()">
+      <mat-icon>add</mat-icon>
+      Item hinzufügen
+    </button>
   </div>
-  <button mat-fab extended
-          color="primary"
-          type="button"
-          class="add-button"
-          (click)="add()">
-    <mat-icon>add</mat-icon>
-    Item hinzufügen
-  </button>
-</div>
-<div *ngIf="isTextOnlyView">
-  <studio-lite-metadata-readonly-items [items]="items">
-  </studio-lite-metadata-readonly-items>
-</div>
+}
+@if (isTextOnlyView) {
+  <div>
+    <studio-lite-metadata-readonly-items [items]="items">
+    </studio-lite-metadata-readonly-items>
+  </div>
+}
 
 
 

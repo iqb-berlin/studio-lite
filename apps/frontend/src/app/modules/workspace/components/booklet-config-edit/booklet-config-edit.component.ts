@@ -2,11 +2,20 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { MatOption } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'studio-lite-booklet-config-edit',
   templateUrl: './booklet-config-edit.component.html',
-  styleUrls: ['./booklet-config-edit.component.scss']
+  styleUrls: ['./booklet-config-edit.component.scss'],
+  standalone: true,
+  imports: [MatSlideToggle, MatFormField, MatLabel, MatSelect, FormsModule, MatOption, TranslateModule]
 })
 export class BookletConfigEditComponent {
   pagingModeOptions = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];

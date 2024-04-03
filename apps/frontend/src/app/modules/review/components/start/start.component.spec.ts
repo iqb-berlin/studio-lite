@@ -16,7 +16,6 @@ describe('StartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [StartComponent],
       imports: [
         TranslateModule.forRoot(),
         MatTooltipModule,

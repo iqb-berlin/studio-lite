@@ -1,13 +1,13 @@
 <div class="page-footer fx-row-space-between-center">
   <div class="fx-row-space-between-center fx-gap-10">
     <studio-lite-status-indication [presentationProgress]="presentationProgress"
-                                   [responseProgress]="responseProgress"
-                                   [hasFocus]="hasFocus">
+      [responseProgress]="responseProgress"
+      [hasFocus]="hasFocus">
     </studio-lite-status-indication>
     <button mat-raised-button
-            [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
-            [matTooltip]="'workspace.send-navigation-denied' | translate"
-            (click)="navigationDenied.emit()">
+      [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
+      [matTooltip]="'workspace.send-navigation-denied' | translate"
+      (click)="navigationDenied.emit()">
       {{'workspace.validate' | translate}}
     </button>
     <button mat-raised-button (click)="checkCoding.emit()">
@@ -16,18 +16,22 @@
     <p>{{ playerName }}</p>
   </div>
 
-  <studio-lite-paging-mode-selection *ngIf="pageList"
-                                     class="paging-mode-selection-container">
-  </studio-lite-paging-mode-selection>
+  @if (pageList) {
+    <studio-lite-paging-mode-selection
+      class="paging-mode-selection-container">
+    </studio-lite-paging-mode-selection>
+  }
 
-  <button mat-icon-button *ngIf="unitId"
-          [matTooltip]="'workspace.print' | translate"
-          (click)="showPrintOptions()">
-    <mat-icon>print</mat-icon>
-  </button>
+  @if (unitId) {
+    <button mat-icon-button
+      [matTooltip]="'workspace.print' | translate"
+      (click)="showPrintOptions()">
+      <mat-icon>print</mat-icon>
+    </button>
+  }
 
   <studio-lite-page-navigation [pageList]="pageList"
-                               (gotoPage)="gotoPage.emit($event)">
+    (gotoPage)="gotoPage.emit($event)">
   </studio-lite-page-navigation>
 
 </div>

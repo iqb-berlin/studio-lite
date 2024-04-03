@@ -28,27 +28,11 @@ import { UnitInfoLoaderComponent } from './components/unit-info-loader/unit-info
 import { BookletConfigShowComponent } from './components/booklet-config-show/booklet-config-show.component';
 import { UnitNavComponent } from './components/unit-nav/unit-nav.component';
 import { AddCommentButtonComponent } from './components/add-comment-button/add-comment-button.component';
-import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
-  declarations: [
-    ReviewComponent,
-    StartComponent,
-    FinishComponent,
-    UnitsComponent,
-    UnitInfoComponent,
-    UnitInfoCodingComponent,
-    UnitInfoCommentsComponent,
-    UnitInfoLoaderComponent,
-    CommentDialogComponent,
-    BookletConfigShowComponent,
-    UnitNavComponent,
-    AddCommentButtonComponent
-  ],
   imports: [
     CommonModule,
     ReviewRoutingModule,
-    SharedModule,
     CommentsModule,
     MatButtonModule,
     MatTooltipModule,
@@ -62,7 +46,19 @@ import { SharedModule } from '../shared/shared.module';
     TranslateModule,
     MatFormFieldModule,
     FormsModule,
-    MatInputModule
+    MatInputModule,
+    ReviewComponent,
+    StartComponent,
+    FinishComponent,
+    UnitsComponent,
+    UnitInfoComponent,
+    UnitInfoCodingComponent,
+    UnitInfoCommentsComponent,
+    UnitInfoLoaderComponent,
+    CommentDialogComponent,
+    BookletConfigShowComponent,
+    UnitNavComponent,
+    AddCommentButtonComponent
   ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'de-DE' }],
   exports: [ReviewComponent]

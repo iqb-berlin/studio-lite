@@ -14,7 +14,6 @@ describe('ChangePasswordComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ChangePasswordComponent],
       imports: [
         ReactiveFormsModule,
         RouterTestingModule,

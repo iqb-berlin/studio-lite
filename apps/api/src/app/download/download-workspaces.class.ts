@@ -1,13 +1,12 @@
 import * as Excel from 'exceljs';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataDto, CodebookDto, CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import {
   CodeData, CodingRule, RuleSet, VariableCodingData, ToTextFactory
 } from '@iqb/responses';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
-const HTMLtoDOCX = require('html-to-docx');
+import { DownloadDocx } from './downloadDocx.class';
+import { Missing } from '../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
 
 interface WorkspaceData {
   id: number;
@@ -21,27 +20,37 @@ interface WorkspaceData {
   schemers: { [key: string]: number };
 }
 
-interface CodingBook {
-  key: string;
-  name: string;
-  variables: any;
+interface BookVariable {
+  id: string;
+  label: string;
+  generalInstruction: string;
+  codes: CodeInfo[];
+  missings: Missing[];
+}
+
+interface CodeInfo {
+  id: string;
+  label: string;
+  score: string;
+  scoreLabel: string;
+  description: string;
 
 }
 
 export class DownloadWorkspacesClass {
-  static setUnitsItemsDataRows(units: any[]): any {
-    const allUnits: any[] = [];
-    units.forEach((unit: any) => {
+  static setUnitsItemsDataRows(units) {
+    const allUnits = [];
+    units.forEach(unit => {
       const totalValues: Record<string, string>[] = [];
       if (unit.metadata.items) {
-        unit.metadata.items.forEach((item: any, i: number) => {
-          const activeProfile: any = item.profiles?.find((profile: any) => profile.isCurrent);
+        unit.metadata.items.forEach((item, i: number) => {
+          const activeProfile = item.profiles?.find(profile => profile.isCurrent);
           if (activeProfile) {
             const values: Record<string, string> = {};
-            activeProfile.entries.forEach((entry: any) => {
+            activeProfile.entries.forEach(entry => {
               if (entry.valueAsText.length > 1) {
-                const textValues: any[] = [];
-                entry.valueAsText.forEach((textValue: any) => {
+                const textValues = [];
+                entry.valueAsText.forEach(textValue => {
                   textValues.push(`${textValue.value || ''}`);
                 });
                 values[entry.label[0].value] = textValues.join('<br>');
@@ -65,16 +74,16 @@ export class DownloadWorkspacesClass {
     return allUnits.flat();
   }
 
-  static setUnitsDataRows(units: any): any {
+  static setUnitsDataRows(units) {
     const totalValues: Record<string, string>[] = [];
-    units.forEach((unit: any) => {
-      const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
+    units.forEach(unit => {
+      const activeProfile = unit.metadata.profiles?.find(profile => profile.isCurrent);
       if (activeProfile) {
         const values: Record<string, string> = {};
-        activeProfile.entries.forEach((entry: any) => {
+        activeProfile.entries.forEach(entry => {
           if (entry.valueAsText.length > 1) {
-            const textValues: any[] = [];
-            entry.valueAsText.forEach((textValue: any) => {
+            const textValues = [];
+            entry.valueAsText.forEach(textValue => {
               textValues.push(textValue.value || '');
             });
             values[entry.label[0].value] = textValues.join(', ');
@@ -116,105 +125,146 @@ export class DownloadWorkspacesClass {
 
   static async getWorkspaceCodingBook(workspaceGroupId:number,
                                       unitService: UnitService,
-                                      exportFormat:'json' | 'docx',
-                                      hasOnlyManualCodings:string,
-                                      hasClosedCodings:string,
-                                      unitList:string): Promise<Buffer> {
-    const codingBook: CodingBook[] = [];
-    let docHtml = '';
-    let unitsHtml = '';
+                                      contentSetting:CodeBookContentSetting,
+                                      unitList:string): Promise<Buffer | []> {
+    const {
+      exportFormat,
+      hasClosedVars,
+      hasOnlyManualCoding,
+      hasDerivedVars,
+      hasGeneralInstructions
+    } = contentSetting;
+
     const units = await unitService.findAllWithMetadata(workspaceGroupId);
     const selectedUnits =
-        units.filter(unit => unitList.split(',')
-          .map((u:string) => parseInt(u, 10))
-          .includes(unit.id));
+      units.filter(unit => unitList.split(',')
+        .map((u:string) => parseInt(u, 10))
+        .includes(unit.id));
+    const codebook: CodebookDto[] = [];
+
     selectedUnits.forEach((unit: UnitMetadataDto) => {
-      const unitHeaderHtml = `<h2><u>${unit.key} ${unit.name}</u></h2>`;
-      const parsedScheme: any = JSON.parse(unit.scheme);
-      let variablesHtml = '';
-      let bookVariables = [];
+      const parsedScheme = JSON.parse(unit.scheme);
+      const bookVariables:Array<BookVariable> = [];
       if (parsedScheme?.variableCodings) {
         parsedScheme?.variableCodings.forEach((variableCoding: VariableCodingData) => {
-          const variableHeaderHtml = `<h3>${variableCoding.id}</h3><p>${variableCoding.label}   ${variableCoding.page}</p><p>${variableCoding.manualInstruction}</p>`;
-          let codesHtml = '';
-          let codes = [];
-          let closedCodingVar:boolean;
-          let onlyManualCodingVar:boolean;
-          let hasRules = false;
-          if (variableCoding.codes.length > 0) {
-            variableCoding.codes.forEach((code: CodeData) => {
-              const codeAsText = ToTextFactory.codeAsText(code);
-              const hasManualInstruction = code.manualInstruction.length > 0;
-              code.ruleSets.forEach((ruleSet: RuleSet) => {
-                onlyManualCodingVar = (hasManualInstruction && ruleSet.rules.length === 0);
-                hasRules = ruleSet.rules.length > 0;
-                ruleSet.rules.forEach((rule: CodingRule) => {
-                  if (rule.method === 'ELSE') {
-                    closedCodingVar = true;
-                  }
+          const codes = [];
+          let closedCodingVar:boolean = false;
+          let onlyManualCodingVar = true;
+          let isDerived;
+          variableCoding.deriveSources.length > 0 ? isDerived = true : isDerived = false;
+          if (unit.schemer.split('@')[1] >= '1.5') {
+            if (variableCoding.codes.length > 0) {
+              variableCoding.codes.forEach((code: CodeData) => {
+                const codeAsText = ToTextFactory.codeAsText(code);
+                if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
+                code.ruleSets.forEach((ruleSet: RuleSet) => {
+                  if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) onlyManualCodingVar = false;
+                  ruleSet.rules.forEach((rule: CodingRule) => {
+                    if (rule.method === 'ELSE') {
+                      closedCodingVar = true;
+                    }
+                  });
                 });
+                let rulesDescription = '';
+                codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+                  rulesDescription += `<p>${ruleSetDescription}</p>`;
+                });
+                const codeInfo = {
+                  id: `${code.id}`,
+                  label: codeAsText.label,
+                  score: codeAsText.score,
+                  scoreLabel: codeAsText.scoreLabel,
+                  description: `${rulesDescription}${code.manualInstruction}`
+                };
+                codes.push(codeInfo);
               });
-              let rulesDescription = '';
-              codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-                rulesDescription += `<p>${ruleSetDescription}</p>`;
-              });
-              const codeHtml = `<tr><td>${code.id}</td><td>${codeAsText.score} ${codeAsText.scoreLabel}</td><td>${codeAsText.label}</td><td>${rulesDescription}${code.manualInstruction}</td></tr>`;
 
-              codesHtml += codeHtml;
-              const codeInfo = {
-                id: code.id,
-                label: codeAsText.label,
-                score: codeAsText.score,
-                scoreLabel: codeAsText.scoreLabel,
-                description: `${rulesDescription}${code.manualInstruction}`
-              };
-              codes = [...codes, codeInfo];
-            });
-          }
-          const variableCodesTableHtml = `<table><tr><th style="background-color:#d9d9d9">Code</th><th style="background-color:#d9d9d9">Score</th><th style="background-color:#d9d9d9">Label</th><th style="background-color:#d9d9d9">Beschreibung</th></tr>${codesHtml}</table>`;
-          if (codesHtml.length > 0) {
-            if ((closedCodingVar && hasClosedCodings) || (onlyManualCodingVar && hasOnlyManualCodings) || (hasRules && !closedCodingVar)) {
-              bookVariables = [...bookVariables, {
-                id: variableCoding.id,
-                label: variableCoding.label,
-                generalInstruction: variableCoding.manualInstruction,
-                codes: codes,
-                missings: []
-              }];
-              variablesHtml += `${variableHeaderHtml}${variableCodesTableHtml}`;
+              if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
+                bookVariables.push(
+                  {
+                    id: variableCoding.id,
+                    label: variableCoding.label,
+                    generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                    codes: codes,
+                    missings: []
+                  });
+              }
+              if (closedCodingVar && hasClosedVars === 'true') {
+                bookVariables.push(
+                  {
+                    id: variableCoding.id,
+                    label: variableCoding.label,
+                    generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                    codes: codes,
+                    missings: []
+                  });
+              }
+              if (onlyManualCodingVar) {
+                if (hasOnlyManualCoding === 'true') {
+                  bookVariables.push(
+                    {
+                      id: variableCoding.id,
+                      label: variableCoding.label,
+                      generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                      codes: codes,
+                      missings: []
+                    });
+                }
+              }
+
+              if (isDerived) {
+                if (hasDerivedVars === 'true') {
+                  bookVariables.push(
+                    {
+                      id: variableCoding.id,
+                      label: variableCoding.label,
+                      generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                      codes: codes,
+                      missings: []
+                    });
+                }
+              }
             }
+          } else {
+            bookVariables.push(
+              {
+                id: '',
+                label: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+                generalInstruction: '',
+                codes: [],
+                missings: []
+              });
           }
         });
       }
-      if (variablesHtml) {
-        codingBook.push(
-          {
-            key: unit.key,
-            name: unit.name,
-            variables: bookVariables
-          }
-        );
-        unitsHtml += `${unitHeaderHtml}${variablesHtml}`;
-      }
+      const sortedBookVariables = bookVariables.sort((a, b) => {
+        if (a.id < b.id) {
+          return -1;
+        }
+        if (a.id > b.id) {
+          return 1;
+        }
+        return 0;
+      });
+      codebook.push(
+        {
+          key: unit.key,
+          name: unit.name,
+          variables: sortedBookVariables
+        }
+      );
     });
-    docHtml = `<!DOCTYPE html><html lang="de"><head><title></title><style>th {background-color:#d9d9d9}</style></head><body>${unitsHtml}</body></body></html>`;
 
     if (exportFormat === 'docx') {
       return new Promise(resolve => {
-        resolve(HTMLtoDOCX(docHtml, null, {
-          title: 'IQB-Studio Kodierbuch ',
-          table: { row: { cantSplit: true } },
-          footer: true,
-          pageNumber: true,
-          lang: 'de-DE',
-          orientation: 'landscape',
-          'font-size': '12pt'
-        }));
+        resolve(
+          DownloadDocx.getCodebook(codebook, contentSetting)
+        );
       });
     }
 
     return new Promise(resolve => {
-      const data = JSON.stringify(codingBook);
+      const data = JSON.stringify(codebook);
       resolve(Buffer.from(data, 'utf-8'));
     });
   }

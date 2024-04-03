@@ -1,19 +1,21 @@
 import {
-  Component, forwardRef, Inject, OnInit
+  Component, OnInit
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver-es';
-import { DatePipe, NgForOf } from '@angular/common';
+import { DatePipe, JsonPipe } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
+import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
-import { SharedModule } from '../../../shared/shared.module';
-// eslint-disable-next-line import/no-cycle
-import { WorkspaceModule } from '../../workspace.module';
 import { BackendService } from '../../services/backend.service';
+import { SelectUnitComponent } from '../select-unit/select-unit.component';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { AppService } from '../../../../services/app.service';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -23,48 +25,56 @@ const datePipe = new DatePipe('de-DE');
   imports: [
     TranslateModule,
     MatDialogModule,
-    SharedModule,
-    forwardRef(() => WorkspaceModule),
     MatCheckboxModule,
     FormsModule,
     MatRadioModule,
     MatSelectModule,
-    WorkspaceModule,
-    NgForOf
+    MatButton,
+    SelectUnitComponent,
+    SelectUnitListComponent,
+    JsonPipe
   ],
   styleUrls: ['export-coding-book.component.scss']
 })
 
 export class ExportCodingBookComponent implements OnInit {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
+    // @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService,
-    private backendService: BackendService
+    private backendService: BackendService,
+    private appService: AppService
   ) {
   }
 
-  includeManualCoding = true;
-  includeClosedCoding = true;
-  exportFormat: 'docx' | 'json' = 'docx';
-  missingsProfiles = [''];
   unitList: number[] = [];
   selectedMissingsProfile!:string;
+  missingsProfiles = [''];
+  workspaceChanges = this.workspaceService.isChanged();
 
   ngOnInit() {
     this.backendService.getMissingsProfiles(this.workspaceService.selectedWorkspaceId);
   }
 
+  contentOptions:CodeBookContentSetting = {
+    exportFormat: 'docx',
+    hasOnlyManualCoding: 'true',
+    hasGeneralInstructions: 'true',
+    hasDerivedVars: 'true',
+    hasClosedVars: 'true'
+  };
+
   exportCodingBook() {
+    this.appService.dataLoading = true;
     this.backendService
       .getCodingBook(this.workspaceService.selectedWorkspaceId,
-        this.exportFormat,
-        this.includeManualCoding,
-        this.includeClosedCoding,
+        this.contentOptions,
         this.unitList)
       .subscribe(data => {
         if (data) {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
-          saveAs(data, `${thisDate} Kodierbuch ${this.workspaceService.selectedWorkspaceName}${(this.exportFormat === 'json') ? '.json' : '.docx'}`);
+          // eslint-disable-next-line max-len
+          saveAs(data, `${thisDate} Codebook ${this.workspaceService.selectedWorkspaceName}${(this.contentOptions.exportFormat === 'json') ? '.json' : '.docx'}`);
+          this.appService.dataLoading = false;
         }
       });
   }

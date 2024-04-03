@@ -8,7 +8,6 @@ describe('PrintComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PrintComponent],
       imports: [
         RouterTestingModule
       ]

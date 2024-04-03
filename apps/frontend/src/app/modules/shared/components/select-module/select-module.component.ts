@@ -1,15 +1,24 @@
 import {
   Component, EventEmitter, Input, OnDestroy, Output
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatFormField } from '@angular/material/form-field';
+
 import { VeronaModuleClass } from '../../models/verona-module.class';
 
 @Component({
   selector: 'studio-lite-select-module',
   templateUrl: './select-module.component.html',
-  styleUrls: ['./select-module.component.scss']
+  styleUrls: ['./select-module.component.scss'],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, TranslateModule]
 })
 export class SelectModuleComponent implements OnDestroy {
   private allModules: VeronaModuleClass[] = [];

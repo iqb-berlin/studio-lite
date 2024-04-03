@@ -1,11 +1,11 @@
 import {
   Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MDProfile, MDProfileEntry, MDProfileGroup, MDValue, ProfileEntryParametersNumber
 } from '@iqb/metadata';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { Subject } from 'rxjs';
 import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
 import { MetadataService } from '../../services/metadata.service';
@@ -15,7 +15,9 @@ import { BackendService } from '../../services/backend.service';
 @Component({
   selector: 'studio-lite-profile-form',
   templateUrl: './profile-form.component.html',
-  styleUrls: ['./profile-form.component.scss']
+  styleUrls: ['./profile-form.component.scss'],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   constructor(public metadataService: MetadataService, public backendService:BackendService) {}

@@ -5,7 +5,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { HttpClientModule } from '@angular/common/http';
 import { WorkspaceGroupsMenuComponent } from './workspace-groups-menu.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { environment } from '../../../../../environments/environment';
 
 describe('WorkspaceGroupsMenuComponent', () => {
@@ -14,10 +13,6 @@ describe('WorkspaceGroupsMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        WorkspaceGroupsMenuComponent,
-        WrappedIconComponent
-      ],
       providers: [{
         provide: 'SERVER_URL',
         useValue: environment.backendUrl

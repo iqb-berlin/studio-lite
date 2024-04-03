@@ -4,14 +4,16 @@
 </h1>
 <mat-dialog-content>
   <ul>
-    <li *ngFor="let m of messageData.messages">
-      <span class="list-element">{{m.objectKey}}</span>: {{m.messageKey | translate}}
-    </li>
+    @for (m of messageData.messages; track m) {
+      <li>
+        <span class="list-element">{{m.objectKey}}</span>: {{m.messageKey | translate}}
+      </li>
+    }
   </ul>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-raised-button
-          [mat-dialog-close]="false">
+    [mat-dialog-close]="false">
     {{ 'dialogs.close' | translate }}
   </button>
 </mat-dialog-actions>

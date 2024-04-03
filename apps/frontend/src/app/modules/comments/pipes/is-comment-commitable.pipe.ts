@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'isCommentCommittable'
+  name: 'isCommentCommittable',
+  standalone: true
 })
 export class IsCommentCommittablePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

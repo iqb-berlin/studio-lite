@@ -3,7 +3,8 @@ import { Component, ElementRef, Input } from '@angular/core';
 @Component({
   selector: 'studio-lite-splitter-pane',
   templateUrl: './splitter-pane.component.html',
-  styleUrls: ['./splitter-pane.component.scss']
+  styleUrls: ['./splitter-pane.component.scss'],
+  standalone: true
 })
 export class SplitterPaneComponent {
   size: number = 0;

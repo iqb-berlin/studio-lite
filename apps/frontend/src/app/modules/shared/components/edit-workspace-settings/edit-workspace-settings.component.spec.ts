@@ -26,7 +26,6 @@ describe('EditWorkspaceSettingsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        EditWorkspaceSettingsComponent,
         MockSelectModuleComponent
       ],
       imports: [

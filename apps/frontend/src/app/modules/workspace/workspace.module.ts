@@ -27,7 +27,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
-// import { NgxCodingComponentsModule } from '@iqb/ngx-coding-components/lib/ngx-coding-components.module';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
@@ -54,10 +53,8 @@ import { UnitSaveButtonComponent } from './components/unit-save-button/unit-save
 import { UnitDataAreaComponent } from './components/unit-data-area/unit-data-area.component';
 import { AddUnitButtonComponent } from './components/add-unit-button/add-unit-button.component';
 import { DeleteUnitButtonComponent } from './components/delete-unit-button/delete-unit-button.component';
-// eslint-disable-next-line import/no-cycle
 import { EditUnitButtonComponent } from './components/edit-unit-button/edit-unit-button.component';
 import { UnitsAreaComponent } from './components/units-area/units-area.component';
-import { SplitterModule } from '../splitter/splitter.module';
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
@@ -76,7 +73,7 @@ import { NewGroupButtonComponent } from './components/new-group-button/new-group
 import { GroupMenuComponent } from './components/group-menu/group-menu.component';
 import { PreviewBarComponent } from './components/preview-bar/preview-bar.component';
 import { StatusIndicationComponent } from './components/status-indication/status-indication.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
@@ -88,7 +85,6 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
 @NgModule({
   imports: [
     CommonModule,
-    SharedModule,
     MetadataModule,
     MatIconModule,
     MatTooltipModule,
@@ -120,9 +116,6 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    SplitterModule
-  ],
-  declarations: [
     TestConfigComponent,
     WorkspaceComponent,
     NewUnitComponent,

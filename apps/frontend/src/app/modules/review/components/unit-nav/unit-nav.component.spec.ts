@@ -15,7 +15,6 @@ describe('UnitNavComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UnitNavComponent],
       imports: [
         TranslateModule.forRoot(),
         HttpClientModule,

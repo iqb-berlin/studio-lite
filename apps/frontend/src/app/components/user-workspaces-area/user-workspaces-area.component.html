@@ -3,18 +3,22 @@
     [title]="'home.select-workspace' | translate">
   </studio-lite-area-title>
   <div>
-    <button mat-button *ngIf="isAdmin"
-            [routerLink]="['/admin']"
-            [matTooltip]="'home.goto-admin' | translate"
-            matTooltipPosition="above">
-      <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
-    </button>
+    @if (isAdmin) {
+      <button mat-button
+        [routerLink]="['/admin']"
+        [matTooltip]="'home.goto-admin' | translate"
+        matTooltipPosition="above">
+        <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
+      </button>
+    }
     <studio-lite-user-menu></studio-lite-user-menu>
   </div>
 </div>
-<studio-lite-warning *ngIf="warning"
-  [warnMessage]="warning">
-</studio-lite-warning>
+@if (warning) {
+  <studio-lite-warning
+    [warnMessage]="warning">
+  </studio-lite-warning>
+}
 
 <studio-lite-user-workspaces-groups
   class="fx-column-start-stretch workspace-groups"

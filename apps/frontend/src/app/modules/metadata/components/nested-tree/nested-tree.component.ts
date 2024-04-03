@@ -4,9 +4,18 @@ import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   Component, Inject, Injectable, OnInit
 } from '@angular/core';
-import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
+import {
+  MatTreeFlatDataSource, MatTreeFlattener, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding
+} from '@angular/material/tree';
 import { BehaviorSubject } from 'rxjs';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import {
   DialogData, VocabFlatNode, VocabNode, Vocabulary
 } from '../../models/types';
@@ -120,8 +129,10 @@ export class ChecklistDatabase {
   selector: 'studio-lite-nested-tree',
   templateUrl: './nested-tree.component.html',
   styleUrls: ['./nested-tree.component.scss'],
-  providers: [ChecklistDatabase]
-
+  providers: [ChecklistDatabase],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class NestedTreeComponent implements OnInit {

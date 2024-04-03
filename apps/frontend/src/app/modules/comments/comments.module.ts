@@ -31,11 +31,9 @@ import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-v
 import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
-import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
-    SharedModule,
     CommonModule,
     ReactiveFormsModule,
     MatIconModule,
@@ -49,9 +47,7 @@ import { SharedModule } from '../shared/shared.module';
     NgxTiptapModule,
     FormsModule,
     MatInputModule,
-    MatProgressSpinnerModule
-  ],
-  declarations: [
+    MatProgressSpinnerModule,
     CommentsComponent,
     CommentComponent,
     CommentEditorComponent,

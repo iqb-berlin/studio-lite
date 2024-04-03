@@ -1,14 +1,21 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-unit-export-config',
   templateUrl: './unit-export-config.component.html',
-  styleUrls: ['./unit-export-config.component.scss']
+  styleUrls: ['./unit-export-config.component.scss'],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
 })
 
 export class UnitExportConfigComponent implements OnInit, OnDestroy {

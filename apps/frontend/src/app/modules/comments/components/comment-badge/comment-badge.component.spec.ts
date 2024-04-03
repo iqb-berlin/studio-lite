@@ -8,7 +8,6 @@ describe('CommentBadgeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CommentBadgeComponent],
       imports: [MatTooltipModule]
     }).compileComponents();
 

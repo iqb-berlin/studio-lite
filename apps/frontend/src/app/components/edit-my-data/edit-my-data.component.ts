@@ -1,12 +1,24 @@
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
+} from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
 import { MyData } from '../../models/my-data.interface';
 
 @Component({
   selector: 'studio-lite-edit-my-data',
   templateUrl: './edit-my-data.component.html',
-  styleUrls: ['./edit-my-data.component.scss']
+  styleUrls: ['./edit-my-data.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class EditMyDataComponent {

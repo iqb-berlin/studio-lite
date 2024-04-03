@@ -2,22 +2,40 @@ import {
   Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
-  FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators
+  FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { ModuleService } from '../../../shared/services/module.service';
-import { WorkspaceService } from '../../services/workspace.service';
-import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
-import { BackendService } from '../../services/backend.service';
-import { State } from '../../../admin/models/state.type';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { DatePipe } from '@angular/common';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import {
+  MatCard, MatCardHeader, MatCardTitle, MatCardContent
+} from '@angular/material/card';
+import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
+import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
+import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
+import { State } from '../../../admin/models/state.type';
+import { BackendService } from '../../services/backend.service';
+import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { WorkspaceService } from '../../services/workspace.service';
+import { ModuleService } from '../../../shared/services/module.service';
 
 @Component({
   templateUrl: './unit-properties.component.html',
-  styleUrls: ['unit-properties.component.scss']
+  styleUrls: ['unit-properties.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent, CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe, TranslateModule]
 })
 
 export class UnitPropertiesComponent implements OnInit, OnDestroy {

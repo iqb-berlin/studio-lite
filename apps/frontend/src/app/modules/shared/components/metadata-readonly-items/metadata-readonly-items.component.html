@@ -1,17 +1,19 @@
-<div *ngFor="let item of items" class="item">
-  <h5 class="item-id">{{ item.id || 'metadata.without-id' | translate }}</h5>
-  <div class="fx-row-space-between-start">
-    <span class="item-key">Wichtung</span>
-    <span class="item-value">{{ item.weighting || '-' }}</span>
+@for (item of items; track item) {
+  <div class="item">
+    <h5 class="item-id">{{ item.id || 'metadata.without-id' | translate }}</h5>
+    <div class="fx-row-space-between-start">
+      <span class="item-key">Wichtung</span>
+      <span class="item-value">{{ item.weighting || '-' }}</span>
+    </div>
+    <div class="fx-row-space-between-start">
+      <span class="item-key">Variablen Id</span>
+      <span class="item-value">{{ item.variableId || '-' }}</span>
+    </div>
+    <div class="fx-row-space-between-start">
+      <span class="item-key">Notiz</span>
+      <div class="item-value">{{ item.description || '-' }}</div>
+    </div>
+    <studio-lite-metadata-profile-entries [profiles]="item.profiles">
+    </studio-lite-metadata-profile-entries>
   </div>
-  <div class="fx-row-space-between-start">
-    <span class="item-key">Variablen Id</span>
-    <span class="item-value">{{ item.variableId || '-' }}</span>
-  </div>
-  <div class="fx-row-space-between-start">
-    <span class="item-key">Notiz</span>
-    <div class="item-value">{{ item.description || '-' }}</div>
-  </div>
-  <studio-lite-metadata-profile-entries [profiles]="item.profiles">
-  </studio-lite-metadata-profile-entries>
-</div>
+}

@@ -2,12 +2,16 @@ import {
   Component, ElementRef, OnInit, ViewChild
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
 import { PrintOption } from '../../models/print-options.interface';
+import { UnitPrintLayoutComponent } from '../unit-print-layout/unit-print-layout.component';
 
 @Component({
   selector: 'studio-lite-print',
   templateUrl: './print.component.html',
-  styleUrls: ['./print.component.scss']
+  styleUrls: ['./print.component.scss'],
+  standalone: true,
+  imports: [UnitPrintLayoutComponent]
 })
 export class PrintComponent implements OnInit {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;

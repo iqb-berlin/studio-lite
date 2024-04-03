@@ -10,7 +10,6 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AdminComponent],
       imports: [
         MatTabsModule,
         RouterTestingModule,

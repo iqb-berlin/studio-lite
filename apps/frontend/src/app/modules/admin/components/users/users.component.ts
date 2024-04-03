@@ -1,23 +1,40 @@
-import { MatTableDataSource } from '@angular/material/table';
+import {
+  // eslint-disable-next-line max-len
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+} from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort } from '@angular/material/sort';
-import { UntypedFormGroup } from '@angular/forms';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { UntypedFormGroup, FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+
 import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
+import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
+import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
+import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
+import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { UsersMenuComponent } from '../users-menu/users-menu.component';
 
 @Component({
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
-  styleUrls: ['./users.component.scss']
+  styleUrls: ['./users.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();

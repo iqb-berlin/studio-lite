@@ -10,13 +10,18 @@ import {
   MessageType
 } from '@studio-lite-lib/iqb-components';
 import { UserFullDto } from '@studio-lite-lib/api-dto';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 import { EditUserComponent } from '../edit-user/edit-user.component';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-users-menu',
   templateUrl: './users-menu.component.html',
-  styleUrls: ['./users-menu.component.scss']
+  styleUrls: ['./users-menu.component.scss'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class UsersMenuComponent {
   @Input() selectedUser!: number;

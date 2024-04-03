@@ -1,13 +1,18 @@
 import {
+  addFirstUser,
   changePassword,
-  clickButtonToAccept, createNewUser, deleteUser, login, logout, visitLoginPage
+  clickButtonToAccept, createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
 
 describe('User Management', () => {
-  beforeEach(visitLoginPage);
+  beforeEach(() => {
+    cy.viewport(1600, 900);
+    visitLoginPage();
+  });
 
   it('prepare the Context', () => {
+    addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser(userData.user_name, userData.user_pass);
     visitLoginPage();
@@ -60,9 +65,10 @@ describe('User Management', () => {
   });
 
   it('delete the Context', () => {
-    cy.pause();
     login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
+    visitLoginPage();
+    deleteFirstUser();
     visitLoginPage();
     logout();
   });

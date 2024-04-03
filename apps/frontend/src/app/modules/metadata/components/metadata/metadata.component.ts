@@ -3,10 +3,16 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { ItemsComponent } from '../items/items.component';
+import { ProfileFormComponent } from '../profile-form/profile-form.component';
+
 @Component({
   selector: 'studio-lite-metadata',
   templateUrl: './metadata.component.html',
-  styleUrls: ['./metadata.component.scss']
+  styleUrls: ['./metadata.component.scss'],
+  standalone: true,
+  imports: [MatCard, MatCardContent, ProfileFormComponent, ItemsComponent]
 })
 export class MetadataComponent implements OnInit, OnDestroy {
   @Output() metadataChange: EventEmitter<any> = new EventEmitter();

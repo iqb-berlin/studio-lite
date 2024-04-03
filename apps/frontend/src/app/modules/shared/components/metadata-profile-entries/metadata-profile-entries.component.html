@@ -1,24 +1,40 @@
-<div *ngFor="let profile of profiles"
-     class="profiles">
-  <div *ngIf="profile.isCurrent">
-    <div *ngFor="let entry of profile.entries">
-      <div class="fx-row-space-between-start">
-        <span class="item-key">{{ entry.label[0].value }}</span>
-        <span *ngIf="entry.valueAsText"
-              class="item-value">
-          {{ entry.valueAsText?.value }}
-        </span>
-        <div *ngIf="entry.valueAsText?.length > 1">
-          <ul *ngFor="let value of entry.valueAsText">
-            <li class="item-list-value">{{ value.value }}</li>
-          </ul>
-        </div>
-        <span *ngIf="entry.valueAsText?.length === 1"
-              class="item-value">
-          {{ entry.valueAsText[0]?.value }}
-        </span>
-        <span *ngIf="entry.valueAsText?.length === 0">-</span>
+@for (profile of profiles; track profile) {
+  <div
+    class="profiles">
+    @if (profile.isCurrent) {
+      <div>
+        @for (entry of profile.entries; track entry) {
+          <div>
+            <div class="fx-row-space-between-start">
+              <span class="item-key">{{ entry.label[0].value }}</span>
+              @if (entry.valueAsText) {
+                <span
+                  class="item-value">
+                  {{ entry.valueAsText?.value }}
+                </span>
+              }
+              @if (entry.valueAsText?.length > 1) {
+                <div>
+                  @for (value of entry.valueAsText; track value) {
+                    <ul>
+                      <li class="item-list-value">{{ value.value }}</li>
+                    </ul>
+                  }
+                </div>
+              }
+              @if (entry.valueAsText?.length === 1) {
+                <span
+                  class="item-value">
+                  {{ entry.valueAsText[0]?.value }}
+                </span>
+              }
+              @if (entry.valueAsText?.length === 0) {
+                <span>-</span>
+              }
+            </div>
+          </div>
+        }
       </div>
-    </div>
+    }
   </div>
-</div>
+}

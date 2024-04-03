@@ -1,72 +1,80 @@
-<form *ngIf="appConfig"
-      [formGroup]="configForm"
-      class="fx-column-start-stretch">
-  <p>{{'config.start-page-warning' | translate}}</p>
-  <div class="fx-column-start-stretch">
-    <mat-form-field>
-      <mat-label>Text</mat-label>
-      <input matInput
-             formControlName="globalWarningText"
-             [placeholder]="'config.warning-placeholder' | translate">
-    </mat-form-field>
-    <div class="fx-row-start-center fx-wrap fx-gap-20">
-      <p>{{'config.show-warning-until' | translate}}</p>
+@if (appConfig) {
+  <form
+    [formGroup]="configForm"
+    class="fx-column-start-stretch">
+    <p>{{'config.start-page-warning' | translate}}</p>
+    <div class="fx-column-start-stretch">
       <mat-form-field>
-        <mat-label>{{'config.date' | translate}}</mat-label>
+        <mat-label>Text</mat-label>
         <input matInput
-               formControlName="globalWarningExpiredDay"
-               [matDatepicker]="picker">
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="picker">
-        </mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
+          formControlName="globalWarningText"
+          [placeholder]="'config.warning-placeholder' | translate">
       </mat-form-field>
-      <mat-form-field>
-        <mat-select [placeholder]="'config.hour' | translate"
-                    formControlName="globalWarningExpiredHour">
-          <mat-option *ngFor="let m of expiredHours"
-                      [value]="m">
-            {{m | toTime}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <p *ngIf="warningIsExpired"
-         class="warning-warning">
-        {{'config.time-in-past' | translate}}
-      </p>
+      <div class="fx-row-start-center fx-wrap fx-gap-20">
+        <p>{{'config.show-warning-until' | translate}}</p>
+        <mat-form-field>
+          <mat-label>{{'config.date' | translate}}</mat-label>
+          <input matInput
+            formControlName="globalWarningExpiredDay"
+            [matDatepicker]="picker">
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker">
+          </mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-select [placeholder]="'config.hour' | translate"
+            formControlName="globalWarningExpiredHour">
+            @for (m of expiredHours; track m) {
+              <mat-option
+                [value]="m">
+                {{m | toTime}}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (warningIsExpired) {
+          <p
+            class="warning-warning">
+            {{'config.time-in-past' | translate}}
+          </p>
+        }
+      </div>
     </div>
-  </div>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'config.app-name' | translate}}</mat-label>
-    <input matInput
-           formControlName="appTitle"
-           [placeholder]="'config.app-name-placeholder' | translate">
-  </mat-form-field>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'config.start-page-content-right' | translate}}</mat-label>
-    <textarea matInput
-              formControlName="introHtml"
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="6"></textarea>
-  </mat-form-field>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'config.imprint-content' | translate}}</mat-label>
-    <textarea matInput
-              formControlName="imprintHtml"
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="6"></textarea>
-  </mat-form-field>
-  <div class="fx-row-start-start fx-gap-30 save-button">
-    <button mat-raised-button
-            color="primary"
-            [disabled]="!dataChanged"
-            (click)="saveData()">
-      {{'save' | translate}}
-    </button>
-    <div *ngIf="dataChanged"
-         class="fx-flex-fill">
-      {{'admin.reload-page' | translate}}
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'config.app-name' | translate}}</mat-label>
+      <input matInput
+        formControlName="appTitle"
+        [placeholder]="'config.app-name-placeholder' | translate">
+    </mat-form-field>
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'config.start-page-content-right' | translate}}</mat-label>
+      <textarea matInput
+        formControlName="introHtml"
+        cdkTextareaAutosize
+      cdkAutosizeMinRows="6"></textarea>
+    </mat-form-field>
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'config.imprint-content' | translate}}</mat-label>
+      <textarea matInput
+        formControlName="imprintHtml"
+        cdkTextareaAutosize
+      cdkAutosizeMinRows="6"></textarea>
+    </mat-form-field>
+    <div class="fx-row-start-start fx-gap-30 save-button">
+      <button mat-raised-button
+        color="primary"
+        [disabled]="!dataChanged"
+        (click)="saveData()">
+        {{'save' | translate}}
+      </button>
+      @if (dataChanged) {
+        <div
+          class="fx-flex-fill">
+          {{'admin.reload-page' | translate}}
+        </div>
+      }
     </div>
-  </div>
-</form>
+  </form>
+}

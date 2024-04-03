@@ -13,7 +13,6 @@ describe('VeronaModulesTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [VeronaModulesTableComponent],
       imports: [
         TranslateModule.forRoot(),
         MatTableModule,

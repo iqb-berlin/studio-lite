@@ -11,7 +11,8 @@ import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-
 @Component({
   selector: 'studio-lite-unit-print-player',
   templateUrl: './unit-print-player.component.html',
-  styleUrls: ['./unit-print-player.component.scss']
+  styleUrls: ['./unit-print-player.component.scss'],
+  standalone: true
 })
 export class UnitPrintPlayerComponent implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

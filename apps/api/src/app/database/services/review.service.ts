@@ -5,13 +5,14 @@ import {
   CreateReviewDto,
   ReviewFullDto,
   ReviewInListDto,
-  ReviewDto
+  ReviewDto, UnitMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { v4 as uuIdv4 } from 'uuid';
 import Review from '../entities/review.entity';
 import ReviewUnit from '../entities/review-unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import Workspace from '../entities/workspace.entity';
+import { UnitService } from './unit.service';
 
 @Injectable()
 export class ReviewService {
@@ -25,7 +26,8 @@ export class ReviewService {
     @InjectRepository(WorkspaceUser)
     private workspaceUsersRepository: Repository<WorkspaceUser>,
     @InjectRepository(Workspace)
-    private workspaceRepository: Repository<Workspace>
+    private workspaceRepository: Repository<Workspace>,
+    private unitService: UnitService
   ) {}
 
   async findAll(workspaceId: number): Promise<ReviewInListDto[]> {
@@ -74,6 +76,12 @@ export class ReviewService {
       settings: review.settings,
       units: units.map(u => u.unitId)
     };
+  }
+
+  async findUnitMetadata(unitId: number, reviewId: number): Promise<UnitMetadataDto> {
+    const review = await this.reviewRepository
+      .findOne({ where: { id: reviewId }, select: ['workspaceId'] });
+    return this.unitService.findOnesMetadata(unitId, review.workspaceId);
   }
 
   async findOneForAuth(reviewId: number): Promise<ReviewDto> {

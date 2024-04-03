@@ -39,3 +39,5 @@ export { UnitCommentDto } from './lib/dto/unit-comment/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dto/unit-comment/create-unit-comment-dto';
 export { UpdateUnitCommentDto } from './lib/dto/unit-comment/update-unit-comment-dto';
 export { UpdateUnitUserDto } from './lib/dto/unit-user/update-unit-user-dto';
+export { CodebookDto } from './lib/dto/coding/coding-dto';
+export { CodeBookContentSetting } from './lib/dto/coding/coding-dto';

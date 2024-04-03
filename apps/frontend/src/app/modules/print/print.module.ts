@@ -15,24 +15,13 @@ import { UnitPrintCommentsComponent } from './components/unit-print-comments/uni
 import { CommentsModule } from '../comments/comments.module';
 import { UnitPrintCodingComponent } from './components/unit-print-coding/unit-print-coding.component';
 import { UnitPrintCodeComponent } from './components/unit-print-code/unit-print-code.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { PrintMetadataComponent } from './components/print-metadata/print-metadata.component';
 import { PrintOptionsDialogComponent } from './components/print-options-dialog/print-options-dialog.component';
 
 @NgModule({
-  declarations: [
-    PrintComponent,
-    UnitPrintLayoutComponent,
-    UnitPrintPlayerComponent,
-    UnitPrintCommentsComponent,
-    UnitPrintCodingComponent,
-    UnitPrintCodeComponent,
-    PrintMetadataComponent,
-    PrintOptionsDialogComponent
-  ],
   imports: [
     CommonModule,
-    SharedModule,
     PrintRoutingModule,
     TranslateModule,
     FormsModule,
@@ -41,7 +30,15 @@ import { PrintOptionsDialogComponent } from './components/print-options-dialog/p
     MatCheckboxModule,
     MatTableModule,
     MatIconModule,
-    CommentsModule
+    CommentsModule,
+    PrintComponent,
+    UnitPrintLayoutComponent,
+    UnitPrintPlayerComponent,
+    UnitPrintCommentsComponent,
+    UnitPrintCodingComponent,
+    UnitPrintCodeComponent,
+    PrintMetadataComponent,
+    PrintOptionsDialogComponent
   ]
 })
 export class PrintModule {}

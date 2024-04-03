@@ -1,5 +1,9 @@
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
 import { State } from '../../../admin/models/state.type';
 
 export interface DeleteStateData {
@@ -12,7 +16,9 @@ export interface DeleteStateData {
 @Component({
   selector: 'studio-lite-delete-state',
   templateUrl: './delete-state.component.html',
-  styleUrls: ['./delete-state.component.scss']
+  styleUrls: ['./delete-state.component.scss'],
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class DeleteStateComponent {
   typedData: DeleteStateData;

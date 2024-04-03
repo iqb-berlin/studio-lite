@@ -10,7 +10,6 @@ describe('AccountActionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AccountActionComponent],
       imports: [
         MatIconModule,
         TranslateModule.forRoot()

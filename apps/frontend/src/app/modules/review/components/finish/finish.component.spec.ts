@@ -12,7 +12,6 @@ describe('FinishComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [FinishComponent],
       imports: [
         TranslateModule.forRoot(),
         HttpClientModule,

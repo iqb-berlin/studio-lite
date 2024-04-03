@@ -33,7 +33,6 @@ describe('UnitPropertiesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UnitPropertiesComponent,
         MockNewGroupButtonComponent,
         MockSelectModuleComponent
       ],

@@ -3,7 +3,8 @@ import { Comment } from '../models/comment.interface';
 
 @Pipe({
   name: 'rootComments',
-  pure: false
+  pure: false,
+  standalone: true
 })
 export class RootCommentsPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

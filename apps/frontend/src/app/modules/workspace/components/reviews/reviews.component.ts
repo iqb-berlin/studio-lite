@@ -4,20 +4,35 @@ import {
 import {
   BookletConfigDto, ReviewConfigDto, ReviewFullDto, ReviewInListDto
 } from '@studio-lite-lib/api-dto';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  MatDialog, MatDialogTitle, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import {
+  // eslint-disable-next-line max-len
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+} from '@angular/material/table';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatButton } from '@angular/material/button';
+
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../../services/app.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
+import { SaveChangesComponent } from '../save-changes/save-changes.component';
+import { ReviewConfigComponent } from '../review-config/review-config.component';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
+import { ReviewMenuComponent } from '../review-menu/review-menu.component';
+import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
 @Component({
   selector: 'studio-lite-reviews',
   templateUrl: './reviews.component.html',
-  styleUrls: ['./reviews.component.scss']
+  styleUrls: ['./reviews.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {

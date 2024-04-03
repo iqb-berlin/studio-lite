@@ -1,28 +1,40 @@
-<div *ngIf="workspaceGroups.length === 0">
-  <p>{{'home.no-user-workspaces' | translate}}</p>
-</div>
-<div *ngIf="workspaceGroups.length > 0"
-     class="fx-column-start-stretch workspace-gap">
-  <div *ngFor="let wsg of workspaceGroups"
-       class="fx-column-start-stretch">
-    <div *ngIf="wsg.workspaces.length > 0 || wsg.isAdmin"
-         class="fx-row-space-between-center workspace-group-header">
-      <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
-      <a *ngIf="wsg.isAdmin"
-              mat-button
-              [routerLink]="['/wsg-admin/' + wsg.id]"
-              [matTooltip]="'home.goto-wsg-admin' | translate">
-        <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
-      </a>
-    </div>
-    <div *ngIf="wsg.workspaces.length > 0"
-         class="fx-row-start-stretch"
-         [style.overflow-y]="'auto'">
-      <studio-lite-user-issues
-        class="fx-column-start-start"
-        layout="small"
-        [issues]="wsg.workspaces | userIssues: 'a'">
-      </studio-lite-user-issues>
-    </div>
+@if (workspaceGroups.length === 0) {
+  <div>
+    <p>{{'home.no-user-workspaces' | translate}}</p>
   </div>
-</div>
+}
+@if (workspaceGroups.length > 0) {
+  <div
+    class="fx-column-start-stretch workspace-gap">
+    @for (wsg of workspaceGroups; track wsg) {
+      <div
+        class="fx-column-start-stretch">
+        @if (wsg.workspaces.length > 0 || wsg.isAdmin) {
+          <div
+            class="fx-row-space-between-center workspace-group-header">
+            <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
+            @if (wsg.isAdmin) {
+              <a
+                mat-button
+                [routerLink]="['/wsg-admin/' + wsg.id]"
+                [matTooltip]="'home.goto-wsg-admin' | translate">
+                <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
+              </a>
+            }
+          </div>
+        }
+        @if (wsg.workspaces.length > 0) {
+          <div
+            class="fx-row-start-stretch"
+            [style.overflow-y]="'auto'">
+            <studio-lite-user-issues
+              class="fx-column-start-start"
+              layout="small"
+              [issues]="wsg.workspaces | userIssues: 'a'">
+            </studio-lite-user-issues>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

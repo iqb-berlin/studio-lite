@@ -32,7 +32,6 @@ describe('UserReviewsAreaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        UserReviewsAreaComponent,
         MockAreaTitleComponent,
         MockUserIssuesComponent,
         MockUserIssuesPipe

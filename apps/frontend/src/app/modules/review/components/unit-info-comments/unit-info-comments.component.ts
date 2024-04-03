@@ -1,6 +1,9 @@
 import {
   Component, Input, ViewChild
 } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { DatePipe } from '@angular/common';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
 import { Comment } from '../../../comments/models/comment.interface';
@@ -9,7 +12,9 @@ import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.co
 @Component({
   selector: 'studio-lite-unit-info-comments',
   templateUrl: './unit-info-comments.component.html',
-  styleUrls: ['./unit-info-comments.component.scss']
+  styleUrls: ['./unit-info-comments.component.scss'],
+  standalone: true,
+  imports: [UnitInfoLoaderComponent, MatIcon, DatePipe, TranslateModule]
 })
 export class UnitInfoCommentsComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;

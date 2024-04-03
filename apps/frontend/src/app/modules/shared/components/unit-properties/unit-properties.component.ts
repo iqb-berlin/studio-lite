@@ -1,13 +1,17 @@
 import {
   Component, Input, OnChanges, SimpleChanges
 } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { DatePipe } from '@angular/common';
 import { BackendService } from '../../../workspace/services/backend.service';
 import { State } from '../../../admin/models/state.type';
 
 @Component({
   selector: 'studio-lite-unit-properties',
   templateUrl: './unit-properties.component.html',
-  styleUrls: ['./unit-properties.component.scss']
+  styleUrls: ['./unit-properties.component.scss'],
+  standalone: true,
+  imports: [DatePipe, TranslateModule]
 })
 export class UnitPropertiesComponent implements OnChanges {
   @Input() workspaceGroupId!: number;

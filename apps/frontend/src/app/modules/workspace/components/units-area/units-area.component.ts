@@ -3,12 +3,22 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
+import { EditUnitButtonComponent } from '../edit-unit-button/edit-unit-button.component';
+import { DeleteUnitButtonComponent } from '../delete-unit-button/delete-unit-button.component';
+import { AddUnitButtonComponent } from '../add-unit-button/add-unit-button.component';
+import { UnitSelectionComponent } from '../unit-selection/unit-selection.component';
+import { UpdateUnitsButtonComponent } from '../update-units-button/update-units-button.component';
+import { UnitSaveButtonComponent } from '../unit-save-button/unit-save-button.component';
 
 @Component({
   selector: 'studio-lite-units-area',
   templateUrl: './units-area.component.html',
-  styleUrls: ['./units-area.component.scss']
+  styleUrls: ['./units-area.component.scss'],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [UnitSaveButtonComponent, UpdateUnitsButtonComponent, UnitSelectionComponent, AddUnitButtonComponent, DeleteUnitButtonComponent, EditUnitButtonComponent, AsyncPipe]
 })
 export class UnitsAreaComponent implements OnInit, OnDestroy {
   @Input() selectedRouterLink!: number;

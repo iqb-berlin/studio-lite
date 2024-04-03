@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'namedRouterLink'
+  name: 'namedRouterLink',
+  standalone: true
 })
 export class NamedRouterLinkPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

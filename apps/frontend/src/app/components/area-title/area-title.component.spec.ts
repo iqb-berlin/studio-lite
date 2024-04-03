@@ -7,9 +7,7 @@ describe('AreaTitleComponent', () => {
   let fixture: ComponentFixture<AreaTitleComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [AreaTitleComponent]
-    }).compileComponents();
+    await TestBed.configureTestingModule({}).compileComponents();
 
     fixture = TestBed.createComponent(AreaTitleComponent);
     component = fixture.componentInstance;
