@@ -8,9 +8,6 @@ import { UnitService } from '../database/services/unit.service';
 import { DownloadDocx } from './downloadDocx.class';
 import { Missing } from '../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
-// const HTMLtoDOCX = require('html-to-docx');
-
 interface WorkspaceData {
   id: number;
   name: string;
@@ -155,54 +152,34 @@ export class DownloadWorkspacesClass {
           let onlyManualCodingVar = true;
           let isDerived;
           variableCoding.deriveSources.length > 0 ? isDerived = true : isDerived = false;
-          if (variableCoding.codes.length > 0) {
-            variableCoding.codes.forEach((code: CodeData) => {
-              const codeAsText = ToTextFactory.codeAsText(code);
-              if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
-              code.ruleSets.forEach((ruleSet: RuleSet) => {
-                if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) onlyManualCodingVar = false;
-                ruleSet.rules.forEach((rule: CodingRule) => {
-                  if (rule.method === 'ELSE') {
-                    closedCodingVar = true;
-                  }
+          if (unit.schemer.split('@')[1] >= '1.5') {
+            if (variableCoding.codes.length > 0) {
+              variableCoding.codes.forEach((code: CodeData) => {
+                const codeAsText = ToTextFactory.codeAsText(code);
+                if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
+                code.ruleSets.forEach((ruleSet: RuleSet) => {
+                  if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) onlyManualCodingVar = false;
+                  ruleSet.rules.forEach((rule: CodingRule) => {
+                    if (rule.method === 'ELSE') {
+                      closedCodingVar = true;
+                    }
+                  });
                 });
+                let rulesDescription = '';
+                codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+                  rulesDescription += `<p>${ruleSetDescription}</p>`;
+                });
+                const codeInfo = {
+                  id: `${code.id}`,
+                  label: codeAsText.label,
+                  score: codeAsText.score,
+                  scoreLabel: codeAsText.scoreLabel,
+                  description: `${rulesDescription}${code.manualInstruction}`
+                };
+                codes.push(codeInfo);
               });
-              let rulesDescription = '';
-              codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-                rulesDescription += `<p>${ruleSetDescription}</p>`;
-              });
-              const codeInfo = {
-                id: `${code.id}`,
-                label: codeAsText.label,
-                score: codeAsText.score,
-                scoreLabel: codeAsText.scoreLabel,
-                description: `${rulesDescription}${code.manualInstruction}`
-              };
-              codes.push(codeInfo);
-            });
 
-            if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
-              bookVariables.push(
-                {
-                  id: variableCoding.id,
-                  label: variableCoding.label,
-                  generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
-                  codes: codes,
-                  missings: []
-                });
-            }
-            if (closedCodingVar && hasClosedVars === 'true') {
-              bookVariables.push(
-                {
-                  id: variableCoding.id,
-                  label: variableCoding.label,
-                  generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
-                  codes: codes,
-                  missings: []
-                });
-            }
-            if (onlyManualCodingVar) {
-              if (hasOnlyManualCoding === 'true') {
+              if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
                 bookVariables.push(
                   {
                     id: variableCoding.id,
@@ -212,10 +189,7 @@ export class DownloadWorkspacesClass {
                     missings: []
                   });
               }
-            }
-
-            if (isDerived) {
-              if (hasDerivedVars === 'true') {
+              if (closedCodingVar && hasClosedVars === 'true') {
                 bookVariables.push(
                   {
                     id: variableCoding.id,
@@ -225,7 +199,41 @@ export class DownloadWorkspacesClass {
                     missings: []
                   });
               }
+              if (onlyManualCodingVar) {
+                if (hasOnlyManualCoding === 'true') {
+                  bookVariables.push(
+                    {
+                      id: variableCoding.id,
+                      label: variableCoding.label,
+                      generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                      codes: codes,
+                      missings: []
+                    });
+                }
+              }
+
+              if (isDerived) {
+                if (hasDerivedVars === 'true') {
+                  bookVariables.push(
+                    {
+                      id: variableCoding.id,
+                      label: variableCoding.label,
+                      generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                      codes: codes,
+                      missings: []
+                    });
+                }
+              }
             }
+          } else {
+            bookVariables.push(
+              {
+                id: '',
+                label: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+                generalInstruction: '',
+                codes: [],
+                missings: []
+              });
           }
         });
       }
@@ -238,7 +246,6 @@ export class DownloadWorkspacesClass {
         }
         return 0;
       });
-
       codebook.push(
         {
           key: unit.key,

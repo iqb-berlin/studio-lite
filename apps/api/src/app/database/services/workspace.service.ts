@@ -211,7 +211,7 @@ export class WorkspaceService {
     const unitListWithMetadata = await this.unitService.findAllWithMetadata(id);
     if (unitListWithMetadata) {
       unitListWithMetadata?.forEach((unit: UnitMetadataDto) => {
-        if (unit.scheme && unit.scheme !== 'undefined') {
+        if (unit.scheme && unit.scheme !== 'undefined' && unit.schemer.split('@')[1] >= '1.5') {
           const parsedUnitScheme = JSON.parse(unit.scheme as string);
           let codingType:string;
           if (parsedUnitScheme) {
@@ -265,6 +265,14 @@ export class WorkspaceService {
               });
             });
           }
+        } else {
+          unitDataRows.push({
+            unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+            variable: '',
+            item: '',
+            validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+            codingType: ''
+          });
         }
       });
       return unitDataRows as CodingReportDto[];

@@ -43,7 +43,6 @@ type ParagraphOptions = {
 export class DownloadDocx {
   static async getCodebook(codingBookUnits:CodebookDto[], contentSetting:CodeBookContentSetting): Promise<Buffer | []> {
     let codeRows: TableRow[] = [];
-    let codesTable!: Table;
     let unitHeader:Paragraph;
     let generalInstructions:Paragraph[] = [];
 
@@ -90,74 +89,76 @@ export class DownloadDocx {
             if (contentSetting.hasGeneralInstructions === 'true') {
               generalInstructions = this.htmltoDocx(variable.generalInstruction);
             } else generalInstructions = [];
-
-            codeRows = variable.codes.map(code => new TableRow({
-              cantSplit: true,
-              children: [
-                new TableCell({
-                  borders: {
-                    top: { size: 1, color: 'FFFFFF', style: 'single' },
-                    bottom: { size: 1, color: 'FFFFFF', style: 'single' },
-                    left: { size: 1, color: 'FFFFFF', style: 'single' },
-                    right: { size: 1, color: 'FFFFFF', style: 'single' }
-                  },
-                  children: [new Paragraph({
-                    text: `${code.id}  ${code.label}`,
-                    spacing: {
-                      before: 100,
-                      after: 100
+            let codesTable!: Table;
+            if (variable.codes.length > 0) {
+              codeRows = variable.codes.map(code => new TableRow({
+                cantSplit: true,
+                children: [
+                  new TableCell({
+                    borders: {
+                      top: { size: 1, color: 'FFFFFF', style: 'single' },
+                      bottom: { size: 1, color: 'FFFFFF', style: 'single' },
+                      left: { size: 1, color: 'FFFFFF', style: 'single' },
+                      right: { size: 1, color: 'FFFFFF', style: 'single' }
                     },
-                    indent: { firstLine: 100 }
-                  })],
-                  width: {
-                    size: '25%',
-                    type: WidthType.PERCENTAGE
-                  }
-                }),
-                new TableCell({
+                    children: [new Paragraph({
+                      text: `${code.id}  ${code.label}`,
+                      spacing: {
+                        before: 100,
+                        after: 100
+                      },
+                      indent: { firstLine: 100 }
+                    })],
+                    width: {
+                      size: '25%',
+                      type: WidthType.PERCENTAGE
+                    }
+                  }),
+                  new TableCell({
 
-                  borders: {
-                    top: { size: 1, color: 'FFFFFF', style: 'single' },
-                    bottom: { size: 1, color: 'FFFFFF', style: 'single' },
-                    left: { size: 1, color: 'FFFFFF', style: 'single' },
-                    right: { size: 1, color: 'FFFFFF', style: 'single' }
-                  },
-                  children: [new Paragraph({
-                    text: `${code.score}  ${code.scoreLabel}`,
-                    spacing: {
-                      before: 100,
-                      after: 100
+                    borders: {
+                      top: { size: 1, color: 'FFFFFF', style: 'single' },
+                      bottom: { size: 1, color: 'FFFFFF', style: 'single' },
+                      left: { size: 1, color: 'FFFFFF', style: 'single' },
+                      right: { size: 1, color: 'FFFFFF', style: 'single' }
                     },
-                    indent: { firstLine: 100 }
-                  })],
-                  width: {
-                    size: '25%',
-                    type: WidthType.PERCENTAGE
-                  }
-                }),
-                new TableCell({
-                  width: {
-                    size: '50%',
-                    type: WidthType.PERCENTAGE
-                  },
-                  borders: {
-                    top: { size: 1, color: 'FFFFFF', style: 'single' },
-                    bottom: { size: 1, color: 'FFFFFF', style: 'single' },
-                    left: { size: 1, color: 'FFFFFF', style: 'single' },
-                    right: { size: 1, color: 'FFFFFF', style: 'single' }
-                  },
-                  children: [...this.htmltoDocx(code.description)]
-                })
-              ]
-            })
-            );
-            codesTable = new Table({
-              rows: codeRows,
-              width: {
-                size: 100,
-                type: WidthType.PERCENTAGE
-              }
-            });
+                    children: [new Paragraph({
+                      text: `${code.score}  ${code.scoreLabel}`,
+                      spacing: {
+                        before: 100,
+                        after: 100
+                      },
+                      indent: { firstLine: 100 }
+                    })],
+                    width: {
+                      size: '25%',
+                      type: WidthType.PERCENTAGE
+                    }
+                  }),
+                  new TableCell({
+                    width: {
+                      size: '50%',
+                      type: WidthType.PERCENTAGE
+                    },
+                    borders: {
+                      top: { size: 1, color: 'FFFFFF', style: 'single' },
+                      bottom: { size: 1, color: 'FFFFFF', style: 'single' },
+                      left: { size: 1, color: 'FFFFFF', style: 'single' },
+                      right: { size: 1, color: 'FFFFFF', style: 'single' }
+                    },
+                    children: [...this.htmltoDocx(code.description)]
+                  })
+                ]
+              })
+              );
+              codesTable = new Table({
+                rows: codeRows,
+                width: {
+                  size: 100,
+                  type: WidthType.PERCENTAGE
+                }
+              });
+            }
             variables.push(...[variableHeader, ...generalInstructions, codesTable]);
           });
 
@@ -178,7 +179,7 @@ export class DownloadDocx {
       const date = new Date().toLocaleDateString();
       const doc = new Document({
         background: {
-          color: '000000'
+          color: 'FFFFFF'
         },
         sections: [
           {
