@@ -39,8 +39,8 @@ describe('Admin Management', () => {
     //   .eq(0)
     //   .click();
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-      .should('exist')
       .eq(0)
+      .should('exist')
       .click();
     // cy.get('button')
     //   .should('have.attr', 'ng-reflect-message', 'Allgemeine Systemverwaltung')

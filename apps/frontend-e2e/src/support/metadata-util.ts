@@ -51,10 +51,14 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 }
 
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    'studio-lite-wrapped-icon >' +
-    ' .center-icon > .mat-icon')
+  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+  //   'studio-lite-wrapped-icon >' +
+  //   ' .center-icon > .mat-icon')
+  //   .eq(0)
+  //   .click();
+  cy.get('mat-icon:contains("setting")')
     .eq(0)
+    .should('exist')
     .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
@@ -78,7 +82,8 @@ export function selectProfileForGroup(group:string, profile:IqbProfile) {
     .eq(0)
     .click();
   checkProfile(profile);
-  cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
+  cy.get('mat-icon:contains("save")').click();
 }
 
 export function selectProfileForArea(profile:IqbProfile) {
@@ -86,9 +91,10 @@ export function selectProfileForArea(profile:IqbProfile) {
     .click();
   cy.get('span:contains("Einstellungen")')
     .click();
-  cy.get('svg').eq(2).click();
+  cy.get('svg').eq(1).click();
   cy.get('mat-option>span').contains(profile).click();
-  cy.get('svg').eq(3).click();
+  cy.wait(400);
+  cy.get('svg').eq(2).click();
   cy.get('mat-option>span').contains(profile).click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
@@ -119,7 +125,9 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
 }
 
 export function checkProfile(profile: string):void {
-  cy.intercept('https://raw.githubusercontent.com/iqb-vocabs/p60/master/item.json').as('loaded');
+  cy.intercept('https://raw.githubusercontent.com/iqb-vocabs/p60/master/item.json', req => {
+    req.continue();
+  }).as('loaded');
   cy.wait('@loaded', { timeout: 10000 }).then(() => {
     cy.get('mat-panel-title')
       .contains(profile)
