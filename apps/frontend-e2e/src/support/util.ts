@@ -249,11 +249,42 @@ export function addModule():void {
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
-  cy.get('mat-icon:contains("cloud_upload")')
-    .selectFile('apps/frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html')
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('iqb-schemer@1.5')
+    .should('exist');
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.0-beta.1.html', {
+      action: 'select',
+      force: true
+    });
+}
+
+export function deleteModule():void {
+  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    .eq(0)
     .click();
-  //  TODO
-  //  cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
+  cy.get('span:contains("Module")')
+    .eq(0)
+    .click();
+  cy.get('span:contains("IQB-Schemer")')
+    .parent()
+    .parent()
+    .prev()
+    .click();
+  cy.get('span:contains("IQB-Player")')
+    .parent()
+    .parent()
+    .prev()
+    .click();
+  cy.get('div > mat-icon')
+    .contains('delete')
+    .click();
+  clickButtonToAccept('Löschen');
 }
 
 export function visitLoginPage():void {

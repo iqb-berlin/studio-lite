@@ -20,13 +20,13 @@ describe('User Management', () => {
     logout();
   });
 
-  it.skip('should be possible login with credentials', () => {
+  it('should be possible login with credentials', () => {
     login(userData.user_name, userData.user_pass);
     visitLoginPage();
     logout();
   });
 
-  it.skip('should not be able to login with correct credentials', () => {
+  it('should not be able to login with correct credentials', () => {
     cy.get('input[placeholder="Anmeldename"]')
       .should('exist')
       .clear()
@@ -40,13 +40,13 @@ describe('User Management', () => {
     cy.wait('@responseLogin').its('response.statusCode').should('eq', 401);
   });
 
-  it.skip('user should be able to logout', () => {
+  it('user should be able to logout', () => {
     login(userData.user_name, userData.user_pass);
     visitLoginPage();
     logout();
   });
 
-  it.skip('should not be able to find admin user setting button', () => {
+  it('should not be able to find admin user setting button', () => {
     login(userData.user_name, userData.user_pass);
     cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
       .should('not.exist');
@@ -60,7 +60,7 @@ describe('User Management', () => {
     logout();
   });
 
-  it.skip('should be possible change the password', () => {
+  it('should be possible change the password', () => {
     login(userData.user_name, userData.user_pass);
     changePassword('newpass', userData.user_pass);
     visitLoginPage();
