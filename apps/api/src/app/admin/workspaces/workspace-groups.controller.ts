@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
-} from "@nestjs/swagger";
+} from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto, UserInListDto,
   WorkspaceGroupFullDto,

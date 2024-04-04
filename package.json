@@ -1,6 +1,6 @@
 {
   "name": "studio-lite",
-  "version": "7.0.0",
+  "version": "7.1.1",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "scripts": {
@@ -86,12 +86,12 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "date-fns": "^2.29.3",
+    "docx": "^8.5.0",
     "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-import": "^2.27.5",
     "exceljs": "^4.4.0",
     "express": "^4.18.2",
     "file-saver-es": "^2.0.5",
-    "html-to-docx": "^1.8.0",
     "keycloak-angular": "15.1.0",
     "keycloak-js": "^22.0.3",
     "multer": "^1.4.5-lts.1",

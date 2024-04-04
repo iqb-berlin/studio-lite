@@ -269,8 +269,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   exportCodingBook():void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.selectUnitDialog.open(ExportCodingBookComponent, {
-        width: '800px',
-        minHeight: '50%',
+        width: '900px',
         autoFocus: false
       });
     }

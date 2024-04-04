@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags
-} from "@nestjs/swagger";
+} from '@nestjs/swagger';
 import {
   ReviewInListDto,
   ReviewFullDto,
