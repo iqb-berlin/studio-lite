@@ -230,7 +230,7 @@ export class DownloadWorkspacesClass {
           } else {
             bookVariables.push(
               {
-                id: '',
+                id: variableCoding.id,
                 label: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
                 generalInstruction: '',
                 codes: [],
