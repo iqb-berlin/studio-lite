@@ -18,6 +18,7 @@ import { CodeBookContentSetting, CodebookDto } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { UnderlineType } from 'docx/build/file/paragraph/run/underline';
 import { ShadingType } from 'docx/build/file/shading/shading';
+import { WebColors } from './webcolors';
 
 type ParagraphOptions = {
   text?: string;
@@ -52,12 +53,12 @@ export class DownloadDocx {
         unitHeader = new Paragraph({
           border: {
             bottom: {
-              color: 'FFFFFF',
+              color: '#000000',
               style: 'single',
               size: 10
             },
             top: {
-              color: 'FFFFFF',
+              color: '#000000',
               style: 'single',
               size: 10
             }
@@ -68,11 +69,7 @@ export class DownloadDocx {
           },
           text: `${variableCoding.key}  ${variableCoding.name}`,
           heading: HeadingLevel.HEADING_1,
-          alignment: AlignmentType.CENTER,
-          shading: {
-            fill: 'e7e7e7',
-            type: 'solid'
-          }
+          alignment: AlignmentType.CENTER
         });
         const variables = [];
         if (variableCoding.variables.length > 0) {
@@ -96,10 +93,10 @@ export class DownloadDocx {
                 children: [
                   new TableCell({
                     borders: {
-                      top: { size: 1, color: 'FFFFFF', style: 'single' },
-                      bottom: { size: 1, color: 'FFFFFF', style: 'single' },
-                      left: { size: 1, color: 'FFFFFF', style: 'single' },
-                      right: { size: 1, color: 'FFFFFF', style: 'single' }
+                      top: { size: 1, color: '#000000', style: 'single' },
+                      bottom: { size: 1, color: '#000000', style: 'single' },
+                      left: { size: 1, color: '#000000', style: 'single' },
+                      right: { size: 1, color: '#000000', style: 'single' }
                     },
                     children: [new Paragraph({
                       text: `${code.id}  ${code.label}`,
@@ -110,17 +107,17 @@ export class DownloadDocx {
                       indent: { firstLine: 100 }
                     })],
                     width: {
-                      size: '25%',
+                      size: 25,
                       type: WidthType.PERCENTAGE
                     }
                   }),
                   new TableCell({
 
                     borders: {
-                      top: { size: 1, color: 'FFFFFF', style: 'single' },
-                      bottom: { size: 1, color: 'FFFFFF', style: 'single' },
-                      left: { size: 1, color: 'FFFFFF', style: 'single' },
-                      right: { size: 1, color: 'FFFFFF', style: 'single' }
+                      top: { size: 1, color: '#000000', style: 'single' },
+                      bottom: { size: 1, color: '#000000', style: 'single' },
+                      left: { size: 1, color: '#000000', style: 'single' },
+                      right: { size: 1, color: '#000000', style: 'single' }
                     },
                     children: [new Paragraph({
                       text: `${code.score}  ${code.scoreLabel}`,
@@ -131,20 +128,20 @@ export class DownloadDocx {
                       indent: { firstLine: 100 }
                     })],
                     width: {
-                      size: '25%',
+                      size: 25,
                       type: WidthType.PERCENTAGE
                     }
                   }),
                   new TableCell({
                     width: {
-                      size: '50%',
+                      size: 50,
                       type: WidthType.PERCENTAGE
                     },
                     borders: {
-                      top: { size: 1, color: 'FFFFFF', style: 'single' },
-                      bottom: { size: 1, color: 'FFFFFF', style: 'single' },
-                      left: { size: 1, color: 'FFFFFF', style: 'single' },
-                      right: { size: 1, color: 'FFFFFF', style: 'single' }
+                      top: { size: 1, color: '#000000', style: 'single' },
+                      bottom: { size: 1, color: '#000000', style: 'single' },
+                      left: { size: 1, color: '#000000', style: 'single' },
+                      right: { size: 1, color: '#000000', style: 'single' }
                     },
                     children: [...this.htmltoDocx(code.description)]
                   })
@@ -179,7 +176,7 @@ export class DownloadDocx {
       const date = new Date().toLocaleDateString();
       const doc = new Document({
         background: {
-          color: 'FFFFFF'
+          color: '#FFFFFF'
         },
         sections: [
           {
@@ -242,27 +239,33 @@ export class DownloadDocx {
         }));
     });
     $('p,h1,h2,h3,h4').each((i, elem) => {
-      const textAlignment = $(elem).css('text-align');
+      const textAlignment = $(elem).css('text-align') || 'left';
       const span = $(elem).find('span');
       const mark = $(elem).find('mark');
       const color = $(span).css('color');
       // const name = elem.name;
-      let colorParsed:string;
+      let colorParsed:string = '#000000';
       if (color) {
         if (color.startsWith('#')) {
           colorParsed = color;
-        } else {
+        } else if (color.startsWith('rgb')) {
           const rgbString = parseCssRgbString(color);
           colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
+        } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
+          colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
+        } else {
+          colorParsed = '#000000';
         }
       }
-      const size = $(span).css('font-size')?.replace('px', '');
-      const backgroundColor = $(mark).css('background-color');
+
+      const size = $(span).css('font-size') || '20pt';
+      const backgroundColor = $(mark).css('background-color') || '#FFFFFF';
       const formattedParagraph = createParagraph(elem.children, textAlignment, colorParsed, backgroundColor, size);
       if (formattedParagraph) {
         elements.push(formattedParagraph);
       }
     });
+
     images.forEach(image => elements.push(new Paragraph(
       {
         spacing: {
@@ -305,7 +308,7 @@ export class DownloadDocx {
         };
       }
       if (size) {
-        textRunOptions.size = Number(size);
+        textRunOptions.size = parseInt(size, 10);
       }
 
       if (tags.includes('u')) {

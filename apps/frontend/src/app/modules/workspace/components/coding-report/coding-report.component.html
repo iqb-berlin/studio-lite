@@ -1,10 +1,12 @@
-<h2 mat-dialog-title>{{ 'workspace.coding-report' | translate }}</h2>
-<div class="fx-column-start-start">
+<div mat-dialog-title class="fx-column-start-start title">
+  <span>{{ 'workspace.coding-report' | translate }}</span>
   <mat-form-field class="filter">
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Filtern nach..." #input>
+    <mat-label>{{'filter-by' | translate}}</mat-label>
+    <input matInput (keyup)="applyFilter($event)" #input>
   </mat-form-field>
-  <mat-slide-toggle class="toggle" [checked]="codedVariablesOnly" (toggleChange)="toggleChange()">nur kodierte Variablen</mat-slide-toggle>
+  <mat-slide-toggle class="toggle" [checked]="codedVariablesOnly" (toggleChange)="toggleChange()">
+    nur mit Regeln kodierte Variablen
+  </mat-slide-toggle>
 </div>
 <mat-dialog-content>
   @if (isLoading) {
@@ -25,9 +27,9 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end" >
   <button mat-raised-button
-    color="primary"
-    type="submit"
-    [mat-dialog-close]="">
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="">
     {{ 'close' | translate }}
   </button>
 </mat-dialog-actions>

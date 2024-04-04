@@ -167,7 +167,9 @@ export class DownloadWorkspacesClass {
                 });
                 let rulesDescription = '';
                 codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-                  rulesDescription += `<p>${ruleSetDescription}</p>`;
+                  if (ruleSetDescription !== 'Keine Regeln definiert.') {
+                    rulesDescription += `<p>${ruleSetDescription}</p>`;
+                  } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
                 });
                 const codeInfo = {
                   id: `${code.id}`,
@@ -228,7 +230,7 @@ export class DownloadWorkspacesClass {
           } else {
             bookVariables.push(
               {
-                id: '',
+                id: variableCoding.id,
                 label: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
                 generalInstruction: '',
                 codes: [],
