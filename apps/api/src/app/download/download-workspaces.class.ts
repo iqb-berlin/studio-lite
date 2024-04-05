@@ -155,30 +155,33 @@ export class DownloadWorkspacesClass {
           if (unit.schemer.split('@')[1] >= '1.5') {
             if (variableCoding.codes.length > 0) {
               variableCoding.codes.forEach((code: CodeData) => {
-                const codeAsText = ToTextFactory.codeAsText(code);
-                if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
-                code.ruleSets.forEach((ruleSet: RuleSet) => {
-                  if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) onlyManualCodingVar = false;
-                  ruleSet.rules.forEach((rule: CodingRule) => {
-                    if (rule.method === 'ELSE') {
-                      closedCodingVar = true;
-                    }
+                // Catch schemer version <1.5
+                if(!code.hasOwnProperty('rules')){
+                  const codeAsText = ToTextFactory.codeAsText(code);
+                  if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
+                  code.ruleSets.forEach((ruleSet: RuleSet) => {
+                    if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) onlyManualCodingVar = false;
+                    ruleSet.rules.forEach((rule: CodingRule) => {
+                      if (rule.method === 'ELSE') {
+                        closedCodingVar = true;
+                      }
+                    });
                   });
-                });
-                let rulesDescription = '';
-                codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-                  if (ruleSetDescription !== 'Keine Regeln definiert.') {
-                    rulesDescription += `<p>${ruleSetDescription}</p>`;
-                  } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
-                });
-                const codeInfo = {
-                  id: `${code.id}`,
-                  label: codeAsText.label,
-                  score: codeAsText.score,
-                  scoreLabel: codeAsText.scoreLabel,
-                  description: `${rulesDescription}${code.manualInstruction}`
-                };
-                codes.push(codeInfo);
+                  let rulesDescription = '';
+                  codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+                    if (ruleSetDescription !== 'Keine Regeln definiert.') {
+                      rulesDescription += `<p>${ruleSetDescription}</p>`;
+                    } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
+                  });
+                  const codeInfo = {
+                    id: `${code.id}`,
+                    label: codeAsText.label,
+                    score: codeAsText.score,
+                    scoreLabel: codeAsText.scoreLabel,
+                    description: `${rulesDescription}${code.manualInstruction}`
+                  };
+                  codes.push(codeInfo);
+                }
               });
 
               if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
