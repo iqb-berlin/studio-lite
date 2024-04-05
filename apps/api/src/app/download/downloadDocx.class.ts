@@ -202,9 +202,11 @@ export class DownloadDocx {
                     alignment: AlignmentType.CENTER,
                     children: [
                       new TextRun({
+                        color: '000000',
                         children: [' Seite ', PageNumber.CURRENT]
                       }),
                       new TextRun({
+                        color: '000000',
                         children: [' von ', PageNumber.TOTAL_PAGES]
                       })
                     ]
@@ -308,7 +310,8 @@ export class DownloadDocx {
         };
       }
       if (size) {
-        textRunOptions.size = parseInt(size, 10);
+        const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+        sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
       }
 
       if (tags.includes('u')) {
