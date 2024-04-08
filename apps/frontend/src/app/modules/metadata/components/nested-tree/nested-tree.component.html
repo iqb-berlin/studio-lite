@@ -3,7 +3,6 @@
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <mat-tree-node
       *matTreeNodeDef="let node"
-      [style.display]="filterLeafNode(node) ? 'none' : 'block'"
       matTreeNodeToggle
       matTreeNodePadding
       matTreeNodePaddingIndent="20">
@@ -11,8 +10,8 @@
         <button class="button__arrow" mat-icon-button disabled></button>
         <mat-checkbox
           class="checklist-leaf-node"
-          [checked]="checklistSelection.isSelected(node)"
-          (change)="VocabLeafSelectionToggle(node)">
+          [checked]="checklistSelection | isNodeSelected : node : pipeTransformTrigger"
+          (change)="vocabLeafSelectionToggle(node)">
         </mat-checkbox>
         @if (!this.dialogData.props.hideNumbering) {
           <span class="notation">{{node.notation}}</span>
@@ -24,7 +23,6 @@
     </mat-tree-node>
     <mat-tree-node
       *matTreeNodeDef="let node; when: hasChild"
-      [style.display]="filterParentNode(node) ? 'none' : 'block'"
       matTreeNodePadding
       matTreeNodePaddingIndent="20">
       <div class="fx-row-start-center">
@@ -32,16 +30,17 @@
           class="button__arrow"
           mat-icon-button
           matTreeNodeToggle
-          [attr.aria-label]="'Toggle ' + node?.label">
+          [attr.aria-label]="'Toggle ' + node?.label"
+          (click)="pipeTransformTrigger = !pipeTransformTrigger">
           <mat-icon class="mat-icon-rtl-mirror">
-            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+            {{(treeControl | isTreeControlExpanded : node : pipeTransformTrigger) ? 'expand_more' : 'chevron_right'}}
           </mat-icon>
         </button>
 
         <mat-checkbox
-          [checked]="descendantsAllSelected(node)"
-          [indeterminate]="descendantsPartiallySelected(node)"
-          (change)="VocabNodeSelectionToggle(node)"
+          [checked]="treeControl | areAllDescendantsSelected : checklistSelection : node : pipeTransformTrigger"
+          [indeterminate]="treeControl | areSomeDescendantsSelected : checklistSelection : node : pipeTransformTrigger"
+          (change)="vocabNodeSelectionToggle(node)"
         ></mat-checkbox>
         @if (!this.dialogData.props.hideNumbering) {
           <span class="notation">{{node.notation}}</span>
@@ -58,7 +57,7 @@
   <button mat-raised-button
     color="primary"
     type="submit"
-    [mat-dialog-close]="{nodes:getSelectedNodesList(),hideNumbering:dialogData.props.hideNumbering}">
+    [mat-dialog-close]="{nodes: selectedNodesList, hideNumbering: dialogData.props.hideNumbering}">
     {{'confirm' | translate}}
   </button>
   <button mat-raised-button

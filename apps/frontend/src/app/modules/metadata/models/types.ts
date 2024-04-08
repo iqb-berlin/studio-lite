@@ -1,4 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
+import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+
 export type NotationNode = {
   id: string,
   notation: string[],
@@ -17,15 +20,13 @@ export type NotationNode = {
   narrower?: NotationNode[]
 };
 
-export type NestedTreeParameters = {
-  url: string,
-  allowMultipleValues: boolean,
-  maxLevel: number,
-  hideNumbering: boolean,
-  hideDescription: boolean,
-  hideTitle: boolean,
-  addTextLanguages: Array<string>
-};
+export class NestedTreeParameters {
+  url!: string;
+  allowMultipleValues!: boolean;
+  maxLevel!: number;
+  hideNumbering!: boolean;
+  hideTitle!: boolean;
+}
 
 export type Vocabulary = {
   id: string,
@@ -35,8 +36,7 @@ export type Vocabulary = {
 };
 
 export type DialogData = {
-  vocab: Vocabulary,
-  value: VocabFlatNode[],
+  value: VocabularyEntry[],
   props: NestedTreeParameters,
   vocabularies: Array<{ url: string, data: Vocabulary }>
 };
@@ -45,7 +45,7 @@ export class VocabNode {
   children!: VocabNode[];
   id!: string;
   label!: string;
-  notation!: string;
+  notation!: string[];
   description!: string;
 }
 
@@ -53,8 +53,40 @@ export class VocabNode {
 export class VocabFlatNode {
   id!: string;
   label!: string;
-  notation!: string;
+  notation!: string[];
   level!: number;
   description!: string;
   expandable!: boolean;
+}
+
+export interface VocabularyEntry {
+  id: string
+  name: string;
+  notation: string[],
+  description?: string,
+  text: TextWithLanguage[],
+}
+
+export class TopConcept {
+  notation!: string[];
+  prefLabel!: { de: string };
+  narrower!: TopConcept[];
+  id!: string;
+}
+
+export class VocabData {
+  hasTopConcept?: TopConcept[];
+  id?: string;
+  title?: Record<string, string>;
+  type?: string;
+}
+
+export class Vocab {
+  data!: VocabData;
+  url!: string;
+}
+
+export class VocabIdDictionaryValue extends ProfileEntryParametersVocabulary {
+  labels!: Record<'de', string>;
+  notation!: string[];
 }
