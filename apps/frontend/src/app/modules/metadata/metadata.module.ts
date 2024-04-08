@@ -23,7 +23,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
-import { MetadataComponent } from './components/metadata/metadata.component';
 import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
 import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
 import { FormlyDurationComponent } from './components/formly-duration/formly-duration.component';
@@ -106,7 +105,6 @@ export function formlyValidationConfig(translate: TranslateService) {
     MatListModule,
     MatTooltipModule,
     FormlyChipsComponent,
-    MetadataComponent,
     FormlyWrapperPanel,
     FormlyToggleComponent,
     FormlyDurationComponent,
@@ -124,6 +122,6 @@ export function formlyValidationConfig(translate: TranslateService) {
       deps: [TranslateService]
     }
   ],
-  exports: [MetadataComponent, ProfileFormComponent, ItemsComponent]
+  exports: [ProfileFormComponent, ItemsComponent]
 })
 export class MetadataModule {}
