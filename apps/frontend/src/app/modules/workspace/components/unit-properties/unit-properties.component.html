@@ -221,7 +221,6 @@
         @if (workspaceSettings && workspaceSettings.unitMDProfile && metadata) {
           <studio-lite-profile-form
             [profileUrl]="workspaceSettings && workspaceSettings.unitMDProfile"
-            [metadataKey]="'profiles'"
             [metadata]="metadata"
             [language]="'de'"
             [formlyWrapper]="'panel'"
@@ -245,7 +244,6 @@
           <studio-lite-items
             class="fx-flex-row-50"
             [profileUrl]="workspaceSettings && workspaceSettings.itemMDProfile"
-            [metadataKey]="'items'"
             [metadata]="metadata"
             [language]="'de'"
             [variablesLoader]="variablesLoader"
