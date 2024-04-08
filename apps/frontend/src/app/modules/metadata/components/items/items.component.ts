@@ -9,6 +9,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 
+import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 // eslint-disable-next-line max-len
@@ -24,18 +25,17 @@ import { MetadataReadonlyItemsComponent } from '../../../shared/components/metad
 })
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
-  items: any[] = [];
+  items: ItemsMetadataValues[] = [];
   variables!: string[];
   isTextOnlyView = false;
   private ngUnsubscribe = new Subject<void>();
 
   @Input() variablesLoader!: BehaviorSubject<string[]>;
   @Input() profileUrl!: string | undefined;
-  @Input() metadataKey!: 'profiles' | 'items';
-  @Input() metadata!: any;
+  @Input() metadata: Partial<UnitMetadataValues> = {};
   @Input() language!: string;
 
-  @Output() metadataChange: EventEmitter<any> = new EventEmitter();
+  @Output() metadataChange: EventEmitter<UnitMetadataValues> = new EventEmitter();
 
   ngOnInit(): void {
     this.variablesLoader
@@ -43,7 +43,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(variables => {
         this.variables = variables;
       });
-    this.items = this.metadata[this.metadataKey] || [];
+    this.items = this.metadata.items || [];
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -51,7 +51,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     if (changes[metadata] &&
       !changes[metadata].firstChange &&
       changes[metadata].previousValue !== changes[metadata].currentValue) {
-      this.items = this.metadata[this.metadataKey] || [];
+      this.items = this.metadata.items || [];
     }
   }
 
@@ -61,18 +61,22 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   remove(index: number): void {
     this.items.splice(index, 1);
-    this.metadata[this.metadataKey] = this.items;
-    this.metadataChange.emit(this.metadata);
+    this.metadata.items = this.items;
+    this.emitMetadata();
   }
 
   add(): void {
     this.items.push({});
-    this.metadata[this.metadataKey] = this.items;
-    this.metadataChange.emit(this.metadata);
+    this.metadata.items = this.items;
+    this.emitMetadata();
   }
 
-  onMetadataChange(metadata: any): void {
-    this.metadata[this.metadataKey] = metadata;
+  onMetadataChange(metadata: Partial<ProfileMetadataValues>[]): void {
+    this.metadata.items = metadata;
+    this.emitMetadata();
+  }
+
+  private emitMetadata(): void {
     this.metadataChange.emit(this.metadata);
   }
 

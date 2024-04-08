@@ -3,14 +3,42 @@ import {
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
-  MDProfile, MDProfileEntry, MDProfileGroup, MDValue, ProfileEntryParametersNumber
+  MDProfile,
+  MDProfileEntry,
+  MDProfileGroup,
+  ProfileEntryParametersBoolean,
+  ProfileEntryParametersNumber
 } from '@iqb/metadata';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { Subject } from 'rxjs';
-import { ProfileEntryParametersText } from '@iqb/metadata/md-profile-entry';
+import { ProfileEntryParametersText, ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { TextsWithLanguageAndId } from '@iqb/metadata/md-values';
+import { MetadataValues, MetadataValuesEntry, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MetadataService } from '../../services/metadata.service';
 import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
+import { VocabularyEntry } from '../../models/types';
+
+interface FormlyConfigProps {
+  label: string;
+  min?: number;
+  max?: number;
+  autosize?: boolean;
+  autosizeMinRows?: number;
+  autosizeMaxRows?: number;
+}
+
+interface ProfileItemKeyValue {
+  label: string;
+  type: string;
+  parameters: ProfileEntryParametersNumber | ProfileEntryParametersBoolean | ProfileEntryParametersText |
+  ProfileEntryParametersVocabulary | null;
+}
+
+type ModelValueEntry = [string, ModelValue];
+
+type ModelValue = string | number | boolean | Record<string, string> | VocabularyEntry[];
 
 @Component({
   selector: 'studio-lite-profile-form',
@@ -22,20 +50,19 @@ import { BackendService } from '../../services/backend.service';
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   constructor(public metadataService: MetadataService, public backendService:BackendService) {}
 
-  @Output() metadataChange: EventEmitter<any> = new EventEmitter();
+  @Output() metadataChange: EventEmitter<Partial<UnitMetadataValues>> = new EventEmitter();
   @Input() language!: string;
   @Input() profileUrl!: string | undefined;
-  @Input() metadataKey!: 'profiles' | 'items';
-  @Input() metadata!: any;
+  @Input() metadata!: Partial<UnitMetadataValues>;
   @Input() formlyWrapper!: string;
   @Input() panelExpanded!: boolean;
 
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
-  model: any = {};
+  model: Record<string, ModelValue> = {};
   profile!: MDProfile;
 
-  private profileItemKeys: Record<string, any> = {};
+  private profileItemKeys: Record<string, ProfileItemKeyValue> = {};
   private ngUnsubscribe = new Subject<void>();
 
   ngOnInit() {
@@ -48,7 +75,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       !changes[metadata].firstChange &&
       changes[metadata].previousValue !== changes[metadata].currentValue) {
       this.model = this.mapMetadataValuesToFormlyModel(
-        this.findCurrentProfileMetadata(this.metadata[this.metadataKey])
+        this.findCurrentProfileMetadata(this.metadata.profiles)
       );
     }
 
@@ -65,25 +92,25 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       .then((profile => this.loadProfile(profile)));
   }
 
-  private async initProfile() {
+  private async initProfile(): Promise<MDProfile | Record<string, never>> {
     return this.getProfile(this.profileUrl as string);
   }
 
-  private async loadProfile(json: unknown) {
-    this.profile = new MDProfile(json);
+  private async loadProfile(profile: MDProfile | Record<string, never>) {
+    this.profile = new MDProfile(profile);
     await this.metadataService.getProfileVocabularies(this.profile);
     this.model = this.mapMetadataValuesToFormlyModel(
-      this.findCurrentProfileMetadata(this.metadata[this.metadataKey])
+      this.findCurrentProfileMetadata(this.metadata.profiles)
     );
     this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
   }
 
-  private findCurrentProfileMetadata(metadata: any[]): any {
+  private findCurrentProfileMetadata(metadata: MetadataValues[] | undefined): MetadataValues | undefined {
     if (!metadata || !metadata.length) return {};
     return metadata.find(data => data.profileId === this.profile.id);
   }
 
-  private async getProfile(profileUrl: string) {
+  private async getProfile(profileUrl: string): Promise<MDProfile | Record<string, never>> {
     try {
       const response = await fetch(`${profileUrl}`);
       if (response.ok) {
@@ -93,7 +120,12 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       }
       return await new Promise(resolve => {
         this.backendService.getProfile(profileUrl)
-          .subscribe(profile => { resolve(profile); });
+          .subscribe(profile => {
+            if (profile && profile !== true) {
+              return resolve(profile);
+            }
+            return {};
+          });
       });
     } catch (err) {
       return {};
@@ -125,60 +157,66 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   // //////////////////////////////////
   // Formly Model To Metadata Values //
   // //////////////////////////////////
-  private mapFormlyModelToMetadataValues(model: any, profileId: string): any {
+  private mapFormlyModelToMetadataValues(model: Record<string, ModelValue>, profileId: string): MetadataValues {
     return this.mapFormlyModelToMetadataValueEntries(Object.entries(model), profileId);
   }
 
-  private mapFormlyModelToMetadataValueEntries(allEntries: any[], profileId: string) : any {
+  private mapFormlyModelToMetadataValueEntries(allEntries: ModelValueEntry[], profileId: string) : MetadataValues {
     return {
       entries: [
         ...allEntries
-          .map((keyValue: Record<string, any>) => ({
-            id: keyValue[0],
+          .map(entry => ({
+            id: entry[0],
             label: [{
               lang: this.language,
-              value: this.profileItemKeys[keyValue[0]]?.label
+              value: this.profileItemKeys[entry[0]]?.label
             }],
-            value: this.mapFormlyModelValueToMetadataValue(keyValue),
-            valueAsText: this.mapFormlyModelValueToMetadataValueAsText(keyValue)
+            value: this.mapFormlyModelValueToMetadataValue(entry),
+            valueAsText: this.mapFormlyModelValueToMetadataValueAsText(entry)
           }))
       ],
       profileId: profileId
     };
   }
 
-  private mapFormlyModelValueToMetadataValue(keyValue: Record<string, any>) {
-    const type = this.profileItemKeys[keyValue[0]]?.type;
+  private mapFormlyModelValueToMetadataValue(
+    modelValueEntry: ModelValueEntry
+  ): TextsWithLanguageAndId[] | TextWithLanguage[] | string {
+    const type = this.profileItemKeys[modelValueEntry[0]]?.type;
     if (type === 'text') {
-      const textWithLanguages = Object.entries(keyValue[1]);
+      const textWithLanguages = Object.entries(modelValueEntry[1]);
       return textWithLanguages
         .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
     }
     if (type === 'vocabulary') {
-      return keyValue[1].map((kv:any) => ({ id: kv?.id, text: kv?.text }));
+      return (modelValueEntry[1] as VocabularyEntry[])
+        .map(vocabEntry => ({ id: vocabEntry?.id, text: vocabEntry?.text }));
     }
-    return keyValue[1].toString();
+    return modelValueEntry[1].toString();
   }
 
-  private mapFormlyModelValueToMetadataValueAsText(keyValue: Record<string, any>) {
-    const type = this.profileItemKeys[keyValue[0]]?.type;
+  private mapFormlyModelValueToMetadataValueAsText(
+    modelValueEntry: ModelValueEntry
+  ): TextWithLanguage | TextWithLanguage[] {
+    const type = this.profileItemKeys[modelValueEntry[0]]?.type;
     if (type === 'text') {
-      const textWithLanguages = Object.entries(keyValue[1]);
+      const textWithLanguages = Object.entries(modelValueEntry[1]);
       return textWithLanguages
         .map(textWithLanguage => ({ lang: textWithLanguage[0], value: textWithLanguage[1] as string }));
     }
     if (type === 'vocabulary') {
-      return keyValue[1].map((kv:any) => kv?.text).flat();
+      return (modelValueEntry[1] as VocabularyEntry[])
+        .map(vocabEntry => vocabEntry?.text).flat();
     }
     if (type === 'boolean') {
       return {
         lang: this.language,
-        value: this.getBooleanTypeLabel(keyValue[0])
+        value: this.getBooleanTypeLabel(modelValueEntry[0])
       };
     }
     if (type === 'number') {
-      if (this.profileItemKeys[keyValue[0]].parameters.isPeriodSeconds) {
-        const duration = DurationService.convertSecondsToMinutes(keyValue[1]);
+      if ((this.profileItemKeys[modelValueEntry[0]].parameters as ProfileEntryParametersNumber).isPeriodSeconds) {
+        const duration = DurationService.convertSecondsToMinutes(Number(modelValueEntry[1]));
         return {
           lang: this.language,
           value: `${duration.minutes}:${duration.seconds}`
@@ -187,57 +225,67 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     }
     return {
       lang: this.language,
-      value: keyValue[1].toString()
+      value: modelValueEntry[1].toString()
     };
   }
 
-  private getBooleanTypeLabel(id: string): string {
-    if (id) {
-      return this.profileItemKeys[id].parameters.trueLabel || id.toString();
+  private getBooleanTypeLabel(value: string): string {
+    if (value) {
+      return (this.profileItemKeys[value].parameters as ProfileEntryParametersBoolean).trueLabel || value.toString();
     }
-    return this.profileItemKeys[id].parameters.falseLabel || id.toString();
+    return (this.profileItemKeys[value].parameters as ProfileEntryParametersBoolean).falseLabel || value.toString();
   }
 
   // //////////////////////////////////
   // Metadata Values To Formly Model //
   // //////////////////////////////////
 
-  private mapMetadataValuesToFormlyModel(metadata: any) {
+  private mapMetadataValuesToFormlyModel(metadata: MetadataValues | undefined): Record<string, ModelValue> {
     if (!metadata || !metadata.entries) return {};
     return this.mapMetaDataEntriesToFormlyModel(metadata.entries);
   }
 
-  private mapMetaDataEntriesToFormlyModel(entries: MDValue[]): any {
-    const model: any = {};
-    entries.forEach((entry: any) => {
+  private mapMetaDataEntriesToFormlyModel(entries: MetadataValuesEntry[]): Record<string, ModelValue> {
+    const model: Record<string, ModelValue> = {};
+    entries.forEach((entry: MetadataValuesEntry) => {
       model[entry.id] = this.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
     });
     return model;
   }
 
-  private mapMetaDataEntriesValueToFormlyModelValue(value: any): any {
+  private mapMetaDataEntriesValueToFormlyModelValue(
+    value: TextsWithLanguageAndId[] | TextWithLanguage[] | string | null
+  ): ModelValue {
     if (Array.isArray(value)) {
-      if (value.length && value[0].lang) {
-        return value.reduce((obj, currentValue) => ({ ...obj, [currentValue.lang]: currentValue.value }), {});
-      }
-      if (value.length && value[0].id) {
-        return value.map((v:any) => {
-          const name = this.metadataService.vocabulariesIdDictionary[v.id]?.labels.de;
-          const notation = this.metadataService.vocabulariesIdDictionary[v.id]?.notation[0] || '';
-          return {
-            name: `${this.metadataService.vocabulariesIdDictionary[v.id]?.hideNumbering ? '' : notation} ${name} `,
-            notation: notation,
-            text: v.text,
-            id: v.id
-          };
-        });
+      if (value.length) {
+        const valueElement = value[0];
+        const hasLanguage = Object.prototype.hasOwnProperty.call(valueElement, 'lang');
+        const hasId = Object.prototype.hasOwnProperty.call(valueElement, 'id');
+        if (hasLanguage) {
+          return (value as TextWithLanguage[]).reduce((obj, currentValue) => ({
+            ...obj,
+            [currentValue.lang]: currentValue.value
+          }), {});
+        }
+        if (hasId) {
+          return (value as TextsWithLanguageAndId[]).map(v => {
+            const name = this.metadataService.vocabulariesIdDictionary[v.id]?.labels.de;
+            const notation = this.metadataService.vocabulariesIdDictionary[v.id]?.notation[0] || '';
+            return {
+              name: `${this.metadataService.vocabulariesIdDictionary[v.id]?.hideNumbering ? '' : notation} ${name} `,
+              notation: notation ? [notation] : [],
+              text: v.text,
+              id: v.id
+            };
+          });
+        }
       }
       return [];
     }
     // must be a boolean or number
     if (value === 'true') return true;
     if (value === 'false') return false;
-    return parseInt(value, 10);
+    return parseInt((value as string), 10);
   }
 
   // ///////////////////////////
@@ -270,14 +318,14 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {
-    const props: any = {
+    const props: FormlyConfigProps = {
       ...entry.parameters,
       label: entry.label
     };
     if (entry.parameters instanceof ProfileEntryParametersNumber) {
       if (ProfileFormComponent.getFormlyType(entry) !== 'duration') {
-        props.min = entry.parameters.minValue;
-        props.max = entry.parameters.maxValue;
+        props.min = entry.parameters.minValue === null ? undefined : entry.parameters.minValue;
+        props.max = entry.parameters.maxValue === null ? undefined : entry.parameters.maxValue;
       }
     } else if (entry.parameters instanceof ProfileEntryParametersText) {
       if (ProfileFormComponent.getFormlyType(entry) === 'textarea') {
@@ -294,7 +342,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return ProfileFormComponent.createFormlyField(entry.id, entry, props);
   }
 
-  private static createFormlyField(key: string, entry: MDProfileEntry, props: any): FormlyFieldConfig {
+  private static createFormlyField(key: string, entry: MDProfileEntry, props: FormlyConfigProps): FormlyFieldConfig {
     return {
       key,
       type: ProfileFormComponent.getFormlyType(entry),
@@ -312,24 +360,23 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
 
   onModelChange(): void {
     const metadata = this.mapFormlyModelToMetadataValues(this.model, this.profile.id);
-    if (this.metadata && this.metadata[this.metadataKey]) {
-      const index = this.metadata[this.metadataKey]
-        .findIndex((data: any) => data.profileId === this.profile.id);
+    if (this.metadata && this.metadata.profiles) {
+      const index = this.metadata.profiles!
+        .findIndex((data: MetadataValues) => data.profileId === this.profile.id);
       if (index < 0) {
-        this.metadata[this.metadataKey].push(metadata);
+        this.metadata.profiles!.push(metadata);
       } else {
-        this.metadata[this.metadataKey][index] = metadata;
+        this.metadata.profiles![index] = metadata;
       }
     } else {
-      this.metadata[this.metadataKey] = [metadata];
+      this.metadata.profiles = [metadata];
     }
-    this.metadata[this.metadataKey] = this.defineCurrentProfile();
+    this.metadata.profiles = this.defineCurrentProfile();
     this.metadataChange.emit(this.metadata);
   }
 
-  private defineCurrentProfile(): any[] {
-    // eslint-disable-next-line no-return-assign
-    return this.metadata[this.metadataKey].map((metadata: any) => ({
+  private defineCurrentProfile(): MetadataValues[] {
+    return this.metadata.profiles!.map((metadata: MetadataValues) => ({
       ...metadata,
       isCurrent: metadata.profileId === this.profile.id
     }));
