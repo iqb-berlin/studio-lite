@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { MDProfile, MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -7,22 +7,18 @@ import { HttpClient } from '@angular/common/http';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
-
-type TopConcept = {
-  notation: string[];
-  prefLabel: { de: string };
-  narrower: TopConcept[];
-  id: string
-};
+import {
+  TopConcept, Vocab, VocabData, VocabIdDictionaryValue
+} from '../models/types';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class MetadataService {
-  idLabelDictionary: any = {};
-  vocabulariesIdDictionary: any = {};
-  vocabularies: any = [];
+  idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
+  vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
+  vocabularies: Vocab[] = [];
   unitProfileColumns:MDProfileGroup[] = [];
   itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
@@ -33,26 +29,27 @@ export class MetadataService {
   }
 
   async getProfileVocabularies(profile: MDProfile) {
-    const vocabularyURLs:any = [];
+    const vocabularyURLs: ProfileEntryParametersVocabulary[] = [];
     profile.groups.forEach(group => {
       group.entries.forEach(entry => {
         const entryParams = entry.parameters as ProfileEntryParametersVocabulary;
         if (entry.type === 'vocabulary') vocabularyURLs.push(entryParams);
       });
     });
-    const promises:any = [];
-    vocabularyURLs.forEach((entryParams:any) => {
+    const promises: Promise<Vocab>[] = [];
+    vocabularyURLs.forEach(entryParams => {
       promises.push(this.fetchVocabulary(entryParams.url));
     });
-    const vocabularies = await Promise.all(promises);
-    this.backendService.saveVocabs(vocabularies).subscribe(() => {});
+    const vocabularies: Vocab[] = await Promise.all(promises);
+    this.backendService.saveVocabs(vocabularies)
+      .subscribe(() => {});
     if (this.vocabularies.length) {
       this.vocabularies = [...this.vocabularies, ...vocabularies];
     } else {
       this.vocabularies = vocabularies;
     }
-    this.vocabularies.forEach((vocabulary:any) => {
-      vocabularyURLs.forEach((entryParams:any) => {
+    this.vocabularies.forEach(vocabulary => {
+      vocabularyURLs.forEach(entryParams => {
         if (entryParams.url === vocabulary.url) {
           this.vocabulariesIdDictionary = {
             ...this.vocabulariesIdDictionary,
@@ -64,22 +61,24 @@ export class MetadataService {
     return this.vocabulariesIdDictionary;
   }
 
-  mapVocabularyIds(vocabulary: any, entryParams: MDProfileEntry) {
+  private mapVocabularyIds(vocabulary: VocabData, entryParams: ProfileEntryParametersVocabulary) {
     const hasNarrower = (narrower: TopConcept[]) => {
       narrower.forEach((vocabularyEntry: TopConcept) => {
+        // console.log(this.idLabelDictionary, entryParams);
         this.idLabelDictionary[vocabularyEntry.id] = {
           labels: vocabularyEntry.prefLabel,
-          notation: vocabularyEntry.notation || '',
+          notation: vocabularyEntry.notation || [],
           ...entryParams
         };
         if (vocabularyEntry.narrower) hasNarrower(vocabularyEntry.narrower);
+        // console.log(this.idLabelDictionary);
       });
     };
 
     if (vocabulary.hasTopConcept) {
       vocabulary.hasTopConcept.forEach((topConcept: TopConcept) => {
         this.idLabelDictionary[topConcept.id] = {
-          labels: topConcept.prefLabel, notation: topConcept.notation || '', ...entryParams
+          labels: topConcept.prefLabel, notation: topConcept.notation || [], ...entryParams
         };
         if (topConcept.narrower) hasNarrower(topConcept.narrower);
       });
@@ -87,7 +86,7 @@ export class MetadataService {
     return this.idLabelDictionary;
   }
 
-  async fetchVocabulary(url: string): Promise<any> {
+  async fetchVocabulary(url: string): Promise<Vocab> {
     try {
       const response = await fetch(`${url}index.jsonld`);
       if (response.ok) {
@@ -96,7 +95,12 @@ export class MetadataService {
       }
       return await new Promise(resolve => {
         this.backendService.getVocab(url)
-          .subscribe((vocab: any) => resolve({ data: vocab, url }));
+          .subscribe((vocab: VocabData | boolean) => {
+            if (vocab && vocab !== true) {
+              return resolve({ data: vocab, url });
+            }
+            return { data: {}, url };
+          });
       });
     } catch {
       return { data: {}, url };

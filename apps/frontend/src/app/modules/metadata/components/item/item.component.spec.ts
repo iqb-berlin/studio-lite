@@ -5,6 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { HttpClientModule } from '@angular/common/http';
+import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
 import { ItemComponent } from './item.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -17,7 +18,7 @@ describe('ItemComponent', () => {
     @Input() language!: string;
     @Input() profileUrl!: string | undefined;
     @Input() metadataKey!: 'profiles' | 'items';
-    @Input() metadata!: any;
+    @Input() metadata!: ItemsMetadataValues[];
     @Input() formlyWrapper!: string;
     @Input() panelExpanded!: boolean;
   }
@@ -43,7 +44,7 @@ describe('ItemComponent', () => {
 
     fixture = TestBed.createComponent(ItemComponent);
     component = fixture.componentInstance;
-    component.metadata = {};
+    component.metadata = [];
   });
 
   it('should create', () => {

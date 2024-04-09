@@ -7,7 +7,7 @@ import {
 import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
-import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -49,9 +49,9 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   private schemerSelectionChangedSubscription: Subscription | undefined;
   private statesChangedSubscription: Subscription | undefined;
   private ngUnsubscribe = new Subject<void>();
-  metadata!: any;
+  metadata!: UnitMetadataValues;
   workspaceSettings!: WorkspaceSettingsDto;
-  metadataLoader: BehaviorSubject<any> = new BehaviorSubject({});
+  metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
   variablesLoader: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
@@ -251,7 +251,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     return [];
   }
 
-  onMetadataChange(metadata: any): void {
+  onMetadataChange(metadata: UnitMetadataValues): void {
     this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
   }
 

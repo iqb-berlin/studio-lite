@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class UnitMetadataDto {
   @ApiProperty()
@@ -26,7 +27,7 @@ export class UnitMetadataDto {
     groupName?: string;
 
   @ApiProperty()
-    metadata?: any;
+    metadata?: UnitMetadataValues;
 
   @ApiProperty()
     player?: string;

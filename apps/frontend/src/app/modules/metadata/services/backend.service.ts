@@ -4,6 +4,8 @@ import {
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { MDProfile } from '@iqb/metadata/md-profile';
+import { Vocab, VocabData } from '../models/types';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +19,7 @@ export class BackendService {
   private baseUrlVocabs = 'https://w3id.org/iqb/';
   private baseUrlProfile = 'https://raw.githubusercontent.com/iqb-vocabs/';
 
-  saveVocabs(vocabs:any):Observable<boolean> {
+  saveVocabs(vocabs: Vocab[]):Observable<boolean> {
     return this.http
       .post(`${this.serverUrl}profile/vocabs`, vocabs)
       .pipe(
@@ -26,7 +28,7 @@ export class BackendService {
       );
   }
 
-  getVocab(url:string):Observable<any> {
+  getVocab(url:string):Observable<VocabData | boolean> {
     const shortenedUrl = url.replace(this.baseUrlVocabs, '')
       .replace(/\//g, '');
     return this.http
@@ -37,18 +39,18 @@ export class BackendService {
       );
   }
 
-  getProfile(url:string):Observable<any> {
+  getProfile(url:string):Observable<MDProfile | boolean> {
     const shortenedUrl = url.replace(this.baseUrlProfile, '')
       .replace(/\//g, '').replace('.json', '');
     return this.http
       .get(`${this.serverUrl}profile/${shortenedUrl}`)
       .pipe(
         catchError(() => of(false)),
-        map(profile => profile)
+        map(profile => profile as MDProfile)
       );
   }
 
-  saveProfile(profile:any):Observable<any> {
+  saveProfile(profile:MDProfile):Observable<boolean> {
     return this.http
       .post(`${this.serverUrl}profile`, profile)
       .pipe(

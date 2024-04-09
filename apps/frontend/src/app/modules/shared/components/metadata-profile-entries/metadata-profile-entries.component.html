@@ -1,40 +1,37 @@
 @for (profile of profiles; track profile) {
-  <div
-    class="profiles">
+  <div class="profiles">
     @if (profile.isCurrent) {
-      <div>
-        @for (entry of profile.entries; track entry) {
-          <div>
-            <div class="fx-row-space-between-start">
-              <span class="item-key">{{ entry.label[0].value }}</span>
-              @if (entry.valueAsText) {
-                <span
-                  class="item-value">
-                  {{ entry.valueAsText?.value }}
-                </span>
-              }
-              @if (entry.valueAsText?.length > 1) {
+      @for (entry of profile.entries; track entry) {
+        <div class="fx-row-space-between-start">
+          <span class="item-key">{{ entry.label[0].value }}</span>
+          @if (entry.valueAsText) {
+            @if (entry.valueAsText | isArray) {
+              @if ((entry.valueAsText | cast: TextWithLanguageArray).length > 1) {
                 <div>
-                  @for (value of entry.valueAsText; track value) {
+                  @for (value of (entry.valueAsText | cast: TextWithLanguageArray); track value) {
                     <ul>
                       <li class="item-list-value">{{ value.value }}</li>
                     </ul>
                   }
                 </div>
               }
-              @if (entry.valueAsText?.length === 1) {
+              @if ((entry.valueAsText | cast: TextWithLanguageArray).length === 1) {
                 <span
                   class="item-value">
-                  {{ entry.valueAsText[0]?.value }}
-                </span>
+                    {{ (entry.valueAsText | cast: TextWithLanguageArray)[0].value }}
+                  </span>
               }
-              @if (entry.valueAsText?.length === 0) {
+              @if ((entry.valueAsText | cast: TextWithLanguageArray).length === 0) {
                 <span>-</span>
               }
-            </div>
-          </div>
-        }
-      </div>
+            } @else {
+              <span class="item-value">
+                {{ (entry.valueAsText | cast: TextWithLanguage).value }}
+              </span>
+            }
+          }
+        </div>
+      }
     }
   </div>
 }
