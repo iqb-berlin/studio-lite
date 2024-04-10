@@ -215,6 +215,7 @@ build-db-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
     DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
@@ -239,6 +240,7 @@ build-liquibase-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
     DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
@@ -278,7 +280,11 @@ test-db:
     - build-liquibase-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
     - docker network create app-net
@@ -322,11 +328,14 @@ test-app-e2e:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+      - name: $DOCKER_SERVICE
+        entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+        alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -351,11 +360,14 @@ test-app-e2e-api:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+      - name: $DOCKER_SERVICE
+        entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+        alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -380,11 +392,14 @@ test-app-e2e-ui-chrome:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -409,11 +424,14 @@ test-app-e2e-ui-chrome-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -439,11 +457,14 @@ test-app-e2e-ui-firefox:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -468,11 +489,14 @@ test-app-e2e-ui-firefox-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -498,11 +522,14 @@ test-app-e2e-ui-edge:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -527,11 +554,14 @@ test-app-e2e-ui-edge-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  variables:
-    DOCKER_HOST: tcp://docker:2375
   image: $CYPRESS_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
@@ -607,6 +637,7 @@ build-develop-commit-liquibase-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
     DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
@@ -628,6 +659,7 @@ build-develop-commit-backend-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
     DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
@@ -650,6 +682,7 @@ build-develop-commit-frontend-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
     DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
@@ -838,8 +871,11 @@ build-pre-release:
     - !reference [ .pre-release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
+    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
     DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
     LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
     BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
