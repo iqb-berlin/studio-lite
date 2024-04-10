@@ -8,39 +8,26 @@ import {
 import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
 import { MatTabChangeEvent, MatTabGroup, MatTab } from '@angular/material/tabs';
-import { MDProfileEntry, MDProfileGroup } from '@iqb/metadata';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import {
   // eslint-disable-next-line max-len
   MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
+import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MetadataService } from '../../services/metadata.service';
 
 const datePipe = new DatePipe('de-DE');
 
-type Unit = {
-  id: number,
-  workspaceId: number,
-  key: string,
-  name: string,
-  groupName: string,
-  description: string,
-  reference: string,
-  transcript: string,
-  state: string,
-  metadata: any,
-  player: string,
-  editor: string,
-  definitionId: number,
-  variables: any,
-  lastChangedDefinition: Date,
-  schemer: string,
-  scheme: string,
-  schemeType: string,
-  lastChangedScheme: Date,
-  lastChangedMetadata: Date
-};
+interface ColumnValues {
+  Aufgabe?: string;
+  'Item-Id'?: string;
+  Variablen?: string,
+  Wichtung?: string,
+  Notiz?: string,
+  [key: string]: string | undefined
+}
+
 @Component({
   selector: 'studio-lite-table-view',
   templateUrl: './table-view.component.html',
@@ -53,7 +40,7 @@ type Unit = {
 export class TableViewComponent implements OnInit {
   constructor(
     private metadataService: MetadataService,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: { units: UnitMetadataDto[] }
   ) {
   }
 
@@ -65,7 +52,7 @@ export class TableViewComponent implements OnInit {
     this.getTableUnitsColumnsDefinitions().slice() :
     this.getTableItemsColumnsDefinitions().slice();
 
-  tableData: Record<string, string>[] = [];
+  tableData: ColumnValues[] = [];
 
   ngOnInit(): void {
     this.getTableUnitsColumnsDefinitions();
@@ -84,29 +71,33 @@ export class TableViewComponent implements OnInit {
     }
   }
 
-  setUnitsItemsDataRows(units: Unit[]): any {
-    const allUnits: any = [];
-    units.forEach((unit: Unit) => {
-      const totalValues: any = [];
-      if (unit.metadata.items) {
-        unit.metadata.items.forEach((item: any, i: number) => {
-          const activeProfile: MDProfileGroup = item.profiles?.find((profile: any) => profile.isCurrent);
-          if (activeProfile) {
-            const values: any = {};
-            activeProfile.entries.forEach((entry: any) => {
-              if (entry.valueAsText.length > 1) {
-                const textValues: any[] = [];
-                entry.valueAsText.forEach((textValue: any) => {
-                  textValues.push(`${textValue.value || ''}`);
-                });
-                values[entry.label[0].value] = textValues.join('<br>');
+  private setUnitsItemsDataRows(units: UnitMetadataDto[]): void {
+    const allUnits: ColumnValues[][] = [];
+    units.forEach(unit => {
+      const totalValues: ColumnValues[] = [];
+      if (unit.metadata && unit.metadata.items) {
+        unit.metadata.items.forEach((item, i: number) => {
+          const activeProfile = item.profiles?.find(profile => profile.isCurrent);
+          if (activeProfile && activeProfile.entries) {
+            const values: ColumnValues = {};
+            activeProfile.entries.forEach(entry => {
+              if (Array.isArray(entry.valueAsText)) {
+                if (entry.valueAsText.length > 1) {
+                  const textValues: string[] = [];
+                  entry.valueAsText.forEach(textValue => {
+                    textValues.push(`${textValue.value || ''}`);
+                  });
+                  values[entry.label[0].value] = textValues.join('<br>');
+                } else {
+                  values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
+                }
               } else {
-                values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
+                values[entry.label[0].value] = entry.valueAsText?.value || '';
               }
               if (i === 0) values.Aufgabe = unit.key || '–';
               values['Item-Id'] = item.id || '–';
               values.Variablen = item.variableId || '';
-              values.Wichtung = item.weighting || '';
+              values.Wichtung = item.weighting ? item.weighting.toString() : '';
               values.Notiz = item.description || '';
             });
             totalValues.push(values);
@@ -115,31 +106,37 @@ export class TableViewComponent implements OnInit {
           }
         });
       }
-
       allUnits.push(totalValues);
     });
     this.tableData = allUnits.flat();
   }
 
-  setUnitsDataRows(units: any): any {
-    const totalValues: Record<string, string>[] = [];
-    units.forEach((unit: any) => {
-      const activeProfile = unit.metadata.profiles?.find((profile: any) => profile.isCurrent);
+  private setUnitsDataRows(units: UnitMetadataDto[]): void {
+    const totalValues: ColumnValues[] = [];
+    units.forEach(unit => {
+      const activeProfile = unit.metadata &&
+        unit.metadata.profiles?.find(profile => profile.isCurrent);
       if (activeProfile) {
         const values: Record<string, string> = {};
-        activeProfile.entries.forEach((entry: any) => {
-          if (entry.valueAsText.length > 0) {
-            const textValues: any[] = [];
-            entry.valueAsText.forEach((textValue: any) => {
-              textValues.push(textValue.value || '');
-            });
-            values[entry.label[0].value] = textValues.join(', ');
-          } else {
-            values[entry.label[0].value] = entry.valueAsText[0]?.value || entry.valueAsText?.value || '';
-          }
-          // eslint-disable-next-line @typescript-eslint/dot-notation
-          values['Aufgabe'] = unit.key || '–';
-        });
+        if (activeProfile.entries && activeProfile.entries) {
+          activeProfile.entries.forEach(entry => {
+            if (Array.isArray(entry.valueAsText)) {
+              if (entry.valueAsText.length > 0) {
+                const textValues: string[] = [];
+                entry.valueAsText.forEach(textValue => {
+                  textValues.push(textValue.value || '');
+                });
+                values[entry.label[0].value] = textValues.join(', ');
+              } else {
+                values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
+              }
+            } else {
+              values[entry.label[0].value] = entry.valueAsText?.value || '';
+            }
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            values['Aufgabe'] = unit.key || '–';
+          });
+        }
         totalValues.push(values);
       } else {
         totalValues.push({ Aufgabe: unit.key || '–' });
@@ -148,18 +145,18 @@ export class TableViewComponent implements OnInit {
     this.tableData = totalValues.flat();
   }
 
-  getTableItemsColumnsDefinitions(): string[] {
+  private getTableItemsColumnsDefinitions(): string[] {
     if (!this.metadataService.itemProfileColumns) return [];
     const columnsDefinitions:string[] = this.metadataService.itemProfileColumns.entries
       ?.map(entry => entry.label) || [];
     return [...this.displayedColumns, ...columnsDefinitions];
   }
 
-  getTableUnitsColumnsDefinitions(): string[] {
-    const columnsDefinitions:string[] = [];
+  private getTableUnitsColumnsDefinitions(): string[] {
+    const columnsDefinitions: string[][] = [];
     if (!this.metadataService.unitProfileColumns) return [];
-    this.metadataService.unitProfileColumns.forEach((group: any) => {
-      columnsDefinitions.push(group.entries.map((entry:MDProfileEntry) => entry.label));
+    this.metadataService.unitProfileColumns.forEach(group => {
+      columnsDefinitions.push(group.entries.map(entry => entry.label));
     });
     return ['Aufgabe', ...columnsDefinitions.flat()];
   }
