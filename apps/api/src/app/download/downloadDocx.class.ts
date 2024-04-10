@@ -42,10 +42,11 @@ type ParagraphOptions = {
 };
 
 export class DownloadDocx {
-  static async getCodebook(codingBookUnits:CodebookDto[], contentSetting:CodeBookContentSetting): Promise<Buffer | []> {
+  static async getCodebook(codingBookUnits: CodebookDto[],
+                           contentSetting: CodeBookContentSetting): Promise<Buffer | []> {
     let codeRows: TableRow[] = [];
-    let unitHeader:Paragraph;
-    let generalInstructions:Paragraph[] = [];
+    let unitHeader: Paragraph;
+    let generalInstructions: Paragraph[] = [];
 
     const units = [];
     if (codingBookUnits.length > 0) {
@@ -84,7 +85,7 @@ export class DownloadDocx {
               }
             });
             if (contentSetting.hasGeneralInstructions === 'true') {
-              generalInstructions = this.htmltoDocx(variable.generalInstruction);
+              generalInstructions = this.htmlToDocx(variable.generalInstruction);
             } else generalInstructions = [];
             let codesTable!: Table;
             if (variable.codes.length > 0) {
@@ -93,10 +94,26 @@ export class DownloadDocx {
                 children: [
                   new TableCell({
                     borders: {
-                      top: { size: 1, color: '#000000', style: 'single' },
-                      bottom: { size: 1, color: '#000000', style: 'single' },
-                      left: { size: 1, color: '#000000', style: 'single' },
-                      right: { size: 1, color: '#000000', style: 'single' }
+                      top: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      bottom: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      left: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      right: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      }
                     },
                     children: [new Paragraph({
                       text: `${code.id}  ${code.label}`,
@@ -114,10 +131,26 @@ export class DownloadDocx {
                   new TableCell({
 
                     borders: {
-                      top: { size: 1, color: '#000000', style: 'single' },
-                      bottom: { size: 1, color: '#000000', style: 'single' },
-                      left: { size: 1, color: '#000000', style: 'single' },
-                      right: { size: 1, color: '#000000', style: 'single' }
+                      top: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      bottom: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      left: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      right: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      }
                     },
                     children: [new Paragraph({
                       text: `${code.score}  ${code.scoreLabel}`,
@@ -138,12 +171,28 @@ export class DownloadDocx {
                       type: WidthType.PERCENTAGE
                     },
                     borders: {
-                      top: { size: 1, color: '#000000', style: 'single' },
-                      bottom: { size: 1, color: '#000000', style: 'single' },
-                      left: { size: 1, color: '#000000', style: 'single' },
-                      right: { size: 1, color: '#000000', style: 'single' }
+                      top: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      bottom: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      left: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      },
+                      right: {
+                        size: 1,
+                        color: '#000000',
+                        style: 'single'
+                      }
                     },
-                    children: [...this.htmltoDocx(code.description)]
+                    children: [...this.htmlToDocx(code.description)]
                   })
                 ]
               })
@@ -202,9 +251,11 @@ export class DownloadDocx {
                     alignment: AlignmentType.CENTER,
                     children: [
                       new TextRun({
+                        color: '000000',
                         children: [' Seite ', PageNumber.CURRENT]
                       }),
                       new TextRun({
+                        color: '000000',
                         children: [' von ', PageNumber.TOTAL_PAGES]
                       })
                     ]
@@ -223,48 +274,65 @@ export class DownloadDocx {
     return [];
   }
 
-  static htmltoDocx(html:string) {
+  static htmlToDocx(html: string) {
     const $ = cheerio.load(html, null, false);
     const elements = [];
     const images = [];
-    $('img').each((i, elem) => {
-      const base64 = elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1);
-      images.push(
-        new ImageRun({
-          data: Buffer.from(base64, 'base64'),
-          transformation: {
-            width: 200,
-            height: 200
+    $('img')
+      .each((i, elem) => {
+        const base64 = elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1);
+        images.push(
+          new ImageRun({
+            data: Buffer.from(base64, 'base64'),
+            transformation: {
+              width: 200,
+              height: 200
+            }
+          }));
+      });
+    $('p,h1,h2,h3,h4')
+      .each((i, elem) => {
+        const textAlignment = $(elem)
+          .css('text-align') || 'left';
+        const span = $(elem)
+          .find('span');
+        const mark = $(elem)
+          .find('mark');
+        const color = $(span)
+          .css('color');
+          // const name = elem.name;
+        let colorParsed: string = '#000000';
+        if (color) {
+          if (color.startsWith('#')) {
+            colorParsed = color;
+          } else if (color.startsWith('rgb')) {
+            const rgbString = parseCssRgbString(color);
+            colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
+          } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
+            colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
+          } else {
+            colorParsed = '#000000';
           }
-        }));
-    });
-    $('p,h1,h2,h3,h4').each((i, elem) => {
-      const textAlignment = $(elem).css('text-align') || 'left';
-      const span = $(elem).find('span');
-      const mark = $(elem).find('mark');
-      const color = $(span).css('color');
-      // const name = elem.name;
-      let colorParsed:string = '#000000';
-      if (color) {
-        if (color.startsWith('#')) {
-          colorParsed = color;
-        } else if (color.startsWith('rgb')) {
-          const rgbString = parseCssRgbString(color);
-          colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
-        } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
-          colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
-        } else {
-          colorParsed = '#000000';
         }
-      }
 
-      const size = $(span).css('font-size') || '20pt';
-      const backgroundColor = $(mark).css('background-color') || '#FFFFFF';
-      const formattedParagraph = createParagraph(elem.children, textAlignment, colorParsed, backgroundColor, size);
-      if (formattedParagraph) {
-        elements.push(formattedParagraph);
-      }
-    });
+        const size = $(span)
+          .css('font-size') || '20pt';
+        const backgroundColor = $(mark)
+          .css('background-color') || '#FFFFFF';
+        let formattedParagraph:Paragraph;
+        try {
+          formattedParagraph = createParagraph(elem.children, textAlignment, colorParsed, backgroundColor, size);
+        } catch (e) {
+          formattedParagraph = new Paragraph(
+            {
+              text: 'HTML konnte nicht verarbeitet werden.'
+            }
+          );
+        }
+        if (formattedParagraph) {
+          elements.push(formattedParagraph);
+        }
+      });
 
     images.forEach(image => elements.push(new Paragraph(
       {
@@ -272,7 +340,10 @@ export class DownloadDocx {
           before: 100,
           after: 100
         },
-        indent: { start: 100, end: 100 },
+        indent: {
+          start: 100,
+          end: 100
+        },
         children: [image]
       }
     )));
@@ -287,11 +358,18 @@ export class DownloadDocx {
       return ele;
     }
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    function createParagraph(elem:any, textAlignment:string, colorParsed:string, backgroundColor:string, size:string) {
+    function createParagraph(elem: any,
+      textAlignment: string,
+      colorParsed: string,
+      backgroundColor: string,
+      size: string) {
       const tags = getChildrenTags(elem);
 
-      const textRunOptions: ParagraphOptions = { text: $(elem).text() };
-      let alignment:(typeof AlignmentType)[keyof typeof AlignmentType] = AlignmentType.LEFT;
+      const textRunOptions: ParagraphOptions = {
+        text: $(elem)
+          .text()
+      };
+      let alignment: (typeof AlignmentType)[keyof typeof AlignmentType] = AlignmentType.LEFT;
       // let heading :(typeof HeadingLevel)[keyof typeof HeadingLevel];
       if (textAlignment) {
         if (textAlignment === 'center') alignment = AlignmentType.CENTER;
@@ -308,7 +386,8 @@ export class DownloadDocx {
         };
       }
       if (size) {
-        textRunOptions.size = parseInt(size, 10);
+        const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+        sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
       }
 
       if (tags.includes('u')) {
@@ -336,7 +415,10 @@ export class DownloadDocx {
           before: 100,
           after: 100
         },
-        indent: { start: 100, end: 100 },
+        indent: {
+          start: 100,
+          end: 100
+        },
         children: [new TextRun(textRunOptions)]
       });
     }

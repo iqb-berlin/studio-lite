@@ -150,11 +150,12 @@ export class DownloadWorkspacesClass {
           const codes = [];
           let closedCodingVar:boolean = false;
           let onlyManualCodingVar = true;
-          let isDerived;
-          variableCoding.deriveSources.length > 0 ? isDerived = true : isDerived = false;
-          if (unit.schemer.split('@')[1] >= '1.5') {
-            if (variableCoding.codes.length > 0) {
-              variableCoding.codes.forEach((code: CodeData) => {
+          let isDerived: boolean;
+          variableCoding.sourceType === 'BASE' ? isDerived = false : isDerived = true;
+          if (variableCoding.codes.length > 0) {
+            variableCoding.codes.forEach((code: CodeData) => {
+              // Catch schemer version <1.5
+              if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
                 const codeAsText = ToTextFactory.codeAsText(code);
                 if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
                 code.ruleSets.forEach((ruleSet: RuleSet) => {
@@ -179,9 +180,38 @@ export class DownloadWorkspacesClass {
                   description: `${rulesDescription}${code.manualInstruction}`
                 };
                 codes.push(codeInfo);
-              });
-
-              if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
+              } else {
+                const codeInfo = {
+                  id: `${code.id}`,
+                  label: '',
+                  score: '',
+                  scoreLabel: '',
+                  description: '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
+                };
+                codes.push(codeInfo);
+              }
+            }); if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
+              bookVariables.push(
+                {
+                  id: variableCoding.id,
+                  label: variableCoding.label,
+                  generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                  codes: codes,
+                  missings: []
+                });
+            }
+            if (closedCodingVar && hasClosedVars === 'true') {
+              bookVariables.push(
+                {
+                  id: variableCoding.id,
+                  label: variableCoding.label,
+                  generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                  codes: codes,
+                  missings: []
+                });
+            }
+            if (onlyManualCodingVar) {
+              if (hasOnlyManualCoding === 'true') {
                 bookVariables.push(
                   {
                     id: variableCoding.id,
@@ -190,52 +220,21 @@ export class DownloadWorkspacesClass {
                     codes: codes,
                     missings: []
                   });
-              }
-              if (closedCodingVar && hasClosedVars === 'true') {
-                bookVariables.push(
-                  {
-                    id: variableCoding.id,
-                    label: variableCoding.label,
-                    generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
-                    codes: codes,
-                    missings: []
-                  });
-              }
-              if (onlyManualCodingVar) {
-                if (hasOnlyManualCoding === 'true') {
-                  bookVariables.push(
-                    {
-                      id: variableCoding.id,
-                      label: variableCoding.label,
-                      generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
-                      codes: codes,
-                      missings: []
-                    });
-                }
-              }
-
-              if (isDerived) {
-                if (hasDerivedVars === 'true') {
-                  bookVariables.push(
-                    {
-                      id: variableCoding.id,
-                      label: variableCoding.label,
-                      generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
-                      codes: codes,
-                      missings: []
-                    });
-                }
               }
             }
-          } else {
-            bookVariables.push(
-              {
-                id: variableCoding.id,
-                label: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
-                generalInstruction: '',
-                codes: [],
-                missings: []
-              });
+
+            if (isDerived) {
+              if (hasDerivedVars === 'true') {
+                bookVariables.push(
+                  {
+                    id: variableCoding.id,
+                    label: variableCoding.label,
+                    generalInstruction: hasGeneralInstructions ? variableCoding.manualInstruction : '',
+                    codes: codes,
+                    missings: []
+                  });
+              }
+            }
           }
         });
       }
