@@ -5,7 +5,8 @@ import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto, UnitMetadataDto
+  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto, UnitMetadataDto,
+  UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -469,7 +470,7 @@ export class WorkspaceService {
           editor: u.editor,
           player: u.player,
           schemer: u.schemer,
-          metadata: u.metadata,
+          metadata: u.metadata as UnitMetadataValues,
           description: u.description,
           transcript: u.transcript,
           reference: u.reference,

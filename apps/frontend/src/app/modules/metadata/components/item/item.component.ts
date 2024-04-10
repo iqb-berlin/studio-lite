@@ -5,7 +5,16 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
+
+interface ItemModel {
+  id?: string;
+  variableId?: string;
+  description?: string;
+  weighting?: number;
+  [key: string]: string | number | undefined;
+}
 
 @Component({
   selector: 'studio-lite-item',
@@ -18,15 +27,15 @@ import { ProfileFormComponent } from '../profile-form/profile-form.component';
 export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }
   @Input() variables!: string[];
-  @Input() metadata!: any;
+  @Input() metadata!: ItemsMetadataValues[];
   @Input() profileUrl!: string | undefined;
   @Input() itemIndex!: number;
   @Input() language!: string;
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
-  model: any = {};
+  model: ItemModel = {};
 
-  @Output() metadataChange: EventEmitter<any> = new EventEmitter();
+  @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
 
   ngOnInit(): void {
     this.initModel();
@@ -101,13 +110,19 @@ export class ItemComponent implements OnInit, OnChanges {
 
   onModelChange(): void {
     Object.entries(this.model).forEach((entry => {
-      this.metadata[this.itemIndex][entry[0]] = entry[1];
+      if (entry[1] !== undefined) {
+        this.metadata[this.itemIndex][entry[0]] = entry[1];
+      }
     }));
-    this.metadataChange.emit(this.metadata);
+    this.emitMetadata();
   }
 
-  onMetadataChange(metadata: any): void {
+  onMetadataChange(metadata: Partial<ProfileMetadataValues>): void {
     this.metadata[this.itemIndex] = metadata;
+    this.emitMetadata();
+  }
+
+  private emitMetadata(): void {
     this.metadataChange.emit(this.metadata);
   }
 }

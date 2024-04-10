@@ -1,4 +1,4 @@
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
 
 export class UnitMetadataStore {
@@ -85,7 +85,7 @@ export class UnitMetadataStore {
     this.dataChange.emit();
   }
 
-  setMetadata(newMetadata: any): void {
+  setMetadata(newMetadata: UnitMetadataValues): void {
     if (JSON.stringify(newMetadata) === JSON.stringify(this.originalData.metadata)) {
       if (this.changedData.metadata) delete this.changedData.metadata;
     } else {

@@ -13,7 +13,7 @@
       <span class="item-key">Notiz</span>
       <div class="item-value">{{ item.description || '-' }}</div>
     </div>
-    <studio-lite-metadata-profile-entries [profiles]="item.profiles">
+    <studio-lite-metadata-profile-entries [profiles]="item.profiles || []">
     </studio-lite-metadata-profile-entries>
   </div>
 }
