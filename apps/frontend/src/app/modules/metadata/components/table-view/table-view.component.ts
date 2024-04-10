@@ -14,7 +14,7 @@ import {
   // eslint-disable-next-line max-len
   MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MetadataService } from '../../services/metadata.service';
 
 const datePipe = new DatePipe('de-DE');
@@ -79,21 +79,9 @@ export class TableViewComponent implements OnInit {
         unit.metadata.items.forEach((item, i: number) => {
           const activeProfile = item.profiles?.find(profile => profile.isCurrent);
           if (activeProfile && activeProfile.entries) {
-            const values: ColumnValues = {};
+            let values: ColumnValues = {};
             activeProfile.entries.forEach(entry => {
-              if (Array.isArray(entry.valueAsText)) {
-                if (entry.valueAsText.length > 1) {
-                  const textValues: string[] = [];
-                  entry.valueAsText.forEach(textValue => {
-                    textValues.push(`${textValue.value || ''}`);
-                  });
-                  values[entry.label[0].value] = textValues.join('<br>');
-                } else {
-                  values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
-                }
-              } else {
-                values[entry.label[0].value] = entry.valueAsText?.value || '';
-              }
+              values = TableViewComponent.setColumnValues(values, entry);
               if (i === 0) values.Aufgabe = unit.key || '–';
               values['Item-Id'] = item.id || '–';
               values.Variablen = item.variableId || '';
@@ -111,30 +99,34 @@ export class TableViewComponent implements OnInit {
     this.tableData = allUnits.flat();
   }
 
+  private static setColumnValues(values: ColumnValues, entry: MetadataValuesEntry): ColumnValues {
+    if (Array.isArray(entry.valueAsText)) {
+      if (entry.valueAsText.length > 1) {
+        const textValues: string[] = [];
+        entry.valueAsText.forEach(textValue => {
+          textValues.push(`${textValue.value || ''}`);
+        });
+        values[entry.label[0].value] = textValues.join('<br>');
+      } else {
+        values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
+      }
+    } else {
+      values[entry.label[0].value] = entry.valueAsText?.value || '';
+    }
+    return values;
+  }
+
   private setUnitsDataRows(units: UnitMetadataDto[]): void {
     const totalValues: ColumnValues[] = [];
     units.forEach(unit => {
       const activeProfile = unit.metadata &&
         unit.metadata.profiles?.find(profile => profile.isCurrent);
       if (activeProfile) {
-        const values: Record<string, string> = {};
-        if (activeProfile.entries && activeProfile.entries) {
+        let values: ColumnValues = {};
+        if (activeProfile.entries) {
           activeProfile.entries.forEach(entry => {
-            if (Array.isArray(entry.valueAsText)) {
-              if (entry.valueAsText.length > 0) {
-                const textValues: string[] = [];
-                entry.valueAsText.forEach(textValue => {
-                  textValues.push(textValue.value || '');
-                });
-                values[entry.label[0].value] = textValues.join(', ');
-              } else {
-                values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
-              }
-            } else {
-              values[entry.label[0].value] = entry.valueAsText?.value || '';
-            }
-            // eslint-disable-next-line @typescript-eslint/dot-notation
-            values['Aufgabe'] = unit.key || '–';
+            values = TableViewComponent.setColumnValues(values, entry);
+            values.Aufgabe = unit.key || '–';
           });
         }
         totalValues.push(values);
