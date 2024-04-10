@@ -16,9 +16,6 @@ describe('MessageDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MessageDialogComponent
-      ],
       providers: [
         {
           provide: MAT_DIALOG_DATA,
