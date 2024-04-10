@@ -32,7 +32,7 @@ variables:
   DOCKER_TLS_CERTDIR: ''
   CYPRESS_IMAGE: cypress/browsers:node-20.12.0-chrome-123.0.6312.86-1-ff-124.0.2-edge-123.0.2420.65-1
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
-  TRIVY_IMAGE: aquasec/trivy:0.42.1
+  TRIVY_IMAGE: aquasec/trivy:0.50.1
 
 include:
   - local: ".gitlab-ci/*.gitlab-ci.yml"
