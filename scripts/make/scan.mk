@@ -1,5 +1,5 @@
 STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
-TRIVY_VERSION := aquasec/trivy:0.42.1
+TRIVY_VERSION := aquasec/trivy:0.50.1
 
 ## prevents collisions of make target names with possible file names
 .PHONY: scan-app scan-db scan-liquibase scan-backend scan-frontend

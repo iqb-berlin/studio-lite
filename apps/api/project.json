@@ -79,7 +79,7 @@
       "options": {
         "commands": [
           "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}",
-          "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --scanners vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}"
+          "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.50.1 image --exit-code 1 --scanners vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-backend:{args.tag}"
         ]
       }
     }
