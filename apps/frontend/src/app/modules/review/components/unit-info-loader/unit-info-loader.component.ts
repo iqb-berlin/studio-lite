@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
-
 @Component({
   selector: 'studio-lite-unit-info-loader',
   templateUrl: './unit-info-loader.component.html',

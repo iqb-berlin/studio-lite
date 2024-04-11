@@ -14,15 +14,16 @@ import {
   MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
   MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues, MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MetadataService } from '../../services/metadata.service';
+import { IncludePipe } from '../../../shared/pipes/include.pipe';
 
 interface ColumnValues {
-  Aufgabe?: string;
-  'Item-Id'?: string;
-  Variablen?: string,
-  Wichtung?: string,
-  Notiz?: string,
+  key?: string;
+  id?: string;
+  variableId?: string,
+  weighting?: string,
+  description?: string,
   [key: string]: string | undefined
 }
 
@@ -33,7 +34,7 @@ interface ColumnValues {
   standalone: true,
   imports: [MatDialogContent, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions,
-    MatButton, MatDialogClose, TranslateModule]
+    MatButton, MatDialogClose, TranslateModule, IncludePipe]
 })
 
 export class TableViewComponent implements OnInit {
@@ -46,7 +47,7 @@ export class TableViewComponent implements OnInit {
   @ViewChild('tabGroup') tabGroup!: MatTabGroup;
   viewMode = 'units';
 
-  displayedColumns: string[] = ['Aufgabe', 'Item-Id', 'Variablen', 'Wichtung', 'Notiz'];
+  displayedColumns: string[] = ['key', 'id', 'variableId', 'weighting', 'description'];
   columnsToDisplay: string[] = this.viewMode === 'units' ?
     this.getTableUnitsColumnsDefinitions().slice() :
     this.getTableItemsColumnsDefinitions().slice();
@@ -80,22 +81,35 @@ export class TableViewComponent implements OnInit {
           if (activeProfile && activeProfile.entries) {
             let values: ColumnValues = {};
             activeProfile.entries.forEach(entry => {
-              values = TableViewComponent.setColumnValues(values, entry);
-              if (i === 0) values.Aufgabe = unit.key || '–';
-              values['Item-Id'] = item.id || '–';
-              values.Variablen = item.variableId || '';
-              values.Wichtung = item.weighting ? item.weighting.toString() : '';
-              values.Notiz = item.description || '';
+              values = this.setItemColumnValues(
+                TableViewComponent.setColumnValues(values, entry),
+                item,
+                unit,
+                i === 0);
             });
             totalValues.push(values);
           } else {
-            totalValues.push({ 'Item-Id': '–' });
+            totalValues.push({ id: '–' });
           }
         });
       }
       allUnits.push(totalValues);
     });
     this.tableData = allUnits.flat();
+  }
+
+  private setItemColumnValues(values: ColumnValues,
+                              item: ItemsMetadataValues,
+                              unit: UnitMetadataDto,
+                              addKey: boolean): ColumnValues {
+    this.displayedColumns.forEach(column => {
+      if (column === 'key' && addKey) {
+        values.key = unit.key || '–';
+      } else {
+        values[column] = item[column] ? item[column]?.toString() : '';
+      }
+    });
+    return values;
   }
 
   private static setColumnValues(values: ColumnValues, entry: MetadataValuesEntry): ColumnValues {
@@ -125,12 +139,12 @@ export class TableViewComponent implements OnInit {
         if (activeProfile.entries) {
           activeProfile.entries.forEach(entry => {
             values = TableViewComponent.setColumnValues(values, entry);
-            values.Aufgabe = unit.key || '–';
+            values.key = unit.key || '–';
           });
         }
         totalValues.push(values);
       } else {
-        totalValues.push({ Aufgabe: unit.key || '–' });
+        totalValues.push({ key: unit.key || '–' });
       }
     });
     this.tableData = totalValues.flat();
@@ -149,7 +163,7 @@ export class TableViewComponent implements OnInit {
     this.metadataService.unitProfileColumns.forEach(group => {
       columnsDefinitions.push(group.entries.map(entry => entry.label));
     });
-    return ['Aufgabe', ...columnsDefinitions.flat()];
+    return ['key', ...columnsDefinitions.flat()];
   }
 
   downloadMetadata(): void {

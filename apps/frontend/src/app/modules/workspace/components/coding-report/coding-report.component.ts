@@ -35,7 +35,7 @@ import { CodingReportDto } from '../../../../../../../../libs/api-dto/src/lib/dt
     MatFormField,
     MatInput,
     MatLabel
-]
+  ]
 })
 
 export class CodingReportComponent implements OnInit {
