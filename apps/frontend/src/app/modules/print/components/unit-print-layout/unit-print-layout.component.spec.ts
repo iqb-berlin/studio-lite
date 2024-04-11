@@ -4,6 +4,7 @@ import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { UnitPrintLayoutComponent } from './unit-print-layout.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -39,7 +40,7 @@ describe('UnitPrintLayoutComponent', () => {
 
   @Component({ selector: 'studio-lite-print-metadata', template: '' })
   class MockUnitPrintMetaDateComponent {
-    @Input() metadata!: any;
+    @Input() metadata!: UnitMetadataValues | null;
   }
 
   @Component({ selector: 'studio-lite-unit-print-comments', template: '' })
