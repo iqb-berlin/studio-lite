@@ -8,7 +8,7 @@ import {
 import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
 import { MatTabChangeEvent, MatTabGroup, MatTab } from '@angular/material/tabs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import {
   MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
@@ -40,6 +40,7 @@ interface ColumnValues {
 export class TableViewComponent implements OnInit {
   constructor(
     private metadataService: MetadataService,
+    private translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: { units: UnitMetadataDto[] }
   ) {
   }
@@ -172,14 +173,18 @@ export class TableViewComponent implements OnInit {
       this.metadataService.downloadUnitsMetadataReport(this.getTableUnitsColumnsDefinitions())
         .subscribe(b => {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
-          saveAs(b, `${thisDate} Bericht Aufgaben Metadaten.xlsx`);
+          saveAs(b,
+            `${thisDate} ${this.translateService
+              .instant('metadata.unitMetadataReportFileName', { date: thisDate })}.xlsx`);
         });
     }
     if (this.viewMode === 'items') {
       this.metadataService.downloadItemsMetadataReport(this.getTableItemsColumnsDefinitions())
         .subscribe(b => {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
-          saveAs(b, `${thisDate} Bericht Items Metadaten.xlsx`);
+          saveAs(b,
+            `${thisDate} ${this.translateService
+              .instant('metadata.itemsMetadataReportFileName', { date: thisDate })}.xlsx`);
         });
     }
   }

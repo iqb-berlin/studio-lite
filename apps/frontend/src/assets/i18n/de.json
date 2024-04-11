@@ -245,7 +245,9 @@
     "items-title": "Metadaten (Items)",
     "id": "Item-Id",
     "key": "Aufgabe",
-    "variableId": "Variablen"
+    "variableId": "Variablen",
+    "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
+    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
