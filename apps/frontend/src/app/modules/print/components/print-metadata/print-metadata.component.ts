@@ -2,11 +2,11 @@ import {
   Component, Input, OnChanges, SimpleChanges
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-
-// eslint-disable-next-line max-len
-import { MetadataReadonlyItemsComponent } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
-// eslint-disable-next-line max-len
-import { MetadataProfileEntriesComponent } from '../../../shared/components/metadata-profile-entries/metadata-profile-entries.component';
+import { ItemsMetadataValues, MetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { MetadataReadonlyItemsComponent }
+  from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
+import { MetadataProfileEntriesComponent }
+  from '../../../shared/components/metadata-profile-entries/metadata-profile-entries.component';
 
 @Component({
   selector: 'studio-lite-print-metadata',
@@ -16,10 +16,10 @@ import { MetadataProfileEntriesComponent } from '../../../shared/components/meta
   imports: [MetadataProfileEntriesComponent, MetadataReadonlyItemsComponent, TranslateModule]
 })
 export class PrintMetadataComponent implements OnChanges {
-  @Input() metadata!: any;
+  @Input() metadata!: UnitMetadataValues | null;
 
-  unitProfiles!: any;
-  items!: any;
+  unitProfiles!: MetadataValues[];
+  items!: ItemsMetadataValues[];
 
   ngOnChanges(changes: SimpleChanges): void {
     const changeProperty = 'metadata';
