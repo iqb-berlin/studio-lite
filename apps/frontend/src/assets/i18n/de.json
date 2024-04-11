@@ -233,8 +233,8 @@
     "error-states": "Status Liste konnte nicht geladen werden!",
     "without-id": "ohne ID",
     "choose-item-variable": "Variable auswählen",
-    "item-description": "Notiz",
-    "item-weighting": "Wichtung",
+    "description": "Notiz",
+    "weighting": "Wichtung",
     "formly-field-required": "Pflichtfeld",
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
@@ -242,7 +242,12 @@
     "items": "Metadaten Items",
     "units": "Metadaten Aufgaben",
     "unit-title": "Metadaten (Aufgabe)",
-    "items-title": "Metadaten (Items)"
+    "items-title": "Metadaten (Items)",
+    "id": "Item-Id",
+    "key": "Aufgabe",
+    "variableId": "Variablen",
+    "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
+    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",

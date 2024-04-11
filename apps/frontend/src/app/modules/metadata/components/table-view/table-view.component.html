@@ -5,7 +5,9 @@
         <table mat-table [dataSource]="tableData">
           @for (column of columnsToDisplay; track column) {
             <ng-container [matColumnDef]="column">
-              <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
+              <th mat-header-cell *matHeaderCellDef>
+                {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
+              </th>
               <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
             </ng-container>
           }
@@ -17,7 +19,9 @@
         <table mat-table [dataSource]="tableData">
           @for (column of columnsToDisplay; track column) {
             <ng-container [matColumnDef]="column">
-              <th mat-header-cell *matHeaderCellDef> {{ column }}</th>
+              <th mat-header-cell *matHeaderCellDef>
+                {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
+              </th>
               <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
             </ng-container>
           }
