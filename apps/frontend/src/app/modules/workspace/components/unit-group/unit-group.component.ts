@@ -7,7 +7,6 @@ import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatBadge } from '@angular/material/badge';
 
-
 @Component({
   selector: 'studio-lite-unit-group',
   templateUrl: './unit-group.component.html',
