@@ -114,6 +114,7 @@ export class UnitImportData {
             recognizeSelfClosing: true
           });
           const valuesElement = varDocument('Values').first();
+          const valuePositionLabelsElement = varDocument('ValuePositionLabels').first();
           this.baseVariables.push(new VeronaVariable({
             // eslint-disable-next-line @typescript-eslint/dot-notation
             id: varElement.attribs['id'],
@@ -126,6 +127,9 @@ export class UnitImportData {
             // eslint-disable-next-line @typescript-eslint/dot-notation
             multiple: varElement.attribs['multiple'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
+            page: varElement.attribs['page'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            valuePositionLabels: UnitImportData.getValuePositionLabelsForVariable(valuePositionLabelsElement),
             valuesComplete: valuesElement.length ? valuesElement.attr('complete') : false,
             values: UnitImportData.getValuesForVariable(valuesElement)
           }));
@@ -147,6 +151,21 @@ export class UnitImportData {
           label: valueDocument('label').first().text(),
           value: valueDocument('value').first().text()
         });
+      });
+    return values;
+  }
+
+  private static getValuePositionLabelsForVariable(
+    valuePositionLabelsElement: cheerio.Cheerio<cheerio.Element>
+  ): string[] {
+    const values: string[] = [];
+    valuePositionLabelsElement.find('ValuePositionLabel')
+      .each((j, element) => {
+        const valueDocument = cheerio.load(element, {
+          xmlMode: true,
+          recognizeSelfClosing: true
+        });
+        values.push(valueDocument.text());
       });
     return values;
   }

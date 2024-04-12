@@ -17,7 +17,6 @@ export class UnitDownloadClass {
     settingService: SettingService,
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
-    console.log('UnitDownloadClass get');
     const zip = new AdmZip();
     const unitsMetadata: UnitMetadataDto[] = [];
     const usedPlayers: string[] = [];
@@ -71,7 +70,6 @@ export class UnitDownloadClass {
       if (definitionData.variables && definitionData.variables.length > 0) {
         const variablesElement = unitXml.root().ele('BaseVariables');
         definitionData.variables.forEach(v => {
-          console.log('UnitDownloadClass variables', v);
           const transformedVariable = new VeronaVariable(v);
           const variableElement = variablesElement.ele({
             Variable: {
@@ -79,11 +77,17 @@ export class UnitDownloadClass {
               '@type': transformedVariable.type,
               '@format': transformedVariable.format,
               '@nullable': transformedVariable.nullable,
-              '@multiple': transformedVariable.multiple
+              '@multiple': transformedVariable.multiple,
+              '@page': transformedVariable.page
             }
           });
-          console.log('UnitDownloadClass transformedVariable', transformedVariable);
-          if (transformedVariable.values.length > 0) {
+          if (transformedVariable.valuePositionLabels.length) {
+            const valuePositionLabelsElement = variableElement.ele('ValuePositionLabels');
+            transformedVariable.valuePositionLabels.forEach(label => {
+              valuePositionLabelsElement.ele({ ValuePositionLabel: { '#': label } });
+            });
+          }
+          if (transformedVariable.values.length) {
             const valuesElement = variableElement.ele({
               Values: {
                 '@complete': transformedVariable.valuesComplete
