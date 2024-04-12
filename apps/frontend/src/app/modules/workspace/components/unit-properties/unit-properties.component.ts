@@ -20,7 +20,7 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import {
   MatCard, MatCardHeader, MatCardTitle, MatCardContent
 } from '@angular/material/card';
-import { VariableInfo } from '@iqb/responses';
+import { CodingScheme, VariableInfo } from '@iqb/responses';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -245,9 +245,9 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
         .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
       if (variables) {
         const variableIds = variables.map(variable => variable.id);
-        const scheme = JSON.parse(data.scheme);
+        const scheme: CodingScheme = JSON.parse(data.scheme);
         const variableCodings = scheme?.variableCodings || [];
-        const variableCodingIds = variableCodings.map((item: any) => item.id);
+        const variableCodingIds = variableCodings.map(item => item.id);
         // merge without duplicates
         return [...new Set([...variableIds, ...variableCodingIds])];
       }
