@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VeronaVariable } from '@studio-lite/shared-code';
 
 export class UnitSchemeDto {
   @ApiProperty()
@@ -8,5 +9,5 @@ export class UnitSchemeDto {
     schemeType = '';
 
   @ApiProperty()
-    variables?: unknown[] = [];
+    variables?: VeronaVariable[] = [];
 }

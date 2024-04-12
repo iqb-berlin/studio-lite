@@ -20,6 +20,7 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import {
   MatCard, MatCardHeader, MatCardTitle, MatCardContent
 } from '@angular/material/card';
+import { VeronaVariable } from '@studio-lite/shared-code';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -240,14 +241,16 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const variables = this.workspaceService.getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
-      console.log('variables', variables);
-      const variableIds = variables.map((variable: any) => variable.id);
-      const scheme = JSON.parse(data.scheme);
-      const variableCodings = scheme?.variableCodings || [];
-      const variableCodingIds = variableCodings.map((item: any) => item.id);
-      // merge without duplicates
-      return [...new Set([...variableIds, ...variableCodingIds])];
+      const variables: VeronaVariable[] = this.workspaceService
+        .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
+      if (variables) {
+        const variableIds = variables.map(variable => variable.id);
+        const scheme = JSON.parse(data.scheme);
+        const variableCodings = scheme?.variableCodings || [];
+        const variableCodingIds = variableCodings.map((item: any) => item.id);
+        // merge without duplicates
+        return [...new Set([...variableIds, ...variableCodingIds])];
+      }
     }
     return [];
   }

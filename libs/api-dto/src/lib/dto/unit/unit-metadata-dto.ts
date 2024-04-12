@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VeronaVariable } from '@studio-lite/shared-code';
 import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class UnitMetadataDto {
@@ -45,7 +46,7 @@ export class UnitMetadataDto {
     scheme?: string;
 
   @ApiProperty()
-    variables?: any;
+    variables?: VeronaVariable[];
 
   @ApiProperty({
     type: 'string',
