@@ -10,10 +10,8 @@ export class VeronaVariable {
   valuesComplete = false;
   valuePositionLabels: string[] = [];
   page: string = '';
-  //unknownKeys: string[] = [];
 
   constructor(variableData: unknown) {
-    console.log('variableData', variableData);
     const transformedData = variableData as Record<string, never>;
     Object.keys(transformedData).forEach(k => {
       switch (k) {
@@ -25,7 +23,6 @@ export class VeronaVariable {
           break;
         case 'format':
           this.format = transformedData[k];
-            //'text-selection' : transformedData[k];
           break;
         case 'nullable':
           this.nullable = transformedData[k];
@@ -37,7 +34,7 @@ export class VeronaVariable {
           this.valuesComplete = transformedData[k];
           break;
         case 'values':
-          this.values = transformedData[k]; //(transformedData[k] as string[]).map(s => s);
+          this.values = transformedData[k];
           break;
         case 'page':
           this.page = transformedData[k];
@@ -46,7 +43,7 @@ export class VeronaVariable {
           this.valuePositionLabels = transformedData[k];
           break;
         default:
-          //this.unknownKeys.push(k);
+          // this.unknownKeys.push(k);
       }
     });
   }
