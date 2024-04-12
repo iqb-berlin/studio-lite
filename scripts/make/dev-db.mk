@@ -16,7 +16,9 @@ dev-db-up:
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
 	fi
+	@if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
 	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev up --build -d db liquibase
+	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Stop db container
 dev-db-down:

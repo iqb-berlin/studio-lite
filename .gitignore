@@ -6,11 +6,11 @@
 /data
 /database/changelogDocs
 /backup
-/apps/frontend-e2e/cypress
 
-# config files
-config/frontend/default.conf.template
-config/frontend/default.conf.template.bkp
+# Caches
+.angular
+.nx/cache
+/.sass-cache
 
 # secret files
 *.pem
@@ -19,6 +19,8 @@ config/frontend/default.conf.template.bkp
 *.key
 
 # environment files
+docker.env
+.env.dev
 .env.studio-lite
 
 # compiled output
@@ -45,8 +47,23 @@ config/frontend/default.conf.template.bkp
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# System Files
+.DS_Store
+Thumbs.db
+
+# Backend files
+auth.constants.ts
+database.constants.ts
+apps/api/ormconfig.json
+
+# Frontend files
+config/frontend/default.conf.template
+config/frontend/default.conf.template.bkp
+
+# Frontend-e2e files
+apps/frontend-e2e/cypress/downloads
+
 # misc
-/.sass-cache
 /connect.lock
 /coverage
 /libpeerconnection.log
@@ -54,16 +71,3 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
-
-# System Files
-.DS_Store
-Thumbs.db
-
-.angular
-
-auth.constants.ts
-database.constants.ts
-docker.env
-apps/api/ormconfig.json
-
-.nx/cache

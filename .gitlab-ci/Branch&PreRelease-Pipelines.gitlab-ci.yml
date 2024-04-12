@@ -193,6 +193,66 @@ install-dependencies:
       - node_modules
       - cache/Cypress
 
+build-cicd-base-image:
+  stage: build
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE=${BASE_IMAGE}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
+          -f .gitlab-ci/CICD.Dockerfile
+          -t ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
+        .
+    - docker push -q ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
+  after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
+    - docker logout $REGISTRY
+
+build-e2e-base-image:
+  stage: build
+  rules:
+    - !reference [ .default_base_rules, rules ]
+    - !reference [ .develop_pr_base_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+  script:
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE=${CYPRESS_IMAGE}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
+          -f .gitlab-ci/E2E.Dockerfile
+          -t ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
+        .
+    - docker push -q ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
+  after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
+    - docker logout $REGISTRY
+
 .distributed:
   interruptible: true
   rules:
@@ -200,6 +260,8 @@ install-dependencies:
     - !reference [ .develop_pr_base_rules, rules ]
   needs:
     - install-dependencies
+    - build-cicd-base-image
+    - build-e2e-base-image
   artifacts:
     paths:
       - node_modules/.cache/nx
@@ -217,17 +279,25 @@ build-db-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
+    DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build --progress plain -f database/Postgres.Dockerfile
-      -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${DB_IMAGE_NAME}:latest .
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${DB_IMAGE_NAME}:latest
+          -f database/Postgres.Dockerfile
+          -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${DB_IMAGE_NAME}:latest
+        .
     - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $REGISTRY
 
 build-liquibase-image:
@@ -242,17 +312,25 @@ build-liquibase-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
+    LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build --progress plain -f database/Liquibase.Dockerfile
-      -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} -t ${LIQUIBASE_IMAGE_NAME}:latest .
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
+          -f database/Liquibase.Dockerfile
+          -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${LIQUIBASE_IMAGE_NAME}:latest
+        .
     - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $REGISTRY
 
 build-app:
@@ -262,8 +340,8 @@ build-app:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
+  image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
-    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=build --parallel=3
   artifacts:
     paths:
@@ -283,30 +361,61 @@ test-db:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.dev
+    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - docker network create app-net
-    - docker compose --env-file .env.dev pull -q db liquibase
-    - docker compose --env-file .env.dev up -d db
-    - export $(grep -v '^#' .env.dev | xargs)
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
-      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
-      --classpath=changelog status
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
-      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
-      --classpath=changelog validate
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
-      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
-      --classpath=changelog updateSQL
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        pull --quiet db liquibase
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        up -d db
+    - export $(grep -v '^#' .env.studio-lite.template | xargs)
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        run --rm liquibase
+          liquibase
+              --changelogFile studio-lite.changelog-root.xml
+              --url jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username ${POSTGRES_USER}
+              --password ${POSTGRES_PASSWORD}
+              --classpath changelog
+            status
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        run --rm liquibase
+          liquibase
+              --changelogFile studio-lite.changelog-root.xml
+              --url jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username ${POSTGRES_USER}
+              --password ${POSTGRES_PASSWORD}
+              --classpath changelog
+            validate
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        run --rm liquibase
+          liquibase
+              --changelogFile studio-lite.changelog-root.xml
+              --url jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username ${POSTGRES_USER}
+              --password ${POSTGRES_PASSWORD}
+              --classpath changelog
+            updateSQL
   script:
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
-      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
-      --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.dev run --rm liquibase liquibase --changelogFile=studio-lite.changelog-root.xml
-      --url=jdbc:postgresql://db:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD}
-      --classpath=changelog history
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        run --rm liquibase
+          liquibase
+              --changelogFile studio-lite.changelog-root.xml
+              --url jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username ${POSTGRES_USER}
+              --password ${POSTGRES_PASSWORD}
+              --classpath changelog
+            updateTestingRollback
+    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+        run --rm liquibase
+          liquibase
+              --changelogFile studio-lite.changelog-root.xml
+              --url jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username ${POSTGRES_USER}
+              --password ${POSTGRES_PASSWORD}
+              --classpath changelog
+            history
 
 test-app:
   stage: test-units
@@ -316,8 +425,8 @@ test-app:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
+  image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
-    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=test --parallel=2
 
 test-app-e2e:
@@ -328,22 +437,20 @@ test-app-e2e:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
       - name: $DOCKER_SERVICE
         entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
         alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -351,6 +458,8 @@ test-app-e2e:
   script:
     - npx nx serve api --verbose --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-api:
   stage: test-e2e
@@ -360,22 +469,20 @@ test-app-e2e-api:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
       - name: $DOCKER_SERVICE
         entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
         alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -383,6 +490,8 @@ test-app-e2e-api:
   script:
     - npx nx serve api --verbose --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/api/*" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-ui-chrome:
   stage: test-e2e
@@ -392,22 +501,20 @@ test-app-e2e-ui-chrome:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -415,6 +522,8 @@ test-app-e2e-ui-chrome:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-ui-chrome-mobile:
   stage: test-e2e
@@ -424,22 +533,20 @@ test-app-e2e-ui-chrome-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -448,6 +555,8 @@ test-app-e2e-ui-chrome-mobile:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*"
       --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-ui-firefox:
   stage: test-e2e
@@ -457,22 +566,20 @@ test-app-e2e-ui-firefox:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -480,6 +587,8 @@ test-app-e2e-ui-firefox:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-ui-firefox-mobile:
   stage: test-e2e
@@ -489,22 +598,20 @@ test-app-e2e-ui-firefox-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -513,6 +620,8 @@ test-app-e2e-ui-firefox-mobile:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*"
       --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-ui-edge:
   stage: test-e2e
@@ -522,22 +631,20 @@ test-app-e2e-ui-edge:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -545,6 +652,8 @@ test-app-e2e-ui-edge:
   script:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 test-app-e2e-ui-edge-mobile:
   stage: test-e2e
@@ -554,22 +663,20 @@ test-app-e2e-ui-edge-mobile:
   rules:
     - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
-  image: $CYPRESS_IMAGE
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh
-    - sed -i "s/TAG=.*$/TAG=latest/" .env.dev
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.dev
     - docker network create app-net
-    - docker compose --env-file .env.dev up -d --quiet-pull db
-    - docker compose --env-file .env.dev up --quiet-pull liquibase
+    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up --no-build --pull never liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -578,6 +685,8 @@ test-app-e2e-ui-edge-mobile:
     - npx nx serve api --watch=false & # start backend
     - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*"
       --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+  after_script:
+    - docker logout $REGISTRY
 
 lint-app:
   stage: lint
@@ -587,8 +696,8 @@ lint-app:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
+  image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
-    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
     - npx nx affected --base=HEAD~1 --target=lint --parallel=2
 
 audit-app:
@@ -617,16 +726,25 @@ build-develop-commit-db-image:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
+    DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --progress plain -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${DB_IMAGE_NAME}:latest
+          -f database/Postgres.Dockerfile
+          -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${DB_IMAGE_NAME}:latest
+        .
+    - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-develop-commit-liquibase-image:
@@ -639,16 +757,25 @@ build-develop-commit-liquibase-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
+    LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --progress plain -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
+          -f database/Liquibase.Dockerfile
+          -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${LIQUIBASE_IMAGE_NAME}:latest
+        .
+    - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-develop-commit-backend-image:
@@ -661,17 +788,27 @@ build-develop-commit-backend-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --progress plain -f apps/api/Dockerfile --build-arg project=api --target=prod
-      -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --target=prod
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=api
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${BACKEND_IMAGE_NAME}:latest
+          -f apps/api/Dockerfile
+          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${BACKEND_IMAGE_NAME}:latest
+        .
+    - docker push -q -a ${BACKEND_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-develop-commit-frontend-image:
@@ -684,17 +821,27 @@ build-develop-commit-frontend-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --progress plain -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod
-      -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --target=prod
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=frontend
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${FRONTEND_IMAGE_NAME}:latest
+          -f apps/frontend/Dockerfile
+          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${FRONTEND_IMAGE_NAME}:latest
+        .
+    - docker push -q -a ${FRONTEND_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 scan-develop-commit-db-image:
@@ -716,7 +863,7 @@ scan-develop-commit-db-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -758,7 +905,7 @@ scan-develop-commit-liquibase-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -800,7 +947,7 @@ scan-develop-commit-backend-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -842,7 +989,7 @@ scan-develop-commit-frontend-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -875,11 +1022,10 @@ build-pre-release:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
-    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
+    LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
     - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
