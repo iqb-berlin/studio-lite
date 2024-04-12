@@ -241,6 +241,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     if (data) {
       const unitSchemeVariables = data.variables || [];
       const variables = this.workspaceService.getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
+      console.log('variables', variables);
       const variableIds = variables.map((variable: any) => variable.id);
       const scheme = JSON.parse(data.scheme);
       const variableCodings = scheme?.variableCodings || [];

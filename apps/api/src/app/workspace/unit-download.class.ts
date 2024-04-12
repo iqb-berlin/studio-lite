@@ -17,6 +17,7 @@ export class UnitDownloadClass {
     settingService: SettingService,
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
+    console.log('UnitDownloadClass get');
     const zip = new AdmZip();
     const unitsMetadata: UnitMetadataDto[] = [];
     const usedPlayers: string[] = [];
@@ -70,6 +71,7 @@ export class UnitDownloadClass {
       if (definitionData.variables && definitionData.variables.length > 0) {
         const variablesElement = unitXml.root().ele('BaseVariables');
         definitionData.variables.forEach(v => {
+          console.log('UnitDownloadClass variables', v);
           const transformedVariable = new VeronaVariable(v);
           const variableElement = variablesElement.ele({
             Variable: {
@@ -80,6 +82,7 @@ export class UnitDownloadClass {
               '@multiple': transformedVariable.multiple
             }
           });
+          console.log('UnitDownloadClass transformedVariable', transformedVariable);
           if (transformedVariable.values.length > 0) {
             const valuesElement = variableElement.ele({
               Values: {
