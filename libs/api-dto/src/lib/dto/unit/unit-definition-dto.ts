@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VariableInfo } from '@iqb/responses';
 
 export class UnitDefinitionDto {
   @ApiProperty()
-    variables?: unknown[] = [];
+    variables?: VariableInfo[] = [];
 
   @ApiProperty()
     definition?: string;
