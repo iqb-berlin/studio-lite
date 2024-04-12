@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { VeronaVariable } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqb/responses';
 
 export class UnitDefinitionDto {
   @ApiProperty()
-    variables?: VeronaVariable[] = [];
+    variables?: VariableInfo[] = [];
 
   @ApiProperty()
     definition?: string;

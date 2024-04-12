@@ -1,6 +1,6 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
-import { VeronaVariable } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqb/responses';
 
 export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
@@ -14,7 +14,7 @@ export class UnitDefinitionStore {
     this.changedData = <UnitDefinitionDto>{};
   }
 
-  setData(newVariables: VeronaVariable[], newDefinition: string) {
+  setData(newVariables: VariableInfo[], newDefinition: string) {
     if (newVariables === this.originalData.variables) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {

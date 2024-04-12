@@ -20,7 +20,7 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import {
   MatCard, MatCardHeader, MatCardTitle, MatCardContent
 } from '@angular/material/card';
-import { VeronaVariable } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqb/responses';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -241,7 +241,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const variables: VeronaVariable[] = this.workspaceService
+      const variables: VariableInfo[] = this.workspaceService
         .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
       if (variables) {
         const variableIds = variables.map(variable => variable.id);
