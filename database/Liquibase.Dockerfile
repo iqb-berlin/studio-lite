@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1
 
-FROM liquibase/liquibase:4.27 AS base
+ARG REGISTRY_PATH
+
+
+FROM ${REGISTRY_PATH}liquibase/liquibase:4.27 AS base
 
 FROM base AS prod
 

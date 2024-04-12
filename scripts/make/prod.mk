@@ -25,11 +25,13 @@ studio-lite-up:
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
 	fi
+	@if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
 	docker compose\
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
 			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		pull
+	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 	docker compose\
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
