@@ -119,63 +119,69 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     });
   }
 
-  moveOrCopyUnit(moveOnly: boolean): void {
-    const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
-      width: '500px',
-      height: '700px',
-      data: <MoveUnitData>{
-        title: moveOnly ?
-          this.translate.instant('workspace.move-units') :
-          this.translate.instant('workspace.copy-units'),
-        buttonLabel: moveOnly ?
-          this.translate.instant('workspace.move') :
-          this.translate.instant('workspace.copy'),
-        currentWorkspaceId: this.workspaceService.selectedWorkspaceId
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (typeof result !== 'undefined') {
-        if (result !== false) {
-          const dialogComponent = dialogRef.componentInstance;
-          if (dialogComponent.targetWorkspace > 0) {
-            this.backendService.moveOrCopyUnits(
-              this.workspaceService.selectedWorkspaceId,
-              dialogComponent.selectedUnits,
-              dialogComponent.targetWorkspace,
-              moveOnly
-            ).subscribe(uploadStatus => {
-              if (typeof uploadStatus === 'boolean') {
-                this.snackBar.open(
-                  this.translate
-                    .instant('workspace.unit-not-moved-or-copied',
-                      { action: moveOnly ? 'verschieben' : 'kopieren' }),
-                  this.translate.instant('workspace.error'),
-                  { duration: 3000 }
-                );
-              } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-                const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
-                  width: '500px',
-                  data: uploadStatus
-                });
-                dialogRef2.afterClosed().subscribe(() => {
-                  this.updateUnitList();
-                });
-              } else {
-                this.snackBar.open(
-                  this.translate
-                    .instant('workspace.unit-moved-or-copied',
-                      { action: moveOnly ? 'verschoben' : 'kopiert' }),
-                  '',
-                  { duration: 5000 }
-                );
-                this.updateUnitList();
-              }
-            });
-          }
+  async moveOrCopyUnit(moveOnly: boolean): Promise<void> {
+    const routingOk = moveOnly ? await this.selectUnit(0) : true;
+    if (routingOk) {
+      const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
+        width: '500px',
+        height: '700px',
+        data: <MoveUnitData>{
+          title: moveOnly ?
+            this.translate.instant('workspace.move-units') :
+            this.translate.instant('workspace.copy-units'),
+          buttonLabel: moveOnly ?
+            this.translate.instant('workspace.move') :
+            this.translate.instant('workspace.copy'),
+          currentWorkspaceId: this.workspaceService.selectedWorkspaceId
         }
-      }
-    });
+      });
+
+      dialogRef.afterClosed()
+        .subscribe(result => {
+          if (typeof result !== 'undefined') {
+            if (result !== false) {
+              const dialogComponent = dialogRef.componentInstance;
+              if (dialogComponent.targetWorkspace > 0) {
+                this.backendService.moveOrCopyUnits(
+                  this.workspaceService.selectedWorkspaceId,
+                  dialogComponent.selectedUnits,
+                  dialogComponent.targetWorkspace,
+                  moveOnly
+                )
+                  .subscribe(uploadStatus => {
+                    if (typeof uploadStatus === 'boolean') {
+                      this.snackBar.open(
+                        this.translate
+                          .instant('workspace.unit-not-moved-or-copied',
+                            { action: moveOnly ? 'verschieben' : 'kopieren' }),
+                        this.translate.instant('workspace.error'),
+                        { duration: 3000 }
+                      );
+                    } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+                      const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
+                        width: '500px',
+                        data: uploadStatus
+                      });
+                      dialogRef2.afterClosed()
+                        .subscribe(() => {
+                          this.updateUnitList();
+                        });
+                    } else {
+                      this.snackBar.open(
+                        this.translate
+                          .instant('workspace.unit-moved-or-copied',
+                            { action: moveOnly ? 'verschoben' : 'kopiert' }),
+                        '',
+                        { duration: 5000 }
+                      );
+                      this.updateUnitList();
+                    }
+                  });
+              }
+            }
+          }
+        });
+    }
   }
 
   exportUnit(): void {
