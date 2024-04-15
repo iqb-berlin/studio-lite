@@ -37,7 +37,6 @@ export class WorkspaceService {
   isValidFormKey = new BehaviorSubject<boolean>(true);
   states: State[] = [];
   codingSchemer!: CodingScheme;
-  codingScheme!: CodingScheme;
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
   @Output() unitMetadataStoreChanged = new EventEmitter<UnitMetadataStore | undefined>();

@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 
+import { CodingScheme } from '@iqb/responses';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -57,7 +58,8 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
           case 'vosSchemeChangedNotification':
             if (msgData.sessionId === this.sessionId) {
               if (msgData.codingScheme) {
-                this.workspaceService.codingScheme = JSON.parse(msgData.codingScheme);
+                const codingScheme = JSON.parse(msgData.codingScheme);
+                this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
                 this.workspaceService.getUnitSchemeStore()?.setData(msgData.codingScheme, msgData.codingSchemeType);
                 // } else { TODO: find solution for vosGetSchemeRequest
                 //   this.postMessageTarget.postMessage({
