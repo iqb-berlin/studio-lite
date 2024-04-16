@@ -15,7 +15,7 @@ export class UnitDefinitionStore {
   }
 
   setData(newVariables: VariableInfo[], newDefinition: string) {
-    if (newVariables === this.originalData.variables) {
+    if (JSON.stringify(newVariables) === JSON.stringify(this.originalData.variables)) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
       this.changedData.variables = newVariables;
@@ -29,7 +29,7 @@ export class UnitDefinitionStore {
   }
 
   isChanged(): boolean {
-    return Object.keys(this.changedData).length > 1;
+    return Object.keys(this.changedData).length > 0;
   }
 
   getChangedData(): UnitDefinitionDto {
