@@ -223,7 +223,7 @@ export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
   cy.get(`label:contains(${user})`).prev().click();
 
   // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
-  cy.get('studio-lite-wrapped>div>mat-icon:contains("save")')
+  cy.get('.center-icon > .mat-icon:contains("save")')
     .eq(0)
     .should('exist')
     .click();
@@ -277,30 +277,44 @@ export function addUnit(kurzname: string):void {
 }
 
 export function addModule():void {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+  // 'studio-lite-wrapped-icon > .center-icon > .mat-icon').eq(0).click();
+  cy.get('mat-icon:contains("setting")')
     .eq(0)
     .click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
   cy.get('input[type=file]')
-    .selectFile('../frontend-e2e/src/fixtures/iqb-schemer-1.3.0.html', {
+    .selectFile('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', {
       action: 'select',
       force: true
     });
-  cy.contains('iqb-schemer@1.3')
+  cy.contains('iqb-schemer@1.5')
     .should('exist');
   cy.get('input[type=file]')
-    .selectFile('../frontend-e2e/src/fixtures/iqb-player-aspect-2.32.0.html', {
+    .selectFile('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', {
       action: 'select',
       force: true
     });
+  cy.contains('iqb-player-aspect@2.4.10')
+    .should('exist');
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('iqb-editor-aspect@2.4.9')
+    .should('exist');
+  cy.pause();
 }
 
 export function deleteModule():void {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+  //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  //   .eq(0)
+  //   .click();
+  cy.get('mat-icon:contains("setting")')
     .eq(0)
     .click();
   cy.get('span:contains("Module")')
@@ -312,6 +326,11 @@ export function deleteModule():void {
     .prev()
     .click();
   cy.get('span:contains("IQB-Player")')
+    .parent()
+    .parent()
+    .prev()
+    .click();
+  cy.get('span:contains("IQB-Editor")')
     .parent()
     .parent()
     .prev()

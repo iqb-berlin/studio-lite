@@ -15,7 +15,7 @@ import { IqbProfile } from '../../../support/config/iqbProfile';
 
 /* This test is written to probe that we can set the metadata profile
 * from administration, and we can add choose the profile from the group.
-* <Tghey are alternative tests to "choose profiles from the group" and
+* They are alternative tests to "choose profiles from the group" and
 * "choose a profil for an area from a group" from insert-record.cy.ts */
 
 describe('Metadata Management from administration', () => {

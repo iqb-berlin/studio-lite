@@ -96,7 +96,7 @@ describe('Load metadata profile', () => {
     logout();
   });
 
-  it.only('remove the Context', () => {
+  it('remove the Context', () => {
     login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
     visitLoginPage();

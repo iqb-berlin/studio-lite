@@ -38,14 +38,14 @@ describe('Admin Management', () => {
     //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
     //   .eq(0)
     //   .click();
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    //   .eq(0)
+    //   .should('exist')
+    //   .click();
+    cy.get('mat-icon:contains("setting")')
       .eq(0)
       .should('exist')
       .click();
-    // cy.get('button')
-    //   .should('have.attr', 'ng-reflect-message', 'Allgemeine Systemverwaltung')
-    //   .eq(0)
-    //   .click();
     cy.get('mat-table')
       .contains('newuser')
       .should('exist')
@@ -61,9 +61,13 @@ describe('Admin Management', () => {
     // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
     //   .should('exist')
     //   .click();
-    cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-      'studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
+    //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
+    //   .eq(0)
+    //   .click();
+    cy.get('mat-icon:contains("setting")')
       .eq(0)
+      .should('exist')
       .click();
     visitLoginPage();
     logout();
