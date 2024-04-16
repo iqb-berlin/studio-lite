@@ -1,6 +1,7 @@
 import {
   addFirstUser,
   changePassword,
+  updatePersonalData,
   clickButtonToAccept, createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
@@ -53,6 +54,12 @@ describe('User Management', () => {
     logout();
   });
 
+  it('should be able to modify personal data', () => {
+    login(userData.user_name, userData.user_pass);
+    updatePersonalData();
+    logout();
+  });
+
   it('should be possible change the password', () => {
     login(userData.user_name, userData.user_pass);
     changePassword('newpass', userData.user_pass);
@@ -72,8 +79,4 @@ describe('User Management', () => {
     visitLoginPage();
     logout();
   });
-
-  // it('should be able to modify personal data', () => {
-  //   // TODO
-  // });
 });
