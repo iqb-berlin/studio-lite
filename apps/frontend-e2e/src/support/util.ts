@@ -79,7 +79,7 @@ export function deleteGroupArea(areaName: string):void {
   // '.center-icon > .mat-icon')
   // .eq(0)
   // .click();
-  // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]').should('exist').click();
+  //  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]').should('exist').click();
   cy.get('mat-icon:contains("setting")')
     .eq(0)
     .should('exist')
