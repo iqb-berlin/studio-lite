@@ -6,13 +6,19 @@
 # https://docs.gitlab.com/ee/ci/jobs/job_control.html#cicd-variable-expressions
 .default_base_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH &&
+          ($CI_COMMIT_BRANCH != "main") &&
+          ($CI_COMMIT_BRANCH != "develop") &&
+          ($CI_PIPELINE_SOURCE != "external_pull_request_event")
     - if: $CI_COMMIT_TAG
       when: never
 
 .default_db_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH &&
+          ($CI_COMMIT_BRANCH != "main") &&
+          ($CI_COMMIT_BRANCH != "develop") &&
+          ($CI_PIPELINE_SOURCE != "external_pull_request_event")
       changes:
         - database/*
     - if: $CI_COMMIT_TAG
@@ -20,7 +26,10 @@
 
 .default_manual_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH != "main") && ($CI_COMMIT_BRANCH != "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH &&
+          ($CI_COMMIT_BRANCH != "main") &&
+          ($CI_COMMIT_BRANCH != "develop") &&
+          ($CI_PIPELINE_SOURCE != "external_pull_request_event")
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
@@ -40,7 +49,9 @@
 
 .develop_commit_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "develop") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH &&
+          ($CI_COMMIT_BRANCH == "develop") &&
+          ($CI_PIPELINE_SOURCE != "external_pull_request_event")
     - if: $CI_COMMIT_TAG
       when: never
 
@@ -82,10 +93,16 @@ check-default-rules:
     - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
       then echo "pipeline source is 'external_pull_request_event'" ;
       else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" != "main" ] && [ "$CI_COMMIT_BRANCH" != "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+    - if [ -n "$CI_COMMIT_BRANCH" ] &&
+          [ "$CI_COMMIT_BRANCH" != "main" ] &&
+          [ "$CI_COMMIT_BRANCH" != "develop" ] &&
+          [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
       then echo "commit branch exists, isn't 'main', isn't 'develop', and it's not an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+    - if [ -z "$CI_COMMIT_BRANCH" ] ||
+          [ "$CI_COMMIT_BRANCH" = "main" ] ||
+          [ "$CI_COMMIT_BRANCH" = "develop" ] ||
+          [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
       then echo "commit branch doesn't exist or is 'main' or is 'develop' or it's an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
     - if [ -z "$CI_COMMIT_TAG" ];
@@ -145,10 +162,14 @@ check-develop-commit-rules:
     - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
       then echo "pipeline source is 'external_pull_request_event'";
       else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "develop" ] && [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+    - if [ -n "$CI_COMMIT_BRANCH" ] &&
+          [ "$CI_COMMIT_BRANCH" = "develop" ] &&
+          [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
       then echo "commit branch exists, is 'develop', and it's not an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "develop" ] || [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+    - if [ -z "$CI_COMMIT_BRANCH" ] ||
+          [ "$CI_COMMIT_BRANCH" != "develop" ] ||
+          [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
       then echo "commit branch doesn't exist or isn't 'develop' or it's an external pull request";
       else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
     - if [ -z "$CI_COMMIT_TAG" ];
@@ -365,12 +386,21 @@ test-db:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - docker network create app-net
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         pull --quiet db liquibase
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         up -d db
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         run --rm liquibase
           liquibase
               --changelogFile studio-lite.changelog-root.xml
@@ -379,7 +409,10 @@ test-db:
               --password ${POSTGRES_PASSWORD}
               --classpath changelog
             status
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         run --rm liquibase
           liquibase
               --changelogFile studio-lite.changelog-root.xml
@@ -388,7 +421,10 @@ test-db:
               --password ${POSTGRES_PASSWORD}
               --classpath changelog
             validate
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         run --rm liquibase
           liquibase
               --changelogFile studio-lite.changelog-root.xml
@@ -398,7 +434,10 @@ test-db:
               --classpath changelog
             updateSQL
   script:
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         run --rm liquibase
           liquibase
               --changelogFile studio-lite.changelog-root.xml
@@ -407,7 +446,10 @@ test-db:
               --password ${POSTGRES_PASSWORD}
               --classpath changelog
             updateTestingRollback
-    - docker compose -f docker-compose.yaml -f docker-compose.studio-lite.prod.yaml --env-file .env.studio-lite.template
+    - docker compose
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+          --env-file .env.studio-lite.template
         run --rm liquibase
           liquibase
               --changelogFile studio-lite.changelog-root.xml
@@ -489,7 +531,11 @@ test-app-e2e-api:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/api/*" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser chrome
+        --spec "./apps/frontend-e2e/src/e2e/api/*" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -521,7 +567,11 @@ test-app-e2e-ui-chrome:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser chrome
+        --spec "./apps/frontend-e2e/src/e2e/ui/*" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -553,8 +603,12 @@ test-app-e2e-ui-chrome-mobile:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser chrome --spec "./apps/frontend-e2e/src/e2e/ui/*"
-      --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser chrome
+        --spec "./apps/frontend-e2e/src/e2e/ui/*"
+        --config "viewportWidth=375,viewportHeight=667" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -586,7 +640,11 @@ test-app-e2e-ui-firefox:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser firefox
+        --spec "./apps/frontend-e2e/src/e2e/ui/*" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -618,8 +676,12 @@ test-app-e2e-ui-firefox-mobile:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser firefox --spec "./apps/frontend-e2e/src/e2e/ui/*"
-      --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser firefox
+        --spec "./apps/frontend-e2e/src/e2e/ui/*"
+        --config "viewportWidth=375,viewportHeight=667" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -651,7 +713,11 @@ test-app-e2e-ui-edge:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser edge
+        --spec "./apps/frontend-e2e/src/e2e/ui/*" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -683,8 +749,12 @@ test-app-e2e-ui-edge-mobile:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --watch=false & # start backend
-    - npx nx e2e frontend-e2e --prod --browser edge --spec "./apps/frontend-e2e/src/e2e/ui/*"
-      --config "viewportWidth=375,viewportHeight=667" || ( pkill npx && exit 1 )
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser edge
+        --spec "./apps/frontend-e2e/src/e2e/ui/*"
+        --config "viewportWidth=375,viewportHeight=667" ||
+      ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
 
@@ -871,12 +941,28 @@ scan-develop-commit-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -913,12 +999,28 @@ scan-develop-commit-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -955,12 +1057,28 @@ scan-develop-commit-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -997,12 +1115,28 @@ scan-develop-commit-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/

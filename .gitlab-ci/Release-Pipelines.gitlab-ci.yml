@@ -354,25 +354,78 @@ test-main-pr-db:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml pull -q db liquibase
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d db
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        pull -q db liquibase
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d db
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            status
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            validate
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            updateSQL
   script:
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            updateTestingRollback
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
 
 test-main-pr-backend:
   stage: test-units
@@ -437,10 +490,23 @@ test-main-pr-e2e:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
 
 test-main-pr-e2e-api:
@@ -466,10 +532,22 @@ test-main-pr-e2e-api:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
 test-main-pr-e2e-ui-chrome:
@@ -495,10 +573,23 @@ test-main-pr-e2e-ui-chrome:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
 test-main-pr-e2e-ui-chrome-mobile:
@@ -524,11 +615,25 @@ test-main-pr-e2e-ui-chrome-mobile:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
+    - docker compose -f docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
 test-main-pr-e2e-ui-firefox:
   stage: test-e2e
@@ -553,10 +658,23 @@ test-main-pr-e2e-ui-firefox:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
 test-main-pr-e2e-ui-firefox-mobile:
@@ -582,11 +700,25 @@ test-main-pr-e2e-ui-firefox-mobile:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
+    - docker compose -f docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
 
 test-main-pr-e2e-ui-edge:
   stage: test-e2e
@@ -611,10 +743,23 @@ test-main-pr-e2e-ui-edge:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
 
 test-main-pr-e2e-ui-edge-mobile:
@@ -640,11 +785,25 @@ test-main-pr-e2e-ui-edge-mobile:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
+    - docker compose -f docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
 
 lint-main-pr-backend:
   stage: lint
@@ -898,12 +1057,28 @@ scan-main-commit-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity
+        CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -940,12 +1115,28 @@ scan-main-commit-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -982,12 +1173,28 @@ scan-main-commit-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -1024,12 +1231,28 @@ scan-main-commit-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
