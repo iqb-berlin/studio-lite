@@ -6,7 +6,6 @@
 /data
 /database/changelogDocs
 /backup
-/apps/frontend-e2e/cypress
 
 # config files
 config/frontend/default.conf.template

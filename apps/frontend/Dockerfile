@@ -1,7 +1,10 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20.12-bookworm-slim AS build
-ARG project
+ARG REGISTRY_PATH
+
+
+FROM ${REGISTRY_PATH}node:20.12-bookworm-slim AS build
+ARG PROJECT
 
 RUN mkdir /studio-lite
 WORKDIR /studio-lite
@@ -18,24 +21,24 @@ RUN npm --version && \
 RUN npm ci --no-fund && npm cache clean --force
 
 # Build project
-RUN npx nx --version && npx nx build $project --prod
+RUN npx nx --version && npx nx build ${PROJECT} --prod
 
 
 FROM build AS dev
-ARG project
+ARG PROJECT
 
-RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${project}/proxy.conf.json
+RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${PROJECT}/proxy.conf.json
 
 EXPOSE 80
 
 ENTRYPOINT ["npx", "nx"]
 
 
-FROM nginx:stable AS base
-ARG project
+FROM ${REGISTRY_PATH}nginx:stable AS base
+ARG PROJECT
 
 COPY config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
-COPY --from=build /studio-lite/dist/apps/$project /usr/share/nginx/html
+COPY --from=build /studio-lite/dist/apps/${PROJECT} /usr/share/nginx/html
 
 EXPOSE 80
 
