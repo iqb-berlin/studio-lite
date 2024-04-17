@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HttpModule } from '@nestjs/axios';
 import KeycloakUser from './entities/keycloak-user.entity';
 import User from './entities/user.entity';
 import { UsersService } from './services/users.service';
@@ -28,9 +29,12 @@ import ReviewUnit from './entities/review-unit.entity';
 import { ReviewService } from './services/review.service';
 import ResourcePackage from './entities/resource-package.entity';
 import { ResourcePackageService } from './services/resource-package.service';
+import MetadataProfile from './entities/metadata-profile.entity';
+import { MetadataProfileService } from './services/metadata-profile.service';
 
 @Module({
   imports: [
+    HttpModule,
     User,
     KeycloakUser,
     Workspace,
@@ -41,6 +45,7 @@ import { ResourcePackageService } from './services/resource-package.service';
     VeronaModule,
     UnitDefinition,
     UnitComment,
+    MetadataProfile,
     UnitUser,
     Setting,
     ResourcePackage,
@@ -67,6 +72,7 @@ import { ResourcePackageService } from './services/resource-package.service';
           Setting,
           Unit,
           UnitComment,
+          MetadataProfile,
           UnitUser,
           WorkspaceGroupAdmin,
           Review,
@@ -88,6 +94,7 @@ import { ResourcePackageService } from './services/resource-package.service';
       Setting,
       Unit,
       UnitComment,
+      MetadataProfile,
       UnitUser,
       WorkspaceGroupAdmin,
       Review,
@@ -103,6 +110,7 @@ import { ResourcePackageService } from './services/resource-package.service';
     WorkspaceGroupAdminService,
     UnitService,
     UnitCommentService,
+    MetadataProfileService,
     UnitUserService,
     VeronaModulesService,
     SettingService,
@@ -126,6 +134,7 @@ import { ResourcePackageService } from './services/resource-package.service';
     Review,
     ReviewUnit,
     ReviewService,
+    MetadataProfileService,
     UsersService,
     UnitService,
     UnitCommentService,

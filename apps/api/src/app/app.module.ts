@@ -11,6 +11,7 @@ import { AppVersionProvider } from './app-version.guard';
 import { DownloadModule } from './download/download.module';
 import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.module';
 import { ProfileModule } from './profile/profile.module';
+import { MetadataProfileModule } from './metadata-profile/metadata-profile.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { ProfileModule } from './profile/profile.module';
     DownloadModule,
     MulterModule,
     WorkspaceGroupsModule,
-    ProfileModule
+    ProfileModule,
+    MetadataProfileModule
   ],
   controllers: [AppController],
   providers: [AppVersionProvider],
