@@ -48,7 +48,7 @@ describe('User Management', () => {
 
   it('should not be able to find admin user setting button', () => {
     login(userData.user_name, userData.user_pass);
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    cy.get('[data-cy="goto-admin"]')
       .should('not.exist');
     visitLoginPage();
     logout();

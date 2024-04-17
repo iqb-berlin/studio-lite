@@ -31,7 +31,6 @@ export function login(username: string, password = '') {
     .clear()
     .type(username);
   if (password) {
-    // cy.get("#mat-input-1") gut
     cy.get('input[placeholder="Kennwort"]')
       .should('exist')
       .clear()
@@ -44,11 +43,7 @@ export function login(username: string, password = '') {
 }
 
 export function createGroupArea(group:string):void {
-  // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -75,15 +70,7 @@ export function createAreaForGroupFromAdmin(area:string, group:string):void {
 }
 
 export function deleteGroupArea(areaName: string):void {
-  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > ' +
-  // '.center-icon > .mat-icon')
-  // .eq(0)
-  // .click();
-  //  cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]').should('exist').click();
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -97,8 +84,6 @@ export function deleteGroupArea(areaName: string):void {
 }
 
 export function logout() {
-  // cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
-  //   .click();
   cy.get('mat-icon:contains("account_box")')
     .eq(0)
     .should('exist')
@@ -111,7 +96,6 @@ export function logout() {
 }
 
 export function changePassword(newPass:string, oldPass:string):void {
-  // cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
   cy.get('mat-icon:contains("account_box")')
     .eq(0)
     .should('exist')
@@ -133,7 +117,6 @@ export function changePassword(newPass:string, oldPass:string):void {
 }
 
 export function updatePersonalData():void {
-  // cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
   cy.get('mat-icon:contains("account_box")')
     .eq(0)
     .should('exist')
@@ -157,14 +140,7 @@ export function updatePersonalData():void {
 }
 
 export function createNewUser(name: string, pass: string):void {
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .should('exist')
-    .click();
-  // eslint-disable-next-line max-len
-  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
-  //  .eq(0)
-  //  .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
     .should('exist')
@@ -186,14 +162,7 @@ export function createNewUser(name: string, pass: string):void {
 }
 
 export function deleteUser(user: string):void {
-  // eslint-disable-next-line max-len
-  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
-  //   .eq(0)
-  //   .click();
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('mat-table')
     .contains(`${user}`)
     .should('exist')
@@ -205,14 +174,7 @@ export function deleteUser(user: string):void {
 }
 
 export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
-  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-  //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-  //   .eq(0)
-  //   .click();
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -221,14 +183,10 @@ export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
     .should('exist')
     .click();
   cy.get(`label:contains(${user})`).prev().click();
-
-  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
   cy.get('.center-icon > .mat-icon:contains("save")')
     .eq(0)
     .should('exist')
     .click();
-  // cy.get('.fx-row-space-between-center > .mat-mdc-tooltip-trigger > ' +
-  //   '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
 }
 
 export function grantRemovePrivilegeOnArea(user:string, area: string):void {
@@ -237,9 +195,6 @@ export function grantRemovePrivilegeOnArea(user:string, area: string):void {
     .should('exist')
     .click();
   cy.get(`label.mdc-label:contains(${user})`).click();
-  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
-  // cy.get('.fx-row-space-between-center > .mat-mdc-tooltip-trigger > ' +
-  //   '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
   cy.get('mat-icon:contains("save")')
     .eq(1)
     .should('exist')
@@ -259,17 +214,11 @@ export function deleteUnit(kurzname: string):void {
 }
 
 export function addUnit(kurzname: string):void {
-  // cy.get('studio-lite-add-unit-button.unit-crud-button > .mat-mdc-tooltip-trigger > ' +
-  //   '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').should('exist').click();
-  // cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]').should('exist').click();
   cy.get('mat-icon:contains("add")')
     .click();
   cy.get('button > span:contains("Neue Aufgabe")')
     .should('exist')
     .click();
-  // cy.get('.mat-focused > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix')
-  //   .should('exist')
-  //   .type(kurzname);
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
@@ -277,11 +226,7 @@ export function addUnit(kurzname: string):void {
 }
 
 export function addModule():void {
-  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-  // 'studio-lite-wrapped-icon > .center-icon > .mat-icon').eq(0).click();
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
@@ -306,17 +251,10 @@ export function addModule():void {
     });
   cy.contains('iqb-editor-aspect@2.4.9')
     .should('exist');
-  cy.pause();
 }
 
 export function deleteModule():void {
-  // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-  //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-  //   .eq(0)
-  //   .click();
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();

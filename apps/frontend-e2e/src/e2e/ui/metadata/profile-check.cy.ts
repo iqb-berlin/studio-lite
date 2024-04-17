@@ -39,10 +39,7 @@ describe('Load metadata profile', () => {
   it('should be possible load a metadata profile from General administration', () => {
     const searchProfile:string = 'Deutsch';
     login(adminData.user_name, adminData.user_pass);
-    cy.get('mat-icon:contains("setting")')
-      .eq(0)
-      .should('exist')
-      .click();
+    cy.get('[data-cy="goto-admin"]').click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();
@@ -75,10 +72,7 @@ describe('Load metadata profile', () => {
   it.skip('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Französisch'];
     login(adminData.user_name, adminData.user_pass);
-    cy.get('mat-icon:contains("settings")')
-      .eq(0)
-      .should('exist')
-      .click();
+    cy.get('[data-cy="goto-admin"]').click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();

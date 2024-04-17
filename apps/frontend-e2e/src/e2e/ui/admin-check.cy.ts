@@ -34,18 +34,7 @@ describe('Admin Management', () => {
 
   it('user with admin credentials can delete a user', () => {
     login(adminData.user_name, adminData.user_pass);
-    // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-    //   .eq(0)
-    //   .click();
-    // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    //   .eq(0)
-    //   .should('exist')
-    //   .click();
-    cy.get('mat-icon:contains("setting")')
-      .eq(0)
-      .should('exist')
-      .click();
+    cy.get('[data-cy="goto-admin"]').click();
     cy.get('mat-table')
       .contains('newuser')
       .should('exist')
@@ -58,17 +47,7 @@ describe('Admin Management', () => {
 
   it('should be able to find admin user setting button', () => {
     login(adminData.user_name, adminData.user_pass);
-    // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    //   .should('exist')
-    //   .click();
-    // cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    //   'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-    //   .eq(0)
-    //   .click();
-    cy.get('mat-icon:contains("setting")')
-      .eq(0)
-      .should('exist')
-      .click();
+    cy.get('[data-cy="goto-admin"]').click();
     visitLoginPage();
     logout();
   });
