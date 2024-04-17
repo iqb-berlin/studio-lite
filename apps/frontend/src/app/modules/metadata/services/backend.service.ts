@@ -3,8 +3,8 @@ import {
 } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
-import { MDProfile } from '@iqb/metadata/md-profile';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { MetadataProfileDto } from '@studio-lite-lib/api-dto';
 import { Vocab, VocabData } from '../models/types';
 
 @Injectable({
@@ -39,23 +39,15 @@ export class BackendService {
       );
   }
 
-  getProfile(url:string):Observable<MDProfile | boolean> {
-    const shortenedUrl = url.replace(this.baseUrlProfile, '')
-      .replace(/\//g, '').replace('.json', '');
-    return this.http
-      .get(`${this.serverUrl}profile/${shortenedUrl}`)
-      .pipe(
-        catchError(() => of(false)),
-        map(profile => profile as MDProfile)
-      );
-  }
+  getMetadataProfile(url:string): Observable<MetadataProfileDto | boolean> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('url', url);
 
-  saveProfile(profile:MDProfile):Observable<boolean> {
     return this.http
-      .post(`${this.serverUrl}profile`, profile)
+      .get(`${this.serverUrl}metadata-profile`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
-        map(() => true)
+        map(profile => profile as MetadataProfileDto)
       );
   }
 }

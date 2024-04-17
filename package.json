@@ -43,6 +43,7 @@
     "@iqb/ngx-coding-components": "^1.4.2",
     "@iqb/responses": "1.1.1",
     "@iqb/validate-md-profile": "^0.4.0",
+    "@nestjs/axios": "^3.0.2",
     "@nestjs/cli": "^9.3.0",
     "@nestjs/common": "10.1.3",
     "@nestjs/config": "^3.0.0",
