@@ -99,10 +99,10 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   private async loadProfile(profile: MDProfile | Record<string, never>) {
     this.profile = new MDProfile(profile);
     await this.metadataService.getProfileVocabularies(this.profile);
+    this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
     this.model = this.mapMetadataValuesToFormlyModel(
       this.findCurrentProfileMetadata(this.metadata.profiles)
     );
-    this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
   }
 
   private findCurrentProfileMetadata(metadata: MetadataValues[] | undefined): MetadataValues | undefined {
@@ -247,10 +247,29 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
 
   private mapMetaDataEntriesToFormlyModel(entries: MetadataValuesEntry[]): Record<string, ModelValue> {
     const model: Record<string, ModelValue> = {};
+    let triggerSaving = false;
     entries.forEach((entry: MetadataValuesEntry) => {
-      model[entry.id] = this.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
+      const storedValue = this.mapMetaDataEntriesValueToFormlyModelValue(entry.value);
+      if (this.isStoredValueValidForFormlyField(entry.id, storedValue)) {
+        model[entry.id] = storedValue;
+      } else {
+        triggerSaving = true;
+      }
     });
+    if (triggerSaving) setTimeout(() => this.onModelChange());
     return model;
+  }
+
+  private isStoredValueValidForFormlyField(id: string, value: ModelValue): boolean {
+    const type = this.profileItemKeys[id]?.type;
+    if (value !== undefined) {
+      if (!type) return false; // stored value does not match anymore
+      if (type === 'text' && !(typeof value === 'object')) return false;
+      if (type === 'vocabulary' && !Array.isArray(value)) return false;
+      if (type === 'boolean' && !(typeof value === 'boolean')) return false;
+      if (type === 'number' && !(typeof value === 'number')) return false;
+    }
+    return true;
   }
 
   private mapMetaDataEntriesValueToFormlyModelValue(
@@ -307,13 +326,13 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
           label: group.label,
           expanded: this.panelExpanded
         },
-        fieldGroup:
-            group.entries.map((entry: MDProfileEntry) => {
-              this.registerProfileItem(entry);
-              return ProfileFormComponent.getFormlyField(entry);
-            })
-      })
-      );
+        fieldGroup: group.entries
+          .map((entry: MDProfileEntry) => {
+            // this.checkStoredValueForField(entry);
+            this.registerProfileItem(entry);
+            return ProfileFormComponent.getFormlyField(entry);
+          })
+      }));
     } return [];
   }
 
