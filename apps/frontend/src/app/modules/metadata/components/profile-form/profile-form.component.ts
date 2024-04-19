@@ -106,10 +106,10 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     if (profile) {
       this.profile = new MDProfile(profile);
       await this.metadataService.getProfileVocabularies(this.profile);
+      this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
       this.model = this.mapMetadataValuesToFormlyModel(
         this.findCurrentProfileMetadata(this.metadata.profiles)
       );
-      this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
     } else {
       // eslint-disable-next-line no-console
       console.warn(`Profil ${this.profileUrl} could not be loaded`);
