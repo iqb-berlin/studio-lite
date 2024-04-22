@@ -28,7 +28,7 @@ TAG := dev
 		docker build\
 				--pull\
 				-f $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
-				--build-arg project=api\
+				--build-arg PROJECT=api\
 				--target=prod\
 				--no-cache\
 				--rm\
@@ -39,7 +39,7 @@ TAG := dev
 		docker build\
 				--pull\
 				-f $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
-				--build-arg project=frontend\
+				--build-arg PROJECT=frontend\
 				--target=prod\
 				--no-cache\
 				--rm\

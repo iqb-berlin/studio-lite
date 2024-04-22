@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: database/Postgres.Dockerfile
+      args:
+        REGISTRY_PATH: ${REGISTRY_PATH}
     ports:
       - "${POSTGRES_PORT}:5432"
 
@@ -11,6 +13,8 @@ services:
       context: .
       dockerfile: database/Liquibase.Dockerfile
       target: base
+      args:
+        REGISTRY_PATH: ${REGISTRY_PATH}
     volumes:
       - ./database/changelog:/liquibase/changelog
       - ./database/changelogDocs:/liquibase/changelogDocs
@@ -28,13 +32,15 @@ services:
       dockerfile: apps/api/Dockerfile
       target: dev
       args:
-        project: api
+        REGISTRY_PATH: ${REGISTRY_PATH}
+        PROJECT: api
     ports:
       - "${API_PORT}:3333"  # api
       - "9229:9229"         # default debug port
     volumes:
       - ./apps/api/src:/studio-lite/apps/api/src
       - backend_vol:/studio-lite/packages
+      - backend_profiles_vol:/studio-lite/profiles
     command:
       - "serve"
       - "api"
@@ -53,7 +59,8 @@ services:
       dockerfile: apps/frontend/Dockerfile
       target: dev
       args:
-        project: frontend
+        REGISTRY_PATH: ${REGISTRY_PATH}
+        PROJECT: frontend
     ports:
       - "${HTTP_PORT}:80"
     volumes:
