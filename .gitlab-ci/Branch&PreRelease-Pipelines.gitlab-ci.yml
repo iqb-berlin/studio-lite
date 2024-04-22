@@ -795,6 +795,7 @@ build-develop-commit-db-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
     DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
