@@ -24,7 +24,7 @@ import {
 import { MetadataService } from '../../services/metadata.service';
 import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
-import { VocabularyEntry } from '../../models/types';
+import { VocabularyEntry } from '../../models/vocabulary.class';
 
 interface FormlyConfigProps {
   label: string;
@@ -105,7 +105,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   private async loadProfile(profile: MetadataProfileDto | boolean) {
     if (profile) {
       this.profile = new MDProfile(profile);
-      await this.metadataService.getProfileVocabularies(this.profile);
+      await this.metadataService.loadProfileVocabularies(this.profile);
       this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
       this.model = this.mapMetadataValuesToFormlyModel(
         this.findCurrentProfileMetadata(this.metadata.profiles)

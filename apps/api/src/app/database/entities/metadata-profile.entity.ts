@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { TextWithLanguage } from '@iqb/metadata';
+import { MetadataProfileGroup } from "../../../../../../libs/api-dto/src/lib/dto/metadata-profile/metadata-profile-dto";
 
 @Entity()
 class MetadataProfile {
@@ -12,7 +13,7 @@ class MetadataProfile {
     default: () => "'[]'",
     nullable: false
   })
-    groups: Record<string, never>[] = [];
+    groups: MetadataProfileGroup[] = [];
 
   @Column({
     type: 'jsonb',

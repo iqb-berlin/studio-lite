@@ -1,18 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { HttpService } from '@nestjs/axios';
 import {
   catchError, firstValueFrom, map, of
 } from 'rxjs';
-import { MetadataProfileDto } from '@studio-lite-lib/api-dto';
+import { MetadataProfileDto, MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
+import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import MetadataProfile from '../entities/metadata-profile.entity';
+import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
 @Injectable()
 export class MetadataProfileService {
   constructor(
     @InjectRepository(MetadataProfile)
     private metadataProfileRepository: Repository<MetadataProfile>,
+    private metadataVocabularyService: MetadataVocabularyService,
     private http: HttpService) {}
 
   async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
@@ -50,5 +54,20 @@ export class MetadataProfileService {
     const newMetadataProfile = this.metadataProfileRepository
       .create({ ...profile, modifiedAt: new Date() });
     await this.metadataProfileRepository.save(newMetadataProfile);
+  }
+
+  async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {
+    const profile = await this.getMetadataProfile(url);
+    const vocabularies: MetadataVocabularyDto[] = [];
+    const vocabularyIds = profile.groups
+      .map(group => group.entries)
+      .flat()
+      .filter(entry => (entry.type === 'vocabulary'))
+      .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url);
+    await Promise.all(vocabularyIds
+      .map(async id => {
+        vocabularies.push(await this.metadataVocabularyService.getMetadataVocabularyById(id));
+      }));
+    return vocabularies;
   }
 }

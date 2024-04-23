@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
 import { TextWithLanguage } from '@iqb/metadata/md-main';
 
@@ -9,8 +10,20 @@ export class MetadataProfileDto {
     label!: TextWithLanguage[];
 
   @ApiProperty()
-    groups!: Record<string, never>[];
+    groups!: MetadataProfileGroup[];
 
   @ApiProperty()
     modifiedAt!: Date;
+}
+
+export class MetadataProfileGroup {
+  label!: TextWithLanguage[];
+  entries!: MetadataProfileGroupEntry[];
+}
+
+export class MetadataProfileGroupEntry {
+  id!: string;
+  label!: TextWithLanguage[];
+  type!: string;
+  parameters!: Record<string, unknown>[];
 }

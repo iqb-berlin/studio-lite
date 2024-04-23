@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { HttpModule } from '@nestjs/axios';
 import KeycloakUser from './entities/keycloak-user.entity';
 import User from './entities/user.entity';
@@ -31,6 +32,8 @@ import ResourcePackage from './entities/resource-package.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import MetadataProfile from './entities/metadata-profile.entity';
 import { MetadataProfileService } from './services/metadata-profile.service';
+import MetadataVocabulary from './entities/metadata-vocabulary.entity';
+import { MetadataVocabularyService } from './services/metadata-vocabulary.service';
 
 @Module({
   imports: [
@@ -46,6 +49,7 @@ import { MetadataProfileService } from './services/metadata-profile.service';
     UnitDefinition,
     UnitComment,
     MetadataProfile,
+    MetadataVocabulary,
     UnitUser,
     Setting,
     ResourcePackage,
@@ -73,6 +77,7 @@ import { MetadataProfileService } from './services/metadata-profile.service';
           Unit,
           UnitComment,
           MetadataProfile,
+          MetadataVocabulary,
           UnitUser,
           WorkspaceGroupAdmin,
           Review,
@@ -95,6 +100,7 @@ import { MetadataProfileService } from './services/metadata-profile.service';
       Unit,
       UnitComment,
       MetadataProfile,
+      MetadataVocabulary,
       UnitUser,
       WorkspaceGroupAdmin,
       Review,
@@ -111,6 +117,7 @@ import { MetadataProfileService } from './services/metadata-profile.service';
     UnitService,
     UnitCommentService,
     MetadataProfileService,
+    MetadataVocabularyService,
     UnitUserService,
     VeronaModulesService,
     SettingService,
@@ -135,6 +142,7 @@ import { MetadataProfileService } from './services/metadata-profile.service';
     ReviewUnit,
     ReviewService,
     MetadataProfileService,
+    MetadataVocabularyService,
     UsersService,
     UnitService,
     UnitCommentService,
