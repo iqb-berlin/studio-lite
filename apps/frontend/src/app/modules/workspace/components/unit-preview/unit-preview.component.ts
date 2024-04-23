@@ -432,13 +432,24 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.hasFocus = status;
   }
 
-  async checkCoding() {
-    let codingScheme: CodingScheme;
+  async checkCodingChanged() {
     const data = await new Promise<UnitSchemeDto | undefined>(resolve => {
       resolve(this.workspaceService.getUnitSchemeStore()?.getData());
     });
     if (data && !this.workspaceService.isChanged()) {
-      codingScheme = JSON.parse(data.scheme);
+      this.checkCoding(data);
+    } else {
+      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .subscribe(schemeData => {
+          this.checkCoding(schemeData);
+        });
+    }
+  }
+
+  private checkCoding(schemeData: UnitSchemeDto | null): void {
+    let codingScheme: CodingScheme;
+    if (schemeData) {
+      codingScheme = JSON.parse(schemeData.scheme);
       if (codingScheme === null) {
         this.snackBar.open(
           this.translateService.instant('workspace.coding-check-error'),
@@ -452,26 +463,6 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         .map(vc => vc.id);
       const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
       this.showCodingResults(newResponses, varsWithCodes);
-    } else {
-      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
-        .subscribe(schemeData => {
-          if (schemeData) {
-            codingScheme = JSON.parse(schemeData.scheme);
-            if (codingScheme === null) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.coding-check-error'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 });
-              return;
-            }
-            this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
-          }
-          const varsWithCodes = codingScheme.variableCodings
-            .filter(vc => vc.codes.length > 0)
-            .map(vc => vc.id);
-          const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
-          this.showCodingResults(newResponses, varsWithCodes);
-        });
     }
   }
 
