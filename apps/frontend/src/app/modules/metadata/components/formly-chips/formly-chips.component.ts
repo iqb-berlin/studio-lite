@@ -9,7 +9,7 @@ import { MatIcon } from '@angular/material/icon';
 import {
   MatChipGrid, MatChipRow, MatChipRemove, MatChipInput
 } from '@angular/material/chips';
-import { NotationNode } from '../../models/types';
+import { NotationNode } from '../../models/vocabulary.class';
 import { MetadataService } from '../../services/metadata.service';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 

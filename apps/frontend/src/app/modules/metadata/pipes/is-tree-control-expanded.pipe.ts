@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { VocabFlatNode } from '../models/types';
+import { VocabFlatNode } from '../models/vocabulary.class';
 
 @Pipe({
   name: 'isTreeControlExpanded',

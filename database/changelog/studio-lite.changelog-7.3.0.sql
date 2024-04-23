@@ -9,3 +9,17 @@ CREATE TABLE "public"."metadata_profile"
   "modified_at" TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 -- rollback DROP TABLE "public"."metadata_profile";
+
+-- changeset jojohoch:2
+CREATE TABLE "public"."metadata_vocabulary"
+(
+  "id"  VARCHAR(128)  NOT NULL,
+  "type" VARCHAR(128)  NOT NULL,
+  "title" JSONB NOT NULL,
+  "description" JSONB,
+  "hasTopConcept" JSONB,
+  "@context" JSONB NOT NULL,
+  "modified_at" TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+-- rollback DROP TABLE "public"."metadata_vocabulary";
+

@@ -1,6 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { TextWithLanguage } from '@iqb/metadata/md-main';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { TopConcept } from '@studio-lite-lib/api-dto';
 
 export type NotationNode = {
   id: string,
@@ -28,12 +29,12 @@ export class NestedTreeParameters {
   hideTitle!: boolean;
 }
 
-export type Vocabulary = {
-  id: string,
-  type: string,
-  title: { de: string },
-  hasTopConcept: Array<NotationNode>,
-};
+export class Vocabulary {
+  id!: string;
+  type!: string;
+  title!: { de: string };
+  hasTopConcept!: Array<NotationNode>;
+}
 
 export type DialogData = {
   value: VocabularyEntry[],
@@ -65,13 +66,6 @@ export interface VocabularyEntry {
   notation: string[],
   description?: string,
   text: TextWithLanguage[],
-}
-
-export class TopConcept {
-  notation!: string[];
-  prefLabel!: { de: string };
-  narrower!: TopConcept[];
-  id!: string;
 }
 
 export class VocabData {
