@@ -46,9 +46,11 @@ export class MissingsProfilesConfigComponent implements OnInit, OnDestroy {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
       }
-      this.configForm.setValue({
-        iqbStandardMissings: missingsProfiles[0].missings
-      });
+      if (missingsProfiles.length > 0) {
+        this.configForm.setValue({
+          iqbStandardMissings: missingsProfiles[0].missings
+        });
+      }
       this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
         if (this.configForm) {
           this.dataChanged = true;
