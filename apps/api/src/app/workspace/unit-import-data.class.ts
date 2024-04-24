@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { VeronaVariable } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqb/responses';
 import { FileIo } from '../interfaces/file-io.interface';
 
 export class UnitImportData {
@@ -17,7 +17,7 @@ export class UnitImportData {
   editor: string;
   schemer: string;
   schemeType: string;
-  baseVariables: VeronaVariable[] = [];
+  baseVariables: VariableInfo[] = [];
   codingScheme: string;
   codingSchemeFileName: string;
   lastChangedMetadata: Date;
@@ -108,27 +108,32 @@ export class UnitImportData {
     const baseVariablesElement = xmlDocument('BaseVariables').first();
     if (baseVariablesElement.length > 0) {
       baseVariablesElement.find('Variable')
-        .each((i, varElement) => {
-          const varDocument = cheerio.load(varElement, {
+        .each((i, variableElement) => {
+          const varDocument = cheerio.load(variableElement, {
             xmlMode: true,
             recognizeSelfClosing: true
           });
+          const variableRecord = variableElement as unknown as Record<string, unknown>;
           const valuesElement = varDocument('Values').first();
-          this.baseVariables.push(new VeronaVariable({
+          const valuePositionLabelsElement = varDocument('ValuePositionLabels').first();
+          this.baseVariables.push({
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            id: varElement.attribs['id'],
+            id: variableRecord.attribs['id'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            type: varElement.attribs['type'],
+            type: variableRecord.attribs['type'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            format: varElement.attribs['format'],
+            format: variableRecord.attribs['format'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            nullable: varElement.attribs['nullable'],
+            nullable: variableRecord.attribs['nullable'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            multiple: varElement.attribs['multiple'],
+            multiple: variableRecord.attribs['multiple'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            valuesComplete: valuesElement.length ? valuesElement.attr('complete') : false,
+            page: variableRecord.attribs['page'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            valuePositionLabels: UnitImportData.getValuePositionLabelsForVariable(valuePositionLabelsElement),
+            valuesComplete: valuesElement.length ? valuesElement.attr('complete') as unknown as boolean : false,
             values: UnitImportData.getValuesForVariable(valuesElement)
-          }));
+          });
         });
     }
   }
@@ -147,6 +152,21 @@ export class UnitImportData {
           label: valueDocument('label').first().text(),
           value: valueDocument('value').first().text()
         });
+      });
+    return values;
+  }
+
+  private static getValuePositionLabelsForVariable(
+    valuePositionLabelsElement: cheerio.Cheerio<cheerio.Element>
+  ): string[] {
+    const values: string[] = [];
+    valuePositionLabelsElement.find('ValuePositionLabel')
+      .each((j, element) => {
+        const valueDocument = cheerio.load(element, {
+          xmlMode: true,
+          recognizeSelfClosing: true
+        });
+        values.push(valueDocument.text());
       });
     return values;
   }

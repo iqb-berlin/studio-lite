@@ -1,5 +1,5 @@
 STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
-TRIVY_VERSION := aquasec/trivy:0.42.1
+TRIVY_VERSION := aquasec/trivy:0.50.1
 
 ## prevents collisions of make target names with possible file names
 .PHONY: scan-app scan-db scan-liquibase scan-backend scan-frontend
@@ -55,7 +55,7 @@ scan-backend:
 		docker build\
 				--pull\
 				-f $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
-				--build-arg project=api\
+				--build-arg PROJECT=api\
 				--target=prod\
 				--no-cache\
 				--rm\
@@ -78,7 +78,7 @@ scan-frontend:
 		docker build\
 				--pull\
 				-f $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
-				--build-arg project=frontend\
+				--build-arg PROJECT=frontend\
 				--target=prod\
 				--no-cache\
 				--rm\

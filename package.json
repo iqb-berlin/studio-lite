@@ -1,6 +1,6 @@
 {
   "name": "studio-lite",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "scripts": {
@@ -49,7 +49,7 @@
     "@nestjs/core": "10.0.5",
     "@nestjs/jwt": "^10.1.0",
     "@nestjs/passport": "^10.0.0",
-    "@nestjs/platform-express": "10.0.5",
+    "@nestjs/platform-express": "^10.3.7",
     "@nestjs/swagger": "7.3.0",
     "@nestjs/typeorm": "^10.0.0",
     "@ngx-formly/core": "^6.2.1",
@@ -113,7 +113,7 @@
     "zone.js": "0.14.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "17.1.4",
+    "@angular-devkit/build-angular": "^17.3.2",
     "@angular-devkit/core": "17.1.4",
     "@angular-devkit/schematics": "17.1.4",
     "@angular-devkit/schematics-cli": "17.1.4",

@@ -3,7 +3,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { VeronaModuleKeyCollection, VeronaVariable } from '@studio-lite/shared-code';
+import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
 import { SettingService } from '../database/services/setting.service';
@@ -69,18 +69,24 @@ export class UnitDownloadClass {
       }
       if (definitionData.variables && definitionData.variables.length > 0) {
         const variablesElement = unitXml.root().ele('BaseVariables');
-        definitionData.variables.forEach(v => {
-          const transformedVariable = new VeronaVariable(v);
+        definitionData.variables.forEach(transformedVariable => {
           const variableElement = variablesElement.ele({
             Variable: {
               '@id': transformedVariable.id,
               '@type': transformedVariable.type,
               '@format': transformedVariable.format,
               '@nullable': transformedVariable.nullable,
-              '@multiple': transformedVariable.multiple
+              '@multiple': transformedVariable.multiple,
+              '@page': transformedVariable.page
             }
           });
-          if (transformedVariable.values.length > 0) {
+          if (transformedVariable.valuePositionLabels.length) {
+            const valuePositionLabelsElement = variableElement.ele('ValuePositionLabels');
+            transformedVariable.valuePositionLabels.forEach(label => {
+              valuePositionLabelsElement.ele({ ValuePositionLabel: { '#': label } });
+            });
+          }
+          if (transformedVariable.values.length) {
             const valuesElement = variableElement.ele({
               Values: {
                 '@complete': transformedVariable.valuesComplete

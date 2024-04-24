@@ -4,7 +4,6 @@ import {
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 
-
 const bookletConfigDefault = {
   pagingMode: '',
   pageNaviButtons: '',

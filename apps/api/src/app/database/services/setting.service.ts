@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api-dto';
+import {
+  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto
+} from '@studio-lite-lib/api-dto';
+
 import Setting from '../entities/setting.entity';
 import { UsersService } from './users.service';
 
@@ -42,7 +45,7 @@ export class SettingService {
       settingToUpdate.content = JSON.stringify(settingContent);
       await this.settingsRepository.save(settingToUpdate);
     } else {
-      const newSetting = await this.settingsRepository.create({
+      const newSetting = this.settingsRepository.create({
         key: 'config',
         content: JSON.stringify(settingContent)
       });
@@ -65,7 +68,7 @@ export class SettingService {
       settingToUpdate.content = JSON.stringify(newLogo);
       await this.settingsRepository.save(settingToUpdate);
     } else {
-      const newSetting = await this.settingsRepository.create({
+      const newSetting = this.settingsRepository.create({
         key: 'app-logo',
         content: JSON.stringify(newLogo)
       });
@@ -88,9 +91,33 @@ export class SettingService {
       settingToUpdate.content = JSON.stringify(newUnitExportConfig);
       await this.settingsRepository.save(settingToUpdate);
     } else {
-      const newSetting = await this.settingsRepository.create({
+      const newSetting = this.settingsRepository.create({
         key: 'unit-export-config',
         content: JSON.stringify(newUnitExportConfig)
+      });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findMissingsProfiles(): Promise<MissingsProfilesDto[] | null> {
+    this.logger.log('Returning settings missings profiles config.');
+    const missingsProfiles = await this.settingsRepository.findOne({ where: { key: 'missings-profile-iqb-standard' } });
+    if (!missingsProfiles) {
+      return [];
+    }
+    return missingsProfiles ? JSON.parse(missingsProfiles.content) : new MissingsProfilesDto();
+  }
+
+  async patchMissingsProfiles(newMissingsProfiles: MissingsProfilesDto): Promise<void> {
+    this.logger.log('Updating settings missings profiles config.');
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'missings-profiles-iqb-standard' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = JSON.stringify(newMissingsProfiles);
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = this.settingsRepository.create({
+        key: 'missings-profile-iqb-standard',
+        content: JSON.stringify(newMissingsProfiles)
       });
       await this.settingsRepository.save(newSetting);
     }

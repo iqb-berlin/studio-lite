@@ -111,18 +111,28 @@ build-main-pr-backend-test-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/api/Dockerfile --target=dev --build-arg project=api --progress plain
-      -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test .
+    - docker build
+          --progress plain
+          --target=dev
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=api
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${BACKEND_IMAGE_NAME}:latest
+          -f apps/api/Dockerfile
+          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+        .
     - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-pr-frontend-test-image:
@@ -134,19 +144,30 @@ build-main-pr-frontend-test-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend/Dockerfile --target=dev --progress plain
-      --build-arg project=frontend --build-arg apihost=studio-lite-backend --build-arg apiport=3333
-      -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test .
+    - docker build
+          --progress plain
+          --target=dev
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=frontend
+          --build-arg apihost=studio-lite-backend
+          --build-arg apiport=3333
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${FRONTEND_IMAGE_NAME}:latest
+          -f apps/frontend/Dockerfile
+          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+        .
     - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-pr-frontend-e2e-test-image:
@@ -158,20 +179,26 @@ build-main-pr-frontend-e2e-test-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    FRONTEND_E2E_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend-e2e"
+    FRONTEND_E2E_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --progress plain
-      -f apps/frontend-e2e/Dockerfile
-      -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
-      -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${FRONTEND_E2E_IMAGE_NAME}:latest
+          -f apps/frontend-e2e/Dockerfile
+          -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
     - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-pr-db-image:
@@ -183,19 +210,27 @@ build-main-pr-db-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
+    DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build --progress plain
-      -f database/Postgres.Dockerfile
-      -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${DB_IMAGE_NAME}:latest
+          -f database/Postgres.Dockerfile
+          -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${DB_IMAGE_NAME}:main
+        .
+    - docker push -q -a ${DB_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-pr-liquibase-image:
@@ -207,19 +242,27 @@ build-main-pr-liquibase-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
+    LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
   script:
-    - docker build --progress plain
-      -f database/Liquibase.Dockerfile
-      -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
+          -f database/Liquibase.Dockerfile
+          -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${LIQUIBASE_IMAGE_NAME}:main
+        .
+    - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $REGISTRY
 
 build-main-pr-backend-image:
@@ -233,20 +276,29 @@ build-main-pr-backend-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
   script:
-    - docker build --progress plain --cache-from ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
-      -f apps/api/Dockerfile --target=prod --build-arg project=api
-      -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --target=prod
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=api
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+          -f apps/api/Dockerfile
+          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${BACKEND_IMAGE_NAME}:main
+        .
+    - docker push -q -a ${BACKEND_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-pr-frontend-image:
@@ -260,20 +312,29 @@ build-main-pr-frontend-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
   script:
-    - docker build --progress plain --cache-from ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
-      -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend
-      -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
-    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker build
+          --progress plain
+          --target=prod
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=frontend
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --cache-from ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+          -f apps/frontend/Dockerfile
+          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          -t ${FRONTEND_IMAGE_NAME}:main
+        .
+    - docker push -q -a ${FRONTEND_IMAGE_NAME}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 test-main-pr-db:
@@ -286,30 +347,85 @@ test-main-pr-db:
     - build-main-pr-liquibase-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml pull -q db liquibase
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d db
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        pull -q db liquibase
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d db
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog status
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog validate
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateSQL
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            status
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            validate
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            updateSQL
   script:
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog updateTestingRollback
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            updateTestingRollback
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
 
 test-main-pr-backend:
   stage: test-units
@@ -321,9 +437,11 @@ test-main-pr-backend:
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
@@ -339,9 +457,11 @@ test-main-pr-frontend:
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
@@ -360,7 +480,9 @@ test-main-pr-e2e:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -368,10 +490,23 @@ test-main-pr-e2e:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
 
 test-main-pr-e2e-api:
@@ -387,7 +522,9 @@ test-main-pr-e2e-api:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -395,10 +532,22 @@ test-main-pr-e2e-api:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
 
 test-main-pr-e2e-ui-chrome:
@@ -414,7 +563,9 @@ test-main-pr-e2e-ui-chrome:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -422,10 +573,23 @@ test-main-pr-e2e-ui-chrome:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
 
 test-main-pr-e2e-ui-chrome-mobile:
@@ -441,7 +605,9 @@ test-main-pr-e2e-ui-chrome-mobile:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -449,11 +615,25 @@ test-main-pr-e2e-ui-chrome-mobile:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
+    - docker compose -f docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
 
 test-main-pr-e2e-ui-firefox:
   stage: test-e2e
@@ -468,7 +648,9 @@ test-main-pr-e2e-ui-firefox:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -476,10 +658,23 @@ test-main-pr-e2e-ui-firefox:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
 
 test-main-pr-e2e-ui-firefox-mobile:
@@ -495,7 +690,9 @@ test-main-pr-e2e-ui-firefox-mobile:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -503,11 +700,25 @@ test-main-pr-e2e-ui-firefox-mobile:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
+    - docker compose -f docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
 
 test-main-pr-e2e-ui-edge:
   stage: test-e2e
@@ -522,7 +733,9 @@ test-main-pr-e2e-ui-edge:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -530,10 +743,23 @@ test-main-pr-e2e-ui-edge:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
 
 test-main-pr-e2e-ui-edge-mobile:
@@ -549,7 +775,9 @@ test-main-pr-e2e-ui-edge-mobile:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
@@ -557,11 +785,25 @@ test-main-pr-e2e-ui-edge-mobile:
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
   script:
     - docker network create app-net
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml up -d --quiet-pull
-    - docker compose --env-file .env.studio-lite.template -f docker-compose.studio-lite.yaml -f docker-compose.studio-lite.prod.yaml run --rm liquibase
-      liquibase --changelogFile=studio-lite.changelog-root.xml --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        up -d --quiet-pull
+    - docker compose
+          --env-file .env.studio-lite.template
+          -f docker-compose.studio-lite.yaml
+          -f docker-compose.studio-lite.prod.yaml
+        run --rm liquibase
+          liquibase
+              --changelogFile=studio-lite.changelog-root.xml
+              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+              --username=${POSTGRES_USER}
+              --password=${POSTGRES_PASSWORD}
+              --classpath=changelog
+            history
+    - docker compose -f docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
 
 lint-main-pr-backend:
   stage: lint
@@ -573,9 +815,11 @@ lint-main-pr-backend:
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
@@ -591,9 +835,11 @@ lint-main-pr-frontend:
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
@@ -609,9 +855,11 @@ lint-main-pr-frontend-e2e:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    FRONTEND_E2E_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend-e2e"
+    FRONTEND_E2E_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e"
   before_script:
     - docker pull -q ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
   script:
@@ -626,9 +874,11 @@ audit-main-pr-backend:
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
@@ -643,9 +893,11 @@ audit-main-pr-frontend:
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
@@ -666,17 +918,25 @@ build-main-commit-db-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
+    DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Postgres.Dockerfile -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA} --progress plain .
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --cache-from ${DB_IMAGE_NAME}:main
+          -f database/Postgres.Dockerfile
+          -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+        .
     - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-commit-liquibase-image:
@@ -687,17 +947,25 @@ build-main-commit-liquibase-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
+    LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f database/Liquibase.Dockerfile -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA} --progress plain .
+    - docker build
+          --progress plain
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --cache-from ${LIQUIBASE_IMAGE_NAME}:main
+          -f database/Liquibase.Dockerfile
+          -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+        .
     - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $REGISTRY
 
 build-main-commit-backend-image:
@@ -708,18 +976,27 @@ build-main-commit-backend-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/api/Dockerfile --target=prod --build-arg project=api --progress plain
-      -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build
+          --progress plain
+          --target=prod
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=api
+          --cache-from ${BACKEND_IMAGE_NAME}:main
+          -f apps/api/Dockerfile
+          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+        .
     - docker push ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 build-main-commit-frontend-image:
@@ -730,18 +1007,27 @@ build-main-commit-frontend-image:
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - docker build -f apps/frontend/Dockerfile --target=prod --build-arg project=frontend --progress plain
-      -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA} .
+    - docker build
+          --progress plain
+          --target=prod
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg PROJECT=frontend
+          --cache-from ${BACKEND_IMAGE_NAME}:main
+          -f apps/frontend/Dockerfile
+          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+        .
     - docker push ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
 scan-main-commit-db-image:
@@ -763,7 +1049,7 @@ scan-main-commit-db-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -771,12 +1057,28 @@ scan-main-commit-db-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL $FULL_IMAGE_NAME
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity
+        CRITICAL $FULL_IMAGE_NAME
   cache:
     paths:
       - .trivycache/
@@ -805,7 +1107,7 @@ scan-main-commit-liquibase-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -813,12 +1115,28 @@ scan-main-commit-liquibase-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -847,7 +1165,7 @@ scan-main-commit-backend-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -855,12 +1173,28 @@ scan-main-commit-backend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -889,7 +1223,7 @@ scan-main-commit-frontend-image:
     TRIVY_AUTH_URL: "$CI_REGISTRY"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
+    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
@@ -897,12 +1231,28 @@ scan-main-commit-frontend-image:
     # update vulnerabilities db
     - trivy image --download-db-only
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln --format template --template "@/contrib/gitlab.tpl"
-      --output "$CI_PROJECT_DIR/gl-container-scanning-report.json" "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
     # Prints full report
-    - trivy image --exit-code 0 --timeout 30m --scanners vuln "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
     # Fail on critical vulnerabilities
-    - trivy image --exit-code 1 --timeout 30m --scanners vuln --ignore-unfixed --severity CRITICAL "$FULL_IMAGE_NAME"
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
   cache:
     paths:
       - .trivycache/
@@ -918,12 +1268,14 @@ build-release:
     - !reference [ .release_rules, rules ]
   image: $DOCKER_IMAGE
   services:
-    - $DOCKER_SERVICE
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
   variables:
-    DB_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-db"
-    LIQUIBASE_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-liquibase"
-    BACKEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-backend"
-    FRONTEND_IMAGE_NAME: "${REGISTRY}${REGISTRY_PROJECT}iqbberlin/studio-lite-frontend"
+    DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
+    LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
+    BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
+    FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
     - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}

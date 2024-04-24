@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VariableInfo } from '@iqb/responses';
 import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class UnitMetadataDto {
@@ -45,7 +46,7 @@ export class UnitMetadataDto {
     scheme?: string;
 
   @ApiProperty()
-    variables?: any;
+    variables?: VariableInfo[];
 
   @ApiProperty({
     type: 'string',

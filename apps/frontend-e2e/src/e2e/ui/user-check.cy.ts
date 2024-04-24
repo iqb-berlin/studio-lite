@@ -1,6 +1,7 @@
 import {
   addFirstUser,
   changePassword,
+  updatePersonalData,
   clickButtonToAccept, createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
 } from '../../support/util';
 import { adminData, userData } from '../../support/config/userdata';
@@ -47,9 +48,15 @@ describe('User Management', () => {
 
   it('should not be able to find admin user setting button', () => {
     login(userData.user_name, userData.user_pass);
-    cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
+    cy.get('[data-cy="goto-admin"]')
       .should('not.exist');
     visitLoginPage();
+    logout();
+  });
+
+  it('should be able to modify personal data', () => {
+    login(userData.user_name, userData.user_pass);
+    updatePersonalData();
     logout();
   });
 
@@ -72,8 +79,4 @@ describe('User Management', () => {
     visitLoginPage();
     logout();
   });
-
-  // it('should be able to modify personal data', () => {
-  //   // TODO
-  // });
 });

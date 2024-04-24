@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>{{ 'workspace.responses' | translate }}</h2>
+<p class="sub-title">{{ 'workspace.no-responses' | translate }}</p>
+<mat-dialog-content>
+  @if (data.table) {
+    <table mat-table [dataSource]="dataSource">
+      @for (column of displayedColumns; track column) {
+        <ng-container [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef>{{column}}</th>
+          <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  } @else {
+    <pre>
+      {{data.responses | json}}
+    </pre>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button color="primary" mat-raised-button [mat-dialog-close]="false">
+    {{ 'close' | translate }}
+  </button>
+</mat-dialog-actions>
+
+

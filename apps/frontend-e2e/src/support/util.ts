@@ -31,7 +31,6 @@ export function login(username: string, password = '') {
     .clear()
     .type(username);
   if (password) {
-    // cy.get("#mat-input-1") gut
     cy.get('input[placeholder="Kennwort"]')
       .should('exist')
       .clear()
@@ -39,16 +38,12 @@ export function login(username: string, password = '') {
   }
   cy.intercept('POST', '/api/login').as('responseLogin');
   clickButtonToAccept('Weiter');
-  cy.wait('@responseLogin').its('response.statusCode').should('eq', 201);
+  cy.wait('@responseLogin')
+    .its('response.statusCode').should('eq', 201);
 }
 
 export function createGroupArea(group:string):void {
-  // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-
-  cy.get('mat-icon:contains("setting")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -75,11 +70,7 @@ export function createAreaForGroupFromAdmin(area:string, group:string):void {
 }
 
 export function deleteGroupArea(areaName: string):void {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > ' +
-    '.center-icon > .mat-icon')
-    .eq(0)
-    .click();
-  // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]').should('exist').click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -93,23 +84,25 @@ export function deleteGroupArea(areaName: string):void {
 }
 
 export function logout() {
-  cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+  cy.get('mat-icon:contains("account_box")')
+    .eq(0)
+    .should('exist')
     .click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
-  // TODO  dont use systematically wait
   cy.wait(400);
   clickButtonToAccept('Abmelden');
 }
 
 export function changePassword(newPass:string, oldPass:string):void {
-  cy.get('.mat-mdc-menu-trigger > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
+  cy.get('mat-icon:contains("account_box")')
+    .eq(0)
+    .should('exist')
+    .click();
   cy.get('span:contains("Kennwort ändern")')
     .should('exist')
     .click();
-  // TODO  dont use systematically wait
-  // cy.wait(400);
   cy.get('mat-label:contains("Altes Kennwort")')
     .should('exist')
     .type(oldPass);
@@ -123,11 +116,31 @@ export function changePassword(newPass:string, oldPass:string):void {
   clickButtonToAccept('Speichern');
 }
 
-export function createNewUser(name: string, pass: string):void {
-  // eslint-disable-next-line max-len
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
+export function updatePersonalData():void {
+  cy.get('mat-icon:contains("account_box")')
     .eq(0)
+    .should('exist')
     .click();
+  cy.get('span:contains("Nutzerdaten ändern")')
+    .should('exist')
+    .click();
+  cy.get('input[placeholder="Nachname"]')
+    .should('exist')
+    .clear()
+    .type('Müller');
+  cy.get('input[placeholder="Vorname"]')
+    .should('exist')
+    .clear()
+    .type('Adam');
+  cy.get('input[placeholder="E-Mail"]')
+    .should('exist')
+    .clear()
+    .type('adam.muller@iqb.hu-berlin.de');
+  clickButtonToAccept('Speichern');
+}
+
+export function createNewUser(name: string, pass: string):void {
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
     .should('exist')
@@ -149,10 +162,7 @@ export function createNewUser(name: string, pass: string):void {
 }
 
 export function deleteUser(user: string):void {
-  // eslint-disable-next-line max-len
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon')
-    .eq(0)
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('mat-table')
     .contains(`${user}`)
     .should('exist')
@@ -164,10 +174,7 @@ export function deleteUser(user: string):void {
 }
 
 export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-    .eq(0)
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -176,10 +183,10 @@ export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
     .should('exist')
     .click();
   cy.get(`label:contains(${user})`).prev().click();
-
-  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
-  cy.get('.fx-row-space-between-center > .mat-mdc-tooltip-trigger > ' +
-    '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
+  cy.get('.center-icon > .mat-icon:contains("save")')
+    .eq(0)
+    .should('exist')
+    .click();
 }
 
 export function grantRemovePrivilegeOnArea(user:string, area: string):void {
@@ -188,9 +195,10 @@ export function grantRemovePrivilegeOnArea(user:string, area: string):void {
     .should('exist')
     .click();
   cy.get(`label.mdc-label:contains(${user})`).click();
-  // cy.get('studio-lite-wrapped-icon[ng-reflect-icon="save"]').click();
-  cy.get('.fx-row-space-between-center > .mat-mdc-tooltip-trigger > ' +
-    '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').click();
+  cy.get('mat-icon:contains("save")')
+    .eq(1)
+    .should('exist')
+    .click();
 }
 
 export function visitArea(area: string):void {
@@ -206,34 +214,69 @@ export function deleteUnit(kurzname: string):void {
 }
 
 export function addUnit(kurzname: string):void {
-  cy.get('studio-lite-add-unit-button.unit-crud-button > .mat-mdc-tooltip-trigger > ' +
-    '.mdc-button__label > studio-lite-wrapped-icon > .center-icon > .mat-icon').should('exist').click();
-  // cy.get('button[ng-reflect-message="Aufgabe(n) hinzufügen"]').should('exist').click();
+  cy.get('mat-icon:contains("add")')
+    .click();
   cy.get('button > span:contains("Neue Aufgabe")')
     .should('exist')
     .click();
-  cy.get('.mat-focused > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix')
+  cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
-  // cy.get('input[ng-reflect-placeholder="Kurzname"]')
-  //   .should('exist')
-  //   .type(kurzname);
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
 
 export function addModule():void {
-  cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-    'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-    .eq(0)
-    .click();
+  cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
-  cy.get('mat-icon:contains("cloud_upload")')
-    .selectFile('apps/frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html')
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('iqb-schemer@1.5')
+    .should('exist');
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('iqb-player-aspect@2.4.10')
+    .should('exist');
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('iqb-editor-aspect@2.4.9')
+    .should('exist');
+}
+
+export function deleteModule():void {
+  cy.get('[data-cy="goto-admin"]').click();
+  cy.get('span:contains("Module")')
+    .eq(0)
     .click();
-  //  TODO
-  //  cy.selectFile('./../fixtures/iqb-editor-aspect-2.4.0-beta.1.html');
+  cy.get('span:contains("IQB-Schemer")')
+    .parent()
+    .parent()
+    .prev()
+    .click();
+  cy.get('span:contains("IQB-Player")')
+    .parent()
+    .parent()
+    .prev()
+    .click();
+  cy.get('span:contains("IQB-Editor")')
+    .parent()
+    .parent()
+    .prev()
+    .click();
+  cy.get('div > mat-icon')
+    .contains('delete')
+    .click();
+  clickButtonToAccept('Löschen');
 }
 
 export function visitLoginPage():void {

@@ -7,6 +7,7 @@ import { map } from 'rxjs/operators';
 import {
   UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
+import { CodingScheme } from '@iqb/responses';
 import { BackendService } from './backend.service';
 import {
   UnitMetadataStore
@@ -35,8 +36,7 @@ export class WorkspaceService {
   lastChangedScheme?: Date;
   isValidFormKey = new BehaviorSubject<boolean>(true);
   states: State[] = [];
-  codingSchemer: any;
-  codingScheme!: any;
+  codingSchemer!: CodingScheme;
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
   @Output() unitMetadataStoreChanged = new EventEmitter<UnitMetadataStore | undefined>();

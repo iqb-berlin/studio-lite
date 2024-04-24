@@ -1,3 +1,5 @@
+export { CodingReportDto } from './lib/dto/workspace/coding-report-dto';
+export { MissingsProfilesDto } from './lib/dto/setting/missings-profiles-dto';
 export { ReviewConfigDto } from './lib/dto/review/review-config-dto';
 export { BookletConfigDto } from './lib/dto/review/booklet-config-dto';
 export { CreateReviewDto } from './lib/dto/review/create-review-dto';
@@ -43,6 +45,6 @@ export { ProfileMetadataValues } from './lib/dto/unit/profile-metadata-values.cl
 export { MetadataValues } from './lib/dto/unit/profile-metadata-values.class';
 export { ItemsMetadataValues } from './lib/dto/unit/profile-metadata-values.class';
 export { MetadataValuesEntry } from './lib/dto/unit/profile-metadata-values.class';
-export { CodebookDto } from './lib/dto/coding/coding-dto';
+export { CodebookUnitDto } from './lib/dto/coding/coding-dto';
 export { CodeBookContentSetting } from './lib/dto/coding/coding-dto';
 export { UnitMetadataValues } from './lib/dto/unit/profile-metadata-values.class';

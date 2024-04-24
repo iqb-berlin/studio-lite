@@ -8,6 +8,8 @@ audit-backend:
 audit-frontend:
 	$(MAKE) -f $(MK_FILE_DIR)/audit.mk -C $(MK_FILE_DIR) $@
 
+dev-build:
+	$(MAKE) -f $(MK_FILE_DIR)/dev.mk -C $(MK_FILE_DIR) $@
 dev-up:
 	$(MAKE) -f $(MK_FILE_DIR)/dev.mk -C $(MK_FILE_DIR) $@
 dev-down:
@@ -21,8 +23,6 @@ dev-status:
 dev-logs:
 	$(MAKE) -f $(MK_FILE_DIR)/dev.mk -C $(MK_FILE_DIR) $@
 dev-config:
-	$(MAKE) -f $(MK_FILE_DIR)/dev.mk -C $(MK_FILE_DIR) $@
-dev-build:
 	$(MAKE) -f $(MK_FILE_DIR)/dev.mk -C $(MK_FILE_DIR) $@
 dev-system-prune:
 	$(MAKE) -f $(MK_FILE_DIR)/dev.mk -C $(MK_FILE_DIR) $@
@@ -55,6 +55,31 @@ dev-db-rollback-lastchangeset:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-db.mk -C $(MK_FILE_DIR) $@
 dev-db-generate-docs:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-db.mk -C $(MK_FILE_DIR) $@
+
+dev-test-app:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-backend:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-frontend:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-build-e2e:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-api:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-ui-chrome:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-ui-chrome-mobile:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-ui-firefox:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-ui-firefox-mobile:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-ui-edge:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
+dev-test-e2e-ui-edge-mobile:
+	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
 
 lint-app:
 	$(MAKE) -f $(MK_FILE_DIR)/lint.mk -C $(MK_FILE_DIR) $@
@@ -104,6 +129,25 @@ studio-lite-restore-db-data-only:
 studio-lite-update:
 	$(MAKE) -f $(MK_FILE_DIR)/prod.mk -C $(MK_FILE_DIR) $@
 
+prod-test-build-e2e:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-api:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-ui-chrome:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-ui-chrome-mobile:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-ui-firefox:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-ui-firefox-mobile:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-ui-edge:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+prod-test-e2e-ui-edge-mobile:
+	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
+
 push-dockerhub:
 	$(MAKE) -f $(MK_FILE_DIR)/push.mk -C $(MK_FILE_DIR) $@
 push-iqb-registry:
@@ -120,43 +164,3 @@ scan-backend:
 scan-frontend:
 	$(MAKE) -f $(MK_FILE_DIR)/scan.mk -C $(MK_FILE_DIR) $@
 
-test-app:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-backend:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-frontend:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-build:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-api-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-chrome-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-chrome-mobile-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-firefox-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-firefox-mobile-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-edge-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-edge-mobile-dev:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-api-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-chrome-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-chrome-mobile-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-firefox-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-firefox-mobile-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-edge-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@
-test-e2e-ui-edge-mobile-prod:
-	$(MAKE) -f $(MK_FILE_DIR)/test.mk -C $(MK_FILE_DIR) $@

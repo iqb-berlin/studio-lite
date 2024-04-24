@@ -107,7 +107,7 @@
             "command": "docker login {args.registry}",
             "forwardAllArgs": false
           },
-          "docker build -f apps/frontend/Dockerfile --build-arg project=frontend --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag} -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:latest .",
+          "docker build -f apps/frontend/Dockerfile --build-arg PROJECT=frontend --target=prod -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag} -t {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:latest .",
           "docker push -q -a {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend"
         ],
         "parallel": false
@@ -118,7 +118,7 @@
       "options": {
         "commands": [
           "docker pull {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}",
-          "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.29.2 image --exit-code 1 --scanners vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}"
+          "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy:0.50.1 image --exit-code 1 --scanners vuln --ignore-unfixed --severity CRITICAL {args.registry}{args.registryProject}iqbberlin/studio-lite-frontend:{args.tag}"
         ]
       }
     }

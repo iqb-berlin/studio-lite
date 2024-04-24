@@ -6,7 +6,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 
-
 @Component({
   selector: 'studio-lite-unit-groups',
   templateUrl: './unit-groups.component.html',

@@ -1,5 +1,6 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
+import { VariableInfo } from '@iqb/responses';
 
 export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
@@ -13,8 +14,8 @@ export class UnitDefinitionStore {
     this.changedData = <UnitDefinitionDto>{};
   }
 
-  setData(newVariables: unknown[], newDefinition: string) {
-    if (newVariables === this.originalData.variables) {
+  setData(newVariables: VariableInfo[], newDefinition: string) {
+    if (JSON.stringify(newVariables) === JSON.stringify(this.originalData.variables)) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
       this.changedData.variables = newVariables;
@@ -28,7 +29,7 @@ export class UnitDefinitionStore {
   }
 
   isChanged(): boolean {
-    return Object.keys(this.changedData).length > 1;
+    return Object.keys(this.changedData).length > 0;
   }
 
   getChangedData(): UnitDefinitionDto {

@@ -81,16 +81,16 @@ export class ItemComponent implements OnInit, OnChanges {
             props: {
               type: 'number',
               min: 0,
-              placeholder: this.translateService.instant('metadata.item-weighting'),
-              label: this.translateService.instant('metadata.item-weighting')
+              placeholder: this.translateService.instant('metadata.weighting'),
+              label: this.translateService.instant('metadata.weighting')
             }
           },
           {
             type: 'textarea',
             key: 'description',
             props: {
-              placeholder: this.translateService.instant('metadata.item-description'),
-              label: this.translateService.instant('metadata.item-description'),
+              placeholder: this.translateService.instant('metadata.description'),
+              label: this.translateService.instant('metadata.description'),
               autosize: true,
               autosizeMinRows: 3,
               autosizeMaxRows: 10

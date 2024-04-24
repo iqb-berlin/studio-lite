@@ -6,7 +6,13 @@ import {
   logout,
   visitLoginPage,
   createGroupArea,
-  deleteGroupArea, createAreaForGroupFromAdmin, grantRemovePrivilegeOnArea, addFirstUser, deleteFirstUser, addModule
+  deleteGroupArea,
+  createAreaForGroupFromAdmin,
+  grantRemovePrivilegeOnArea,
+  addFirstUser,
+  deleteFirstUser,
+  addModule,
+  deleteModule
 } from '../../support/util';
 import { adminData } from '../../support/config/userdata';
 
@@ -15,9 +21,11 @@ describe('Admin Management', () => {
     cy.viewport(1600, 900);
     visitLoginPage();
   });
+  it('add the first User', () => {
+    addFirstUser();
+  });
 
   it('user with admin credentials can add new user', () => {
-    addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser('newuser', 'newpass');
     visitLoginPage();
@@ -26,13 +34,7 @@ describe('Admin Management', () => {
 
   it('user with admin credentials can delete a user', () => {
     login(adminData.user_name, adminData.user_pass);
-    cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-      'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-      .eq(0)
-      .click();
-    // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    //   .should('exist')
-    //   .click();
+    cy.get('[data-cy="goto-admin"]').click();
     cy.get('mat-table')
       .contains('newuser')
       .should('exist')
@@ -45,13 +47,7 @@ describe('Admin Management', () => {
 
   it('should be able to find admin user setting button', () => {
     login(adminData.user_name, adminData.user_pass);
-    // cy.get('button[ng-reflect-message="Allgemeine Systemverwaltung"]')
-    //   .should('exist')
-    //   .click();
-    cy.get('.mat-mdc-tooltip-trigger.ng-star-inserted > .mdc-button__label > ' +
-      'studio-lite-wrapped-icon > .center-icon > .mat-icon')
-      .eq(0)
-      .click();
+    cy.get('[data-cy="goto-admin"]').click();
     visitLoginPage();
     logout();
   });
@@ -77,19 +73,24 @@ describe('Admin Management', () => {
     visitLoginPage();
     logout();
   });
+  it('user with admin credentials can Modules upload', () => {
+    login(adminData.user_name, adminData.user_pass);
+    addModule();
+    visitLoginPage();
+    logout();
+  });
 
+  it('user with admin credentials delete Modules', () => {
+    login(adminData.user_name, adminData.user_pass);
+    deleteModule();
+    visitLoginPage();
+    logout();
+  });
   it('remove the Context', () => {
     login(adminData.user_name, adminData.user_pass);
     deleteGroupArea('Mathematik Primär Bereichsgruppe');
     visitLoginPage();
     deleteFirstUser();
-    visitLoginPage();
-    logout();
-  });
-  it.skip('user with admin credentials can Module hochladen', () => {
-    login(adminData.user_name, adminData.user_pass);
-    // TODO
-    addModule();
     visitLoginPage();
     logout();
   });

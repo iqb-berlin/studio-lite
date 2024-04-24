@@ -11,9 +11,8 @@ import { adminData } from '../../../support/config/userdata';
 import {
   getItem,
   getStructure,
-  selectProfileForArea,
   selectProfileForAreaFromGroup,
-  selectProfileForGroupFromAdmin, selectProfileForGroup
+  selectProfileForGroup
 } from '../../../support/metadata-util';
 import { IqbProfile } from '../../../support/config/iqbProfile';
 
@@ -42,34 +41,20 @@ describe('Metadata Management', () => {
     createAreaForGroupFromAdmin(mathArea, group);
     grantRemovePrivilegeOnArea(adminData.user_name, mathArea);
   });
-  it('choose profiles from the administration ', () => {
-    visitLoginPage();
-    selectProfileForGroupFromAdmin(group, IqbProfile.DE);
-    visitLoginPage();
-    selectProfileForGroupFromAdmin(group, IqbProfile.MA);
-  });
 
-  it.skip('choose profiles from the group ', () => {
+  it('choose profiles from the group ', () => {
     visitLoginPage();
     selectProfileForGroup(group, IqbProfile.DE);
     visitLoginPage();
     selectProfileForGroup(group, IqbProfile.MA);
   });
   // Execute only one of the two test: the previous oder this, not both together
-  it('choose a profil for an area from a group', () => {
+
+  it('choose profile for an area from a group', () => {
     visitLoginPage();
     selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
     visitLoginPage();
     selectProfileForAreaFromGroup(IqbProfile.MA, mathArea, group);
-  });
-
-  it.skip('choose a profile for an area', () => {
-    visitLoginPage();
-    cy.contains(area).click();
-    selectProfileForArea(IqbProfile.DE);
-    visitLoginPage();
-    cy.contains(mathArea).click();
-    selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {

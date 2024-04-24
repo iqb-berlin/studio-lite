@@ -14,7 +14,7 @@ import {
   WidthType, PageNumber
 } from 'docx';
 
-import { CodeBookContentSetting, CodebookDto } from '@studio-lite-lib/api-dto';
+import { CodeBookContentSetting, CodebookUnitDto } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { UnderlineType } from 'docx/build/file/paragraph/run/underline';
 import { ShadingType } from 'docx/build/file/shading/shading';
@@ -42,12 +42,12 @@ type ParagraphOptions = {
 };
 
 export class DownloadDocx {
-  static async getCodebook(codingBookUnits: CodebookDto[],
+  static async getCodebook(codingBookUnits: CodebookUnitDto[],
                            contentSetting: CodeBookContentSetting): Promise<Buffer | []> {
     let codeRows: TableRow[] = [];
     let unitHeader: Paragraph;
     let generalInstructions: Paragraph[] = [];
-
+    const missings: Paragraph[] = [];
     const units = [];
     if (codingBookUnits.length > 0) {
       codingBookUnits.forEach(variableCoding => {
@@ -73,6 +73,39 @@ export class DownloadDocx {
           alignment: AlignmentType.CENTER
         });
         const variables = [];
+        try {
+          variableCoding.missings.forEach(missing => {
+            if (missing.code && missing.label && missing.description) {
+              missings.push(new Paragraph({
+                children: [new TextRun({ text: `${missing.code} ${missing.label}`, bold: true })],
+                spacing: {
+                  after: 20
+                }
+              }));
+              missings.push(new Paragraph({
+                text: `${missing.description}`,
+                spacing: {
+                  after: 100
+                }
+              }));
+            } else {
+              missings.push(new Paragraph({
+                text: 'kein valides Missing ',
+                spacing: {
+                  after: 200
+                }
+              }));
+            }
+          });
+        } catch {
+          missings.push(new Paragraph({
+            text: 'kein validen Missings gefunden',
+            spacing: {
+              after: 200
+            }
+          }));
+        }
+
         if (variableCoding.variables.length > 0) {
           variableCoding.variables?.forEach(variable => {
             const variableHeader = new Paragraph({
@@ -264,6 +297,7 @@ export class DownloadDocx {
               })
             },
             children: [
+              ...missings,
               ...units
             ]
           }]

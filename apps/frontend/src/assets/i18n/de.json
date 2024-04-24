@@ -233,8 +233,8 @@
     "error-states": "Status Liste konnte nicht geladen werden!",
     "without-id": "ohne ID",
     "choose-item-variable": "Variable auswählen",
-    "item-description": "Notiz",
-    "item-weighting": "Wichtung",
+    "description": "Notiz",
+    "weighting": "Wichtung",
     "formly-field-required": "Pflichtfeld",
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
@@ -242,7 +242,12 @@
     "items": "Metadaten Items",
     "units": "Metadaten Aufgaben",
     "unit-title": "Metadaten (Aufgabe)",
-    "items-title": "Metadaten (Items)"
+    "items-title": "Metadaten (Items)",
+    "id": "Item-Id",
+    "key": "Aufgabe",
+    "variableId": "Variablen",
+    "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
+    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
@@ -256,7 +261,8 @@
   "settings": {
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
-    "unit-export-params": "Parameter für den Unit-Export"
+    "unit-export-params": "Parameter für den Unit-Export",
+    "missings-profiles": "Kodierung: Missings Profile"
   },
   "config": {
     "start-page-warning": "Warnung auf der Startseite",
@@ -278,6 +284,12 @@
     "unit-xml-path": "Xsd-Pfad für Unit.Xml",
     "params-saved": "Parameter für Unitexport gespeichert",
     "params-not-saved": "Konnte Parameter für Unitexport nicht speichern"
+  },
+  "missings-profiles-config": {
+    "iqb-standard": "IQB-Standard",
+    "profiles-saved": "Missings Profile gespeichert",
+    "profiles-not-saved": "Konnte Missings Profile nicht speichern",
+    "not-valid-json": "Kein gültiges JSON Format"
   },
   "logo": {
     "upload-info": "Klick rechts auf den Schalter zum Hochladen",
@@ -395,6 +407,8 @@
     "VALUE_CHANGED": "Wert geändert"
   },
   "workspace": {
+    "no-responses": "Es liegen keine Kodierungen vor",
+    "responses": "Antwortdaten",
     "routes": {
       "properties": "Eigenschaften",
       "metadata": "Metadaten",

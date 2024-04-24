@@ -7,8 +7,6 @@ x-env-postgres: &env-postgres
 
 services:
   db:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
-    restart: always
     environment:
       <<: *env-postgres
     volumes:
@@ -17,7 +15,6 @@ services:
       - application-network
 
   liquibase:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
     depends_on:
       db:
         condition: service_healthy
@@ -36,13 +33,11 @@ services:
       - application-network
 
   backend:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
     depends_on:
       db:
         condition: service_healthy
       liquibase:
         condition: service_completed_successfully
-    restart: always
     environment:
       API_HOST: backend
       <<: *env-postgres
@@ -50,7 +45,6 @@ services:
       - application-network
 
   frontend:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     depends_on:
       db:
         condition: service_healthy
@@ -58,7 +52,6 @@ services:
         condition: service_completed_successfully
       backend:
         condition: service_started
-    restart: always
     networks:
       - application-network
 
