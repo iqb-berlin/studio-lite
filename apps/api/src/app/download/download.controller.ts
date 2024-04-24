@@ -12,13 +12,15 @@ import { UnitService } from '../database/services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { IsAdminGuard } from '../admin/is-admin.guard';
 import { WorkspaceGuard } from '../workspace/workspace.guard';
+import { SettingService } from '../database/services/setting.service';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
 export class DownloadController {
   constructor(
     private workspaceService: WorkspaceService,
-    private unitService: UnitService
+    private unitService: UnitService,
+    private settingsService: SettingService
   ) {
   }
 
@@ -33,12 +35,14 @@ export class DownloadController {
   @WorkspaceGroupId() workspaceGroupId: number,
     @Param('unitList') unitList: string,
     @Query('format')exportFormat: 'json' | 'docx',
+    @Query('missingsProfile')missingsProfile: string,
     @Query('onlyManual') hasOnlyManualCoding: string,
     @Query('generalInstructions') hasGeneralInstructions: string,
     @Query('derived') hasDerivedVars: string,
     @Query('closed') hasClosedVars: string) {
     const options:CodeBookContentSetting = {
       exportFormat,
+      missingsProfile: missingsProfile,
       hasOnlyManualCoding: hasOnlyManualCoding,
       hasGeneralInstructions: hasGeneralInstructions,
       hasDerivedVars: hasDerivedVars,
@@ -49,6 +53,7 @@ export class DownloadController {
       .getWorkspaceCodingBook(
         workspaceGroupId,
         this.unitService,
+        this.settingsService,
         options,
         unitList);
     return new StreamableFile(file as Buffer);

@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CodebookDto {
+export class CodebookUnitDto {
   @ApiProperty()
     key!: string;
 
@@ -10,6 +10,9 @@ export class CodebookDto {
 
   @ApiProperty()
     variables?: CodeBookVariable[];
+
+  @ApiProperty()
+    missings?: Missing[];
 }
 
 export class CodeBookVariable {
@@ -48,6 +51,9 @@ export class CodeBookContentSetting {
     exportFormat!: 'json' | 'docx';
 
   @ApiProperty()
+    missingsProfile!: string;
+
+  @ApiProperty()
     hasClosedVars!: string;
 
   @ApiProperty()
@@ -58,4 +64,18 @@ export class CodeBookContentSetting {
 
   @ApiProperty()
     hasGeneralInstructions!: string;
+}
+
+export class Missing {
+  @ApiProperty()
+    id!: string;
+
+  @ApiProperty()
+    label!: string;
+
+  @ApiProperty()
+    description!: string;
+
+  @ApiProperty()
+    code!: number;
 }

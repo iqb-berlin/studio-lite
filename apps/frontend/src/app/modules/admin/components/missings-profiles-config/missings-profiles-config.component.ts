@@ -30,7 +30,7 @@ export class MissingsProfilesConfigComponent implements OnInit, OnDestroy {
     private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
-      iqbStandardMissings: this.fb.control('')
+      iqbStandardMissings: this.fb.control('[]')
     });
   }
 
@@ -63,21 +63,20 @@ export class MissingsProfilesConfigComponent implements OnInit, OnDestroy {
         const parsedJSON = JSON.parse(this.configForm.get('iqbStandardMissings')?.value);
         const missings = JSON.stringify(parsedJSON);
         this.backendService.setMissingsProfiles([{
-          id: 1,
           label: 'IQB-Standard',
           missings: missings
         }])
           .subscribe(isOk => {
             if (isOk) {
               this.snackBar.open(
-                this.translateService.instant('unit-export-config.params-saved'),
+                this.translateService.instant('missings-profiles-config.profiles-saved'),
                 '',
                 { duration: 3000 }
               );
               this.dataChanged = false;
             } else {
               this.snackBar.open(
-                this.translateService.instant('unit-export-config.params-not-saved'),
+                this.translateService.instant('missings-profiles-config.profiles-not-saved'),
                 this.translateService.instant('error'),
                 { duration: 3000 }
               );
@@ -85,7 +84,7 @@ export class MissingsProfilesConfigComponent implements OnInit, OnDestroy {
           });
       } catch {
         this.snackBar.open(
-          this.translateService.instant('unit-export-config.not-valid-json'),
+          this.translateService.instant('missings-profiles-config.not-valid-json'),
           this.translateService.instant('error'),
           { duration: 3000 }
         );
