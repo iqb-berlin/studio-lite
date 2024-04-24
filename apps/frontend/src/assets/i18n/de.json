@@ -261,7 +261,8 @@
   "settings": {
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
-    "unit-export-params": "Parameter für den Unit-Export"
+    "unit-export-params": "Parameter für den Unit-Export",
+    "missings-profiles": "Kodierung: Missings Profile"
   },
   "config": {
     "start-page-warning": "Warnung auf der Startseite",
@@ -283,6 +284,12 @@
     "unit-xml-path": "Xsd-Pfad für Unit.Xml",
     "params-saved": "Parameter für Unitexport gespeichert",
     "params-not-saved": "Konnte Parameter für Unitexport nicht speichern"
+  },
+  "missings-profiles-config": {
+    "iqb-standard": "IQB-Standard",
+    "profiles-saved": "Missings Profile gespeichert",
+    "profiles-not-saved": "Konnte Missings Profile nicht speichern",
+    "not-valid-json": "Kein gültiges JSON Format"
   },
   "logo": {
     "upload-info": "Klick rechts auf den Schalter zum Hochladen",

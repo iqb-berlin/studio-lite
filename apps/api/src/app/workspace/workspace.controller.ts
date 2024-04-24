@@ -5,7 +5,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
+  CodingReportDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../database/services/workspace.service';
@@ -18,7 +18,6 @@ import { VeronaModulesService } from '../database/services/verona-modules.servic
 import { SettingService } from '../database/services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { UsersService } from '../database/services/users.service';
-import { CodingReportDto } from '../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {

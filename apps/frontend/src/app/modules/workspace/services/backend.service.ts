@@ -3,6 +3,8 @@ import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
+  MissingsProfilesDto,
+  CodingReportDto,
   CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
@@ -12,10 +14,6 @@ import {
   UnitMetadataDto,
   UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
-import {
-  MissingsProfilesDto
-} from '../../../../../../../libs/api-dto/src/lib/dto/missings-profiles/missings-profiles-dto';
-import { CodingReportDto } from '../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -34,9 +32,9 @@ export class BackendService {
       );
   }
 
-  getMissingsProfiles(workspaceGroupId: number):Observable<MissingsProfilesDto> {
+  getMissingsProfiles():Observable<MissingsProfilesDto[]> {
     return this.http
-      .get<MissingsProfilesDto>(`${this.serverUrl}workspace/${workspaceGroupId}/missings-profiles`)
+      .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
       .pipe(
         catchError(() => [])
       );
@@ -121,7 +119,7 @@ export class BackendService {
     );
   }
 
-  getCodingBook(workspaceId: number, contentOptions: CodeBookContentSetting,
+  getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
       const {
@@ -136,6 +134,7 @@ export class BackendService {
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
           params: new HttpParams()
             .set('format', exportFormat)
+            .set('missingsProfile', missingsProfile)
             .set('generalInstructions', hasGeneralInstructions)
             .set('onlyManual', hasOnlyManualCoding)
             .set('closed', hasClosedVars)

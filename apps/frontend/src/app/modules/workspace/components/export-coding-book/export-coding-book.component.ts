@@ -47,16 +47,21 @@ export class ExportCodingBookComponent implements OnInit {
   }
 
   unitList: number[] = [];
-  selectedMissingsProfile!:string;
-  missingsProfiles = [''];
+  selectedMissingsProfile:string = '';
+  missingsProfiles:string[] = [''];
   workspaceChanges = this.workspaceService.isChanged();
 
   ngOnInit() {
-    this.backendService.getMissingsProfiles(this.workspaceService.selectedWorkspaceId);
+    this.backendService.getMissingsProfiles().subscribe(missingsProfiles => {
+      if (missingsProfiles.length > 0) {
+        this.missingsProfiles = missingsProfiles.map(mp => mp.label);
+      }
+    });
   }
 
   contentOptions:CodeBookContentSetting = {
     exportFormat: 'docx',
+    missingsProfile: '',
     hasOnlyManualCoding: 'true',
     hasGeneralInstructions: 'true',
     hasDerivedVars: 'true',
@@ -67,6 +72,7 @@ export class ExportCodingBookComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService
       .getCodingBook(this.workspaceService.selectedWorkspaceId,
+        this.selectedMissingsProfile,
         this.contentOptions,
         this.unitList)
       .subscribe(data => {
