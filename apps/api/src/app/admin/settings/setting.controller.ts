@@ -4,7 +4,9 @@ import {
 import {
   ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags
 } from '@nestjs/swagger';
-import { ConfigDto, AppLogoDto, UnitExportConfigDto } from '@studio-lite-lib/api-dto';
+import {
+  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto
+} from '@studio-lite-lib/api-dto';
 import { SettingService } from '../../database/services/setting.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { IsAdminGuard } from '../is-admin.guard';
@@ -72,5 +74,20 @@ export class SettingController {
   @ApiTags('admin settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
     return this.settingService.patchUnitExportConfig(newUnitExportConfig);
+  }
+
+  @Get('missings-profiles')
+  @ApiOkResponse({ description: 'Missings profiles config retrieved successfully.' }) // TODO Exception
+  @ApiTags('admin settings')
+  async findMissingsProfiles(): Promise<MissingsProfilesDto[]> {
+    return this.settingService.findMissingsProfiles();
+  }
+
+  @Patch('missings-profiles')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin settings')
+  async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
+    return this.settingService.patchMissingsProfiles(newMissingsProfiles);
   }
 }

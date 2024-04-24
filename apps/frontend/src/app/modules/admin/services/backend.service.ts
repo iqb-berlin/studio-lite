@@ -3,6 +3,7 @@ import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
+  MissingsProfilesDto,
   ConfigDto, AppLogoDto,
   CreateUserDto, CreateWorkspaceGroupDto,
   UserFullDto,
@@ -232,6 +233,23 @@ export class BackendService {
       .pipe(
         catchError(() => of(false)),
         map(() => true)
+      );
+  }
+
+  setMissingsProfiles(missingsProfiles: MissingsProfilesDto[]): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/missings-profiles`, missingsProfiles)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  getMissingsProfiles():Observable<MissingsProfilesDto[]> {
+    return this.http
+      .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
+      .pipe(
+        catchError(() => [])
       );
   }
 
