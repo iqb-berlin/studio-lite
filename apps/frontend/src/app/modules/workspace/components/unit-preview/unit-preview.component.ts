@@ -21,6 +21,7 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
+import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -47,7 +48,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
   hasFocus: boolean = false;
-  responses!: Response[];
+  responses!: Response[] | null;
 
   constructor(
     private appService: AppService,
@@ -60,6 +61,25 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     private dialog: MatDialog
   ) {
     super();
+    this.subscribeForMessages();
+    this.subscribeForUnitChange();
+  }
+
+  ngAfterViewInit(): void {
+    this.previewService.pagingMode
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.initPlayer());
+  }
+
+  private subscribeForUnitChange(): void {
+    this.workspaceService.selectedUnit$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.responses = null;
+      });
+  }
+
+  private subscribeForMessages(): void {
     this.appService.postMessage$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((m: MessageEvent) => {
@@ -165,12 +185,6 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
           }
         }
       });
-  }
-
-  ngAfterViewInit(): void {
-    this.previewService.pagingMode
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => this.initPlayer());
   }
 
   private initPlayer(): void {
@@ -432,46 +446,50 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.hasFocus = status;
   }
 
-  async checkCoding() {
-    let codingScheme: CodingScheme;
+  async checkCodingChanged() {
     const data = await new Promise<UnitSchemeDto | undefined>(resolve => {
       resolve(this.workspaceService.getUnitSchemeStore()?.getData());
     });
     if (data && !this.workspaceService.isChanged()) {
-      codingScheme = JSON.parse(data.scheme);
+      this.checkCoding(data);
+    } else {
+      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .subscribe(schemeData => {
+          this.checkCoding(schemeData);
+        });
+    }
+  }
+
+  private checkCoding(schemeData: UnitSchemeDto | null): void {
+    let codingScheme: CodingScheme;
+    if (schemeData) {
+      codingScheme = JSON.parse(schemeData.scheme);
       if (codingScheme === null) {
-        this.snackBar.open(
-          this.translateService.instant('workspace.coding-check-error'),
-          this.translateService.instant('workspace.error'),
-          { duration: 3000 });
+        if (this.responses) {
+          this.dialog
+            .open(ShowResponsesComponent, {
+              data: { responses: this.responses, table: true },
+              height: '80%',
+              width: '60%'
+            })
+            .afterClosed()
+            .pipe(
+              takeUntil(this.ngUnsubscribe)
+            ).subscribe(() => {});
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('workspace.coding-check-error'),
+            this.translateService.instant('workspace.error'),
+            { duration: 3000 });
+        }
         return;
       }
       this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
         .map(vc => vc.id);
-      const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
+      const newResponses = this.workspaceService.codingSchemer?.code(this.responses!);
       this.showCodingResults(newResponses, varsWithCodes);
-    } else {
-      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
-        .subscribe(schemeData => {
-          if (schemeData) {
-            codingScheme = JSON.parse(schemeData.scheme);
-            if (codingScheme === null) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.coding-check-error'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 });
-              return;
-            }
-            this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
-          }
-          const varsWithCodes = codingScheme.variableCodings
-            .filter(vc => vc.codes.length > 0)
-            .map(vc => vc.id);
-          const newResponses = this.workspaceService.codingSchemer?.code(this.responses);
-          this.showCodingResults(newResponses, varsWithCodes);
-        });
     }
   }
 

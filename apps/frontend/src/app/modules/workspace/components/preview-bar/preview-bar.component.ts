@@ -36,7 +36,7 @@ export class PreviewBarComponent {
   @Input() presentationProgress!: Progress;
   @Input() responseProgress!: Progress;
   @Input() hasFocus!: boolean;
-  @Input() responses!: Response[];
+  @Input() responses!: Response[] | null;
   @Output() gotoPage = new EventEmitter<{ action: string, index?: number }>();
   @Output() navigationDenied = new EventEmitter<void>();
   @Output() checkCoding = new EventEmitter<void>();
