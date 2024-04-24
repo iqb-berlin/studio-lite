@@ -400,6 +400,8 @@
     "VALUE_CHANGED": "Wert geändert"
   },
   "workspace": {
+    "no-responses": "Es liegen keine Kodierungen vor",
+    "responses": "Antwortdaten",
     "routes": {
       "properties": "Eigenschaften",
       "metadata": "Metadaten",
