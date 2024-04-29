@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { TextWithLanguage } from '@iqb/metadata';
-import { MetadataProfileGroup } from "../../../../../../libs/api-dto/src/lib/dto/metadata-profile/metadata-profile-dto";
+import { MetadataProfileGroup } from '@studio-lite-lib/api-dto';
 
 @Entity()
 class MetadataProfile {
