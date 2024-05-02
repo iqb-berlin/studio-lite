@@ -30,7 +30,7 @@ CREATE TABLE "public"."metadata_profile_registry"
   "csv"  TEXT  NOT NULL,
   "modified_at" TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
--- rollback DROP TABLE "public"."metadata_profile_registry;
+-- rollback DROP TABLE "public"."metadata_profile_registry";
 
 -- changeset jojohoch:4
 CREATE TABLE "public"."registered_metadata_profile"
