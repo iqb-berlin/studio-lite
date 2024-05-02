@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
-import { VocabFlatNode } from '../models/types';
+import { VocabFlatNode } from '../models/vocabulary.class';
 
 @Pipe({
   name: 'isNodeSelected',

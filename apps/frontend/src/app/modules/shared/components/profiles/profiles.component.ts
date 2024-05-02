@@ -12,6 +12,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { NgIf, NgFor } from '@angular/common';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
+import { BackendService } from '../../../metadata/services/backend.service';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
@@ -20,14 +21,12 @@ export type CoreProfile = Omit<MDProfile, 'groups'>;
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
+  imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel,
+    MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
 })
 export class ProfilesComponent implements OnInit {
   isLoading: boolean = false;
   isError: boolean = false;
-  PROFILE_REGISTRY = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
-  storesURLs: string[] = [];
   ProfileStoreWithProfilesCollection : ProfileStoreWithProfiles[] = [];
   fetchedProfiles: CoreProfile[] = [];
   profilesSelected : CoreProfile[] = [];
@@ -36,80 +35,54 @@ export class ProfilesComponent implements OnInit {
   @Output() hasChanged = new EventEmitter<Array<CoreProfile>>();
   @Input() profiles!: Profile[];
   constructor(
-    private wsgAdminService: WsgAdminService
+    private wsgAdminService: WsgAdminService,
+    private backendService: BackendService
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.readCsv();
-    this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
-    this.profilesSelected = this.fetchedProfiles || [];
+    this.loadProfiles();
   }
 
-  async readCsv() {
-    try {
-      const profileRegistryResponse = await fetch(this.PROFILE_REGISTRY);
-      if (profileRegistryResponse.ok) {
-        this.isLoading = true;
-        const profileRegistry = await profileRegistryResponse.text();
-        this.csvToProfileURLs(profileRegistry, '"');
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const url of this.storesURLs) {
-          const response = await fetch(url);
-          if (response.ok) {
-            const store = await response.json();
-            if (store) {
-              const ProfilesStore = new MDProfileStore(store);
-              const profiles:MDProfile[] = [];
-              // eslint-disable-next-line no-restricted-syntax
-              for await (const profile of ProfilesStore.profiles) {
-                const afterWith = (url.slice(0, url.lastIndexOf('/')));
-                const pro = await this.getProfile(`${afterWith}/${profile}`);
-                profiles.push(pro as MDProfile);
-              }
-              this.ProfileStoreWithProfilesCollection.push({
-                profileStore: ProfilesStore,
-                profiles: profiles
-              });
-            }
-          }
+  private loadProfiles(): void {
+    this.isLoading = true;
+    this.backendService.getRegisteredProfiles()
+      .subscribe(registeredProfiles => {
+        if (registeredProfiles && registeredProfiles !== true) {
+          registeredProfiles.forEach(async registeredProfile => {
+            const ProfilesStore = new MDProfileStore(registeredProfile);
+            const profiles: (MDProfile | null)[] = await Promise.all(ProfilesStore.profiles.map(profile => {
+              const afterWith = (registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/')));
+              return this.getProfile(`${afterWith}/${profile}`);
+            }));
+            this.ProfileStoreWithProfilesCollection.push({
+              profileStore: ProfilesStore,
+              profiles: profiles
+                .filter(profile => !!profile)
+                .map(profile => profile as MDProfile)
+            });
+          });
           this.wsgAdminService.profileStores = this.ProfileStoreWithProfilesCollection;
+          this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
+          this.profilesSelected = this.fetchedProfiles || [];
           this.isLoading = false;
+          this.isError = false;
+        } else {
+          this.isLoading = false;
+          this.isError = true;
         }
-      }
-    } catch (err) {
-      this.isError = true;
-      this.isLoading = false;
-    }
+      });
   }
 
-  csvToProfileURLs(stringVal:string, splitter:string) {
-    const [, ...rest] = stringVal
-      .trim()
-      .split('\n')
-      .map(item => item.split(splitter));
-    const storesArray = rest.map(e => e.filter(el => (el !== ',' && el !== '')));
-    const storesURLs: string[] = [];
-    storesArray.forEach(store => {
-      const sanitizedURL = store[2].replace(',', '');
-      storesURLs.push(sanitizedURL);
+  async getProfile(profileUrl:string): Promise<MDProfile | null> {
+    return new Promise(resolve => {
+      this.backendService.getMetadataProfile(profileUrl)
+        .subscribe(profile => {
+          if (profile && profile !== true) {
+            return resolve(new MDProfile(profile));
+          }
+          return resolve(null);
+        });
     });
-    this.storesURLs = storesURLs;
-  }
-
-  async getProfile(profileURL:string) {
-    try {
-      const response = await fetch(`${profileURL}`);
-      if (response.ok) {
-        const data = await response.json();
-        this.profile = new MDProfile(data);
-        return this.profile;
-      }
-      return [];
-    } catch {
-      this.isError = true;
-      this.isLoading = false;
-      return [];
-    }
   }
 
   isChecked(id:string):boolean {
