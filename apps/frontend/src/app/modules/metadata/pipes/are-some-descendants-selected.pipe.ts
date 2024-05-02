@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { SelectionModel } from '@angular/cdk/collections';
-import { VocabFlatNode } from '../models/types';
+import { VocabFlatNode } from '../models/vocabulary.class';
 import { AreAllDescendantsSelectedPipe } from './are-all-descendants-selected.pipe';
 
 @Pipe({

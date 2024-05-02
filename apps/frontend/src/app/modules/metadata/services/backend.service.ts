@@ -3,9 +3,12 @@ import {
 } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
-import { MDProfile } from '@iqb/metadata/md-profile';
-import { Vocab, VocabData } from '../models/types';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+  MetadataProfileDto,
+  MetadataVocabularyDto,
+  RegisteredMetadataProfileDto
+} from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -16,46 +19,35 @@ export class BackendService {
     private http: HttpClient
   ) {}
 
-  private baseUrlVocabs = 'https://w3id.org/iqb/';
-  private baseUrlProfile = 'https://raw.githubusercontent.com/iqb-vocabs/';
-
-  saveVocabs(vocabs: Vocab[]):Observable<boolean> {
+  getMetadataVocabulariesForProfile(url:string):Observable<MetadataVocabularyDto[] | boolean> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('url', url);
     return this.http
-      .post(`${this.serverUrl}profile/vocabs`, vocabs)
+      .get(`${this.serverUrl}metadata-profile/vocabularies`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
-        map(() => true)
+        map(vocab => vocab as MetadataVocabularyDto[])
       );
   }
 
-  getVocab(url:string):Observable<VocabData | boolean> {
-    const shortenedUrl = url.replace(this.baseUrlVocabs, '')
-      .replace(/\//g, '');
+  getMetadataProfile(url:string): Observable<MetadataProfileDto | boolean> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('url', url);
+
     return this.http
-      .get(`${this.serverUrl}profile/vocab/${shortenedUrl}`)
+      .get(`${this.serverUrl}metadata-profile`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
-        map(vocab => vocab)
+        map(profile => profile as MetadataProfileDto)
       );
   }
 
-  getProfile(url:string):Observable<MDProfile | boolean> {
-    const shortenedUrl = url.replace(this.baseUrlProfile, '')
-      .replace(/\//g, '').replace('.json', '');
+  getRegisteredProfiles():Observable<RegisteredMetadataProfileDto[] | boolean> {
     return this.http
-      .get(`${this.serverUrl}profile/${shortenedUrl}`)
+      .get(`${this.serverUrl}metadata-profile/registry`)
       .pipe(
         catchError(() => of(false)),
-        map(profile => profile as MDProfile)
-      );
-  }
-
-  saveProfile(profile:MDProfile):Observable<boolean> {
-    return this.http
-      .post(`${this.serverUrl}profile`, profile)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(vocab => vocab as RegisteredMetadataProfileDto[])
       );
   }
 }
