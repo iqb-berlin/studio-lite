@@ -50,112 +50,129 @@ dev-db-images-clean:
 
 ## Outputs the count of changesets that have not been deployed
 # (https://docs.liquibase.com/commands/status/status.html)
-dev-db-update-status: .EXPORT_ALL_VARIABLES
+dev-db-update-status:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			status\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			status
+				--password=$(POSTGRES_PASSWORD)
 
 ## Lists all deployed changesets and their deploymentIds
 # (https://docs.liquibase.com/commands/status/history.html)
-dev-db-update-history: .EXPORT_ALL_VARIABLES
+dev-db-update-history:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			history\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			history
+				--password=$(POSTGRES_PASSWORD)
 
 ## Checks and identifies any possible errors in a changelog that may cause the update command to fail
 # (https://docs.liquibase.com/commands/maintenance/validate.html)
-dev-db-validate-changelog: .EXPORT_ALL_VARIABLES
+dev-db-validate-changelog:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			validate\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			validate
+				--password=$(POSTGRES_PASSWORD)
 
 ## Displays the SQL Liquibase will run while using the update command
 # (https://docs.liquibase.com/commands/update/update-sql.html)
-dev-db-update-display-sql: .EXPORT_ALL_VARIABLES
+dev-db-update-display-sql:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			updateSQL\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			updateSQL
+				--password=$(POSTGRES_PASSWORD)
 
 ## Updates the database, then rolls back changes before updating again
 # (https://docs.liquibase.com/commands/update/update-testing-rollback.html)
-dev-db-update-testing-rollback: .EXPORT_ALL_VARIABLES
+dev-db-update-testing-rollback:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			updateTestingRollback\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			updateTestingRollback
+				--password=$(POSTGRES_PASSWORD)
 
 ## Updates database to current version
 # (https://docs.liquibase.com/commands/update/update.html)
-dev-db-update: .EXPORT_ALL_VARIABLES
+dev-db-update:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			update\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			update
+				--password=$(POSTGRES_PASSWORD)
 
 ## Rolls back the last changeset
 # (https://docs.liquibase.com/commands/rollback/rollback-count.html)
-dev-db-rollback-lastchangeset: .EXPORT_ALL_VARIABLES
+dev-db-rollback-lastchangeset:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			rollbackCount 1\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
-				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			rollbackCount 1
+				--password=$(POSTGRES_PASSWORD)
 
 ## Generates Javadoc-like documentation based on current database and changelog
 # (https://docs.liquibase.com/commands/docs/db-doc.html)
-dev-db-generate-docs: .EXPORT_ALL_VARIABLES
+dev-db-generate-docs:
 	cd $(STUDIO_LITE_BASE_DIR)/database/changelogDocs && rm -vrf !(".gitignore") && cd $(STUDIO_LITE_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
+				--headless=true\
+				--show-banner=false\
+				--classpath=changelog\
+				--logLevel=info\
+			db-doc\
 				--changelogFile=studio-lite.changelog-root.xml\
 				--url=jdbc:postgresql://db:5432/$(POSTGRES_DB)\
 				--username=$(POSTGRES_USER)\
 				--password=$(POSTGRES_PASSWORD)\
-				--classpath=changelog\
-				--logLevel=info\
-			db-doc --output-directory=changelogDocs
+				--output-directory=changelogDocs
