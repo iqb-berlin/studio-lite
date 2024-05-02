@@ -6,12 +6,14 @@ import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MetadataProfileService } from '../database/services/metadata-profile.service';
+import { RegisteredMetadataProfileService } from '../database/services/registered-metadata-profile.service';
 
 @Controller('metadata-profile')
 @UseFilters(HttpExceptionFilter)
 export class MetadataProfileController {
   constructor(
-    private metadataProfileService: MetadataProfileService
+    private metadataProfileService: MetadataProfileService,
+    private registeredMetadataProfileService: RegisteredMetadataProfileService
   ) {
   }
 
@@ -35,5 +37,12 @@ export class MetadataProfileController {
   @ApiBearerAuth()
   async getMetadataVocabulariesForProfile(@Query('url') url: string): Promise<MetadataVocabularyDto[]> {
     return this.metadataProfileService.getProfileVocabularies(url);
+  }
+
+  @Get('registry')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getRegistry() {
+    return this.registeredMetadataProfileService.getRegisteredMetadataProfiles();
   }
 }

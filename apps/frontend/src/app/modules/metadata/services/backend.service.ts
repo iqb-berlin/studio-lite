@@ -4,7 +4,11 @@ import {
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { MetadataProfileDto, MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
+import {
+  MetadataProfileDto,
+  MetadataVocabularyDto,
+  RegisteredMetadataProfileDto
+} from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +39,15 @@ export class BackendService {
       .pipe(
         catchError(() => of(false)),
         map(profile => profile as MetadataProfileDto)
+      );
+  }
+
+  getRegisteredProfiles():Observable<RegisteredMetadataProfileDto[] | boolean> {
+    return this.http
+      .get(`${this.serverUrl}metadata-profile/registry`)
+      .pipe(
+        catchError(() => of(false)),
+        map(vocab => vocab as RegisteredMetadataProfileDto[])
       );
   }
 }
