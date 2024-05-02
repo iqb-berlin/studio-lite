@@ -34,6 +34,9 @@ import MetadataProfile from './entities/metadata-profile.entity';
 import { MetadataProfileService } from './services/metadata-profile.service';
 import MetadataVocabulary from './entities/metadata-vocabulary.entity';
 import { MetadataVocabularyService } from './services/metadata-vocabulary.service';
+import { RegisteredMetadataProfileService } from './services/registered-metadata-profile.service';
+import MetadataProfileRegistry from './entities/metadata-profile-registry.entity';
+import RegisteredMetadataProfile from './entities/registered-metadata-profile.entity';
 
 @Module({
   imports: [
@@ -50,6 +53,8 @@ import { MetadataVocabularyService } from './services/metadata-vocabulary.servic
     UnitComment,
     MetadataProfile,
     MetadataVocabulary,
+    MetadataProfileRegistry,
+    RegisteredMetadataProfile,
     UnitUser,
     Setting,
     ResourcePackage,
@@ -78,6 +83,8 @@ import { MetadataVocabularyService } from './services/metadata-vocabulary.servic
           UnitComment,
           MetadataProfile,
           MetadataVocabulary,
+          MetadataProfileRegistry,
+          RegisteredMetadataProfile,
           UnitUser,
           WorkspaceGroupAdmin,
           Review,
@@ -101,6 +108,8 @@ import { MetadataVocabularyService } from './services/metadata-vocabulary.servic
       UnitComment,
       MetadataProfile,
       MetadataVocabulary,
+      MetadataProfileRegistry,
+      RegisteredMetadataProfile,
       UnitUser,
       WorkspaceGroupAdmin,
       Review,
@@ -118,6 +127,7 @@ import { MetadataVocabularyService } from './services/metadata-vocabulary.servic
     UnitCommentService,
     MetadataProfileService,
     MetadataVocabularyService,
+    RegisteredMetadataProfileService,
     UnitUserService,
     VeronaModulesService,
     SettingService,
@@ -143,6 +153,7 @@ import { MetadataVocabularyService } from './services/metadata-vocabulary.servic
     ReviewService,
     MetadataProfileService,
     MetadataVocabularyService,
+    RegisteredMetadataProfileService,
     UsersService,
     UnitService,
     UnitCommentService,
