@@ -3,28 +3,49 @@ STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include $(STUDIO_LITE_BASE_DIR)/.env.dev
 
-## prevents collisions of make target names with possible file names
-.PHONY: dev-db-up dev-db-down dev-db-update-status dev-db-update-history dev-db-validate-changelog\
-	dev-db-update-display-sql dev-db-update-testing-rollback dev-db-update dev-db-rollback-lastchangeset\
-	dev-db-generate-docs
-
 ## exports all variables (especially those of the included .env.dev file!)
 .EXPORT_ALL_VARIABLES:
+
+## prevents collisions of make target names with possible file names
+.PHONY: dev-db-build dev-db-up dev-db-down dev-db-volumes-clean dev-db-images-clean dev-db-update-status\
+	dev-db-update-history dev-db-validate-changelog dev-db-update-display-sql dev-db-update-testing-rollback\
+	dev-db-update dev-db-rollback-lastchangeset dev-db-generate-docs
+
+## disables printing the recipe of a make target before executing it
+.SILENT: dev-db-volumes-clean dev-db-images-clean
+
+
+## Build docker images
+dev-db-build:
+	@if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
+	docker compose --progress plain --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev build --pull db liquibase
+	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Start db container (e.g. for a localhost dev environment with non containerized frontend and backend servers)
 dev-db-up:
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
 	fi
-	@if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev up --build -d db liquibase
-	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
+	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev up --no-build --pull never -d db liquibase
 
 ## Stop db container
 dev-db-down:
 	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev down
 	@if test $(shell docker network ls -q --filter name=app-net);\
 		then docker network rm $(shell docker network ls -q -f name=app-net);\
+	fi
+
+## Remove all unused db volumes
+# Be very careful, all data could be lost!!!
+dev-db-volumes-clean:
+	if test "$(shell docker volume ls -f name=db -q)";\
+		then docker volume rm $(shell docker volume ls -f name=db -q);\
+	fi
+
+## Remove all unused (not just dangling) db and liquibase images!
+dev-db-images-clean:
+	if test "$(shell docker images -f reference=studio-lite-db -f reference=studio-lite-liquibase -q)";\
+		then docker rmi $(shell docker images -f reference=studio-lite-db -f reference=studio-lite-liquibase -q);\
 	fi
 
 ## Outputs the count of changesets that have not been deployed
