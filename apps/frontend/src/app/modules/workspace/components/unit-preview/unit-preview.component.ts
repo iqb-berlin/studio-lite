@@ -48,7 +48,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
   hasFocus: boolean = false;
-  responses!: Response[] | null;
+  private dataParts!: Record<string, string> | null;
 
   constructor(
     private appService: AppService,
@@ -71,11 +71,21 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       .subscribe(() => this.initPlayer());
   }
 
+  private getResponses(): Response[] | null {
+    if (this.dataParts) {
+      const dataPartValues = Object.entries(this.dataParts)
+        .map(kv => ({ [kv[0]]: JSON.parse(kv[1]) }))
+        .reduce((previous, current) => ({ ...previous, ...current }), {});
+      return Object.values(dataPartValues).flat();
+    }
+    return null;
+  }
+
   private subscribeForUnitChange(): void {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.responses = null;
+        this.dataParts = null;
       });
   }
 
@@ -124,11 +134,12 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                 this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
               }
               if (msgData.unitState) {
-                this.responses = Object.values(msgData.unitState.dataParts)
-                  .map((dp: unknown) => JSON.parse(dp as string))
-                  .flat();
                 this.setPresentationStatus(msgData.unitState.presentationProgress);
                 this.setResponsesStatus(msgData.unitState.responseProgress);
+                if (msgData.unitState.dataParts) {
+                  const dataParts: Record<string, string> = msgData.unitState.dataParts;
+                  this.dataParts = { ...(this.dataParts ? this.dataParts : {}), ...dataParts };
+                }
               }
               break;
 
@@ -462,13 +473,14 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   private checkCoding(schemeData: UnitSchemeDto | null): void {
     let codingScheme: CodingScheme;
+    const responses = this.getResponses();
     if (schemeData) {
       codingScheme = JSON.parse(schemeData.scheme);
       if (codingScheme === null) {
-        if (this.responses) {
+        if (this.getResponses()) {
           this.dialog
             .open(ShowResponsesComponent, {
-              data: { responses: this.responses, table: true },
+              data: { responses: responses, table: true },
               height: '80%',
               width: '60%'
             })
@@ -488,7 +500,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
         .map(vc => vc.id);
-      const newResponses = this.workspaceService.codingSchemer?.code(this.responses!);
+      const newResponses = this.workspaceService.codingSchemer?.code(responses!);
       this.showCodingResults(newResponses, varsWithCodes);
     }
   }
