@@ -1,7 +1,6 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -24,8 +23,8 @@ import { StatusIndicationComponent } from '../status-indication/status-indicatio
   templateUrl: './preview-bar.component.html',
   styleUrls: ['./preview-bar.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent, MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
+  imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent,
+    MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];
@@ -36,7 +35,6 @@ export class PreviewBarComponent {
   @Input() presentationProgress!: Progress;
   @Input() responseProgress!: Progress;
   @Input() hasFocus!: boolean;
-  @Input() responses!: Response[] | null;
   @Output() gotoPage = new EventEmitter<{ action: string, index?: number }>();
   @Output() navigationDenied = new EventEmitter<void>();
   @Output() checkCoding = new EventEmitter<void>();
