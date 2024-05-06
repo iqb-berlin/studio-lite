@@ -1,4 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { VariableInfo } from '@iqb/responses';
+import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class CreateUnitDto {
   @ApiProperty({ example: 'EL2443' })
@@ -21,4 +23,16 @@ export class CreateUnitDto {
 
   @ApiProperty()
     schemer?: string;
+
+  @ApiProperty()
+    schemeType?: string;
+
+  @ApiProperty()
+    scheme?: string;
+
+  @ApiProperty()
+    metadata?: UnitMetadataValues;
+
+  @ApiProperty()
+    variables?: VariableInfo[];
 }
