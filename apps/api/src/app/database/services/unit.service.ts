@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateUnitDto, RequestReportDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto,
+  RequestReportDto,
+  UnitDefinitionDto,
+  UnitInListDto,
+  UnitMetadataDto,
+  UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
@@ -253,15 +258,18 @@ export class UnitService {
   async copy(unitIds: number[], newWorkspace: number): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unitToCopy = await this.unitsRepository.findOne({
-        where: { id: unitId },
-        select: ['id', 'key', 'name', 'groupName']
+        where: { id: unitId }
       });
-      const newUnitId = await this.create(newWorkspace, {
-        key: unitToCopy.key,
-        name: unitToCopy.name,
-        groupName: '',
-        createFrom: unitToCopy.id
-      });
+      const keysToIgnore = ['id', 'groupName', 'key'];
+      const keysToCopy = Object.keys(unitToCopy)
+        .filter(key => !keysToIgnore.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = unitToCopy[key];
+          return obj;
+        }, { key: unitToCopy.key, groupName: '', createFrom: unitToCopy.id });
+      const newUnitId = await this.create(
+        newWorkspace,
+        { ...keysToCopy, createFrom: unitToCopy.id });
       return <RequestReportDto>{
         source: 'unit-copy',
         messages: newUnitId > 0 ? [] : [{
