@@ -40,7 +40,6 @@ services:
     volumes:
       - ./apps/api/src:/studio-lite/apps/api/src
       - backend_vol:/studio-lite/packages
-      - backend_profiles_vol:/studio-lite/profiles
     command:
       - "serve"
       - "api"

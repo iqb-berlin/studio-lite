@@ -58,7 +58,6 @@ services:
 volumes:
   db_vol:
   backend_vol:
-  backend_profiles_vol:
 
 networks:
   application-network:
