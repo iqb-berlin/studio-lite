@@ -21,6 +21,8 @@ import {
   MetadataValuesEntry,
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { MetadataService } from '../../services/metadata.service';
 import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
@@ -54,7 +56,11 @@ type ModelValue = string | number | boolean | Record<string, string> | Vocabular
   imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
-  constructor(public metadataService: MetadataService, public backendService:BackendService) {}
+  constructor(
+    public metadataService: MetadataService,
+    public backendService:BackendService,
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService) {}
 
   @Output() metadataChange: EventEmitter<Partial<UnitMetadataValues>> = new EventEmitter();
   @Input() language!: string;
@@ -112,12 +118,20 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
           this.findCurrentProfileMetadata(this.metadata.profiles)
         );
       } else {
-        // eslint-disable-next-line no-console
-        console.warn(`Profil ${this.profileUrl} could not be loaded`);
+        this.snackBar.open(
+          this.translateService
+            .instant('workspace.vocabs-not-loaded', { profileUrl: this.profileUrl }),
+          this.translateService.instant('error'),
+          { duration: 5000 }
+        );
       }
     } else {
-      // eslint-disable-next-line no-console
-      console.warn(`Profil ${this.profileUrl} could not be loaded`);
+      this.snackBar.open(
+        this.translateService
+          .instant('workspace.profile-not-loaded', { profileUrl: this.profileUrl }),
+        this.translateService.instant('error'),
+        { duration: 5000 }
+      );
     }
   }
 

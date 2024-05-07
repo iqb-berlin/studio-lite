@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
 import { ProfileFormComponent } from './profile-form.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -14,7 +15,8 @@ describe('ProfileFormComponent', () => {
       imports: [
         HttpClientModule,
         ReactiveFormsModule,
-        FormlyModule.forRoot()
+        FormlyModule.forRoot(),
+        TranslateModule.forRoot()
       ],
       providers: [
         {

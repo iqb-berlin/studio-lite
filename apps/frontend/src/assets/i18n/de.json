@@ -575,7 +575,9 @@
     "page-selection": "Seitenauswahl",
     "validate": "Validieren",
     "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
-    "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher."
+    "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher.",
+    "vocabs-not-loaded":  "Vokabulare für das Metadatenprofil \"{{profileUrl}}\" können aktuell nicht geladen werden",
+    "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden"
   },
 
   "coding-report": {
