@@ -49,6 +49,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
   responseProgress: Progress = 'none';
   hasFocus: boolean = false;
   private dataParts!: Record<string, string> | null;
+  private unitStateDataType: string | null = null;
 
   constructor(
     private appService: AppService,
@@ -71,6 +72,13 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       .subscribe(() => this.initPlayer());
   }
 
+  private isIqbStandardResponse(): boolean {
+    if (this.unitStateDataType) {
+      return this.unitStateDataType.split('@')[0] === 'iqb-standard';
+    }
+    return false;
+  }
+
   private getResponses(): Response[] | null {
     if (this.dataParts) {
       const dataPartValues = Object.entries(this.dataParts)
@@ -86,6 +94,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.dataParts = null;
+        this.unitStateDataType = null;
       });
   }
 
@@ -139,6 +148,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                 if (msgData.unitState.dataParts) {
                   const dataParts: Record<string, string> = msgData.unitState.dataParts;
                   this.dataParts = { ...(this.dataParts ? this.dataParts : {}), ...dataParts };
+                  this.unitStateDataType = msgData.unitState.unitStateDataType || null;
                 }
               }
               break;
@@ -480,7 +490,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         if (this.getResponses()) {
           this.dialog
             .open(ShowResponsesComponent, {
-              data: { responses: responses, table: true },
+              data: { responses: responses, table: !this.isIqbStandardResponse() },
               height: '80%',
               width: '60%'
             })
