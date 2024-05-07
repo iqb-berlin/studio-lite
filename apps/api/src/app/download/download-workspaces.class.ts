@@ -378,13 +378,13 @@ export class DownloadWorkspacesClass {
     });
     const wsDataWithMetadata = await Promise.all(wsDataWithMetadataPromises);
     const allEditors = [
-      ...new Set(...wsDataWithMetadata.map(d => Object.keys(d.editors)))
+      ...new Set(wsDataWithMetadata.map(d => Object.keys(d.editors)).flat())
     ];
     const allPlayers = [
-      ...new Set(...wsDataWithMetadata.map(d => Object.keys(d.players)))
+      ...new Set(wsDataWithMetadata.map(d => Object.keys(d.players)).flat())
     ];
     const allSchemers = [
-      ...new Set(...wsDataWithMetadata.map(d => Object.keys(d.schemers)))
+      ...new Set(wsDataWithMetadata.map(d => Object.keys(d.schemers)).flat())
     ];
     const headerRow = [
       'Gruppe Name',
@@ -415,10 +415,10 @@ export class DownloadWorkspacesClass {
     wsDataWithMetadata.forEach(wsData => {
       let date = '';
       if (wsData.latestChange !== null) {
-        date = `${wsData.latestChange.getDate()}
-        .${
-  wsData.latestChange.getMonth() + 1
-}.${wsData.latestChange.getFullYear()}`;
+        date = `${wsData.latestChange
+          .getDate()}.${wsData.latestChange
+          .getMonth() + 1}.${wsData.latestChange
+          .getFullYear()}`;
       }
       const rowData = [
         wsData.groupName,
