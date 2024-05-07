@@ -32,7 +32,8 @@ export class MetadataService {
     return new Promise(resolve => {
       this.backendService.getMetadataVocabulariesForProfile(profile.id)
         .subscribe(metadataVocabularies => {
-          if (metadataVocabularies && metadataVocabularies !== true) {
+          if (metadataVocabularies && metadataVocabularies !== true &&
+            !metadataVocabularies.some(vocabulary => vocabulary === null)) {
             const vocabularies: Vocab[] = metadataVocabularies
               .map(vocabulary => ({
                 data: vocabulary,
@@ -58,8 +59,9 @@ export class MetadataService {
                 }
               });
             });
+            resolve(true);
           }
-          resolve(true);
+          resolve(false);
         });
     });
   }
