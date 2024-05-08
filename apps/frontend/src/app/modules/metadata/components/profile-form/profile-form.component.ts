@@ -11,14 +11,22 @@ import {
 } from '@iqb/metadata';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { Subject } from 'rxjs';
-import { ProfileEntryParametersText, ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { ProfileEntryParametersText, ProfileEntryParametersVocabulary }
+  from '@iqb/metadata/md-profile-entry';
 import { TextWithLanguage } from '@iqb/metadata/md-main';
 import { TextsWithLanguageAndId } from '@iqb/metadata/md-values';
-import { MetadataValues, MetadataValuesEntry, UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import {
+  MetadataProfileDto,
+  MetadataValues,
+  MetadataValuesEntry,
+  UnitMetadataValues
+} from '@studio-lite-lib/api-dto';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 import { MetadataService } from '../../services/metadata.service';
 import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
-import { VocabularyEntry } from '../../models/types';
+import { VocabularyEntry } from '../../models/vocabulary.class';
 
 interface FormlyConfigProps {
   label: string;
@@ -48,7 +56,11 @@ type ModelValue = string | number | boolean | Record<string, string> | Vocabular
   imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
-  constructor(public metadataService: MetadataService, public backendService:BackendService) {}
+  constructor(
+    public metadataService: MetadataService,
+    public backendService:BackendService,
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService) {}
 
   @Output() metadataChange: EventEmitter<Partial<UnitMetadataValues>> = new EventEmitter();
   @Input() language!: string;
@@ -92,17 +104,35 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       .then((profile => this.loadProfile(profile)));
   }
 
-  private async initProfile(): Promise<MDProfile | Record<string, never>> {
+  private async initProfile(): Promise<MetadataProfileDto | boolean> {
     return this.getProfile(this.profileUrl as string);
   }
 
-  private async loadProfile(profile: MDProfile | Record<string, never>) {
-    this.profile = new MDProfile(profile);
-    await this.metadataService.getProfileVocabularies(this.profile);
-    this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
-    this.model = this.mapMetadataValuesToFormlyModel(
-      this.findCurrentProfileMetadata(this.metadata.profiles)
-    );
+  private async loadProfile(profile: MetadataProfileDto | boolean) {
+    if (profile) {
+      this.profile = new MDProfile(profile);
+      const isLoaded = await this.metadataService.loadProfileVocabularies(this.profile);
+      if (isLoaded) {
+        this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
+        this.model = this.mapMetadataValuesToFormlyModel(
+          this.findCurrentProfileMetadata(this.metadata.profiles)
+        );
+      } else {
+        this.snackBar.open(
+          this.translateService
+            .instant('workspace.vocabs-not-loaded', { profileUrl: this.profileUrl }),
+          this.translateService.instant('error'),
+          { duration: 5000 }
+        );
+      }
+    } else {
+      this.snackBar.open(
+        this.translateService
+          .instant('workspace.profile-not-loaded', { profileUrl: this.profileUrl }),
+        this.translateService.instant('error'),
+        { duration: 5000 }
+      );
+    }
   }
 
   private findCurrentProfileMetadata(metadata: MetadataValues[] | undefined): MetadataValues | undefined {
@@ -110,26 +140,16 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     return metadata.find(data => data.profileId === this.profile.id);
   }
 
-  private async getProfile(profileUrl: string): Promise<MDProfile | Record<string, never>> {
-    try {
-      const response = await fetch(`${profileUrl}`);
-      if (response.ok) {
-        const profile = await response.json();
-        this.backendService.saveProfile(profile).subscribe(() => {});
-        return profile;
-      }
-      return await new Promise(resolve => {
-        this.backendService.getProfile(profileUrl)
-          .subscribe(profile => {
-            if (profile && profile !== true) {
-              return resolve(profile);
-            }
-            return {};
-          });
-      });
-    } catch (err) {
-      return {};
-    }
+  private async getProfile(profileUrl: string): Promise<MetadataProfileDto | boolean> {
+    return new Promise(resolve => {
+      this.backendService.getMetadataProfile(profileUrl)
+        .subscribe(profile => {
+          if (profile && profile !== true) {
+            return resolve(profile);
+          }
+          return resolve(false);
+        });
+    });
   }
 
   private static getFormlyType(entry: MDProfileEntry): string {

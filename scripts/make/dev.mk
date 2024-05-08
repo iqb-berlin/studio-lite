@@ -12,6 +12,7 @@ include $(STUDIO_LITE_BASE_DIR)/.env.dev
 ## disables printing the recipe of a make target before executing it
 .SILENT: dev-volumes-clean dev-images-clean
 
+
 ## Build docker images
 # Param (optional): SERVICE - Build the specified service only, e.g. `SERVICE=db make dev-build`
 dev-build:
@@ -74,7 +75,7 @@ dev-volumes-clean:
 	fi
 
 ## Remove all unused (not just dangling) images!
-dev-images-clean: .EXPORT_ALL_VARIABLES
+dev-images-clean:
 	if test "$(shell docker images -f reference=studio-lite-* -q)";\
 		then docker rmi $(shell docker images -f reference=studio-lite-* -q);\
 	fi

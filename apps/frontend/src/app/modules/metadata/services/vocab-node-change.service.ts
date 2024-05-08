@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
   DialogData, NotationNode, VocabNode, Vocabulary
-} from '../models/types';
+} from '../models/vocabulary.class';
 
 @Injectable()
 export class VocabNodeChangeService {

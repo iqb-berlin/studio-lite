@@ -48,3 +48,8 @@ export { MetadataValuesEntry } from './lib/dto/unit/profile-metadata-values.clas
 export { CodebookUnitDto } from './lib/dto/coding/coding-dto';
 export { CodeBookContentSetting } from './lib/dto/coding/coding-dto';
 export { UnitMetadataValues } from './lib/dto/unit/profile-metadata-values.class';
+export { MetadataProfileDto, MetadataProfileGroup } from './lib/dto/metadata-profile/metadata-profile-dto';
+export { MetadataVocabularyDto, TopConcept } from './lib/dto/metadata-vocabulary/metadata-vocabulary-dto';
+export { MetadataProfileRegistryDto }
+  from './lib/dto/metadata-profile-registry/metadata-profile-registry-dto';
+export { RegisteredMetadataProfileDto } from './lib/dto/registered-metadata-profile/registered-metadata-profile-dto';

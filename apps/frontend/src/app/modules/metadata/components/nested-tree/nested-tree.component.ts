@@ -21,7 +21,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   DialogData, VocabFlatNode, VocabNode, Vocabulary
-} from '../../models/types';
+} from '../../models/vocabulary.class';
 import { AreAllDescendantsSelectedPipe } from '../../pipes/are-all-descendants-selected.pipe';
 import { AreSomeDescendantsSelectedPipe } from '../../pipes/are-some-descendants-selected.pipe';
 import { IsTreeControlExpandedPipe } from '../../pipes/is-tree-control-expanded.pipe';

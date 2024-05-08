@@ -80,13 +80,13 @@ export class UnitDownloadClass {
               '@page': transformedVariable.page
             }
           });
-          if (transformedVariable.valuePositionLabels.length) {
+          if (transformedVariable.valuePositionLabels && transformedVariable.valuePositionLabels.length) {
             const valuePositionLabelsElement = variableElement.ele('ValuePositionLabels');
             transformedVariable.valuePositionLabels.forEach(label => {
               valuePositionLabelsElement.ele({ ValuePositionLabel: { '#': label } });
             });
           }
-          if (transformedVariable.values.length) {
+          if (transformedVariable.values && transformedVariable.values.length) {
             const valuesElement = variableElement.ele({
               Values: {
                 '@complete': transformedVariable.valuesComplete

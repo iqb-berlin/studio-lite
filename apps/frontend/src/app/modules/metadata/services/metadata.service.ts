@@ -4,12 +4,12 @@ import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { TopConcept, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 import {
-  TopConcept, Vocab, VocabData, VocabIdDictionaryValue
-} from '../models/types';
+  Vocab, VocabData, VocabIdDictionaryValue
+} from '../models/vocabulary.class';
 
 @Injectable({
   providedIn: 'root'
@@ -28,50 +28,53 @@ export class MetadataService {
               private http: HttpClient) {
   }
 
-  async getProfileVocabularies(profile: MDProfile) {
-    const vocabularyURLs: ProfileEntryParametersVocabulary[] = [];
-    profile.groups.forEach(group => {
-      group.entries.forEach(entry => {
-        const entryParams = entry.parameters as ProfileEntryParametersVocabulary;
-        if (entry.type === 'vocabulary') vocabularyURLs.push(entryParams);
-      });
+  async loadProfileVocabularies(profile: MDProfile): Promise<boolean> {
+    return new Promise(resolve => {
+      this.backendService.getMetadataVocabulariesForProfile(profile.id)
+        .subscribe(metadataVocabularies => {
+          if (metadataVocabularies && metadataVocabularies !== true &&
+            !metadataVocabularies.some(vocabulary => vocabulary === null)) {
+            const vocabularies: Vocab[] = metadataVocabularies
+              .map(vocabulary => ({
+                data: vocabulary,
+                url: vocabulary.id
+              }));
+            if (this.vocabularies.length) {
+              this.vocabularies = [...this.vocabularies, ...vocabularies];
+            } else {
+              this.vocabularies = vocabularies;
+            }
+            const vocabularyEntryParams = profile.groups
+              .map(group => group.entries)
+              .flat()
+              .filter(entry => (entry.type === 'vocabulary'))
+              .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary));
+            this.vocabularies.forEach(vocabulary => {
+              vocabularyEntryParams.forEach(entryParam => {
+                if (entryParam.url === vocabulary.url) {
+                  this.vocabulariesIdDictionary = {
+                    ...this.vocabulariesIdDictionary,
+                    ...this.mapVocabularyIds(vocabulary.data, entryParam)
+                  };
+                }
+              });
+            });
+            resolve(true);
+          }
+          resolve(false);
+        });
     });
-    const promises: Promise<Vocab>[] = [];
-    vocabularyURLs.forEach(entryParams => {
-      promises.push(this.fetchVocabulary(entryParams.url));
-    });
-    const vocabularies: Vocab[] = await Promise.all(promises);
-    this.backendService.saveVocabs(vocabularies)
-      .subscribe(() => {});
-    if (this.vocabularies.length) {
-      this.vocabularies = [...this.vocabularies, ...vocabularies];
-    } else {
-      this.vocabularies = vocabularies;
-    }
-    this.vocabularies.forEach(vocabulary => {
-      vocabularyURLs.forEach(entryParams => {
-        if (entryParams.url === vocabulary.url) {
-          this.vocabulariesIdDictionary = {
-            ...this.vocabulariesIdDictionary,
-            ...this.mapVocabularyIds(vocabulary.data, entryParams)
-          };
-        }
-      });
-    });
-    return this.vocabulariesIdDictionary;
   }
 
   private mapVocabularyIds(vocabulary: VocabData, entryParams: ProfileEntryParametersVocabulary) {
     const hasNarrower = (narrower: TopConcept[]) => {
       narrower.forEach((vocabularyEntry: TopConcept) => {
-        // console.log(this.idLabelDictionary, entryParams);
         this.idLabelDictionary[vocabularyEntry.id] = {
           labels: vocabularyEntry.prefLabel,
           notation: vocabularyEntry.notation || [],
           ...entryParams
         };
         if (vocabularyEntry.narrower) hasNarrower(vocabularyEntry.narrower);
-        // console.log(this.idLabelDictionary);
       });
     };
 
@@ -84,27 +87,6 @@ export class MetadataService {
       });
     }
     return this.idLabelDictionary;
-  }
-
-  async fetchVocabulary(url: string): Promise<Vocab> {
-    try {
-      const response = await fetch(`${url}index.jsonld`);
-      if (response.ok) {
-        const vocab = await response.json();
-        return { data: vocab, url };
-      }
-      return await new Promise(resolve => {
-        this.backendService.getVocab(url)
-          .subscribe((vocab: VocabData | boolean) => {
-            if (vocab && vocab !== true) {
-              return resolve({ data: vocab, url });
-            }
-            return { data: {}, url };
-          });
-      });
-    } catch {
-      return { data: {}, url };
-    }
   }
 
   downloadItemsMetadataReport(columns:string[]): Observable<Blob> {

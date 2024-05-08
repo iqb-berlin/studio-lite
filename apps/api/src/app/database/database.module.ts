@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { HttpModule } from '@nestjs/axios';
 import KeycloakUser from './entities/keycloak-user.entity';
 import User from './entities/user.entity';
 import { UsersService } from './services/users.service';
@@ -28,9 +30,17 @@ import ReviewUnit from './entities/review-unit.entity';
 import { ReviewService } from './services/review.service';
 import ResourcePackage from './entities/resource-package.entity';
 import { ResourcePackageService } from './services/resource-package.service';
+import MetadataProfile from './entities/metadata-profile.entity';
+import { MetadataProfileService } from './services/metadata-profile.service';
+import MetadataVocabulary from './entities/metadata-vocabulary.entity';
+import { MetadataVocabularyService } from './services/metadata-vocabulary.service';
+import { RegisteredMetadataProfileService } from './services/registered-metadata-profile.service';
+import MetadataProfileRegistry from './entities/metadata-profile-registry.entity';
+import RegisteredMetadataProfile from './entities/registered-metadata-profile.entity';
 
 @Module({
   imports: [
+    HttpModule,
     User,
     KeycloakUser,
     Workspace,
@@ -41,6 +51,10 @@ import { ResourcePackageService } from './services/resource-package.service';
     VeronaModule,
     UnitDefinition,
     UnitComment,
+    MetadataProfile,
+    MetadataVocabulary,
+    MetadataProfileRegistry,
+    RegisteredMetadataProfile,
     UnitUser,
     Setting,
     ResourcePackage,
@@ -67,6 +81,10 @@ import { ResourcePackageService } from './services/resource-package.service';
           Setting,
           Unit,
           UnitComment,
+          MetadataProfile,
+          MetadataVocabulary,
+          MetadataProfileRegistry,
+          RegisteredMetadataProfile,
           UnitUser,
           WorkspaceGroupAdmin,
           Review,
@@ -88,6 +106,10 @@ import { ResourcePackageService } from './services/resource-package.service';
       Setting,
       Unit,
       UnitComment,
+      MetadataProfile,
+      MetadataVocabulary,
+      MetadataProfileRegistry,
+      RegisteredMetadataProfile,
       UnitUser,
       WorkspaceGroupAdmin,
       Review,
@@ -103,6 +125,9 @@ import { ResourcePackageService } from './services/resource-package.service';
     WorkspaceGroupAdminService,
     UnitService,
     UnitCommentService,
+    MetadataProfileService,
+    MetadataVocabularyService,
+    RegisteredMetadataProfileService,
     UnitUserService,
     VeronaModulesService,
     SettingService,
@@ -126,6 +151,9 @@ import { ResourcePackageService } from './services/resource-package.service';
     Review,
     ReviewUnit,
     ReviewService,
+    MetadataProfileService,
+    MetadataVocabularyService,
+    RegisteredMetadataProfileService,
     UsersService,
     UnitService,
     UnitCommentService,
