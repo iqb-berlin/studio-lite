@@ -3,7 +3,7 @@
 ARG REGISTRY_PATH
 
 
-FROM ${REGISTRY_PATH}node:20.12-bookworm-slim AS build
+FROM ${REGISTRY_PATH}node:20.13-bookworm-slim AS build
 ARG PROJECT
 
 RUN mkdir /studio-lite

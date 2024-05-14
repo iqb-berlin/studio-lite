@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG REGISTRY_PATH
-ARG BASE_IMAGE=${REGISTRY_PATH}node:20.12-bookworm-slim
+ARG BASE_IMAGE=${REGISTRY_PATH}node:20.13-bookworm-slim
 
 
 FROM ${BASE_IMAGE} AS build
