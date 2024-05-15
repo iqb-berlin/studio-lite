@@ -53,3 +53,7 @@ export { MetadataVocabularyDto, TopConcept } from './lib/dto/metadata-vocabulary
 export { MetadataProfileRegistryDto }
   from './lib/dto/metadata-profile-registry/metadata-profile-registry-dto';
 export { RegisteredMetadataProfileDto } from './lib/dto/registered-metadata-profile/registered-metadata-profile-dto';
+export { UserWorkspaceFullDto } from './lib/dto/workspace/user-workspace-full-dto';
+export { UserWorkspaceAccessDto } from "./lib/dto/workspace/user-workspace-access-dto";
+export { UsersWorkspaceInListDto } from "./lib/dto/workspace/users-workspace-in-list-dto";
+export { WorkspaceUserInListDto } from "./lib/dto/user/workspace-user-in-list-dto";

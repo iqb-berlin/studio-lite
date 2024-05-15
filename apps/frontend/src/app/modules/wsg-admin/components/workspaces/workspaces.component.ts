@@ -1,13 +1,13 @@
 import {
-  // eslint-disable-next-line max-len
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
+  MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  CreateWorkspaceDto, UserInListDto, WorkspaceInListDto
+  CreateWorkspaceDto, WorkspaceInListDto, WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
@@ -16,12 +16,12 @@ import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService as WorkspaceBackendService } from '../../../workspace/services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
@@ -30,6 +30,8 @@ import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
+import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
+import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 
 const datePipe = new DatePipe('de-DE');
 
@@ -38,8 +40,10 @@ const datePipe = new DatePipe('de-DE');
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, TranslateModule]
+  imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
+    MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
+    IsSelectedIdPipe, TranslateModule, MatIcon]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
@@ -47,7 +51,7 @@ export class WorkspacesComponent implements OnInit {
   tableSelectionCheckboxes = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
-  workspaceUsers = new UserToCheckCollection([]);
+  workspaceUsers = new WorkspaceUserToCheckCollection([]);
   isWorkspaceGroupAdmin = false;
 
   @ViewChild(MatSort) sort = new MatSort();
@@ -89,7 +93,7 @@ export class WorkspacesComponent implements OnInit {
     if (this.selectedWorkspaceId > 0) {
       this.appService.dataLoading = true;
       this.backendService.getUsersByWorkspace(this.selectedWorkspaceId).subscribe(
-        (dataResponse: UserInListDto[]) => {
+        (dataResponse: WorkspaceUserInListDto[]) => {
           this.workspaceUsers.setChecks(dataResponse);
           this.appService.dataLoading = false;
         }
@@ -105,7 +109,8 @@ export class WorkspacesComponent implements OnInit {
         this.appService.dataLoading = true;
         this.backendService.setUsersByWorkspace(
           this.selectedWorkspaceId,
-          this.workspaceUsers.getChecks()).subscribe(
+          this.workspaceUsers.getChecks()
+        ).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open(
@@ -154,10 +159,10 @@ export class WorkspacesComponent implements OnInit {
   }
 
   createUserList(): void {
-    this.workspaceUsers = new UserToCheckCollection([]);
+    this.workspaceUsers = new WorkspaceUserToCheckCollection([]);
     this.backendService.getUsers()
       .subscribe(users => {
-        this.workspaceUsers = new UserToCheckCollection(users);
+        this.workspaceUsers = new WorkspaceUserToCheckCollection(users);
         this.updateWorkspaceList();
       });
   }
@@ -327,5 +332,12 @@ export class WorkspacesComponent implements OnInit {
       this.translateService.instant('error'),
       { duration: 3000 }
     );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  updateWriteAccess(user: WorkspaceUserChecked): void {
+    if (!user.isChecked) {
+      user.hasWriteAccess = false;
+    }
   }
 }

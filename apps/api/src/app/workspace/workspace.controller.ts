@@ -5,7 +5,11 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  CodingReportDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto, UsersInWorkspaceDto
+  CodingReportDto,
+  WorkspaceFullDto,
+  RequestReportDto,
+  WorkspaceSettingsDto,
+  UsersInWorkspaceDto, UserWorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../database/services/workspace.service';
@@ -39,6 +43,21 @@ export class WorkspaceController {
   @ApiTags('workspace')
   async find(@WorkspaceId() workspaceId: number): Promise<WorkspaceFullDto> {
     return this.workspaceService.findOne(workspaceId);
+  }
+
+  @Get('users/:user_id')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'user_id', type: Number })
+  @ApiCreatedResponse({
+    type: UserWorkspaceFullDto
+  })
+  @ApiTags('workspace')
+  async findByUser(@WorkspaceId() workspaceId: number,
+    @Param('user_id') userId: number
+  ): Promise<UserWorkspaceFullDto> {
+    return this.workspaceService.findOneByUser(workspaceId, userId);
   }
 
   @Get('users')

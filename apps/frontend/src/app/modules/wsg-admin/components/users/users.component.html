@@ -1,6 +1,5 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="fx-flex-row-50 fx-column-start-stretch object-list">
-
     @if (objectsDatasource.data.length) {
       <studio-lite-search-filter
         [title]="'search-filter.filter-users' | translate"
@@ -63,17 +62,13 @@
     </mat-table>
   </div>
 
-  <div class="fx-flex-row-40 object-list">
+  <div class="object-list fx-column-start-stretch fx-flex-row-40">
     <div class="fx-row-space-between-center">
       @if (!selectedUser) {
-        <div>
-          {{'access-rights.hint' | translate}}
-        </div>
+        <div>{{'access-rights.hint' | translate}}</div>
       }
       @if (selectedUser) {
-        <div >
-          {{'access-rights.for-user' | translate: {user: tableSelectionRow.selected[0].name } }}
-        </div>
+        <div>{{'access-rights.for-user' | translate: {user: tableSelectionRow.selected[0].name } }}</div>
       }
       <button mat-raised-button
         [matTooltip]="'save' | translate"
@@ -84,14 +79,44 @@
       </button>
     </div>
 
-    <div class="scroll-area fx-column-start-stretch">
+    @if (userWorkspaces.entries.length) {
+      <div class="fx-row-start-stretch">
+        <div class="access-icon">
+          <mat-icon [matTooltip]="'access-rights.read-access' | translate"
+                    color="primary"
+                    fontIcon="visibility">
+          </mat-icon>
+        </div>
+        <div class="access-icon">
+          <mat-icon [matTooltip]="'access-rights.write-access' | translate"
+                    color="primary"
+                    fontIcon="edit">
+          </mat-icon>
+        </div>
+      </div>
+    }
+
+    <div class="scroll-area fx-column-start-start">
       @for (ws of userWorkspaces.entries; track ws) {
-        <mat-checkbox
-          [(ngModel)]="ws.isChecked"
-          [disabled]="!selectedUser"
-          (change)="userWorkspaces.updateHasChanged()">
-          {{ws.name}}
-        </mat-checkbox>
+        <div class="fx-row-start-center">
+          <div class="fx-row-start-center fx-flex-fill fx-gap-15">
+            <div class="fx-row-start-center">
+              <mat-checkbox
+                [(ngModel)]="ws.isChecked"
+                [disabled]="!selectedUser"
+                [matTooltip]="'access-rights.read-access' | translate"
+                (change)="updateWriteAccess(ws); userWorkspaces.updateHasChanged()">
+              </mat-checkbox>
+              <mat-checkbox
+                [(ngModel)]="ws.hasWriteAccess"
+                [disabled]="!selectedUser || !ws.isChecked"
+                [matTooltip]="'access-rights.write-access' | translate"
+                (change)="userWorkspaces.updateHasChanged()">
+              </mat-checkbox>
+            </div>
+            <div>{{ws.name}}</div>
+          </div>
+        </div>
       }
     </div>
   </div>
