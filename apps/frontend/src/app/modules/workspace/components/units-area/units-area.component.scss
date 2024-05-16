@@ -4,6 +4,17 @@
   margin: 0;
 }
 
+.no-write-access-hint {
+  color: #333;
+  width: 100%;
+  height: 36px;
+  line-height: 36px;
+  box-sizing: border-box;
+  padding-left: 15px;
+  padding-right: 10px;
+  background-color: #ffcc00;
+}
+
 .unit-list {
   overflow: auto;
 }

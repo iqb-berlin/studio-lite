@@ -11,9 +11,9 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateWorkspaceGroupDto, UserInListDto,
+  CreateWorkspaceGroupDto, UserInListDto, UsersWorkspaceInListDto,
   WorkspaceGroupFullDto,
-  WorkspaceGroupInListDto, WorkspaceInListDto
+  WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
@@ -57,7 +57,7 @@ export class WorkspaceGroupsController {
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Admin workspaces by workspace-group retrieved successfully.' })
   @ApiTags('wsg-admin workspaces')
-  async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
+  async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<UsersWorkspaceInListDto[]> {
     return this.workspaceService.findAllByGroup(id);
   }
 

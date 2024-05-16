@@ -83,7 +83,6 @@ export class UnitSaveButtonComponent {
 
   private setUnitMetadataChangeSubscription(store: UnitMetadataStore | undefined) {
     if (store) {
-      // console.log('setUnitMetadataChangeSubscription', !!this.unitMetadataChangeSubscription);
       if (this.unitMetadataChangeSubscription) this.unitMetadataChangeSubscription.unsubscribe();
       this.unitMetadataChangeSubscription = store.dataChange
         .subscribe(() => this.setStoresDataChanged());

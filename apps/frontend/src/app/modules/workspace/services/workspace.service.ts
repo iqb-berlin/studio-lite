@@ -31,6 +31,7 @@ export class WorkspaceService {
   workspaceSettings: WorkspaceSettingsDto;
   unitList: { [key: string]: UnitInListDto[] } = {};
   isWorkspaceGroupAdmin = false;
+  userHasWriteAccess = false;
   lastChangedMetadata?: Date;
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;

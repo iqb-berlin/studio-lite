@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import {
-  CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto,
+  CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
   CodingReportDto
 } from '@studio-lite-lib/api-dto';
@@ -129,7 +129,7 @@ export class WorkspaceService {
     return myReturn;
   }
 
-  async findAllByGroup(workspaceGroupId: number): Promise<WorkspaceInListDto[]> {
+  async findAllByGroup(workspaceGroupId: number): Promise<UsersWorkspaceInListDto[]> {
     const workspaces: Workspace[] = await this.workspacesRepository.find({
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
@@ -141,7 +141,7 @@ export class WorkspaceService {
       unitsCount: (await this.unitsRepository.find({
         where: { workspaceId: workspace.id }
       })).length
-    } as WorkspaceInListDto)));
+    } as UsersWorkspaceInListDto)));
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {

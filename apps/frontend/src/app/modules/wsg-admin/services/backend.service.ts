@@ -9,7 +9,7 @@ import {
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   WorkspaceGroupFullDto,
-  WorkspaceInListDto, WorkspaceUserInListDto
+  WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -45,7 +45,10 @@ export class BackendService {
       );
   }
 
-  setWorkspacesByUser(userId: number, accessTo: UserWorkspaceAccessDto[], workspaceGroupId: number): Observable<boolean> {
+  setWorkspacesByUser(
+    userId: number,
+    accessTo: UserWorkspaceAccessDto[],
+    workspaceGroupId: number): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
       .pipe(
@@ -54,9 +57,9 @@ export class BackendService {
       );
   }
 
-  getWorkspaces(workspaceGroupId: number): Observable<WorkspaceInListDto[]> {
+  getWorkspaces(workspaceGroupId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<WorkspaceInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );

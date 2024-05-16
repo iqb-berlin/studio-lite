@@ -1,4 +1,4 @@
-import { UsersWorkspaceInListDto, UserWorkspaceAccessDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { UsersWorkspaceInListDto, UserWorkspaceAccessDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceChecked } from './workspace-checked.class';
 
 export class WorkspaceToCheckCollection {
@@ -6,7 +6,7 @@ export class WorkspaceToCheckCollection {
   private userWorkspacesIds: UserWorkspaceAccessDto[] = [];
   hasChanged = false;
 
-  constructor(workspaces: UsersWorkspaceInListDto[] | WorkspaceInListDto[]) {
+  constructor(workspaces: UsersWorkspaceInListDto[]) {
     this.entries = [];
     workspaces.forEach(workspace => {
       this.entries.push(new WorkspaceChecked(workspace));
@@ -26,7 +26,6 @@ export class WorkspaceToCheckCollection {
       const userWorkspace = this.userWorkspacesIds
         .find(userWorkspaceId => workspace.id === userWorkspaceId.id);
       if (userWorkspace) {
-        console.log('setChecks: userWorkspaces', userWorkspaces);
         workspace.isChecked = true;
         workspace.hasWriteAccess = userWorkspace.hasWriteAccess;
       } else {
@@ -34,7 +33,6 @@ export class WorkspaceToCheckCollection {
         workspace.hasWriteAccess = false;
       }
     });
-    console.log('this.entries', this.entries);
     this.hasChanged = false;
   }
 
