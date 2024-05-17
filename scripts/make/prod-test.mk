@@ -19,7 +19,7 @@ prod-test-build-e2e:
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				-f $(STUDIO_LITE_BASE_DIR)/apps/frontend-e2e/Dockerfile\
 				-t $(REGISTRY_PATH)iqbberlin/studio-lite-frontend-e2e:$(TAG)\
-			.nake prod
+			.
 	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Run all e2e tests in production environment (only in combination with 'make studio-lite-up')
