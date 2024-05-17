@@ -12,8 +12,8 @@ export function addFirstUser() {
   clickButtonToAccept('Weiter');
   cy.wait(400);
   visitLoginPage();
-  cy.get('mat-icon:contains("account_box")')
-    .click();
+  // cy.get('mat-icon:contains("account_box")').click();
+  cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
@@ -84,10 +84,11 @@ export function deleteGroupArea(areaName: string):void {
 }
 
 export function logout() {
-  cy.get('mat-icon:contains("account_box")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('mat-icon:contains("account_box")')
+  //   .eq(0)
+  //   .should('exist')
+  //   .click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
@@ -96,10 +97,11 @@ export function logout() {
 }
 
 export function changePassword(newPass:string, oldPass:string):void {
-  cy.get('mat-icon:contains("account_box")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('mat-icon:contains("account_box")')
+  //   .eq(0)
+  //   .should('exist')
+  //   .click();
   cy.get('span:contains("Kennwort ändern")')
     .should('exist')
     .click();
@@ -117,10 +119,11 @@ export function changePassword(newPass:string, oldPass:string):void {
 }
 
 export function updatePersonalData():void {
-  cy.get('mat-icon:contains("account_box")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('mat-icon:contains("account_box")')
+  //   .eq(0)
+  //   .should('exist')
+  //   .click();
   cy.get('span:contains("Nutzerdaten ändern")')
     .should('exist')
     .click();
