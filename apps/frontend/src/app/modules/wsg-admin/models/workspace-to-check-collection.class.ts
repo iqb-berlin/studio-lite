@@ -1,31 +1,51 @@
-import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { UsersWorkspaceInListDto, UserWorkspaceAccessDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceChecked } from './workspace-checked.class';
 
 export class WorkspaceToCheckCollection {
   entries: WorkspaceChecked[];
-  private userWorkspacesIds: number[] = [];
+  private userWorkspacesIds: UserWorkspaceAccessDto[] = [];
   hasChanged = false;
 
-  constructor(workspaces: WorkspaceInListDto[]) {
+  constructor(workspaces: UsersWorkspaceInListDto[]) {
     this.entries = [];
     workspaces.forEach(workspace => {
       this.entries.push(new WorkspaceChecked(workspace));
     });
   }
 
-  setChecks(userWorkspaces?: WorkspaceInListDto[]): void {
+  setChecks(userWorkspaces?: UsersWorkspaceInListDto[]): void {
     this.userWorkspacesIds = [];
-    if (userWorkspaces) userWorkspaces.forEach(ws => this.userWorkspacesIds.push(ws.id));
+    if (userWorkspaces) {
+      userWorkspaces.forEach(ws => this.userWorkspacesIds.push(
+        {
+          id: ws.id,
+          hasWriteAccess: ws.userHasWriteAccess
+        }));
+    }
     this.entries.forEach(workspace => {
-      workspace.isChecked = this.userWorkspacesIds.indexOf(workspace.id) > -1;
+      const userWorkspace = this.userWorkspacesIds
+        .find(userWorkspaceId => workspace.id === userWorkspaceId.id);
+      if (userWorkspace) {
+        workspace.isChecked = true;
+        workspace.hasWriteAccess = userWorkspace.hasWriteAccess;
+      } else {
+        workspace.isChecked = false;
+        workspace.hasWriteAccess = false;
+      }
     });
     this.hasChanged = false;
   }
 
-  getChecks(): number[] {
-    const checkedWorkspacesIds: number[] = [];
+  getChecks(): UserWorkspaceAccessDto[] {
+    const checkedWorkspacesIds: UserWorkspaceAccessDto[] = [];
     this.entries.forEach(workspace => {
-      if (workspace.isChecked) checkedWorkspacesIds.push(workspace.id);
+      if (workspace.isChecked) {
+        checkedWorkspacesIds.push(
+          {
+            id: workspace.id,
+            hasWriteAccess: workspace.hasWriteAccess
+          });
+      }
     });
     return checkedWorkspacesIds;
   }
@@ -33,8 +53,16 @@ export class WorkspaceToCheckCollection {
   updateHasChanged(): void {
     this.hasChanged = false;
     this.entries.forEach(workspace => {
-      if ((workspace.isChecked && this.userWorkspacesIds.indexOf(workspace.id) < 0) ||
-        (!workspace.isChecked && this.userWorkspacesIds.indexOf(workspace.id) > -1)) {
+      const userWorkspace = this.userWorkspacesIds
+        .find(userWorkspaceId => workspace.id === userWorkspaceId.id);
+
+      if ((workspace.isChecked && !userWorkspace) || (!workspace.isChecked && userWorkspace)) {
+        this.hasChanged = true;
+      }
+      if (workspace.hasWriteAccess && userWorkspace && !userWorkspace.hasWriteAccess) {
+        this.hasChanged = true;
+      }
+      if (!workspace.hasWriteAccess && userWorkspace && userWorkspace.hasWriteAccess) {
         this.hasChanged = true;
       }
     });
@@ -43,7 +71,12 @@ export class WorkspaceToCheckCollection {
   setHasChangedFalse(): void {
     this.userWorkspacesIds = [];
     this.entries.forEach(workspace => {
-      if (workspace.isChecked) this.userWorkspacesIds.push(workspace.id);
+      if (workspace.isChecked) {
+        this.userWorkspacesIds.push({
+          id: workspace.id,
+          hasWriteAccess: workspace.hasWriteAccess
+        });
+      }
     });
     this.hasChanged = false;
   }

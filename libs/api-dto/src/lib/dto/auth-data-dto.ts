@@ -41,6 +41,9 @@ export class WorkspaceDto {
 
   @ApiProperty()
     name!: string;
+
+  @ApiProperty()
+    userHasWriteAccess!: boolean;
 }
 
 export class ReviewDto {

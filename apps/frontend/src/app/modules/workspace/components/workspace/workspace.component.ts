@@ -3,7 +3,7 @@ import {
 } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { UserWorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -66,7 +66,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.resetUnitList([]);
     const workspaceKey = 'ws';
     this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params[workspaceKey]);
-    this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspaceId).subscribe(
+    this.appBackendService.getUserWorkspaceData(
+      this.workspaceService.selectedWorkspaceId,
+      this.appService.authData.userId
+    ).subscribe(
       wResponse => {
         if (wResponse) {
           this.initWorkspace(wResponse);
@@ -96,7 +99,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.pinnedNavTab = secondaryOutletTab ? [{ name: secondaryOutletTab, duplicable: true }] : [];
   }
 
-  private initWorkspace(workspace: WorkspaceFullDto): void {
+  private initWorkspace(workspace: UserWorkspaceFullDto): void {
     this.workspaceService.selectedWorkspaceName = `${workspace.groupName}: ${workspace.name}`;
     this.workspaceService.groupId = workspace.groupId || 0;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
@@ -105,6 +108,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (workspace.settings) {
       this.workspaceService.workspaceSettings = workspace.settings;
     }
+    this.workspaceService.userHasWriteAccess = workspace.userHasWriteAccess;
     this.workspaceService.isWorkspaceGroupAdmin =
       this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
     this.moduleService.loadList();

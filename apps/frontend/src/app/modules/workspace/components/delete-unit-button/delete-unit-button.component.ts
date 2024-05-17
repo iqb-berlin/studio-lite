@@ -22,6 +22,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 })
 export class DeleteUnitButtonComponent extends SelectUnitDirective {
   @Input() selectedUnitId!: number;
+  @Input() disabled!: boolean;
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,

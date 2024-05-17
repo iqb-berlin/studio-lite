@@ -24,11 +24,10 @@ import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
   templateUrl: './unit-selection.component.html',
   styleUrls: ['./unit-selection.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, UnitGroupComponent, KeyValuePipe, TranslateModule]
+  imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, UnitGroupComponent,
+    KeyValuePipe, TranslateModule]
 })
-export class UnitSelectionComponent extends SelectUnitDirective
-  implements OnInit, OnDestroy {
+export class UnitSelectionComponent extends SelectUnitDirective implements OnInit, OnDestroy {
   numberOfGroups!: number;
   numberOfUnits!: number;
   expandedGroups!: number;

@@ -33,6 +33,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   private uploadSubscription: Subscription | null = null;
   @Input() selectedUnitId!: number;
+  @Input() disabled!: boolean;
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,

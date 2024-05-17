@@ -2,11 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import {
-  CreateWorkspaceDto,
-  WorkspaceGroupDto,
-  WorkspaceFullDto,
-  WorkspaceInListDto, RequestReportDto, WorkspaceSettingsDto, UnitMetadataDto,
-  UnitMetadataValues
+  CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
+  UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
+  CodingReportDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -27,7 +25,6 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
-import { CodingReportDto } from '../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Injectable()
 export class WorkspaceService {
@@ -51,43 +48,48 @@ export class WorkspaceService {
   ) {
   }
 
-  async findAll(userId?: number): Promise<WorkspaceInListDto[]> {
+  async findAll(userId: number): Promise<UsersWorkspaceInListDto[]> {
     this.logger.log(`Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`);
-    const validWorkspaces: number[] = [];
-    // TODO: hier fehlt echte User Abfrage!
+    const validWorkspaces: UserWorkspaceAccessDto[] = [];
     if (userId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
         .find({ where: { userId: userId } });
-      workspaceUsers.forEach(wsU => validWorkspaces.push(wsU.workspaceId));
+      workspaceUsers.forEach(wsU => validWorkspaces.push(
+        { id: wsU.workspaceId, hasWriteAccess: wsU.hasWriteAccess }
+      ));
     }
-    const workspaces: Workspace[] = await this.workspacesRepository.find({ order: { name: 'ASC' } });
-
+    const workspaces: Workspace[] = await this.workspacesRepository
+      .find({ order: { name: 'ASC' } });
     return Promise.all(
       workspaces
-        .filter(w => !userId || validWorkspaces.indexOf(w.id) > -1)
+        .filter(w => !userId || validWorkspaces
+          .find(validWorkspace => validWorkspace.id === w.id))
         .map(async workspace => (
           {
             id: workspace.id,
             name: workspace.name,
+            userHasWriteAccess: validWorkspaces
+              .find(validWorkspace => validWorkspace.id === workspace.id)?.hasWriteAccess || false,
             groupId: workspace.groupId,
             unitsCount: (await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
             })).length
-          } as WorkspaceInListDto)
+          })
         ));
   }
 
-  async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: number[]) {
+  async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: UserWorkspaceAccessDto[]) {
     this.logger.log(`Set workspace for userId: ${userId}.`);
     return this.workspaceUserService.deleteAllByWorkspaceGroup(workspaceGroupId, userId).then(async () => {
-      await Promise.all(workspaces.map(async workspaceId => {
-        const newWorkspaceUser = await this.workspaceUsersRepository.create(<WorkspaceUser>{
+      await Promise.all(workspaces.map(async workspace => {
+        const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
           userId: userId,
-          workspaceId: workspaceId
+          workspaceId: workspace.id,
+          hasWriteAccess: workspace.hasWriteAccess
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
 
-        const units = await this.unitService.findAll(workspaceId);
+        const units = await this.unitService.findAll(workspace.id);
         this.logger.log(`Found units: ${units.length}.`);
         await Promise.all(units.map(async unit => {
           await this.unitUserService.createUnitUser(userId, unit.id);
@@ -127,7 +129,7 @@ export class WorkspaceService {
     return myReturn;
   }
 
-  async findAllByGroup(workspaceGroupId: number): Promise<WorkspaceInListDto[]> {
+  async findAllByGroup(workspaceGroupId: number): Promise<UsersWorkspaceInListDto[]> {
     const workspaces: Workspace[] = await this.workspacesRepository.find({
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
@@ -139,7 +141,7 @@ export class WorkspaceService {
       unitsCount: (await this.unitsRepository.find({
         where: { workspaceId: workspace.id }
       })).length
-    } as WorkspaceInListDto)));
+    } as UsersWorkspaceInListDto)));
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
@@ -157,6 +159,30 @@ export class WorkspaceService {
         name: workspace.name,
         groupId: workspace.groupId,
         groupName: workspaceGroup.name,
+        settings: workspace.settings
+      };
+    }
+    throw new AdminWorkspaceNotFoundException(id, 'GET');
+  }
+
+  async findOneByUser(id: number, userId: number): Promise<UserWorkspaceFullDto> {
+    this.logger.log(`Returning workspace with id: ${id}`);
+    const workspace = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    const workspaceUser = await this.workspaceUsersRepository.findOne({
+      where: { workspaceId: id, userId: userId }
+    });
+    if (workspace && workspaceUser) {
+      const workspaceGroup = await this.workspaceGroupRepository.findOne({
+        where: { id: workspace.groupId }
+      });
+      return <UserWorkspaceFullDto>{
+        id: workspace.id,
+        name: workspace.name,
+        groupId: workspace.groupId,
+        groupName: workspaceGroup.name,
+        userHasWriteAccess: workspaceUser.hasWriteAccess,
         settings: workspace.settings
       };
     }

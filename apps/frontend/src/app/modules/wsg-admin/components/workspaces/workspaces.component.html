@@ -84,17 +84,44 @@
       </button>
     </div>
 
+    @if (workspaceUsers.entries.length) {
+      <div class="fx-row-start-stretch">
+        <div class="access-icon">
+          <mat-icon [matTooltip]="'access-rights.read-access' | translate"
+                    color="primary"
+                    fontIcon="visibility">
+          </mat-icon>
+        </div>
+        <div class="access-icon">
+          <mat-icon [matTooltip]="'access-rights.write-access' | translate"
+                    color="primary"
+                    fontIcon="edit">
+          </mat-icon>
+        </div>
+      </div>
+    }
+
     <div class="scroll-area fx-column-start-stretch">
       @for (u of workspaceUsers.entries; track u) {
-        <div
-          class="fx-row-start-stretch">
-          <mat-checkbox class="fx-flex-fill"
-            [disabled]="!selectedWorkspaceId"
-            (change)="workspaceUsers.updateHasChanged()"
-            [(ngModel)]="u.isChecked">
-            {{u.displayName}} ({{u.name}})
-          </mat-checkbox>
-          <div class="fx-flex-fill secondary-text">
+        <div class="fx-row-start-center">
+          <div class="fx-row-start-center fx-flex-fill fx-gap-15">
+            <div class="fx-row-start-center">
+              <mat-checkbox
+                [(ngModel)]="u.isChecked"
+                [disabled]="!selectedWorkspaceId"
+                [matTooltip]="'access-rights.read-access' | translate"
+                (change)="updateWriteAccess(u); workspaceUsers.updateHasChanged()">
+              </mat-checkbox>
+              <mat-checkbox
+                [(ngModel)]="u.hasWriteAccess"
+                [disabled]="!selectedWorkspaceId || !u.isChecked"
+                [matTooltip]="'access-rights.write-access' | translate"
+                (change)="workspaceUsers.updateHasChanged()">
+              </mat-checkbox>
+            </div>
+            <div>{{u.displayName}} ({{u.name}})</div>
+          </div>
+          <div class="fx-flex-fill secondary-text" >
             {{u.description}}
           </div>
         </div>

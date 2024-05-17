@@ -1,20 +1,20 @@
 import {
-  // eslint-disable-next-line max-len
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell,
+  MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { ViewChild, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  UserFullDto, UserInListDto, WorkspaceInListDto
+  UserFullDto, UserInListDto, UsersWorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-
+import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
@@ -22,6 +22,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { WorkspaceChecked } from '../../models/workspace-checked.class';
 
 @Component({
   selector: 'studio-lite-users',
@@ -29,7 +30,9 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   styleUrls: ['./users.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule]
+  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef,
+    MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, MatCheckbox,
+    FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
@@ -65,6 +68,13 @@ export class UsersComponent implements OnInit {
     this.createWorkspaceList();
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  updateWriteAccess(workspace: WorkspaceChecked): void {
+    if (!workspace.isChecked) {
+      workspace.hasWriteAccess = false;
+    }
+  }
+
   updateWorkspaceList(): void {
     if (this.userWorkspaces.hasChanged) {
       this.snackBar.open(
@@ -76,7 +86,7 @@ export class UsersComponent implements OnInit {
       this.appService.dataLoading = true;
       this.backendService.getWorkspacesByUser(this.selectedUser)
         .subscribe(
-          (dataResponse: WorkspaceInListDto[]) => {
+          (dataResponse: UsersWorkspaceInListDto[]) => {
             this.userWorkspaces.setChecks(dataResponse);
             this.appService.dataLoading = false;
           }
@@ -102,7 +112,9 @@ export class UsersComponent implements OnInit {
       if (this.userWorkspaces.hasChanged) {
         this.appService.dataLoading = true;
         this.backendService.setWorkspacesByUser(
-          this.selectedUser, this.userWorkspaces.getChecks(), this.wsgAdminService.selectedWorkspaceGroupId
+          this.selectedUser,
+          this.userWorkspaces.getChecks(),
+          this.wsgAdminService.selectedWorkspaceGroupId
         ).subscribe(
           respOk => {
             if (respOk) {

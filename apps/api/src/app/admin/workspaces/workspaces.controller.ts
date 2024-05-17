@@ -5,7 +5,11 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  WorkspaceGroupDto, CreateWorkspaceDto, UserInListDto, WorkspaceFullDto, WorkspaceInListDto
+  WorkspaceGroupDto,
+  CreateWorkspaceDto,
+  WorkspaceFullDto,
+  WorkspaceUserInListDto,
+  UserWorkspaceAccessDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WorkspaceService } from '../../database/services/workspace.service';
@@ -23,16 +27,6 @@ export class WorkspacesController {
     private userService: UsersService
   ) {}
 
-  @Get()
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspaces retrieved successfully.' })
-  @ApiTags('admin workspaces')
-  async findAll(): Promise<WorkspaceInListDto[]> {
-    return this.workspaceService.findAll();
-  }
-
-  // TODO: sollte vermutlich besser über einen Query Parameter gelöst werden (evtl. auch gar keine Aufgabe des BE)?
   @Get('groupwise')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
@@ -58,7 +52,7 @@ export class WorkspacesController {
   @ApiOkResponse({ description: 'Admin workspace users retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
   @ApiTags('admin workspaces')
-  async findOnesUsers(@Param('id') id: number): Promise<UserInListDto[]> {
+  async findOnesUsers(@Param('id') id: number): Promise<WorkspaceUserInListDto[]> {
     return this.userService.findAllUsers(id);
   }
 
@@ -67,11 +61,10 @@ export class WorkspacesController {
   @ApiBearerAuth()
   @ApiTags('admin workspaces')
   async patchOnesUsers(@Param('id') id: number,
-    @Body() users: number[]) {
+    @Body() users: UserWorkspaceAccessDto[]) {
     return this.userService.setUsersByWorkspace(id, users);
   }
 
-  // TODO: Sollen hier mehrere Workspaces gelöscht werden? Sollte über Query gelöst werden.
   @Delete(':ids/:workspace_group_id')
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)

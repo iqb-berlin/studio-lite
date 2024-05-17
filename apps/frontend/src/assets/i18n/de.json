@@ -158,7 +158,10 @@
     "for-user": "Zugriffsrechte für \"{{user}}\"",
     "not-saved": "Zugriffsrechte nicht gespeichert.",
     "changed": "Zugriffsrechte geändert",
-    "not-changed": "Konnte Zugriffsrechte nicht ändern"
+    "not-changed": "Konnte Zugriffsrechte nicht ändern",
+    "read-access": "Leserechte",
+    "write-access": "Schreibrechte",
+    "no-write-access": "Schreibgeschützt"
   },
   "admin": {
     "users": "Nutzer:innen",
