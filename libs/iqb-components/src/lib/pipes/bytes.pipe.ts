@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'bytes',
-    standalone: true
+  name: 'bytes',
+  standalone: true
 })
 export class BytesPipe implements PipeTransform {
   private units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
