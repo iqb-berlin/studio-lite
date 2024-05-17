@@ -2,8 +2,8 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  // eslint-disable-next-line max-len
-  ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
+  ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse,
+  ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
@@ -17,7 +17,7 @@ import { CommentWriteGuard } from './comment-write.guard';
 import { UnitUserService } from '../database/services/unit-user.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
 import { AppVersionGuard } from '../app-version.guard';
-import { WriteAccessGuard } from "./write-access.guard";
+import { WriteAccessGuard } from './write-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
