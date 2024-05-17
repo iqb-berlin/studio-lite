@@ -16,6 +16,8 @@ describe('User Management', () => {
     addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser(userData.user_name, userData.user_pass);
+    // TODO find adequate intercept
+    cy.wait(100);
     visitLoginPage();
     logout();
   });

@@ -116,24 +116,26 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
 }
 
 export function checkProfile(profile: string):void {
-  cy.intercept('https://raw.githubusercontent.com/iqb-vocabs/p60/master/item.json', req => {
-    req.continue();
-  }).as('loaded');
-  cy.wait('@loaded', { timeout: 10000 }).then(() => {
-    cy.get('mat-panel-title')
-      .contains(profile)
-      .parent()
-      .next()
-      .click();
-    cy.get('label:contains("Aufgabe")')
-      .contains(profile)
-      .prev()
-      .click();
-    cy.get('label:contains("Item")')
-      .contains(profile)
-      .prev()
-      .click();
-  });
+  // cy.intercept('https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json', req => {
+  //   req.continue();
+  // }).as('loaded');
+  // cy.wait('@loaded', { timeout: 10000 }).then(() => {
+  // });
+  // TODO: Find a appropiate way to intercept that all profile are loaded
+  cy.wait(2000);
+  cy.get('mat-panel-title')
+    .contains(profile)
+    .parent()
+    .next()
+    .click();
+  cy.get('label:contains("Aufgabe")')
+    .contains(profile)
+    .prev()
+    .click();
+  cy.get('label:contains("Item")')
+    .contains(profile)
+    .prev()
+    .click();
 }
 
 export function getStructure(profile: string, moreThanOne: boolean): void {
