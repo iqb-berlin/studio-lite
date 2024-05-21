@@ -7,23 +7,25 @@
 </button>
 
 <mat-menu #menuOther>
-  @if (workspaceService.isWorkspaceGroupAdmin) {
-    <button
-      [matTooltip]="'workspace-settings.title' | translate"
+  @if (workspaceService.userHasWriteAccess) {
+    @if (workspaceService.isWorkspaceGroupAdmin) {
+      <button
+        [matTooltip]="'workspace-settings.title' | translate"
+        matTooltipPosition="right"
+        mat-menu-item
+        (click)="settings()">
+        <mat-icon>settings</mat-icon>
+        {{ 'workspace.unit-settings' | translate }}
+      </button>
+    }
+    <button mat-menu-item
+      [matTooltip]="'workspace.manage-unit-groups' | translate"
       matTooltipPosition="right"
-      mat-menu-item
-      (click)="settings()">
-      <mat-icon>settings</mat-icon>
-      {{ 'workspace.unit-settings' | translate }}
+      (click)="manageGroups()">
+      <mat-icon>format_align_right</mat-icon>
+      {{ 'workspace.manage-groups' | translate }}
     </button>
   }
-  <button mat-menu-item
-    [matTooltip]="'workspace.manage-unit-groups' | translate"
-    matTooltipPosition="right"
-    (click)="manageGroups()">
-    <mat-icon>format_align_right</mat-icon>
-    {{ 'workspace.manage-groups' | translate }}
-  </button>
   <button mat-menu-item
     [matTooltip]="'workspace.review-admin' | translate"
     matTooltipPosition="right"
@@ -58,13 +60,15 @@
     {{ 'workspace.print-preview' | translate }}
   </button>
   <mat-divider></mat-divider>
-  <button mat-menu-item
-    [matTooltip]="'workspace.move-unit' | translate"
-    matTooltipPosition="right"
-    (click)="moveOrCopyUnit(true)">
-    <mat-icon>swap_horiz</mat-icon>
-    {{ 'workspace.move-to' | translate }}
-  </button>
+  @if (workspaceService.userHasWriteAccess) {
+    <button mat-menu-item
+      [matTooltip]="'workspace.move-unit' | translate"
+      matTooltipPosition="right"
+      (click)="moveOrCopyUnit(true)">
+      <mat-icon>swap_horiz</mat-icon>
+      {{ 'workspace.move-to' | translate }}
+    </button>
+  }
   <button mat-menu-item
     [matTooltip]="'workspace.copy-unit' | translate"
     matTooltipPosition="right"

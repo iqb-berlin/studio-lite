@@ -11,7 +11,7 @@ import {
   VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto
+  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto, UserWorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -162,6 +162,16 @@ export class BackendService {
     return this.http
       .get<WorkspaceFullDto>(
       `${this.serverUrl}workspace/${workspaceId}`
+    )
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  getUserWorkspaceData(workspaceId: number, userId: number): Observable<UserWorkspaceFullDto | null> {
+    return this.http
+      .get<UserWorkspaceFullDto>(
+      `${this.serverUrl}workspace/${workspaceId}/users/${userId}`
     )
       .pipe(
         catchError(() => of(null))

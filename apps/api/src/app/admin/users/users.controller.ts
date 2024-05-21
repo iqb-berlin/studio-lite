@@ -6,7 +6,11 @@ import {
   ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, WorkspaceInListDto
+  CreateUserDto,
+  UserFullDto,
+  UserWorkspaceAccessDto,
+  WorkspaceGroupInListDto,
+  WorkspaceInListDto, WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../../database/services/users.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -29,7 +33,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin users retrieved successfully.' })
   @ApiTags('admin users')
-  async findAll(): Promise<UserInListDto[]> {
+  async findAll(): Promise<WorkspaceUserInListDto[]> {
     return this.usersService.findAllUsers();
   }
 
@@ -84,7 +88,7 @@ export class UsersController {
   @ApiTags('admin users')
   async patchOnesWorkspaces(@Param('id') id: number,
     @WorkspaceGroupId() workspaceGroupId: number,
-    @Body() workspaces: number[]) {
+    @Body() workspaces: UserWorkspaceAccessDto[]) {
     return this.workspaceService.setWorkspacesByUser(id, workspaceGroupId, workspaces);
   }
 
@@ -138,7 +142,6 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  // TODO: der Pfad sollte die Id beinhalten
   @Patch()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

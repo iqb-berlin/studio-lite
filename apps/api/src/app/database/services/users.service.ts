@@ -3,7 +3,13 @@ import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
-  CreateUserDto, MyDataDto, UserFullDto, UserInListDto, UsersInWorkspaceDto
+  CreateUserDto,
+  MyDataDto,
+  UserFullDto,
+  UserInListDto,
+  UsersInWorkspaceDto,
+  UserWorkspaceAccessDto,
+  WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import { passwordHash } from '../../auth/auth.constants';
@@ -35,23 +41,29 @@ export class UsersService {
   ) {
   }
 
-  async findAllUsers(workspaceId?: number): Promise<UserInListDto[]> {
+  async findAllUsers(workspaceId?: number): Promise<WorkspaceUserInListDto[]> {
     // TODO: sollte Fehler liefern wenn eine nicht gültige workspaceId verwendet wird
     this.logger.log(`Returning users${workspaceId ? ` for workspaceId: ${workspaceId}` : '.'}`);
-    const validUsers: number[] = [];
+    const validUsers: UserWorkspaceAccessDto[] = [];
     if (workspaceId) {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
         .find({ where: { workspaceId: workspaceId } });
-      workspaceUsers.forEach(wsU => validUsers.push(wsU.userId));
+      workspaceUsers.forEach(wsU => validUsers.push(
+        { id: wsU.userId, hasWriteAccess: wsU.hasWriteAccess }
+      ));
     }
-    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
-    const returnUsers: UserInListDto[] = [];
+    const users: User[] = await this.usersRepository
+      .find({ order: { name: 'ASC' } });
+    const returnUsers: WorkspaceUserInListDto[] = [];
     users.forEach(user => {
-      if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
+      if (!workspaceId || (validUsers
+        .find(validUser => validUser.id === user.id))) {
         const displayName = user.lastName ? user.lastName : user.name;
-        returnUsers.push(<UserInListDto>{
+        returnUsers.push(<WorkspaceUserInListDto>{
           id: user.id,
           name: user.name,
+          hasWorkspaceWriteAccess: validUsers
+            .find(validUser => validUser.id === user.id)?.hasWriteAccess || false,
           isAdmin: user.isAdmin,
           description: user.description,
           displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
@@ -294,7 +306,6 @@ export class UsersService {
     return false;
   }
 
-  // TODO: Kein Return Value, stattdessen Exception
   async setPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
     this.logger.log(`Setting password for user with id: ${userId}.`);
     const userForName = await this.usersRepository.findOne({
@@ -418,13 +429,14 @@ export class UsersService {
     await this.usersRepository.save(userToUpdate);
   }
 
-  async setUsersByWorkspace(workspaceId: number, users: number[]) {
+  async setUsersByWorkspace(workspaceId: number, users: UserWorkspaceAccessDto[]) {
     this.logger.log(`Adding ${users.length} users for workspaceId: ${workspaceId}`);
     return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
-      await Promise.all(users.map(async userId => {
+      await Promise.all(users.map(async user => {
         const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
-          userId: userId,
-          workspaceId: workspaceId
+          userId: user.id,
+          workspaceId: workspaceId,
+          hasWriteAccess: user.hasWriteAccess
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
         const units = await this.unitService.findAll(workspaceId);
@@ -432,11 +444,11 @@ export class UsersService {
         await Promise.all(units.map(async unit => {
           this.unitUserService.findByUnitId(unit.id).then(async unitUsers => {
             const unitUsersIds = unitUsers.map(unitUser => unitUser.userId);
-            if (!unitUsersIds.includes(userId)) {
-              await this.unitUserService.createUnitUser(userId, unit.id);
+            if (!unitUsersIds.includes(user.id)) {
+              await this.unitUserService.createUnitUser(user.id, unit.id);
             } else {
               unitUsersIds.map(async unitUserId => {
-                if (!users.includes(unitUserId)) {
+                if (!users.find(u => u.id === unitUserId)) {
                   await this.unitUserService.deleteUnitUsers(workspaceId, unitUserId);
                 }
               });
@@ -476,11 +488,9 @@ export class UsersService {
   }
 
   removeIds(ids: number[]) {
-    // TODO: Sich selbst bzw. alle löschen verhindern?
     if (ids && ids.length) {
       ids.forEach(id => this.remove(id));
     }
-    // TODO: Eigene Exception mit Custom-Parametern
     throw new MethodNotAllowedException();
   }
 }

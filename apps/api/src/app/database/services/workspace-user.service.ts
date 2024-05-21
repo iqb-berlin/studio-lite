@@ -30,4 +30,14 @@ export class WorkspaceUserService {
       await this.unitUserService.deleteUnitUsers(workspaceData.id, userId);
     }));
   }
+
+  async canWrite(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return !!workspaceUser;
+  }
 }

@@ -1,5 +1,5 @@
 import {
-  Entity, JoinColumn, OneToOne, PrimaryColumn
+  Column, Entity, JoinColumn, OneToOne, PrimaryColumn
 } from 'typeorm';
 import Workspace from './workspace.entity';
 
@@ -14,6 +14,11 @@ class WorkspaceUser {
     name: 'user_id'
   })
     userId: number;
+
+  @Column({
+    name: 'has_write_access'
+  })
+    hasWriteAccess: boolean = false; // default to false
 
   @OneToOne(() => Workspace)
   @JoinColumn({

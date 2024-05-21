@@ -3,11 +3,14 @@
 ARG REGISTRY_PATH
 
 
-FROM ${REGISTRY_PATH}postgres:14.11-bookworm
+FROM ${REGISTRY_PATH}postgres:14.12-alpine3.19
+
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --update musl musl-utils musl-locales tzdata
 
 # Localization
-RUN localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
 ENV LANG de_DE.utf8
+ENV TZ=Europe/Berlin
 
 COPY database/healthcheck/postgres-healthcheck /usr/local/bin/
 HEALTHCHECK \

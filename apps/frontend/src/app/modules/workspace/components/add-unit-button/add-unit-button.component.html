@@ -1,6 +1,7 @@
 <button mat-button
         [style.width.%]="100"
         [matMenuTriggerFor]="menuNew"
+        [disabled]="disabled"
         [matTooltip]="'workspace.add-units' | translate"
         matTooltipPosition="above">
   <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>

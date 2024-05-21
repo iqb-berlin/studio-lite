@@ -1,7 +1,8 @@
 <button mat-button
         [style.width.%]="100"
-        (click)="deleteUnit()"
+        [disabled]="disabled"
         [matTooltip]="'workspace.delete-units' | translate"
-        matTooltipPosition="above">
+        matTooltipPosition="above"
+        (click)="deleteUnit()">
   <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
 </button>

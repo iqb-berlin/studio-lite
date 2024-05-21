@@ -5,8 +5,11 @@ import { catchError, map } from 'rxjs/operators';
 import {
   CreateWorkspaceDto,
   UserFullDto,
-  UserInListDto, WorkspaceGroupFullDto,
-  WorkspaceInListDto
+  UserInListDto,
+  UsersWorkspaceInListDto,
+  UserWorkspaceAccessDto,
+  WorkspaceGroupFullDto,
+  WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -34,15 +37,18 @@ export class BackendService {
       );
   }
 
-  getWorkspacesByUser(userId: number): Observable<WorkspaceInListDto[]> {
+  getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<WorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
-  setWorkspacesByUser(userId: number, accessTo: number[], workspaceGroupId: number): Observable<boolean> {
+  setWorkspacesByUser(
+    userId: number,
+    accessTo: UserWorkspaceAccessDto[],
+    workspaceGroupId: number): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
       .pipe(
@@ -51,9 +57,9 @@ export class BackendService {
       );
   }
 
-  getWorkspaces(workspaceGroupId: number): Observable<WorkspaceInListDto[]> {
+  getWorkspaces(workspaceGroupId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<WorkspaceInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );
@@ -105,15 +111,15 @@ export class BackendService {
   }
 
   // *******************************************************************
-  getUsersByWorkspace(workspaceId: number): Observable<UserInListDto[]> {
+  getUsersByWorkspace(workspaceId: number): Observable<WorkspaceUserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
+      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
-  setUsersByWorkspace(workspaceId: number, accessTo: number[]): Observable<boolean> {
+  setUsersByWorkspace(workspaceId: number, accessTo: UserWorkspaceAccessDto[]): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/workspaces/${workspaceId}/users`, accessTo)
       .pipe(
