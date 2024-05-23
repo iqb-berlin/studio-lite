@@ -73,6 +73,15 @@ export class UsersComponent implements OnInit {
     if (!workspace.isChecked) {
       workspace.hasWriteAccess = false;
     }
+    this.userWorkspaces.updateHasChanged();
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  updateReadAccess(workspace: WorkspaceChecked): void {
+    if (workspace.hasWriteAccess) {
+      workspace.isChecked = true;
+    }
+    this.userWorkspaces.updateHasChanged();
   }
 
   updateWorkspaceList(): void {
