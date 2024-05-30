@@ -309,6 +309,7 @@ export class DownloadDocx {
   }
 
   static htmlToDocx(html: string) {
+    console.log('html', html);
     const $ = cheerio.load(html, null, false);
     const elements = [];
     const images = [];
@@ -324,6 +325,27 @@ export class DownloadDocx {
             }
           }));
       });
+    $('ul,ol').each((i, elem) => {
+      const listItems = [];
+      $(elem)
+        .find('li')
+        .each((i, el) => {
+          listItems.push(new Paragraph({
+            text: $(el)
+              .text(),
+            bullet: $(elem)
+              .is('ul') ? {
+                level: 0
+              } : {
+                level: 0
+              }
+          }));
+        });
+      elements.push(new Paragraph({
+        children: listItems
+      }));
+    });
+
     $('p,h1,h2,h3,h4')
       .each((i, elem) => {
         const textAlignment = $(elem)
@@ -332,6 +354,9 @@ export class DownloadDocx {
           .find('span');
         const mark = $(elem)
           .find('mark');
+        elements.push(new Paragraph({
+          children: [new TextRun({ text: 'LLL', bold: true })]
+        }));
         const color = $(span)
           .css('color');
           // const name = elem.name;
@@ -351,11 +376,9 @@ export class DownloadDocx {
 
         const size = $(span)
           .css('font-size') || '20pt';
-        const backgroundColor = $(mark)
-          .css('background-color') || '#FFFFFF';
         let formattedParagraph:Paragraph;
         try {
-          formattedParagraph = createParagraph(elem.children, textAlignment, colorParsed, backgroundColor, size);
+          formattedParagraph = createParagraph(elem.children, textAlignment, colorParsed, mark, size);
         } catch (e) {
           formattedParagraph = new Paragraph(
             {
@@ -395,8 +418,12 @@ export class DownloadDocx {
     function createParagraph(elem: any,
       textAlignment: string,
       colorParsed: string,
-      backgroundColor: string,
+      markedText: cheerio.Cheerio<cheerio.Element>,
       size: string) {
+      $(elem).each((i, el) => {
+        console.log('el', $(el).text(), $(el).css('background-color'), $(el).data());
+      });
+
       const tags = getChildrenTags(elem);
 
       const textRunOptions: ParagraphOptions = {
@@ -414,11 +441,7 @@ export class DownloadDocx {
       if (colorParsed) {
         textRunOptions.color = colorParsed;
       }
-      if (backgroundColor) {
-        textRunOptions.shading = {
-          fill: backgroundColor
-        };
-      }
+
       if (size) {
         const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
         sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
@@ -443,6 +466,26 @@ export class DownloadDocx {
         textRunOptions.superscript = true;
       }
 
+      const textRuns = [new TextRun(textRunOptions)];
+
+      $(elem).each((i, el) => {
+        textRuns.push(new TextRun({
+          text: $(el).text(),
+          shading: { fill: '#F50050' }
+        }));
+      });
+
+      if (markedText) {
+        markedText.each((i, el) => {
+          console.log('MarkedText', $(el).text(), $(el).css('background-color'));
+        });
+        // console.log(markedText.text());
+        const backgroundColor = markedText.css('background-color') || '#FFFFFF';
+        textRunOptions.shading = {
+          fill: backgroundColor
+        };
+      }
+
       return new Paragraph({
         alignment: alignment,
         spacing: {
@@ -453,7 +496,7 @@ export class DownloadDocx {
           start: 100,
           end: 100
         },
-        children: [new TextRun(textRunOptions)]
+        children: textRuns
       });
     }
   }
