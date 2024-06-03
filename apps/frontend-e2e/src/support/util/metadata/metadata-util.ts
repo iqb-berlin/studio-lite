@@ -1,5 +1,5 @@
-import { clickButtonToAccept } from './util';
-import { IqbProfile, IqbProfileExamples, RegistryProfile } from './config/iqbProfile';
+import { clickButtonToAccept } from '../util';
+import { IqbProfile, IqbProfileExamples, RegistryProfile } from './iqbProfile';
 
 function getCheckBoxByName(name: string) {
   cy.log(typeof name);
@@ -95,9 +95,11 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .eq(0)
     .next()
     .click();
+  cy.wait(200);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();
+  cy.wait(200);
   cy.get('mat-table')
     .contains(area)
     .click();

@@ -7,7 +7,8 @@
       matTooltip="{{'login.alternative' | translate}}"
       [matTooltipPosition]="'above'"
       [matTooltipShowDelay]="300"
-      (click)="loginKeycloak()">
+      (click)="loginKeycloak()"
+      data-cy="alternative-login">
       <studio-lite-wrapped-icon icon="call_made"></studio-lite-wrapped-icon>
     </button>
   }
@@ -29,7 +30,8 @@
     <mat-form-field [class.invisible]="loginNamePreset">
       <input matInput formControlName="name"
         [placeholder]="'home.user-name' | translate"
-        (keyup.enter)="pw.focus()">
+        (keyup.enter)="pw.focus()"
+        data-cy="home-user-name">
     </mat-form-field>
     @if (loginNamePreset) {
       <p>
@@ -41,7 +43,8 @@
         type="password"
         formControlName="pw"
         [placeholder]="'home.password' | translate"
-        (keyup.enter)="login()">
+        (keyup.enter)="login()"
+        data-cy="home-password">
     </mat-form-field>
   </div>
   @if (errorMessage) {
@@ -53,7 +56,8 @@
   <button mat-raised-button
     type="submit"
     [disabled]="loginForm.invalid"
-    color="primary">{{ 'next' | translate }}
+    color="primary"
+    data-cy="home-submit">{{ 'next' | translate }}
   </button>
 </form>
 
