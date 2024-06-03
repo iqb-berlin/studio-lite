@@ -16,7 +16,7 @@ export default defineConfig({
     ...nxE2EPreset(__dirname),
     ...cypressJsonConfig,
     watchForFileChanges: false,
-    defaultCommandTimeout: 20000,
+    defaultCommandTimeout: 5000,
     /**
      * TODO(@nx/cypress): In Cypress v12,the testIsolation option is turned on by default.
      * This can cause tests to start breaking where not indended.

@@ -1,11 +1,11 @@
-import { adminData } from './config/userdata';
+import { adminData } from '../config/userdata';
 
 export function addFirstUser() {
-  cy.get('input[placeholder="Anmeldename"]')
+  cy.get('[data-cy="home-user-name"]')
     .should('exist')
     .clear()
     .type(adminData.user_name);
-  cy.get('input[placeholder="Kennwort"]')
+  cy.get('[data-cy="home-password"]')
     .should('exist')
     .clear()
     .type(adminData.user_pass);
@@ -26,12 +26,12 @@ export function deleteFirstUser() {
 }
 
 export function login(username: string, password = '') {
-  cy.get('input[placeholder="Anmeldename"]')
+  cy.get('[data-cy="home-user-name"]')
     .should('exist')
     .clear()
     .type(username);
   if (password) {
-    cy.get('input[placeholder="Kennwort"]')
+    cy.get('[data-cy="home-password"]')
       .should('exist')
       .clear()
       .type(password);
@@ -176,7 +176,7 @@ export function deleteUser(user: string):void {
   clickButtonToAccept('Löschen');
 }
 
-export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
+export function grantRemovePrivilegeFromAdminSettings(user:string, group: string):void {
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
@@ -192,12 +192,24 @@ export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
     .click();
 }
 
-export function grantRemovePrivilegeOnArea(user:string, area: string):void {
+export function grantRemovePrivilegeFromGroup(user:string, area: string, rights:string):void {
   cy.get('mat-table')
     .contains(`${area}`)
     .should('exist')
     .click();
-  cy.get(`label.mdc-label:contains(${user})`).click();
+  if (rights === 'read') {
+    cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+      .prev()
+      .within(() => {
+        cy.get('mat-checkbox').eq(0).click();
+      });
+  } else {
+    cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+      .prev()
+      .within(() => {
+        cy.get('mat-checkbox').eq(1).click();
+      });
+  }
   cy.get('mat-icon:contains("save")')
     .eq(1)
     .should('exist')
@@ -287,8 +299,13 @@ export function visitLoginPage():void {
 }
 
 export function clickButtonToAccept(text: string):void {
+  // Combining waits
   cy.get('button')
     .contains(text)
     .should('exist')
     .click();
+  cy.wait(400);
+  cy.get('button')
+    .contains(text)
+    .should('not.exist');
 }
