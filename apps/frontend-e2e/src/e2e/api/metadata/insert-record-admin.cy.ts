@@ -18,9 +18,9 @@ import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
 * "choose a profil for an area from a group" from insert-record.cy.ts */
 
 describe('Metadata Management from administration', () => {
-  const area = 'Deutsch I';
-  const mathArea = 'Mathematik I';
-  const group = 'Bista I';
+  const area = 'Deutsch II';
+  const mathArea = 'Mathematik II';
+  const group = 'Bista II';
 
   beforeEach(() => {
     cy.viewport(1600, 900);
