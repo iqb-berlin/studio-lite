@@ -5,7 +5,6 @@ import {
 import { adminData } from '../../support/config/userdata';
 
 describe('IU check: workspace', () => {
-  // Counter to keep track of test execution
   let testIndex = 0;
 
   beforeEach(() => {
@@ -21,9 +20,8 @@ describe('IU check: workspace', () => {
       logout();
     }
   });
-
-  // Although this is ui test, it is necessary to introduce a user (api), than
-  // the first and last test are api test.
+  // Although this is ui test, it is necessary to introduce a user (api) to test
+  // the user workspace
   it('should be able to create the first user', () => {
     addFirstUser();
   });

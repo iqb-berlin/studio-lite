@@ -29,7 +29,7 @@ describe('Admin Management', () => {
   });
 
   afterEach(() => {
-    if (testIndex !== 1) {
+    if (testIndex !== 1 && testIndex ! < 10) {
       visitLoginPage();
       logout();
     }
@@ -72,9 +72,27 @@ describe('Admin Management', () => {
   it('user with admin credentials delete Modules', () => {
     deleteModule();
   });
+
   it('remove the Context', () => {
     deleteGroupArea('Mathematik Primär Bereichsgruppe');
     visitLoginPage();
     deleteFirstUser();
   });
+  /*
+  it('should be able to add notice warning and set its duration', () => {
+  });
+  it('should be able to change the title of the application', () => {
+  });
+  it('should be able to change the content of te secondary box', () => {
+  });
+  it('should be able to edit the legal notice and data protection', () => {
+  });
+  it('should be able to change the apps logo', () => {
+  });
+  it('should be able to change the background color of the application', () => {
+  });
+  it('should be able to change the background of the secondary box', () => {
+  });
+  it('should be able to add the parameter for unit export', () => {
+  }); */
 });

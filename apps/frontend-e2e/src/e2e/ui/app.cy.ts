@@ -10,8 +10,4 @@ describe('frontend', () => {
     // Function helper example, see `../support/app.po.ts` file
     getAppTitle().contains('IQB-Studio');
   });
-
-  it('should have a field to introduce the user name', () => {
-
-  });
 });

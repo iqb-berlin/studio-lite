@@ -240,6 +240,44 @@ export function addUnit(kurzname: string):void {
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
 
+export function addUnitPred(shortname:string, name:string, group: string):void {
+  cy.get('[data-cy="workspace-add-units"]')
+    .click();
+  cy.get('button > span:contains("Neue Aufgabe")')
+    .should('exist')
+    .click();
+  cy.get('input[placeholder="Kurzname"]')
+    .should('exist')
+    .type(shortname);
+  cy.get('input[placeholder="Name"]')
+    .should('exist')
+    .type(name);
+  cy.get('body').then($body => {
+    if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
+      cy.get('input[placeholder="Neue Gruppe"]')
+        .type(group);
+    } else {
+      cy.get('svg')
+        .click();
+      cy.wait(100);
+      cy.get('body').then($body1 => {
+        if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
+          cy.get(`mat-option:contains("${group}")`)
+            .click();
+        } else {
+          cy.get('.cdk-overlay-transparent-backdrop').click();
+          cy.get('[data-cy="workspace-add-new-group"]')
+            .click();
+          cy.get('input[placeholder="Neue Gruppe"]')
+            .type(group);
+        }
+      });
+    }
+  });
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.wait(100);
+}
+
 export function addModule():void {
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Module")')
@@ -294,6 +332,18 @@ export function deleteModule():void {
   clickButtonToAccept('Löschen');
 }
 
+export function clickArbitraryPoint() {
+  cy.document().then((doc: Document) => {
+    const event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: 800, // X-coordinate where you want to click
+      clientY: 400 // Y-coordinate where you want to click
+    });
+    doc.dispatchEvent(event);
+  });
+}
 export function visitLoginPage():void {
   cy.visit(<string>Cypress.config().baseUrl);
 }
