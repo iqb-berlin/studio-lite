@@ -248,13 +248,16 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
     .click();
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
+    .clear()
     .type(shortname);
   cy.get('input[placeholder="Name"]')
     .should('exist')
+    .clear()
     .type(name);
   cy.get('body').then($body => {
     if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
       cy.get('input[placeholder="Neue Gruppe"]')
+        .clear()
         .type(group);
     } else {
       cy.get('svg')
@@ -269,6 +272,7 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
           cy.get('[data-cy="workspace-add-new-group"]')
             .click();
           cy.get('input[placeholder="Neue Gruppe"]')
+            .clear()
             .type(group);
         }
       });
@@ -276,6 +280,64 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
   });
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
   cy.wait(100);
+}
+
+export function addUnitFromExisting(ws:string, shortname:string, name:string, group: string,
+  newshortname:string, newname:string, newgroup: string):void {
+  // select the group and the area
+  cy.get('mat-select')
+    .click();
+
+  cy.get(`mat-option:contains("${ws}")`).click();
+  // const search_text = `${shortname}: ${name}`;
+  cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
+  clickButtonToAccept('Fortsetzen');
+  cy.get('input[placeholder="Kurzname"]')
+    .should('exist')
+    .clear()
+    .type(newshortname);
+  cy.get('input[placeholder="Name"]')
+    .should('exist')
+    .clear()
+    .type(newname);
+  cy.get('body').then($body => {
+    if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
+      cy.get('input[placeholder="Neue Gruppe"]')
+        .clear()
+        .type(newgroup);
+    } else {
+      cy.get('svg')
+        .click();
+      cy.wait(100);
+      cy.get('body').then($body1 => {
+        if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
+          cy.get(`mat-option:contains("${group}")`)
+            .click();
+        } else {
+          cy.get('.cdk-overlay-transparent-backdrop').click();
+          cy.get('[data-cy="workspace-add-new-group"]')
+            .click();
+          cy.get('input[placeholder="Neue Gruppe"]')
+            .clear()
+            .type(newgroup);
+        }
+      });
+    }
+  });
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.wait(100);
+}
+
+export function importExercise(): void {
+  cy.get('[data-cy="workspace-add-units"]')
+    .click();
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/test_studio_units_download.zip', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('M6_AK0011')
+    .should('exist');
 }
 
 export function addModule():void {
