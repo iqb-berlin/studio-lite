@@ -1,5 +1,6 @@
 ![GitHub Release (latest SemVer)](https://img.shields.io/github/v/release/iqb-berlin/studio-lite)
 [![pipeline status](https://scm.cms.hu-berlin.de/iqb/studio-lite/badges/main/pipeline.svg)](https://scm.cms.hu-berlin.de/iqb/studio-lite/-/commits/main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Studio Lite
 
