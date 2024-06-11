@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addUnitFromExisting, addUnitPred,
+  addFirstUser, addUnitFromExisting, addUnitPred, clickButtonToAccept,
   createAreaForGroupFromAdmin,
   createGroupArea,
   deleteFirstUser, deleteGroupArea,
@@ -29,7 +29,6 @@ describe('API check: workspace', () => {
     addUnitPred('AUF_D1', 'Name Auf 1', 'Gruppe D');
     addUnitPred('AUF_E1', 'Name Auf 2', 'Gruppe E');
     addUnitPred('AUF_D2', 'Name Auf 2', 'Gruppe D');
-    cy.pause();
   });
 
   it('should be add button present and can a exercise from existing exercises', () => {
@@ -46,7 +45,38 @@ describe('API check: workspace', () => {
     importExercise();
   });
 
+  it('should be able to delete Unit', () => {
+    visitArea('UnitArea_API_AB');
+    cy.get('mat-icon:contains("delete")')
+      .click();
+    cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
+      .should('exist')
+      .click()
+      .type('AUF_D1');
+    cy.get('mat-cell:contains("AUF_D1 - Name Auf 1")').prev().click();
+    clickButtonToAccept('Löschen');
+  });
+
+  it('should be able to assign group to the units', () => {
+    cy.visit('/');
+    createAreaForGroupFromAdmin('API_AB2', 'UnitArea_API_BG');
+    grantRemovePrivilegeFromGroup(adminData.user_name, 'API_AB2', 'write');
+
+    visitArea('UnitArea_API_AB');
+    cy.get('mat-icon:contains("menu")')
+      .click();
+    cy.get('span:contains("Verschieben")')
+      .click();
+    cy.get('mat-select')
+      .click();
+    cy.get('mat-option:contains("API_AB2")').click();
+    // const search_text = `${shortname}: ${name}`;
+    cy.get('mat-cell:contains("AUF_E1 - Name Auf 2")').prev().click();
+    cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Verschieben")').click();
+  });
+
   it('delete the context ', () => {
+    cy.pause();
     deleteGroupArea('UnitArea_API_BG');
     cy.visit('/');
     deleteFirstUser();
