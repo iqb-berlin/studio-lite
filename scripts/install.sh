@@ -247,6 +247,9 @@ customize_settings() {
     sed -i "s#$VAR.*#$VAR=$NEW_ENV_VAR_VALUE#" .env.studio-lite
   done
 
+  JWT_SECRET=$(openssl rand -base64 32 | tr -- '+/' '-_')
+  sed -i "s#JWT_SECRET.*#JWT_SECRET=$JWT_SECRET#" .env.studio-lite
+
   # Setup makefiles
   sed -i "s#STUDIO_LITE_BASE_DIR :=.*#STUDIO_LITE_BASE_DIR := \\$TARGET_DIR#" scripts/make/studio-lite.mk
   sed -i "s#scripts/update.sh#scripts/update_${APP_NAME}.sh#" scripts/make/studio-lite.mk
