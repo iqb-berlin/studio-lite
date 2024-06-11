@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
 import { AppHttpError } from '../models/app-http-error.class';
@@ -35,7 +35,7 @@ export class AppService {
     reviews: []
   };
 
-  authData = AppService.defaultAuthData;
+  private _authData = AppService.defaultAuthData;
   isLoggedInKeycloak = false;
   appConfig: AppConfig;
   appLogo: AppLogoDto | null = null;
@@ -45,6 +45,16 @@ export class AppService {
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();
   dataLoading: boolean | number = false;
+  @Output() authDataChanged = new EventEmitter<AuthDataDto>();
+
+  set authData(authData: AuthDataDto) {
+    this._authData = authData;
+    this.authDataChanged.emit(authData);
+  }
+
+  get authData(): AuthDataDto {
+    return this._authData;
+  }
 
   constructor(
     private titleService: Title

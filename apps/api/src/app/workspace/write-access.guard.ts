@@ -17,6 +17,6 @@ export class WriteAccessGuard implements CanActivate {
     if (!canAccess) {
       throw new ForbiddenException();
     }
-    return true;
+    return canAccess;
   }
 }
