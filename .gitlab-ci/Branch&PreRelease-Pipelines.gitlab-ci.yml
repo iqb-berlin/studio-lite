@@ -493,7 +493,7 @@ test-app-e2e:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -525,7 +525,7 @@ test-app-e2e-api:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -561,7 +561,7 @@ test-app-e2e-ui-chrome:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -597,7 +597,7 @@ test-app-e2e-ui-chrome-mobile:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -634,7 +634,7 @@ test-app-e2e-ui-firefox:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -670,7 +670,7 @@ test-app-e2e-ui-firefox-mobile:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -707,7 +707,7 @@ test-app-e2e-ui-edge:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
@@ -743,7 +743,7 @@ test-app-e2e-ui-edge-mobile:
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
     - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
     - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up --no-build --pull never liquibase
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
     - npx cypress cache path # show where the Cypress test runner binaries are cached
     - npx cypress cache list # show all installed versions of Cypress binary
     - npx cypress verify
