@@ -4,9 +4,10 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserWorkspaceFullDto } from '@studio-lite-lib/api-dto';
-import { filter, Subject, takeUntil } from 'rxjs';
+import {
+  filter, Subject, takeUntil, takeWhile
+} from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -40,6 +41,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   secondaryRoutingOutlet: string = 'secondary';
   routingOutlet: string = 'primary';
   private ngUnsubscribe = new Subject<void>();
+  private userId = 0;
 
   constructor(
     public appService: AppService,
@@ -66,6 +68,34 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.resetUnitList([]);
     const workspaceKey = 'ws';
     this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params[workspaceKey]);
+    this.userId = this.appService.authData.userId;
+    if (this.userId === 0) {
+      this.appService.authDataChanged
+        .pipe(
+          takeUntil(this.ngUnsubscribe),
+          takeWhile(() => this.userId === 0)
+        )
+        .subscribe(authData => {
+          if (authData.userId !== 0) {
+            this.fetchUserWorkspaceDataForUser();
+            this.userId = authData.userId;
+          }
+        });
+    } else {
+      this.fetchUserWorkspaceDataForUser();
+    }
+    this.router.events
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        filter(event => event instanceof NavigationEnd))
+      .subscribe(event => {
+        const url = (event as NavigationEnd).url;
+        this.openSecondaryOutlet(url);
+      });
+    this.openSecondaryOutlet(this.router.routerState.snapshot.url);
+  }
+
+  private fetchUserWorkspaceDataForUser(): void {
     this.appBackendService.getUserWorkspaceData(
       this.workspaceService.selectedWorkspaceId,
       this.appService.authData.userId
@@ -82,15 +112,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       }
     );
-    this.router.events
-      .pipe(
-        takeUntil(this.ngUnsubscribe),
-        filter(event => event instanceof NavigationEnd))
-      .subscribe(event => {
-        const url = (event as NavigationEnd).url;
-        this.openSecondaryOutlet(url);
-      });
-    this.openSecondaryOutlet(this.router.routerState.snapshot.url);
   }
 
   private openSecondaryOutlet(url: string): void {
