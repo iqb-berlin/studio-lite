@@ -9,7 +9,7 @@ import {
 } from '../../support/util/util';
 import { adminData } from '../../support/config/userdata';
 
-describe('IU check: workspace', () => {
+describe('UI check: workspace', () => {
   // Although this is ui test, it is necessary to introduce a user (api) to test
   // the user workspace
   beforeEach(() => {

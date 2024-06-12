@@ -4,7 +4,7 @@ import {
 } from '../../support/util/util';
 import { adminData } from '../../support/config/userdata';
 
-describe('IU check: workspace', () => {
+describe('UI check: workspace', () => {
   let testIndex = 0;
 
   beforeEach(() => {

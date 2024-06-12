@@ -1,6 +1,6 @@
 import { getAppTitle, isButtonClickable } from '../../support/app.po';
 
-describe('IU check: initial page', () => {
+describe('UI check: initial page', () => {
   beforeEach(() => cy.visit('/'));
 
   it('should display application title', () => {
