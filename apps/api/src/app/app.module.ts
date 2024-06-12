@@ -15,6 +15,7 @@ import { MetadataProfileModule } from './metadata-profile/metadata-profile.modul
 @Module({
   imports: [
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: '.env.dev',
       cache: true
     }),

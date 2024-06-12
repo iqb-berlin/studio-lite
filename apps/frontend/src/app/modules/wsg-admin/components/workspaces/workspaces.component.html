@@ -110,16 +110,16 @@
                 [(ngModel)]="u.isChecked"
                 [disabled]="!selectedWorkspaceId"
                 [matTooltip]="'access-rights.read-access' | translate"
-                (change)="updateWriteAccess(u); workspaceUsers.updateHasChanged()">
+                (change)="updateWriteAccess(u)">
               </mat-checkbox>
               <mat-checkbox
                 [(ngModel)]="u.hasWriteAccess"
-                [disabled]="!selectedWorkspaceId || !u.isChecked"
+                [disabled]="!selectedWorkspaceId"
                 [matTooltip]="'access-rights.write-access' | translate"
-                (change)="workspaceUsers.updateHasChanged()">
+                (change)="updateReadAccess(u)">
               </mat-checkbox>
             </div>
-            <div>{{u.displayName}} ({{u.name}})</div>
+            <div data-cy="access-rights">{{u.displayName}} ({{u.name}})</div>
           </div>
           <div class="fx-flex-fill secondary-text" >
             {{u.description}}

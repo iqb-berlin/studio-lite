@@ -2,16 +2,15 @@ import {
   addFirstUser,
   createAreaForGroupFromAdmin,
   createGroupArea, deleteFirstUser, deleteGroupArea,
-  grantRemovePrivilegeOnArea,
+  grantRemovePrivilegeFromGroup,
   login, logout,
   visitLoginPage
-} from 'apps/frontend-e2e/src/support/util';
+} from '../../../support/util/util';
 import { adminData } from '../../../support/config/userdata';
 import {
-  selectProfileForArea,
   selectProfileForGroupFromAdmin
-} from '../../../support/metadata-util';
-import { IqbProfile } from '../../../support/config/iqbProfile';
+} from '../../../support/util/metadata/metadata-util';
+import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
 
 /* This test is written to probe that we can set the metadata profile
 * from administration, and we can add choose the profile from the group.
@@ -19,9 +18,9 @@ import { IqbProfile } from '../../../support/config/iqbProfile';
 * "choose a profil for an area from a group" from insert-record.cy.ts */
 
 describe('Metadata Management from administration', () => {
-  const area = 'Deutsch I';
-  const mathArea = 'Mathematik I';
-  const group = 'Bista I';
+  const area = 'Deutsch II';
+  const mathArea = 'Mathematik II';
+  const group = 'Bista II';
 
   beforeEach(() => {
     cy.viewport(1600, 900);
@@ -37,25 +36,18 @@ describe('Metadata Management from administration', () => {
     createGroupArea(group);
     visitLoginPage();
     createAreaForGroupFromAdmin(area, group);
-    grantRemovePrivilegeOnArea(adminData.user_name, area);
+    grantRemovePrivilegeFromGroup(adminData.user_name, area, 'write');
     visitLoginPage();
     createAreaForGroupFromAdmin(mathArea, group);
-    grantRemovePrivilegeOnArea(adminData.user_name, mathArea);
+    grantRemovePrivilegeFromGroup(adminData.user_name, mathArea, 'write');
   });
-  it('choose profiles from the administration ', () => {
+  it('choose profiles for a Group from the administration settings ', () => {
     visitLoginPage();
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);
     visitLoginPage();
     selectProfileForGroupFromAdmin(group, IqbProfile.MA);
   });
-  it.skip('choose a profile for an area', () => {
-    visitLoginPage();
-    cy.contains(area).click();
-    selectProfileForArea(IqbProfile.DE);
-    visitLoginPage();
-    cy.contains(mathArea).click();
-    selectProfileForArea(IqbProfile.MA);
-  });
+
   it('delete the data', () => {
     visitLoginPage();
     deleteGroupArea(group);

@@ -12,7 +12,6 @@ import {
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
-import { passwordHash } from '../../auth/auth.constants';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { AdminUserNotFoundException } from '../../exceptions/admin-user-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -484,7 +483,7 @@ export class UsersService {
   }
 
   private static getPasswordHash(stringToHash: string): string {
-    return bcrypt.hashSync(stringToHash, passwordHash.salt);
+    return bcrypt.hashSync(stringToHash, 11);
   }
 
   removeIds(ids: number[]) {

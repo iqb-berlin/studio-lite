@@ -2,6 +2,7 @@ server {
     listen 80 default_server;
     server_name _;
     return 301 https://${SERVER_NAME}$request_uri;
+    server_tokens off;
 }
 
 server {
