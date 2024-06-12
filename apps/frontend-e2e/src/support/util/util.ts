@@ -238,6 +238,7 @@ export function addUnit(kurzname: string):void {
     .should('exist')
     .type(kurzname);
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.wait(100);
 }
 
 export function addUnitPred(shortname:string, name:string, group: string):void {

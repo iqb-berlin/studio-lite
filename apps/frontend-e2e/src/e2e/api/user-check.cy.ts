@@ -81,36 +81,37 @@ describe('User Management', () => {
     visitLoginPage();
     logout();
   });
-  it('should everyone in the gruppe be able to administrate the Bereichsgruppe were?', () => {
 
-  });
-  it('should be able to grant other people to ', () => {
-
-  });
-  it('should be able to delete see enter into a area of work', () => {
-
-  });
-  it('should someone from the same group grant and remove permissions to other users (from users)?', () => {
-
-  });
-  it('should someone from a group able to grant permissions person that not belong to the gruppe (from users)?', () => {
-
-  });
-  it('should someone from the same group grant and remove permissions to other users (from area of work)?', () => {
-
-  });
-  it('should someone from a group able to grant permissions person ' +
-    'that not belong to the gruppe (from area of work)?', () => {
-
-  });
-  it('See fall 4 ');
-
-  it('should be able to add neu Status', () => {
-
-  });
-  it('should be delete to add neu Status', () => {
-
-  });
+  // it('should everyone in the gruppe be able to administrate the Bereichsgruppe were?', () => {
+  //
+  // });
+  // it('should be able to grant other people to ', () => {
+  //
+  // });
+  // it('should be able to delete see enter into a area of work', () => {
+  //
+  // });
+  // it('should someone from the same group grant and remove permissions to other users (from users)?', () => {
+  //
+  // });
+  // it('should someone from a group able to grant permissions person that not belong to the gruppe (from users)?', () => {
+  //
+  // });
+  // it('should someone from the same group grant and remove permissions to other users (from area of work)?', () => {
+  //
+  // });
+  // it('should someone from a group able to grant permissions person ' +
+  //   'that not belong to the gruppe (from area of work)?', () => {
+  //
+  // });
+  // it('See fall 4 ');
+  //
+  // it('should be able to add neu Status', () => {
+  //
+  // });
+  // it('should be delete to add neu Status', () => {
+  //
+  // });
 
   it('delete the Context', () => {
     login(adminData.user_name, adminData.user_pass);

@@ -89,7 +89,7 @@ describe('Metadata Management', () => {
     cy.contains('Speichern').click();
   });
 
-  it.skip('add metadata with more than one element', () => {
+  it('add metadata with more than one element', () => {
     visitArea(area);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
