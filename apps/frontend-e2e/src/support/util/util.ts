@@ -1,19 +1,19 @@
-import { adminData } from './config/userdata';
+import { adminData } from '../config/userdata';
 
 export function addFirstUser() {
-  cy.get('input[placeholder="Anmeldename"]')
+  cy.get('[data-cy="home-user-name"]')
     .should('exist')
     .clear()
     .type(adminData.user_name);
-  cy.get('input[placeholder="Kennwort"]')
+  cy.get('[data-cy="home-password"]')
     .should('exist')
     .clear()
     .type(adminData.user_pass);
   clickButtonToAccept('Weiter');
   cy.wait(400);
   visitLoginPage();
-  cy.get('mat-icon:contains("account_box")')
-    .click();
+  // cy.get('mat-icon:contains("account_box")').click();
+  cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
@@ -26,12 +26,12 @@ export function deleteFirstUser() {
 }
 
 export function login(username: string, password = '') {
-  cy.get('input[placeholder="Anmeldename"]')
+  cy.get('[data-cy="home-user-name"]')
     .should('exist')
     .clear()
     .type(username);
   if (password) {
-    cy.get('input[placeholder="Kennwort"]')
+    cy.get('[data-cy="home-password"]')
       .should('exist')
       .clear()
       .type(password);
@@ -84,10 +84,11 @@ export function deleteGroupArea(areaName: string):void {
 }
 
 export function logout() {
-  cy.get('mat-icon:contains("account_box")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('mat-icon:contains("account_box")')
+  //   .eq(0)
+  //   .should('exist')
+  //   .click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
@@ -96,10 +97,11 @@ export function logout() {
 }
 
 export function changePassword(newPass:string, oldPass:string):void {
-  cy.get('mat-icon:contains("account_box")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('mat-icon:contains("account_box")')
+  //   .eq(0)
+  //   .should('exist')
+  //   .click();
   cy.get('span:contains("Kennwort ändern")')
     .should('exist')
     .click();
@@ -117,10 +119,11 @@ export function changePassword(newPass:string, oldPass:string):void {
 }
 
 export function updatePersonalData():void {
-  cy.get('mat-icon:contains("account_box")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('mat-icon:contains("account_box")')
+  //   .eq(0)
+  //   .should('exist')
+  //   .click();
   cy.get('span:contains("Nutzerdaten ändern")')
     .should('exist')
     .click();
@@ -173,7 +176,7 @@ export function deleteUser(user: string):void {
   clickButtonToAccept('Löschen');
 }
 
-export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
+export function grantRemovePrivilegeFromAdminSettings(user:string, group: string):void {
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
@@ -189,12 +192,24 @@ export function grantRemovePrivilegeOnGroup(user:string, group: string):void {
     .click();
 }
 
-export function grantRemovePrivilegeOnArea(user:string, area: string):void {
+export function grantRemovePrivilegeFromGroup(user:string, area: string, rights:string):void {
   cy.get('mat-table')
     .contains(`${area}`)
     .should('exist')
     .click();
-  cy.get(`label.mdc-label:contains(${user})`).click();
+  if (rights === 'read') {
+    cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+      .prev()
+      .within(() => {
+        cy.get('mat-checkbox').eq(0).click();
+      });
+  } else {
+    cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+      .prev()
+      .within(() => {
+        cy.get('mat-checkbox').eq(1).click();
+      });
+  }
   cy.get('mat-icon:contains("save")')
     .eq(1)
     .should('exist')
@@ -223,6 +238,107 @@ export function addUnit(kurzname: string):void {
     .should('exist')
     .type(kurzname);
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.wait(100);
+}
+
+export function addUnitPred(shortname:string, name:string, group: string):void {
+  cy.get('[data-cy="workspace-add-units"]')
+    .click();
+  cy.get('button > span:contains("Neue Aufgabe")')
+    .should('exist')
+    .click();
+  cy.get('input[placeholder="Kurzname"]')
+    .should('exist')
+    .clear()
+    .type(shortname);
+  cy.get('input[placeholder="Name"]')
+    .should('exist')
+    .clear()
+    .type(name);
+  cy.get('body').then($body => {
+    if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
+      cy.get('input[placeholder="Neue Gruppe"]')
+        .clear()
+        .type(group);
+    } else {
+      cy.get('svg')
+        .click();
+      cy.wait(100);
+      cy.get('body').then($body1 => {
+        if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
+          cy.get(`mat-option:contains("${group}")`)
+            .click();
+        } else {
+          cy.get('.cdk-overlay-transparent-backdrop').click();
+          cy.get('[data-cy="workspace-add-new-group"]')
+            .click();
+          cy.get('input[placeholder="Neue Gruppe"]')
+            .clear()
+            .type(group);
+        }
+      });
+    }
+  });
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.wait(100);
+}
+
+export function addUnitFromExisting(ws:string, shortname:string, name:string, group: string,
+  newshortname:string, newname:string, newgroup: string):void {
+  // select the group and the area
+  cy.get('mat-select')
+    .click();
+
+  cy.get(`mat-option:contains("${ws}")`).click();
+  // const search_text = `${shortname}: ${name}`;
+  cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
+  clickButtonToAccept('Fortsetzen');
+  cy.get('input[placeholder="Kurzname"]')
+    .should('exist')
+    .clear()
+    .type(newshortname);
+  cy.get('input[placeholder="Name"]')
+    .should('exist')
+    .clear()
+    .type(newname);
+  cy.get('body').then($body => {
+    if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
+      cy.get('input[placeholder="Neue Gruppe"]')
+        .clear()
+        .type(newgroup);
+    } else {
+      cy.get('svg')
+        .click();
+      cy.wait(100);
+      cy.get('body').then($body1 => {
+        if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
+          cy.get(`mat-option:contains("${group}")`)
+            .click();
+        } else {
+          cy.get('.cdk-overlay-transparent-backdrop').click();
+          cy.get('[data-cy="workspace-add-new-group"]')
+            .click();
+          cy.get('input[placeholder="Neue Gruppe"]')
+            .clear()
+            .type(newgroup);
+        }
+      });
+    }
+  });
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.wait(100);
+}
+
+export function importExercise(): void {
+  cy.get('[data-cy="workspace-add-units"]')
+    .click();
+  cy.get('input[type=file]')
+    .selectFile('../frontend-e2e/src/fixtures/test_studio_units_download.zip', {
+      action: 'select',
+      force: true
+    });
+  cy.contains('M6_AK0011')
+    .should('exist');
 }
 
 export function addModule():void {
@@ -279,13 +395,30 @@ export function deleteModule():void {
   clickButtonToAccept('Löschen');
 }
 
+export function clickArbitraryPoint() {
+  cy.document().then((doc: Document) => {
+    const event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: 800, // X-coordinate where you want to click
+      clientY: 400 // Y-coordinate where you want to click
+    });
+    doc.dispatchEvent(event);
+  });
+}
 export function visitLoginPage():void {
   cy.visit(<string>Cypress.config().baseUrl);
 }
 
 export function clickButtonToAccept(text: string):void {
+  // Combining waits
   cy.get('button')
     .contains(text)
     .should('exist')
     .click();
+  cy.wait(400);
+  cy.get('button')
+    .contains(text)
+    .should('not.exist');
 }

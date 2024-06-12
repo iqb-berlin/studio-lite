@@ -9,9 +9,9 @@ import {
   login,
   logout,
   visitLoginPage
-} from '../../../support/util';
+} from '../../../support/util/util';
 import { adminData, userData } from '../../../support/config/userdata';
-import { checkProfile } from '../../../support/metadata-util';
+import { checkProfile } from '../../../support/util/metadata/metadata-util';
 
 describe('Load metadata profile', () => {
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('Load metadata profile', () => {
     logout();
   });
 
-  it('should be possible load a metadata profile from General administration', () => {
+  it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
     login(adminData.user_name, adminData.user_pass);
     cy.get('[data-cy="goto-admin"]').click();
@@ -55,7 +55,7 @@ describe('Load metadata profile', () => {
     logout();
   });
 
-  it('should be possible load a metadata profile from Group administration', () => {
+  it('should be possible load a metadata profile from workspace', () => {
     const searchProfile:string = 'Französisch';
     login(adminData.user_name, adminData.user_pass);
     cy.get(`div>div>div:contains("${searchProfile}")`)
@@ -69,7 +69,7 @@ describe('Load metadata profile', () => {
     logout();
   });
 
-  it.skip('should be possible load more metadata profile', () => {
+  it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Französisch'];
     login(adminData.user_name, adminData.user_pass);
     cy.get('[data-cy="goto-admin"]').click();

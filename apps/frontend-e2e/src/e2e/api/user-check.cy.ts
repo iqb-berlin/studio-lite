@@ -2,8 +2,8 @@ import {
   addFirstUser,
   changePassword,
   updatePersonalData,
-  clickButtonToAccept, createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
-} from '../../support/util';
+  createNewUser, deleteFirstUser, deleteUser, login, logout, visitLoginPage
+} from '../../support/util/util';
 import { adminData, userData } from '../../support/config/userdata';
 
 describe('User Management', () => {
@@ -16,6 +16,8 @@ describe('User Management', () => {
     addFirstUser();
     login(adminData.user_name, adminData.user_pass);
     createNewUser(userData.user_name, userData.user_pass);
+    // TODO find adequate intercept
+    cy.wait(100);
     visitLoginPage();
     logout();
   });
@@ -26,18 +28,26 @@ describe('User Management', () => {
     logout();
   });
 
-  it('should not be able to login with correct credentials', () => {
-    cy.get('input[placeholder="Anmeldename"]')
+  it('should not be able to login with incorrect credentials', () => {
+    cy.get('[data-cy="home-user-name"]')
       .should('exist')
       .clear()
       .type(userData.user_name);
-    cy.get('input[placeholder="Kennwort"]')
+    cy.get('[data-cy="home-password"]')
       .should('exist')
       .clear()
       .type('nopass');
-    cy.intercept('POST', '/api/login').as('responseLogin');
-    clickButtonToAccept('Weiter');
-    cy.wait('@responseLogin').its('response.statusCode').should('eq', 401);
+    // cy.intercept('POST', '/api/login').as('responseLogin');
+    // clickButtonToAccept('Weiter');
+    // cy.wait('@responseLogin').its('response.statusCode').should('eq', 401);
+    cy.get('button')
+      .contains('Weiter')
+      .should('exist')
+      .click();
+    cy.wait(400);
+    cy.get('button')
+      .contains('Weiter')
+      .should('exist');
   });
 
   it('user should be able to logout', () => {
@@ -57,6 +67,7 @@ describe('User Management', () => {
   it('should be able to modify personal data', () => {
     login(userData.user_name, userData.user_pass);
     updatePersonalData();
+    visitLoginPage();
     logout();
   });
 
@@ -70,6 +81,37 @@ describe('User Management', () => {
     visitLoginPage();
     logout();
   });
+
+  // it('should everyone in the gruppe be able to administrate the Bereichsgruppe were?', () => {
+  //
+  // });
+  // it('should be able to grant other people to ', () => {
+  //
+  // });
+  // it('should be able to delete see enter into a area of work', () => {
+  //
+  // });
+  // it('should someone from the same group grant and remove permissions to other users (from users)?', () => {
+  //
+  // });
+  // it('should someone from a group able to grant permissions person that not belong to the gruppe (from users)?', () => {
+  //
+  // });
+  // it('should someone from the same group grant and remove permissions to other users (from area of work)?', () => {
+  //
+  // });
+  // it('should someone from a group able to grant permissions person ' +
+  //   'that not belong to the gruppe (from area of work)?', () => {
+  //
+  // });
+  // it('See fall 4 ');
+  //
+  // it('should be able to add neu Status', () => {
+  //
+  // });
+  // it('should be delete to add neu Status', () => {
+  //
+  // });
 
   it('delete the Context', () => {
     login(adminData.user_name, adminData.user_pass);

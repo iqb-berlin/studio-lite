@@ -3,18 +3,18 @@ import {
   addUnit,
   createAreaForGroupFromAdmin,
   createGroupArea, deleteFirstUser, deleteGroupArea, deleteUnit,
-  grantRemovePrivilegeOnArea,
+  grantRemovePrivilegeFromGroup,
   login, logout, visitArea,
   visitLoginPage
-} from 'apps/frontend-e2e/src/support/util';
+} from '../../../support/util/util';
 import { adminData } from '../../../support/config/userdata';
 import {
   getItem,
-  getStructure,
+  getStructure, selectProfileForArea,
   selectProfileForAreaFromGroup,
   selectProfileForGroup
-} from '../../../support/metadata-util';
-import { IqbProfile } from '../../../support/config/iqbProfile';
+} from '../../../support/util/metadata/metadata-util';
+import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
 
 describe('Metadata Management', () => {
   const area = 'Deutsch I';
@@ -36,10 +36,10 @@ describe('Metadata Management', () => {
     createGroupArea(group);
     visitLoginPage();
     createAreaForGroupFromAdmin(area, group);
-    grantRemovePrivilegeOnArea(adminData.user_name, area);
+    grantRemovePrivilegeFromGroup(adminData.user_name, area, 'write');
     visitLoginPage();
     createAreaForGroupFromAdmin(mathArea, group);
-    grantRemovePrivilegeOnArea(adminData.user_name, mathArea);
+    grantRemovePrivilegeFromGroup(adminData.user_name, mathArea, 'write');
   });
 
   it('choose profiles from the group ', () => {
@@ -55,6 +55,15 @@ describe('Metadata Management', () => {
     selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
     visitLoginPage();
     selectProfileForAreaFromGroup(IqbProfile.MA, mathArea, group);
+  });
+
+  it('choose a profile for an area from workspace', () => {
+    visitLoginPage();
+    cy.contains(area).click();
+    selectProfileForArea(IqbProfile.DE);
+    visitLoginPage();
+    cy.contains(mathArea).click();
+    selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {

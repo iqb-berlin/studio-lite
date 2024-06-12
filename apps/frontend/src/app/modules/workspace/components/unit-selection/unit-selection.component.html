@@ -22,7 +22,8 @@
         [count]="unitGroup.value.length"
         [title]="unitGroup.key"
         [expandAll]="unitGroups.expandAll"
-        (expandedChange) = onExpandedChange($event)>
+        (expandedChange) = onExpandedChange($event)
+        data-cy="unit-group-name">
         <studio-lite-unit-table
           [hasSortHeader]="false"
           [unitList]="unitGroup.value"
