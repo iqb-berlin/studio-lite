@@ -1,7 +1,8 @@
 <button mat-button
         [matMenuTriggerFor]="menuUser"
         [matTooltip]="'home.user-menu' | translate"
-        matTooltipPosition="above">
+        matTooltipPosition="above"
+        data-cy = "goto-user-menu" >
   <studio-lite-wrapped-icon icon="account_box"></studio-lite-wrapped-icon>
 </button>
 <mat-menu #menuUser="matMenu">
