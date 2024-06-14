@@ -1,8 +1,9 @@
+/// <reference types="cypress" />
 import {
   addFirstUser,
-  createAreaForGroupFromAdmin,
-  createGroupArea, deleteFirstUser, deleteGroupArea,
-  grantRemovePrivilegeFromGroup,
+  createWs,
+  createGroup, deleteFirstUser, deleteGroup,
+  grantRemovePrivilege,
   login, logout,
   visitLoginPage
 } from '../../../support/util/util';
@@ -17,7 +18,7 @@ import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
 * They are alternative tests to "choose profiles from the group" and
 * "choose a profil for an area from a group" from insert-record.cy.ts */
 
-describe('Metadata Management from administration', () => {
+describe('UI Metadata Management from administration', () => {
   const area = 'Deutsch II';
   const mathArea = 'Mathematik II';
   const group = 'Bista II';
@@ -33,13 +34,13 @@ describe('Metadata Management from administration', () => {
     addFirstUser();
     visitLoginPage();
     login(adminData.user_name, adminData.user_pass);
-    createGroupArea(group);
+    createGroup(group);
     visitLoginPage();
-    createAreaForGroupFromAdmin(area, group);
-    grantRemovePrivilegeFromGroup(adminData.user_name, area, 'write');
+    createWs(area, group);
+    grantRemovePrivilege(adminData.user_name, area, 'write');
     visitLoginPage();
-    createAreaForGroupFromAdmin(mathArea, group);
-    grantRemovePrivilegeFromGroup(adminData.user_name, mathArea, 'write');
+    createWs(mathArea, group);
+    grantRemovePrivilege(adminData.user_name, mathArea, 'write');
   });
   it('choose profiles for a Group from the administration settings ', () => {
     visitLoginPage();
@@ -50,7 +51,7 @@ describe('Metadata Management from administration', () => {
 
   it('delete the data', () => {
     visitLoginPage();
-    deleteGroupArea(group);
+    deleteGroup(group);
     visitLoginPage();
     deleteFirstUser();
     visitLoginPage();

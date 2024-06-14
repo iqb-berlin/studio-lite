@@ -1,10 +1,11 @@
+/// <reference types="cypress" />
 import {
   addFirstUser,
   clickButtonToAccept,
-  createGroupArea,
+  createGroup,
   createNewUser,
   deleteFirstUser,
-  deleteGroupArea,
+  deleteGroup,
   deleteUser,
   login,
   logout,
@@ -29,7 +30,7 @@ describe('Load metadata profile', () => {
       'Französisch Sek I',
       'Englisch Sek I'];
     areaGroups.forEach(area => {
-      createGroupArea(area);
+      createGroup(area);
       cy.wait(400);
       visitLoginPage();
     });
@@ -100,7 +101,7 @@ describe('Load metadata profile', () => {
       'Englisch Sek I'
     ];
     areaGroups.forEach(area => {
-      deleteGroupArea(area);
+      deleteGroup(area);
       visitLoginPage();
     });
     visitLoginPage();

@@ -1,10 +1,11 @@
+/// <reference types="cypress" />
 import {
   addFirstUser,
   addUnit,
-  createAreaForGroupFromAdmin,
-  createGroupArea, deleteFirstUser, deleteGroupArea, deleteUnit,
-  grantRemovePrivilegeFromGroup,
-  login, logout, visitArea,
+  createWs,
+  createGroup, deleteFirstUser, deleteGroup, deleteUnit,
+  grantRemovePrivilege,
+  login, logout, visitWs,
   visitLoginPage
 } from '../../../support/util/util';
 import { adminData } from '../../../support/config/userdata';
@@ -33,13 +34,13 @@ describe('Metadata Management', () => {
     addFirstUser();
     visitLoginPage();
     login(adminData.user_name, adminData.user_pass);
-    createGroupArea(group);
+    createGroup(group);
     visitLoginPage();
-    createAreaForGroupFromAdmin(area, group);
-    grantRemovePrivilegeFromGroup(adminData.user_name, area, 'write');
+    createWs(area, group);
+    grantRemovePrivilege(adminData.user_name, area, 'write');
     visitLoginPage();
-    createAreaForGroupFromAdmin(mathArea, group);
-    grantRemovePrivilegeFromGroup(adminData.user_name, mathArea, 'write');
+    createWs(mathArea, group);
+    grantRemovePrivilege(adminData.user_name, mathArea, 'write');
   });
 
   it('choose profiles from the group ', () => {
@@ -68,21 +69,21 @@ describe('Metadata Management', () => {
 
   it('create a new Unit in an area', () => {
     visitLoginPage();
-    visitArea(mathArea);
+    visitWs(mathArea);
     addUnit('M1_001');
   });
 
   it('create more than one Unit in an area', () => {
     visitLoginPage();
-    visitArea(area);
+    visitWs(area);
     addUnit('D1_001');
     visitLoginPage();
-    visitArea(area);
+    visitWs(area);
     addUnit('D1_002');
   });
 
   it('add metadata', () => {
-    visitArea(mathArea);
+    visitWs(mathArea);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
     getItem('iMA', false);
@@ -90,7 +91,7 @@ describe('Metadata Management', () => {
   });
 
   it('add metadata with more than one element', () => {
-    visitArea(area);
+    visitWs(area);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
     getItem('iDE', false);
@@ -99,14 +100,14 @@ describe('Metadata Management', () => {
   });
 
   it('delete the data', () => {
-    visitArea(area);
+    visitWs(area);
     deleteUnit('D1_001');
     deleteUnit('D1_002');
     visitLoginPage();
-    visitArea(mathArea);
+    visitWs(mathArea);
     deleteUnit('M1_001');
     visitLoginPage();
-    deleteGroupArea(group);
+    deleteGroup(group);
     visitLoginPage();
     deleteFirstUser();
     visitLoginPage();

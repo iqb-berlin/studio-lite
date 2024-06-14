@@ -15,6 +15,8 @@ export default defineConfig({
   e2e: {
     ...nxE2EPreset(__dirname),
     ...cypressJsonConfig,
+    viewportWidth: 1600,
+    viewportHeight: 900,
     watchForFileChanges: false,
     defaultCommandTimeout: 5000,
     /**

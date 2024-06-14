@@ -1,148 +1,13 @@
 import { adminData } from '../config/userdata';
 
 export function addFirstUser() {
-  cy.get('[data-cy="home-user-name"]')
-    .should('exist')
-    .clear()
-    .type(adminData.user_name);
-  cy.get('[data-cy="home-password"]')
-    .should('exist')
-    .clear()
-    .type(adminData.user_pass);
-  clickButtonToAccept('Weiter');
-  cy.wait(400);
-  visitLoginPage();
-  // cy.get('mat-icon:contains("account_box")').click();
-  cy.get('[data-cy="goto-user-menu"]').click();
-  cy.get('span:contains("Abmelden")')
-    .should('exist')
-    .click();
-  cy.wait(400);
-  clickButtonToAccept('Abmelden');
-}
-
-export function deleteFirstUser() {
-  deleteUser(adminData.user_name);
-}
-
-export function login(username: string, password = '') {
-  cy.get('[data-cy="home-user-name"]')
-    .should('exist')
-    .clear()
-    .type(username);
-  if (password) {
-    cy.get('[data-cy="home-password"]')
-      .should('exist')
-      .clear()
-      .type(password);
-  }
-  cy.intercept('POST', '/api/login').as('responseLogin');
-  clickButtonToAccept('Weiter');
-  cy.wait('@responseLogin')
-    .its('response.statusCode').should('eq', 201);
-}
-
-export function createGroupArea(group:string):void {
-  cy.get('[data-cy="goto-admin"]').click();
-  cy.get('span:contains("Bereichsgruppen")')
-    .eq(0)
-    .click();
-  cy.get('mat-icon').contains('add').click();
-  cy.get('input[placeholder="Name"]')
-    .type(group);
-  clickButtonToAccept('Anlegen');
-}
-
-export function createAreaForGroupFromAdmin(area:string, group:string):void {
-  cy.get(`div>div>div>div:contains("${group}")`)
-    .eq(0)
-    .next()
-    .click();
-  cy.get('span:contains("Arbeitsbereiche")')
-    .eq(0)
-    .click();
-  cy.get('mat-icon')
-    .contains('add')
-    .click();
-  cy.get('input[placeholder="Bitte Namen eingeben"]')
-    .type(area);
-  clickButtonToAccept('Anlegen');
-}
-
-export function deleteGroupArea(areaName: string):void {
-  cy.get('[data-cy="goto-admin"]').click();
-  cy.get('span:contains("Bereichsgruppen")')
-    .eq(0)
-    .click();
-  cy.get('mat-table')
-    .contains(areaName)
-    .click();
-  cy.get('mat-icon')
-    .contains('delete')
-    .click();
-  clickButtonToAccept('Löschen');
-}
-
-export function logout() {
-  cy.get('[data-cy="goto-user-menu"]').click();
-  // cy.get('mat-icon:contains("account_box")')
-  //   .eq(0)
-  //   .should('exist')
-  //   .click();
-  cy.get('span:contains("Abmelden")')
-    .should('exist')
-    .click();
-  cy.wait(400);
-  clickButtonToAccept('Abmelden');
-}
-
-export function changePassword(newPass:string, oldPass:string):void {
-  cy.get('[data-cy="goto-user-menu"]').click();
-  // cy.get('mat-icon:contains("account_box")')
-  //   .eq(0)
-  //   .should('exist')
-  //   .click();
-  cy.get('span:contains("Kennwort ändern")')
-    .should('exist')
-    .click();
-  cy.get('mat-label:contains("Altes Kennwort")')
-    .should('exist')
-    .type(oldPass);
-  cy.get('mat-label:contains("Neues Kennwort")')
-    .eq(0)
-    .should('exist')
-    .type(newPass);
-  cy.get('mat-label:contains("Neues Kennwort (Wiederholung)")')
-    .should('exist')
-    .type(newPass);
-  clickButtonToAccept('Speichern');
-}
-
-export function updatePersonalData():void {
-  cy.get('[data-cy="goto-user-menu"]').click();
-  // cy.get('mat-icon:contains("account_box")')
-  //   .eq(0)
-  //   .should('exist')
-  //   .click();
-  cy.get('span:contains("Nutzerdaten ändern")')
-    .should('exist')
-    .click();
-  cy.get('input[placeholder="Nachname"]')
-    .should('exist')
-    .clear()
-    .type('Müller');
-  cy.get('input[placeholder="Vorname"]')
-    .should('exist')
-    .clear()
-    .type('Adam');
-  cy.get('input[placeholder="E-Mail"]')
-    .should('exist')
-    .clear()
-    .type('adam.muller@iqb.hu-berlin.de');
-  clickButtonToAccept('Speichern');
+  cy.visit('/');
+  cy.login(adminData.user_name, adminData.user_pass);
+  cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
 }
 
 export function createNewUser(name: string, pass: string):void {
+  cy.visit('/');
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
@@ -161,7 +26,7 @@ export function createNewUser(name: string, pass: string):void {
     .should('exist')
     .clear()
     .type(`${pass}`);
-  clickButtonToAccept('Anlegen');
+  cy.buttonToContinue('Anlegen', 201, '/api/admin/users', 'POST', 'addUser');
 }
 
 export function deleteUser(user: string):void {
@@ -173,28 +38,39 @@ export function deleteUser(user: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  clickButtonToAccept('Löschen');
+  cy.buttonToContinue('Löschen', 200, '/api/admin/users/*', 'DELETE', 'deleteUser');
 }
 
-export function grantRemovePrivilegeFromAdminSettings(user:string, group: string):void {
+export function createGroup(group:string):void {
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
-  cy.get('mat-table')
-    .contains(`${group}`)
-    .should('exist')
-    .click();
-  cy.get(`label:contains(${user})`).prev().click();
-  cy.get('.center-icon > .mat-icon:contains("save")')
-    .eq(0)
-    .should('exist')
-    .click();
+  cy.get('mat-icon').contains('add').click();
+  cy.get('input[placeholder="Name"]')
+    .type(group);
+  cy.buttonToContinue('Anlegen', 201, '/api/admin/workspace-groups', 'POST', 'createWsGroup');
 }
 
-export function grantRemovePrivilegeFromGroup(user:string, area: string, rights:string):void {
+export function createWs(ws:string, group:string):void {
+  cy.get(`div>div>div>div:contains("${group}")`)
+    .eq(0)
+    .next()
+    .click();
+  cy.get('span:contains("Arbeitsbereiche")')
+    .eq(0)
+    .click();
+  cy.get('mat-icon')
+    .contains('add')
+    .click();
+  cy.get('input[placeholder="Bitte Namen eingeben"]')
+    .type(ws);
+  cy.buttonToContinue('Anlegen', 201, '/api/admin/workspaces/*', 'POST', 'createWs');
+}
+
+export function grantRemovePrivilege(user:string, ws: string, rights:string):void {
   cy.get('mat-table')
-    .contains(`${area}`)
+    .contains(`${ws}`)
     .should('exist')
     .click();
   if (rights === 'read') {
@@ -216,10 +92,105 @@ export function grantRemovePrivilegeFromGroup(user:string, area: string, rights:
     .click();
 }
 
-export function visitArea(area: string):void {
-  visitLoginPage();
-  cy.get(`a:contains("${area}")`).click();
+export function deleteFirstUser() {
+  cy.visit('/');
+  deleteUser(adminData.user_name);
+  cy.visit('/');
+  logout();
 }
+
+export function login(username: string, password = '') {
+  cy.login(username, password);
+  cy.buttonToContinue('Weiter', 201, '/api/login', 'POST', 'responseLogin');
+}
+
+export function addModule():void {
+  cy.get('[data-cy="goto-admin"]').click();
+  cy.get('span:contains("Module")')
+    .eq(0)
+    .click();
+  cy.loadModule('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', 'iqb-schemer@1.5');
+  cy.loadModule('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', 'iqb-player-aspect@2.4.10');
+  cy.loadModule('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', 'iqb-editor-aspect@2.4.9');
+}
+
+export function deleteModule():void {
+  cy.get('[data-cy="goto-admin"]').click();
+  cy.get('span:contains("Module")')
+    .eq(0)
+    .click();
+  cy.selectModule('IQB-Schemer');
+  cy.selectModule('IQB-Player');
+  cy.selectModule('IQB-Editor');
+  cy.get('div > mat-icon')
+    .contains('delete')
+    .click();
+  cy.buttonToContinue('Löschen', 200, '/api/verona-modules', 'GET', 'deleteModule');
+}
+
+export function deleteGroup(wsName: string):void {
+  cy.get('[data-cy="goto-admin"]').click();
+  cy.get('span:contains("Bereichsgruppen")')
+    .eq(0)
+    .click();
+  cy.get('mat-table')
+    .contains(wsName)
+    .click();
+  cy.get('mat-icon')
+    .contains('delete')
+    .click();
+  cy.buttonToContinue('Löschen', 200, '/api/admin/workspace-groups/*', 'DELETE', 'deleteGroup');
+}
+
+export function logout() {
+  cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('span:contains("Abmelden")')
+    .should('exist')
+    .click();
+  cy.dialogButtonToContinue('Abmelden', 304, '/assets/IQB-LogoA.png', 'GET', 'abmelden');
+}
+
+export function changePassword(newPass:string, oldPass:string):void {
+  cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('span:contains("Kennwort ändern")')
+    .should('exist')
+    .click();
+  cy.get('mat-label:contains("Altes Kennwort")')
+    .should('exist')
+    .type(oldPass);
+  cy.get('mat-label:contains("Neues Kennwort")')
+    .eq(0)
+    .should('exist')
+    .type(newPass);
+  cy.get('mat-label:contains("Neues Kennwort (Wiederholung)")')
+    .should('exist')
+    .type(newPass);
+  cy.buttonToContinue('Speichern', 200, '/api/password', 'PATCH', 'updatePass');
+}
+
+export function updatePersonalData():void {
+  cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('span:contains("Nutzerdaten ändern")')
+    .should('exist')
+    .click();
+  cy.get('input[placeholder="Nachname"]')
+    .should('exist')
+    .clear()
+    .type('Müller');
+  cy.get('input[placeholder="Vorname"]')
+    .should('exist')
+    .clear()
+    .type('Adam');
+  cy.get('input[placeholder="E-Mail"]')
+    .should('exist')
+    .clear()
+    .type('adam.muller@iqb.hu-berlin.de');
+  cy.buttonToContinue('Speichern', 200, '/api/my-data', 'PATCH', 'updateData');
+}
+
+// export function visitWs(ws: string):void {
+//   cy.get(`a:contains("${ws}")`).click();
+// }
 
 export function deleteUnit(kurzname: string):void {
   cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
@@ -237,8 +208,9 @@ export function addUnit(kurzname: string):void {
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
-  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-  cy.wait(100);
+  // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  // cy.wait(100);
+  cy.buttonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
 }
 
 export function addUnitPred(shortname:string, name:string, group: string):void {
@@ -263,7 +235,6 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
     } else {
       cy.get('svg')
         .click();
-      cy.wait(100);
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
           cy.get(`mat-option:contains("${group}")`)
@@ -279,13 +250,14 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
       });
     }
   });
-  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-  cy.wait(100);
+  cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
+  // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  // cy.wait(100);
 }
 
 export function addUnitFromExisting(ws:string, shortname:string, name:string, group: string,
   newshortname:string, newname:string, newgroup: string):void {
-  // select the group and the area
+  // select the group and the ws
   cy.get('mat-select')
     .click();
 
@@ -339,60 +311,6 @@ export function importExercise(): void {
     });
   cy.contains('M6_AK0011')
     .should('exist');
-}
-
-export function addModule():void {
-  cy.get('[data-cy="goto-admin"]').click();
-  cy.get('span:contains("Module")')
-    .eq(0)
-    .click();
-  cy.get('input[type=file]')
-    .selectFile('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', {
-      action: 'select',
-      force: true
-    });
-  cy.contains('iqb-schemer@1.5')
-    .should('exist');
-  cy.get('input[type=file]')
-    .selectFile('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', {
-      action: 'select',
-      force: true
-    });
-  cy.contains('iqb-player-aspect@2.4.10')
-    .should('exist');
-  cy.get('input[type=file]')
-    .selectFile('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', {
-      action: 'select',
-      force: true
-    });
-  cy.contains('iqb-editor-aspect@2.4.9')
-    .should('exist');
-}
-
-export function deleteModule():void {
-  cy.get('[data-cy="goto-admin"]').click();
-  cy.get('span:contains("Module")')
-    .eq(0)
-    .click();
-  cy.get('span:contains("IQB-Schemer")')
-    .parent()
-    .parent()
-    .prev()
-    .click();
-  cy.get('span:contains("IQB-Player")')
-    .parent()
-    .parent()
-    .prev()
-    .click();
-  cy.get('span:contains("IQB-Editor")')
-    .parent()
-    .parent()
-    .prev()
-    .click();
-  cy.get('div > mat-icon')
-    .contains('delete')
-    .click();
-  clickButtonToAccept('Löschen');
 }
 
 export function clickArbitraryPoint() {
