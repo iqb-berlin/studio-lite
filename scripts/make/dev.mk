@@ -6,19 +6,24 @@ include $(STUDIO_LITE_BASE_DIR)/.env.dev
 .EXPORT_ALL_VARIABLES:
 
 ## prevents collisions of make target names with possible file names
-.PHONY: dev-build dev-up dev-down dev-start dev-stop dev-status dev-logs dev-config dev-system-prune dev-volumes-prune\
-	dev-volumes-clean dev-images-clean dev-clean-all
+.PHONY: dev-registry-login dev-registry-logout dev-build dev-up dev-down dev-start dev-stop dev-status dev-logs\
+	dev-config dev-system-prune dev-volumes-prune dev-volumes-clean dev-images-clean dev-clean-all
 
 ## disables printing the recipe of a make target before executing it
-.SILENT: dev-volumes-clean dev-images-clean
+.SILENT: dev-registry-login dev-registry-logout dev-volumes-clean dev-images-clean
 
+## Log in to selected registry (see .env.dev file)
+dev-registry-login:
+	if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
+
+## Log out of selected registry (see .env.dev file)
+dev-registry-logout:
+	if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Build docker images
 # Param (optional): SERVICE - Build the specified service only, e.g. `SERVICE=db make dev-build`
-dev-build:
-	@if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
+dev-build: dev-registry-login
 	docker compose --progress plain --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev build --pull $(SERVICE)
-	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Create and start all docker containers
 dev-up:
