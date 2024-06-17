@@ -23,7 +23,8 @@ dev-registry-logout:
 ## Build docker images
 # Param (optional): SERVICE - Build the specified service only, e.g. `SERVICE=db make dev-build`
 dev-build: dev-registry-login
-	docker compose --progress plain --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev build --pull $(SERVICE)
+	cd $(STUDIO_LITE_BASE_DIR) && docker build --progress plain --pull -t studio-lite-base:latest .
+	docker compose --progress plain --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev build $(SERVICE)
 
 ## Create and start all docker containers
 dev-up:
