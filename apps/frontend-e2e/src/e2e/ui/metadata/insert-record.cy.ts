@@ -3,10 +3,8 @@ import {
   addFirstUser,
   addUnit,
   createWs,
-  createGroup, deleteFirstUser, deleteGroup, deleteUnit,
-  grantRemovePrivilege,
-  login, logout, visitWs,
-  visitLoginPage
+  createGroup, deleteFirstUser, deleteGroup, deleteUnit2,
+  grantRemovePrivilege
 } from '../../../support/util/util';
 import { adminData } from '../../../support/config/userdata';
 import {
@@ -22,68 +20,68 @@ describe('Metadata Management', () => {
   const mathArea = 'Mathematik I';
   const group = 'Bista I';
 
-  beforeEach(() => {
-    cy.viewport(1600, 900);
-    visitLoginPage();
+  before(() => {
+    addFirstUser();
   });
-  afterEach(() => {
-    visitLoginPage();
+  after(() => {
+    deleteFirstUser();
+  });
+  beforeEach(() => {
+    cy.visit('/');
   });
 
   it('prepare context', () => {
-    addFirstUser();
-    visitLoginPage();
-    login(adminData.user_name, adminData.user_pass);
     createGroup(group);
-    visitLoginPage();
+    cy.visit('/');
     createWs(area, group);
     grantRemovePrivilege(adminData.user_name, area, 'write');
-    visitLoginPage();
+
+    cy.visit('/');
     createWs(mathArea, group);
     grantRemovePrivilege(adminData.user_name, mathArea, 'write');
   });
 
   it('choose profiles from the group ', () => {
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.DE);
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.MA);
   });
   // Execute only one of the two test: the previous oder this, not both together
 
   it('choose profile for an area from a group', () => {
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.MA, mathArea, group);
   });
 
   it('choose a profile for an area from workspace', () => {
-    visitLoginPage();
+    cy.visit('/');
     cy.contains(area).click();
     selectProfileForArea(IqbProfile.DE);
-    visitLoginPage();
+    cy.visit('/');
     cy.contains(mathArea).click();
     selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {
-    visitLoginPage();
-    visitWs(mathArea);
+    cy.visit('/');
+    cy.visitWs(mathArea);
     addUnit('M1_001');
   });
 
   it('create more than one Unit in an area', () => {
-    visitLoginPage();
-    visitWs(area);
+    cy.visit('/');
+    cy.visitWs(area);
     addUnit('D1_001');
-    visitLoginPage();
-    visitWs(area);
+    cy.visit('/');
+    cy.visitWs(area);
     addUnit('D1_002');
   });
 
   it('add metadata', () => {
-    visitWs(mathArea);
+    cy.visitWs(mathArea);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
     getItem('iMA', false);
@@ -91,7 +89,7 @@ describe('Metadata Management', () => {
   });
 
   it('add metadata with more than one element', () => {
-    visitWs(area);
+    cy.visitWs(area);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
     getItem('iDE', false);
@@ -100,17 +98,14 @@ describe('Metadata Management', () => {
   });
 
   it('delete the data', () => {
-    visitWs(area);
-    deleteUnit('D1_001');
-    deleteUnit('D1_002');
-    visitLoginPage();
-    visitWs(mathArea);
-    deleteUnit('M1_001');
-    visitLoginPage();
+    cy.visitWs(area);
+    deleteUnit2('D1_001');
+    deleteUnit2('D1_002');
+    cy.visit('/');
+    cy.visitWs(mathArea);
+    deleteUnit2('M1_001');
+    cy.visit('/');
     deleteGroup(group);
-    visitLoginPage();
-    deleteFirstUser();
-    visitLoginPage();
-    logout();
+    cy.visit('/');
   });
 });

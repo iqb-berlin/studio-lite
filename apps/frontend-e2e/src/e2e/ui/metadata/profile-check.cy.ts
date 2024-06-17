@@ -1,45 +1,41 @@
 /// <reference types="cypress" />
 import {
   addFirstUser,
-  clickButtonToAccept,
   createGroup,
   createNewUser,
   deleteFirstUser,
   deleteGroup,
-  deleteUser,
-  login,
-  logout,
-  visitLoginPage
+  deleteUser
 } from '../../../support/util/util';
-import { adminData, userData } from '../../../support/config/userdata';
+import { userData } from '../../../support/config/userdata';
 import { checkProfile } from '../../../support/util/metadata/metadata-util';
 
 describe('Load metadata profile', () => {
+  before(() => {
+    addFirstUser();
+  });
+  after(() => {
+    deleteFirstUser();
+  });
   beforeEach(() => {
-    cy.viewport(1600, 900);
-    visitLoginPage();
+    cy.visit('/');
   });
 
   it('user admin prepare the Context', () => {
-    addFirstUser();
-    login(adminData.user_name, adminData.user_pass);
     createNewUser(userData.user_name, userData.user_pass);
-    visitLoginPage();
+    cy.visit('/');
     const areaGroups = ['Mathematik Primär und Sek I',
       'Deutsch Primär und Sek I',
       'Französisch Sek I',
       'Englisch Sek I'];
     areaGroups.forEach(area => {
       createGroup(area);
-      cy.wait(400);
-      visitLoginPage();
+      cy.visit('/');
     });
-    logout();
   });
 
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
-    login(adminData.user_name, adminData.user_pass);
     cy.get('[data-cy="goto-admin"]').click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
@@ -50,15 +46,14 @@ describe('Load metadata profile', () => {
     cy.get('mat-icon')
       .contains('settings')
       .click();
+
     checkProfile(searchProfile);
-    clickButtonToAccept('Speichern');
-    visitLoginPage();
-    logout();
+    //  cy.pause();
+    cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   });
 
   it('should be possible load a metadata profile from workspace', () => {
     const searchProfile:string = 'Französisch';
-    login(adminData.user_name, adminData.user_pass);
     cy.get(`div>div>div:contains("${searchProfile}")`)
       .next()
       .click();
@@ -66,13 +61,11 @@ describe('Load metadata profile', () => {
       .eq(0)
       .click();
     checkProfile(searchProfile);
-    visitLoginPage();
-    logout();
   });
 
+  // rewrite TODO
   it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Französisch'];
-    login(adminData.user_name, adminData.user_pass);
     cy.get('[data-cy="goto-admin"]').click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
@@ -86,15 +79,12 @@ describe('Load metadata profile', () => {
     searchProfiles.forEach(searchProfile => {
       checkProfile(searchProfile);
     });
-    clickButtonToAccept('Speichern');
-    visitLoginPage();
-    logout();
+    cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   });
 
   it('remove the Context', () => {
-    login(adminData.user_name, adminData.user_pass);
     deleteUser(userData.user_name);
-    visitLoginPage();
+    cy.visit('/');
     const areaGroups = ['Mathematik Primär und Sek I',
       'Deutsch Primär und Sek I',
       'Französisch Sek I',
@@ -102,11 +92,7 @@ describe('Load metadata profile', () => {
     ];
     areaGroups.forEach(area => {
       deleteGroup(area);
-      visitLoginPage();
+      cy.visit('/');
     });
-    visitLoginPage();
-    deleteFirstUser();
-    visitLoginPage();
-    logout();
   });
 });

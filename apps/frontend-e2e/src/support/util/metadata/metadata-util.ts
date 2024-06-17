@@ -1,4 +1,3 @@
-import { clickButtonToAccept } from '../util';
 import { IqbProfile, IqbProfileExamples, RegistryProfile } from './iqbProfile';
 
 function getCheckBoxByName(name: string) {
@@ -62,7 +61,9 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
     .contains('settings')
     .click();
   checkProfile(profile);
-  clickButtonToAccept('Speichern');
+  // clickButtonToAccept('Speichern');
+
+  cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
 }
 
 export function selectProfileForGroup(group:string, profile:IqbProfile) {
@@ -84,9 +85,10 @@ export function selectProfileForArea(profile:IqbProfile) {
     .click();
   cy.get('svg').eq(1).click();
   cy.get('mat-option>span').contains(profile).click();
-  cy.wait(400);
+  // cy.wait(400);
   cy.get('svg').eq(2).click();
   cy.get('mat-option>span').contains(profile).click();
+
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
 
@@ -95,11 +97,11 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .eq(0)
     .next()
     .click();
-  cy.wait(200);
+  // cy.wait(200);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();
-  cy.wait(200);
+  // cy.wait(200);
   cy.get('mat-table')
     .contains(area)
     .click();
@@ -114,17 +116,16 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
   cy.get(`span:contains(${profile})`)
     .contains('Item')
     .click();
-  clickButtonToAccept('Speichern');
+  cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace/*/settings', 'PATCH', 'setProfile');
+  // clickButtonToAccept('Speichern');
 }
 
 export function checkProfile(profile: string):void {
-  // cy.intercept('https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json', req => {
-  //   req.continue();
-  // }).as('loaded');
-  // cy.wait('@loaded', { timeout: 10000 }).then(() => {
-  // });
-  // TODO: Find a appropiate way to intercept that all profile are loaded
-  cy.wait(2000);
+  const alias = `load${profile}`;
+  cy.intercept('GET', '/api/metadata-profile?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
+    .as(alias);
+  cy.wait(`@${alias}`)
+    .its('response.statusCode').should('eq', 304);
   cy.get('mat-panel-title')
     .contains(profile)
     .parent()

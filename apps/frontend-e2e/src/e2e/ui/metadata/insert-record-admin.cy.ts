@@ -3,9 +3,7 @@ import {
   addFirstUser,
   createWs,
   createGroup, deleteFirstUser, deleteGroup,
-  grantRemovePrivilege,
-  login, logout,
-  visitLoginPage
+  grantRemovePrivilege
 } from '../../../support/util/util';
 import { adminData } from '../../../support/config/userdata';
 import {
@@ -23,38 +21,31 @@ describe('UI Metadata Management from administration', () => {
   const mathArea = 'Mathematik II';
   const group = 'Bista II';
 
-  beforeEach(() => {
-    cy.viewport(1600, 900);
-    visitLoginPage();
+  before(() => {
+    addFirstUser();
   });
-  afterEach(() => {
-    visitLoginPage();
+  after(() => {
+    deleteFirstUser();
+  });
+  beforeEach(() => {
+    cy.visit('/');
   });
   it('prepare context', () => {
-    addFirstUser();
-    visitLoginPage();
-    login(adminData.user_name, adminData.user_pass);
     createGroup(group);
-    visitLoginPage();
+    cy.visit('/');
     createWs(area, group);
     grantRemovePrivilege(adminData.user_name, area, 'write');
-    visitLoginPage();
+    cy.visit('/');
     createWs(mathArea, group);
     grantRemovePrivilege(adminData.user_name, mathArea, 'write');
   });
   it('choose profiles for a Group from the administration settings ', () => {
-    visitLoginPage();
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForGroupFromAdmin(group, IqbProfile.MA);
   });
 
   it('delete the data', () => {
-    visitLoginPage();
     deleteGroup(group);
-    visitLoginPage();
-    deleteFirstUser();
-    visitLoginPage();
-    logout();
   });
 });

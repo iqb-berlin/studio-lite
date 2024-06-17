@@ -13,6 +13,7 @@ declare namespace Cypress {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Chainable<Subject> {
     login(username: string, password: string): void;
+    clickButton(text: string):void;
     buttonToContinue(text: string, code: number, url: string, rest: string, alias: string):void;
     dialogButtonToContinue(text: string, code: number, url: string, rest: string, alias: string):void;
     loadModule(filename: string, name: string):void;
@@ -30,6 +31,13 @@ Cypress.Commands.add('login', (username:string, password:string) => {
     .should('exist')
     .clear()
     .type(password);
+});
+
+Cypress.Commands.add('clickButton', (text: string) => {
+  cy.get('button')
+    .contains(text)
+    .should('exist')
+    .click();
 });
 
 Cypress.Commands.add('buttonToContinue', (text: string, code: number, url: string, rest: string, alias:string) => {
@@ -73,6 +81,7 @@ Cypress.Commands.add('selectModule', (name:string) => {
 Cypress.Commands.add('visitWs', (ws:string) => {
   cy.get(`a:contains("${ws}")`).click();
 });
+
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

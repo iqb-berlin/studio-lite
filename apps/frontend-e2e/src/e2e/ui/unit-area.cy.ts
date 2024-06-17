@@ -1,10 +1,10 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addUnitFromExisting, addUnitPred, clickButtonToAccept,
+  addFirstUser, addUnitFromExisting, addUnitPred,
   createWs,
   createGroup,
   deleteFirstUser, deleteGroup,
-  grantRemovePrivilege, importExercise
+  grantRemovePrivilege, importExercise, deleteUnit, moveUnit
 } from '../../support/util/util';
 
 import { adminData } from '../../support/config/userdata';
@@ -36,10 +36,6 @@ describe('UI check: workspace', () => {
 
   it('should be add button present and can a exercise from existing exercises', () => {
     cy.visitWs('Unit_UI_WS');
-    cy.get('[data-cy="workspace-add-units"]')
-      .click();
-    cy.get('button > span:contains("Neu von vorhandener Aufgabe")')
-      .click();
     addUnitFromExisting('Unit_UI_BG: Unit_UI_WS', 'AUF_D1', 'Name Auf 1', 'Gruppe D', 'Neu_AUF_D1', 'New Name Auf 1', 'Group D');
   });
 
@@ -50,30 +46,13 @@ describe('UI check: workspace', () => {
 
   it('should be able to delete Unit', () => {
     cy.visitWs('Unit_UI_WS');
-    cy.get('mat-icon:contains("delete")')
-      .click();
-    cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
-      .should('exist')
-      .click()
-      .type('AUF_D1');
-    cy.get('mat-cell:contains("AUF_D1 - Name Auf 1")').prev().click();
-    clickButtonToAccept('Löschen');
+    deleteUnit('AUF_D1', 'Name Auf 1');
   });
 
   it('should be able to assign group to the units', () => {
-    createWs('API_WS2', 'Unit_UI_BG');
-    grantRemovePrivilege(adminData.user_name, 'API_WS2', 'write');
-    cy.visit('/');
-    cy.visitWs('Unit_UI_WS');
-    cy.get('mat-icon:contains("menu")')
-      .click();
-    cy.get('span:contains("Verschieben")')
-      .click();
-    cy.get('mat-select')
-      .click();
-    cy.get('mat-option:contains("API_WS2")').click();
-    cy.get('mat-cell:contains("AUF_E1 - Name Auf 2")').prev().click();
-    cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Verschieben")').click();
+    createWs('UI_WS2', 'Unit_UI_BG');
+    grantRemovePrivilege(adminData.user_name, 'UI_WS2', 'write');
+    moveUnit('Unit_UI_WS', 'UI_WS2', 'AUF_E1', 'Name Auf 2');
   });
 
   it('delete the context ', () => {

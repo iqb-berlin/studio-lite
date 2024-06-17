@@ -192,7 +192,21 @@ export function updatePersonalData():void {
 //   cy.get(`a:contains("${ws}")`).click();
 // }
 
-export function deleteUnit(kurzname: string):void {
+/*
+ABOUT UNIT
+*/
+export function deleteUnit(kurzname: string, name: string):void {
+  cy.get('mat-icon:contains("delete")')
+    .click();
+  cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
+    .should('exist')
+    .click()
+    .type(kurzname);
+  cy.get(`mat-cell:contains("${kurzname} - ${name}")`).prev().click();
+  cy.buttonToContinue('Löschen', 200, '/api/workspace/*/*', 'DELETE', 'deleteUnit');
+}
+
+export function deleteUnit2(kurzname: string):void {
   cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
   cy.get('mat-icon:contains("delete")').eq(0)
     .click();
@@ -210,7 +224,7 @@ export function addUnit(kurzname: string):void {
     .type(kurzname);
   // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
   // cy.wait(100);
-  cy.buttonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
+  cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
 }
 
 export function addUnitPred(shortname:string, name:string, group: string):void {
@@ -258,13 +272,16 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
 export function addUnitFromExisting(ws:string, shortname:string, name:string, group: string,
   newshortname:string, newname:string, newgroup: string):void {
   // select the group and the ws
+  cy.get('[data-cy="workspace-add-units"]')
+    .click();
+  cy.get('button > span:contains("Neu von vorhandener Aufgabe")')
+    .click();
   cy.get('mat-select')
     .click();
-
   cy.get(`mat-option:contains("${ws}")`).click();
   // const search_text = `${shortname}: ${name}`;
   cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
-  clickButtonToAccept('Fortsetzen');
+  cy.clickButton('Fortsetzen');
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .clear()
@@ -281,7 +298,6 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
     } else {
       cy.get('svg')
         .click();
-      cy.wait(100);
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
           cy.get(`mat-option:contains("${group}")`)
@@ -297,10 +313,24 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
       });
     }
   });
-  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-  cy.wait(100);
+  cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'createUnitFromExisting');
+  // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  // cy.wait(100);
 }
 
+export function moveUnit(wsorigin:string, wsdestination:string, shortname:string, name:string):void {
+  cy.visit('/');
+  cy.visitWs(wsorigin);
+  cy.get('mat-icon:contains("menu")')
+    .click();
+  cy.get('span:contains("Verschieben")')
+    .click();
+  cy.get('mat-select')
+    .click();
+  cy.get(`mat-option:contains("${wsdestination}")`).click();
+  cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
+  cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/*/moveto/*', 'PATCH', 'createUnitFromExisting');
+}
 export function importExercise(): void {
   cy.get('[data-cy="workspace-add-units"]')
     .click();
