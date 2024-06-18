@@ -76,8 +76,8 @@ dev-volumes-prune:
 ## Remove all unused data volumes
 # Be very careful, all data could be lost!!!
 dev-volumes-clean:
-	if test "$(shell docker volume ls -f name=db -f name=backend -q)";\
-		then docker volume rm $(shell docker volume ls -f name=db -f name=backend -q);\
+	if test "$(shell docker volume ls -f name=studio-lite -q)";\
+		then docker volume rm $(shell docker volume ls -f name=studio-lite -q);\
 	fi
 
 ## Remove all unused (not just dangling) images!
