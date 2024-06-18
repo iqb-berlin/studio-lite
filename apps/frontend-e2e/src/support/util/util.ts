@@ -188,13 +188,6 @@ export function updatePersonalData():void {
   cy.buttonToContinue('Speichern', 200, '/api/my-data', 'PATCH', 'updateData');
 }
 
-// export function visitWs(ws: string):void {
-//   cy.get(`a:contains("${ws}")`).click();
-// }
-
-/*
-ABOUT UNIT
-*/
 export function deleteUnit(kurzname: string, name: string):void {
   cy.get('mat-icon:contains("delete")')
     .click();
@@ -222,8 +215,6 @@ export function addUnit(kurzname: string):void {
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
-  // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-  // cy.wait(100);
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
 }
 
@@ -265,8 +256,6 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
     }
   });
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
-  // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-  // cy.wait(100);
 }
 
 export function addUnitFromExisting(ws:string, shortname:string, name:string, group: string,

@@ -30,7 +30,11 @@ describe('UI check: workspace', () => {
   it('should be add button present and we can add new exercises', () => {
     cy.visitWs('Unit_UI_WS');
     addUnitPred('AUF_D1', 'Name Auf 1', 'Gruppe D');
+    cy.visit('/');
+    cy.visitWs('Unit_UI_WS');
     addUnitPred('AUF_E1', 'Name Auf 2', 'Gruppe E');
+    cy.visit('/');
+    cy.visitWs('Unit_UI_WS');
     addUnitPred('AUF_D2', 'Name Auf 2', 'Gruppe D');
   });
 

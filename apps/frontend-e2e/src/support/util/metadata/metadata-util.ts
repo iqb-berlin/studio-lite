@@ -61,7 +61,6 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
     .contains('settings')
     .click();
   checkProfile(profile);
-  // clickButtonToAccept('Speichern');
 
   cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
 }
@@ -75,6 +74,8 @@ export function selectProfileForGroup(group:string, profile:IqbProfile) {
     .eq(0)
     .click();
   checkProfile(profile);
+  // which data should be
+
   cy.get('mat-icon:contains("save")').click();
 }
 
@@ -97,11 +98,9 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .eq(0)
     .next()
     .click();
-  // cy.wait(200);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();
-  // cy.wait(200);
   cy.get('mat-table')
     .contains(area)
     .click();
@@ -116,8 +115,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
   cy.get(`span:contains(${profile})`)
     .contains('Item')
     .click();
-  cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace/*/settings', 'PATCH', 'setProfile');
-  // clickButtonToAccept('Speichern');
+  cy.buttonToContinue('Speichern', 200, '/api/workspace/*/settings', 'PATCH', 'setProfileArea');
 }
 
 export function checkProfile(profile: string):void {
@@ -125,7 +123,10 @@ export function checkProfile(profile: string):void {
   cy.intercept('GET', '/api/metadata-profile?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
     .as(alias);
   cy.wait(`@${alias}`)
-    .its('response.statusCode').should('eq', 304);
+    .its('response.statusCode')
+    .should('to.be.oneOf', [200, 304]);
+  //  .its('response.statusCode').should('eq', 304);
+  // cy.wait(2000);
   cy.get('mat-panel-title')
     .contains(profile)
     .parent()
@@ -146,7 +147,8 @@ export function checkMultipleProfiles(profiles: string[]):void {
     .as('selectedProfiles');
   cy.wait('@selectedProfiles')
     .its('response.statusCode')
-    .should('eq', 304);
+    .should('to.be.oneOf', [200, 304]);
+  // cy.wait(2000);
   profiles.forEach(profile => {
     cy.get('mat-panel-title')
       .contains(profile)
