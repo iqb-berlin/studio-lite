@@ -17,7 +17,7 @@ FROM ${REGISTRY_PATH}nginx:stable AS base
 ARG PROJECT
 
 COPY config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
-COPY --from=studio-lite-base /studio-lite/dist/apps/${PROJECT} /usr/share/nginx/html
+COPY --from=studio-lite-base /usr/src/studio-lite-base/dist/apps/${PROJECT} /usr/share/nginx/html
 
 EXPOSE 80
 
