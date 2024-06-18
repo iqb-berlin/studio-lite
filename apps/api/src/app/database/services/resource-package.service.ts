@@ -36,7 +36,7 @@ export class ResourcePackageService {
   }
 
   async removeResourcePackage(id: number): Promise<void> {
-    this.logger.log(`Deleting resource package with id ${id}.`);
+    this.logger.log(`Deleting sss resource package with id ${id}.`);
     const resourcePackage = await this.resourcePackageRepository
       .findOne({
         where: { id: id }
@@ -53,7 +53,7 @@ export class ResourcePackageService {
   }
 
   async create(zippedResourcePackage: Express.Multer.File): Promise<number> {
-    this.logger.log('Creating resource package.');
+    this.logger.log('Creating resource package');
     const zip = new AdmZip(zippedResourcePackage.buffer);
     const packageNameArray = zippedResourcePackage.originalname.split('.itcr.zip');
     if (packageNameArray.length === 2) {
@@ -67,30 +67,36 @@ export class ResourcePackageService {
           .map(entry => entry.entryName);
         const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
         return zipExtractAllToAsync(`${this.resourcePackagesPath}/${packageName}`, true, true)
-          .then(async () => {
-            const newResourcePackage = this.resourcePackageRepository.create({
-              name: packageName,
-              elements: packageFiles,
-              createdAt: new Date()
-            });
-            await this.resourcePackageRepository.save(newResourcePackage);
-            fs.writeFileSync(
-              `${this.resourcePackagesPath}/${packageName}/${zippedResourcePackage.originalname}`,
-              zippedResourcePackage.buffer
-            );
-            return newResourcePackage.id;
-          })
-          .catch(error => {
-            throw new Error(error.message);
-          });
+          .then(() => {
+            this.storeZippedResourcePackage(packageName, zippedResourcePackage);
+            return this.saveResourcePackage(packageName, packageFiles);
+          },
+          () => { throw new Error(`Creating resource package with name ${packageName} failed`); });
       }
       throw new Error('Package is already installed');
     }
     throw new Error('No Resource Package');
   }
 
+  private async saveResourcePackage(packageName: string, packageFiles: string[]): Promise<number> {
+    const newResourcePackage = this.resourcePackageRepository.create({
+      name: packageName,
+      elements: packageFiles,
+      createdAt: new Date()
+    });
+    await this.resourcePackageRepository.save(newResourcePackage);
+    return newResourcePackage.id;
+  }
+
+  private storeZippedResourcePackage(packageName: string, zippedResourcePackage: Express.Multer.File): void {
+    fs.writeFileSync(
+      `${this.resourcePackagesPath}/${packageName}/${zippedResourcePackage.originalname}`,
+      zippedResourcePackage.buffer
+    );
+  }
+
   getZippedResourcePackage(name: string): Buffer {
     this.logger.log('Returning zipped resource package.');
-    return fs.readFileSync(`${this.resourcePackagesPath}/packages/${name}/${name}.itcr.zip`);
+    return fs.readFileSync(`${this.resourcePackagesPath}/${name}/${name}.itcr.zip`);
   }
 }
