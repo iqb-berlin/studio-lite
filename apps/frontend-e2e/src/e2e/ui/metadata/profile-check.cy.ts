@@ -8,7 +8,7 @@ import {
   deleteUser
 } from '../../../support/util/util';
 import { userData } from '../../../support/config/userdata';
-import { checkProfile } from '../../../support/util/metadata/metadata-util';
+import { checkMultipleProfiles, checkProfile } from '../../../support/util/metadata/metadata-util';
 
 describe('Load metadata profile', () => {
   before(() => {
@@ -65,7 +65,7 @@ describe('Load metadata profile', () => {
 
   // rewrite TODO
   it('should be possible load more metadata profile', () => {
-    const searchProfiles:string[] = ['Englisch', 'Französisch'];
+    const searchProfiles:string[] = ['Englisch', 'Mathematik'];
     cy.get('[data-cy="goto-admin"]').click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
@@ -76,9 +76,9 @@ describe('Load metadata profile', () => {
     cy.get('mat-icon')
       .contains('settings')
       .click();
-    searchProfiles.forEach(searchProfile => {
-      checkProfile(searchProfile);
-    });
+    // searchProfiles.forEach(searchProfile => {
+    checkMultipleProfiles(searchProfiles);
+    // });
     cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   });
 

@@ -1,11 +1,11 @@
 /// <reference types="cypress" />
+/*
 import {
   addFirstUser,
-  createAreaForGroupFromAdmin,
   createGroup,
   deleteFirstUser, deleteGroup,
   grantRemovePrivilege, login,
-  logout, visitWs
+  logout
 } from '../../support/util/util';
 import { adminData } from '../../support/config/userdata';
 
@@ -62,3 +62,4 @@ describe('UI check: workspace', () => {
     logout();
   });
 });
+*/

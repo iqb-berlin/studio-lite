@@ -141,6 +141,29 @@ export function checkProfile(profile: string):void {
     .click();
 }
 
+export function checkMultipleProfiles(profiles: string[]):void {
+  cy.intercept('GET', '/api/metadata-profile?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
+    .as('selectedProfiles');
+  cy.wait('@selectedProfiles')
+    .its('response.statusCode')
+    .should('eq', 304);
+  profiles.forEach(profile => {
+    cy.get('mat-panel-title')
+      .contains(profile)
+      .parent()
+      .next()
+      .click();
+    cy.get('label:contains("Aufgabe")')
+      .contains(profile)
+      .prev()
+      .click();
+    cy.get('label:contains("Item")')
+      .contains(profile)
+      .prev()
+      .click();
+  });
+}
+
 export function getStructure(profile: string, moreThanOne: boolean): void {
   cy.request({
     method: 'GET',

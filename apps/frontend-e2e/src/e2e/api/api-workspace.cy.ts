@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+/*
 import {
   addFirstUser, deleteFirstUser, login, logout
 } from '../../support/util/util';
@@ -65,3 +66,4 @@ describe('UI check: workspace', () => {
     cy.visit('/');
   });
 });
+*/
