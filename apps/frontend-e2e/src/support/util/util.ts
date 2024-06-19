@@ -1,8 +1,6 @@
-import { adminData } from '../config/userdata';
-
 export function addFirstUser() {
   cy.visit('/');
-  cy.login(adminData.user_name, adminData.user_pass);
+  cy.login(Cypress.env('username'), Cypress.env('password'));
   cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
 }
 
@@ -31,7 +29,7 @@ export function createNewUser(name: string, pass: string):void {
 
 export function deleteUser(user: string):void {
   cy.get('[data-cy="goto-admin"]').click();
-  cy.get('mat-table')
+  cy.get('mat-cell')
     .contains(`${user}`)
     .should('exist')
     .click();
@@ -94,7 +92,7 @@ export function grantRemovePrivilege(user:string, ws: string, rights:string):voi
 
 export function deleteFirstUser() {
   cy.visit('/');
-  deleteUser(adminData.user_name);
+  deleteUser(Cypress.env('username'));
   cy.visit('/');
   logout();
 }
@@ -303,8 +301,6 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
     }
   });
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'createUnitFromExisting');
-  // cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
-  // cy.wait(100);
 }
 
 export function moveUnit(wsorigin:string, wsdestination:string, shortname:string, name:string):void {
@@ -330,32 +326,4 @@ export function importExercise(): void {
     });
   cy.contains('M6_AK0011')
     .should('exist');
-}
-
-export function clickArbitraryPoint() {
-  cy.document().then((doc: Document) => {
-    const event = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: 800, // X-coordinate where you want to click
-      clientY: 400 // Y-coordinate where you want to click
-    });
-    doc.dispatchEvent(event);
-  });
-}
-export function visitLoginPage():void {
-  cy.visit(<string>Cypress.config().baseUrl);
-}
-
-export function clickButtonToAccept(text: string):void {
-  // Combining waits
-  cy.get('button')
-    .contains(text)
-    .should('exist')
-    .click();
-  cy.wait(400);
-  cy.get('button')
-    .contains(text)
-    .should('not.exist');
 }

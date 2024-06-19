@@ -19,6 +19,8 @@ declare namespace Cypress {
     loadModule(filename: string, name: string):void;
     selectModule(name: string):void;
     visitWs(ws:string):void;
+    loginAPI(username: string, password:string):void;
+
   }
 }
 // -- This is a parent command --
@@ -31,6 +33,21 @@ Cypress.Commands.add('login', (username:string, password:string) => {
     .should('exist')
     .clear()
     .type(password);
+});
+
+// TO DO: find the methods that work
+Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
+  cy.request('POST', '/api/init-login', {
+    username,
+    password
+  }).its('body.token').then(token => {
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        win.sessionStorage.setItem('token', token);
+        console.log(token);
+      }
+    });
+  });
 });
 
 Cypress.Commands.add('clickButton', (text: string) => {

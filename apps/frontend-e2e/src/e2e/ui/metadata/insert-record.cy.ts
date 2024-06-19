@@ -6,7 +6,6 @@ import {
   createGroup, deleteFirstUser, deleteGroup, deleteUnit2,
   grantRemovePrivilege
 } from '../../../support/util/util';
-import { adminData } from '../../../support/config/userdata';
 import {
   getItem,
   getStructure, selectProfileForArea,
@@ -34,11 +33,11 @@ describe('Metadata Management', () => {
     createGroup(group);
     cy.visit('/');
     createWs(area, group);
-    grantRemovePrivilege(adminData.user_name, area, 'write');
+    grantRemovePrivilege(Cypress.env('username'), area, 'write');
 
     cy.visit('/');
     createWs(mathArea, group);
-    grantRemovePrivilege(adminData.user_name, mathArea, 'write');
+    grantRemovePrivilege(Cypress.env('username'), mathArea, 'write');
   });
 
   it('choose profiles from the group ', () => {

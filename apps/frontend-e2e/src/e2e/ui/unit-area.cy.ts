@@ -7,8 +7,6 @@ import {
   grantRemovePrivilege, importExercise, deleteUnit, moveUnit
 } from '../../support/util/util';
 
-import { adminData } from '../../support/config/userdata';
-
 describe('UI check: workspace', () => {
   before(() => {
     addFirstUser();
@@ -24,7 +22,7 @@ describe('UI check: workspace', () => {
     createGroup('Unit_UI_BG');
     cy.visit('/');
     createWs('Unit_UI_WS', 'Unit_UI_BG');
-    grantRemovePrivilege(adminData.user_name, 'Unit_UI_WS', 'write');
+    grantRemovePrivilege(Cypress.env('username'), 'Unit_UI_WS', 'write');
   });
 
   it('should be add button present and we can add new exercises', () => {
@@ -40,6 +38,7 @@ describe('UI check: workspace', () => {
 
   it('should be add button present and can a exercise from existing exercises', () => {
     cy.visitWs('Unit_UI_WS');
+    // eslint-disable-next-line max-len
     addUnitFromExisting('Unit_UI_BG: Unit_UI_WS', 'AUF_D1', 'Name Auf 1', 'Gruppe D', 'Neu_AUF_D1', 'New Name Auf 1', 'Group D');
   });
 
@@ -55,7 +54,7 @@ describe('UI check: workspace', () => {
 
   it('should be able to assign group to the units', () => {
     createWs('UI_WS2', 'Unit_UI_BG');
-    grantRemovePrivilege(adminData.user_name, 'UI_WS2', 'write');
+    grantRemovePrivilege(Cypress.env('username'), 'UI_WS2', 'write');
     moveUnit('Unit_UI_WS', 'UI_WS2', 'AUF_E1', 'Name Auf 2');
   });
 

@@ -7,7 +7,6 @@ import {
   deleteGroup,
   deleteUser
 } from '../../../support/util/util';
-import { userData } from '../../../support/config/userdata';
 import { checkMultipleProfiles, checkProfile } from '../../../support/util/metadata/metadata-util';
 
 describe('Load metadata profile', () => {
@@ -22,7 +21,7 @@ describe('Load metadata profile', () => {
   });
 
   it('user admin prepare the Context', () => {
-    createNewUser(userData.user_name, userData.user_pass);
+    createNewUser('normaluser', '5678');
     cy.visit('/');
     const areaGroups = ['Mathematik Primär und Sek I',
       'Deutsch Primär und Sek I',
@@ -63,7 +62,6 @@ describe('Load metadata profile', () => {
     checkProfile(searchProfile);
   });
 
-  // rewrite TODO
   it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Mathematik'];
     cy.get('[data-cy="goto-admin"]').click();
@@ -76,14 +74,12 @@ describe('Load metadata profile', () => {
     cy.get('mat-icon')
       .contains('settings')
       .click();
-    // searchProfiles.forEach(searchProfile => {
     checkMultipleProfiles(searchProfiles);
-    // });
     cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   });
 
   it('remove the Context', () => {
-    deleteUser(userData.user_name);
+    deleteUser('normaluser');
     cy.visit('/');
     const areaGroups = ['Mathematik Primär und Sek I',
       'Deutsch Primär und Sek I',

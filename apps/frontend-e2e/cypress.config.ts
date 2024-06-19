@@ -12,6 +12,10 @@ const cypressJsonConfig = {
   supportFile: 'src/support/e2e.ts'
 };
 export default defineConfig({
+  env: {
+    username: 'admin',
+    password: '1234'
+  },
   e2e: {
     ...nxE2EPreset(__dirname),
     ...cypressJsonConfig,

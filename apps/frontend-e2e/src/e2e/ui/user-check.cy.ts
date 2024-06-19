@@ -9,7 +9,6 @@ import {
   login,
   logout
 } from '../../support/util/util';
-import { adminData, userData } from '../../support/config/userdata';
 
 describe('UI User Management', () => {
   before(() => {
@@ -23,13 +22,13 @@ describe('UI User Management', () => {
   });
 
   it('prepare the Context', () => {
-    createNewUser(userData.user_name, userData.user_pass);
+    createNewUser('normaluser', '5678');
     cy.visit('/');
     logout();
   });
 
   it('should be possible login with credentials', () => {
-    login(userData.user_name, userData.user_pass);
+    login('normaluser', '5678');
   });
 
   it('should not be able to find admin user setting button', () => {
@@ -42,11 +41,11 @@ describe('UI User Management', () => {
   });
 
   it('should be possible change the password', () => {
-    changePassword('newpass', userData.user_pass);
+    changePassword('newpass', '5678');
     cy.visit('/');
     logout();
-    login(userData.user_name, 'newpass');
-    changePassword(userData.user_pass, 'newpass');
+    login('normaluser', 'newpass');
+    changePassword('5678', 'newpass');
   });
 
   it('should be able to logout', () => {
@@ -54,42 +53,13 @@ describe('UI User Management', () => {
   });
 
   it('should not be able to login with incorrect credentials', () => {
-    cy.login(userData.user_name, 'nopass');
+    cy.login('normaluser', 'nopass');
     cy.buttonToContinue('Weiter', 401, '/api/login', 'POST', 'loginFail');
   });
-  // it('should everyone in the gruppe be able to administrate the Bereichsgruppe were?', () => {
-  //
-  // });
-  // it('should be able to grant other people to ', () => {
-  //
-  // });
-  // it('should be able to delete see enter into a area of work', () => {
-  //
-  // });
-  // it('should someone from the same group grant and remove permissions to other users (from users)?', () => {
-  //
-  // });
-  // it('should someone from a group able to grant permissions person that not belong to the gruppe (from users)?', () => {
-  //
-  // });
-  // it('should someone from the same group grant and remove permissions to other users (from area of work)?', () => {
-  //
-  // });
-  // it('should someone from a group able to grant permissions person ' +
-  //   'that not belong to the gruppe (from area of work)?', () => {
-  //
-  // });
-  // it('See fall 4 ');
-  //
-  // it('should be able to add neu Status', () => {
-  //
-  // });
-  // it('should be delete to add neu Status', () => {
-  //
-  // });
 
   it('delete the user', () => {
-    login(adminData.user_name, adminData.user_pass);
-    deleteUser(userData.user_name);
+    // TODO test with a username as user: check mat-cell
+    login(Cypress.env('username'), Cypress.env('password'));
+    deleteUser('normaluser');
   });
 });

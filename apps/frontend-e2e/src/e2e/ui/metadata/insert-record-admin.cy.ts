@@ -5,39 +5,33 @@ import {
   createGroup, deleteFirstUser, deleteGroup,
   grantRemovePrivilege
 } from '../../../support/util/util';
-import { adminData } from '../../../support/config/userdata';
 import {
   selectProfileForGroupFromAdmin
 } from '../../../support/util/metadata/metadata-util';
 import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
 
-/* This test is written to probe that we can set the metadata profile
-* from administration, and we can add choose the profile from the group.
-* They are alternative tests to "choose profiles from the group" and
-* "choose a profil for an area from a group" from insert-record.cy.ts */
-
 describe('UI Metadata Management from administration', () => {
   const area = 'Deutsch II';
   const mathArea = 'Mathematik II';
   const group = 'Bista II';
-
+  beforeEach(() => {
+    cy.visit('/');
+  });
   before(() => {
     addFirstUser();
   });
   after(() => {
     deleteFirstUser();
   });
-  beforeEach(() => {
-    cy.visit('/');
-  });
-  it('prepare context', () => {
+
+  it('UI prepare context', () => {
     createGroup(group);
     cy.visit('/');
     createWs(area, group);
-    grantRemovePrivilege(adminData.user_name, area, 'write');
+    grantRemovePrivilege(Cypress.env('username'), area, 'write');
     cy.visit('/');
     createWs(mathArea, group);
-    grantRemovePrivilege(adminData.user_name, mathArea, 'write');
+    grantRemovePrivilege(Cypress.env('username'), mathArea, 'write');
   });
   it('choose profiles for a Group from the administration settings ', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);
