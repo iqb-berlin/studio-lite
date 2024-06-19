@@ -1,6 +1,10 @@
 # syntax=docker/dockerfile:1
 
 ARG REGISTRY_PATH
+ARG BASE_IMAGE_NAME=studio-lite-base
+
+
+FROM $BASE_IMAGE_NAME AS base
 
 
 FROM ${REGISTRY_PATH}cypress/browsers:node-20.13.0-chrome-124.0.6367.155-1-ff-125.0.3-edge-124.0.2478.80-1
@@ -11,7 +15,7 @@ WORKDIR /usr/src/studio-lite
 COPY . .
 
 # Copy pre-installed dependencies
-COPY --from=studio-lite-base /usr/src/studio-lite-base/node_modules ./node_modules
+COPY --from=base /usr/src/studio-lite-base/node_modules ./node_modules
 
 # Check nx workspace version
 RUN npx nx --version

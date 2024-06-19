@@ -1,19 +1,23 @@
 # syntax=docker/dockerfile:1
 
 ARG REGISTRY_PATH
+ARG BASE_IMAGE_NAME=studio-lite-base
 
 
-FROM studio-lite-base AS dev
+FROM $BASE_IMAGE_NAME AS base
+
+
+FROM base AS dev
 ENTRYPOINT ["npx", "nx"]
 
 
-FROM ${REGISTRY_PATH}node:20.13-bookworm-slim AS base
+FROM ${REGISTRY_PATH}node:20.13-bookworm-slim AS build
 ARG PROJECT
 ENV NODE_ENV=production
 
 RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && \
-    apt-get install -y --no-install-recommends tini
+    apt update && \
+    apt install -y --no-install-recommends tini
 
 USER node
 
@@ -21,7 +25,7 @@ WORKDIR /usr/src/studio-lite-${PROJECT}
 RUN mkdir packages
 
 # Install dependencies
-COPY --chown=node:node --from=studio-lite-base /usr/src/studio-lite-base/dist/apps/${PROJECT}/package.json .
+COPY --chown=node:node --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT}/package.json .
 RUN --mount=type=cache,target=~/.npm \
     npm install --omit=dev --no-fund
 
@@ -32,11 +36,11 @@ RUN --mount=type=cache,target=~/.npm \
 EXPOSE 3333
 
 
-FROM base AS source
+FROM build AS source
 ARG PROJECT
 
 # Copy the build artifacts from the previous stage
-COPY --chown=node:node --from=studio-lite-base /usr/src/studio-lite-base/dist/apps/${PROJECT} .
+COPY --chown=node:node --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT} .
 
 
 FROM source AS prod

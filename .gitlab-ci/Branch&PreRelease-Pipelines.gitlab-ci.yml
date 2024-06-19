@@ -232,6 +232,7 @@ build-cicd-base-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BASE_IMAGE=${BASE_IMAGE}
           --build-arg BUILDKIT_INLINE_CACHE=1
@@ -262,6 +263,7 @@ build-e2e-base-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BASE_IMAGE=${CYPRESS_IMAGE}
           --build-arg BUILDKIT_INLINE_CACHE=1
@@ -309,6 +311,7 @@ build-db-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${DB_IMAGE_NAME}:latest
@@ -342,6 +345,7 @@ build-liquibase-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
@@ -778,6 +782,8 @@ audit-app:
   rules:
     - !reference [ .default_base_rules, rules ]
     - !reference [ .develop_pr_base_rules, rules ]
+  needs:
+    - install-dependencies
   script:
     - npm audit --audit-level critical
 
@@ -787,6 +793,8 @@ gemnasium-dependency_scanning:
   allow_failure: true
   rules: # TODO: Overwriting of rules does not work
     - !reference [ .develop_pr_base_rules, rules ]
+  needs:
+    - install-dependencies
 
 build-develop-commit-db-image:
   stage: build-images
@@ -807,6 +815,7 @@ build-develop-commit-db-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${DB_IMAGE_NAME}:latest
@@ -838,6 +847,7 @@ build-develop-commit-liquibase-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
@@ -850,7 +860,7 @@ build-develop-commit-liquibase-image:
     - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $CI_REGISTRY
 
-build-develop-commit-backend-image:
+build-develop-commit-base-image:
   stage: build-images
   rules:
     - !reference [ .develop_commit_rules, rules ]
@@ -860,6 +870,38 @@ build-develop-commit-backend-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
+  before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build
+      --progress plain
+      --pull
+      --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+      --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+      --tag ${BASE_IMAGE_NAME}:latest
+      .
+    - docker push -q -a ${BASE_IMAGE_NAME}
+  after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
+    - docker logout $CI_REGISTRY
+
+build-develop-commit-backend-image:
+  stage: build-images
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  needs:
+    - build-develop-commit-base-image
+  image: $DOCKER_IMAGE
+  services:
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
@@ -869,9 +911,11 @@ build-develop-commit-backend-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=prod
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=api
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:latest
           -f apps/api/Dockerfile
@@ -887,12 +931,15 @@ build-develop-commit-frontend-image:
   stage: build-images
   rules:
     - !reference [ .develop_commit_rules, rules ]
+  needs:
+    - build-develop-commit-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
@@ -902,9 +949,11 @@ build-develop-commit-frontend-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=prod
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=frontend
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_IMAGE_NAME}:latest
           -f apps/frontend/Dockerfile
