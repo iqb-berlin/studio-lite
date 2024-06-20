@@ -260,7 +260,7 @@ export class UnitService {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
       });
-      const keysToIgnore = ['id', 'groupName', 'key'];
+      const keysToIgnore = ['id', 'groupName', 'key', 'definitionId', 'state'];
       const keysToCopy = Object.keys(unitToCopy)
         .filter(key => !keysToIgnore.includes(key))
         .reduce((obj, key) => {
