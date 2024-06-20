@@ -13,11 +13,11 @@ include $(STUDIO_LITE_BASE_DIR)/.env.studio-lite
 ## disables printing the recipe of a make target before executing it
 .SILENT: prod-registry-login prod-registry-logout
 
-## Log in to selected registry (see .env.dev file)
+## Log in to selected registry (see .env.studio-lite file)
 prod-registry-login:
 	if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
 
-## Log out of selected registry (see .env.dev file)
+## Log out of selected registry (see .env.studio-lite file)
 prod-registry-logout:
 	if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 

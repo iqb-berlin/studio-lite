@@ -17,13 +17,17 @@ EXPOSE 80
 ENTRYPOINT ["npx", "nx"]
 
 
-FROM ${REGISTRY_PATH}nginx:stable AS prod
+FROM ${REGISTRY_PATH}nginxinc/nginx-unprivileged:stable AS prod
 ARG PROJECT
 
-COPY config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
-COPY --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT} /usr/share/nginx/html
+USER root
+RUN chown -R nginx:root /usr/share/nginx/html
 
-EXPOSE 80
-EXPOSE 443
+USER nginx
+
+COPY --chown=nginx:root config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
+COPY --chown=nginx:root --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT} /usr/share/nginx/html
+
+EXPOSE 8080 8443
 
 CMD ["nginx", "-g", "daemon off;"]
