@@ -21,7 +21,6 @@
     "build-app": "nx run-many --target=build --all --parallel",
     "build-frontend": "nx build frontend",
     "build-backend": "nx build api",
-    "postinstall": "node ./decorate-angular-cli.js",
     "ng": "nx"
   },
   "private": true,
@@ -57,8 +56,6 @@
     "@ngx-formly/material": "^6.2.1",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
-    "@nrwl/cli": "^15.9.3",
-    "@nrwl/esbuild": "^18.0.7",
     "@nx/angular": "18.0.7",
     "@nx/webpack": "^18.0.7",
     "@tiptap/core": "^2.1.10",
