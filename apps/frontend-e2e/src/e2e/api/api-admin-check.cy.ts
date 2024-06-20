@@ -8,8 +8,10 @@ describe('API Administration Management', () => {
   // beforeEach(() => {
   //   cy.visit('/');
   // });
-  //
-  // it('logout', () => {
-  //   // cy.loginAPI(Cypress.env('username'), Cypress.env('password'));
-  // });
+  it.only('API login', () => {
+    cy.loginAPI(Cypress.env('username'), Cypress.env('password'));
+  });
+  it('API get data', () => {
+    cy.getWS_API();
+  });
 });

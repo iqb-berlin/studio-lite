@@ -45,9 +45,7 @@ describe('Load metadata profile', () => {
     cy.get('mat-icon')
       .contains('settings')
       .click();
-    cy.pause();
     checkProfile(searchProfile);
-    //  cy.pause();
     cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   });
 

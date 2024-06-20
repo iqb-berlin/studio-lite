@@ -20,7 +20,7 @@ declare namespace Cypress {
     selectModule(name: string):void;
     visitWs(ws:string):void;
     loginAPI(username: string, password:string):void;
-
+    getWS_API():void;
   }
 }
 // -- This is a parent command --
@@ -37,16 +37,41 @@ Cypress.Commands.add('login', (username:string, password:string) => {
 
 // TO DO: find the methods that work
 Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
-  cy.request('POST', '/api/init-login', {
-    username,
-    password
-  }).its('body.token').then(token => {
-    cy.visit('/', {
-      onBeforeLoad(win) {
-        win.sessionStorage.setItem('token', token);
-        console.log(token);
-      }
-    });
+  cy.request({
+    method: 'POST',
+    url: 'http://localhost:4200/api/login',
+    headers: {
+      'content-Type': 'application/json; charset=utf-8',
+      accept: 'application/json; charset=utf-8',
+      'app-version': '7.5.1'
+    },
+    body: {
+      username: username,
+      password: password
+    }
+  }).then(resp => {
+    console.log(resp);
+  });
+
+  // cy.request('POST', '/api/init-login', {
+  //   username,
+  //   password
+  // }).its('body.token').then(token => {
+  //   cy.visit('/', {
+  //     onBeforeLoad(win) {
+  //       win.sessionStorage.setItem('token', token);
+  //       console.log(token);
+  //     }
+  //   });
+  // });
+});
+
+Cypress.Commands.add('getWS_API', () => {
+  cy.request({
+    method: 'GET',
+    url: 'http://localhost:4200/api/auth-data'
+  }).its('response.body.userName').then(userName => {
+    console.log(userName);
   });
 });
 

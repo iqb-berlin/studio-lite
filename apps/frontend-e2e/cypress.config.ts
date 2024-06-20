@@ -14,7 +14,8 @@ const cypressJsonConfig = {
 export default defineConfig({
   env: {
     username: 'admin',
-    password: '1234'
+    password: '1234',
+    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwic3ViIjoxNCwic3ViMiI6MCwiaWF0IjoxNzE4ODA3OTA2LCJleHAiOjE3MTg4OTQzMDZ9.95_aEFxbNvfHH-_YzahsVBtu3hPd5Ya76dM77v0XZwU'
   },
   e2e: {
     ...nxE2EPreset(__dirname),
