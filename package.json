@@ -90,7 +90,6 @@
     "keycloak-js": "^22.0.3",
     "multer": "^1.4.5-lts.1",
     "ngx-tiptap": "^9.0.2",
-    "npm": "^10.0.0",
     "openid-client": "^5.5.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
