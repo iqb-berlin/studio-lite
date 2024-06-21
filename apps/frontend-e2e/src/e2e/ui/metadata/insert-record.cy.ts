@@ -5,14 +5,14 @@ import {
   createWs,
   createGroup, deleteFirstUser, deleteGroup, deleteUnit2,
   grantRemovePrivilege
-} from '../../../support/util/util';
+} from '../../../support/util';
 import {
   getItem,
   getStructure, selectProfileForArea,
   selectProfileForAreaFromGroup,
   selectProfileForGroup
-} from '../../../support/util/metadata/metadata-util';
-import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
+} from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
 describe('Metadata Management', () => {
   const area = 'Deutsch I';

@@ -10,7 +10,7 @@ import {
   deleteModule,
   deleteUser,
   createWs
-} from '../../support/util/util';
+} from '../../support/util';
 
 describe('UI Administration Management', () => {
   before(() => addFirstUser());

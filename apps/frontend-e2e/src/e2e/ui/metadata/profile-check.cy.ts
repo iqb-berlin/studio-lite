@@ -6,8 +6,8 @@ import {
   deleteFirstUser,
   deleteGroup,
   deleteUser
-} from '../../../support/util/util';
-import { checkMultipleProfiles, checkProfile } from '../../../support/util/metadata/metadata-util';
+} from '../../../support/util';
+import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
 
 describe('Load metadata profile', () => {
   before(() => {

@@ -5,7 +5,7 @@ import {
   createGroup,
   deleteFirstUser, deleteGroup,
   grantRemovePrivilege, importExercise, deleteUnit, moveUnit
-} from '../../support/util/util';
+} from '../../support/util';
 
 describe('UI check: workspace', () => {
   before(() => {

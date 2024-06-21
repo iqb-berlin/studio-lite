@@ -4,11 +4,11 @@ import {
   createWs,
   createGroup, deleteFirstUser, deleteGroup,
   grantRemovePrivilege
-} from '../../../support/util/util';
+} from '../../../support/util';
 import {
   selectProfileForGroupFromAdmin
-} from '../../../support/util/metadata/metadata-util';
-import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
+} from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
 describe('UI Metadata Management from administration', () => {
   const area = 'Deutsch II';

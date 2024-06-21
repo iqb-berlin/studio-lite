@@ -8,7 +8,7 @@ import {
   deleteUser,
   login,
   logout
-} from '../../support/util/util';
+} from '../../support/util';
 
 describe('UI User Management', () => {
   before(() => {
