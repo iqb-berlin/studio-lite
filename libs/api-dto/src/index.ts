@@ -22,6 +22,7 @@ export { UnitMetadataDto } from './lib/dto/unit/unit-metadata-dto';
 export { WorkspaceSettingsDto } from './lib/dto/workspace/workspace-settings-dto';
 export { CreateUnitDto } from './lib/dto/unit/create-unit-dto';
 export { UnitInListDto } from './lib/dto/unit/unit-in-list-dto';
+export { UnitByDefinitionIdDto } from './lib/dto/unit/unit-by-definition-id-dto';
 export { VeronaModuleMetadataDto } from './lib/dto/verona-module/verona-module-metadata-dto';
 export { VeronaModuleInListDto } from './lib/dto/verona-module/verona-module-in-list-dto';
 export {
@@ -54,6 +55,6 @@ export { MetadataProfileRegistryDto }
   from './lib/dto/metadata-profile-registry/metadata-profile-registry-dto';
 export { RegisteredMetadataProfileDto } from './lib/dto/registered-metadata-profile/registered-metadata-profile-dto';
 export { UserWorkspaceFullDto } from './lib/dto/workspace/user-workspace-full-dto';
-export { UserWorkspaceAccessDto } from "./lib/dto/workspace/user-workspace-access-dto";
-export { UsersWorkspaceInListDto } from "./lib/dto/workspace/users-workspace-in-list-dto";
-export { WorkspaceUserInListDto } from "./lib/dto/user/workspace-user-in-list-dto";
+export { UserWorkspaceAccessDto } from './lib/dto/workspace/user-workspace-access-dto';
+export { UsersWorkspaceInListDto } from './lib/dto/workspace/users-workspace-in-list-dto';
+export { WorkspaceUserInListDto } from './lib/dto/user/workspace-user-in-list-dto';

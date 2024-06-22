@@ -11,7 +11,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateWorkspaceGroupDto, UserInListDto, UsersWorkspaceInListDto,
+  CreateWorkspaceGroupDto, UnitByDefinitionIdDto, UserInListDto, UsersWorkspaceInListDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
@@ -22,12 +22,14 @@ import { WorkspaceService } from '../../database/services/workspace.service';
 import { WorkspaceGroupId } from '../workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
 import { UsersService } from '../../database/services/users.service';
+import { UnitService } from '../../database/services/unit.service';
 
 @Controller('admin/workspace-groups')
 export class WorkspaceGroupsController {
   constructor(
     private workspaceGroupService: WorkspaceGroupService,
     private workspaceService: WorkspaceService,
+    private unitService: UnitService,
     private userService: UsersService
   ) {}
 
@@ -38,6 +40,15 @@ export class WorkspaceGroupsController {
   @ApiTags('admin workspaces')
   async findAll(): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll();
+  }
+
+  @Get('units')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Admin Units retrieved successfully.' })
+  @ApiTags('admin workspaces')
+  async findAllUnits(): Promise<UnitByDefinitionIdDto[]> {
+    return this.unitService.findAll();
   }
 
   @Get(':workspace_group_id')

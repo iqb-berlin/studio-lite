@@ -16,7 +16,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { FormsModule, UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { CreateWorkspaceGroupDto, UserInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import {
+  CreateWorkspaceGroupDto,
+  UnitByDefinitionIdDto,
+  UserInListDto,
+  WorkspaceGroupInListDto
+} from '@studio-lite-lib/api-dto';
 import { DatePipe, NgFor, NgIf } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -35,8 +40,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';
-
-const datePipe = new DatePipe('de-DE');
 
 @Component({
   selector: 'studio-lite-workspace-groups',
@@ -281,10 +284,59 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.tableSelectionRow.toggle(row);
   }
 
-  xlsxDownloadWorkspaceReport() {
+  private static cleanUnitsData(units: UnitByDefinitionIdDto[]): UnitByDefinitionIdDto[] {
+    return units.map(unit => ({
+      definitionId: unit.definitionId,
+      key: unit.key,
+      name: unit.name,
+      groupName: unit.groupName,
+      id: unit.id,
+      workspaceName: unit.workspaceName,
+      workspaceId: unit.workspaceId,
+      lastChangedDefinition: unit.lastChangedDefinition,
+      lastChangedMetadata: unit.lastChangedMetadata,
+      lastChangedScheme: unit.lastChangedScheme
+    }));
+  }
+
+  private static toCSV(units: UnitByDefinitionIdDto[]): string {
+    const replacer = (key: string, value: unknown) => (value === null ? '' : value);
+    const header = Object.keys(units[0]);
+    return [
+      header.join(','), // header row first
+      ...units.map(row => header
+        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitByDefinitionIdDto], replacer))
+        .join(','))
+    ].join('\r\n');
+  }
+
+  private static saveFile(csv: string): void {
+    const blob = new Blob([csv], { type: 'text/plain;charset=utf-8' });
+    const datePipe = new DatePipe('de-DE');
+    const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+    saveAs(blob, `${thisDate} Units.csv`);
+  }
+
+  downloadUnits(): void {
+    this.appService.dataLoading = true;
+    try {
+      this.backendService.getUnits()
+        .subscribe(units => {
+          const items = WorkspaceGroupsComponent.cleanUnitsData(units);
+          const csv = WorkspaceGroupsComponent.toCSV(items);
+          WorkspaceGroupsComponent.saveFile(csv);
+          this.appService.dataLoading = false;
+        });
+    } catch (e) {
+      this.appService.dataLoading = false;
+    }
+  }
+
+  xlsxDownloadWorkspaceReport(): void {
     this.appService.dataLoading = true;
     try {
       this.backendService.getXlsWorkspaces().subscribe(b => {
+        const datePipe = new DatePipe('de-DE');
         const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
         saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
         this.appService.dataLoading = false;

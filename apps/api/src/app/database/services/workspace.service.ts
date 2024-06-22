@@ -89,7 +89,7 @@ export class WorkspaceService {
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
 
-        const units = await this.unitService.findAll(workspace.id);
+        const units = await this.unitService.findAllForWorkspace(workspace.id);
         this.logger.log(`Found units: ${units.length}.`);
         await Promise.all(units.map(async unit => {
           await this.unitUserService.createUnitUser(userId, unit.id);

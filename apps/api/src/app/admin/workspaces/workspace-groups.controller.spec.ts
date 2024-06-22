@@ -5,6 +5,7 @@ import { AuthService } from '../../auth/service/auth.service';
 import { WorkspaceService } from '../../database/services/workspace.service';
 import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
 import { UsersService } from '../../database/services/users.service';
+import { UnitService } from '../../database/services/unit.service';
 
 describe('WorkspaceGroupsController', () => {
   let controller: WorkspaceGroupsController;
@@ -28,6 +29,10 @@ describe('WorkspaceGroupsController', () => {
         {
           provide: UsersService,
           useValue: createMock<UsersService>()
+        },
+        {
+          provide: UnitService,
+          useValue: createMock<UnitService>()
         }
       ]
     }).compile();

@@ -28,6 +28,7 @@ export class WorkspaceGroupsMenuComponent {
   @Input() selectedRows!: WorkspaceGroupInListDto[];
   @Input() checkedRows!: WorkspaceGroupInListDto[];
   @Output() downloadWorkspacesReport: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() downloadUnits: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
   @Output() groupsDeleted: EventEmitter< WorkspaceGroupInListDto[]> = new EventEmitter< WorkspaceGroupInListDto[]>();
   @Output() groupSettingsEdited = new EventEmitter();
