@@ -4,12 +4,18 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
   MissingsProfilesDto,
-  ConfigDto, AppLogoDto,
-  CreateUserDto, CreateWorkspaceGroupDto,
+  ConfigDto,
+  AppLogoDto,
+  CreateUserDto,
+  CreateWorkspaceGroupDto,
   UserFullDto,
   UserInListDto,
-  WorkspaceGroupFullDto, WorkspaceGroupInListDto,
-  UnitExportConfigDto, WorkspaceGroupSettingsDto, WorkspaceFullDto
+  WorkspaceGroupFullDto,
+  WorkspaceGroupInListDto,
+  UnitExportConfigDto,
+  WorkspaceGroupSettingsDto,
+  WorkspaceFullDto,
+  UnitByDefinitionIdDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -263,6 +269,14 @@ export class BackendService {
         responseType: 'blob'
       }
     );
+  }
+
+  getUnits(): Observable<UnitByDefinitionIdDto[]> {
+    return this.http
+      .get<UnitByDefinitionIdDto[]>(`${this.serverUrl}admin/workspace-groups/units`)
+      .pipe(
+        catchError(() => of([]))
+      );
   }
 
   getXlsWorkspaces(): Observable<Blob> {

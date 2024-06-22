@@ -220,7 +220,8 @@
     "groups-deleted": "Arbeitsbereichsgruppe(n) gelöscht",
     "groups-not-deleted": "Arbeitsbereichsgruppe(n) konnten nicht gelöscht werden",
     "groups-title": "Admin: Arbeitsbereichsgruppen",
-    "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen"
+    "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen",
+    "download-units": "Aufgabenliste als CSV-Datei herunterladen"
   },
   "metadata": {
     "metadata": "Metadaten",

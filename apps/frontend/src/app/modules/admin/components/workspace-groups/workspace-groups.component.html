@@ -1,13 +1,15 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="object-list fx-column-start-stretch fx-flex-row-50">
 
-    <studio-lite-workspace-groups-menu [selectedWorkspaceGroupId]="selectedWorkspaceGroupId"
+    <studio-lite-workspace-groups-menu
+      [selectedWorkspaceGroupId]="selectedWorkspaceGroupId"
       [selectedRows]="tableSelectionRow.selected"
       [checkedRows]="tableSelectionCheckboxes.selected"
       (groupAdded)="addGroup($event)"
       (groupEdited)="editGroup($event)"
       (groupSettingsEdited)="editGroupSettings($event)"
       (groupsDeleted)="deleteGroups($event)"
+      (downloadUnits)="downloadUnits()"
       (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-groups-menu>
 
@@ -17,8 +19,6 @@
         (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
       </studio-lite-search-filter>
     }
-
-
     <mat-table [dataSource]="objectsDatasource"
       matSort
       matSortDisableClear

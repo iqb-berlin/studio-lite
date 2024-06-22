@@ -438,7 +438,7 @@ export class UsersService {
           hasWriteAccess: user.hasWriteAccess
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
-        const units = await this.unitService.findAll(workspaceId);
+        const units = await this.unitService.findAllForWorkspace(workspaceId);
 
         await Promise.all(units.map(async unit => {
           this.unitUserService.findByUnitId(unit.id).then(async unitUsers => {
