@@ -38,8 +38,8 @@ dev-db-down:
 ## Remove all unused db volumes
 # Be very careful, all data could be lost!!!
 dev-db-volumes-clean:
-	if test "$(shell docker volume ls -f name=db -q)";\
-		then docker volume rm $(shell docker volume ls -f name=db -q);\
+	if test "$(shell docker volume ls -f name=studio-lite_db_vol -q)";\
+		then docker volume rm $(shell docker volume ls -f name=studio-lite_db_vol -q);\
 	fi
 
 ## Remove all unused (not just dangling) db and liquibase images!

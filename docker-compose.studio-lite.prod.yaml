@@ -18,7 +18,7 @@ services:
       - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
     volumes:
-      - backend_vol:/studio-lite-api/packages
+      - backend_vol:/usr/src/studio-lite-api/packages
     restart: always
 
   frontend:
