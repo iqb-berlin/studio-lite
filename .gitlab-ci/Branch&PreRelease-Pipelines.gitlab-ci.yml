@@ -793,8 +793,6 @@ gemnasium-dependency_scanning:
   allow_failure: true
   rules: # TODO: Overwriting of rules does not work
     - !reference [ .develop_pr_base_rules, rules ]
-  needs:
-    - install-dependencies
 
 build-develop-commit-db-image:
   stage: build-images
