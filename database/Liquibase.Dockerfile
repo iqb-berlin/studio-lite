@@ -3,7 +3,7 @@
 ARG REGISTRY_PATH
 
 
-FROM ${REGISTRY_PATH}liquibase/liquibase:4.27 AS base
+FROM ${REGISTRY_PATH}liquibase/liquibase:4.28 AS base
 
 FROM base AS prod
 
