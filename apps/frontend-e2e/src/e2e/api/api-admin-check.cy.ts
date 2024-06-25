@@ -1,9 +1,12 @@
 /// <reference types="cypress" />
 
-// import { addFirstUser, deleteFirstUser } from '../../support/util/util';
-
 import {
-  addFirstUserAPI, createNewUserAPI, deleteFirstUserAPI, deleteUserAPI, getAdminUserAPI
+  addFirstUserAPI,
+  createGroupAPI,
+  createNewUserAPI,
+  createWsAPI,
+  deleteFirstUserAPI, deleteGroupAPI,
+  deleteUserAPI
 } from '../../support/utilAPI';
 
 describe('API Administration Management', () => {
@@ -12,21 +15,35 @@ describe('API Administration Management', () => {
   // beforeEach(() => {
   //   cy.visit('/');
   // });
-  it('API admin login', () => {
+  it('API Add first user', () => {
     addFirstUserAPI();
-  });
-  it('API admin login test', () => {
-    getAdminUserAPI();
   });
   it('API user with admin credentials can add new user', () => {
     createNewUserAPI('newuser', 'newpass');
   });
-  // TO DO
-  it.skip('API user with admin credentials can delete a user', () => {
+  it('API delete a user that is not the active admin', () => {
     deleteUserAPI('newuser');
+  });
+  it('API create a group', () => {
+    createGroupAPI('Mathematik Primär Bereichsgruppe');
+  });
+  it('API create a ws for a group', () => {
+    createWsAPI(Cypress.env('groupID'), 'ws');
+  });
+  it('API delete with admin credentials can delete groups', () => {
+    deleteGroupAPI(Cypress.env('groupID'));
     cy.pause();
   });
-  it('API get data', () => {
+
+  it.skip('API user with admin credentials can Modules upload', () => {
+    // addModuleAPI();
+  });
+
+  it.skip('API user with admin credentials delete Modules', () => {
+    // deleteModuleAPI();
+  });
+
+  it('API delete first User', () => {
     deleteFirstUserAPI();
   });
 });
