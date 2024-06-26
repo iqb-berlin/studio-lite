@@ -18,7 +18,7 @@ services:
       - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
     volumes:
-      - backend_vol:/studio-lite-api/packages
+      - backend_vol:/usr/src/studio-lite-api/packages
     restart: always
 
   frontend:
@@ -29,7 +29,7 @@ services:
       - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
       - "traefik.http.routers.frontend.middlewares=security-headers"
       - "traefik.http.routers.frontend.service=frontend"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
       - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     volumes:

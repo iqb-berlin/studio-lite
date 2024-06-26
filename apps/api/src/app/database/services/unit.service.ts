@@ -5,6 +5,7 @@ import {
   CreateUnitDto,
   RequestReportDto,
   UnitDefinitionDto,
+  UnitByDefinitionIdDto,
   UnitInListDto,
   UnitMetadataDto,
   UnitSchemeDto
@@ -33,9 +34,39 @@ export class UnitService {
     private unitCommentService: UnitCommentService
   ) {}
 
-  async findAll(workspaceId: number,
-                userId:number = null,
-                withLastSeenCommentTimeStamp:boolean = null): Promise<UnitInListDto[]> {
+  async findAll(): Promise<UnitByDefinitionIdDto[]> {
+    this.logger.log('Retrieving units for workspaceId');
+    const units = await this.unitsRepository.find({
+      order: { definitionId: 'ASC' },
+      select: {
+        definitionId: true,
+        key: true,
+        name: true,
+        groupName: true,
+        id: true,
+        workspaceId: true,
+        lastChangedDefinition: true,
+        lastChangedMetadata: true,
+        lastChangedScheme: true,
+        metadata: false,
+        variables: false
+      }
+    });
+    const workspaces = await this.workspaceRepository.find();
+    const newUnits = units.map(unit => unit as UnitByDefinitionIdDto);
+    return Promise.all(newUnits.map(async unit => {
+      const workspace = workspaces
+        .find(w => w.id === unit.workspaceId);
+      if (workspace) {
+        unit.workspaceName = workspace.name;
+      }
+      return unit;
+    }));
+  }
+
+  async findAllForWorkspace(workspaceId: number,
+                            userId:number = null,
+                            withLastSeenCommentTimeStamp:boolean = null): Promise<UnitInListDto[]> {
     this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
@@ -69,12 +100,11 @@ export class UnitService {
       select: ['id']
     });
     if (existingUnitId) return 0;
-    const newUnit = await this.unitsRepository.create(unit);
+    const newUnit = this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     newUnit.groupName = unit.groupName;
     await this.unitsRepository.save(newUnit);
 
-    // todo: notwendig? Kann doch erst beim ersten Anschauen der Unitkommentare angelegt werden.
     const workspaceUsers = await this.workspaceUserRepository
       .find({ where: { workspaceId: workspaceId } });
     await Promise.all(workspaceUsers.map(async workspaceUser => {
@@ -186,44 +216,45 @@ export class UnitService {
   }
 
   async patchMetadata(unitId: number, newData: UnitMetadataDto): Promise<void> {
-    const unitToUpdate = await this.unitsRepository.findOne({ where: { id: unitId } });
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const dataKeys = Object.keys(newData);
-    if (dataKeys.indexOf('key') >= 0) unitToUpdate.key = newData.key;
-    if (dataKeys.indexOf('name') >= 0) unitToUpdate.name = newData.name;
-    if (dataKeys.indexOf('description') >= 0) unitToUpdate.description = newData.description;
-    if (dataKeys.indexOf('transcript') >= 0) unitToUpdate.transcript = newData.transcript;
-    if (dataKeys.indexOf('reference') >= 0) unitToUpdate.reference = newData.reference;
-    if (dataKeys.indexOf('editor') >= 0) unitToUpdate.editor = newData.editor;
-    if (dataKeys.indexOf('player') >= 0) unitToUpdate.player = newData.player;
-    if (dataKeys.indexOf('schemer') >= 0) unitToUpdate.schemer = newData.schemer;
-    if (dataKeys.indexOf('schemeType') >= 0) unitToUpdate.schemeType = newData.schemeType;
-    if (dataKeys.indexOf('metadata') >= 0) unitToUpdate.metadata = newData.metadata;
-    if (dataKeys.indexOf('state') >= 0) unitToUpdate.state = newData.state;
+    if (dataKeys.indexOf('key') >= 0) unit.key = newData.key;
+    if (dataKeys.indexOf('name') >= 0) unit.name = newData.name;
+    if (dataKeys.indexOf('description') >= 0) unit.description = newData.description;
+    if (dataKeys.indexOf('transcript') >= 0) unit.transcript = newData.transcript;
+    if (dataKeys.indexOf('reference') >= 0) unit.reference = newData.reference;
+    if (dataKeys.indexOf('editor') >= 0) unit.editor = newData.editor;
+    if (dataKeys.indexOf('player') >= 0) unit.player = newData.player;
+    if (dataKeys.indexOf('schemer') >= 0) unit.schemer = newData.schemer;
+    if (dataKeys.indexOf('schemeType') >= 0) unit.schemeType = newData.schemeType;
+    if (dataKeys.indexOf('metadata') >= 0) unit.metadata = newData.metadata;
+    if (dataKeys.indexOf('state') >= 0) unit.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
-      unitToUpdate.groupName = newData.groupName;
+      unit.groupName = newData.groupName;
     }
     if (dataKeys.indexOf('lastChangedMetadata') >= 0) {
-      unitToUpdate.lastChangedMetadata = newData.lastChangedMetadata;
+      unit.lastChangedMetadata = newData.lastChangedMetadata;
     } else {
-      unitToUpdate.lastChangedMetadata = new Date();
+      unit.lastChangedMetadata = new Date();
     }
     if (dataKeys.indexOf('lastChangedDefinition') >= 0) {
-      unitToUpdate.lastChangedDefinition = newData.lastChangedDefinition;
+      unit.lastChangedDefinition = newData.lastChangedDefinition;
     }
     if (dataKeys.indexOf('lastChangedScheme') >= 0) {
-      unitToUpdate.lastChangedScheme = newData.lastChangedScheme;
+      unit.lastChangedScheme = newData.lastChangedScheme;
     }
+    const unitToUpdate = await this.repairDefinition(unit);
     await this.unitsRepository.save(unitToUpdate);
   }
 
   async patchWorkspace(unitIds: number[], newWorkspace: number): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
-      const unitToUpdate = await this.unitsRepository.findOne({
+      const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
         select: ['id', 'key', 'workspaceId', 'variables', 'metadata']
       });
       const existingUnit = await this.unitsRepository.findOne({
-        where: { workspaceId: newWorkspace, key: unitToUpdate.key },
+        where: { workspaceId: newWorkspace, key: unit.key },
         select: ['id']
       });
       if (existingUnit) {
@@ -231,14 +262,15 @@ export class UnitService {
           source: 'unit-patch-workspace',
           messages: [
             {
-              objectKey: unitToUpdate.key,
+              objectKey: unit.key,
               messageKey: 'unit-patch.duplicate-unit-id'
             }
           ]
         };
       }
-      unitToUpdate.workspaceId = newWorkspace;
-      unitToUpdate.groupName = '';
+      unit.workspaceId = newWorkspace;
+      unit.groupName = '';
+      const unitToUpdate = await this.repairDefinition(unit);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
         source: 'unit-patch-workspace',
@@ -260,7 +292,7 @@ export class UnitService {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
       });
-      const keysToIgnore = ['id', 'groupName', 'key'];
+      const keysToIgnore = ['id', 'groupName', 'key', 'definitionId', 'state'];
       const keysToCopy = Object.keys(unitToCopy)
         .filter(key => !keysToIgnore.includes(key))
         .reduce((obj, key) => {
@@ -346,14 +378,18 @@ export class UnitService {
 
   async removeUnitState(id: number): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: id } });
-    await this.unitsRepository.save({ ...unit, state: '0' }
+    const unitToUpdate = await this.repairDefinition(unit);
+    await this.unitsRepository.save({ ...unitToUpdate, state: '0' }
     );
   }
 
   async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto) {
-    const unitToUpdate = await this.unitsRepository.findOne({
+    const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
+
+    const unitToUpdate = await this.repairDefinition(unit);
+
     let newUnitDefinitionId = -1;
     unitToUpdate.lastChangedDefinition = new Date();
     if (unitToUpdate.definitionId) {
@@ -363,7 +399,7 @@ export class UnitService {
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
     } else {
-      const newUnitDefinition = await this.unitDefinitionsRepository.create({ data: unitDefinitionDto.definition });
+      const newUnitDefinition = this.unitDefinitionsRepository.create({ data: unitDefinitionDto.definition });
       await this.unitDefinitionsRepository.save(newUnitDefinition);
       newUnitDefinitionId = newUnitDefinition.id;
     }
@@ -375,12 +411,35 @@ export class UnitService {
   }
 
   async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto) {
-    const unitToUpdate = await this.unitsRepository.findOne({
+    const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
+    const unitToUpdate = await this.repairDefinition(unit);
     unitToUpdate.scheme = unitSchemeDto.scheme;
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = new Date();
     await this.unitsRepository.save(unitToUpdate);
+  }
+
+  private async repairDefinition(unit: Unit): Promise<Unit> {
+    const unitDefinitionId = unit.definitionId;
+    if (unitDefinitionId) {
+      const sameUnits = await this.unitsRepository.find({
+        where: { definitionId: unitDefinitionId }
+      });
+      if (sameUnits.length > 1) {
+        const unitDefinition = await this.unitDefinitionsRepository.findOne({
+          where: { id: unitDefinitionId }
+        });
+        if (unitDefinition) {
+          const newUnitDefinition = this.unitDefinitionsRepository.create({ data: unitDefinition.data });
+          await this.unitDefinitionsRepository.save(newUnitDefinition);
+          this.logger.log(`Repair: New UnitDefinition ${newUnitDefinition.id} for unit ${unit.id} created`);
+          unit.definitionId = newUnitDefinition.id;
+          unit.lastChangedDefinition = new Date();
+        }
+      }
+    }
+    return unit;
   }
 }

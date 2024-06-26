@@ -6,15 +6,26 @@ include $(STUDIO_LITE_BASE_DIR)/.env.studio-lite
 .EXPORT_ALL_VARIABLES:
 
 ## prevents collisions of make target names with possible file names
-.PHONY: prod-test-build prod-test-up prod-test-down prod-test-e2e prod-test-e2e-api prod-test-e2e-ui-chrome \
-prod-test-e2e-ui-chrome-mobile prod-test-e2e-ui-firefox prod-test-e2e-ui-firefox-mobile prod-test-e2e-ui-edge \
-prod-test-e2e-ui-edge-mobile
+.PHONY: prod-registry-login prod-registry-logout prod-test-build prod-test-up prod-test-down prod-test-logs\
+	prod-test-e2e prod-test-e2e-api prod-test-e2e-ui-chrome prod-test-e2e-ui-chrome-mobile prod-test-e2e-ui-firefox\
+	prod-test-e2e-ui-firefox-mobile prod-test-e2e-ui-edge prod-test-e2e-ui-edge-mobile
+
+## disables printing the recipe of a make target before executing it
+.SILENT: prod-registry-login prod-registry-logout
+
+## Log in to selected registry (see .env.studio-lite file)
+prod-registry-login:
+	if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
+
+## Log out of selected registry (see .env.studio-lite file)
+prod-registry-logout:
+	if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Build production and e2e test images
-prod-test-build:
-	@if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
+prod-test-build: prod-registry-login
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
+				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--file $(STUDIO_LITE_BASE_DIR)/database/Postgres.Dockerfile\
@@ -22,6 +33,7 @@ prod-test-build:
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
+				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--file $(STUDIO_LITE_BASE_DIR)/database/Liquibase.Dockerfile\
@@ -29,30 +41,36 @@ prod-test-build:
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
+				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
-				--file $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
-				--build-arg PROJECT=api\
+				--tag studio-lite-base\
+			.
+	cd $(STUDIO_LITE_BASE_DIR) &&\
+		docker build\
+				--progress plain\
 				--target=prod\
+				--build-arg PROJECT=api\
+				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
+				--file $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-backend:e2e\
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
-				--pull\
+				--progress plain\
+				--target=prod\
+				--build-arg PROJECT=frontend\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
-				--build-arg PROJECT=frontend\
-				--target=prod\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-frontend:e2e\
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
-				--pull\
+				--progress plain\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend-e2e/Dockerfile\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-frontend-e2e:e2e\
 			.
-	@if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
 ## Start production containers
 prod-test-up:
@@ -78,6 +96,15 @@ prod-test-down:
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
 			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		down
+
+## Show service logs
+# Param (optional): SERVICE - Show log of the specified service only, e.g. `make prod-test-logs SERVICE=db`
+prod-test-logs:
+	docker compose\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
+		logs -f $(SERVICE)
 
 ## Run all e2e tests in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e:

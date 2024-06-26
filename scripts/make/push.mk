@@ -8,43 +8,53 @@ TAG := dev
 .build:
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
+				--progress plain\
 				--pull\
-				-f $(STUDIO_LITE_BASE_DIR)/database/Postgres.Dockerfile\
 				--no-cache\
 				--rm\
-				-t iqbberlin/studio-lite-db:$(TAG)\
-				-t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-db:$(TAG)\
+				--file $(STUDIO_LITE_BASE_DIR)/database/Postgres.Dockerfile\
+				--tag iqbberlin/studio-lite-db:$(TAG)\
+				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-db:$(TAG)\
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
+				--progress plain\
 				--pull\
-				-f $(STUDIO_LITE_BASE_DIR)/database/Liquibase.Dockerfile\
 				--no-cache\
 				--rm\
-				-t iqbberlin/studio-lite-liquibase:$(TAG)\
-				-t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-liquibase:$(TAG)\
+				--file $(STUDIO_LITE_BASE_DIR)/database/Liquibase.Dockerfile\
+				--tag iqbberlin/studio-lite-liquibase:$(TAG)\
+				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-liquibase:$(TAG)\
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
+				--progress plain\
 				--pull\
-				-f $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
+				--no-cache\
+				--rm\
+				--tag studio-lite-base\
+			.
+	cd $(STUDIO_LITE_BASE_DIR) &&\
+		docker build\
+				--progress plain\
+				--target=prod\
+				--no-cache\
+				--rm\
 				--build-arg PROJECT=api\
-				--target=prod\
-				--no-cache\
-				--rm\
-				-t iqbberlin/studio-lite-backend:$(TAG)\
-				-t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-backend:$(TAG)\
+				--file $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
+				--tag iqbberlin/studio-lite-backend:$(TAG)\
+				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-backend:$(TAG)\
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
-				--pull\
-				-f $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
-				--build-arg PROJECT=frontend\
+				--progress plain\
 				--target=prod\
 				--no-cache\
 				--rm\
-				-t iqbberlin/studio-lite-frontend:$(TAG)\
-				-t scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend:$(TAG)\
+				--build-arg PROJECT=frontend\
+				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
+				--tag iqbberlin/studio-lite-frontend:$(TAG)\
+				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend:$(TAG)\
 			.
 
 ## Push all docker images to 'hub.docker.com'

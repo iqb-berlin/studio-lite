@@ -43,7 +43,7 @@ export class UnitsController {
     @Req() request,
       @WorkspaceId() workspaceId: number,
       @Query('withLastSeenCommentTimeStamp') withLastSeenCommentTimeStamp): Promise<UnitInListDto[]> {
-    return this.unitService.findAll(workspaceId, request.user.id, withLastSeenCommentTimeStamp);
+    return this.unitService.findAllForWorkspace(workspaceId, request.user.id, withLastSeenCommentTimeStamp);
   }
 
   @Get('units/metadata')

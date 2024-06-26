@@ -1,12 +1,12 @@
 server {
-    listen 80 default_server;
+    listen 8080 default_server;
     server_name _;
     return 301 https://${SERVER_NAME}$request_uri;
     server_tokens off;
 }
 
 server {
-    listen              443 ssl;
+    listen              8443 ssl;
     keepalive_timeout   70;
 
     server_name         ${SERVER_NAME};

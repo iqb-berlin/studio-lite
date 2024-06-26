@@ -102,7 +102,7 @@ check-release-rules:
       then echo "$CI_COMMIT_TAG is a valid release tag.";
       else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
 
-build-main-pr-backend-test-image:
+build-main-pr-base-image:
   stage: build
   interruptible: true
   rules:
@@ -113,6 +113,39 @@ build-main-pr-backend-test-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
+  before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build
+          --progress plain
+          --pull
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --tag ${BASE_IMAGE_NAME}:latest
+        .
+    - docker push -q -a ${BASE_IMAGE_NAME}
+  after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
+    - docker logout $CI_REGISTRY
+
+build-main-pr-backend-test-image:
+  stage: build
+  interruptible: true
+  rules:
+    - !reference [ .main_pr_base_rules, rules ]
+  needs:
+    - build-main-pr-base-image
+  image: $DOCKER_IMAGE
+  services:
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
@@ -122,9 +155,11 @@ build-main-pr-backend-test-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=dev
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=api
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:latest
           -f apps/api/Dockerfile
@@ -140,12 +175,15 @@ build-main-pr-frontend-test-image:
   interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
+  needs:
+    - build-main-pr-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
@@ -155,11 +193,13 @@ build-main-pr-frontend-test-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=dev
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=frontend
           --build-arg apihost=studio-lite-backend
           --build-arg apiport=3333
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_IMAGE_NAME}:latest
           -f apps/frontend/Dockerfile
@@ -175,12 +215,15 @@ build-main-pr-frontend-e2e-test-image:
   interruptible: true
   rules:
     - !reference [ .main_pr_base_rules, rules ]
+  needs:
+    - build-main-pr-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     FRONTEND_E2E_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e"
   before_script:
     - ip a | grep mtu
@@ -190,12 +233,15 @@ build-main-pr-frontend-e2e-test-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_E2E_IMAGE_NAME}:latest
           -f apps/frontend-e2e/Dockerfile
           -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
-          -t ${FRONTEND_E2E_IMAGE_NAME}:latest .
+          -t ${FRONTEND_E2E_IMAGE_NAME}:latest
+        .
     - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
   after_script:
     - docker logout $CI_DEPENDENCY_PROXY_SERVER
@@ -221,6 +267,7 @@ build-main-pr-db-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${DB_IMAGE_NAME}:latest
@@ -253,6 +300,7 @@ build-main-pr-liquibase-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
@@ -271,6 +319,7 @@ build-main-pr-backend-image:
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
+    - build-main-pr-base-image
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
   services:
@@ -278,6 +327,7 @@ build-main-pr-backend-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
@@ -287,9 +337,11 @@ build-main-pr-backend-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=prod
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=api
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
           -f apps/api/Dockerfile
@@ -307,6 +359,7 @@ build-main-pr-frontend-image:
   rules:
     - !reference [ .main_pr_base_rules, rules ]
   needs:
+    - build-main-pr-base-image
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
   services:
@@ -314,6 +367,7 @@ build-main-pr-frontend-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
@@ -323,9 +377,11 @@ build-main-pr-frontend-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=prod
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=frontend
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
           -f apps/frontend/Dockerfile
@@ -929,7 +985,9 @@ build-main-commit-db-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${DB_IMAGE_NAME}:main
           -f database/Postgres.Dockerfile
           -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
@@ -958,7 +1016,9 @@ build-main-commit-liquibase-image:
   script:
     - docker build
           --progress plain
+          --pull
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${LIQUIBASE_IMAGE_NAME}:main
           -f database/Liquibase.Dockerfile
           -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
@@ -972,12 +1032,15 @@ build-main-commit-backend-image:
   stage: build-images
   rules:
     - !reference [ .main_commit_rules, rules ]
+  needs:
+    - build-main-pr-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
     - ip a | grep mtu
@@ -987,9 +1050,12 @@ build-main-commit-backend-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=prod
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=api
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:main
           -f apps/api/Dockerfile
           -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
@@ -1003,12 +1069,15 @@ build-main-commit-frontend-image:
   stage: build-images
   rules:
     - !reference [ .main_commit_rules, rules ]
+  needs:
+    - build-main-pr-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
       alias: docker
   variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
     - ip a | grep mtu
@@ -1018,9 +1087,12 @@ build-main-commit-frontend-image:
   script:
     - docker build
           --progress plain
+          --pull
           --target=prod
-          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg PROJECT=frontend
+          --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+          --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:main
           -f apps/frontend/Dockerfile
           -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}

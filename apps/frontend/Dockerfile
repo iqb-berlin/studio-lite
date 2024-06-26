@@ -1,33 +1,13 @@
 # syntax=docker/dockerfile:1
 
 ARG REGISTRY_PATH
+ARG BASE_IMAGE_NAME=studio-lite-base
 
 
-FROM ${REGISTRY_PATH}node:20.13-bookworm-slim AS build
-ARG PROJECT
-
-RUN mkdir /studio-lite
-WORKDIR /studio-lite
-
-COPY . .
-
-# Update npm to latest version
-RUN npm --version
-RUN --mount=type=cache,target=~/.npm \
-    npm install -g --no-fund npm
-RUN npm --version
-
-# Install dependencies
-RUN --mount=type=cache,target=~/.npm \
-    npm ci --no-fund
-
-# Build project
-RUN npx nx --version
-RUN --mount=type=cache,target=./.nx/cache \
-    npx nx build ${PROJECT} --prod
+FROM $BASE_IMAGE_NAME AS base
 
 
-FROM build AS dev
+FROM base AS dev
 ARG PROJECT
 
 RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${PROJECT}/proxy.conf.json
@@ -37,16 +17,17 @@ EXPOSE 80
 ENTRYPOINT ["npx", "nx"]
 
 
-FROM ${REGISTRY_PATH}nginx:stable AS base
+FROM ${REGISTRY_PATH}nginxinc/nginx-unprivileged:stable AS prod
 ARG PROJECT
 
-COPY config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
-COPY --from=build /studio-lite/dist/apps/${PROJECT} /usr/share/nginx/html
+USER root
+RUN chown -R nginx:root /usr/share/nginx/html
 
-EXPOSE 80
+USER nginx
+
+COPY --chown=nginx:root config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
+COPY --chown=nginx:root --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT} /usr/share/nginx/html
+
+EXPOSE 8080 8443
 
 CMD ["nginx", "-g", "daemon off;"]
-
-
-FROM base AS prod
-EXPOSE 443
