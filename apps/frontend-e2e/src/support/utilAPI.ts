@@ -1,7 +1,7 @@
 export function addFirstUserAPI():void {
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4200/api/init-login',
+    url: '/api/init-login',
     headers: {
       'app-version': Cypress.env('version')
     },
@@ -25,7 +25,7 @@ export function addFirstUserAPI():void {
 export function loginAPI(username:string, password:string) {
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4200/api/login',
+    url: '/api/login',
     headers: {
       'app-version': Cypress.env('version')
     },
@@ -43,7 +43,7 @@ export function deleteFirstUserAPI() {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'DELETE',
-    url: `http://localhost:4200/api/admin/users/${Cypress.env('adminID')}`,
+    url: `/api/admin/users/${Cypress.env('id_admin')}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -54,52 +54,68 @@ export function deleteFirstUserAPI() {
   });
 }
 
-export function getUserIdAPI(username: string, typeId: string): string {
-  const authorization = `bearer ${Cypress.env('token_admin')}`;
+export function getUserIdAPI(username: string, token: string):void {
+  const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: 'http://localhost:4200/api/auth-data',
+    url: '/api/auth-data',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     }
   }).then(resp => {
     expect(resp.status).to.equal(200);
-    Cypress.env(typeId, resp.body.userId);
-    return resp.body.userId;
+    Cypress.env(`id_${username}`, resp.body.userId);
   });
-  return '';
+}
+
+export function getCloakIdAPI():void {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/users',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    cy.wrap(resp.body[1].id).as('IdCloak');
+    expect(resp.status).to.equal(200);
+    console.log('wrapping the id_cloak');
+    Cypress.env('id_cloak', resp.body[1].id);
+  });
 }
 
 export function keyCloakLogin() {
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4200/api/keycloak-login',
+    url: '/api/keycloak-login',
     headers: {
       'app-version': Cypress.env('version')
     },
     body: {
       description: '',
-      email: 'xxx@hu-berlin.com',
-      firstName: 'xxx',
-      identity: 'xxx',
+      email: 'yan.ping.chen.lin@hu-berlin.com',
+      firstName: 'Yan Ping ',
+      identity: '533554df-dbcb-4ac2-a2a2-cbde4ecec80b',
       isAdmin: 'false',
       issuer: 'https://www.iqb-login.de/realms/iqb',
-      lasName: 'xxx',
-      name: 'xxx',
+      lasName: 'Chen Lin',
+      name: 'yan.ping.chen.lin@hu-berlin.de',
       password: ''
     }
   }).then(resp => {
+    cy.wrap(resp.body).as('tokenCloak');
     Cypress.env('token_cloak', resp.body);
-    Cypress.env('user_cloak', 'xxx');
     expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+    return resp.body;
   });
 }
 export function changePasswordAPI(oldpass: string, newpass:string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'PATCH',
-    url: 'http://localhost:4200/api/password',
+    url: '/api/password',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -116,7 +132,7 @@ export function createNewUserAPI(user: string, pass: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4200/api/admin/users',
+    url: '/api/admin/users',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -138,18 +154,17 @@ export function createNewUserAPI(user: string, pass: string) {
   });
 }
 
-export function deleteUserAPI(user: string) {
+export function deleteUserAPI(userId: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'DELETE',
-    url: `http://localhost:4200/api/admin/users/${Cypress.env('userID')}`,
+    url: `/api/admin/users/${userId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     }
   }).then(resp => {
-    Cypress.env('id_user', '');
-    console.log(`The user ${user} is deleted`);
+    console.log(`The user ${userId} is deleted`);
     expect(resp.status).to.equal(200);
   });
 }
@@ -158,7 +173,7 @@ export function createGroupAPI(group: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4200/api/admin/workspace-groups',
+    url: '/api/admin/workspace-groups',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -177,7 +192,7 @@ export function createWsAPI(groupID: string, ws: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
-    url: `http://localhost:4200/api/admin/workspaces/${groupID}`,
+    url: `/api/admin/workspaces/${groupID}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -196,7 +211,7 @@ export function deleteGroupAPI(groupID: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'DELETE',
-    url: `http://localhost:4200/api/admin/workspace-groups/${groupID}`,
+    url: `/api/admin/workspace-groups/${groupID}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -211,7 +226,7 @@ export function addModuleAPI() {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4200/api/admin/verona-modules',
+    url: '/api/admin/verona-modules',
     headers: {
       'app-version': Cypress.env('version'),
       authorization

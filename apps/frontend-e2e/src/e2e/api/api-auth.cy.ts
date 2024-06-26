@@ -1,5 +1,12 @@
 import {
-  addFirstUserAPI, changePasswordAPI, deleteFirstUserAPI, deleteUserAPI, getUserIdAPI, keyCloakLogin, loginAPI
+  addFirstUserAPI,
+  changePasswordAPI,
+  deleteFirstUserAPI,
+  deleteUserAPI,
+  getCloakIdAPI,
+  getUserIdAPI,
+  keyCloakLogin,
+  loginAPI
 } from '../../support/utilAPI';
 
 describe('API Login and authorization testing', () => {
@@ -9,21 +16,31 @@ describe('API Login and authorization testing', () => {
   });
   it('login: log in the api and store token', () => {
     loginAPI(Cypress.env('username'), Cypress.env('password'));
+    console.log(Cypress.env('token_admin'));
   });
   it('auth-data: get authorization data of a user', () => {
-    getUserIdAPI(Cypress.env('username'), 'id_admin');
+    getUserIdAPI(Cypress.env('username'), Cypress.env('token_admin'));
   });
   it('password: change the password for a user', () => {
     changePasswordAPI(Cypress.env('password'), '4567');
     changePasswordAPI('4567', Cypress.env('password'));
   });
   it.skip('keycloak-login: log in the app', () => {
+    // This test doesn't work properly since I can not get the userId from a keycloaklogin
+    // Maybe if we have implemented before log out, it can work.
+    // The code in utilAPI is replaced with a dummy user
+    // TODO PROBLEMATIC asyncronous call
     keyCloakLogin();
-    const userId = getUserIdAPI('xxx', 'id_cloak');
-    deleteUserAPI(userId);
+    cy.wait('@tokenCloak').then(() => {
+      console.log(Cypress.env('token_cloak'));
+      getCloakIdAPI();
+      cy.wait('@idCloak').then(() => {
+        console.log(Cypress.env('id_cloak'));
+        deleteUserAPI(Cypress.env('id_cloak'));
+      });
+    });
   });
-  it.skip('delete admin users', () => {
-    cy.pause();
+  it('delete admin users', () => {
     deleteFirstUserAPI();
   });
 });

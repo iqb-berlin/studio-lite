@@ -29,7 +29,7 @@ Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
       password: password
     }
   }).then(resp => {
-    Cypress.env('access_token', resp.body);
+    Cypress.env('admin_token', resp.body);
   });
 });
 

@@ -1,9 +1,13 @@
+import { addFirstUserAPI, deleteFirstUserAPI } from '../../support/utilAPI';
+
 describe('HOME', () => {
+  before(() => addFirstUserAPI());
+  after(() => deleteFirstUserAPI());
   it('my-data: retrieve user data', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
     cy.request({
       method: 'GET',
-      url: 'http://localhost:4200/api/my-data',
+      url: '/api/my-data',
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -13,25 +17,37 @@ describe('HOME', () => {
     });
   });
 
-  it('verona: modify user data', () => {
+  it('my-data: modify user data', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
-    const id: number = parseInt(Cypress.env('adminID'), 10);
     cy.request({
-      method: 'PATCH',
-      url: 'http://localhost:4200/api/my-data',
+      method: 'GET',
+      url: '/api/auth-data',
       headers: {
         'app-version': Cypress.env('version'),
         authorization
-      },
-      body: {
-        id: id,
-        lastName: 'First'
       }
-    })
-      .then(resp => {
-        expect(resp.status)
-          .to
-          .equal(200);
+    }).then(resp => {
+      Cypress.env('id_admin', resp.body.userId);
+      expect(resp.status).to.equal(200);
+      const nu = parseInt(Cypress.env('id_admin'), 10);
+      cy.request({
+        method: 'PATCH',
+        url: '/api/my-data',
+        headers: {
+          'app-version': Cypress.env('version'),
+          authorization
+        },
+        body: {
+          id: nu,
+          description: '',
+          email: 'first@email.com',
+          lastName: 'First',
+          firstName: '',
+          emailPublishApproved: false
+        }
+      }).then(resp1 => {
+        expect(resp1.status).to.equal(200);
       });
+    });
   });
 });
