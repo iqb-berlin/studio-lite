@@ -58,9 +58,46 @@ get_new_release_version() {
 
 create_backup() {
   printf "2. Backup creation\n"
+  # Save installation directory
   mkdir -p ./backup/release/"$SOURCE_TAG"
   tar -cf - --exclude='./backup' . | tar -xf - -C ./backup/release/"$SOURCE_TAG"
   printf -- "- Current release files have been saved at: '%s'\n" "$PWD/backup/release/$SOURCE_TAG"
+
+  # Dump the db completely
+  if test $(docker compose \
+      --file "$PWD"/docker-compose.studio-lite.yaml \
+      --file "$PWD"/docker-compose.studio-lite.prod.yaml \
+      --env-file "$PWD"/.env.studio-lite \
+    ps -q db)
+  then
+    docker compose \
+        --file "$PWD"/docker-compose.studio-lite.yaml \
+        --file "$PWD"/docker-compose.studio-lite.prod.yaml \
+        --env-file "$PWD"/.env.studio-lite \
+      exec -it db \
+        pg_dumpall --username="$POSTGRES_USER" > "$PWD"/backup/database_dump/all.sql
+  else
+    docker compose \
+        --progress quiet \
+        --file "$PWD"/docker-compose.studio-lite.yaml \
+        --file "$PWD"/docker-compose.studio-lite.prod.yaml \
+        --env-file "$PWD"/.env.studio-lite \
+      up -d db
+    sleep 5 ## wait until db startup is completed
+    docker compose \
+        --file "$PWD"/docker-compose.studio-lite.yaml \
+        --file "$PWD"/docker-compose.studio-lite.prod.yaml \
+        --env-file "$PWD"/.env.studio-lite \
+      exec -it db \
+        pg_dumpall --username="$POSTGRES_USER" > "$PWD"/backup/database_dump/all.sql
+    docker compose \
+        --progress quiet \
+        --file "$PWD"/docker-compose.studio-lite.yaml \
+        --file "$PWD"/docker-compose.studio-lite.prod.yaml \
+        --env-file "$PWD"/.env.studio-lite \
+      down
+  fi
+  printf -- "- Current db dump has been saved at: '%s'\n" "$PWD/backup/release/database_dump/all.sql"
   printf "Backup created.\n\n"
 }
 
