@@ -1028,12 +1028,43 @@ build-main-commit-liquibase-image:
     - docker logout $CI_DEPENDENCY_PROXY_SERVER
     - docker logout $REGISTRY
 
+build-main-commit-base-image:
+  stage: build-images
+  rules:
+    - !reference [ .main_commit_rules, rules ]
+  image: $DOCKER_IMAGE
+  services:
+    - name: $DOCKER_SERVICE
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+      alias: docker
+  variables:
+    BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
+  before_script:
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build
+      --progress plain
+      --pull
+      --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      --cache-from ${BASE_IMAGE_NAME}:latest
+      --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+      --tag ${BASE_IMAGE_NAME}:latest
+      .
+    - docker push -q -a ${BASE_IMAGE_NAME}
+  after_script:
+    - docker logout $CI_DEPENDENCY_PROXY_SERVER
+    - docker logout $CI_REGISTRY
+
 build-main-commit-backend-image:
   stage: build-images
   rules:
     - !reference [ .main_commit_rules, rules ]
   needs:
-    - build-main-pr-base-image
+    - build-main-commit-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -1070,7 +1101,7 @@ build-main-commit-frontend-image:
   rules:
     - !reference [ .main_commit_rules, rules ]
   needs:
-    - build-main-pr-base-image
+    - build-main-commit-base-image
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
