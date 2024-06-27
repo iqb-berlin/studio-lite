@@ -26,11 +26,11 @@ describe('UI Administration Management', () => {
     deleteUser('newuser');
   });
 
-  it('user with admin credentials can create a Bereichsgruppe', () => {
+  it('user with admin credentials can create a group (Bereichsgruppe)', () => {
     createGroup('Mathematik Primär Bereichsgruppe');
   });
 
-  it('user can create a Arbeitsbereich within its Bereichsgruppe', () => {
+  it('user with admin credentials can create a workspace(Arbeitsbereich) within its Bereichsgruppe', () => {
     createWs('Mathematik I', 'Mathematik Primär Bereichsgruppe');
     grantRemovePrivilege(Cypress.env('username'), 'Mathematik I', 'read');
   });

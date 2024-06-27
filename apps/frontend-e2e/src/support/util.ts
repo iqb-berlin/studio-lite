@@ -145,7 +145,12 @@ export function logout() {
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
-  cy.dialogButtonToContinue('Abmelden', 304, '/assets/IQB-LogoA.png', 'GET', 'abmelden');
+  // cy.dialogButtonToContinue('Abmelden', 200, '/assets/IQB-LogoA.png', 'GET', 'abmelden');
+  // cy.dialogButtonToContinue('Abmelden', 200, '/api/admin/settings/app-logo', 'GET', 'abmelden');
+  cy.get('mat-dialog-actions button')
+    .contains('Abmelden')
+    .should('exist')
+    .click();
 }
 
 export function changePassword(newPass:string, oldPass:string):void {

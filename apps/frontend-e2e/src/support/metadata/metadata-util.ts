@@ -125,8 +125,6 @@ export function checkProfile(profile: string):void {
   cy.wait(`@${alias}`)
     .its('response.statusCode')
     .should('to.be.oneOf', [200, 304]);
-  //  .its('response.statusCode').should('eq', 304);
-  // cy.wait(2000);
   cy.get('mat-panel-title')
     .contains(profile)
     .parent()
@@ -148,7 +146,6 @@ export function checkMultipleProfiles(profiles: string[]):void {
   cy.wait('@selectedProfiles')
     .its('response.statusCode')
     .should('to.be.oneOf', [200, 304]);
-  // cy.wait(2000);
   profiles.forEach(profile => {
     cy.get('mat-panel-title')
       .contains(profile)

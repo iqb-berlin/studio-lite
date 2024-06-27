@@ -41,25 +41,29 @@ Cypress.Commands.add('clickButton', (text: string) => {
     .click();
 });
 
-Cypress.Commands.add('buttonToContinue', (text: string, code: number, url: string, rest: string, alias:string) => {
-  cy.intercept(rest, url).as(alias);
-  cy.get('button')
-    .contains(text)
-    .should('exist')
-    .click();
-  cy.wait(`@${alias}`)
-    .its('response.statusCode').should('eq', code);
-});
+Cypress.Commands.add('buttonToContinue',
+  (text: string, code: number, url: string, rest: string, alias:string) => {
+    cy.intercept(rest, url).as(alias);
+    cy.get('button')
+      .contains(text)
+      .should('exist')
+      .click();
+    cy.wait(`@${alias}`)
+      .its('response.statusCode').should('eq', code);
+  });
 
-Cypress.Commands.add('dialogButtonToContinue', (text: string, code: number, url: string, rest: string, alias:string) => {
-  cy.intercept(rest, url).as(alias);
-  cy.get('mat-dialog-actions button')
-    .contains(text)
-    .should('exist')
-    .click();
-  cy.wait(`@${alias}`)
-    .its('response.statusCode').should('eq', code);
-});
+Cypress.Commands.add('dialogButtonToContinue',
+  (text: string, code: number, url: string, rest: string, alias:string) => {
+    cy.intercept(rest, url)
+      .as(alias);
+    cy.get('mat-dialog-actions button')
+      .contains(text)
+      .should('exist')
+      .click();
+    cy.wait(`@${alias}`)
+      .its('response.statusCode')
+      .should('eq', code);
+  });
 
 Cypress.Commands.add('loadModule', (filename:string, name:string) => {
   cy.get('input[type=file]')
