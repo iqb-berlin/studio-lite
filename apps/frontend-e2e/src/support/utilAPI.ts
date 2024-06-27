@@ -81,7 +81,6 @@ export function getCloakIdAPI():void {
   }).then(resp => {
     cy.wrap(resp.body[1].id).as('IdCloak');
     expect(resp.status).to.equal(200);
-    console.log('wrapping the id_cloak');
     Cypress.env('id_cloak', resp.body[1].id);
   });
 }
@@ -95,13 +94,13 @@ export function keyCloakLogin() {
     },
     body: {
       description: '',
-      email: 'yan.ping.chen.lin@hu-berlin.com',
-      firstName: 'Yan Ping ',
-      identity: '533554df-dbcb-4ac2-a2a2-cbde4ecec80b',
+      email: 'xxx@hu-berlin.com',
+      firstName: 'xxx',
+      identity: 'xxx',
       isAdmin: 'false',
       issuer: 'https://www.iqb-login.de/realms/iqb',
-      lasName: 'Chen Lin',
-      name: 'yan.ping.chen.lin@hu-berlin.de',
+      lasName: 'xxx',
+      name: 'xxx',
       password: ''
     }
   }).then(resp => {
@@ -164,7 +163,6 @@ export function deleteUserAPI(userId: string) {
       authorization
     }
   }).then(resp => {
-    console.log(`The user ${userId} is deleted`);
     expect(resp.status).to.equal(200);
   });
 }
