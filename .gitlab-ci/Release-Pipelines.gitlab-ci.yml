@@ -959,13 +959,6 @@ audit-main-pr-frontend:
   script:
     - docker run --entrypoint npm ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test audit --audit-level critical
 
-gemnasium-dependency_scanning:
-  stage: scan-dependencies
-  interruptible: true
-  allow_failure: true
-  rules: # TODO: Rules does not work
-    - !reference [ .main_pr_base_rules, rules ]
-
 build-main-commit-db-image:
   stage: build-images
   rules:
