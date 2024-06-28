@@ -19,7 +19,7 @@ export class WorkspaceUserToCheckCollection {
       workspaceUsers.forEach(u => this.workspacesUsersIds.push(
         {
           id: u.id,
-          hasWriteAccess: u.hasWorkspaceWriteAccess
+          writeAccessLevel: u.workspaceWriteAccessLevel
         }));
     }
     this.entries.forEach(user => {
@@ -27,10 +27,10 @@ export class WorkspaceUserToCheckCollection {
         .find(workspacesUsersId => user.id === workspacesUsersId.id);
       if (workspaceUser) {
         user.isChecked = true;
-        user.hasWriteAccess = workspaceUser.hasWriteAccess;
+        user.writeAccessLevel = workspaceUser.writeAccessLevel;
       } else {
         user.isChecked = false;
-        user.hasWriteAccess = false;
+        user.writeAccessLevel = 0;
       }
     });
     this.hasChanged = false;
@@ -43,7 +43,7 @@ export class WorkspaceUserToCheckCollection {
         checkedUserIds.push(
           {
             id: user.id,
-            hasWriteAccess: user.hasWriteAccess
+            writeAccessLevel: user.writeAccessLevel
           });
       }
     });
@@ -58,10 +58,7 @@ export class WorkspaceUserToCheckCollection {
       if ((user.isChecked && !workspaceUser) || (!user.isChecked && workspaceUser)) {
         this.hasChanged = true;
       }
-      if (user.hasWriteAccess && workspaceUser && !workspaceUser.hasWriteAccess) {
-        this.hasChanged = true;
-      }
-      if (!user.hasWriteAccess && workspaceUser && workspaceUser.hasWriteAccess) {
+      if (workspaceUser && user.writeAccessLevel !== workspaceUser.writeAccessLevel) {
         this.hasChanged = true;
       }
     });
@@ -73,7 +70,7 @@ export class WorkspaceUserToCheckCollection {
       if (user.isChecked) {
         this.workspacesUsersIds.push({
           id: user.id,
-          hasWriteAccess: user.hasWriteAccess
+          writeAccessLevel: user.writeAccessLevel
         });
       }
     });

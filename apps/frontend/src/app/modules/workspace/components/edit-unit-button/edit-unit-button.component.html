@@ -7,7 +7,7 @@
 </button>
 
 <mat-menu #menuOther>
-  @if (workspaceService.userHasWriteAccess) {
+  @if (workspaceService.userWriteAccessLevel) {
     @if (workspaceService.isWorkspaceGroupAdmin) {
       <button
         [matTooltip]="'workspace-settings.title' | translate"
@@ -60,7 +60,7 @@
     {{ 'workspace.print-preview' | translate }}
   </button>
   <mat-divider></mat-divider>
-  @if (workspaceService.userHasWriteAccess) {
+  @if (workspaceService.userWriteAccessLevel) {
     <button mat-menu-item
       [matTooltip]="'workspace.move-unit' | translate"
       matTooltipPosition="right"

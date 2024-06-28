@@ -32,6 +32,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
+import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 
 const datePipe = new DatePipe('de-DE');
 
@@ -43,7 +44,7 @@ const datePipe = new DatePipe('de-DE');
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
-    IsSelectedIdPipe, TranslateModule, MatIcon]
+    IsSelectedIdPipe, TranslateModule, MatIcon, MatRadioGroup, MatRadioButton]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
@@ -337,14 +338,14 @@ export class WorkspacesComponent implements OnInit {
   // eslint-disable-next-line class-methods-use-this
   updateWriteAccess(user: WorkspaceUserChecked): void {
     if (!user.isChecked) {
-      user.hasWriteAccess = false;
+      user.writeAccessLevel = 0;
     }
     this.workspaceUsers.updateHasChanged();
   }
 
   // eslint-disable-next-line class-methods-use-this
   updateReadAccess(user: WorkspaceUserChecked): void {
-    if (user.hasWriteAccess) {
+    if (user.writeAccessLevel) {
       user.isChecked = true;
     }
     this.workspaceUsers.updateHasChanged();

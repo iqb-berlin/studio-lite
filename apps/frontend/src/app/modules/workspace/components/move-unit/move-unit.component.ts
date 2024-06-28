@@ -54,7 +54,7 @@ export class MoveUnitComponent implements OnInit {
     if (this.appService.authData.userId > 0) {
       this.appService.authData.workspaces.forEach(wsg => {
         wsg.workspaces.forEach(ws => {
-          if (ws.id !== this.data.currentWorkspaceId && ws.userHasWriteAccess) {
+          if (ws.id !== this.data.currentWorkspaceId && ws.userWriteAccessLevel) {
             this.workspaceList.push(<WorkspaceDataFlat>{
               id: ws.id,
               name: ws.name,

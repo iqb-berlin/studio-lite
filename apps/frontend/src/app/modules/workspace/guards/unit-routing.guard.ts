@@ -18,7 +18,7 @@ export class UnitRoutingCanDeactivateGuard {
   ) { }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.workspaceService.isChanged() && this.workspaceService.userHasWriteAccess) {
+    if (this.workspaceService.isChanged() && this.workspaceService.userWriteAccessLevel) {
       let content = '';
       let isWarning = true;
       this.workspaceService.isValidFormKey.subscribe(isValid => {

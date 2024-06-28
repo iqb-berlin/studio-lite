@@ -43,7 +43,7 @@ export class WorkspaceDto {
     name!: string;
 
   @ApiProperty()
-    userHasWriteAccess!: boolean;
+    userWriteAccessLevel!: number;
 }
 
 export class ReviewDto {

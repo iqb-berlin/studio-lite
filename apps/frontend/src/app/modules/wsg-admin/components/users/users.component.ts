@@ -15,6 +15,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
@@ -32,7 +33,7 @@ import { WorkspaceChecked } from '../../models/workspace-checked.class';
   // eslint-disable-next-line max-len
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef,
     MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, MatCheckbox,
-    FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon]
+    FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatRadioButton, MatRadioGroup]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
@@ -71,14 +72,14 @@ export class UsersComponent implements OnInit {
   // eslint-disable-next-line class-methods-use-this
   updateWriteAccess(workspace: WorkspaceChecked): void {
     if (!workspace.isChecked) {
-      workspace.hasWriteAccess = false;
+      workspace.writeAccessLevel = 0;
     }
     this.userWorkspaces.updateHasChanged();
   }
 
   // eslint-disable-next-line class-methods-use-this
   updateReadAccess(workspace: WorkspaceChecked): void {
-    if (workspace.hasWriteAccess) {
+    if (workspace.writeAccessLevel) {
       workspace.isChecked = true;
     }
     this.userWorkspaces.updateHasChanged();

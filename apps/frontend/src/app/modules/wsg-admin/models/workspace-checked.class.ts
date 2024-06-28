@@ -4,12 +4,12 @@ export class WorkspaceChecked {
   id: number;
   name: string;
   isChecked: boolean;
-  hasWriteAccess: boolean;
+  writeAccessLevel: number;
 
   constructor(workspaceDto: WorkspaceDto) {
     this.id = workspaceDto.id;
     this.name = workspaceDto.name;
     this.isChecked = false;
-    this.hasWriteAccess = false;
+    this.writeAccessLevel = 0;
   }
 }

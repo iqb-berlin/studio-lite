@@ -107,12 +107,25 @@
                 [matTooltip]="'access-rights.read-access' | translate"
                 (change)="updateWriteAccess(ws)">
               </mat-checkbox>
-              <mat-checkbox
-                [(ngModel)]="ws.hasWriteAccess"
+              <mat-radio-group
+                class="fx-row-start-start"
+                [(ngModel)]="ws.writeAccessLevel"
                 [disabled]="!selectedUser"
                 [matTooltip]="'access-rights.write-access' | translate"
                 (change)="updateReadAccess(ws)">
-              </mat-checkbox>
+                @for (level of [0,1,2,3]; track level) {
+                  @if (selectedUser) {
+                    <mat-radio-button
+                      [disabled]="!ws.writeAccessLevel && !level"
+                      [value]="level">
+                    </mat-radio-button>
+                  } @else {
+                    <mat-radio-button
+                      value="null">
+                    </mat-radio-button>
+                  }
+                }
+              </mat-radio-group>
             </div>
             <div>{{ws.name}}</div>
           </div>
