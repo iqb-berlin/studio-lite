@@ -1,64 +1,64 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser,
-  createAreaForGroupFromAdmin,
-  createGroupArea,
-  deleteFirstUser, deleteGroupArea,
-  grantRemovePrivilegeFromGroup, login,
-  logout, visitArea
-} from '../../support/util/util';
-import { adminData } from '../../support/config/userdata';
+  addFirstUser, addUnitFromExisting, addUnitPred,
+  createWs,
+  createGroup,
+  deleteFirstUser, deleteGroup,
+  grantRemovePrivilege, importExercise, deleteUnit, moveUnit
+} from '../../support/util';
 
 describe('UI check: workspace', () => {
-  // Although this is ui test, it is necessary to introduce a user (api) to test
-  // the user workspace
+  before(() => {
+    addFirstUser();
+  });
+  after(() => {
+    deleteFirstUser();
+  });
   beforeEach(() => {
     cy.visit('/');
   });
 
-  it('prepare the context for unit area test', () => {
-    addFirstUser();
+  it('prepare the context for unit test', () => {
+    createGroup('Unit_UI_BG');
     cy.visit('/');
-    login(adminData.user_name, adminData.user_pass);
-    createGroupArea('UnitArea_BG');
-    cy.visit('/');
-    createAreaForGroupFromAdmin('UnitArea_AB', 'UnitArea_BG');
-    grantRemovePrivilegeFromGroup(adminData.user_name, 'UnitArea_AB', 'write');
+    createWs('Unit_UI_WS', 'Unit_UI_BG');
+    grantRemovePrivilege(Cypress.env('username'), 'Unit_UI_WS', 'write');
   });
 
-  it('should be add button present', () => {
-    visitArea('UnitArea_AB');
-    cy.get('mat-icon:contains("add")')
-      .should('exist');
+  it('should be add button present and we can add new exercises', () => {
+    cy.visitWs('Unit_UI_WS');
+    addUnitPred('AUF_D1', 'Name Auf 1', 'Gruppe D');
+    cy.visit('/');
+    cy.visitWs('Unit_UI_WS');
+    addUnitPred('AUF_E1', 'Name Auf 2', 'Gruppe E');
+    cy.visit('/');
+    cy.visitWs('Unit_UI_WS');
+    addUnitPred('AUF_D2', 'Name Auf 2', 'Gruppe D');
   });
-  it('should be add button present and we can add a new exercise', () => {
-    visitArea('UnitArea_AB');
-    cy.get('mat-icon:contains("add")')
-      .click();
-    cy.get('button > span:contains("Neue Aufgabe")')
-      .should('exist');
-  });
+
   it('should be add button present and can a exercise from existing exercises', () => {
-    visitArea('UnitArea_AB');
-    cy.get('mat-icon:contains("add")')
-      .click();
-    cy.get('button > span:contains("Neu von vorhandener Aufgabe")')
-      .should('exist');
+    cy.visitWs('Unit_UI_WS');
+    // eslint-disable-next-line max-len
+    addUnitFromExisting('Unit_UI_BG: Unit_UI_WS', 'AUF_D1', 'Name Auf 1', 'Gruppe D', 'Neu_AUF_D1', 'New Name Auf 1', 'Group D');
   });
+
   it('should be add button present and the button to import file is present', () => {
-    visitArea('UnitArea_AB');
-    cy.get('mat-icon:contains("add")')
-      .click();
-    cy.get('button > span:contains("Import")')
-      .should('exist')
-      .click();
+    cy.visitWs('Unit_UI_WS');
+    importExercise();
+  });
+
+  it('should be able to delete Unit', () => {
+    cy.visitWs('Unit_UI_WS');
+    deleteUnit('AUF_D1', 'Name Auf 1');
+  });
+
+  it('should be able to assign group to the units', () => {
+    createWs('UI_WS2', 'Unit_UI_BG');
+    grantRemovePrivilege(Cypress.env('username'), 'UI_WS2', 'write');
+    moveUnit('Unit_UI_WS', 'UI_WS2', 'AUF_E1', 'Name Auf 2');
   });
 
   it('delete the context ', () => {
-    deleteGroupArea('UnitArea_BG');
-    cy.visit('/');
-    deleteFirstUser();
-    cy.visit('/');
-    logout();
+    deleteGroup('Unit_UI_BG');
   });
 });

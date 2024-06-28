@@ -1,88 +1,86 @@
+/// <reference types="cypress" />
 import {
   addFirstUser,
   addUnit,
-  createAreaForGroupFromAdmin,
-  createGroupArea, deleteFirstUser, deleteGroupArea, deleteUnit,
-  grantRemovePrivilegeFromGroup,
-  login, logout, visitArea,
-  visitLoginPage
-} from '../../../support/util/util';
-import { adminData } from '../../../support/config/userdata';
+  createWs,
+  createGroup, deleteFirstUser, deleteGroup, deleteUnit2,
+  grantRemovePrivilege
+} from '../../../support/util';
 import {
   getItem,
   getStructure, selectProfileForArea,
   selectProfileForAreaFromGroup,
   selectProfileForGroup
-} from '../../../support/util/metadata/metadata-util';
-import { IqbProfile } from '../../../support/util/metadata/iqbProfile';
+} from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
 describe('Metadata Management', () => {
   const area = 'Deutsch I';
   const mathArea = 'Mathematik I';
   const group = 'Bista I';
 
-  beforeEach(() => {
-    cy.viewport(1600, 900);
-    visitLoginPage();
+  before(() => {
+    addFirstUser();
   });
-  afterEach(() => {
-    visitLoginPage();
+  after(() => {
+    deleteFirstUser();
+  });
+  beforeEach(() => {
+    cy.visit('/');
   });
 
   it('prepare context', () => {
-    addFirstUser();
-    visitLoginPage();
-    login(adminData.user_name, adminData.user_pass);
-    createGroupArea(group);
-    visitLoginPage();
-    createAreaForGroupFromAdmin(area, group);
-    grantRemovePrivilegeFromGroup(adminData.user_name, area, 'write');
-    visitLoginPage();
-    createAreaForGroupFromAdmin(mathArea, group);
-    grantRemovePrivilegeFromGroup(adminData.user_name, mathArea, 'write');
+    createGroup(group);
+    cy.visit('/');
+    createWs(area, group);
+    grantRemovePrivilege(Cypress.env('username'), area, 'write');
+
+    cy.visit('/');
+    createWs(mathArea, group);
+    grantRemovePrivilege(Cypress.env('username'), mathArea, 'write');
   });
 
   it('choose profiles from the group ', () => {
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.DE);
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.MA);
   });
   // Execute only one of the two test: the previous oder this, not both together
 
   it('choose profile for an area from a group', () => {
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
-    visitLoginPage();
+    cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.MA, mathArea, group);
   });
 
   it('choose a profile for an area from workspace', () => {
-    visitLoginPage();
+    cy.visit('/');
     cy.contains(area).click();
     selectProfileForArea(IqbProfile.DE);
-    visitLoginPage();
+    cy.visit('/');
     cy.contains(mathArea).click();
     selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {
-    visitLoginPage();
-    visitArea(mathArea);
+    cy.visit('/');
+    cy.visitWs(mathArea);
     addUnit('M1_001');
   });
 
   it('create more than one Unit in an area', () => {
-    visitLoginPage();
-    visitArea(area);
+    cy.visit('/');
+    cy.visitWs(area);
     addUnit('D1_001');
-    visitLoginPage();
-    visitArea(area);
+    cy.visit('/');
+    cy.visitWs(area);
     addUnit('D1_002');
   });
 
   it('add metadata', () => {
-    visitArea(mathArea);
+    cy.visitWs(mathArea);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
     getItem('iMA', false);
@@ -90,7 +88,7 @@ describe('Metadata Management', () => {
   });
 
   it('add metadata with more than one element', () => {
-    visitArea(area);
+    cy.visitWs(area);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
     getItem('iDE', false);
@@ -99,17 +97,14 @@ describe('Metadata Management', () => {
   });
 
   it('delete the data', () => {
-    visitArea(area);
-    deleteUnit('D1_001');
-    deleteUnit('D1_002');
-    visitLoginPage();
-    visitArea(mathArea);
-    deleteUnit('M1_001');
-    visitLoginPage();
-    deleteGroupArea(group);
-    visitLoginPage();
-    deleteFirstUser();
-    visitLoginPage();
-    logout();
+    cy.visitWs(area);
+    deleteUnit2('D1_001');
+    deleteUnit2('D1_002');
+    cy.visit('/');
+    cy.visitWs(mathArea);
+    deleteUnit2('M1_001');
+    cy.visit('/');
+    deleteGroup(group);
+    cy.visit('/');
   });
 });
