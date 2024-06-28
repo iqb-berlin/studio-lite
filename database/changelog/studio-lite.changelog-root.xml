@@ -17,4 +17,5 @@
   <include file="studio-lite.changelog-6.3.0.sql"/>
   <include file="studio-lite.changelog-7.4.0.sql"/>
   <include file="studio-lite.changelog-7.5.0.sql"/>
+  <include file="studio-lite.changelog-8.0.0.sql"/>
 </databaseChangeLog>
