@@ -823,6 +823,8 @@ build-develop-commit-liquibase-image:
   stage: build-images
   rules:
     - !reference [ .develop_commit_rules, rules ]
+  except:
+    - external_pull_requests
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
