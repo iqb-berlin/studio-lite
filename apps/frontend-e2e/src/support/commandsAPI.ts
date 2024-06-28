@@ -22,7 +22,7 @@ Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
     method: 'POST',
     url: 'http://localhost:4200/api/login',
     headers: {
-      'app-version': '7.5.1'
+      'app-version': '7.6.0'
     },
     body: {
       username: username,
