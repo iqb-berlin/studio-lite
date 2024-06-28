@@ -106,18 +106,34 @@
         <div class="fx-row-start-center">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">
+
               <mat-checkbox
                 [(ngModel)]="u.isChecked"
                 [disabled]="!selectedWorkspaceId"
                 [matTooltip]="'access-rights.read-access' | translate"
                 (change)="updateWriteAccess(u)">
               </mat-checkbox>
-              <mat-checkbox
-                [(ngModel)]="u.hasWriteAccess"
+
+              <mat-radio-group
+                class="fx-row-start-start"
+                [(ngModel)]="u.writeAccessLevel"
                 [disabled]="!selectedWorkspaceId"
                 [matTooltip]="'access-rights.write-access' | translate"
                 (change)="updateReadAccess(u)">
-              </mat-checkbox>
+                @for (level of [0,1,2,3]; track level) {
+                  @if (selectedWorkspaceId) {
+                    <mat-radio-button
+                      [disabled]="!u.writeAccessLevel && !level"
+                      [value]="level">
+                    </mat-radio-button>
+                  } @else {
+                    <mat-radio-button
+                      value="null">
+                    </mat-radio-button>
+                  }
+                }
+              </mat-radio-group>
+
             </div>
             <div data-cy="access-rights">{{u.displayName}} ({{u.name}})</div>
           </div>

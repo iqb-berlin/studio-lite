@@ -5,14 +5,14 @@ export class WorkspaceUserChecked {
   name: string;
   displayName: string | undefined;
   description: string | undefined;
-  hasWriteAccess: boolean;
+  writeAccessLevel: number;
   isChecked: boolean;
   constructor(userDto: UserInListDto) {
     this.id = userDto.id;
     this.name = userDto.name;
     this.displayName = userDto.displayName;
     this.description = userDto.description;
-    this.hasWriteAccess = false;
+    this.writeAccessLevel = 0;
     this.isChecked = false;
   }
 }

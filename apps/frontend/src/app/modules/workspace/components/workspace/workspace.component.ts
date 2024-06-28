@@ -129,7 +129,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (workspace.settings) {
       this.workspaceService.workspaceSettings = workspace.settings;
     }
-    this.workspaceService.userHasWriteAccess = workspace.userHasWriteAccess;
+    this.workspaceService.userWriteAccessLevel = workspace.userWriteAccessLevel;
     this.workspaceService.isWorkspaceGroupAdmin =
       this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
     this.moduleService.loadList();
