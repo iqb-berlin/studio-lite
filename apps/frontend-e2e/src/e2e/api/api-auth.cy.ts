@@ -9,14 +9,13 @@ import {
   loginAPI
 } from '../../support/utilAPI';
 
-describe('API Login and authorization testing', () => {
+describe('API Login and authorization tests', () => {
   // NOTE: Status response for the post is 201 instead of 200
   it('init-login: create first, log in and store token', () => {
     addFirstUserAPI();
   });
   it('login: log in the api and store token', () => {
     loginAPI(Cypress.env('username'), Cypress.env('password'));
-    console.log(Cypress.env('token_admin'));
   });
   it('auth-data: get authorization data of a user', () => {
     getUserIdAPI(Cypress.env('username'), Cypress.env('token_admin'));
@@ -29,13 +28,13 @@ describe('API Login and authorization testing', () => {
     // This test doesn't work properly since I can not get the userId from a keycloaklogin
     // Maybe if we have implemented before log out, it can work.
     // The code in utilAPI is replaced with a dummy user
-    // TODO PROBLEMATIC asyncronous call
+    // TODO PROBLEMATIC asynchronous call
     keyCloakLogin();
     cy.wait('@tokenCloak').then(() => {
-      console.log(Cypress.env('token_cloak'));
+      // console.log(Cypress.env('token_cloak'));
       getCloakIdAPI();
       cy.wait('@idCloak').then(() => {
-        console.log(Cypress.env('id_cloak'));
+        // console.log(Cypress.env('id_cloak'));
         deleteUserAPI(Cypress.env('id_cloak'));
       });
     });

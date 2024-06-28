@@ -32,17 +32,3 @@ Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
     Cypress.env('admin_token', resp.body);
   });
 });
-
-// cy.request('POST', '/api/init-login', {
-//   username,
-//   password
-// }).its('body.token').then(token => {
-//   cy.visit('/', {
-//     onBeforeLoad(win) {
-//       win.sessionStorage.setItem('token', token);
-//       console.log(token);
-//     }
-//   });
-// });
-
-//     window.localStorage.setItem('adminID', resp.body.userId);

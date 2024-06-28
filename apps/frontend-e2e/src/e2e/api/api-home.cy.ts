@@ -1,6 +1,6 @@
 import { addFirstUserAPI, deleteFirstUserAPI } from '../../support/utilAPI';
 
-describe('HOME', () => {
+describe('API home test', () => {
   before(() => addFirstUserAPI());
   after(() => deleteFirstUserAPI());
   it('my-data: retrieve user data', () => {

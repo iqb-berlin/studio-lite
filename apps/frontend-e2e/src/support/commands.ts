@@ -19,7 +19,6 @@ declare namespace Cypress {
     loadModule(filename: string, name: string):void;
     selectModule(name: string):void;
     visitWs(ws:string):void;
-
   }
 }
 // -- This is a parent command --

@@ -145,8 +145,6 @@ export function logout() {
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
-  // cy.dialogButtonToContinue('Abmelden', 200, '/assets/IQB-LogoA.png', 'GET', 'abmelden');
-  // cy.dialogButtonToContinue('Abmelden', 200, '/api/admin/settings/app-logo', 'GET', 'abmelden');
   cy.get('mat-dialog-actions button')
     .contains('Abmelden')
     .should('exist')
@@ -271,7 +269,6 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
   cy.get('mat-select')
     .click();
   cy.get(`mat-option:contains("${ws}")`).click();
-  // const search_text = `${shortname}: ${name}`;
   cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
   cy.clickButton('Fortsetzen');
   cy.get('input[placeholder="Kurzname"]')
