@@ -161,6 +161,10 @@
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
     "read-access": "Leserechte",
     "write-access": "Schreibrechte",
+    "write-access-1": "Standard-Schreibrechte",
+    "write-access-2": "Erweiterte Schreibrechte",
+    "write-access-3": "Volle Schreibrechte",
+    "remove-write-access": "Schreibrechte entfernen",
     "no-write-access": "Schreibgeschützt"
   },
   "admin": {

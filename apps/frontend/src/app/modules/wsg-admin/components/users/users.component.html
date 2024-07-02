@@ -83,13 +83,23 @@
       <div class="fx-row-start-stretch">
         <div class="access-icon">
           <mat-icon [matTooltip]="'access-rights.read-access' | translate"
-                    color="primary"
                     fontIcon="visibility">
           </mat-icon>
         </div>
         <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.write-access' | translate"
-                    color="primary"
+          <mat-icon [matTooltip]="'access-rights.write-access-1' | translate"
+                    fontIcon="edit">
+          </mat-icon>
+        </div>
+        <div class="access-icon">
+          <mat-icon color="primary"
+                    [matTooltip]="'access-rights.write-access-2' | translate"
+                    fontIcon="edit">
+          </mat-icon>
+        </div>
+        <div class="access-icon">
+          <mat-icon [matTooltip]="'access-rights.write-access-3' | translate"
+                    color="warn"
                     fontIcon="edit">
           </mat-icon>
         </div>
@@ -105,27 +115,16 @@
                 [(ngModel)]="ws.isChecked"
                 [disabled]="!selectedUser"
                 [matTooltip]="'access-rights.read-access' | translate"
-                (change)="updateWriteAccess(ws)">
+                (change)="onReadAccessChanged(ws)">
               </mat-checkbox>
-              <mat-radio-group
-                class="fx-row-start-start"
-                [(ngModel)]="ws.writeAccessLevel"
-                [disabled]="!selectedUser"
-                [matTooltip]="'access-rights.write-access' | translate"
-                (change)="updateReadAccess(ws)">
-                @for (level of [0,1,2,3]; track level) {
-                  @if (selectedUser) {
-                    <mat-radio-button
-                      [disabled]="!ws.writeAccessLevel && !level"
-                      [value]="level">
-                    </mat-radio-button>
-                  } @else {
-                    <mat-radio-button
-                      value="null">
-                    </mat-radio-button>
-                  }
-                }
-              </mat-radio-group>
+              @for (level of [1,2,3]; track level) {
+                <mat-checkbox
+                  [checked]="ws.writeAccessLevel === level"
+                  [disabled]="!selectedUser"
+                  [matTooltip]="'access-rights.write-access-'+level | translate"
+                  (change)="changeWriteAccess($event.checked, ws, level)">
+                </mat-checkbox>
+              }
             </div>
             <div>{{ws.name}}</div>
           </div>
