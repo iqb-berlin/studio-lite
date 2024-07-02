@@ -23,6 +23,13 @@
   padding: 8px;
 }
 
+.two-tone-primary-color {
+  color: transparent;
+  background: #006064;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
 .selected {
   background-color: #00606415;
   &:hover {

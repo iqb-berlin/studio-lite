@@ -13,9 +13,8 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
@@ -31,9 +30,9 @@ import { WorkspaceChecked } from '../../models/workspace-checked.class';
   styleUrls: ['./users.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef,
-    MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, MatCheckbox,
-    FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatRadioButton, MatRadioGroup]
+  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
+    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent,
+    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
@@ -69,16 +68,19 @@ export class UsersComponent implements OnInit {
     this.createWorkspaceList();
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  updateWriteAccess(workspace: WorkspaceChecked): void {
+  onReadAccessChanged(workspace: WorkspaceChecked): void {
     if (!workspace.isChecked) {
       workspace.writeAccessLevel = 0;
     }
     this.userWorkspaces.updateHasChanged();
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  updateReadAccess(workspace: WorkspaceChecked): void {
+  changeWriteAccess(checked: boolean, workspace: WorkspaceChecked, level: number): void {
+    workspace.writeAccessLevel = checked ? level : 0;
+    this.onWriteAccessChanged(workspace);
+  }
+
+  private onWriteAccessChanged(workspace: WorkspaceChecked): void {
     if (workspace.writeAccessLevel) {
       workspace.isChecked = true;
     }

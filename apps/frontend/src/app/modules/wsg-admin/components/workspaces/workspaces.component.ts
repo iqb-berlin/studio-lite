@@ -14,7 +14,7 @@ import { saveAs } from 'file-saver-es';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
@@ -32,9 +32,6 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
-import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
-
-const datePipe = new DatePipe('de-DE');
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -44,7 +41,7 @@ const datePipe = new DatePipe('de-DE');
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
-    IsSelectedIdPipe, TranslateModule, MatIcon, MatRadioGroup, MatRadioButton]
+    IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
@@ -188,6 +185,7 @@ export class WorkspacesComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
       .subscribe(workspace => {
+        const datePipe = new DatePipe('de-DE');
         const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
         saveAs(
           workspace,
@@ -335,16 +333,19 @@ export class WorkspacesComponent implements OnInit {
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  updateWriteAccess(user: WorkspaceUserChecked): void {
+  onReadAccessChanged(user: WorkspaceUserChecked): void {
     if (!user.isChecked) {
       user.writeAccessLevel = 0;
     }
     this.workspaceUsers.updateHasChanged();
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  updateReadAccess(user: WorkspaceUserChecked): void {
+  changeWriteAccess(checked: boolean, user: WorkspaceUserChecked, level: number): void {
+    user.writeAccessLevel = checked ? level : 0;
+    this.onWriteAccessChanged(user);
+  }
+
+  private onWriteAccessChanged(user: WorkspaceUserChecked): void {
     if (user.writeAccessLevel) {
       user.isChecked = true;
     }
