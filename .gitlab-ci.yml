@@ -93,5 +93,4 @@ gemnasium-dependency_scanning:
       - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
       - when: never
-    needs:
-      - check-config
+    needs: []
