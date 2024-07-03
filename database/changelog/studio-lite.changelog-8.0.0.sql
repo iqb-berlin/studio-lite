@@ -8,7 +8,7 @@ ALTER TABLE "public"."workspace_user"
 
 -- changeset jojohoch:2
 ALTER TABLE "public"."workspace_user"
-  ALTER "has_write_access" TYPE INTEGER USING CASE WHEN "has_write_access" THEN 1 ELSE 0 END;
+  ALTER "has_write_access" TYPE INTEGER USING CASE WHEN "has_write_access" THEN 3 ELSE 0 END;
 -- rollback ALTER TABLE "public"."workspace_user" ALTER "has_write_access" TYPE BOOLEAN USING CASE WHEN has_write_access=0 THEN FALSE ELSE TRUE END;
 
 
