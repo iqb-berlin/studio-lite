@@ -64,8 +64,9 @@ export function getUserIdAPI(username: string, token: string):void {
       authorization
     }
   }).then(resp => {
-    expect(resp.status).to.equal(200);
     Cypress.env(`id_${username}`, resp.body.userId);
+    expect(resp.status).to.equal(200);
+    console.log(resp.body.userId);
   });
 }
 
@@ -127,6 +128,7 @@ export function changePasswordAPI(oldpass: string, newpass:string) {
     expect(resp.status).to.equal(200);
   });
 }
+
 export function createNewUserAPI(user: string, pass: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -166,8 +168,8 @@ export function deleteUserAPI(userId: string) {
     expect(resp.status).to.equal(200);
   });
 }
-
-export function createGroupAPI(group: string) {
+// admin workspaces
+export function createGroupAPI(group: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
@@ -181,26 +183,73 @@ export function createGroupAPI(group: string) {
       setting: {}
     }
   }).then(resp => {
-    Cypress.env('id_group', resp.body);
+    Cypress.env(groupKey, resp.body);
     expect(resp.status).to.equal(201);
   });
 }
 
-export function createWsAPI(groupID: string, ws: string) {
+export function getGroupsWhereIamAdmin(username: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/users/${Cypress.env(`id_${username}`)}/workspace-groups`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+    const body = JSON.parse(resp.body);
+    if (body.length > 0) {
+      body.forEach(([id, name]: [number, string]) => {
+        console.log(id);
+        console.log(name);
+      });
+    }
+  });
+}
+
+export function makeAdminOfGroupAPI(userKey: string, groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  const groupNum = parseInt(groupKey, 10);
+
+  console.log(`${userKey} es este`);
+
+  const userNum:number = parseInt(userKey, 10);
+  // const body: { [key: number]: number } = {
+  //   0: userNum
+  // };
+  const bodyMap = new Map<number, number>();
+  bodyMap.set(0, groupNum);
+  const body = Object.fromEntries(bodyMap);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/admins/${userKey}/workspace-groups`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: body
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function createWsAPI(groupKey: string, ws: string, wsKey:string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
-    url: `/api/admin/workspaces/${groupID}`,
+    url: `/api/admin/workspaces/${groupKey}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
-      groupId: `${groupID}`,
+      groupId: `${groupKey}`,
       name: `${ws}`
     }
   }).then(resp => {
-    Cypress.env('id_ws', resp.body);
+    Cypress.env(wsKey, resp.body);
     expect(resp.status).to.equal(201);
   });
 }

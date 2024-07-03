@@ -15,7 +15,8 @@ export default defineConfig({
   env: {
     username: 'admin',
     password: '1234',
-    version: '7.6.0'
+    version: '7.6.0',
+    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwic3ViIjoxLCJzdWIyIjowLCJpYXQiOjE3MTk4MjA1MTAsImV4cCI6MTcxOTkwNjkxMH0.5YI_jZy-VM4gNtMART9Kj5Rx42HbHzVj4LA3buy9Sag'
   },
   e2e: {
     ...nxE2EPreset(__dirname),
