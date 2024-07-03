@@ -82,8 +82,8 @@
     @if (userWorkspaces.entries.length) {
       <div class="fx-row-start-stretch">
         <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.read-access' | translate"
-                    fontIcon="visibility">
+          <mat-icon [matTooltip]="'access-rights.write-access-0' | translate"
+                    fontIcon="edit_off">
           </mat-icon>
         </div>
         <div class="access-icon">
@@ -111,15 +111,9 @@
         <div class="fx-row-start-center">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">
-              <mat-checkbox
-                [(ngModel)]="ws.isChecked"
-                [disabled]="!selectedUser"
-                [matTooltip]="'access-rights.read-access' | translate"
-                (change)="onReadAccessChanged(ws)">
-              </mat-checkbox>
-              @for (level of [1,2,3]; track level) {
+              @for (level of [0,1,2,3]; track level) {
                 <mat-checkbox
-                  [checked]="ws.writeAccessLevel === level"
+                  [checked]="!!selectedUser && (ws.writeAccessLevel === level) && ws.isChecked"
                   [disabled]="!selectedUser"
                   [matTooltip]="'access-rights.write-access-'+level | translate"
                   (change)="changeWriteAccess($event.checked, ws, level)">

@@ -80,6 +80,17 @@ export class WorkspacesComponent implements OnInit {
     this.createUserList();
   }
 
+  changeWriteAccess(checked: boolean, user: WorkspaceUserChecked, level: number): void {
+    if (checked) {
+      user.writeAccessLevel = level;
+      user.isChecked = true;
+    } else {
+      user.writeAccessLevel = 0;
+      user.isChecked = false;
+    }
+    this.workspaceUsers.updateHasChanged();
+  }
+
   updateUserList(): void {
     if (this.workspaceUsers.hasChanged) {
       this.snackBar.open(
@@ -331,24 +342,5 @@ export class WorkspacesComponent implements OnInit {
       this.translateService.instant('error'),
       { duration: 3000 }
     );
-  }
-
-  onReadAccessChanged(user: WorkspaceUserChecked): void {
-    if (!user.isChecked) {
-      user.writeAccessLevel = 0;
-    }
-    this.workspaceUsers.updateHasChanged();
-  }
-
-  changeWriteAccess(checked: boolean, user: WorkspaceUserChecked, level: number): void {
-    user.writeAccessLevel = checked ? level : 0;
-    this.onWriteAccessChanged(user);
-  }
-
-  private onWriteAccessChanged(user: WorkspaceUserChecked): void {
-    if (user.writeAccessLevel) {
-      user.isChecked = true;
-    }
-    this.workspaceUsers.updateHasChanged();
   }
 }
