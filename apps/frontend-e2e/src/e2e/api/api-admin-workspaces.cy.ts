@@ -1,22 +1,20 @@
 import {
   addFirstUserAPI,
   createGroupAPI,
-  createWsAPI,
-  deleteFirstUserAPI,
-  getGroupsWhereIamAdmin,
-  getUserIdAPI, loginAPI,
-  makeAdminOfGroupAPI
+  createWsAPI, deleteFirstUserAPI, deleteGroupAPI, getAdminOfGroupAPI,
+  getUserIdAPI,
+  setAdminOfGroupAPI
 } from '../../support/utilAPI';
 
 describe('API admin workspace tests', () => {
   before(() => {
     addFirstUserAPI();
   });
-  // after(() => deleteFirstUserAPI());
+  after(() => deleteFirstUserAPI());
 
   it('1. should be able to create a new workspace group', () => {
     getUserIdAPI(Cypress.env('username'), Cypress.env('token_admin'));
-    createGroupAPI('VERA2022', 'id_group1');
+    createGroupAPI('VERA2002', 'id_group1');
   });
 
   it('2. should be able to create modify details of a group', () => {
@@ -44,7 +42,15 @@ describe('API admin workspace tests', () => {
     });
   });
 
-  it('3. should be able to get details of a group', () => {
+  it('3. should enable the access to a group to a user', () => {
+    setAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env('id_group1'));
+  });
+
+  it('4. should enable the access to a group to a user', () => {
+    getAdminOfGroupAPI(Cypress.env('id_group1'));
+  });
+
+  it('5. should be able to get details of a group', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
     cy.request({
       method: 'GET',
@@ -59,11 +65,11 @@ describe('API admin workspace tests', () => {
     });
   });
 
-  it('4. should be able to create a workspace in a group', () => {
+  it('6. should be able to create a workspace in a group', () => {
     createWsAPI(Cypress.env('id_group1'), '01Vorlage', 'id_ws1');
   });
 
-  it('5. should be able to get all workspaces order by group', () => {
+  it('7. should be able to get all workspaces order by group', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
     cy.request({
       method: 'GET',
@@ -78,16 +84,13 @@ describe('API admin workspace tests', () => {
     });
   });
 
-  it.skip('6.a create a second group', () => {
+  it('8.a create a second group', () => {
     createGroupAPI('GROUP2022', 'id_group2');
   });
 
-  it.skip('6.b should be able to move a workspace to an another group', () => {
+  it('8. should be able to move a workspace to an another group', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
-    makeAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env('id_group1'));
-    makeAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env('id_group2'));
-    cy.pause();
-    getGroupsWhereIamAdmin(Cypress.env('username'));
+    setAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env('id_group2'));
     cy.request({
       method: 'PATCH',
       url: `/api/admin/workspaces/${Cypress.env('id_ws1')}/${Cypress.env('id_group2')}`,
@@ -98,5 +101,9 @@ describe('API admin workspace tests', () => {
     }).then(resp => {
       expect(resp.status).to.equal(200);
     });
+  });
+  it('9. should be able to delete a workspace group', () => {
+    deleteGroupAPI(Cypress.env('id_group1'));
+    deleteGroupAPI(Cypress.env('id_group2'));
   });
 });

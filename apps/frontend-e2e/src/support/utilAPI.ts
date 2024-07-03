@@ -168,7 +168,7 @@ export function deleteUserAPI(userId: string) {
     expect(resp.status).to.equal(200);
   });
 }
-// admin workspaces
+// admin-workspaces
 export function createGroupAPI(group: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -188,50 +188,36 @@ export function createGroupAPI(group: string, groupKey: string) {
   });
 }
 
-export function getGroupsWhereIamAdmin(username: string) {
+export function setAdminOfGroupAPI(userKey: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/admin/users/${Cypress.env(`id_${username}`)}/workspace-groups`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    }
-  }).then(resp => {
-    expect(resp.status).to.equal(200);
-    const body = JSON.parse(resp.body);
-    if (body.length > 0) {
-      body.forEach(([id, name]: [number, string]) => {
-        console.log(id);
-        console.log(name);
-      });
-    }
-  });
-}
-
-export function makeAdminOfGroupAPI(userKey: string, groupKey: string) {
-  const authorization = `bearer ${Cypress.env('token_admin')}`;
-  const groupNum = parseInt(groupKey, 10);
-
-  console.log(`${userKey} es este`);
-
-  const userNum:number = parseInt(userKey, 10);
-  // const body: { [key: number]: number } = {
-  //   0: userNum
-  // };
-  const bodyMap = new Map<number, number>();
-  bodyMap.set(0, groupNum);
-  const body = Object.fromEntries(bodyMap);
   cy.request({
     method: 'PATCH',
-    url: `/api/admin/admins/${userKey}/workspace-groups`,
+    url: `/api/admin/workspace-groups/${groupKey}/admins`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
-    body: body
+    body: [
+      userKey
+    ]
   }).then(resp => {
     expect(resp.status).to.equal(200);
+  });
+}
+
+export function getAdminOfGroupAPI(groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+    expect(resp.body[0]).to.have.property('name');
+    expect(resp.body[0].id).equal(Cypress.env('id_admin'));
   });
 }
 
@@ -264,7 +250,7 @@ export function deleteGroupAPI(groupID: string) {
       authorization
     }
   }).then(resp => {
-    Cypress.env('id_group', '');
+    Cypress.env(groupID, '');
     expect(resp.status).to.equal(200);
   });
 }
