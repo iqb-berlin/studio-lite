@@ -12,6 +12,7 @@ export enum MessageType {
 }
 
 @Component({
+  selector: 'iqb-message-dialog',
   template: `
     <h1 mat-dialog-title>
       @if (messageData.type === 0) {
