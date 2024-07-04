@@ -38,6 +38,6 @@ export class WorkspaceUserService {
         workspaceId: workspaceId
       }
     });
-    return (workspaceUser?.writeAccessLevel || 0) > 0;
+    return (workspaceUser?.accessLevel || 0) > 0;
   }
 }

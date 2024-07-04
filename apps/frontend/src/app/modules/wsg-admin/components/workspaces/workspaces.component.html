@@ -118,7 +118,7 @@
             <div class="fx-row-start-center">
               @for (level of [0,1,2,3]; track level) {
                 <mat-checkbox
-                  [checked]="!!selectedWorkspaceId && u.writeAccessLevel === level && u.isChecked"
+                  [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
                   [disabled]="!selectedWorkspaceId"
                   [matTooltip]="'access-rights.write-access-'+level | translate"
                   (change)="changeWriteAccess($event.checked, u, level)">

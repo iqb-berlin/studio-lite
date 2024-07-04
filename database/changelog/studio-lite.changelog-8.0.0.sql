@@ -14,6 +14,6 @@ ALTER TABLE "public"."workspace_user"
 
 -- changeset jojohoch:3
 ALTER TABLE "public"."workspace_user"
-  RENAME "has_write_access" TO "write_access_level";
--- rollback ALTER TABLE "public"."workspace_user" RENAME "write_access_level" TO "has_write_access";
+  RENAME "has_write_access" TO "access_level";
+-- rollback ALTER TABLE "public"."workspace_user" RENAME "access_level" TO "has_write_access";
 

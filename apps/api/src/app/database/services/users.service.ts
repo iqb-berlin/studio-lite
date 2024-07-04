@@ -48,7 +48,7 @@ export class UsersService {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
         .find({ where: { workspaceId: workspaceId } });
       workspaceUsers.forEach(wsU => validUsers.push(
-        { id: wsU.userId, writeAccessLevel: wsU.writeAccessLevel }
+        { id: wsU.userId, accessLevel: wsU.accessLevel }
       ));
     }
     const users: User[] = await this.usersRepository
@@ -61,8 +61,8 @@ export class UsersService {
         returnUsers.push(<WorkspaceUserInListDto>{
           id: user.id,
           name: user.name,
-          workspaceWriteAccessLevel: validUsers
-            .find(validUser => validUser.id === user.id)?.writeAccessLevel || 0,
+          workspaceAccessLevel: validUsers
+            .find(validUser => validUser.id === user.id)?.accessLevel || 0,
           isAdmin: user.isAdmin,
           description: user.description,
           displayName: user.firstName ? `${displayName}, ${user.firstName}` : displayName,
@@ -435,7 +435,7 @@ export class UsersService {
         const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
           userId: user.id,
           workspaceId: workspaceId,
-          writeAccessLevel: user.writeAccessLevel
+          accessLevel: user.accessLevel
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
         const units = await this.unitService.findAllForWorkspace(workspaceId);

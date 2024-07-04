@@ -70,10 +70,10 @@ export class UsersComponent implements OnInit {
 
   changeWriteAccess(checked: boolean, workspace: WorkspaceChecked, level: number): void {
     if (checked) {
-      workspace.writeAccessLevel = level;
+      workspace.accessLevel = level;
       workspace.isChecked = true;
     } else {
-      workspace.writeAccessLevel = 0;
+      workspace.accessLevel = 0;
       workspace.isChecked = false;
     }
     this.userWorkspaces.updateHasChanged();

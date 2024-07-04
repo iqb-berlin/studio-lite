@@ -15,7 +15,7 @@ export class UserWorkspaceFullDto {
     groupName?: string;
 
   @ApiProperty()
-    userWriteAccessLevel!: number;
+    userAccessLevel!: number;
 
   @ApiProperty()
     settings?: WorkspaceSettingsDto;

@@ -11,7 +11,7 @@ export class UsersWorkspaceInListDto {
     groupId!: number;
 
   @ApiProperty()
-    userWriteAccessLevel!: number;
+    userAccessLevel!: number;
 
   @ApiProperty()
     unitsCount!: number;

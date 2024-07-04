@@ -5,5 +5,5 @@ export class UserWorkspaceAccessDto {
     id!: number;
 
   @ApiProperty()
-    writeAccessLevel!: number;
+    accessLevel!: number;
 }
