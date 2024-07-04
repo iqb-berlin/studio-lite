@@ -26,7 +26,7 @@
     </studio-lite-add-unit-button>
 
     <studio-lite-delete-unit-button class="unit-crud-button"
-                                    [disabled] = !workspaceService.userAccessLevel
+                                    [disabled] = "workspaceService.userAccessLevel < 2"
                                     [navLinks]="navLinks"
                                     [selectedRouterLink]="selectedRouterLink"
                                     [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0">
