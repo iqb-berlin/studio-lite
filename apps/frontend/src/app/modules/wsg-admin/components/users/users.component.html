@@ -80,30 +80,7 @@
     </div>
 
     @if (userWorkspaces.entries.length) {
-      <div class="fx-row-start-stretch">
-        <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.write-access-0' | translate"
-                    fontIcon="edit_off">
-          </mat-icon>
-        </div>
-        <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.write-access-1' | translate"
-                    fontIcon="edit">
-          </mat-icon>
-        </div>
-        <div class="access-icon">
-          <mat-icon color="primary"
-                    [matTooltip]="'access-rights.write-access-2' | translate"
-                    fontIcon="edit">
-          </mat-icon>
-        </div>
-        <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.write-access-3' | translate"
-                    color="warn"
-                    fontIcon="edit">
-          </mat-icon>
-        </div>
-      </div>
+      <studio-lite-roles-header></studio-lite-roles-header>
     }
 
     <div class="scroll-area fx-column-start-start">
@@ -115,8 +92,8 @@
                 <mat-checkbox
                   [checked]="!!selectedUser && (ws.accessLevel === level) && ws.isChecked"
                   [disabled]="!selectedUser"
-                  [matTooltip]="'access-rights.write-access-'+level | translate"
-                  (change)="changeWriteAccess($event.checked, ws, level)">
+                  [matTooltip]="'access-rights.access-level-'+level | translate"
+                  (change)="changeAccessLevel($event.checked, ws, level)">
                 </mat-checkbox>
               }
             </div>

@@ -4,7 +4,7 @@
     @if (workspaceService.userAccessLevel) {
       <studio-lite-unit-save-button></studio-lite-unit-save-button>
     } @else {
-      <div class="no-write-access-hint">{{'access-rights.no-write-access' | translate}}</div>
+      <div class="no-access-level-hint">{{'access-rights.no-access-level' | translate}}</div>
     }
     <studio-lite-update-units-button></studio-lite-update-units-button>
   </div>

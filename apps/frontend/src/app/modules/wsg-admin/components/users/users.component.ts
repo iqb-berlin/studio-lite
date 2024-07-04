@@ -23,6 +23,7 @@ import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
+import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 
 @Component({
   selector: 'studio-lite-users',
@@ -32,7 +33,7 @@ import { WorkspaceChecked } from '../../models/workspace-checked.class';
   // eslint-disable-next-line max-len
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent,
-    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton]
+    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
@@ -68,7 +69,7 @@ export class UsersComponent implements OnInit {
     this.createWorkspaceList();
   }
 
-  changeWriteAccess(checked: boolean, workspace: WorkspaceChecked, level: number): void {
+  changeAccessLevel(checked: boolean, workspace: WorkspaceChecked, level: number): void {
     if (checked) {
       workspace.accessLevel = level;
       workspace.isChecked = true;

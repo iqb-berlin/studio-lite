@@ -4,7 +4,7 @@ import {
 import { WorkspaceUserService } from '../database/services/workspace-user.service';
 
 @Injectable()
-export class WriteAccessGuard implements CanActivate {
+export class AccessLevelGuard implements CanActivate {
   constructor(private workspaceUserService: WorkspaceUserService) {}
 
   async canActivate(

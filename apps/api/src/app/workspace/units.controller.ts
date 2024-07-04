@@ -17,7 +17,7 @@ import { CommentWriteGuard } from './comment-write.guard';
 import { UnitUserService } from '../database/services/unit-user.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
 import { AppVersionGuard } from '../app-version.guard';
-import { WriteAccessGuard } from './write-access.guard';
+import { AccessLevelGuard } from './access-level.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -172,7 +172,7 @@ export class UnitsController {
   }
 
   @Patch(':id/metadata')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -182,7 +182,7 @@ export class UnitsController {
   }
 
   @Patch(':ids/moveto/:target')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -206,7 +206,7 @@ export class UnitsController {
   }
 
   @Patch(':id/definition')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -216,7 +216,7 @@ export class UnitsController {
   }
 
   @Patch(':id/scheme')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -226,7 +226,7 @@ export class UnitsController {
   }
 
   @Post('units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -240,7 +240,7 @@ export class UnitsController {
   }
 
   @Delete(':ids')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit')
   async remove(@WorkspaceId() workspaceId: number,
@@ -251,7 +251,7 @@ export class UnitsController {
   }
 
   @Delete(':id/state')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AccessLevelGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')

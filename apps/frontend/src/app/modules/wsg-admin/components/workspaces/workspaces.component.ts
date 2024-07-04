@@ -32,6 +32,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
+import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -41,7 +42,7 @@ import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class'
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
-    IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton]
+    IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
@@ -80,7 +81,7 @@ export class WorkspacesComponent implements OnInit {
     this.createUserList();
   }
 
-  changeWriteAccess(checked: boolean, user: WorkspaceUserChecked, level: number): void {
+  changeAccessLevel(checked: boolean, user: WorkspaceUserChecked, level: number): void {
     if (checked) {
       user.accessLevel = level;
       user.isChecked = true;

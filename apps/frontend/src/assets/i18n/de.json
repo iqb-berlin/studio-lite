@@ -159,12 +159,12 @@
     "not-saved": "Zugriffsrechte nicht gespeichert.",
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
-    "write-access-0": "Nur Lesen",
-    "write-access-1": "Standard",
-    "write-access-2": "Erweitert",
-    "write-access-3": "Vollzugriff",
-    "remove-write-access": "Schreibrechte entfernen",
-    "no-write-access": "Schreibgeschützt"
+    "access-level-0": "Kommentator:in",
+    "access-level-1": "Entwickler:in",
+    "access-level-2": "Betreuer:in",
+    "access-level-3": "Admin",
+    "remove-access-level": "Schreibrechte entfernen",
+    "no-access-level": "Schreibgeschützt"
   },
   "admin": {
     "users": "Nutzer:innen",
