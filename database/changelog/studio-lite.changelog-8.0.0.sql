@@ -3,7 +3,7 @@
 -- changeset jojohoch:1
 ALTER TABLE "public"."workspace_user"
   ALTER "has_write_access" SET DEFAULT null;
--- rollback ALTER TABLE "public"."workspace_user" SET DEFAULT TRUE;
+-- rollback ALTER TABLE "public"."workspace_user" ALTER "has_write_access" SET DEFAULT TRUE;
 
 
 -- changeset jojohoch:2
