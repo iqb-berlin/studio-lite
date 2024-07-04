@@ -1,10 +1,20 @@
 import {
   addFirstUserAPI,
   createGroupAPI,
-  createWsAPI, deleteFirstUserAPI, deleteGroupAPI, getAdminOfGroupAPI,
-  getUserIdAPI,
-  setAdminOfGroupAPI
+  createWsAPI, deleteFirstUserAPI, deleteGroupAPI, deleteWsAPI, getAdminOfGroupAPI, getGroupAPI,
+  getUserIdAPI, getUsersOfWsAPI, getWsAPI,
+  setAdminOfGroupAPI, updateUsersOfWsAPI, updateWsAPI
 } from '../../support/utilAPI';
+
+// interface GroupData {
+//   id: string;
+//   name: string;
+//   token: string;
+//   workspaces: {
+//     id_ws: string;
+//     name_ws: string;
+//   };
+// }
 
 describe('API admin workspace tests', () => {
   before(() => {
@@ -102,7 +112,32 @@ describe('API admin workspace tests', () => {
       expect(resp.status).to.equal(200);
     });
   });
-  it('9. should be able to delete a workspace group', () => {
+  it('9a. create a second workspace', () => {
+    createWsAPI(Cypress.env('id_group2'), '02Vorlage', 'id_ws2');
+  });
+  it('9. should retrieve the workspaces associated to a workspace id', () => {
+    // TO DO try to recover the names of ws here and check for equality.
+    cy.getWsByGroupAPI(Cypress.env('id_group2'), 2);
+  });
+  it('10. should be able to get details of a workspace group from its group id', () => {
+    getGroupAPI(Cypress.env('id_group1'));
+  });
+  it('11. should be able to get details of a workspace from its workspace id', () => {
+    getWsAPI(Cypress.env('id_ws1'));
+  });
+  it('12. should be able to get the users of a workspace from its workspace id', () => {
+    getUsersOfWsAPI(Cypress.env('id_ws1'));
+  });
+  it('13. should be able to update the users of a workspace from its workspace id', () => {
+    updateUsersOfWsAPI(Cypress.env('id_ws1'));
+  });
+  it('14. should be able to update the users of a workspace ', () => {
+    updateWsAPI(Cypress.env('id_ws1'), Cypress.env('id_group2'), 'LESEN', 'Leseverstehen');
+  });
+  it('16. should be able a workspace from its workspace id and group id', () => {
+    deleteWsAPI(Cypress.env('id_ws1'), Cypress.env('id_group2'));
+  });
+  it('17. should be able to delete a workspace group', () => {
     deleteGroupAPI(Cypress.env('id_group1'));
     deleteGroupAPI(Cypress.env('id_group2'));
   });

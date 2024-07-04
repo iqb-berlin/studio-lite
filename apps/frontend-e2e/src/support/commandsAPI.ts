@@ -13,7 +13,8 @@
 declare namespace Cypress {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Chainable<Subject> {
-    loginAPI(username: string, password:string):void;
+    getWsByGroupAPI(groupKey: string, num_ws:number):void;
+    loginAPI(username: string, password: string): void;
   }
 }
 
@@ -22,7 +23,7 @@ Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
     method: 'POST',
     url: 'http://localhost:4200/api/login',
     headers: {
-      'app-version': '7.6.0'
+      'app-version': Cypress.env('version')
     },
     body: {
       username: username,
@@ -30,5 +31,20 @@ Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
     }
   }).then(resp => {
     Cypress.env('admin_token', resp.body);
+  });
+});
+
+Cypress.Commands.add('getWsByGroupAPI', (groupKey: string, num_ws: number) => {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}/workspaces`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+    expect(resp.body.length).to.equal(num_ws);
   });
 });

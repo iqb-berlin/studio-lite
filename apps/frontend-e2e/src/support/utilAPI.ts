@@ -66,7 +66,6 @@ export function getUserIdAPI(username: string, token: string):void {
   }).then(resp => {
     Cypress.env(`id_${username}`, resp.body.userId);
     expect(resp.status).to.equal(200);
-    console.log(resp.body.userId);
   });
 }
 
@@ -187,7 +186,125 @@ export function createGroupAPI(group: string, groupKey: string) {
     expect(resp.status).to.equal(201);
   });
 }
+// TO DO 10.
+export function getGroupAPI(groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.body.name).to.equal('VERA2022');
+    expect(resp.status).to.equal(200);
+  });
+}
 
+// 11.
+export function getWsAPI(wsKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspaces/${wsKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.body.name).to.equal('01Vorlage');
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 12.
+export function getUsersOfWsAPI(wsKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspaces/${wsKey}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 13.
+export function updateUsersOfWsAPI(wsKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspaces/${wsKey}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      {
+        hasWriteAccess: false,
+        id: Cypress.env('id_admin')
+      }
+    ]
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 14.
+export function updateWsAPI(wsKey: string, groupKey: string, lesen:string, groupName: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/workspaces',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      {
+        id: `${wsKey}`,
+        name: `${lesen}`,
+        groupId: `${groupKey}`,
+        groupName: `${groupName}`,
+        settings: {
+          defaultEditor: {},
+          defaultPlayer: {},
+          defaultSchemer: {},
+          unitGroups: [
+          ],
+          stableModulesOnly: true,
+          unitMDProfile: '',
+          itemMDProfile: '',
+          states: [
+          ]
+        }
+      }
+    ]
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 15.
+export function deleteWsAPI(wsKey: string, groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/workspaces/${wsKey}/${groupKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 8.
 export function setAdminOfGroupAPI(userKey: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -237,6 +354,19 @@ export function createWsAPI(groupKey: string, ws: string, wsKey:string) {
   }).then(resp => {
     Cypress.env(wsKey, resp.body);
     expect(resp.status).to.equal(201);
+  });
+}
+export function getWsByGroupAPI(groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}/workspaces`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(304);
   });
 }
 
