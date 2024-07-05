@@ -502,7 +502,10 @@ export class WorkspaceService {
           reference: u.reference,
           lastChangedMetadata: u.lastChangedMetadata,
           lastChangedDefinition: u.lastChangedDefinition,
-          lastChangedScheme: u.lastChangedScheme
+          lastChangedScheme: u.lastChangedScheme,
+          lastChangedMetadataUser: u.lastChangedMetadataUser,
+          lastChangedDefinitionUser: u.lastChangedDefinitionUser,
+          lastChangedSchemeUser: u.lastChangedSchemeUser
         });
       } else {
         functionReturn.messages.push({

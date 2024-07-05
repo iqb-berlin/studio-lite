@@ -23,6 +23,9 @@ export class UnitImportData {
   lastChangedMetadata: Date;
   lastChangedDefinition: Date;
   lastChangedScheme: Date;
+  lastChangedMetadataUser: string;
+  lastChangedDefinitionUser: string;
+  lastChangedSchemeUser: string;
 
   constructor(fileIo: FileIo) {
     this.fileName = fileIo.originalname;

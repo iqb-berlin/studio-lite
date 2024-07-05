@@ -26,7 +26,10 @@
       [reference]="_unitMetadata?.reference"
       [lastChangedDefinition] = "_unitMetadata ? _unitMetadata.lastChangedDefinition : null"
       [lastChangedMetadata] = "_unitMetadata ? _unitMetadata.lastChangedMetadata : null"
-      [lastChangedScheme] = "_unitMetadata ? _unitMetadata.lastChangedScheme : null">
+      [lastChangedScheme] = "_unitMetadata ? _unitMetadata.lastChangedScheme : null"
+      [lastChangedDefinitionUser]="_unitMetadata?.lastChangedDefinitionUser"
+      [lastChangedMetadataUser]="_unitMetadata?.lastChangedMetadataUser"
+      [lastChangedSchemeUser]="_unitMetadata?.lastChangedSchemeUser">
     </studio-lite-unit-properties>
     @if (reviewService.reviewConfig.showCoding && _unitMetadata) {
       <studio-lite-unit-info-coding

@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Inject, Injectable, Logger, Scope
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -10,18 +12,21 @@ import {
   UnitMetadataDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
+import { REQUEST } from '@nestjs/core';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
+import { UserEntityRequest } from '../../workspace/user-entity-request.class';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
 
   constructor(
+    @Inject(REQUEST) private readonly request: UserEntityRequest,
     @InjectRepository(Unit)
     private unitsRepository: Repository<Unit>,
     @InjectRepository(UnitDefinition)
@@ -141,9 +146,17 @@ export class UnitService {
       if (unit.editor) newUnit.editor = unit.editor;
       if (unit.schemer) newUnit.schemer = unit.schemer;
       newUnit.groupName = unit.groupName;
+      newUnit.lastChangedDefinitionUser = this.getUserName();
+      newUnit.lastChangedMetadataUser = this.getUserName();
+      newUnit.lastChangedSchemeUser = this.getUserName();
       await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
+  }
+
+  getUserName(): string {
+    const name = `${this.request.user.firstName || ''} ${this.request.user.lastName || ''}`;
+    return name.length > 1 ? name : this.request.user.name;
   }
 
   async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitMetadataDto> {
@@ -156,7 +169,8 @@ export class UnitService {
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
+        'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
     unit.metadata = UnitService.setCurrentProfiles(
@@ -176,7 +190,8 @@ export class UnitService {
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference', 'scheme', 'variables',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state'
+        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
+        'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
     return Promise.all(units
@@ -237,11 +252,14 @@ export class UnitService {
     } else {
       unit.lastChangedMetadata = new Date();
     }
+    unit.lastChangedMetadataUser = this.getUserName();
     if (dataKeys.indexOf('lastChangedDefinition') >= 0) {
       unit.lastChangedDefinition = newData.lastChangedDefinition;
+      unit.lastChangedDefinitionUser = this.getUserName();
     }
     if (dataKeys.indexOf('lastChangedScheme') >= 0) {
       unit.lastChangedScheme = newData.lastChangedScheme;
+      unit.lastChangedSchemeUser = this.getUserName();
     }
     const unitToUpdate = await this.repairDefinition(unit);
     await this.unitsRepository.save(unitToUpdate);
@@ -392,6 +410,7 @@ export class UnitService {
 
     let newUnitDefinitionId = -1;
     unitToUpdate.lastChangedDefinition = new Date();
+    unitToUpdate.lastChangedDefinitionUser = this.getUserName();
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
         where: { id: unitToUpdate.definitionId }
@@ -418,6 +437,7 @@ export class UnitService {
     unitToUpdate.scheme = unitSchemeDto.scheme;
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = new Date();
+    unitToUpdate.lastChangedSchemeUser = this.getUserName();
     await this.unitsRepository.save(unitToUpdate);
   }
 
@@ -437,6 +457,7 @@ export class UnitService {
           this.logger.log(`Repair: New UnitDefinition ${newUnitDefinition.id} for unit ${unit.id} created`);
           unit.definitionId = newUnitDefinition.id;
           unit.lastChangedDefinition = new Date();
+          unit.lastChangedDefinitionUser = this.getUserName();
         }
       }
     }

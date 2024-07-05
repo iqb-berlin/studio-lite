@@ -61,6 +61,11 @@ class Unit {
     variables = [];
 
   @Column({
+    name: 'last_changed_definition_user'
+  })
+    lastChangedDefinitionUser: string;
+
+  @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_definition'
   })
@@ -78,6 +83,11 @@ class Unit {
     schemeType: string;
 
   @Column({
+    name: 'last_changed_scheme_user'
+  })
+    lastChangedSchemeUser: string;
+
+  @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_scheme'
   })
@@ -88,6 +98,11 @@ class Unit {
     name: 'last_changed_metadata'
   })
     lastChangedMetadata: Date;
+
+  @Column({
+    name: 'last_changed_metadata_user'
+  })
+    lastChangedMetadataUser: string;
 }
 
 export default Unit;

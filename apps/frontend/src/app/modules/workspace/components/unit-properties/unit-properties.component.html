@@ -141,25 +141,25 @@
                   @if (workspaceService.lastChangedMetadata) {
                     <div>
                       {{'workspace.last-changed-metadata' | translate: {
-                      date: workspaceService.lastChangedMetadata | date : 'dd.MM.yyyy HH:mm' : timeZone
-                    }
-                    }}
+                          date: (workspaceService.lastChangedMetadata | date : 'dd.MM.yyyy HH:mm' : timeZone),
+                          user: workspaceService.lastChangedMetadataUser || 'workspace.unknown' | translate
+                        } }}
                   </div>
                 }
                 @if (workspaceService.lastChangedDefinition) {
                   <div>
                     {{'workspace.last-changed-definition' | translate: {
-                    date: workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone
-                  }
-                  }}
+                      date: (workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone),
+                      user: workspaceService.lastChangedDefinitionUser || 'workspace.unknown' | translate
+                    } }}
                 </div>
               }
               @if (workspaceService.lastChangedScheme) {
                 <div>
                   {{'workspace.last-changed-scheme' | translate: {
-                  date: workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone
-                }
-                }}
+                    date: (workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone),
+                    user: workspaceService.lastChangedSchemeUser || 'workspace.unknown' | translate
+                  } }}
               </div>
             }
           </div>
