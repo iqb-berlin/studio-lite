@@ -40,4 +40,24 @@ export class WorkspaceUserService {
     });
     return (workspaceUser?.accessLevel || 0) > 0;
   }
+
+  async canDelete(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return (workspaceUser?.accessLevel || 0) === 3;
+  }
+
+  async canManage(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return (workspaceUser?.accessLevel || 0) > 1;
+  }
 }

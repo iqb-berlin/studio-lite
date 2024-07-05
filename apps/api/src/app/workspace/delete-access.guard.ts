@@ -4,7 +4,7 @@ import {
 import { WorkspaceUserService } from '../database/services/workspace-user.service';
 
 @Injectable()
-export class AccessLevelGuard implements CanActivate {
+export class DeleteAccessGuard implements CanActivate {
   constructor(private workspaceUserService: WorkspaceUserService) {}
 
   async canActivate(
@@ -13,7 +13,7 @@ export class AccessLevelGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const userId = req.user.id;
     const workspaceId = req.params.workspace_id;
-    const canAccess = await this.workspaceUserService.canWrite(userId, workspaceId);
+    const canAccess = await this.workspaceUserService.canDelete(userId, workspaceId);
     if (!canAccess) {
       throw new ForbiddenException();
     }
