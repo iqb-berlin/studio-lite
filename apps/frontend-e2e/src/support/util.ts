@@ -1,3 +1,5 @@
+import { AccessLevel } from './testData';
+
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
@@ -66,23 +68,44 @@ export function createWs(ws:string, group:string):void {
   cy.buttonToContinue('Anlegen', 201, '/api/admin/workspaces/*', 'POST', 'createWs');
 }
 
-export function grantRemovePrivilege(user:string, ws: string, rights:string):void {
+export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {
   cy.get('mat-table')
     .contains(`${ws}`)
     .should('exist')
     .click();
-  if (rights === 'read') {
-    cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-      .prev()
-      .within(() => {
-        cy.get('mat-checkbox').eq(0).click();
-      });
-  } else {
-    cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-      .prev()
-      .within(() => {
-        cy.get('mat-checkbox').eq(1).click();
-      });
+  switch (rights) {
+    case AccessLevel.Basic: {
+      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+        .prev()
+        .within(() => {
+          cy.get('mat-checkbox').eq(0).click();
+        });
+      break;
+    }
+    case AccessLevel.Developer: {
+      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+        .prev()
+        .within(() => {
+          cy.get('mat-checkbox').eq(1).click();
+        });
+      break;
+    }
+    case AccessLevel.Manager: {
+      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+        .prev()
+        .within(() => {
+          cy.get('mat-checkbox').eq(2).click();
+        });
+      break;
+    }
+    default: {
+      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
+        .prev()
+        .within(() => {
+          cy.get('mat-checkbox').eq(3).click();
+        });
+      break;
+    }
   }
   cy.get('mat-icon:contains("save")')
     .eq(1)
