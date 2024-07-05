@@ -17,7 +17,7 @@ export class WorkspaceUserInListDto {
     displayName?: string;
 
   @ApiProperty()
-    hasWorkspaceWriteAccess!: boolean;
+    workspaceAccessLevel!: number;
 
   @ApiProperty()
     email?: string;

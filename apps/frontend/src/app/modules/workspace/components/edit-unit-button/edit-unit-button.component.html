@@ -7,7 +7,7 @@
 </button>
 
 <mat-menu #menuOther>
-  @if (workspaceService.userHasWriteAccess) {
+  @if (workspaceService.userAccessLevel > 1) {
     @if (workspaceService.isWorkspaceGroupAdmin) {
       <button
         [matTooltip]="'workspace-settings.title' | translate"
@@ -25,14 +25,14 @@
       <mat-icon>format_align_right</mat-icon>
       {{ 'workspace.manage-groups' | translate }}
     </button>
+    <button mat-menu-item
+      [matTooltip]="'workspace.review-admin' | translate"
+      matTooltipPosition="right"
+      (click)="reviews()">
+      <mat-icon>slideshow</mat-icon>
+      {{ 'workspace.reviews' | translate }}
+    </button>
   }
-  <button mat-menu-item
-    [matTooltip]="'workspace.review-admin' | translate"
-    matTooltipPosition="right"
-    (click)="reviews()">
-    <mat-icon>slideshow</mat-icon>
-    {{ 'workspace.reviews' | translate }}
-  </button>
   <button mat-menu-item
     [matTooltip]="'workspace.user-list' | translate"
     matTooltipPosition="right"
@@ -60,7 +60,7 @@
     {{ 'workspace.print-preview' | translate }}
   </button>
   <mat-divider></mat-divider>
-  @if (workspaceService.userHasWriteAccess) {
+  @if (workspaceService.userAccessLevel > 2) {
     <button mat-menu-item
       [matTooltip]="'workspace.move-unit' | translate"
       matTooltipPosition="right"

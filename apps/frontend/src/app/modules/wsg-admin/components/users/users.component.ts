@@ -13,7 +13,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -23,6 +23,7 @@ import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
+import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 
 @Component({
   selector: 'studio-lite-users',
@@ -30,9 +31,9 @@ import { WorkspaceChecked } from '../../models/workspace-checked.class';
   styleUrls: ['./users.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef,
-    MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, MatCheckbox,
-    FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon]
+  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
+    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent,
+    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
@@ -68,18 +69,13 @@ export class UsersComponent implements OnInit {
     this.createWorkspaceList();
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  updateWriteAccess(workspace: WorkspaceChecked): void {
-    if (!workspace.isChecked) {
-      workspace.hasWriteAccess = false;
-    }
-    this.userWorkspaces.updateHasChanged();
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  updateReadAccess(workspace: WorkspaceChecked): void {
-    if (workspace.hasWriteAccess) {
+  changeAccessLevel(checked: boolean, workspace: WorkspaceChecked, level: number): void {
+    if (checked) {
+      workspace.accessLevel = level;
       workspace.isChecked = true;
+    } else {
+      workspace.accessLevel = 0;
+      workspace.isChecked = false;
     }
     this.userWorkspaces.updateHasChanged();
   }

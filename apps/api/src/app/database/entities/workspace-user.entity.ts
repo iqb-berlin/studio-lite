@@ -16,9 +16,9 @@ class WorkspaceUser {
     userId: number;
 
   @Column({
-    name: 'has_write_access'
+    name: 'access_level'
   })
-    hasWriteAccess: boolean = false; // default to false
+    accessLevel: number = 0; // default
 
   @OneToOne(() => Workspace)
   @JoinColumn({

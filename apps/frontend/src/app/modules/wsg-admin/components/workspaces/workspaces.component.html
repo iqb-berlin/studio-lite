@@ -85,20 +85,7 @@
     </div>
 
     @if (workspaceUsers.entries.length) {
-      <div class="fx-row-start-stretch">
-        <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.read-access' | translate"
-                    color="primary"
-                    fontIcon="visibility">
-          </mat-icon>
-        </div>
-        <div class="access-icon">
-          <mat-icon [matTooltip]="'access-rights.write-access' | translate"
-                    color="primary"
-                    fontIcon="edit">
-          </mat-icon>
-        </div>
-      </div>
+      <studio-lite-roles-header></studio-lite-roles-header>
     }
 
     <div class="scroll-area fx-column-start-stretch">
@@ -106,18 +93,14 @@
         <div class="fx-row-start-center">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">
-              <mat-checkbox
-                [(ngModel)]="u.isChecked"
-                [disabled]="!selectedWorkspaceId"
-                [matTooltip]="'access-rights.read-access' | translate"
-                (change)="updateWriteAccess(u)">
-              </mat-checkbox>
-              <mat-checkbox
-                [(ngModel)]="u.hasWriteAccess"
-                [disabled]="!selectedWorkspaceId"
-                [matTooltip]="'access-rights.write-access' | translate"
-                (change)="updateReadAccess(u)">
-              </mat-checkbox>
+              @for (level of [0,1,2,3]; track level) {
+                <mat-checkbox
+                  [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
+                  [disabled]="!selectedWorkspaceId"
+                  [matTooltip]="'access-rights.access-level-'+level | translate"
+                  (change)="changeAccessLevel($event.checked, u, level)">
+                </mat-checkbox>
+              }
             </div>
             <div data-cy="access-rights">{{u.displayName}} ({{u.name}})</div>
           </div>
