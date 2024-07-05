@@ -171,12 +171,18 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
           sessionId: this.sessionId,
           editorConfig: {
             definitionReportPolicy: 'eager',
-            directDownloadUrl: this.backendService.getDirectDownloadLink()
+            directDownloadUrl: this.backendService.getDirectDownloadLink(),
+            role: this.getRole()
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');
       }
     }
+  }
+
+  private getRole(): string {
+    const roles = ['guest', 'commentator', 'developer', 'maintainer', 'super'];
+    return roles[this.workspaceService.userAccessLevel + 1];
   }
 
   private buildEditor(editorId?: string) {
