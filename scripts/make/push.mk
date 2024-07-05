@@ -32,15 +32,16 @@ TAG := dev
 				--pull\
 				--no-cache\
 				--rm\
-				--tag studio-lite-base\
+				--tag studio-lite-base:$(TAG)\
 			.
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
 				--progress plain\
-				--target=prod\
 				--no-cache\
 				--rm\
+				--target=prod\
 				--build-arg PROJECT=api\
+				--build-arg BASE_IMAGE_NAME=studio-lite-base:$(TAG)\
 				--file $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
 				--tag iqbberlin/studio-lite-backend:$(TAG)\
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-backend:$(TAG)\
@@ -48,10 +49,11 @@ TAG := dev
 	cd $(STUDIO_LITE_BASE_DIR) &&\
 		docker build\
 				--progress plain\
-				--target=prod\
 				--no-cache\
 				--rm\
+				--target=prod\
 				--build-arg PROJECT=frontend\
+				--build-arg BASE_IMAGE_NAME=studio-lite-base:$(TAG)\
 				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
 				--tag iqbberlin/studio-lite-frontend:$(TAG)\
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend:$(TAG)\
