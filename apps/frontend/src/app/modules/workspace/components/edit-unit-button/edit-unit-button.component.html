@@ -60,7 +60,7 @@
     {{ 'workspace.print-preview' | translate }}
   </button>
   <mat-divider></mat-divider>
-  @if (workspaceService.userAccessLevel) {
+  @if (workspaceService.userAccessLevel > 2) {
     <button mat-menu-item
       [matTooltip]="'workspace.move-unit' | translate"
       matTooltipPosition="right"
