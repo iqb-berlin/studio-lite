@@ -148,8 +148,6 @@ describe('API admin workspace tests', () => {
     updateWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), ws1.name, group1.name);
   });
   it('16. should be able a workspace from its workspace id and group id', () => {
-    // deleteWsAPI(Cypress.env('id_ws1'), Cypress.env('id_group2'));
-    cy.pause();
     deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group2.id));
   });
   it('17. should be able to delete a workspace group', () => {

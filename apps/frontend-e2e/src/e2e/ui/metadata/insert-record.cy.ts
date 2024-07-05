@@ -2,17 +2,22 @@
 import {
   addFirstUser,
   addUnit,
+  createGroup,
   createWs,
-  createGroup, deleteFirstUser, deleteGroup, deleteUnit2,
+  deleteFirstUser,
+  deleteGroup,
+  deleteUnit2,
   grantRemovePrivilege
 } from '../../../support/util';
 import {
   getItem,
-  getStructure, selectProfileForArea,
+  getStructure,
+  selectProfileForArea,
   selectProfileForAreaFromGroup,
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import { AccessLevel } from '../../../support/testData';
 
 describe('Metadata Management', () => {
   const area = 'Deutsch I';
@@ -33,11 +38,11 @@ describe('Metadata Management', () => {
     createGroup(group);
     cy.visit('/');
     createWs(area, group);
-    grantRemovePrivilege(Cypress.env('username'), area, 'write');
+    grantRemovePrivilege(Cypress.env('username'), area, AccessLevel.Admin);
 
     cy.visit('/');
     createWs(mathArea, group);
-    grantRemovePrivilege(Cypress.env('username'), mathArea, 'write');
+    grantRemovePrivilege(Cypress.env('username'), mathArea, AccessLevel.Admin);
   });
 
   it('choose profiles from the group ', () => {
