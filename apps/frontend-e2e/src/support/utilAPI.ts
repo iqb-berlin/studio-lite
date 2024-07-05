@@ -1,3 +1,5 @@
+import { GroupData, WsData } from './testData';
+
 export function addFirstUserAPI():void {
   cy.request({
     method: 'POST',
@@ -168,7 +170,7 @@ export function deleteUserAPI(userId: string) {
   });
 }
 // admin-workspaces
-export function createGroupAPI(group: string, groupKey: string) {
+export function createGroupAPI(group: GroupData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
@@ -178,11 +180,11 @@ export function createGroupAPI(group: string, groupKey: string) {
       authorization
     },
     body: {
-      name: `${group}`,
+      name: `${group.name}`,
       setting: {}
     }
   }).then(resp => {
-    Cypress.env(groupKey, resp.body);
+    Cypress.env(group.id, resp.body);
     expect(resp.status).to.equal(201);
   });
 }
@@ -255,7 +257,7 @@ export function updateUsersOfWsAPI(wsKey: string) {
 }
 
 // 14.
-export function updateWsAPI(wsKey: string, groupKey: string, lesen:string, groupName: string) {
+export function updateWsAPI(wsKey: string, groupKey: string, wsName:string, groupName: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'PATCH',
@@ -267,7 +269,7 @@ export function updateWsAPI(wsKey: string, groupKey: string, lesen:string, group
     body: [
       {
         id: `${wsKey}`,
-        name: `${lesen}`,
+        name: `${wsName}`,
         groupId: `${groupKey}`,
         groupName: `${groupName}`,
         settings: {
@@ -280,6 +282,7 @@ export function updateWsAPI(wsKey: string, groupKey: string, lesen:string, group
           unitMDProfile: '',
           itemMDProfile: '',
           states: [
+            'HOLA'
           ]
         }
       }
@@ -338,7 +341,8 @@ export function getAdminOfGroupAPI(groupKey: string) {
   });
 }
 
-export function createWsAPI(groupKey: string, ws: string, wsKey:string) {
+// export function createWsAPI(groupKey: string, ws: string, wsKey:string) {
+export function createWsAPI(groupKey: string, ws1:WsData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
@@ -349,10 +353,10 @@ export function createWsAPI(groupKey: string, ws: string, wsKey:string) {
     },
     body: {
       groupId: `${groupKey}`,
-      name: `${ws}`
+      name: `${ws1.name}`
     }
   }).then(resp => {
-    Cypress.env(wsKey, resp.body);
+    Cypress.env(ws1.id, resp.body);
     expect(resp.status).to.equal(201);
   });
 }
