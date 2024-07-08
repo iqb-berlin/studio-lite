@@ -26,6 +26,9 @@ describe('UnitInfoComponent', () => {
     @Input() lastChangedDefinition!: Date | undefined | null;
     @Input() lastChangedMetadata!: Date | undefined | null;
     @Input() lastChangedScheme!: Date | undefined | null;
+    @Input() lastChangedDefinitionUser!: string | undefined | null;
+    @Input() lastChangedMetadataUser!: string | undefined | null;
+    @Input() lastChangedSchemeUser!: string | undefined | null;
   }
 
   @Component({ selector: 'studio-lite-unit-info-comments', template: '' })

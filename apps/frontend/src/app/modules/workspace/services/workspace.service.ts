@@ -35,6 +35,9 @@ export class WorkspaceService {
   lastChangedMetadata?: Date;
   lastChangedDefinition?: Date;
   lastChangedScheme?: Date;
+  lastChangedMetadataUser?: string;
+  lastChangedDefinitionUser?: string;
+  lastChangedSchemeUser?: string;
   isValidFormKey = new BehaviorSubject<boolean>(true);
   states: State[] = [];
   codingSchemer!: CodingScheme;
@@ -149,19 +152,25 @@ export class WorkspaceService {
           this.lastChangedMetadata = undefined;
           this.lastChangedDefinition = undefined;
           this.lastChangedScheme = undefined;
+          this.lastChangedMetadataUser = undefined;
+          this.lastChangedDefinitionUser = undefined;
+          this.lastChangedSchemeUser = undefined;
           // explicit Date object due to timezone
           if (unitData) {
             if (unitData.lastChangedMetadata) {
               unitData.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
               this.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
+              this.lastChangedMetadataUser = unitData.lastChangedMetadataUser;
             }
             if (unitData.lastChangedDefinition) {
               unitData.lastChangedDefinition = new Date(unitData.lastChangedDefinition);
               this.lastChangedDefinition = new Date(unitData.lastChangedDefinition);
+              this.lastChangedDefinitionUser = unitData.lastChangedDefinitionUser;
             }
             if (unitData.lastChangedScheme) {
               unitData.lastChangedScheme = new Date(unitData.lastChangedScheme);
               this.lastChangedScheme = new Date(unitData.lastChangedScheme);
+              this.lastChangedSchemeUser = unitData.lastChangedSchemeUser;
             }
             this.setUnitMetadataStore(new UnitMetadataStore(unitData));
           } else {
