@@ -159,11 +159,11 @@
     "not-saved": "Zugriffsrechte nicht gespeichert.",
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
-    "access-level-0": "Kommentator:in",
-    "access-level-1": "Entwickler:in",
-    "access-level-2": "Betreuer:in",
-    "access-level-3": "Admin",
-    "remove-access-level": "Schreibrechte entfernen",
+    "access-level-0": "Gast",
+    "access-level-1": "Kommentator:in",
+    "access-level-2": "Entwickler:in",
+    "access-level-3": "Betreuer:in",
+    "access-level-4": "Admin",
     "no-access-level": "Schreibgeschützt"
   },
   "admin": {
