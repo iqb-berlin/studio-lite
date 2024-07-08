@@ -1,4 +1,4 @@
-import { GroupData, WsData } from './testData';
+import { GroupData, UserData, WsData } from './testData';
 
 export function addFirstUserAPI():void {
   cy.request({
@@ -130,7 +130,7 @@ export function changePasswordAPI(oldpass: string, newpass:string) {
   });
 }
 
-export function createNewUserAPI(user: string, pass: string) {
+export function createUserAPI(userData:UserData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
@@ -140,19 +140,27 @@ export function createNewUserAPI(user: string, pass: string) {
       authorization
     },
     body: {
-      name: `${user}`,
-      password: `${pass}`,
-      isAdmin: true,
-      description: 'Student im HuDel-Projekt',
-      email: 'email@gmail.com',
-      lastName: 'Schmit',
-      firstName: 'Cristian',
-      issuer: 'issuer',
-      identity: 'identity'
+      name: `${userData.username}`,
+      password: `${userData.password}`,
+      isAdmin: false
     }
   }).then(resp => {
-    Cypress.env('id_user', resp.body);
+    Cypress.env(userData.username, resp.body);
     expect(resp.status).to.equal(201);
+  });
+}
+
+export function getAdminUserAPI() {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/users',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
   });
 }
 

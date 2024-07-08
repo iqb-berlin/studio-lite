@@ -16,14 +16,13 @@ import {
   selectProfileForAreaFromGroup,
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
-import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import { AccessLevel } from '../../../support/testData';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
 describe('Metadata Management', () => {
   const ws1 = 'Deutsch I';
   const ws2 = 'Mathematik I';
   const group = 'Bista I';
-
   before(() => {
     addFirstUser();
   });

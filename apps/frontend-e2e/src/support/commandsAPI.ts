@@ -13,10 +13,23 @@
 declare namespace Cypress {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Chainable<Subject> {
-    getWsByGroupAPI(groupKey: string, num_ws:number):void;
+    getWsByGroupAPI(groupKey: string, num_ws: number): void;
     loginAPI(username: string, password: string): void;
+    getUsersAPI(auth:string): Chainable<Response<any>>;
   }
 }
+
+Cypress.Commands.add('getUsersAPI',
+  (auth:string) => {
+    cy.request({
+      method: 'GET',
+      url: '/api/admin/users/full',
+      headers: {
+        'app-version': Cypress.env('version'),
+        auth
+      }
+    });
+  });
 
 Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
   cy.request({
