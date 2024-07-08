@@ -126,6 +126,9 @@ export class UnitService {
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
         newUnit.schemeType = unitSourceData.schemeType;
+        newUnit.lastChangedDefinitionUser = this.getUserName(user);
+        newUnit.lastChangedMetadataUser = this.getUserName(user);
+        newUnit.lastChangedSchemeUser = this.getUserName(user);
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
