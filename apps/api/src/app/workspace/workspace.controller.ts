@@ -23,8 +23,8 @@ import { SettingService } from '../database/services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { UsersService } from '../database/services/users.service';
 import { ManageAccessGuard } from './manage-access.guard';
-import UserEntity from "../database/entities/user.entity";
-import { User } from "./user.decorator";
+import UserEntity from '../database/entities/user.entity';
+import { User } from './user.decorator';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {

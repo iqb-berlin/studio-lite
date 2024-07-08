@@ -16,9 +16,7 @@ import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
-import UserEntity from "../entities/user.entity";
-import userEntity from "../entities/user.entity";
-import User from "../entities/user.entity";
+import UserEntity from '../entities/user.entity';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);

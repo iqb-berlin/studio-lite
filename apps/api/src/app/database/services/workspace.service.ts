@@ -25,7 +25,7 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
-import UserEntity from "../entities/user.entity";
+import UserEntity from '../entities/user.entity';
 
 @Injectable()
 export class WorkspaceService {
