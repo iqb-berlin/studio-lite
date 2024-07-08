@@ -1,6 +1,4 @@
-import {
-  Inject, Injectable, Logger, Scope
-} from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -12,21 +10,20 @@ import {
   UnitMetadataDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import { REQUEST } from '@nestjs/core';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
-import { UserEntityRequest } from '../../workspace/user-entity-request.class';
+import UserEntity from "../entities/user.entity";
+import userEntity from "../entities/user.entity";
+import User from "../entities/user.entity";
 
-@Injectable({ scope: Scope.REQUEST })
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
 
   constructor(
-    @Inject(REQUEST) private readonly request: UserEntityRequest,
     @InjectRepository(Unit)
     private unitsRepository: Repository<Unit>,
     @InjectRepository(UnitDefinition)
@@ -99,7 +96,7 @@ export class UnitService {
     return units;
   }
 
-  async create(workspaceId: number, unit: CreateUnitDto): Promise<number> {
+  async create(workspaceId: number, unit: CreateUnitDto, user: UserEntity): Promise<number> {
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
       select: ['id']
@@ -134,11 +131,11 @@ export class UnitService {
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
-          await this.patchDefinition(newUnit.id, unitSourceDefinition);
+          await this.patchDefinition(newUnit.id, unitSourceDefinition, user);
         }
         const unitSourceScheme = await this.findOnesScheme(unit.createFrom);
         if (unitSourceScheme && unitSourceScheme.scheme) {
-          await this.patchScheme(newUnit.id, unitSourceScheme);
+          await this.patchScheme(newUnit.id, unitSourceScheme, user);
         }
       }
     } else {
@@ -146,17 +143,18 @@ export class UnitService {
       if (unit.editor) newUnit.editor = unit.editor;
       if (unit.schemer) newUnit.schemer = unit.schemer;
       newUnit.groupName = unit.groupName;
-      newUnit.lastChangedDefinitionUser = this.getUserName();
-      newUnit.lastChangedMetadataUser = this.getUserName();
-      newUnit.lastChangedSchemeUser = this.getUserName();
+      newUnit.lastChangedDefinitionUser = this.getUserName(user);
+      newUnit.lastChangedMetadataUser = this.getUserName(user);
+      newUnit.lastChangedSchemeUser = this.getUserName(user);
       await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
   }
 
-  getUserName(): string {
-    const name = `${this.request.user.firstName || ''} ${this.request.user.lastName || ''}`;
-    return name.length > 1 ? name : this.request.user.name;
+  getUserName(user: UserEntity): string {
+    this.logger.log(`Request for user: ${user.id}`);
+    const name = `${user.firstName || ''} ${user.lastName || ''}`;
+    return name.length > 1 ? name : user.name;
   }
 
   async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitMetadataDto> {
@@ -230,7 +228,7 @@ export class UnitService {
     };
   }
 
-  async patchMetadata(unitId: number, newData: UnitMetadataDto): Promise<void> {
+  async patchMetadata(unitId: number, newData: UnitMetadataDto, user: UserEntity): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) unit.key = newData.key;
@@ -252,20 +250,20 @@ export class UnitService {
     } else {
       unit.lastChangedMetadata = new Date();
     }
-    unit.lastChangedMetadataUser = this.getUserName();
+    unit.lastChangedMetadataUser = this.getUserName(user);
     if (dataKeys.indexOf('lastChangedDefinition') >= 0) {
       unit.lastChangedDefinition = newData.lastChangedDefinition;
-      unit.lastChangedDefinitionUser = this.getUserName();
+      unit.lastChangedDefinitionUser = this.getUserName(user);
     }
     if (dataKeys.indexOf('lastChangedScheme') >= 0) {
       unit.lastChangedScheme = newData.lastChangedScheme;
-      unit.lastChangedSchemeUser = this.getUserName();
+      unit.lastChangedSchemeUser = this.getUserName(user);
     }
-    const unitToUpdate = await this.repairDefinition(unit);
+    const unitToUpdate = await this.repairDefinition(unit, user);
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  async patchWorkspace(unitIds: number[], newWorkspace: number): Promise<RequestReportDto> {
+  async patchWorkspace(unitIds: number[], newWorkspace: number, user: UserEntity): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
@@ -288,7 +286,7 @@ export class UnitService {
       }
       unit.workspaceId = newWorkspace;
       unit.groupName = '';
-      const unitToUpdate = await this.repairDefinition(unit);
+      const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
         source: 'unit-patch-workspace',
@@ -305,7 +303,7 @@ export class UnitService {
     return report;
   }
 
-  async copy(unitIds: number[], newWorkspace: number): Promise<RequestReportDto> {
+  async copy(unitIds: number[], newWorkspace: number, user: UserEntity): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
@@ -319,7 +317,8 @@ export class UnitService {
         }, { key: unitToCopy.key, groupName: '', createFrom: unitToCopy.id });
       const newUnitId = await this.create(
         newWorkspace,
-        { ...keysToCopy, createFrom: unitToCopy.id });
+        { ...keysToCopy, createFrom: unitToCopy.id },
+        user);
       return <RequestReportDto>{
         source: 'unit-copy',
         messages: newUnitId > 0 ? [] : [{
@@ -394,23 +393,23 @@ export class UnitService {
     }
   }
 
-  async removeUnitState(id: number): Promise<void> {
+  async removeUnitState(id: number, user): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: id } });
-    const unitToUpdate = await this.repairDefinition(unit);
+    const unitToUpdate = await this.repairDefinition(unit, user);
     await this.unitsRepository.save({ ...unitToUpdate, state: '0' }
     );
   }
 
-  async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto) {
+  async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto, user: UserEntity) {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
 
-    const unitToUpdate = await this.repairDefinition(unit);
+    const unitToUpdate = await this.repairDefinition(unit, user);
 
     let newUnitDefinitionId = -1;
     unitToUpdate.lastChangedDefinition = new Date();
-    unitToUpdate.lastChangedDefinitionUser = this.getUserName();
+    unitToUpdate.lastChangedDefinitionUser = this.getUserName(user);
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
         where: { id: unitToUpdate.definitionId }
@@ -429,19 +428,19 @@ export class UnitService {
     }
   }
 
-  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto) {
+  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: UserEntity) {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
-    const unitToUpdate = await this.repairDefinition(unit);
+    const unitToUpdate = await this.repairDefinition(unit, user);
     unitToUpdate.scheme = unitSchemeDto.scheme;
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = new Date();
-    unitToUpdate.lastChangedSchemeUser = this.getUserName();
+    unitToUpdate.lastChangedSchemeUser = this.getUserName(user);
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  private async repairDefinition(unit: Unit): Promise<Unit> {
+  private async repairDefinition(unit: Unit, user: UserEntity): Promise<Unit> {
     const unitDefinitionId = unit.definitionId;
     if (unitDefinitionId) {
       const sameUnits = await this.unitsRepository.find({
@@ -457,7 +456,7 @@ export class UnitService {
           this.logger.log(`Repair: New UnitDefinition ${newUnitDefinition.id} for unit ${unit.id} created`);
           unit.definitionId = newUnitDefinition.id;
           unit.lastChangedDefinition = new Date();
-          unit.lastChangedDefinitionUser = this.getUserName();
+          unit.lastChangedDefinitionUser = this.getUserName(user);
         }
       }
     }
