@@ -38,7 +38,7 @@ export class WorkspaceUserService {
         workspaceId: workspaceId
       }
     });
-    return (workspaceUser?.accessLevel || 0) > 0;
+    return (workspaceUser?.accessLevel || 0) > 1;
   }
 
   async canDelete(userId: number, workspaceId: number) {
@@ -48,7 +48,7 @@ export class WorkspaceUserService {
         workspaceId: workspaceId
       }
     });
-    return (workspaceUser?.accessLevel || 0) === 3;
+    return (workspaceUser?.accessLevel || 0) === 4;
   }
 
   async canManage(userId: number, workspaceId: number) {
@@ -58,6 +58,6 @@ export class WorkspaceUserService {
         workspaceId: workspaceId
       }
     });
-    return (workspaceUser?.accessLevel || 0) > 1;
+    return (workspaceUser?.accessLevel || 0) > 2;
   }
 }
