@@ -9,8 +9,13 @@ import {
   login,
   logout
 } from '../../support/util';
+import { UserData } from '../../support/testData';
 
 describe('UI User Management', () => {
+  const newUser: UserData = {
+    username: 'normaluser',
+    password: '5678'
+  };
   before(() => {
     addFirstUser();
   });
@@ -22,13 +27,13 @@ describe('UI User Management', () => {
   });
 
   it('prepare the Context', () => {
-    createNewUser('normaluser', '5678');
+    createNewUser(newUser);
     cy.visit('/');
     logout();
   });
 
   it('should be possible login with credentials', () => {
-    login('normaluser', '5678');
+    login(newUser.username, newUser.password);
   });
 
   it('should not be able to find admin user setting button', () => {
@@ -41,11 +46,11 @@ describe('UI User Management', () => {
   });
 
   it('should be possible change the password', () => {
-    changePassword('newpass', '5678');
+    changePassword('newpass', newUser.password);
     cy.visit('/');
     logout();
-    login('normaluser', 'newpass');
-    changePassword('5678', 'newpass');
+    login(newUser.username, 'newpass');
+    changePassword(newUser.password, 'newpass');
   });
 
   it('should be able to logout', () => {
@@ -53,7 +58,7 @@ describe('UI User Management', () => {
   });
 
   it('should not be able to login with incorrect credentials', () => {
-    cy.login('normaluser', 'nopass');
+    cy.login(newUser.username, 'nopass');
     cy.buttonToContinue('Weiter', 401, '/api/login', 'POST', 'loginFail');
   });
 

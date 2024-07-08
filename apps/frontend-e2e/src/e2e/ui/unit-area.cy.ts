@@ -6,12 +6,32 @@ import {
   deleteFirstUser, deleteGroup,
   grantRemovePrivilege, importExercise, deleteUnit, moveUnit
 } from '../../support/util';
-import { AccessLevel } from '../../support/testData';
+import { AccessLevel, UnitData } from '../../support/testData';
 
 describe('UI check: workspace', () => {
-  const group1:string = 'Unit_UI_BG';
-  const ws1:string = 'Unit_UI_WS';
-
+  const group1:string = 'UI_BG';
+  const ws1:string = '01Vorlage';
+  const ws2:string = '07Final';
+  const unit1: UnitData = {
+    shortname: 'AUF_D1',
+    name: 'Name Auf 1',
+    group: 'Gruppe D'
+  };
+  const unit2: UnitData = {
+    shortname: 'AUF_E1',
+    name: 'Name Auf 2',
+    group: 'Gruppe E'
+  };
+  const unit3: UnitData = {
+    shortname: 'AUF_D2',
+    name: 'Name Auf 2',
+    group: 'Gruppe D'
+  };
+  const newUnit: UnitData = {
+    shortname: 'Neu_AUF_D1',
+    name: 'New Name Auf 1',
+    group: 'Group D'
+  };
   before(() => {
     addFirstUser();
   });
@@ -31,19 +51,18 @@ describe('UI check: workspace', () => {
 
   it('should be add button present and we can add new exercises', () => {
     cy.visitWs(ws1);
-    addUnitPred('AUF_D1', 'Name Auf 1', 'Gruppe D');
+    addUnitPred(unit1);
     cy.visit('/');
     cy.visitWs(ws1);
-    addUnitPred('AUF_E1', 'Name Auf 2', 'Gruppe E');
+    addUnitPred(unit2);
     cy.visit('/');
     cy.visitWs(ws1);
-    addUnitPred('AUF_D2', 'Name Auf 2', 'Gruppe D');
+    addUnitPred(unit3);
   });
 
   it('should be add button present and can a exercise from existing exercises', () => {
     cy.visitWs(ws1);
-    // eslint-disable-next-line max-len
-    addUnitFromExisting('Unit_UI_BG: Unit_UI_WS', 'AUF_D1', 'Name Auf 1', 'Gruppe D', 'Neu_AUF_D1', 'New Name Auf 1', 'Group D');
+    addUnitFromExisting(`${group1}: ${ws1}`, unit1, newUnit);
   });
 
   it('should be add button present and the button to import file is present', () => {
@@ -53,13 +72,13 @@ describe('UI check: workspace', () => {
 
   it('should be able to delete Unit', () => {
     cy.visitWs(ws1);
-    deleteUnit('AUF_D1', 'Name Auf 1');
+    deleteUnit(unit1);
   });
 
   it('should be able to assign group to the units', () => {
-    createWs('UI_WS2', group1);
-    grantRemovePrivilege(Cypress.env('username'), 'UI_WS2', AccessLevel.Admin);
-    moveUnit(ws1, 'UI_WS2', 'AUF_E1', 'Name Auf 2');
+    createWs(ws2, group1);
+    grantRemovePrivilege(Cypress.env('username'), ws2, AccessLevel.Admin);
+    moveUnit(ws1, ws2, unit2);
   });
 
   it('delete the context ', () => {
