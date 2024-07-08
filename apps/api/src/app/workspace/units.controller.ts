@@ -19,6 +19,8 @@ import { UnitCommentService } from '../database/services/unit-comment.service';
 import { AppVersionGuard } from '../app-version.guard';
 import { WriteAccessGuard } from './write-access.guard';
 import { DeleteAccessGuard } from './delete-access.guard';
+import { User } from './user.decorator';
+import UserEntity from '../database/entities/user.entity';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -178,8 +180,9 @@ export class UnitsController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchMetadata(@Param('id', ParseIntPipe) unitId: number,
+    @User() user: UserEntity,
     @Body() unitMetadataDto: UnitMetadataDto) {
-    return this.unitService.patchMetadata(unitId, unitMetadataDto);
+    return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
   @Patch(':ids/moveto/:target')
@@ -188,10 +191,11 @@ export class UnitsController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchWorkspace(@Param('ids') ids: string,
+    @User() user: UserEntity,
     @Param('target', ParseIntPipe) targetWorkspaceId: number) {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId);
+    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user);
   }
 
   @Patch(':ids/copyto/:target')
@@ -200,10 +204,11 @@ export class UnitsController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async copy(@Param('ids') ids: string,
+    @User() user: UserEntity,
     @Param('target', ParseIntPipe) targetWorkspaceId: number) {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.copy(idsAsNumberArray, targetWorkspaceId);
+    return this.unitService.copy(idsAsNumberArray, targetWorkspaceId, user);
   }
 
   @Patch(':id/definition')
@@ -212,8 +217,9 @@ export class UnitsController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
+    @User() user: UserEntity,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
-    return this.unitService.patchDefinition(unitId, unitDefinitionDto);
+    return this.unitService.patchDefinition(unitId, unitDefinitionDto, user);
   }
 
   @Patch(':id/scheme')
@@ -222,8 +228,9 @@ export class UnitsController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchScheme(@Param('id', ParseIntPipe) unitId: number,
+    @User() user: UserEntity,
     @Body() unitSchemeDto: UnitSchemeDto) {
-    return this.unitService.patchScheme(unitId, unitSchemeDto);
+    return this.unitService.patchScheme(unitId, unitSchemeDto, user);
   }
 
   @Post('units')
@@ -236,8 +243,9 @@ export class UnitsController {
   })
   @ApiTags('workspace unit')
   async create(@WorkspaceId() workspaceId: number,
+    @User() user: UserEntity,
     @Body() createUnitDto: CreateUnitDto) {
-    return this.unitService.create(workspaceId, createUnitDto);
+    return this.unitService.create(workspaceId, createUnitDto, user);
   }
 
   @Delete(':ids')
@@ -256,7 +264,8 @@ export class UnitsController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
-  async deleteUnitState(@Param('id', ParseIntPipe) unitId: number) {
-    return this.unitService.removeUnitState(unitId);
+  async deleteUnitState(@Param('id', ParseIntPipe) unitId: number,
+    @User() user: UserEntity) {
+    return this.unitService.removeUnitState(unitId, user);
   }
 }

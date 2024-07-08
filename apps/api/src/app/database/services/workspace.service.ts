@@ -25,6 +25,7 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
+import UserEntity from '../entities/user.entity';
 
 @Injectable()
 export class WorkspaceService {
@@ -417,7 +418,7 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadUnits(id: number, originalFiles: FileIo[]): Promise<RequestReportDto> {
+  async uploadUnits(id: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
@@ -468,7 +469,7 @@ export class WorkspaceService {
       const newUnitId = await this.unitService.create(id, {
         key: u.key,
         name: u.name
-      });
+      }, user);
       if (newUnitId > 0) {
         if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
           u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
@@ -482,14 +483,14 @@ export class WorkspaceService {
         await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition,
           variables: u.baseVariables
-        });
+        }, user);
         if (u.codingSchemeFileName && notXmlFiles[u.codingSchemeFileName]) {
           u.codingScheme = notXmlFiles[u.codingSchemeFileName].buffer.toString();
           usedFiles.push(u.codingSchemeFileName);
           await this.unitService.patchScheme(newUnitId, {
             scheme: u.codingScheme,
             schemeType: u.schemeType
-          });
+          }, user);
         }
         await this.unitService.patchMetadata(newUnitId, {
           id: newUnitId,
@@ -506,7 +507,7 @@ export class WorkspaceService {
           lastChangedMetadataUser: u.lastChangedMetadataUser,
           lastChangedDefinitionUser: u.lastChangedDefinitionUser,
           lastChangedSchemeUser: u.lastChangedSchemeUser
-        });
+        }, user);
       } else {
         functionReturn.messages.push({
           objectKey: u.fileName, messageKey: 'unit-patch.duplicate-unit-id'

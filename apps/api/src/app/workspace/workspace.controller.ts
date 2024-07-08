@@ -23,6 +23,8 @@ import { SettingService } from '../database/services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { UsersService } from '../database/services/users.service';
 import { ManageAccessGuard } from './manage-access.guard';
+import UserEntity from '../database/entities/user.entity';
+import { User } from './user.decorator';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -167,8 +169,10 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: RequestReportDto
   })
-  async addUnitFiles(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<RequestReportDto> {
-    return this.workspaceService.uploadUnits(workspaceId, files);
+  async addUnitFiles(@WorkspaceId() workspaceId: number,
+    @User() user: UserEntity,
+    @UploadedFiles() files): Promise<RequestReportDto> {
+    return this.workspaceService.uploadUnits(workspaceId, files, user);
   }
 
   @Get('download/:settings')
