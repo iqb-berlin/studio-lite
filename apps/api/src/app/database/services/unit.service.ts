@@ -123,7 +123,7 @@ export class UnitService {
         newUnit.description = unitSourceData.description;
         newUnit.transcript = unitSourceData.transcript;
         newUnit.reference = unitSourceData.reference;
-        // todo: newUnit.metadata = unitSource.metadata;
+        newUnit.metadata = unitSourceData.metadata;
         newUnit.player = unitSourceData.player;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
