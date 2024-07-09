@@ -1,4 +1,4 @@
-import { AccessLevel } from './testData';
+import { AccessLevel, UnitData, UserData } from './testData';
 
 export function addFirstUser() {
   cy.visit('/');
@@ -6,14 +6,14 @@ export function addFirstUser() {
   cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
 }
 
-export function createNewUser(name: string, pass: string):void {
+export function createNewUser(newUser: UserData):void {
   cy.visit('/');
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
     .should('exist')
     .clear()
-    .type(`${name}`);
+    .type(`${newUser.username}`);
   cy.get('input[placeholder="Nachname"]')
     .should('exist')
     .clear()
@@ -25,7 +25,7 @@ export function createNewUser(name: string, pass: string):void {
   cy.get('input[placeholder="Kennwort"]')
     .should('exist')
     .clear()
-    .type(`${pass}`);
+    .type(`${newUser.password}`);
   cy.buttonToContinue('Anlegen', 201, '/api/admin/users', 'POST', 'addUser');
 }
 
@@ -90,19 +90,11 @@ export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel
         });
       break;
     }
-    case AccessLevel.Manager: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(2).click();
-        });
-      break;
-    }
     default: {
       cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
         .prev()
         .within(() => {
-          cy.get('mat-checkbox').eq(3).click();
+          cy.get('mat-checkbox').eq(2).click();
         });
       break;
     }
@@ -212,14 +204,14 @@ export function updatePersonalData():void {
   cy.buttonToContinue('Speichern', 200, '/api/my-data', 'PATCH', 'updateData');
 }
 
-export function deleteUnit(kurzname: string, name: string):void {
+export function deleteUnit(unit: UnitData):void {
   cy.get('mat-icon:contains("delete")')
     .click();
   cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
     .should('exist')
     .click()
-    .type(kurzname);
-  cy.get(`mat-cell:contains("${kurzname} - ${name}")`).prev().click();
+    .type(unit.shortname);
+  cy.get(`mat-cell:contains("${unit.shortname} - ${unit.name}")`).prev().click();
   cy.buttonToContinue('Löschen', 200, '/api/workspace/*/*', 'DELETE', 'deleteUnit');
 }
 
@@ -242,7 +234,7 @@ export function addUnit(kurzname: string):void {
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
 }
 
-export function addUnitPred(shortname:string, name:string, group: string):void {
+export function addUnitPred(unit:UnitData):void {
   cy.get('[data-cy="workspace-add-units"]')
     .click();
   cy.get('button > span:contains("Neue Aufgabe")')
@@ -251,22 +243,22 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .clear()
-    .type(shortname);
+    .type(unit.shortname);
   cy.get('input[placeholder="Name"]')
     .should('exist')
     .clear()
-    .type(name);
+    .type(unit.name);
   cy.get('body').then($body => {
     if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
       cy.get('input[placeholder="Neue Gruppe"]')
         .clear()
-        .type(group);
+        .type(unit.group);
     } else {
       cy.get('svg')
         .click();
       cy.get('body').then($body1 => {
-        if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
-          cy.get(`mat-option:contains("${group}")`)
+        if ($body1.find(`mat-option:contains("${unit.group}")`).length > 0) {
+          cy.get(`mat-option:contains("${unit.group}")`)
             .click();
         } else {
           cy.get('.cdk-overlay-transparent-backdrop').click();
@@ -274,7 +266,7 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
             .click();
           cy.get('input[placeholder="Neue Gruppe"]')
             .clear()
-            .type(group);
+            .type(unit.group);
         }
       });
     }
@@ -282,8 +274,7 @@ export function addUnitPred(shortname:string, name:string, group: string):void {
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
 }
 
-export function addUnitFromExisting(ws:string, shortname:string, name:string, group: string,
-  newshortname:string, newname:string, newgroup: string):void {
+export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData):void {
   // select the group and the ws
   cy.get('[data-cy="workspace-add-units"]')
     .click();
@@ -292,27 +283,27 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
   cy.get('mat-select')
     .click();
   cy.get(`mat-option:contains("${ws}")`).click();
-  cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
+  cy.get(`mat-cell:contains("${unit1.shortname} - ${unit1.name}")`).prev().click();
   cy.clickButton('Fortsetzen');
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .clear()
-    .type(newshortname);
+    .type(newUnit.shortname);
   cy.get('input[placeholder="Name"]')
     .should('exist')
     .clear()
-    .type(newname);
+    .type(newUnit.name);
   cy.get('body').then($body => {
     if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
       cy.get('input[placeholder="Neue Gruppe"]')
         .clear()
-        .type(newgroup);
+        .type(newUnit.group);
     } else {
       cy.get('svg')
         .click();
       cy.get('body').then($body1 => {
-        if ($body1.find(`mat-option:contains("${group}")`).length > 0) {
-          cy.get(`mat-option:contains("${group}")`)
+        if ($body1.find(`mat-option:contains("${unit1.group}")`).length > 0) {
+          cy.get(`mat-option:contains("${unit1.group}")`)
             .click();
         } else {
           cy.get('.cdk-overlay-transparent-backdrop').click();
@@ -320,7 +311,7 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
             .click();
           cy.get('input[placeholder="Neue Gruppe"]')
             .clear()
-            .type(newgroup);
+            .type(newUnit.group);
         }
       });
     }
@@ -328,7 +319,7 @@ export function addUnitFromExisting(ws:string, shortname:string, name:string, gr
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'createUnitFromExisting');
 }
 
-export function moveUnit(wsorigin:string, wsdestination:string, shortname:string, name:string):void {
+export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):void {
   cy.visit('/');
   cy.visitWs(wsorigin);
   cy.get('mat-icon:contains("menu")')
@@ -338,7 +329,7 @@ export function moveUnit(wsorigin:string, wsdestination:string, shortname:string
   cy.get('mat-select')
     .click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
-  cy.get(`mat-cell:contains("${shortname} - ${name}")`).prev().click();
+  cy.get(`mat-cell:contains("${unit.shortname} - ${unit.name}")`).prev().click();
   cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/*/moveto/*', 'PATCH', 'createUnitFromExisting');
 }
 export function importExercise(): void {

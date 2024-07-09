@@ -74,8 +74,6 @@ export function selectProfileForGroup(group:string, profile:IqbProfile) {
     .eq(0)
     .click();
   checkProfile(profile);
-  // which data should be
-
   cy.get('mat-icon:contains("save")').click();
 }
 

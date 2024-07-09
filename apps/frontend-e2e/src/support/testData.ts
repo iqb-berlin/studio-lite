@@ -8,4 +8,22 @@ export interface GroupData {
   name: string;
 }
 
-export enum AccessLevel {Basic, Developer, Manager, Admin}
+export interface UnitData {
+  shortname: string;
+  name: string;
+  group: string;
+}
+
+export interface UserData {
+  username: string;
+  password: string;
+  isAdmin?: boolean;
+  description?: string | '';
+  email?: string;
+  lastName?: string;
+  firstName?: string;
+  issuer?: string;
+  identity?: string;
+}
+
+export enum AccessLevel {Basic, Developer, Admin}

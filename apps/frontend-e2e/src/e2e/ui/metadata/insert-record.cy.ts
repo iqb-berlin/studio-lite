@@ -16,14 +16,13 @@ import {
   selectProfileForAreaFromGroup,
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
-import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import { AccessLevel } from '../../../support/testData';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
 describe('Metadata Management', () => {
-  const area = 'Deutsch I';
-  const mathArea = 'Mathematik I';
+  const ws1 = 'Deutsch I';
+  const ws2 = 'Mathematik I';
   const group = 'Bista I';
-
   before(() => {
     addFirstUser();
   });
@@ -37,12 +36,12 @@ describe('Metadata Management', () => {
   it('prepare context', () => {
     createGroup(group);
     cy.visit('/');
-    createWs(area, group);
-    grantRemovePrivilege(Cypress.env('username'), area, AccessLevel.Admin);
+    createWs(ws1, group);
+    grantRemovePrivilege(Cypress.env('username'), ws1, AccessLevel.Admin);
 
     cy.visit('/');
-    createWs(mathArea, group);
-    grantRemovePrivilege(Cypress.env('username'), mathArea, AccessLevel.Admin);
+    createWs(ws2, group);
+    grantRemovePrivilege(Cypress.env('username'), ws2, AccessLevel.Admin);
   });
 
   it('choose profiles from the group ', () => {
@@ -55,37 +54,37 @@ describe('Metadata Management', () => {
 
   it('choose profile for an area from a group', () => {
     cy.visit('/');
-    selectProfileForAreaFromGroup(IqbProfile.DE, area, group);
+    selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group);
     cy.visit('/');
-    selectProfileForAreaFromGroup(IqbProfile.MA, mathArea, group);
+    selectProfileForAreaFromGroup(IqbProfile.MA, ws2, group);
   });
 
   it('choose a profile for an area from workspace', () => {
     cy.visit('/');
-    cy.contains(area).click();
+    cy.contains(ws1).click();
     selectProfileForArea(IqbProfile.DE);
     cy.visit('/');
-    cy.contains(mathArea).click();
+    cy.contains(ws2).click();
     selectProfileForArea(IqbProfile.MA);
   });
 
   it('create a new Unit in an area', () => {
     cy.visit('/');
-    cy.visitWs(mathArea);
+    cy.visitWs(ws2);
     addUnit('M1_001');
   });
 
   it('create more than one Unit in an area', () => {
     cy.visit('/');
-    cy.visitWs(area);
+    cy.visitWs(ws1);
     addUnit('D1_001');
     cy.visit('/');
-    cy.visitWs(area);
+    cy.visitWs(ws1);
     addUnit('D1_002');
   });
 
   it('add metadata', () => {
-    cy.visitWs(mathArea);
+    cy.visitWs(ws2);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
     getItem('iMA', false);
@@ -93,7 +92,7 @@ describe('Metadata Management', () => {
   });
 
   it('add metadata with more than one element', () => {
-    cy.visitWs(area);
+    cy.visitWs(ws1);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
     getItem('iDE', false);
@@ -102,11 +101,11 @@ describe('Metadata Management', () => {
   });
 
   it('delete the data', () => {
-    cy.visitWs(area);
+    cy.visitWs(ws1);
     deleteUnit2('D1_001');
     deleteUnit2('D1_002');
     cy.visit('/');
-    cy.visitWs(mathArea);
+    cy.visitWs(ws2);
     deleteUnit2('M1_001');
     cy.visit('/');
     deleteGroup(group);
