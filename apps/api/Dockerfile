@@ -11,7 +11,7 @@ FROM base AS dev
 ENTRYPOINT ["npx", "nx"]
 
 
-FROM ${REGISTRY_PATH}node:20.13-bookworm-slim AS build
+FROM ${REGISTRY_PATH}node:lts-bookworm-slim AS build
 ARG PROJECT
 ENV NODE_ENV=production
 
