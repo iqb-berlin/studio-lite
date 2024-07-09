@@ -38,6 +38,26 @@ export class WorkspaceUserService {
         workspaceId: workspaceId
       }
     });
-    return workspaceUser?.hasWriteAccess || false;
+    return (workspaceUser?.accessLevel || 0) > 1;
+  }
+
+  async canDelete(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return (workspaceUser?.accessLevel || 0) === 4;
+  }
+
+  async canManage(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return (workspaceUser?.accessLevel || 0) > 2;
   }
 }

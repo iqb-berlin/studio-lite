@@ -1,0 +1,27 @@
+<div class="fx-row-start-end">
+  <div class="access-icon">
+    <mat-icon color="primary"
+              [matTooltip]="'access-rights.access-level-1' | translate"
+              fontIcon="forum">
+    </mat-icon>
+  </div>
+  <div class="access-icon">
+    <mat-icon color="primary"
+              [matTooltip]="'access-rights.access-level-2' | translate"
+              fontIcon="edit">
+    </mat-icon>
+  </div>
+  <div class="access-icon">
+    <mat-icon color="primary"
+              [matTooltip]="'access-rights.access-level-4' | translate"
+              fontIcon="supervisor_account">
+    </mat-icon>
+  </div>
+  <button class="help"
+          mat-icon-button
+          [matTooltip]="'access-rights.roles-table' | translate"
+          (click)="showRolesMatrix()">
+    <mat-icon>help</mat-icon>
+  </button>
+</div>
+

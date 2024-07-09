@@ -2,7 +2,7 @@
 ## 'MAIN' TARGETED PULL REQUESTS, RELEASE TAGS
 #############################################################################
 
-.main_pr_base_rules:
+.main_pr_rules:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
     - if: $CI_COMMIT_TAG
@@ -30,7 +30,7 @@ check-main-pr-rules:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   script:
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
@@ -106,7 +106,7 @@ build-main-pr-base-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -136,7 +136,7 @@ build-main-pr-backend-test-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
   image: $DOCKER_IMAGE
@@ -174,7 +174,7 @@ build-main-pr-frontend-test-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
   image: $DOCKER_IMAGE
@@ -214,7 +214,7 @@ build-main-pr-frontend-e2e-test-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
   image: $DOCKER_IMAGE
@@ -251,7 +251,7 @@ build-main-pr-db-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -284,7 +284,7 @@ build-main-pr-liquibase-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -317,7 +317,7 @@ build-main-pr-backend-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
     - build-main-pr-backend-test-image
@@ -357,7 +357,7 @@ build-main-pr-frontend-image:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
     - build-main-pr-frontend-test-image
@@ -397,7 +397,7 @@ test-main-pr-db:
   stage: test-db
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-db-image
     - build-main-pr-liquibase-image
@@ -488,7 +488,7 @@ test-main-pr-backend:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
@@ -508,7 +508,7 @@ test-main-pr-frontend:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
@@ -528,7 +528,7 @@ test-main-pr-e2e:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - test-main-pr-db
     - build-main-pr-backend-image
@@ -866,7 +866,7 @@ lint-main-pr-backend:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
@@ -886,7 +886,7 @@ lint-main-pr-frontend:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
@@ -906,7 +906,7 @@ lint-main-pr-frontend-e2e:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-e2e-test-image
   image: $DOCKER_IMAGE
@@ -925,7 +925,7 @@ audit-main-pr-backend:
   stage: audit
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-backend-test-image
   image: $DOCKER_IMAGE
@@ -944,7 +944,7 @@ audit-main-pr-frontend:
   stage: audit
   interruptible: true
   rules:
-    - !reference [ .main_pr_base_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-test-image
   image: $DOCKER_IMAGE
@@ -958,13 +958,6 @@ audit-main-pr-frontend:
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run --entrypoint npm ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test audit --audit-level critical
-
-gemnasium-dependency_scanning:
-  stage: scan-dependencies
-  interruptible: true
-  allow_failure: true
-  rules: # TODO: Rules does not work
-    - !reference [ .main_pr_base_rules, rules ]
 
 build-main-commit-db-image:
   stage: build-images

@@ -25,6 +25,7 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
+import UserEntity from '../entities/user.entity';
 
 @Injectable()
 export class WorkspaceService {
@@ -55,7 +56,7 @@ export class WorkspaceService {
       const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
         .find({ where: { userId: userId } });
       workspaceUsers.forEach(wsU => validWorkspaces.push(
-        { id: wsU.workspaceId, hasWriteAccess: wsU.hasWriteAccess }
+        { id: wsU.workspaceId, accessLevel: wsU.accessLevel }
       ));
     }
     const workspaces: Workspace[] = await this.workspacesRepository
@@ -68,8 +69,8 @@ export class WorkspaceService {
           {
             id: workspace.id,
             name: workspace.name,
-            userHasWriteAccess: validWorkspaces
-              .find(validWorkspace => validWorkspace.id === workspace.id)?.hasWriteAccess || false,
+            userAccessLevel: validWorkspaces
+              .find(validWorkspace => validWorkspace.id === workspace.id)?.accessLevel || 0,
             groupId: workspace.groupId,
             unitsCount: (await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
@@ -85,7 +86,7 @@ export class WorkspaceService {
         const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
           userId: userId,
           workspaceId: workspace.id,
-          hasWriteAccess: workspace.hasWriteAccess
+          accessLevel: workspace.accessLevel
         });
         await this.workspaceUsersRepository.save(newWorkspaceUser);
 
@@ -182,7 +183,7 @@ export class WorkspaceService {
         name: workspace.name,
         groupId: workspace.groupId,
         groupName: workspaceGroup.name,
-        userHasWriteAccess: workspaceUser.hasWriteAccess,
+        userAccessLevel: workspaceUser.accessLevel,
         settings: workspace.settings
       };
     }
@@ -417,7 +418,7 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadUnits(id: number, originalFiles: FileIo[]): Promise<RequestReportDto> {
+  async uploadUnits(id: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
@@ -468,7 +469,7 @@ export class WorkspaceService {
       const newUnitId = await this.unitService.create(id, {
         key: u.key,
         name: u.name
-      });
+      }, user);
       if (newUnitId > 0) {
         if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
           u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
@@ -482,14 +483,14 @@ export class WorkspaceService {
         await this.unitService.patchDefinition(newUnitId, {
           definition: u.definition,
           variables: u.baseVariables
-        });
+        }, user);
         if (u.codingSchemeFileName && notXmlFiles[u.codingSchemeFileName]) {
           u.codingScheme = notXmlFiles[u.codingSchemeFileName].buffer.toString();
           usedFiles.push(u.codingSchemeFileName);
           await this.unitService.patchScheme(newUnitId, {
             scheme: u.codingScheme,
             schemeType: u.schemeType
-          });
+          }, user);
         }
         await this.unitService.patchMetadata(newUnitId, {
           id: newUnitId,
@@ -502,8 +503,11 @@ export class WorkspaceService {
           reference: u.reference,
           lastChangedMetadata: u.lastChangedMetadata,
           lastChangedDefinition: u.lastChangedDefinition,
-          lastChangedScheme: u.lastChangedScheme
-        });
+          lastChangedScheme: u.lastChangedScheme,
+          lastChangedMetadataUser: u.lastChangedMetadataUser,
+          lastChangedDefinitionUser: u.lastChangedDefinitionUser,
+          lastChangedSchemeUser: u.lastChangedSchemeUser
+        }, user);
       } else {
         functionReturn.messages.push({
           objectKey: u.fileName, messageKey: 'unit-patch.duplicate-unit-id'

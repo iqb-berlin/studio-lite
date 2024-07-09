@@ -1,15 +1,7 @@
-import { getAppTitle, isButtonClickable } from '../../support/app.po';
+import { isButtonClickable } from '../../support/app.po';
 
 describe('UI check: initial page', () => {
   beforeEach(() => cy.visit('/'));
-
-  it('should display application title', () => {
-    // Custom command example, see `../support/commands.ts` file
-    cy.login('my-email@something.com', 'myPassword');
-
-    // Function helper example, see `../support/app.po.ts` file
-    getAppTitle().contains('IQB-Studio');
-  });
 
   it('should have a field to introduce the username', () => {
     cy.get('input[placeholder="Anmeldename"]')

@@ -295,7 +295,10 @@ export class WorkspaceGroupsComponent implements OnInit {
       workspaceId: unit.workspaceId,
       lastChangedDefinition: unit.lastChangedDefinition,
       lastChangedMetadata: unit.lastChangedMetadata,
-      lastChangedScheme: unit.lastChangedScheme
+      lastChangedScheme: unit.lastChangedScheme,
+      lastChangedDefinitionUser: unit.lastChangedDefinitionUser,
+      lastChangedMetadataUser: unit.lastChangedMetadataUser,
+      lastChangedSchemeUser: unit.lastChangedSchemeUser
     }));
   }
 

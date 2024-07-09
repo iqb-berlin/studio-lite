@@ -1,0 +1,415 @@
+import { GroupData, UserData, WsData } from './testData';
+
+export function addFirstUserAPI():void {
+  cy.request({
+    method: 'POST',
+    url: '/api/init-login',
+    headers: {
+      'app-version': Cypress.env('version')
+    },
+    body: {
+      username: Cypress.env('username'),
+      password: Cypress.env('password')
+    }
+  }).then(resp => {
+    Cypress.env('token_admin', resp.body);
+    expect(resp.status).to.equal(201);
+    // const data:APIProps = {
+    //   username: Cypress.env('username'),
+    //   password: Cypress.env('password'),
+    //   token_admin: resp.body
+    // };
+    // const dataAdmin = new APIData(data);
+    // return dataAdmin;
+  });
+}
+
+export function loginAPI(username:string, password:string) {
+  cy.request({
+    method: 'POST',
+    url: '/api/login',
+    headers: {
+      'app-version': Cypress.env('version')
+    },
+    body: {
+      username: `${username}`,
+      password: `${password}`
+    }
+  }).then(resp => {
+    Cypress.env('token_admin', resp.body);
+    expect(resp.status).to.equal(201);
+  });
+}
+
+export function deleteFirstUserAPI() {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users/${Cypress.env('id_admin')}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    Cypress.env('token_admin', '');
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function getUserIdAPI(username: string, token: string):void {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/auth-data',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    Cypress.env(`id_${username}`, resp.body.userId);
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function getCloakIdAPI():void {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/users',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    cy.wrap(resp.body[1].id).as('IdCloak');
+    expect(resp.status).to.equal(200);
+    Cypress.env('id_cloak', resp.body[1].id);
+  });
+}
+
+export function keyCloakLogin() {
+  cy.request({
+    method: 'POST',
+    url: '/api/keycloak-login',
+    headers: {
+      'app-version': Cypress.env('version')
+    },
+    body: {
+      description: '',
+      email: 'xxx@hu-berlin.com',
+      firstName: 'xxx',
+      identity: 'xxx',
+      isAdmin: 'false',
+      issuer: 'https://www.iqb-login.de/realms/iqb',
+      lasName: 'xxx',
+      name: 'xxx',
+      password: ''
+    }
+  }).then(resp => {
+    cy.wrap(resp.body).as('tokenCloak');
+    Cypress.env('token_cloak', resp.body);
+    expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+    return resp.body;
+  });
+}
+export function changePasswordAPI(oldpass: string, newpass:string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/password',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      oldPassword: oldpass,
+      newPassword: newpass
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function createUserAPI(userData:UserData) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/users',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      name: `${userData.username}`,
+      password: `${userData.password}`,
+      isAdmin: `${userData.isAdmin}`
+    }
+  }).then(resp => {
+    console.log(resp.body);
+    Cypress.env(userData.username, resp.body);
+    expect(resp.status).to.equal(201);
+  });
+}
+
+export function getAdminUserAPI() {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/users',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function deleteUserAPI(userId: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users/${userId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+// admin-workspaces
+export function createGroupAPI(group: GroupData) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/workspace-groups',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      name: `${group.name}`,
+      setting: {}
+    }
+  }).then(resp => {
+    Cypress.env(group.id, resp.body);
+    expect(resp.status).to.equal(201);
+  });
+}
+// TO DO 10.
+export function getGroupAPI(groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.body.name).to.equal('VERA2022');
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 11.
+export function getWsAPI(wsKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspaces/${wsKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.body.name).to.equal('01Vorlage');
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 12.
+export function getUsersOfWsAPI(wsKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspaces/${wsKey}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 13.
+export function updateUsersOfWsAPI(wsKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspaces/${wsKey}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      {
+        hasWriteAccess: false,
+        id: Cypress.env('id_admin')
+      }
+    ]
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 14.
+export function updateWsAPI(wsKey: string, groupKey: string, wsName:string, groupName: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/workspaces',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      {
+        id: `${wsKey}`,
+        name: `${wsName}`,
+        groupId: `${groupKey}`,
+        groupName: `${groupName}`,
+        settings: {
+          defaultEditor: {},
+          defaultPlayer: {},
+          defaultSchemer: {},
+          unitGroups: [
+          ],
+          stableModulesOnly: true,
+          unitMDProfile: '',
+          itemMDProfile: '',
+          states: [
+            'HOLA'
+          ]
+        }
+      }
+    ]
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 15.
+export function deleteWsAPI(wsKey: string, groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/workspaces/${wsKey}/${groupKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+// 8.
+export function setAdminOfGroupAPI(userKey: string, groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupKey}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      userKey
+    ]
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function getAdminOfGroupAPI(groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+    expect(resp.body[0]).to.have.property('name');
+    expect(resp.body[0].id).equal(Cypress.env('id_admin'));
+  });
+}
+
+// export function createWsAPI(groupKey: string, ws: string, wsKey:string) {
+export function createWsAPI(groupKey: string, ws1:WsData) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: `/api/admin/workspaces/${groupKey}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      groupId: `${groupKey}`,
+      name: `${ws1.name}`
+    }
+  }).then(resp => {
+    Cypress.env(ws1.id, resp.body);
+    expect(resp.status).to.equal(201);
+  });
+}
+export function getWsByGroupAPI(groupKey: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupKey}/workspaces`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(304);
+  });
+}
+
+export function deleteGroupAPI(groupID: string) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/workspace-groups/${groupID}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    Cypress.env(groupID, '');
+    expect(resp.status).to.equal(200);
+  });
+}
+
+export function addModuleAPI() {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/verona-modules',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+
+  }).then(resp => {
+    Cypress.env('id_group', '');
+    expect(resp.status).to.equal(201);
+  });
+}

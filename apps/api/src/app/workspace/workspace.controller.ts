@@ -22,7 +22,9 @@ import { VeronaModulesService } from '../database/services/verona-modules.servic
 import { SettingService } from '../database/services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
 import { UsersService } from '../database/services/users.service';
-import { WriteAccessGuard } from './write-access.guard';
+import { ManageAccessGuard } from './manage-access.guard';
+import UserEntity from '../database/entities/user.entity';
+import { User } from './user.decorator';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -86,7 +88,7 @@ export class WorkspaceController {
   }
 
   @Post('group')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
@@ -97,7 +99,7 @@ export class WorkspaceController {
   }
 
   @Patch('group/:name')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({
@@ -115,7 +117,7 @@ export class WorkspaceController {
   }
 
   @Patch('group/:name/units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({
@@ -133,7 +135,7 @@ export class WorkspaceController {
   }
 
   @Delete('group/:name')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({
@@ -159,7 +161,7 @@ export class WorkspaceController {
   }
 
   @Post('upload')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @UseInterceptors(FilesInterceptor('files'))
@@ -167,8 +169,10 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: RequestReportDto
   })
-  async addUnitFiles(@WorkspaceId() workspaceId: number, @UploadedFiles() files): Promise<RequestReportDto> {
-    return this.workspaceService.uploadUnits(workspaceId, files);
+  async addUnitFiles(@WorkspaceId() workspaceId: number,
+    @User() user: UserEntity,
+    @UploadedFiles() files): Promise<RequestReportDto> {
+    return this.workspaceService.uploadUnits(workspaceId, files, user);
   }
 
   @Get('download/:settings')
@@ -203,7 +207,7 @@ export class WorkspaceController {
   }
 
   @Patch('rename/:name')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')

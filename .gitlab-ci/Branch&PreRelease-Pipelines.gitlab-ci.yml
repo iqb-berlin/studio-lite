@@ -4,8 +4,9 @@
 
 # https://gitlab.com/gitlab-org/gitlab/-/issues/206960
 # https://docs.gitlab.com/ee/ci/jobs/job_control.html#cicd-variable-expressions
-.default_base_rules:
+.default_rules:
   rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_BRANCH &&
           ($CI_COMMIT_BRANCH != "main") &&
           ($CI_COMMIT_BRANCH != "develop") &&
@@ -15,6 +16,7 @@
 
 .default_db_rules:
   rules:
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_BRANCH &&
           ($CI_COMMIT_BRANCH != "main") &&
           ($CI_COMMIT_BRANCH != "develop") &&
@@ -24,17 +26,7 @@
     - if: $CI_COMMIT_TAG
       when: never
 
-.default_manual_rules:
-  rules:
-    - if: $CI_COMMIT_BRANCH &&
-          ($CI_COMMIT_BRANCH != "main") &&
-          ($CI_COMMIT_BRANCH != "develop") &&
-          ($CI_PIPELINE_SOURCE != "external_pull_request_event")
-      when: manual
-    - if: $CI_COMMIT_TAG
-      when: never
-
-.develop_pr_base_rules:
+.develop_pr_rules:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
     - if: $CI_COMMIT_TAG
@@ -64,8 +56,16 @@ check-default-rules:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .default_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
   script:
+    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
+    - echo $CI_COMMIT_TAG
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "develop" ];
+      then echo "external pull request target branch is 'develop'";
+      else echo "external pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'develop'"; fi
+    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "develop" ];
+      then echo "external pull request target branch is not 'develop'";
+      else echo "external pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'develop'"; fi
     - echo $CI_COMMIT_BRANCH
     - echo $CI_PIPELINE_SOURCE
     - echo $CI_COMMIT_TAG
@@ -117,7 +117,7 @@ check-develop-pr-rules:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .develop_pr_rules, rules ]
   script:
     - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_COMMIT_TAG
@@ -197,8 +197,8 @@ install-dependencies:
   stage: build
   interruptible: true
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
+  needs: []
   cache:
     key:
       files:
@@ -217,8 +217,18 @@ install-dependencies:
 build-cicd-base-image:
   stage: build
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+      changes:
+        - .gitlab-ci/CICD.Dockerfile
+    - if: $CI_COMMIT_BRANCH &&
+        ($CI_COMMIT_BRANCH != "main") &&
+        ($CI_COMMIT_BRANCH != "develop") &&
+        ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+      changes:
+        - .gitlab-ci/CICD.Dockerfile
+    - if: $CI_COMMIT_TAG
+      when: never
+  needs: []
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -248,8 +258,12 @@ build-cicd-base-image:
 build-e2e-base-image:
   stage: build
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+      changes:
+        - .gitlab-ci/E2E.Dockerfile
+    - if: $CI_COMMIT_TAG
+      when: never
+  needs: []
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -279,12 +293,9 @@ build-e2e-base-image:
 .distributed:
   interruptible: true
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
   needs:
     - install-dependencies
-    - build-cicd-base-image
-    - build-e2e-base-image
   artifacts:
     paths:
       - node_modules/.cache/nx
@@ -295,7 +306,6 @@ build-db-image:
   interruptible: true
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -329,7 +339,6 @@ build-liquibase-image:
   interruptible: true
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
   image: $DOCKER_IMAGE
   services:
     - name: $DOCKER_SERVICE
@@ -363,8 +372,7 @@ build-app:
   interruptible: true
   extends: .distributed
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
     - npx nx affected --base=HEAD~1 --target=build --parallel=3
@@ -377,7 +385,6 @@ test-db:
   interruptible: true
   rules:
     - !reference [ .default_db_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
   needs:
     - build-db-image
     - build-liquibase-image
@@ -470,8 +477,7 @@ test-app:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
     - npx nx affected --base=HEAD~1 --target=test --parallel=2
@@ -482,8 +488,7 @@ test-app-e2e:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .develop_pr_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
       - name: $DOCKER_SERVICE
@@ -514,7 +519,6 @@ test-app-e2e-api:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -550,7 +554,6 @@ test-app-e2e-ui-chrome:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -586,7 +589,6 @@ test-app-e2e-ui-chrome-mobile:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -623,7 +625,6 @@ test-app-e2e-ui-firefox:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -659,7 +660,6 @@ test-app-e2e-ui-firefox-mobile:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -696,7 +696,6 @@ test-app-e2e-ui-edge:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -732,7 +731,6 @@ test-app-e2e-ui-edge-mobile:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .default_manual_rules, rules ]
     - !reference [ .develop_pr_manual_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
@@ -769,8 +767,7 @@ lint-app:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
     - npx nx affected --base=HEAD~1 --target=lint --parallel=2
@@ -780,19 +777,11 @@ audit-app:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .default_base_rules, rules ]
-    - !reference [ .develop_pr_base_rules, rules ]
+    - !reference [ .default_rules, rules ]
   needs:
     - install-dependencies
   script:
     - npm audit --audit-level critical
-
-gemnasium-dependency_scanning:
-  stage: scan-dependencies
-  interruptible: true
-  allow_failure: true
-  rules: # TODO: Overwriting of rules does not work
-    - !reference [ .develop_pr_base_rules, rules ]
 
 build-develop-commit-db-image:
   stage: build-images

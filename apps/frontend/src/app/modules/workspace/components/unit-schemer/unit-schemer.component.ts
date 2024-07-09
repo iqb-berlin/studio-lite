@@ -13,6 +13,7 @@ import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
+import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({
   selector: 'studio-lite-unit-schemer',
@@ -140,7 +141,8 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
         type: 'vosStartCommand',
         sessionId: this.sessionId,
         schemerConfig: {
-          definitionReportPolicy: 'eager'
+          definitionReportPolicy: 'eager',
+          role: new RolePipe().transform(this.workspaceService.userAccessLevel)
         },
         codingScheme: unitScheme.scheme || '',
         codingSchemeType: unitScheme.schemeType || '',

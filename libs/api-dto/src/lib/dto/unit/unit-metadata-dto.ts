@@ -65,4 +65,13 @@ export class UnitMetadataDto {
     format: 'date-time'
   })
     lastChangedScheme?: Date;
+
+  @ApiProperty()
+    lastChangedMetadataUser?: string;
+
+  @ApiProperty()
+    lastChangedDefinitionUser?: string;
+
+  @ApiProperty()
+    lastChangedSchemeUser?: string;
 }

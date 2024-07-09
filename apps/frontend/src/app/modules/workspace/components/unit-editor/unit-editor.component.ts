@@ -11,6 +11,7 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
+import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({
   selector: 'studio-lite-unit-editor',
@@ -171,7 +172,8 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
           sessionId: this.sessionId,
           editorConfig: {
             definitionReportPolicy: 'eager',
-            directDownloadUrl: this.backendService.getDirectDownloadLink()
+            directDownloadUrl: this.backendService.getDirectDownloadLink(),
+            role: new RolePipe().transform(this.workspaceService.userAccessLevel)
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
         }, '*');

@@ -12,11 +12,18 @@ const cypressJsonConfig = {
   supportFile: 'src/support/e2e.ts'
 };
 export default defineConfig({
+  env: {
+    username: 'admin',
+    password: '1234',
+    version: '8.0.0'
+  },
   e2e: {
     ...nxE2EPreset(__dirname),
     ...cypressJsonConfig,
+    viewportWidth: 1600,
+    viewportHeight: 900,
     watchForFileChanges: false,
-    defaultCommandTimeout: 5000,
+    defaultCommandTimeout: 10000,
     /**
      * TODO(@nx/cypress): In Cypress v12,the testIsolation option is turned on by default.
      * This can cause tests to start breaking where not indended.

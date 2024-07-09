@@ -1,12 +1,24 @@
-<button mat-button
-        [style.width.%]="100"
-        [matMenuTriggerFor]="menuNew"
-        [disabled]="disabled"
-        [matTooltip]="'workspace.add-units' | translate"
-        matTooltipPosition="above"
-        data-cy="workspace-add-units">
-  <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
-</button>
+@if (workspaceService.userAccessLevel > 2) {
+  <button mat-button
+          [style.width.%]="100"
+          [matMenuTriggerFor]="menuNew"
+          [disabled]="disabled"
+          [matTooltip]="'workspace.add-units' | translate"
+          matTooltipPosition="above"
+          data-cy="workspace-add-units">
+    <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
+  </button>
+} @else {
+  <button mat-button
+          [style.width.%]="100"
+          [disabled]="disabled"
+          [matTooltip]="'workspace.new-empty-unit' | translate"
+          matTooltipPosition="above"
+          (click)="addUnit()">
+    <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
+  </button>
+}
+
 
 <mat-menu #menuNew>
   <button mat-menu-item

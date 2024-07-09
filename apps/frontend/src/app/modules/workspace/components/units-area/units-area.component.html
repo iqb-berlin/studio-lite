@@ -1,10 +1,10 @@
 <div class="fx-column-start-stretch area-container">
 
   <div class="fx-row-space-between-center">
-    @if (workspaceService.userHasWriteAccess) {
+    @if (workspaceService.userAccessLevel > 1) {
       <studio-lite-unit-save-button></studio-lite-unit-save-button>
     } @else {
-      <div class="no-write-access-hint">{{'access-rights.no-write-access' | translate}}</div>
+      <div class="no-access-level-hint">{{'access-rights.no-access-level' | translate}}</div>
     }
     <studio-lite-update-units-button></studio-lite-update-units-button>
   </div>
@@ -18,7 +18,7 @@
 
   <div class="fx-row-start-stretch">
     <studio-lite-add-unit-button class="unit-crud-button"
-                                 [disabled] = !workspaceService.userHasWriteAccess
+                                 [disabled] = "workspaceService.userAccessLevel < 2"
                                  [navLinks]="navLinks"
                                  [selectedRouterLink]="selectedRouterLink"
                                  [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0">
@@ -26,7 +26,7 @@
     </studio-lite-add-unit-button>
 
     <studio-lite-delete-unit-button class="unit-crud-button"
-                                    [disabled] = !workspaceService.userHasWriteAccess
+                                    [disabled] = "workspaceService.userAccessLevel < 4"
                                     [navLinks]="navLinks"
                                     [selectedRouterLink]="selectedRouterLink"
                                     [selectedUnitId]="(workspaceService.selectedUnit$ | async) || 0">

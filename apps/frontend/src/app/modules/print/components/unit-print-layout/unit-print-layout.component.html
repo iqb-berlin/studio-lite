@@ -24,7 +24,13 @@
     [lastChangedMetadata] = "unitProperties && (printOptions | include : 'printProperties') ?
     unitProperties.lastChangedMetadata : null"
     [lastChangedScheme] = "unitProperties && (printOptions | include : 'printProperties') ?
-    unitProperties.lastChangedScheme : null">
+    unitProperties.lastChangedScheme : null"
+    [lastChangedDefinitionUser] = "unitProperties && (printOptions | include : 'printProperties' ) ?
+    unitProperties.lastChangedDefinitionUser : ''"
+    [lastChangedMetadataUser] = "unitProperties && (printOptions | include : 'printProperties') ?
+    unitProperties.lastChangedMetadataUser : ''"
+    [lastChangedSchemeUser] = "unitProperties && (printOptions | include : 'printProperties') ?
+    unitProperties.lastChangedSchemeUser : ''">
   </studio-lite-unit-properties>
 
   @if ((printOptions | include : 'printMetadata')) {

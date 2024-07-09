@@ -42,7 +42,8 @@ variables:
 
 include:
   - local: ".gitlab-ci/*.gitlab-ci.yml"
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  #- template: Jobs/Dependency-Scanning.gitlab-ci.yml        # commits
+  - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml # pull requests
 
 check-config:
   stage: ".pre"
@@ -83,3 +84,13 @@ check-config:
     - echo $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
     - echo $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - echo $CI_MERGE_REQUEST_TARGET_BRANCH_SHA
+
+gemnasium-dependency_scanning:
+    stage: scan-dependencies
+    interruptible: true
+    allow_failure: true
+    rules:
+      - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
+      - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "main"
+      - when: never
+    needs: []
