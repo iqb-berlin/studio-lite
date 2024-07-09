@@ -3,7 +3,7 @@
 ARG REGISTRY_PATH
 
 
-FROM ${REGISTRY_PATH}node:20.13-bookworm-slim AS builder
+FROM ${REGISTRY_PATH}node:20.13-bookworm AS builder
 
 # Update npm to latest version
 RUN npm --version
