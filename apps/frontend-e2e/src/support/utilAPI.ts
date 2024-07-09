@@ -142,9 +142,10 @@ export function createUserAPI(userData:UserData) {
     body: {
       name: `${userData.username}`,
       password: `${userData.password}`,
-      isAdmin: false
+      isAdmin: `${userData.isAdmin}`
     }
   }).then(resp => {
+    console.log(resp.body);
     Cypress.env(userData.username, resp.body);
     expect(resp.status).to.equal(201);
   });

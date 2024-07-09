@@ -8,25 +8,57 @@
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
-
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Cypress {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Chainable<Subject> {
     getWsByGroupAPI(groupKey: string, num_ws: number): void;
     loginAPI(username: string, password: string): void;
-    getUsersAPI(auth:string): Chainable<Response<any>>;
+    // eslint-disable-next-line
+    getUsersAPI(): Chainable<Response<any>>;
+    // eslint-disable-next-line
+    getUsersFullAPI(): Chainable<Response<any>>;
+    // eslint-disable-next-line
+    getUserAPI(id:string): Chainable<Response<any>>;
   }
 }
 
+Cypress.Commands.add('getUserAPI',
+  (id:string) => {
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/users/${id}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
 Cypress.Commands.add('getUsersAPI',
-  (auth:string) => {
+  () => {
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
+    cy.request({
+      method: 'GET',
+      url: '/api/admin/users',
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      }
+    });
+  });
+
+Cypress.Commands.add('getUsersFullAPI',
+  () => {
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
     cy.request({
       method: 'GET',
       url: '/api/admin/users/full',
       headers: {
         'app-version': Cypress.env('version'),
-        auth
+        authorization
       }
     });
   });
