@@ -16,12 +16,14 @@ import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
-import UserEntity from '../entities/user.entity';
+import User from '../entities/user.entity';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
 
   constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     @InjectRepository(Unit)
     private unitsRepository: Repository<Unit>,
     @InjectRepository(UnitDefinition)
@@ -94,7 +96,7 @@ export class UnitService {
     return units;
   }
 
-  async create(workspaceId: number, unit: CreateUnitDto, user: UserEntity): Promise<number> {
+  async create(workspaceId: number, unit: CreateUnitDto, user: User): Promise<number> {
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
       select: ['id']
@@ -110,7 +112,7 @@ export class UnitService {
     await Promise.all(workspaceUsers.map(async workspaceUser => {
       await this.unitUserService.createUnitUser(workspaceUser.userId, newUnit.id);
     }));
-
+    const displayName = await this.getDisplayNameForUser(user.id);
     if (unit.createFrom) {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
@@ -126,9 +128,9 @@ export class UnitService {
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
         newUnit.schemeType = unitSourceData.schemeType;
-        newUnit.lastChangedDefinitionUser = this.getUserName(user);
-        newUnit.lastChangedMetadataUser = this.getUserName(user);
-        newUnit.lastChangedSchemeUser = this.getUserName(user);
+        newUnit.lastChangedDefinitionUser = displayName;
+        newUnit.lastChangedMetadataUser = displayName;
+        newUnit.lastChangedSchemeUser = displayName;
         await this.unitsRepository.save(newUnit);
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
@@ -144,18 +146,12 @@ export class UnitService {
       if (unit.editor) newUnit.editor = unit.editor;
       if (unit.schemer) newUnit.schemer = unit.schemer;
       newUnit.groupName = unit.groupName;
-      newUnit.lastChangedDefinitionUser = this.getUserName(user);
-      newUnit.lastChangedMetadataUser = this.getUserName(user);
-      newUnit.lastChangedSchemeUser = this.getUserName(user);
+      newUnit.lastChangedDefinitionUser = displayName;
+      newUnit.lastChangedMetadataUser = displayName;
+      newUnit.lastChangedSchemeUser = displayName;
       await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
-  }
-
-  getUserName(user: UserEntity): string {
-    this.logger.log(`Request for user: ${user.id}`);
-    const name = `${user.firstName || ''} ${user.lastName || ''}`;
-    return name.length > 1 ? name : user.name;
   }
 
   async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitMetadataDto> {
@@ -221,6 +217,18 @@ export class UnitService {
     return metadata;
   }
 
+  private async getDisplayNameForUser(id: number): Promise<string> {
+    const user = await this.usersRepository.findOne({
+      where: { id: id }
+    });
+    return user ? UnitService.getUserDisplayName(user) : 'unknown';
+  }
+
+  static getUserDisplayName(user: User): string {
+    const displayName = user.lastName ? user.lastName : user.name;
+    return user.firstName ? `${displayName}, ${user.firstName}` : displayName;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static setCurrentProfile(profileId: string, profile: any): any {
     return {
@@ -229,8 +237,9 @@ export class UnitService {
     };
   }
 
-  async patchMetadata(unitId: number, newData: UnitMetadataDto, user: UserEntity): Promise<void> {
+  async patchMetadata(unitId: number, newData: UnitMetadataDto, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
+    const displayName = await this.getDisplayNameForUser(user.id);
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) unit.key = newData.key;
     if (dataKeys.indexOf('name') >= 0) unit.name = newData.name;
@@ -251,20 +260,20 @@ export class UnitService {
     } else {
       unit.lastChangedMetadata = new Date();
     }
-    unit.lastChangedMetadataUser = this.getUserName(user);
+    unit.lastChangedMetadataUser = displayName;
     if (dataKeys.indexOf('lastChangedDefinition') >= 0) {
       unit.lastChangedDefinition = newData.lastChangedDefinition;
-      unit.lastChangedDefinitionUser = this.getUserName(user);
+      unit.lastChangedDefinitionUser = displayName;
     }
     if (dataKeys.indexOf('lastChangedScheme') >= 0) {
       unit.lastChangedScheme = newData.lastChangedScheme;
-      unit.lastChangedSchemeUser = this.getUserName(user);
+      unit.lastChangedSchemeUser = displayName;
     }
     const unitToUpdate = await this.repairDefinition(unit, user);
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  async patchWorkspace(unitIds: number[], newWorkspace: number, user: UserEntity): Promise<RequestReportDto> {
+  async patchWorkspace(unitIds: number[], newWorkspace: number, user: User): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
@@ -304,7 +313,7 @@ export class UnitService {
     return report;
   }
 
-  async copy(unitIds: number[], newWorkspace: number, user: UserEntity): Promise<RequestReportDto> {
+  async copy(unitIds: number[], newWorkspace: number, user: User): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
@@ -401,16 +410,17 @@ export class UnitService {
     );
   }
 
-  async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto, user: UserEntity) {
+  async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto, user: User) {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
 
+    const displayName = await this.getDisplayNameForUser(user.id);
     const unitToUpdate = await this.repairDefinition(unit, user);
 
     let newUnitDefinitionId = -1;
     unitToUpdate.lastChangedDefinition = new Date();
-    unitToUpdate.lastChangedDefinitionUser = this.getUserName(user);
+    unitToUpdate.lastChangedDefinitionUser = displayName;
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
         where: { id: unitToUpdate.definitionId }
@@ -429,19 +439,20 @@ export class UnitService {
     }
   }
 
-  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: UserEntity) {
+  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: User) {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
+    const displayName = await this.getDisplayNameForUser(user.id);
     const unitToUpdate = await this.repairDefinition(unit, user);
     unitToUpdate.scheme = unitSchemeDto.scheme;
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = new Date();
-    unitToUpdate.lastChangedSchemeUser = this.getUserName(user);
+    unitToUpdate.lastChangedSchemeUser = displayName;
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  private async repairDefinition(unit: Unit, user: UserEntity): Promise<Unit> {
+  private async repairDefinition(unit: Unit, user: User): Promise<Unit> {
     const unitDefinitionId = unit.definitionId;
     if (unitDefinitionId) {
       const sameUnits = await this.unitsRepository.find({
@@ -452,12 +463,13 @@ export class UnitService {
           where: { id: unitDefinitionId }
         });
         if (unitDefinition) {
+          const displayName = await this.getDisplayNameForUser(user.id);
           const newUnitDefinition = this.unitDefinitionsRepository.create({ data: unitDefinition.data });
           await this.unitDefinitionsRepository.save(newUnitDefinition);
           this.logger.log(`Repair: New UnitDefinition ${newUnitDefinition.id} for unit ${unit.id} created`);
           unit.definitionId = newUnitDefinition.id;
           unit.lastChangedDefinition = new Date();
-          unit.lastChangedDefinitionUser = this.getUserName(user);
+          unit.lastChangedDefinitionUser = displayName;
         }
       }
     }
