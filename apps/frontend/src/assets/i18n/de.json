@@ -168,6 +168,7 @@
     "roles-table": "Zugriffsrechte der Rollen",
     "true": "Ja",
     "false": "Nein",
+    "modules": "Verona Module setzen die Zugriffsrechte nach eigenen Anforderungen um.",
     "functionality": "Funktionalität",
     "unit-create": "Aufgaben anlegen",
     "unit-copy": "Aufgaben kopieren",
