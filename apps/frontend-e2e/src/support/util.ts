@@ -90,19 +90,11 @@ export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel
         });
       break;
     }
-    case AccessLevel.Manager: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(2).click();
-        });
-      break;
-    }
     default: {
       cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
         .prev()
         .within(() => {
-          cy.get('mat-checkbox').eq(3).click();
+          cy.get('mat-checkbox').eq(2).click();
         });
       break;
     }
