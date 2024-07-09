@@ -1,0 +1,71 @@
+<h1 mat-dialog-title>{{'access-rights.roles-table' | translate}}</h1>
+<div mat-dialog-content>
+
+  <table mat-table [dataSource]="dataSource">
+
+    <ng-container matColumnDef="functionality">
+      <th mat-header-cell *matHeaderCellDef>{{'access-rights.functionality' | translate}}</th>
+      <td mat-cell *matCellDef="let element"> {{'access-rights.' + element.functionality | translate}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="commentator">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-icon color="primary"
+                  [matTooltip]="'access-rights.access-level-1' | translate"
+                  fontIcon="forum">
+        </mat-icon>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-icon color="primary"
+                  [matTooltip]="(element.commentator ? 'access-rights.true' : 'access-rights.false') | translate"
+                  [color]="element.commentator ? 'primary' : 'default'"
+                  [fontIcon]="element.commentator ? 'check_circle' : 'unpublished'">
+        </mat-icon>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="developer">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-icon color="primary"
+                  [matTooltip]="'access-rights.access-level-2' | translate"
+                  fontIcon="edit">
+        </mat-icon>
+      </th>
+      <td mat-cell *matCellDef="let element">
+          <mat-icon color="primary"
+                    [matTooltip]="(element.developer ? 'access-rights.true' : 'access-rights.false') | translate"
+                    [color]="element.developer ? 'primary' : 'default'"
+                    [fontIcon]="element.developer ? 'check_circle' : 'unpublished'">
+          </mat-icon>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="super">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-icon color="primary"
+                  [matTooltip]="'access-rights.access-level-4' | translate"
+                  fontIcon="supervisor_account">
+        </mat-icon>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-icon color="primary"
+                  [matTooltip]="(element.super ? 'access-rights.true' : 'access-rights.false') | translate"
+                  [color]="element.super ? 'primary' : 'default'"
+                  [fontIcon]="element.super ? 'check_circle' : 'unpublished'">
+        </mat-icon>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+</div>
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          [mat-dialog-close]="false">
+    {{'close' | translate}}
+  </button>
+</mat-dialog-actions>
+
