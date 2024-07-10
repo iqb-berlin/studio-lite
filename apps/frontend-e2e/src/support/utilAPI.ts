@@ -1,5 +1,5 @@
 import { GroupData, UserData, WsData } from './testData';
-
+// 25
 export function addFirstUserAPI():void {
   cy.request({
     method: 'POST',
@@ -23,7 +23,7 @@ export function addFirstUserAPI():void {
     // return dataAdmin;
   });
 }
-
+// 26
 export function loginAPI(username:string, password:string) {
   cy.request({
     method: 'POST',
@@ -40,7 +40,7 @@ export function loginAPI(username:string, password:string) {
     expect(resp.status).to.equal(201);
   });
 }
-
+// 24
 export function deleteFirstUserAPI() {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -55,7 +55,7 @@ export function deleteFirstUserAPI() {
     expect(resp.status).to.equal(200);
   });
 }
-
+// 27
 export function getUserIdAPI(username: string, token: string):void {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -112,6 +112,7 @@ export function keyCloakLogin() {
     return resp.body;
   });
 }
+// 28
 export function changePasswordAPI(oldpass: string, newpass:string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -129,7 +130,7 @@ export function changePasswordAPI(oldpass: string, newpass:string) {
     expect(resp.status).to.equal(200);
   });
 }
-
+// 18 .
 export function createUserAPI(userData:UserData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -164,7 +165,7 @@ export function getAdminUserAPI() {
     expect(resp.status).to.equal(200);
   });
 }
-
+// 22.
 export function deleteUserAPI(userId: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -265,7 +266,7 @@ export function updateUsersOfWsAPI(wsKey: string) {
   });
 }
 
-// 14.
+// 14. What does it do?
 export function updateWsAPI(wsKey: string, groupKey: string, wsName:string, groupName: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -382,7 +383,7 @@ export function getWsByGroupAPI(groupKey: string) {
     expect(resp.status).to.equal(304);
   });
 }
-
+// 16.
 export function deleteGroupAPI(groupID: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({

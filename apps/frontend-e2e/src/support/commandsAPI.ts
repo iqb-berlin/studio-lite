@@ -20,9 +20,24 @@ declare namespace Cypress {
     getUsersFullAPI(): Chainable<Response<any>>;
     // eslint-disable-next-line
     getUserAPI(id:string): Chainable<Response<any>>;
+    getWsByUserAPI(id:string):Chainable<Response<any>>;
   }
 }
-
+// 21.
+Cypress.Commands.add('getWsByUserAPI',
+  (id:string) => {
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/users/${id}/workspaces`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+// 20
 Cypress.Commands.add('getUserAPI',
   (id:string) => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -37,6 +52,7 @@ Cypress.Commands.add('getUserAPI',
     });
   });
 
+// 17.
 Cypress.Commands.add('getUsersAPI',
   () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -49,7 +65,7 @@ Cypress.Commands.add('getUsersAPI',
       }
     });
   });
-
+// 19.
 Cypress.Commands.add('getUsersFullAPI',
   () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
