@@ -11,7 +11,7 @@ import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/m
 import { UserData } from '../../../support/testData';
 
 describe('Load metadata profile', () => {
-  const areaGroups = ['Mathematik Primär und Sek I',
+  const groups = ['Mathematik Primär und Sek I',
     'Deutsch Primär und Sek I',
     'Französisch Sek I',
     'Englisch Sek I'];
@@ -32,7 +32,7 @@ describe('Load metadata profile', () => {
   it('user admin prepare the Context', () => {
     createNewUser(newUser);
     cy.visit('/');
-    areaGroups.forEach(area => {
+    groups.forEach(area => {
       createGroup(area);
       cy.visit('/');
     });
@@ -45,7 +45,7 @@ describe('Load metadata profile', () => {
       .eq(0)
       .click();
     cy.get('mat-table')
-      .contains(areaGroups[0])
+      .contains(groups[0])
       .click();
     cy.get('mat-icon')
       .contains('settings')
@@ -55,7 +55,7 @@ describe('Load metadata profile', () => {
   });
 
   it('should be possible load a metadata profile from workspace', () => {
-    const searchProfile:string = 'Französisch';
+    const searchProfile:string = 'Deutsch';
     cy.get(`div>div>div:contains("${searchProfile}")`)
       .next()
       .click();
@@ -72,7 +72,7 @@ describe('Load metadata profile', () => {
       .eq(0)
       .click();
     cy.get('mat-table')
-      .contains(areaGroups[0])
+      .contains(groups[0])
       .click();
     cy.get('mat-icon')
       .contains('settings')
@@ -82,10 +82,10 @@ describe('Load metadata profile', () => {
   });
 
   it('remove the Context', () => {
-    deleteUser('normaluser');
+    deleteUser(newUser.username);
     cy.visit('/');
-    areaGroups.forEach(area => {
-      deleteGroup(area);
+    groups.forEach(group => {
+      deleteGroup(group);
       cy.visit('/');
     });
   });
