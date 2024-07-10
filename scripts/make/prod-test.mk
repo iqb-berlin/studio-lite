@@ -74,7 +74,7 @@ prod-test-build: prod-registry-login
 
 ## Start production containers
 prod-test-up:
-	sed -i 's/TAG=.*$$/TAG=e2e/' $(STUDIO_LITE_BASE_DIR)/.env.studio-lite
+	sed -i.'' 's/TAG=.*$$/TAG=e2e/' $(STUDIO_LITE_BASE_DIR)/.env.studio-lite
 	@if [ ! -f $(STUDIO_LITE_BASE_DIR)/config/frontend/default.conf.template ]; then\
 		cp\
 			$(STUDIO_LITE_BASE_DIR)/config/frontend/default.conf.http-template\
@@ -113,6 +113,15 @@ prod-test-e2e:
 			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
 		up --no-build --pull never test-e2e
 	docker rm studio-lite-test-e2e-1
+
+## Run all e2e tests in production environment with electron (only in combination with 'make prod-test-up')
+# Use this for arm64 platforms (cypress/browsers only supports 'electron' for arm54 at the moment) ! ! !
+prod-test-e2e-electron:
+	docker compose\
+			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.e2e.yaml\
+			--env-file $(STUDIO_LITE_BASE_DIR)/.env.studio-lite\
+		up --no-build --pull never test-e2e-electron
+	docker rm studio-lite-test-e2e-electron-1
 
 ## Run all e2e api tests in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-api:
