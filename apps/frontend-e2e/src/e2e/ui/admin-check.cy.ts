@@ -42,6 +42,7 @@ describe('UI Administration Management', () => {
   it('user with admin credentials can create a workspace(Arbeitsbereich) within its Bereichsgruppe', () => {
     createWs(ws1, group1);
     grantRemovePrivilege(Cypress.env('username'), 'Mathematik I', AccessLevel.Basic);
+    cy.pause();
   });
 
   it('user with admin credentials can Modules upload', () => {

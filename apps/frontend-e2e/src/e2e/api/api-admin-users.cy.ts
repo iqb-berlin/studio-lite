@@ -66,7 +66,7 @@ describe('API admin users test', () => {
   });
   // 20.
   it('6. should able to retrieve a user', () => {
-    cy.pause();
+    console.log(Cypress.env(user2.username));
     cy.getUserAPI(Cypress.env(user2.username))
       .then(resp => {
         expect(resp.body.name).to.equal(user2.username);
@@ -84,7 +84,7 @@ describe('API admin users test', () => {
     cy.getWsByUserAPI(Cypress.env(user2.username))
       .then(resp => {
         expect(resp.status).to.equal(200);
-        // TODO INSERT WS AND CHECK THE SIZE AFTER THAT
+        // TO DO INSERT WS AND CHECK THE SIZE
         // expect(resp.body.lenght).to.equal(0);
       });
   });
