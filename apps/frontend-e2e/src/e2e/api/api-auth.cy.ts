@@ -12,16 +12,16 @@ import {
 describe('API Login and authorization tests', () => {
   // NOTE: Status response for the post is 201 instead of 200
   it('init-login: create first, log in and store token', () => {
-    addFirstUserAPI();
+    addFirstUserAPI(); // 25
   });
   it('login: log in the api and store token', () => {
-    loginAPI(Cypress.env('username'), Cypress.env('password'));
+    loginAPI(Cypress.env('username'), Cypress.env('password')); // 26
   });
   it('auth-data: get authorization data of a user', () => {
-    getUserIdAPI(Cypress.env('username'), Cypress.env('token_admin'));
+    getUserIdAPI(Cypress.env('username'), Cypress.env('token_admin')); // 27
   });
   it('password: change the password for a user', () => {
-    changePasswordAPI(Cypress.env('password'), '4567');
+    changePasswordAPI(Cypress.env('password'), '4567'); // 28
     changePasswordAPI('4567', Cypress.env('password'));
   });
   it.skip('keycloak-login: log in the app', () => {
