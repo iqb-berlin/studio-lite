@@ -11,6 +11,17 @@ services:
     networks:
       - application-network
 
+  test-e2e-electron:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
+    command:
+      - "e2e"
+      - "frontend-e2e"
+      - "--baseUrl=http://frontend:8080"
+    volumes:
+      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+    networks:
+      - application-network
+
   test-e2e-api:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
