@@ -141,13 +141,13 @@ export function deleteModule():void {
   cy.buttonToContinue('Löschen', 200, '/api/verona-modules', 'GET', 'deleteModule');
 }
 
-export function deleteGroup(wsName: string):void {
+export function deleteGroup(group: string):void {
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
   cy.get('mat-table')
-    .contains(wsName)
+    .contains(group)
     .click();
   cy.get('mat-icon')
     .contains('delete')
