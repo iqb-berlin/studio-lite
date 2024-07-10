@@ -225,8 +225,8 @@ export class UnitService {
   }
 
   static getUserDisplayName(user: User): string {
-    const displayName = user.lastName ? user.lastName : user.name;
-    return user.firstName ? `${displayName}, ${user.firstName}` : displayName;
+    const displayName = user.lastName && user.lastName.trim() ? user.lastName.trim() : user.name.trim();
+    return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
