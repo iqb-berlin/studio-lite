@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME='studio-lite'
+declare APP_NAME='studio-lite'
 
 declare SELECTED_VERSION=$1
 declare REPO_URL="https://raw.githubusercontent.com/iqb-berlin/$APP_NAME"
@@ -301,7 +301,7 @@ check_tag_exists() {
       --write-out "%{response_code}\n" \
       --silent \
       --output /dev/null \
-    https://api.github.com/repos/iqb-berlin/studio-lite/releases/tags/"$tag")
+    $REPO_API/releases/tags/"$tag")
 
   if test "$status_code" -eq "200"; then
     TAG_EXISTS=true
@@ -384,7 +384,6 @@ run_optional_migration_scripts() {
         tr -d " " |
         sed -ne "/$TARGET_TAG/,/$SOURCE_TAG/p" |
         head -n -1)
-    printf -- "- Additional Migration script(s) available.\n\n"
 
   elif [[ ( "$source_tag_is_release" = false && "$source_tag_is_prerelease" = false ) ]]
   then
@@ -401,7 +400,6 @@ run_optional_migration_scripts() {
     printf "Optional migration scripts check done.\n\n"
 
     return
-
   fi
 
   if [ -n "$release_tags" ]; then
@@ -419,6 +417,7 @@ run_optional_migration_scripts() {
       printf -- "- No additional migration scripts to execute.\n\n"
 
     else
+      printf -- "- Additional Migration script(s) available.\n\n"
       printf "6.1 Migration script download\n"
       mkdir -p "$PWD"/scripts/migration
       for migration_script in "${migration_scripts[@]}"; do
