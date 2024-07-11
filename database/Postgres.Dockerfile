@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG REGISTRY_PATH
+ARG REGISTRY_PATH=""
 
 
 FROM ${REGISTRY_PATH}postgres:14.12-alpine3.18
@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/var/cache/apk \
     apk add --update musl musl-utils musl-locales tzdata
 
 # Localization
-ENV LANG de_DE.utf8
+ENV LANG=de_DE.utf8
 ENV TZ=Europe/Berlin
 
 COPY database/healthcheck/postgres-healthcheck /usr/local/bin/

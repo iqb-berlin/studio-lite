@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG REGISTRY_PATH
+ARG REGISTRY_PATH=""
 ARG BASE_IMAGE_NAME=studio-lite-base
 
 

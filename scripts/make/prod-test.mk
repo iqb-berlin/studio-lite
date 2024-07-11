@@ -74,7 +74,8 @@ prod-test-build: prod-registry-login
 
 ## Start production containers
 prod-test-up:
-	sed -i.'' 's/TAG=.*$$/TAG=e2e/' $(STUDIO_LITE_BASE_DIR)/.env.studio-lite
+	sed -i.sed 's/TAG=.*$$/TAG=e2e/' $(STUDIO_LITE_BASE_DIR)/.env.studio-lite && \
+		rm $(STUDIO_LITE_BASE_DIR)/.env.studio-lite.sed
 	@if [ ! -f $(STUDIO_LITE_BASE_DIR)/config/frontend/default.conf.template ]; then\
 		cp\
 			$(STUDIO_LITE_BASE_DIR)/config/frontend/default.conf.http-template\

@@ -1149,9 +1149,9 @@ scan-main-commit-db-image:
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
-    - trivy image --clear-cache
+    - trivy clean --scan-cache
     # update vulnerabilities db
-    - trivy image --download-db-only
+    - trivy image --download-db-only --no-progress
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
@@ -1207,9 +1207,9 @@ scan-main-commit-liquibase-image:
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
-    - trivy image --clear-cache
+    - trivy clean --scan-cache
     # update vulnerabilities db
-    - trivy image --download-db-only
+    - trivy image --download-db-only --no-progress
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
@@ -1265,9 +1265,9 @@ scan-main-commit-backend-image:
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
-    - trivy image --clear-cache
+    - trivy clean --scan-cache
     # update vulnerabilities db
-    - trivy image --download-db-only
+    - trivy image --download-db-only --no-progress
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
@@ -1323,9 +1323,9 @@ scan-main-commit-frontend-image:
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
-    - trivy image --clear-cache
+    - trivy clean --scan-cache
     # update vulnerabilities db
-    - trivy image --download-db-only
+    - trivy image --download-db-only --no-progress
     # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
