@@ -160,7 +160,7 @@
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
     "access-level-0": "Gast",
-    "access-level-1": "Kommentator:in",
+    "access-level-1": "Kommentierer:in",
     "access-level-2": "Entwickler:in",
     "access-level-3": "Betreuer:in",
     "access-level-4": "Admin",
