@@ -16,7 +16,8 @@ declare -A ENV_VARS
 ENV_VARS[POSTGRES_USER]=root
 ENV_VARS[POSTGRES_PASSWORD]=$(tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w 16 | head -n 1)
 ENV_VARS[POSTGRES_DB]=$APP_NAME
-ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB)
+
+declare ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB)
 
 declare TARGET_TAG
 declare TARGET_DIR
@@ -24,7 +25,12 @@ declare TRAEFIK_DIR
 
 get_release_version() {
   local latest_release
-  latest_release=$(curl -s "$REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+  latest_release=$(curl -s "$REPO_API"/releases/latest | \
+    grep tag_name | \
+    cut -d : -f 2,3 | \
+    tr -d \" | \
+    tr -d , | \
+    tr -d " ")
 
   while read -p '1. Please name the desired release tag: ' -er -i "$latest_release" TARGET_TAG; do
     if ! curl --head --silent --fail --output /dev/null $REPO_URL/"$TARGET_TAG"/README.md 2>/dev/null; then
@@ -161,7 +167,12 @@ check_prerequisites() {
 
 install_application_infrastructure() {
   if [ -z "$TRAEFIK_DIR" ]; then
-    LATEST_TRAEFIK_RELEASE=$(curl -s "$TRAEFIK_REPO_API"/releases/latest | grep tag_name | cut -d : -f 2,3 | tr -d \" | tr -d , | tr -d " ")
+    LATEST_TRAEFIK_RELEASE=$(curl -s "$TRAEFIK_REPO_API"/releases/latest | \
+      grep tag_name |
+      cut -d : -f 2,3 | \
+      tr -d \" | \
+      tr -d , | \
+      tr -d " ")
 
     printf "2.4 Installing missing IQB application infrastructure software:\n"
     printf "Downloading traefik installation script version %s ...\n" "$LATEST_TRAEFIK_RELEASE"
