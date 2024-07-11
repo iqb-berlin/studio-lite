@@ -367,6 +367,7 @@ export function createWsAPI(groupKey: string, ws1:WsData) {
     }
   }).then(resp => {
     Cypress.env(ws1.id, resp.body);
+    console.log(resp.body);
     expect(resp.status).to.equal(201);
   });
 }
