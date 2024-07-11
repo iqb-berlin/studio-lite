@@ -1,2 +1,0 @@
-describe('API workspace tests', () => {
-});

@@ -20,6 +20,7 @@ declare namespace Cypress {
     getUsersFullAPI(): Chainable<Response<any>>;
     // eslint-disable-next-line
     getUserAPI(id:string): Chainable<Response<any>>;
+    // eslint-disable-next-line
     getWsByUserAPI(id:string):Chainable<Response<any>>;
   }
 }
@@ -94,7 +95,7 @@ Cypress.Commands.add('loginAPI', (username:string, password:string):void => {
     Cypress.env('admin_token', resp.body);
   });
 });
-
+// 9
 Cypress.Commands.add('getWsByGroupAPI', (groupKey: string, num_ws: number) => {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
