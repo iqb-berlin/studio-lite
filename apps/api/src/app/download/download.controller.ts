@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Header, Param, Query, StreamableFile, UseFilters, UseGuards
+  Controller, Get, Header, Param, ParseBoolPipe, Query, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
@@ -36,17 +36,21 @@ export class DownloadController {
     @Param('unitList') unitList: string,
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('missingsProfile')missingsProfile: string,
-    @Query('onlyManual') hasOnlyManualCoding: string,
-    @Query('generalInstructions') hasGeneralInstructions: string,
-    @Query('derived') hasDerivedVars: string,
-    @Query('closed') hasClosedVars: string) {
+    @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
+    @Query('generalInstructions', new ParseBoolPipe()) hasGeneralInstructions: boolean,
+    @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
+    @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
+    @Query('showScore', new ParseBoolPipe()) showScore: boolean,
+    @Query('showScore', new ParseBoolPipe()) codeLabelToUpper: boolean) {
     const options:CodeBookContentSetting = {
       exportFormat,
       missingsProfile: missingsProfile,
       hasOnlyManualCoding: hasOnlyManualCoding,
       hasGeneralInstructions: hasGeneralInstructions,
       hasDerivedVars: hasDerivedVars,
-      hasClosedVars: hasClosedVars
+      hasClosedVars: hasClosedVars,
+      showScore: showScore,
+      codeLabelToUpper: codeLabelToUpper
     };
 
     const file = await DownloadWorkspacesClass

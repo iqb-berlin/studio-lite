@@ -122,23 +122,25 @@ export class BackendService {
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
-      const {
-        exportFormat,
-        hasOnlyManualCoding,
-        hasGeneralInstructions,
-        hasDerivedVars,
-        hasClosedVars
-      } = contentOptions;
+      // const {
+      //   exportFormat,
+      //   hasOnlyManualCoding,
+      //   hasGeneralInstructions,
+      //   hasDerivedVars,
+      //   hasClosedVars
+      // } = contentOptions;
 
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
           params: new HttpParams()
-            .set('format', exportFormat)
-            .set('missingsProfile', missingsProfile)
-            .set('generalInstructions', hasGeneralInstructions)
-            .set('onlyManual', hasOnlyManualCoding)
-            .set('closed', hasClosedVars)
-            .set('derived', hasDerivedVars),
+            .set('format', contentOptions.exportFormat)
+            .set('missingsProfile', contentOptions.missingsProfile)
+            .set('generalInstructions', contentOptions.hasGeneralInstructions)
+            .set('onlyManual', contentOptions.hasOnlyManualCoding)
+            .set('closed', contentOptions.hasClosedVars)
+            .set('derived', contentOptions.hasDerivedVars)
+            .set('showScore', contentOptions.showScore)
+            .set('codeLabelToUpper', contentOptions.codeLabelToUpper),
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },

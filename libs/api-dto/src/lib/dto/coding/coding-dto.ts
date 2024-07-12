@@ -54,16 +54,22 @@ export class CodeBookContentSetting {
     missingsProfile!: string;
 
   @ApiProperty()
-    hasClosedVars!: string;
+    hasClosedVars!: boolean;
 
   @ApiProperty()
-    hasOnlyManualCoding!: string;
+    hasOnlyManualCoding!: boolean;
 
   @ApiProperty()
-    hasDerivedVars!: string;
+    hasDerivedVars!: boolean;
 
   @ApiProperty()
-    hasGeneralInstructions!: string;
+    hasGeneralInstructions!: boolean;
+
+  @ApiProperty()
+    codeLabelToUpper!: boolean;
+
+  @ApiProperty()
+    showScore!: boolean;
 }
 
 export class Missing {

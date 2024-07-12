@@ -10,11 +10,33 @@
       <div class="settings">
         {{ 'workspace.export-warning-no-coding-vars' | translate }}
         <section class="example-section fx-column-start-start">
-          <h4>Codebook Inhalte</h4>
-          <mat-checkbox class="example-margin" [(ngModel)]="contentOptions.hasGeneralInstructions">allgemeine Hinweise für jede Variable</mat-checkbox>
-          <mat-checkbox class="example-margin" [(ngModel)]="contentOptions.hasDerivedVars">abgeleitete Variablen</mat-checkbox>
-          <mat-checkbox class="example-margin" [(ngModel)]="contentOptions.hasOnlyManualCoding">nur manuell kodierte Variablen</mat-checkbox>
-          <mat-checkbox class="example-margin" [(ngModel)]="contentOptions.hasClosedVars">geschlossen kodierte Variablen</mat-checkbox>
+          <h4>{{'coding.codebook-content' | translate}}</h4>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.hasGeneralInstructions">
+            {{'coding.has-general-instructions' | translate}}
+          </mat-checkbox>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.hasDerivedVars">
+            {{'coding.has-derived-vars' | translate}}
+          </mat-checkbox>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.hasOnlyManualCoding">
+            {{'coding.has-only-manual-coding' | translate}}
+          </mat-checkbox>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.hasClosedVars">
+            {{'coding.has-closed-vars' | translate}}
+          </mat-checkbox>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.showScore">
+            {{'coding.show-score' | translate}}
+          </mat-checkbox>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.codeLabelToUpper">
+            {{'coding.code-label-to-upper' | translate}}
+          </mat-checkbox>
+
+
           <h4>{{ 'workspace.coding-missing-profiles' | translate }}</h4>
           <mat-select class="select-missings-profile"
             placeholder="{{'workspace.select-missings-profile' | translate }}"
@@ -26,13 +48,13 @@
               </mat-option>
             }
           </mat-select>
-          <h4>Exportformat</h4>
+          <h4>{{'coding.export-format' | translate}}</h4>
           <mat-radio-group [(ngModel)]="contentOptions.exportFormat" aria-label="Exportformat">
             <mat-radio-button value="json">JSON</mat-radio-button>
             <mat-radio-button value="docx">DOCX</mat-radio-button>
           </mat-radio-group>
           @if(workspaceChanges) {
-            <mat-error> Änderungen im Arbeitsbereich müssen erst noch gespeichert werden! </mat-error>
+            <mat-error>{{'error-save-changes' | translate}}</mat-error>
           }
         </section>
       </div>
@@ -41,12 +63,12 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
 
-    <button mat-raised-button color="primary"
-      type="submit"
-      (click)="exportCodingBook()"
-      [disabled]="unitList.length === 0 || workspaceChanges"
-      [mat-dialog-close]="{selectedUnits:unitList}"
-      >
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            (click)="exportCodingBook()"
+            [disabled]="unitList.length === 0 || workspaceChanges"
+            [mat-dialog-close]="{selectedUnits:unitList}">
       {{ 'export' | translate }}
     </button>
     <button mat-raised-button [mat-dialog-close]="false">

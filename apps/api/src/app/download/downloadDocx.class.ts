@@ -117,7 +117,7 @@ export class DownloadDocx {
                 after: 200
               }
             });
-            if (contentSetting.hasGeneralInstructions === 'true') {
+            if (contentSetting.hasGeneralInstructions === true) {
               generalInstructions = this.htmlToDocx(variable.generalInstruction);
             } else generalInstructions = [];
             let codesTable!: Table;

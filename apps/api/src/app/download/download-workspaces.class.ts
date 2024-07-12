@@ -248,7 +248,8 @@ export class DownloadWorkspacesClass {
                   codes: codes
                 });
               }
-              if (closedCodingVar && hasClosedVars === 'true') {
+
+              if (closedCodingVar && hasClosedVars) {
                 bookVariables.push({
                   id: variableCoding.id,
                   label: variableCoding.label,
@@ -259,7 +260,7 @@ export class DownloadWorkspacesClass {
                 });
               }
               if (onlyManualCodingVar) {
-                if (hasOnlyManualCoding === 'true') {
+                if (hasOnlyManualCoding) {
                   bookVariables.push({
                     id: variableCoding.id,
                     label: variableCoding.label,
@@ -272,7 +273,7 @@ export class DownloadWorkspacesClass {
               }
 
               if (isDerived) {
-                if (hasDerivedVars === 'true') {
+                if (hasDerivedVars) {
                   bookVariables.push({
                     id: variableCoding.id,
                     label: variableCoding.label,

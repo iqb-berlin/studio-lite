@@ -413,7 +413,15 @@
     "status": "Status",
     "code": "Code",
     "score": "Bewertung",
-    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen"
+    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen",
+    "has-general-instructions": "Allgemeine Hinweise für jede Variable",
+    "has-derived-vars": "Abgeleitete Variablen",
+    "has-only-manual-coding": "Nur manuell kodierte Variablen",
+    "has-closed-vars": "Geschlossen kodierte Variablen",
+    "show-score": "Bewertung anzeigen",
+    "codebook-content": "Codebook Inhalte",
+    "export-format": "Exportformat",
+    "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!"
   },
 
   "status-label" : {
