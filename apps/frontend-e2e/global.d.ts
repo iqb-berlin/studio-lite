@@ -11,7 +11,9 @@ declare namespace Cypress {
     loadModule(filename: string, name: string):void;
     selectModule(name: string):void;
     visitWs(ws:string):void;
+    // commands-unit-api.ts
+    createUnitAPI(unitData: UnitData, idGroup: string): Chainable<Response>;
+    deleteUnitAPI(idUnit:string, idGroup:string): Chainable<Response>;
 
-    createUnitAPI(unitData: UnitData, id: string): Chainable<Response>;
   }
 }
