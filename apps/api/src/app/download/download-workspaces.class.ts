@@ -1,5 +1,10 @@
 import * as Excel from 'exceljs';
-import { UnitMetadataDto, CodebookUnitDto, CodeBookContentSetting } from '@studio-lite-lib/api-dto';
+import {
+  UnitMetadataDto,
+  CodebookUnitDto,
+  CodeBookContentSetting,
+  MissingsProfilesDto
+} from '@studio-lite-lib/api-dto';
 import {
   CodeData, CodingRule, RuleSet, VariableCodingData, ToTextFactory
 } from '@iqb/responses';
@@ -151,15 +156,6 @@ export class DownloadWorkspacesClass {
     contentSetting: CodeBookContentSetting,
     unitList: string
   ): Promise<Buffer | []> {
-    const {
-      exportFormat,
-      missingsProfile,
-      hasClosedVars,
-      hasOnlyManualCoding,
-      hasDerivedVars,
-      hasGeneralInstructions
-    } = contentSetting;
-
     const units = await unitService.findAllWithMetadata(workspaceGroupId);
     const selectedUnits = units.filter(unit => unitList
       .split(',')
@@ -167,145 +163,14 @@ export class DownloadWorkspacesClass {
       .includes(unit.id)
     );
     const codebook: CodebookUnitDto[] = [];
-    let missings: Missing[] = [];
     const profiles = await settingsService.findMissingsProfiles();
-    if (profiles.length > 0) {
-      try {
-        const foundProfile = profiles.find(profile => profile.label === missingsProfile);
-        if (foundProfile) {
-          missings = JSON.parse(foundProfile.missings);
-        }
-      } catch {
-        missings = [];
-      }
-    }
+    const missings = profiles.length ? this.getProfileMissings(profiles, contentSetting.missingsProfile) : [];
 
     selectedUnits.forEach((unit: UnitMetadataDto) => {
-      const parsedScheme = JSON.parse(unit.scheme);
-      const bookVariables: Array<BookVariable> = [];
-      if (parsedScheme?.variableCodings) {
-        parsedScheme?.variableCodings.forEach(
-          (variableCoding: VariableCodingData) => {
-            const codes = [];
-            let closedCodingVar: boolean = false;
-            let onlyManualCodingVar = true;
-            let isDerived: boolean;
-            variableCoding.sourceType === 'BASE' ?
-              (isDerived = false) :
-              (isDerived = true);
-            if (variableCoding.codes.length > 0) {
-              variableCoding.codes.forEach((code: CodeData) => {
-                // Catch schemer version <1.5
-                if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
-                  const codeAsText = ToTextFactory.codeAsText(code);
-                  if (code.manualInstruction.length === 0) onlyManualCodingVar = false;
-                  code.ruleSets.forEach((ruleSet: RuleSet) => {
-                    if (
-                      code.manualInstruction.length > 0 &&
-                      ruleSet.rules.length > 0
-                    ) onlyManualCodingVar = false;
-                    ruleSet.rules.forEach((rule: CodingRule) => {
-                      if (rule.method === 'ELSE') {
-                        closedCodingVar = true;
-                      }
-                    });
-                  });
-                  let rulesDescription = '';
-                  codeAsText.ruleSetDescriptions.forEach(
-                    (ruleSetDescription: string) => {
-                      if (ruleSetDescription !== 'Keine Regeln definiert.') {
-                        rulesDescription += `<p>${ruleSetDescription}</p>`;
-                      } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
-                    }
-                  );
-                  const codeInfo = {
-                    id: `${code.id}`,
-                    label: codeAsText.label,
-                    score: codeAsText.score,
-                    scoreLabel: codeAsText.scoreLabel,
-                    description: `${rulesDescription}${code.manualInstruction}`
-                  };
-                  codes.push(codeInfo);
-                } else {
-                  const codeInfo = {
-                    id: `${code.id}`,
-                    label: '',
-                    score: '',
-                    scoreLabel: '',
-                    description:
-                      '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
-                  };
-                  codes.push(codeInfo);
-                }
-              });
-              if (!closedCodingVar && !onlyManualCodingVar && !isDerived) {
-                bookVariables.push({
-                  id: variableCoding.id,
-                  label: variableCoding.label,
-                  generalInstruction: hasGeneralInstructions ?
-                    variableCoding.manualInstruction :
-                    '',
-                  codes: codes
-                });
-              }
-
-              if (closedCodingVar && hasClosedVars) {
-                bookVariables.push({
-                  id: variableCoding.id,
-                  label: variableCoding.label,
-                  generalInstruction: hasGeneralInstructions ?
-                    variableCoding.manualInstruction :
-                    '',
-                  codes: codes
-                });
-              }
-              if (onlyManualCodingVar) {
-                if (hasOnlyManualCoding) {
-                  bookVariables.push({
-                    id: variableCoding.id,
-                    label: variableCoding.label,
-                    generalInstruction: hasGeneralInstructions ?
-                      variableCoding.manualInstruction :
-                      '',
-                    codes: codes
-                  });
-                }
-              }
-
-              if (isDerived) {
-                if (hasDerivedVars) {
-                  bookVariables.push({
-                    id: variableCoding.id,
-                    label: variableCoding.label,
-                    generalInstruction: hasGeneralInstructions ?
-                      variableCoding.manualInstruction :
-                      '',
-                    codes: codes
-                  });
-                }
-              }
-            }
-          }
-        );
-      }
-      const sortedBookVariables = bookVariables.sort((a, b) => {
-        if (a.id < b.id) {
-          return -1;
-        }
-        if (a.id > b.id) {
-          return 1;
-        }
-        return 0;
-      });
-      codebook.push({
-        key: unit.key,
-        name: unit.name,
-        variables: sortedBookVariables,
-        missings: missings
-      });
+      DownloadWorkspacesClass.setUnitCodeBook(unit, contentSetting, codebook, missings);
     });
 
-    if (exportFormat === 'docx') {
+    if (contentSetting.exportFormat === 'docx') {
       return new Promise(resolve => {
         resolve(DownloadDocx.getCodebook(codebook, contentSetting));
       });
@@ -314,6 +179,143 @@ export class DownloadWorkspacesClass {
     return new Promise(resolve => {
       const data = JSON.stringify(codebook);
       resolve(Buffer.from(data, 'utf-8'));
+    });
+  }
+
+  private static getProfileMissings(profiles: MissingsProfilesDto[], missingsProfile: string): Missing[] {
+    let missings: Missing[] = [];
+    try {
+      const foundProfile = profiles.find(profile => profile.label === missingsProfile);
+      if (foundProfile) {
+        missings = JSON.parse(foundProfile.missings);
+      }
+    } catch {
+      missings = [];
+    }
+    return missings;
+  }
+
+  private static modifyCodingVar(codingVar: { closed: boolean; manual: boolean }, code: CodeData): void {
+    if (code.manualInstruction.length === 0) codingVar.manual = false;
+    code.ruleSets.forEach((ruleSet: RuleSet) => {
+      if (
+        code.manualInstruction.length > 0 &&
+        ruleSet.rules.length > 0
+      ) codingVar.manual = false;
+      ruleSet.rules.forEach((rule: CodingRule) => {
+        if (rule.method === 'ELSE') {
+          codingVar.closed = true;
+        }
+      });
+    });
+  }
+
+  private static getCodeInfo(code: CodeData): CodeInfo {
+    const codeAsText = ToTextFactory.codeAsText(code);
+    let rulesDescription = '';
+    codeAsText.ruleSetDescriptions.forEach(
+      (ruleSetDescription: string) => {
+        if (ruleSetDescription !== 'Keine Regeln definiert.') {
+          rulesDescription += `<p>${ruleSetDescription}</p>`;
+        } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
+      }
+    );
+    return {
+      id: `${code.id}`,
+      label: codeAsText.label,
+      score: codeAsText.score.toString(),
+      scoreLabel: codeAsText.scoreLabel,
+      description: `${rulesDescription}${code.manualInstruction}`
+    };
+  }
+
+  private static setVariableCodingData(
+    variableCoding: VariableCodingData,
+    contentSetting: CodeBookContentSetting,
+    bookVariables: BookVariable[]
+  ): void {
+    if (variableCoding.codes.length) {
+      const codes: CodeInfo[] = [];
+      const codingVar = { closed: false, manual: true };
+      const isDerived: boolean = variableCoding.sourceType !== 'BASE';
+      variableCoding.codes.forEach((code: CodeData) => {
+        // Catch schemer version <1.5
+        if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
+          DownloadWorkspacesClass.modifyCodingVar(codingVar, code);
+          codes.push(DownloadWorkspacesClass.getCodeInfo(code));
+        } else {
+          codes.push({
+            id: `${code.id}`,
+            label: '',
+            score: '',
+            scoreLabel: '',
+            description:
+              '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
+          });
+        }
+      });
+      if (!codingVar.closed && !codingVar.manual && !isDerived) {
+        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+      }
+      if (codingVar.closed && contentSetting.hasClosedVars) {
+        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+      }
+      if (codingVar.manual && contentSetting.hasOnlyManualCoding) {
+        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+      }
+      if (isDerived && contentSetting.hasDerivedVars) {
+        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+      }
+    }
+  }
+
+  private static addBookVariable(
+    contentSetting: CodeBookContentSetting,
+    codes: CodeInfo[],
+    bookVariables: BookVariable[],
+    variableCoding: VariableCodingData
+  ): void {
+    bookVariables.push({
+      id: variableCoding.id,
+      label: variableCoding.label,
+      generalInstruction: contentSetting.hasGeneralInstructions ?
+        variableCoding.manualInstruction :
+        '',
+      codes: codes
+    });
+  }
+
+  private static setUnitCodeBook(
+    unit: UnitMetadataDto, contentSetting: CodeBookContentSetting,
+    codebook: CodebookUnitDto[],
+    missings: Missing[]
+  ): void {
+    const parsedScheme = JSON.parse(unit.scheme);
+    const bookVariables: Array<BookVariable> = [];
+    if (parsedScheme?.variableCodings) {
+      parsedScheme?.variableCodings.forEach(
+        (variableCoding: VariableCodingData) => {
+          DownloadWorkspacesClass.setVariableCodingData(variableCoding, contentSetting, bookVariables);
+        }
+      );
+    }
+    codebook.push({
+      key: unit.key,
+      name: unit.name,
+      variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
+      missings: missings
+    });
+  }
+
+  private static getSortedBookVariables(bookVariables: BookVariable[]): BookVariable[] {
+    return bookVariables.sort((a, b) => {
+      if (a.id < b.id) {
+        return -1;
+      }
+      if (a.id > b.id) {
+        return 1;
+      }
+      return 0;
     });
   }
 
