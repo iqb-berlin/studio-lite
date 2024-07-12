@@ -421,6 +421,7 @@
     "show-score": "Bewertung anzeigen",
     "codebook-content": "Codebook Inhalte",
     "export-format": "Exportformat",
+    "code-label-to-upper": "Code-Label in Großbuchstaben",
     "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!"
   },
 

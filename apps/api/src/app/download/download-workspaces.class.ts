@@ -210,7 +210,7 @@ export class DownloadWorkspacesClass {
     });
   }
 
-  private static getCodeInfo(code: CodeData): CodeInfo {
+  private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
     const codeAsText = ToTextFactory.codeAsText(code);
     let rulesDescription = '';
     codeAsText.ruleSetDescriptions.forEach(
@@ -222,7 +222,7 @@ export class DownloadWorkspacesClass {
     );
     return {
       id: `${code.id}`,
-      label: codeAsText.label,
+      label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
       score: codeAsText.score.toString(),
       scoreLabel: codeAsText.scoreLabel,
       description: `${rulesDescription}${code.manualInstruction}`
@@ -242,7 +242,7 @@ export class DownloadWorkspacesClass {
         // Catch schemer version <1.5
         if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
           DownloadWorkspacesClass.modifyCodingVar(codingVar, code);
-          codes.push(DownloadWorkspacesClass.getCodeInfo(code));
+          codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
         } else {
           codes.push({
             id: `${code.id}`,
@@ -309,12 +309,8 @@ export class DownloadWorkspacesClass {
 
   private static getSortedBookVariables(bookVariables: BookVariable[]): BookVariable[] {
     return bookVariables.sort((a, b) => {
-      if (a.id < b.id) {
-        return -1;
-      }
-      if (a.id > b.id) {
-        return 1;
-      }
+      if (a.id < b.id) return -1;
+      if (a.id > b.id) return 1;
       return 0;
     });
   }
