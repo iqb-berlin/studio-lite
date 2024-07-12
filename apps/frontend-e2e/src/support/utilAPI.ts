@@ -257,8 +257,28 @@ export function updateUsersOfWsAPI(wsKey: string) {
     },
     body: [
       {
-        hasWriteAccess: false,
+        accessLevel: 4,
         id: Cypress.env('id_admin')
+      }
+    ]
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+}
+// 13.Option 2
+export function grantAccessWsAPI(wsKey: string, userId:string, accessLevel:number) {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspaces/${wsKey}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      {
+        accessLevel: accessLevel,
+        id: userId
       }
     ]
   }).then(resp => {

@@ -5,28 +5,32 @@
 import { UnitData } from './testData';
 
 // 32
-Cypress.Commands.add('createUnitAPI', (unitData: UnitData, id:string) => {
+Cypress.Commands.add('createUnitAPI', (unitData: UnitData, idGroup:string) => {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   return cy.request({
     method: 'POST',
-    url: `/api/workspace/${id}/units`,
+    url: `/api/workspace/${idGroup}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
       key: `${unitData.shortname}`,
-      name: `${unitData.name}`,
-      groupName: '',
-      createFrom: 0,
-      player: '',
-      editor: '',
-      schemer: '',
-      schemeType: '',
-      scheme: '',
-      metadata: {},
-      variables: [
-      ]
+      name: `${unitData.name}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 33
+Cypress.Commands.add('deleteUnitAPI', (idUnit: string, idGroup:string) => {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  return cy.request({
+    method: 'DELETE',
+    url: `/api/workspace/${idGroup}/${idUnit}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
     },
     failOnStatusCode: false
   });
