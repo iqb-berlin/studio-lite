@@ -37,7 +37,7 @@ export class CodeBookCode {
     label!: string;
 
   @ApiProperty()
-    score!: string;
+    score?: string;
 
   @ApiProperty()
     scoreLabel!: string;

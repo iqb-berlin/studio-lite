@@ -42,7 +42,7 @@ interface BookVariable {
 interface CodeInfo {
   id: string;
   label: string;
-  score: string;
+  score?: string;
   scoreLabel: string;
   description: string;
 
@@ -167,12 +167,12 @@ export class DownloadWorkspacesClass {
     const missings = profiles.length ? this.getProfileMissings(profiles, contentSetting.missingsProfile) : [];
 
     selectedUnits.forEach((unit: UnitMetadataDto) => {
-      DownloadWorkspacesClass.setUnitCodeBook(unit, contentSetting, codebook, missings);
+      DownloadWorkspacesClass.setCodeBookDataForUnit(unit, contentSetting, codebook, missings);
     });
 
     if (contentSetting.exportFormat === 'docx') {
       return new Promise(resolve => {
-        resolve(DownloadDocx.getCodebook(codebook, contentSetting));
+        resolve(DownloadDocx.getDocXCodebook(codebook, contentSetting));
       });
     }
 
@@ -211,6 +211,18 @@ export class DownloadWorkspacesClass {
   }
 
   private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
+    const codeInfo: CodeInfo = {
+      id: `${code.id}`,
+      label: '',
+      scoreLabel: '',
+      description:
+        '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
+    };
+    if (contentSetting.showScore) codeInfo.score = '';
+    return codeInfo;
+  }
+
+  private static getCodeInfoFromCodeAsText(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
     const codeAsText = ToTextFactory.codeAsText(code);
     let rulesDescription = '';
     codeAsText.ruleSetDescriptions.forEach(
@@ -220,13 +232,14 @@ export class DownloadWorkspacesClass {
         } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
       }
     );
-    return {
+    const codeInfo: CodeInfo = {
       id: `${code.id}`,
       label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
-      score: codeAsText.score.toString(),
       scoreLabel: codeAsText.scoreLabel,
       description: `${rulesDescription}${code.manualInstruction}`
     };
+    if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();
+    return codeInfo;
   }
 
   private static setVariableCodingData(
@@ -242,16 +255,9 @@ export class DownloadWorkspacesClass {
         // Catch schemer version <1.5
         if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
           DownloadWorkspacesClass.modifyCodingVar(codingVar, code);
-          codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
+          codes.push(DownloadWorkspacesClass.getCodeInfoFromCodeAsText(code, contentSetting));
         } else {
-          codes.push({
-            id: `${code.id}`,
-            label: '',
-            score: '',
-            scoreLabel: '',
-            description:
-              '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
-          });
+          codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
         }
       });
       if (!codingVar.closed && !codingVar.manual && !isDerived) {
@@ -285,7 +291,7 @@ export class DownloadWorkspacesClass {
     });
   }
 
-  private static setUnitCodeBook(
+  private static setCodeBookDataForUnit(
     unit: UnitMetadataDto, contentSetting: CodeBookContentSetting,
     codebook: CodebookUnitDto[],
     missings: Missing[]

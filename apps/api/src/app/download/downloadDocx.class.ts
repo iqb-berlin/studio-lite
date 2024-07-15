@@ -14,10 +14,11 @@ import {
   WidthType, PageNumber
 } from 'docx';
 
-import { CodeBookContentSetting, CodebookUnitDto } from '@studio-lite-lib/api-dto';
+import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { UnderlineType } from 'docx/build/file/paragraph/run/underline';
 import { ShadingType } from 'docx/build/file/shading/shading';
+import { FileChild } from 'docx/build/file/file-child';
 import { WebColors } from './webcolors';
 
 type ParagraphOptions = {
@@ -42,270 +43,299 @@ type ParagraphOptions = {
 };
 
 export class DownloadDocx {
-  static async getCodebook(codingBookUnits: CodebookUnitDto[],
-                           contentSetting: CodeBookContentSetting): Promise<Buffer | []> {
-    let codeRows: TableRow[] = [];
-    let unitHeader: Paragraph;
-    let generalInstructions: Paragraph[] = [];
-    const missings: Paragraph[] = [];
-    const units = [];
-    if (codingBookUnits.length > 0) {
+  static async getDocXCodebook(codingBookUnits: CodebookUnitDto[],
+                               contentSetting: CodeBookContentSetting): Promise<Buffer | []> {
+    if (codingBookUnits.length) {
+      const units: FileChild[] = [];
+      const missings: Paragraph[] = [];
       codingBookUnits.forEach(variableCoding => {
-        unitHeader = new Paragraph({
-          border: {
-            bottom: {
-              color: '#000000',
-              style: 'single',
-              size: 10
-            },
-            top: {
-              color: '#000000',
-              style: 'single',
-              size: 10
-            }
+        const unitHeader = DownloadDocx.getUnitHeader(variableCoding);
+        DownloadDocx.addMissings(variableCoding, missings);
+        if (variableCoding.variables.length) {
+          DownloadDocx.addDocXForUnit(variableCoding.variables, contentSetting, unitHeader, units);
+        }
+      });
+      const b64string = await Packer.toBase64String(DownloadDocx.setDocXDocument(units, missings));
+      return Buffer.from(b64string, 'base64');
+    }
+    return [];
+  }
 
-          },
-          spacing: {
-            after: 200
-          },
-          text: `${variableCoding.key}  ${variableCoding.name}`,
-          heading: HeadingLevel.HEADING_1,
-          alignment: AlignmentType.CENTER
-        });
-        const variables = [];
-        try {
-          variableCoding.missings.forEach(missing => {
-            if (missing.code && missing.label && missing.description) {
-              missings.push(new Paragraph({
-                children: [new TextRun({ text: `${missing.code} ${missing.label}`, bold: true })],
-                spacing: {
-                  after: 20
-                }
-              }));
-              missings.push(new Paragraph({
-                text: `${missing.description}`,
-                spacing: {
-                  after: 100
-                }
-              }));
-            } else {
-              missings.push(new Paragraph({
-                text: 'kein valides Missing ',
-                spacing: {
-                  after: 200
-                }
-              }));
-            }
-          });
-        } catch {
+  private static getUnitHeader(variableCoding: CodebookUnitDto): Paragraph {
+    return new Paragraph({
+      border: {
+        bottom: {
+          color: '#000000',
+          style: 'single',
+          size: 10
+        },
+        top: {
+          color: '#000000',
+          style: 'single',
+          size: 10
+        }
+
+      },
+      spacing: {
+        after: 200
+      },
+      text: `${variableCoding.key}  ${variableCoding.name}`,
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER
+    });
+  }
+
+  private static addMissings(variableCoding: CodebookUnitDto, missings: Paragraph[]): void {
+    try {
+      variableCoding.missings.forEach(missing => {
+        if (missing.code && missing.label && missing.description) {
           missings.push(new Paragraph({
-            text: 'kein validen Missings gefunden',
+            children: [new TextRun({ text: `${missing.code} ${missing.label}`, bold: true })],
+            spacing: {
+              after: 20
+            }
+          }));
+          missings.push(new Paragraph({
+            text: `${missing.description}`,
+            spacing: {
+              after: 100
+            }
+          }));
+        } else {
+          missings.push(new Paragraph({
+            text: 'kein valides Missing ',
             spacing: {
               after: 200
             }
           }));
         }
-
-        if (variableCoding.variables.length > 0) {
-          variableCoding.variables?.forEach(variable => {
-            const variableHeader = new Paragraph({
-              text: `${variable.id}  ${variable.label}`,
-              heading: HeadingLevel.HEADING_2,
-              alignment: AlignmentType.LEFT,
-              spacing: {
-                before: 200,
-                after: 200
-              }
-            });
-            if (contentSetting.hasGeneralInstructions === true) {
-              generalInstructions = this.htmlToDocx(variable.generalInstruction);
-            } else generalInstructions = [];
-            let codesTable!: Table;
-            if (variable.codes.length > 0) {
-              codeRows = variable.codes.map(code => new TableRow({
-                cantSplit: true,
-                children: [
-                  new TableCell({
-                    borders: {
-                      top: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      bottom: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      left: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      right: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      }
-                    },
-                    children: [new Paragraph({
-                      text: `${code.id}  ${code.label}`,
-                      spacing: {
-                        before: 100,
-                        after: 100
-                      },
-                      indent: { firstLine: 100 }
-                    })],
-                    width: {
-                      size: 25,
-                      type: WidthType.PERCENTAGE
-                    }
-                  }),
-                  new TableCell({
-
-                    borders: {
-                      top: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      bottom: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      left: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      right: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      }
-                    },
-                    children: [new Paragraph({
-                      text: `${code.score}  ${code.scoreLabel}`,
-                      spacing: {
-                        before: 100,
-                        after: 100
-                      },
-                      indent: { firstLine: 100 }
-                    })],
-                    width: {
-                      size: 25,
-                      type: WidthType.PERCENTAGE
-                    }
-                  }),
-                  new TableCell({
-                    width: {
-                      size: 50,
-                      type: WidthType.PERCENTAGE
-                    },
-                    borders: {
-                      top: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      bottom: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      left: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      },
-                      right: {
-                        size: 1,
-                        color: '#000000',
-                        style: 'single'
-                      }
-                    },
-                    children: [...this.htmlToDocx(code.description)]
-                  })
-                ]
-              })
-              );
-              codesTable = new Table({
-                rows: codeRows,
-                width: {
-                  size: 100,
-                  type: WidthType.PERCENTAGE
-                }
-              });
-            }
-            variables.push(...[variableHeader, ...generalInstructions, codesTable]);
-          });
-
-          units.push(
-            ...[
-              unitHeader,
-              ...variables,
-              new Paragraph({
-                text: '',
-                spacing: {
-                  before: 100,
-                  after: 100
-                }
-              })
-            ]);
+      });
+    } catch {
+      missings.push(new Paragraph({
+        text: 'kein validen Missings gefunden',
+        spacing: {
+          after: 200
         }
-      });
-      const date = new Date().toLocaleDateString();
-      const doc = new Document({
-        background: {
-          color: '#FFFFFF'
-        },
-        sections: [
-          {
-            properties: {
-              page: {
-                pageNumbers: {
-                  start: 1,
-                  formatType: NumberFormat.DECIMAL
-                }
-              }
-            },
-            footers: {
-              default: new Footer({
-                children: [
-                  new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                      new TextRun('IQB-Studio Codebook '),
-                      new TextRun(date)
-                    ]
-                  }),
-                  new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                      new TextRun({
-                        color: '000000',
-                        children: [' Seite ', PageNumber.CURRENT]
-                      }),
-                      new TextRun({
-                        color: '000000',
-                        children: [' von ', PageNumber.TOTAL_PAGES]
-                      })
-                    ]
-                  })
-                ]
-              })
-            },
-            children: [
-              ...missings,
-              ...units
-            ]
-          }]
-      });
-      const b64string = await Packer.toBase64String(doc);
-      return Buffer.from(b64string, 'base64');
+      }));
     }
-    return [];
+  }
+
+  private static getCodeRows(variable: CodeBookVariable): TableRow[] {
+    return variable.codes.map(code => new TableRow({
+      cantSplit: true,
+      children: [
+        new TableCell({
+          borders: {
+            top: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            bottom: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            left: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            right: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            }
+          },
+          children: [new Paragraph({
+            text: `${code.id}  ${code.label}`,
+            spacing: {
+              before: 100,
+              after: 100
+            },
+            indent: { firstLine: 100 }
+          })],
+          width: {
+            size: 25,
+            type: WidthType.PERCENTAGE
+          }
+        }),
+        new TableCell({
+          borders: {
+            top: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            bottom: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            left: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            right: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            }
+          },
+          children: [new Paragraph({
+            text: `${code.score}  ${code.scoreLabel}`,
+            spacing: {
+              before: 100,
+              after: 100
+            },
+            indent: { firstLine: 100 }
+          })],
+          width: {
+            size: 25,
+            type: WidthType.PERCENTAGE
+          }
+        }),
+        new TableCell({
+          width: {
+            size: 50,
+            type: WidthType.PERCENTAGE
+          },
+          borders: {
+            top: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            bottom: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            left: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            },
+            right: {
+              size: 1,
+              color: '#000000',
+              style: 'single'
+            }
+          },
+          children: [...DownloadDocx.htmlToDocx(code.description)]
+        })
+      ]
+    })
+    );
+  }
+
+  private static setDocXDocument(units: FileChild[], missings: Paragraph[]): Document {
+    return new Document({
+      background: {
+        color: '#FFFFFF'
+      },
+      sections: [
+        {
+          properties: {
+            page: {
+              pageNumbers: {
+                start: 1,
+                formatType: NumberFormat.DECIMAL
+              }
+            }
+          },
+          footers: {
+            default: new Footer({
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [
+                    new TextRun('IQB-Studio Codebook '),
+                    new TextRun(new Date().toLocaleDateString())
+                  ]
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [
+                    new TextRun({
+                      color: '000000',
+                      children: [' Seite ', PageNumber.CURRENT]
+                    }),
+                    new TextRun({
+                      color: '000000',
+                      children: [' von ', PageNumber.TOTAL_PAGES]
+                    })
+                  ]
+                })
+              ]
+            })
+          },
+          children: [
+            ...missings,
+            ...units
+          ]
+        }]
+    });
+  }
+
+  private static getVariableHeader(variable: CodeBookVariable): Paragraph {
+    return new Paragraph({
+      text: `${variable.id}  ${variable.label}`,
+      heading: HeadingLevel.HEADING_2,
+      alignment: AlignmentType.LEFT,
+      spacing: {
+        before: 200,
+        after: 200
+      }
+    });
+  }
+
+  private static getGeneralInstructions(
+    contentSetting: CodeBookContentSetting,
+    codeBookVariable: CodeBookVariable
+  ): Paragraph[] {
+    return contentSetting.hasGeneralInstructions ? DownloadDocx.htmlToDocx(codeBookVariable.generalInstruction) : [];
+  }
+
+  private static getCodeTable(codeBookVariable: CodeBookVariable): Table {
+    return new Table({
+      rows: DownloadDocx.getCodeRows(codeBookVariable),
+      width: {
+        size: 100,
+        type: WidthType.PERCENTAGE
+      }
+    });
+  }
+
+  private static getVariables(codeBookVariable: CodeBookVariable[], contentSetting: CodeBookContentSetting): unknown[] {
+    const variables: unknown[] = [];
+    codeBookVariable.forEach(variable => {
+      variables.push(...[
+        DownloadDocx.getVariableHeader(variable),
+        ...DownloadDocx.getGeneralInstructions(contentSetting, variable),
+        DownloadDocx.getCodeTable(variable)]);
+    });
+    return variables;
+  }
+
+  private static addDocXForUnit(
+    codeBookVariable: CodeBookVariable[],
+    contentSetting: CodeBookContentSetting,
+    unitHeader: Paragraph,
+    units: unknown[]): void {
+    units.push(
+      ...[
+        unitHeader,
+        ...DownloadDocx.getVariables(codeBookVariable, contentSetting),
+        new Paragraph({
+          text: '',
+          spacing: {
+            before: 100,
+            after: 100
+          }
+        })
+      ]);
   }
 
   static htmlToDocx(html: string) {
