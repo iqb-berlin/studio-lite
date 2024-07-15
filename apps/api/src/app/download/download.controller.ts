@@ -41,7 +41,7 @@ export class DownloadController {
     @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
     @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
     @Query('showScore', new ParseBoolPipe()) showScore: boolean,
-    @Query('showScore', new ParseBoolPipe()) codeLabelToUpper: boolean) {
+    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
     const options:CodeBookContentSetting = {
       exportFormat,
       missingsProfile: missingsProfile,
