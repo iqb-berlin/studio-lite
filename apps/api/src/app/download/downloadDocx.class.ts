@@ -11,7 +11,7 @@ import {
   TableRow,
   TextRun,
   Footer,
-  WidthType, PageNumber
+  WidthType, PageNumber, ITableCellBorders
 } from 'docx';
 
 import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
@@ -120,114 +120,65 @@ export class DownloadDocx {
     }
   }
 
-  private static getCodeRows(variable: CodeBookVariable): TableRow[] {
+  private static get TableBoarders(): ITableCellBorders {
+    return {
+      top: {
+        size: 1,
+        color: '#000000',
+        style: 'single'
+      },
+      bottom: {
+        size: 1,
+        color: '#000000',
+        style: 'single'
+      },
+      left: {
+        size: 1,
+        color: '#000000',
+        style: 'single'
+      },
+      right: {
+        size: 1,
+        color: '#000000',
+        style: 'single'
+      }
+    };
+  }
+
+  private static getCodeRows(variable: CodeBookVariable, contentSetting: CodeBookContentSetting): TableRow[] {
     return variable.codes.map(code => new TableRow({
       cantSplit: true,
       children: [
-        new TableCell({
-          borders: {
-            top: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            bottom: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            left: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            right: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            }
-          },
-          children: [new Paragraph({
-            text: `${code.id}  ${code.label}`,
-            spacing: {
-              before: 100,
-              after: 100
-            },
-            indent: { firstLine: 100 }
-          })],
-          width: {
-            size: 25,
-            type: WidthType.PERCENTAGE
-          }
-        }),
-        new TableCell({
-          borders: {
-            top: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            bottom: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            left: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            right: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            }
-          },
-          children: [new Paragraph({
-            text: `${code.score}  ${code.scoreLabel}`,
-            spacing: {
-              before: 100,
-              after: 100
-            },
-            indent: { firstLine: 100 }
-          })],
-          width: {
-            size: 25,
-            type: WidthType.PERCENTAGE
-          }
-        }),
-        new TableCell({
-          width: {
-            size: 50,
-            type: WidthType.PERCENTAGE
-          },
-          borders: {
-            top: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            bottom: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            left: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            },
-            right: {
-              size: 1,
-              color: '#000000',
-              style: 'single'
-            }
-          },
-          children: [...DownloadDocx.htmlToDocx(code.description)]
-        })
+        DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.id)),
+        DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.label)),
+        ...contentSetting.showScore ? [DownloadDocx
+          .createCodeCell(DownloadDocx.createCellChildren(`${code.score}  ${code.scoreLabel}`))] : [],
+        DownloadDocx.createCodeCell([...DownloadDocx.htmlToDocx(code.description)])
       ]
     })
     );
+  }
+
+  private static createCellChildren(value: string): Paragraph[] {
+    return [new Paragraph({
+      text: value,
+      spacing: {
+        before: 100,
+        after: 100
+      },
+      indent: { firstLine: 50 }
+    })];
+  }
+
+  private static createCodeCell(children: Paragraph[]): TableCell {
+    return new TableCell({
+      borders: DownloadDocx.TableBoarders,
+      children: children,
+      width: {
+        size: 100,
+        type: WidthType.PERCENTAGE
+      }
+    });
   }
 
   private static setDocXDocument(units: FileChild[], missings: Paragraph[]): Document {
@@ -298,14 +249,19 @@ export class DownloadDocx {
     return contentSetting.hasGeneralInstructions ? DownloadDocx.htmlToDocx(codeBookVariable.generalInstruction) : [];
   }
 
-  private static getCodeTable(codeBookVariable: CodeBookVariable): Table {
+  private static getCodeTable(codeBookVariable: CodeBookVariable, contentSetting: CodeBookContentSetting): Table {
     return new Table({
-      rows: DownloadDocx.getCodeRows(codeBookVariable),
+      rows: DownloadDocx.getCodeRows(codeBookVariable, contentSetting),
       width: {
         size: 100,
         type: WidthType.PERCENTAGE
-      }
+      },
+      columnWidths: DownloadDocx.getColumnWidths(contentSetting)
     });
+  }
+
+  private static getColumnWidths(contentSetting: CodeBookContentSetting): number[] {
+    return contentSetting.showScore ? [10, 25, 25, 40] : [10, 25, 65];
   }
 
   private static getVariables(codeBookVariable: CodeBookVariable[], contentSetting: CodeBookContentSetting): unknown[] {
@@ -314,7 +270,7 @@ export class DownloadDocx {
       variables.push(...[
         DownloadDocx.getVariableHeader(variable),
         ...DownloadDocx.getGeneralInstructions(contentSetting, variable),
-        DownloadDocx.getCodeTable(variable)]);
+        DownloadDocx.getCodeTable(variable, contentSetting)]);
     });
     return variables;
   }
