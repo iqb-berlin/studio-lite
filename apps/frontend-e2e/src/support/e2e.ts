@@ -18,3 +18,4 @@ import './commands';
 import './commandsAPI';
 import './commands-ws-api';
 import './commands-unit-api';
+import './commands-verona-api';

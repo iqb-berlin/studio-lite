@@ -14,6 +14,7 @@ declare namespace Cypress {
     // commands-unit-api.ts
     createUnitAPI(unitData: UnitData, idGroup: string): Chainable<Response>;
     deleteUnitAPI(idUnit:string, idGroup:string): Chainable<Response>;
-
+    // commands-verona-api.ts
+    addModuleAPI(module:string);
   }
 }
