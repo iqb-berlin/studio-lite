@@ -43,9 +43,7 @@ interface CodeInfo {
   id: string;
   label: string;
   score?: string;
-  scoreLabel: string;
   description: string;
-
 }
 
 export class DownloadWorkspacesClass {
@@ -214,7 +212,6 @@ export class DownloadWorkspacesClass {
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
       label: '',
-      scoreLabel: '',
       description:
         '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
     };
@@ -235,7 +232,6 @@ export class DownloadWorkspacesClass {
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
       label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
-      scoreLabel: codeAsText.scoreLabel,
       description: `${rulesDescription}${code.manualInstruction}`
     };
     if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();

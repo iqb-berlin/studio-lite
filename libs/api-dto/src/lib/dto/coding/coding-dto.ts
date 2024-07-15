@@ -40,9 +40,6 @@ export class CodeBookCode {
     score?: string;
 
   @ApiProperty()
-    scoreLabel!: string;
-
-  @ApiProperty()
     description!: string;
 }
 

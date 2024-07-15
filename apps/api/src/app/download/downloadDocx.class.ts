@@ -152,7 +152,7 @@ export class DownloadDocx {
         DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.id)),
         DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.label)),
         ...contentSetting.showScore ? [DownloadDocx
-          .createCodeCell(DownloadDocx.createCellChildren(`${code.score}  ${code.scoreLabel}`))] : [],
+          .createCodeCell(DownloadDocx.createCellChildren(code.score))] : [],
         DownloadDocx.createCodeCell([...DownloadDocx.htmlToDocx(code.description)])
       ]
     })
@@ -261,7 +261,7 @@ export class DownloadDocx {
   }
 
   private static getColumnWidths(contentSetting: CodeBookContentSetting): number[] {
-    return contentSetting.showScore ? [10, 25, 25, 40] : [10, 25, 65];
+    return contentSetting.showScore ? [10, 25, 10, 55] : [10, 25, 65];
   }
 
   private static getVariables(codeBookVariable: CodeBookVariable[], contentSetting: CodeBookContentSetting): unknown[] {
