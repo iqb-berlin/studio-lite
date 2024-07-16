@@ -370,10 +370,16 @@ export class DownloadDocx {
       .css('text-align') || 'left';
   }
 
-  private static htmlToDocx(html: string) {
-    const cheerioAPI = cheerio.load(html, null, false);
-    const elements: Paragraph[] = [];
+  private static stripFromLeadigEmptyParagraph(html: string): string {
+    return html.replace(/^<p><\/p>/g, '');
+  }
 
+  private static htmlToDocx(html: string) {
+    const cheerioAPI = cheerio
+      .load(DownloadDocx.stripFromLeadigEmptyParagraph(html),
+        null,
+        false);
+    const elements: Paragraph[] = [];
     cheerioAPI('p,h1,h2,h3,h4')
       .each((i, elem) => {
         const span = cheerioAPI(elem)
