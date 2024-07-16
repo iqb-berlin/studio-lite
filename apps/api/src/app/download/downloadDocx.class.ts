@@ -18,32 +18,9 @@ import {
 
 import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
-import { UnderlineType } from 'docx/build/file/paragraph/run/underline';
-import { ShadingType } from 'docx/build/file/shading/shading';
 import { FileChild } from 'docx/build/file/file-child';
 import { AnyNode, BasicAcceptedElems } from 'cheerio';
 import { WebColors } from './webcolors';
-
-type ParagraphOptions = {
-  text?: string;
-  underline?: {
-    color?: string;
-    type?: (typeof UnderlineType)[keyof typeof UnderlineType];
-  };
-  heading?: (typeof HeadingLevel)[keyof typeof HeadingLevel];
-  bold?: boolean;
-  italics?: boolean;
-  strike?: boolean;
-  subscript?: boolean;
-  superscript?: boolean;
-  color?: string;
-  shading?:{
-    type?: (typeof ShadingType)[keyof typeof ShadingType];
-    color?: string;
-    fill?: string;
-  };
-  size?:number;
-};
 
 type AnyNodeWithName = AnyNode & { name: string; };
 
@@ -410,35 +387,34 @@ export class DownloadDocx {
     return elements.filter(e => e !== undefined && e !== null);
   }
 
-  private static getTextRunOptions(
+  private static getFontSize(size: string): number {
+    const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+    return sizeTypes.includes(size) ? 20 : parseInt(size, 10);
+  }
+
+  private static getTextRun(
     cheerioAPI: cheerio.CheerioAPI,
     child: AnyNodeWithName,
     colorParsed: string,
     backgroundColor: string,
     size: string
-  ): ParagraphOptions {
+  ): TextRun {
     const tag = child.name;
-    const textRunOptions: ParagraphOptions = {
+    return new TextRun({
       text: cheerioAPI(child)
-        .text()
-    };
-    textRunOptions.color = colorParsed;
-    textRunOptions.shading = {
-      fill: backgroundColor
-    };
-    if (size) {
-      const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
-      sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
-    }
-    if (tag === 'u') {
-      textRunOptions.underline = {};
-    }
-    textRunOptions.bold = tag === 'strong';
-    textRunOptions.italics = tag === 'em';
-    textRunOptions.strike = tag === 's';
-    textRunOptions.subscript = tag === 'sub';
-    textRunOptions.superscript = tag === 'sup';
-    return textRunOptions;
+        .text(),
+      color: colorParsed,
+      shading: {
+        fill: backgroundColor
+      },
+      underline: tag === 'u' ? {} : null,
+      bold: tag === 'strong',
+      italics: tag === 'em',
+      strike: tag === 's',
+      subScript: tag === 'sub',
+      superScript: tag === 'sup',
+      size: DownloadDocx.getFontSize(size)
+    });
   }
 
   private static getAlignment(textAlignment: string): (typeof AlignmentType)[keyof typeof AlignmentType] {
@@ -471,8 +447,8 @@ export class DownloadDocx {
         end: 100
       },
       children: DownloadDocx.getChildren(cheerioAPI, elem)
-        .map((child: AnyNodeWithName) => new TextRun(DownloadDocx
-          .getTextRunOptions(cheerioAPI, child, colorParsed, backgroundColor, size)))
+        .map((child: AnyNodeWithName) => DownloadDocx
+          .getTextRun(cheerioAPI, child, colorParsed, backgroundColor, size))
     });
   }
 }
