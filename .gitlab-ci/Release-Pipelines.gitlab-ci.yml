@@ -23,7 +23,7 @@
 
 .release_rules:
   rules:
-    - if: $CI_COMMIT_TAG =~ /^(?P<MAJOR>0|[1-9]\d*)\.(?P<MINOR>0|[1-9]\d*)\.(?P<PATCH>0|[1-9]\d*)$/
+    - if: $CI_COMMIT_TAG =~ /^(?<MAJOR>(?:0|(?:[1-9]\d*)))\.(?<MINOR>(?:0|(?:[1-9]\d*)))\.(?<PATCH>(?:0|(?:[1-9]\d*)))$/
 
 check-main-pr-rules:
   stage: .pre
@@ -95,7 +95,7 @@ check-release-rules:
   rules:
     - !reference [ .release_rules, rules ]
   before_script:
-    - RELEASE_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
+    - RELEASE_REGEX="^((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))$"
   script:
     - echo $PRERELEASE_REGEX
     - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]];
