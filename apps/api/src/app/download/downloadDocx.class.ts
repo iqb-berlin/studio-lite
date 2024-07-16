@@ -11,7 +11,9 @@ import {
   TableRow,
   TextRun,
   Footer,
-  WidthType, PageNumber, ITableCellBorders
+  WidthType,
+  PageNumber,
+  ITableCellBorders
 } from 'docx';
 
 import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
@@ -19,6 +21,7 @@ import * as cheerio from 'cheerio';
 import { UnderlineType } from 'docx/build/file/paragraph/run/underline';
 import { ShadingType } from 'docx/build/file/shading/shading';
 import { FileChild } from 'docx/build/file/file-child';
+import { AnyNode, BasicAcceptedElems } from 'cheerio';
 import { WebColors } from './webcolors';
 
 type ParagraphOptions = {
@@ -41,6 +44,8 @@ type ParagraphOptions = {
   };
   size?:number;
 };
+
+type AnyNodeWithName = AnyNode & { name: string; };
 
 export class DownloadDocx {
   static async getDocXCodebook(codingBookUnits: CodebookUnitDto[],
@@ -294,54 +299,95 @@ export class DownloadDocx {
       ]);
   }
 
-  static htmlToDocx(html: string) {
-    const $ = cheerio.load(html, null, false);
-    const elements = [];
-    const images = [];
-    $('img')
-      .each((i, elem) => {
-        const base64 = elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1);
-        images.push(
-          new ImageRun({
-            data: Buffer.from(base64, 'base64'),
-            transformation: {
-              width: 200,
-              height: 200
-            }
-          }));
-      });
-    $('p,h1,h2,h3,h4')
-      .each((i, elem) => {
-        const textAlignment = $(elem)
-          .css('text-align') || 'left';
-        const span = $(elem)
-          .find('span');
-        const mark = $(elem)
-          .find('mark');
-        const color = $(span)
-          .css('color');
-          // const name = elem.name;
-        let colorParsed: string = '#000000';
-        if (color) {
-          if (color.startsWith('#')) {
-            colorParsed = color;
-          } else if (color.startsWith('rgb')) {
-            const rgbString = parseCssRgbString(color);
-            colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
-          } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
-            colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
-          } else {
-            colorParsed = '#000000';
-          }
-        }
+  private static getChildren(cheerioAPI: cheerio.CheerioAPI, elem: BasicAcceptedElems<AnyNode>) {
+    const children: AnyNodeWithName[] = [];
+    cheerioAPI(elem).each((i, child: AnyNodeWithName) => {
+      children.push(child);
+      DownloadDocx.getChildren(cheerioAPI, cheerioAPI(child).contents());
+    });
+    return children;
+  }
 
-        const size = $(span)
-          .css('font-size') || '20pt';
-        const backgroundColor = $(mark)
-          .css('background-color') || '#FFFFFF';
+  private static addImages(cheerioAPI: cheerio.CheerioAPI, elements: Paragraph[]): void {
+    cheerioAPI('img')
+      .each((i, elem) => {
+        elements.push(new Paragraph(
+          {
+            spacing: {
+              before: 100,
+              after: 100
+            },
+            indent: {
+              start: 100,
+              end: 100
+            },
+            children: [new ImageRun({
+              data: Buffer.from(
+                elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1),
+                'base64'),
+              transformation: {
+                width: 200,
+                height: 200
+              }
+            })]
+          }
+        ));
+      });
+  }
+
+  private static getBackgroundColor(cheerioAPI: cheerio.CheerioAPI, elem: cheerio.Element): string {
+    const mark = cheerioAPI(elem)
+      .find('mark');
+    return cheerioAPI(mark)
+      .css('background-color') || '#FFFFFF';
+  }
+
+  private static getColor(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<cheerio.Element>): string {
+    const color = cheerioAPI(tag)
+      .css('color');
+    // const name = elem.name;
+    let colorParsed: string = '#000000';
+    if (color) {
+      if (color.startsWith('#')) {
+        colorParsed = color;
+      } else if (color.startsWith('rgb')) {
+        const rgbString = parseCssRgbString(color);
+        colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
+      } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
+        colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
+      }
+    }
+    return colorParsed;
+  }
+
+  private static getSize(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<cheerio.Element>): string {
+    return cheerioAPI(tag)
+      .css('font-size') || '20pt';
+  }
+
+  private static getTextAlignment(cheerioAPI: cheerio.CheerioAPI, elem: cheerio.Element): string {
+    return cheerioAPI(elem)
+      .css('text-align') || 'left';
+  }
+
+  private static htmlToDocx(html: string) {
+    const cheerioAPI = cheerio.load(html, null, false);
+    const elements: Paragraph[] = [];
+
+    cheerioAPI('p,h1,h2,h3,h4')
+      .each((i, elem) => {
+        const span = cheerioAPI(elem)
+          .find('span');
         let formattedParagraph:Paragraph;
         try {
-          formattedParagraph = createParagraph(elem.children, textAlignment, colorParsed, backgroundColor, size);
+          formattedParagraph = DownloadDocx
+            .createParagraph(
+              cheerioAPI,
+              elem.children,
+              DownloadDocx.getTextAlignment(cheerioAPI, elem),
+              DownloadDocx.getColor(cheerioAPI, span),
+              DownloadDocx.getBackgroundColor(cheerioAPI, elem),
+              DownloadDocx.getSize(cheerioAPI, span));
         } catch (e) {
           formattedParagraph = new Paragraph(
             {
@@ -354,94 +400,74 @@ export class DownloadDocx {
         }
       });
 
-    images.forEach(image => elements.push(new Paragraph(
-      {
-        spacing: {
-          before: 100,
-          after: 100
-        },
-        indent: {
-          start: 100,
-          end: 100
-        },
-        children: [image]
-      }
-    )));
+    DownloadDocx.addImages(cheerioAPI, elements);
     return elements.filter(e => e !== undefined && e !== null);
+  }
 
-    function getChildrenTags(elem) {
-      const ele = [];
-      $(elem).each((i, el) => {
-        ele.push(el.name);
-        getChildrenTags($(el).contents());
-      });
-      return ele;
+  private static getTextRunOptions(
+    cheerioAPI: cheerio.CheerioAPI,
+    child: AnyNodeWithName,
+    colorParsed: string,
+    backgroundColor: string,
+    size: string
+  ): ParagraphOptions {
+    const tag = child.name;
+    const textRunOptions: ParagraphOptions = {
+      text: cheerioAPI(child)
+        .text()
+    };
+    textRunOptions.color = colorParsed;
+    textRunOptions.shading = {
+      fill: backgroundColor
+    };
+    if (size) {
+      const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+      sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
     }
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
-    function createParagraph(elem: any,
-      textAlignment: string,
-      colorParsed: string,
-      backgroundColor: string,
-      size: string) {
-      const tags = getChildrenTags(elem);
-
-      const textRunOptions: ParagraphOptions = {
-        text: $(elem)
-          .text()
-      };
-      let alignment: (typeof AlignmentType)[keyof typeof AlignmentType] = AlignmentType.LEFT;
-      // let heading :(typeof HeadingLevel)[keyof typeof HeadingLevel];
-      if (textAlignment) {
-        if (textAlignment === 'center') alignment = AlignmentType.CENTER;
-        if (textAlignment === 'right') alignment = AlignmentType.RIGHT;
-        if (textAlignment === 'justify') alignment = AlignmentType.JUSTIFIED;
-      }
-
-      if (colorParsed) {
-        textRunOptions.color = colorParsed;
-      }
-      if (backgroundColor) {
-        textRunOptions.shading = {
-          fill: backgroundColor
-        };
-      }
-      if (size) {
-        const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
-        sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
-      }
-
-      if (tags.includes('u')) {
-        textRunOptions.underline = {};
-      }
-      if (tags.includes('strong')) {
-        textRunOptions.bold = true;
-      }
-      if (tags.includes('em')) {
-        textRunOptions.italics = true;
-      }
-      if (tags.includes('s')) {
-        textRunOptions.strike = true;
-      }
-      if (tags.includes('sub')) {
-        textRunOptions.subscript = true;
-      }
-      if (tags.includes('sup')) {
-        textRunOptions.superscript = true;
-      }
-
-      return new Paragraph({
-        alignment: alignment,
-        spacing: {
-          before: 100,
-          after: 100
-        },
-        indent: {
-          start: 100,
-          end: 100
-        },
-        children: [new TextRun(textRunOptions)]
-      });
+    if (tag === 'u') {
+      textRunOptions.underline = {};
     }
+    textRunOptions.bold = tag === 'strong';
+    textRunOptions.italics = tag === 'em';
+    textRunOptions.strike = tag === 's';
+    textRunOptions.subscript = tag === 'sub';
+    textRunOptions.superscript = tag === 'sup';
+    return textRunOptions;
+  }
+
+  private static getAlignment(textAlignment: string): (typeof AlignmentType)[keyof typeof AlignmentType] {
+    switch (textAlignment) {
+      case 'center':
+        return AlignmentType.CENTER;
+      case 'right':
+        return AlignmentType.RIGHT;
+      case 'justify':
+        return AlignmentType.JUSTIFIED;
+      default:
+        return AlignmentType.LEFT;
+    }
+  }
+
+  private static createParagraph(cheerioAPI: cheerio.CheerioAPI,
+                                 elem: BasicAcceptedElems<AnyNode>,
+                                 textAlignment: string,
+                                 colorParsed: string,
+                                 backgroundColor: string,
+                                 size: string) {
+    return new Paragraph({
+      alignment: DownloadDocx.getAlignment(textAlignment),
+      spacing: {
+        before: 100,
+        after: 100
+      },
+      indent: {
+        start: 100,
+        end: 100
+      },
+      children: DownloadDocx.getChildren(cheerioAPI, elem)
+        .map((child: AnyNodeWithName) => new TextRun(DownloadDocx
+          .getTextRunOptions(cheerioAPI, child, colorParsed, backgroundColor, size)))
+    });
   }
 }
 
