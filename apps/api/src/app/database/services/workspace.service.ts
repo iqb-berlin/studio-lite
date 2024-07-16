@@ -8,7 +8,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
-  CodeData, CodingRule, CodingScheme, CodingSchemeProblem, RuleSet, VariableCodingData
+  CodeData, CodingScheme, CodingSchemeProblem, RuleSet, VariableCodingData
 } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -267,12 +267,8 @@ export class WorkspaceService {
                   code.ruleSets.forEach((ruleSet: RuleSet) => {
                     if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) manualCodingOnly = false;
                     hasRules = ruleSet.rules.length > 0;
-                    ruleSet.rules.forEach((rule: CodingRule) => {
-                      if (rule.method === 'ELSE') {
-                        closedCoding = true;
-                      }
-                    });
                   });
+                  closedCoding = code.type === 'RESIDUAL_AUTO';
                 });
               }
               if (closedCoding) {
