@@ -62,10 +62,12 @@ export class ExportCodingBookComponent implements OnInit {
   contentOptions:CodeBookContentSetting = {
     exportFormat: 'docx',
     missingsProfile: '',
-    hasOnlyManualCoding: 'true',
-    hasGeneralInstructions: 'true',
-    hasDerivedVars: 'true',
-    hasClosedVars: 'true'
+    hasOnlyManualCoding: true,
+    hasGeneralInstructions: true,
+    hasDerivedVars: true,
+    hasClosedVars: true,
+    codeLabelToUpper: true,
+    showScore: true
   };
 
   exportCodingBook() {

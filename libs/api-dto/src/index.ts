@@ -46,7 +46,7 @@ export { ProfileMetadataValues } from './lib/dto/unit/profile-metadata-values.cl
 export { MetadataValues } from './lib/dto/unit/profile-metadata-values.class';
 export { ItemsMetadataValues } from './lib/dto/unit/profile-metadata-values.class';
 export { MetadataValuesEntry } from './lib/dto/unit/profile-metadata-values.class';
-export { CodebookUnitDto } from './lib/dto/coding/coding-dto';
+export { CodebookUnitDto, CodeBookVariable } from './lib/dto/coding/coding-dto';
 export { CodeBookContentSetting } from './lib/dto/coding/coding-dto';
 export { UnitMetadataValues } from './lib/dto/unit/profile-metadata-values.class';
 export { MetadataProfileDto, MetadataProfileGroup } from './lib/dto/metadata-profile/metadata-profile-dto';
