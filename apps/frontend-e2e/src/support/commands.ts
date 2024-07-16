@@ -16,7 +16,7 @@ declare namespace Cypress {
     clickButton(text: string):void;
     buttonToContinue(text: string, code: number, url: string, rest: string, alias: string):void;
     dialogButtonToContinue(text: string, code: number, url: string, rest: string, alias: string):void;
-    loadModule(filename: string, name: string):void;
+    loadModule(filename: string):void;
     selectModule(name: string):void;
     visitWs(ws:string):void;
   }
@@ -64,9 +64,11 @@ Cypress.Commands.add('dialogButtonToContinue',
       .should('eq', code);
   });
 
-Cypress.Commands.add('loadModule', (filename:string, name:string) => {
+Cypress.Commands.add('loadModule', (filename:string) => {
+  const path:string = `../frontend-e2e/src/fixtures/${filename}`;
+  const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
   cy.get('input[type=file]')
-    .selectFile(filename, {
+    .selectFile(path, {
       action: 'select',
       force: true
     });
