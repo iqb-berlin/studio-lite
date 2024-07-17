@@ -6,7 +6,7 @@ import {
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
 import {
-  CodeData, CodingRule, RuleSet, VariableCodingData, ToTextFactory
+  CodeData, VariableCodingData, ToTextFactory, CodingScheme
 } from '@iqb/responses';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
@@ -193,19 +193,12 @@ export class DownloadWorkspacesClass {
     return missings;
   }
 
-  private static modifyCodingVar(codingVar: { closed: boolean; manual: boolean }, code: CodeData): void {
-    if (code.manualInstruction.length === 0) codingVar.manual = false;
-    code.ruleSets.forEach((ruleSet: RuleSet) => {
-      if (
-        code.manualInstruction.length > 0 &&
-        ruleSet.rules.length > 0
-      ) codingVar.manual = false;
-      ruleSet.rules.forEach((rule: CodingRule) => {
-        if (rule.method === 'ELSE') {
-          codingVar.closed = true;
-        }
-      });
-    });
+  private static isClosed(variableCodingData: VariableCodingData): boolean {
+    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO');
+  }
+
+  private static isManual(variableCodingData: VariableCodingData): boolean {
+    return variableCodingData.codes.some(codeData => codeData.manualInstruction);
   }
 
   private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
@@ -220,7 +213,7 @@ export class DownloadWorkspacesClass {
   }
 
   private static getCodeInfoFromCodeAsText(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
-    const codeAsText = ToTextFactory.codeAsText(code);
+    const codeAsText = ToTextFactory.codeAsText(code, 'SIMPLE');
     let rulesDescription = '';
     codeAsText.ruleSetDescriptions.forEach(
       (ruleSetDescription: string) => {
@@ -229,6 +222,7 @@ export class DownloadWorkspacesClass {
         } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
       }
     );
+
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
       label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
@@ -245,12 +239,14 @@ export class DownloadWorkspacesClass {
   ): void {
     if (variableCoding.codes.length) {
       const codes: CodeInfo[] = [];
-      const codingVar = { closed: false, manual: true };
+      const codingVar = {
+        closed: DownloadWorkspacesClass.isClosed(variableCoding),
+        manual: DownloadWorkspacesClass.isManual(variableCoding)
+      };
       const isDerived: boolean = variableCoding.sourceType !== 'BASE';
-      variableCoding.codes.forEach((code: CodeData) => {
+      variableCoding.codes.forEach(code => {
         // Catch schemer version <1.5
         if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
-          DownloadWorkspacesClass.modifyCodingVar(codingVar, code);
           codes.push(DownloadWorkspacesClass.getCodeInfoFromCodeAsText(code, contentSetting));
         } else {
           codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
@@ -292,8 +288,9 @@ export class DownloadWorkspacesClass {
     codebook: CodebookUnitDto[],
     missings: Missing[]
   ): void {
-    const parsedScheme = JSON.parse(unit.scheme);
+    const parsedScheme = new CodingScheme(unit.scheme);
     const bookVariables: Array<BookVariable> = [];
+
     if (parsedScheme?.variableCodings) {
       parsedScheme?.variableCodings.forEach(
         (variableCoding: VariableCodingData) => {

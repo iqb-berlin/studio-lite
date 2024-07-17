@@ -18,32 +18,9 @@ import {
 
 import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
-import { UnderlineType } from 'docx/build/file/paragraph/run/underline';
-import { ShadingType } from 'docx/build/file/shading/shading';
 import { FileChild } from 'docx/build/file/file-child';
 import { AnyNode, BasicAcceptedElems } from 'cheerio';
 import { WebColors } from './webcolors';
-
-type ParagraphOptions = {
-  text?: string;
-  underline?: {
-    color?: string;
-    type?: (typeof UnderlineType)[keyof typeof UnderlineType];
-  };
-  heading?: (typeof HeadingLevel)[keyof typeof HeadingLevel];
-  bold?: boolean;
-  italics?: boolean;
-  strike?: boolean;
-  subscript?: boolean;
-  superscript?: boolean;
-  color?: string;
-  shading?:{
-    type?: (typeof ShadingType)[keyof typeof ShadingType];
-    color?: string;
-    fill?: string;
-  };
-  size?:number;
-};
 
 type AnyNodeWithName = AnyNode & { name: string; };
 
@@ -351,8 +328,8 @@ export class DownloadDocx {
       if (color.startsWith('#')) {
         colorParsed = color;
       } else if (color.startsWith('rgb')) {
-        const rgbString = parseCssRgbString(color);
-        colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
+        const rgbString = DownloadDocx.parseCssRgbString(color);
+        colorParsed = DownloadDocx.toHex(rgbString[0], rgbString[1], rgbString[2]);
       } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
         colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
       }
@@ -370,33 +347,35 @@ export class DownloadDocx {
       .css('text-align') || 'left';
   }
 
-  private static htmlToDocx(html: string) {
-    const cheerioAPI = cheerio.load(html, null, false);
-    const elements: Paragraph[] = [];
+  private static stripFromLeadingEmptyParagraph(html: string): string {
+    return html.replace(/<p><\/p>/g, '');
+  }
 
+  private static htmlToDocx(html: string) {
+    const cheerioAPI = cheerio
+      .load(DownloadDocx.stripFromLeadingEmptyParagraph(html),
+        null,
+        false);
+    const elements: Paragraph[] = [];
     cheerioAPI('p,h1,h2,h3,h4')
       .each((i, elem) => {
         const span = cheerioAPI(elem)
           .find('span');
-        let formattedParagraph:Paragraph;
         try {
-          formattedParagraph = DownloadDocx
+          elements.push(DownloadDocx
             .createParagraph(
               cheerioAPI,
               elem.children,
               DownloadDocx.getTextAlignment(cheerioAPI, elem),
               DownloadDocx.getColor(cheerioAPI, span),
               DownloadDocx.getBackgroundColor(cheerioAPI, elem),
-              DownloadDocx.getSize(cheerioAPI, span));
+              DownloadDocx.getSize(cheerioAPI, span)));
         } catch (e) {
-          formattedParagraph = new Paragraph(
+          elements.push(new Paragraph(
             {
               text: 'HTML konnte nicht verarbeitet werden.'
             }
-          );
-        }
-        if (formattedParagraph) {
-          elements.push(formattedParagraph);
+          ));
         }
       });
 
@@ -404,35 +383,34 @@ export class DownloadDocx {
     return elements.filter(e => e !== undefined && e !== null);
   }
 
-  private static getTextRunOptions(
+  private static getFontSize(size: string): number {
+    const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+    return sizeTypes.includes(size) ? 20 : parseInt(size, 10);
+  }
+
+  private static getTextRun(
     cheerioAPI: cheerio.CheerioAPI,
     child: AnyNodeWithName,
     colorParsed: string,
     backgroundColor: string,
     size: string
-  ): ParagraphOptions {
+  ): TextRun {
     const tag = child.name;
-    const textRunOptions: ParagraphOptions = {
+    return new TextRun({
       text: cheerioAPI(child)
-        .text()
-    };
-    textRunOptions.color = colorParsed;
-    textRunOptions.shading = {
-      fill: backgroundColor
-    };
-    if (size) {
-      const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
-      sizeTypes.includes(size) ? textRunOptions.size = 20 : textRunOptions.size = parseInt(size, 10);
-    }
-    if (tag === 'u') {
-      textRunOptions.underline = {};
-    }
-    textRunOptions.bold = tag === 'strong';
-    textRunOptions.italics = tag === 'em';
-    textRunOptions.strike = tag === 's';
-    textRunOptions.subscript = tag === 'sub';
-    textRunOptions.superscript = tag === 'sup';
-    return textRunOptions;
+        .text(),
+      color: colorParsed,
+      shading: {
+        fill: backgroundColor
+      },
+      underline: tag === 'u' ? {} : null,
+      bold: tag === 'strong',
+      italics: tag === 'em',
+      strike: tag === 's',
+      subScript: tag === 'sub',
+      superScript: tag === 'sup',
+      size: DownloadDocx.getFontSize(size)
+    });
   }
 
   private static getAlignment(textAlignment: string): (typeof AlignmentType)[keyof typeof AlignmentType] {
@@ -453,7 +431,7 @@ export class DownloadDocx {
                                  textAlignment: string,
                                  colorParsed: string,
                                  backgroundColor: string,
-                                 size: string) {
+                                 size: string): Paragraph {
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
@@ -465,38 +443,38 @@ export class DownloadDocx {
         end: 100
       },
       children: DownloadDocx.getChildren(cheerioAPI, elem)
-        .map((child: AnyNodeWithName) => new TextRun(DownloadDocx
-          .getTextRunOptions(cheerioAPI, child, colorParsed, backgroundColor, size)))
+        .map((child: AnyNodeWithName) => DownloadDocx
+          .getTextRun(cheerioAPI, child, colorParsed, backgroundColor, size))
     });
   }
-}
 
-// Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
-function parseCssRgbString(input) {
-  const parts = input?.replace(/rgba?\(([^)]+)\)/, '$1').split(/[,\s/]+/).filter(Boolean);
-  if (parts?.length < 3) {
-    return;
-  }
-
-  const parseValue = (value, max) => {
-    // eslint-disable-next-line no-param-reassign
-    value = value.trim();
-
-    if (value.endsWith('%')) {
-      // eslint-disable-next-line no-bitwise,no-mixed-operators
-      return Math.min(Number.parseFloat(value) * max / 100, max);
+  private static parseCssRgbString(input) {
+    const parts = input?.replace(/rgba?\(([^)]+)\)/, '$1').split(/[,\s/]+/).filter(Boolean);
+    if (parts?.length < 3) {
+      return;
     }
 
-    return Math.min(Number.parseFloat(value), max);
-  };
+    const parseValue = (value, max) => {
+      // eslint-disable-next-line no-param-reassign
+      value = value.trim();
 
-  const red = parseValue(parts[0], 255);
-  const green = parseValue(parts[1], 255);
-  const blue = parseValue(parts[2], 255);
+      if (value.endsWith('%')) {
+        // eslint-disable-next-line no-bitwise,no-mixed-operators
+        return Math.min(Number.parseFloat(value) * max / 100, max);
+      }
 
-  // eslint-disable-next-line consistent-return
-  return [red, green, blue];
+      return Math.min(Number.parseFloat(value), max);
+    };
+
+    const red = parseValue(parts[0], 255);
+    const green = parseValue(parts[1], 255);
+    const blue = parseValue(parts[2], 255);
+
+    // eslint-disable-next-line consistent-return
+    return [red, green, blue];
+  }
+
+  // Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
+  // eslint-disable-next-line no-bitwise,no-mixed-operators
+  private static toHex = (red, green, blue) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1);
 }
-
-// eslint-disable-next-line no-bitwise,no-mixed-operators
-const toHex = (red, green, blue) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1);
