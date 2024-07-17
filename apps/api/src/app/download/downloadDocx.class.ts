@@ -328,8 +328,8 @@ export class DownloadDocx {
       if (color.startsWith('#')) {
         colorParsed = color;
       } else if (color.startsWith('rgb')) {
-        const rgbString = parseCssRgbString(color);
-        colorParsed = toHex(rgbString[0], rgbString[1], rgbString[2]);
+        const rgbString = DownloadDocx.parseCssRgbString(color);
+        colorParsed = DownloadDocx.toHex(rgbString[0], rgbString[1], rgbString[2]);
       } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
         colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
       }
@@ -347,13 +347,13 @@ export class DownloadDocx {
       .css('text-align') || 'left';
   }
 
-  private static stripFromLeadigEmptyParagraph(html: string): string {
-    return html.replace(/^<p><\/p>/g, '');
+  private static stripFromLeadingEmptyParagraph(html: string): string {
+    return html.replace(/<p><\/p>/g, '');
   }
 
   private static htmlToDocx(html: string) {
     const cheerioAPI = cheerio
-      .load(DownloadDocx.stripFromLeadigEmptyParagraph(html),
+      .load(DownloadDocx.stripFromLeadingEmptyParagraph(html),
         null,
         false);
     const elements: Paragraph[] = [];
@@ -361,25 +361,21 @@ export class DownloadDocx {
       .each((i, elem) => {
         const span = cheerioAPI(elem)
           .find('span');
-        let formattedParagraph:Paragraph;
         try {
-          formattedParagraph = DownloadDocx
+          elements.push(DownloadDocx
             .createParagraph(
               cheerioAPI,
               elem.children,
               DownloadDocx.getTextAlignment(cheerioAPI, elem),
               DownloadDocx.getColor(cheerioAPI, span),
               DownloadDocx.getBackgroundColor(cheerioAPI, elem),
-              DownloadDocx.getSize(cheerioAPI, span));
+              DownloadDocx.getSize(cheerioAPI, span)));
         } catch (e) {
-          formattedParagraph = new Paragraph(
+          elements.push(new Paragraph(
             {
               text: 'HTML konnte nicht verarbeitet werden.'
             }
-          );
-        }
-        if (formattedParagraph) {
-          elements.push(formattedParagraph);
+          ));
         }
       });
 
@@ -435,7 +431,7 @@ export class DownloadDocx {
                                  textAlignment: string,
                                  colorParsed: string,
                                  backgroundColor: string,
-                                 size: string) {
+                                 size: string): Paragraph {
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
@@ -451,34 +447,34 @@ export class DownloadDocx {
           .getTextRun(cheerioAPI, child, colorParsed, backgroundColor, size))
     });
   }
-}
 
-// Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
-function parseCssRgbString(input) {
-  const parts = input?.replace(/rgba?\(([^)]+)\)/, '$1').split(/[,\s/]+/).filter(Boolean);
-  if (parts?.length < 3) {
-    return;
-  }
-
-  const parseValue = (value, max) => {
-    // eslint-disable-next-line no-param-reassign
-    value = value.trim();
-
-    if (value.endsWith('%')) {
-      // eslint-disable-next-line no-bitwise,no-mixed-operators
-      return Math.min(Number.parseFloat(value) * max / 100, max);
+  private static parseCssRgbString(input) {
+    const parts = input?.replace(/rgba?\(([^)]+)\)/, '$1').split(/[,\s/]+/).filter(Boolean);
+    if (parts?.length < 3) {
+      return;
     }
 
-    return Math.min(Number.parseFloat(value), max);
-  };
+    const parseValue = (value, max) => {
+      // eslint-disable-next-line no-param-reassign
+      value = value.trim();
 
-  const red = parseValue(parts[0], 255);
-  const green = parseValue(parts[1], 255);
-  const blue = parseValue(parts[2], 255);
+      if (value.endsWith('%')) {
+        // eslint-disable-next-line no-bitwise,no-mixed-operators
+        return Math.min(Number.parseFloat(value) * max / 100, max);
+      }
 
-  // eslint-disable-next-line consistent-return
-  return [red, green, blue];
+      return Math.min(Number.parseFloat(value), max);
+    };
+
+    const red = parseValue(parts[0], 255);
+    const green = parseValue(parts[1], 255);
+    const blue = parseValue(parts[2], 255);
+
+    // eslint-disable-next-line consistent-return
+    return [red, green, blue];
+  }
+
+  // Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
+  // eslint-disable-next-line no-bitwise,no-mixed-operators
+  private static toHex = (red, green, blue) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1);
 }
-
-// eslint-disable-next-line no-bitwise,no-mixed-operators
-const toHex = (red, green, blue) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1);
