@@ -19,7 +19,7 @@ import {
 import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { FileChild } from 'docx/build/file/file-child';
-import { AnyNode, BasicAcceptedElems } from 'cheerio';
+import { AnyNode, BasicAcceptedElems, Element } from 'cheerio';
 import { WebColors } from './webcolors';
 
 type AnyNodeWithName = AnyNode & { name: string; };
@@ -359,6 +359,7 @@ export class DownloadDocx {
     const elements: Paragraph[] = [];
     cheerioAPI('p,h1,h2,h3,h4')
       .each((i, elem) => {
+        const isListParagraph = elem.parent && (elem.parent as Element).name === 'li';
         const span = cheerioAPI(elem)
           .find('span');
         try {
@@ -369,7 +370,8 @@ export class DownloadDocx {
               DownloadDocx.getTextAlignment(cheerioAPI, elem),
               DownloadDocx.getColor(cheerioAPI, span),
               DownloadDocx.getBackgroundColor(cheerioAPI, elem),
-              DownloadDocx.getSize(cheerioAPI, span)));
+              DownloadDocx.getSize(cheerioAPI, span),
+              isListParagraph));
         } catch (e) {
           elements.push(new Paragraph(
             {
@@ -431,17 +433,17 @@ export class DownloadDocx {
                                  textAlignment: string,
                                  colorParsed: string,
                                  backgroundColor: string,
-                                 size: string): Paragraph {
+                                 size: string,
+                                 isListParagraph: boolean
+  ): Paragraph {
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
         before: 100,
         after: 100
       },
-      indent: {
-        start: 100,
-        end: 100
-      },
+      indent: !isListParagraph ? { start: 100, end: 100 } : null,
+      bullet: isListParagraph ? { level: 0 } : null,
       children: DownloadDocx.getChildren(cheerioAPI, elem)
         .map((child: AnyNodeWithName) => DownloadDocx
           .getTextRun(cheerioAPI, child, colorParsed, backgroundColor, size))
