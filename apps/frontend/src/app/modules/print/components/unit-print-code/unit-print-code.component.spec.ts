@@ -16,7 +16,13 @@ describe('UnitPrintCodeComponent', () => {
     fixture = TestBed.createComponent(UnitPrintCodeComponent);
     component = fixture.componentInstance;
     component.codeData = {
-      id: 1, label: 'test', score: 0, manualInstruction: '', ruleSets: [], ruleSetOperatorAnd: true
+      id: 1,
+      label: 'test',
+      score: 0,
+      manualInstruction: '',
+      ruleSets: [],
+      ruleSetOperatorAnd: true,
+      type: 'RESIDUAL_AUTO'
     };
     fixture.detectChanges();
   });
