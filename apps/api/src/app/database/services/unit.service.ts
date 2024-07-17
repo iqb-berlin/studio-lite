@@ -8,7 +8,7 @@ import {
   UnitByDefinitionIdDto,
   UnitInListDto,
   UnitMetadataDto,
-  UnitSchemeDto
+  UnitSchemeDto, MetadataValues, UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
@@ -199,18 +199,18 @@ export class UnitService {
       })));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static setCurrentProfiles(unitProfile: string, itemProfile: string, metadata: any): any {
+  private static setCurrentProfiles(
+    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
+  ): UnitMetadataValues {
     if (metadata.profiles) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata.profiles = metadata.profiles.map((profile: any) => UnitService.setCurrentProfile(unitProfile, profile));
+      metadata.profiles = metadata.profiles.map((profile: MetadataValues) => UnitService
+        .setCurrentProfile(unitProfile, profile));
     }
     if (metadata.items) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata.items.forEach((item: any) => {
+      metadata.items.forEach(item => {
         if (item.profiles) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          item.profiles = item.profiles.map((profile: any) => UnitService.setCurrentProfile(itemProfile, profile));
+          item.profiles = item.profiles.map(profile => UnitService
+            .setCurrentProfile(itemProfile, profile));
         }
       });
     }
@@ -225,12 +225,11 @@ export class UnitService {
   }
 
   static getUserDisplayName(user: User): string {
-    const displayName = user.lastName ? user.lastName : user.name;
-    return user.firstName ? `${displayName}, ${user.firstName}` : displayName;
+    const displayName = user.lastName && user.lastName.trim() ? user.lastName.trim() : user.name.trim();
+    return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static setCurrentProfile(profileId: string, profile: any): any {
+  private static setCurrentProfile(profileId: string, profile: MetadataValues): MetadataValues {
     return {
       ...profile,
       isCurrent: profile.profileId === profileId
@@ -403,7 +402,7 @@ export class UnitService {
     }
   }
 
-  async removeUnitState(id: number, user): Promise<void> {
+  async removeUnitState(id: number, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: id } });
     const unitToUpdate = await this.repairDefinition(unit, user);
     await this.unitsRepository.save({ ...unitToUpdate, state: '0' }

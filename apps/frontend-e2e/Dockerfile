@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 
-ARG REGISTRY_PATH
+ARG REGISTRY_PATH=""
 ARG BASE_IMAGE_NAME=studio-lite-base
 
 
 FROM $BASE_IMAGE_NAME AS base
 
 
-FROM ${REGISTRY_PATH}cypress/browsers:node-20.13.0-chrome-124.0.6367.155-1-ff-125.0.3-edge-124.0.2478.80-1
+FROM ${REGISTRY_PATH}cypress/browsers:node-20.15.1-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
 
 WORKDIR /usr/src/studio-lite
 

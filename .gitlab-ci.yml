@@ -27,18 +27,18 @@ variables:
   REGISTRY_PASSWORD: "$CI_REGISTRY_PASSWORD"
   REGISTRY_PROJECT: "/${CI_PROJECT_PATH}/"
   DOCKER_HUB_PROXY: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/"
-  BASE_IMAGE: node:20.13-bookworm-slim
+  BASE_IMAGE: node:lts-bookworm-slim
   CICD_BASE_IMAGE: "${BASE_IMAGE}-git"
-  CYPRESS_IMAGE: cypress/browsers:node-20.13.0-chrome-124.0.6367.155-1-ff-125.0.3-edge-124.0.2478.80-1
+  CYPRESS_IMAGE: cypress/browsers:node-20.15.1-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
   E2E_BASE_IMAGE: "${CYPRESS_IMAGE}-docker"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DAEMON_OPTIONS: "--mtu=${DOCKER_SERVICE_MTU}"
-  DOCKER_IMAGE: ${DOCKER_HUB_PROXY}docker:26.1
-  DOCKER_SERVICE: ${DOCKER_HUB_PROXY}docker:26.1-dind
+  DOCKER_IMAGE: ${DOCKER_HUB_PROXY}docker:27.0
+  DOCKER_SERVICE: ${DOCKER_HUB_PROXY}docker:27.0-dind
   DOCKER_SERVICE_MTU: 1442
   DOCKER_TLS_CERTDIR: ''
-  TRIVY_IMAGE: ${DOCKER_HUB_PROXY}aquasec/trivy:0.51.1
+  TRIVY_IMAGE: ${DOCKER_HUB_PROXY}aquasec/trivy:latest
 
 include:
   - local: ".gitlab-ci/*.gitlab-ci.yml"

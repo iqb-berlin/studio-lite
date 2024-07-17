@@ -160,7 +160,7 @@
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
     "access-level-0": "Gast",
-    "access-level-1": "Kommentator:in",
+    "access-level-1": "Kommentierer:in",
     "access-level-2": "Entwickler:in",
     "access-level-3": "Betreuer:in",
     "access-level-4": "Admin",
@@ -413,7 +413,16 @@
     "status": "Status",
     "code": "Code",
     "score": "Bewertung",
-    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen"
+    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen",
+    "has-general-instructions": "Allgemeine Hinweise für jede Variable",
+    "has-derived-vars": "Abgeleitete Variablen",
+    "has-only-manual-coding": "Nur manuell kodierte Variablen",
+    "has-closed-vars": "Geschlossen kodierte Variablen",
+    "show-score": "Bewertung anzeigen",
+    "codebook-content": "Codebook Inhalte",
+    "export-format": "Exportformat",
+    "code-label-to-upper": "Code-Label in Großbuchstaben",
+    "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!"
   },
 
   "status-label" : {
