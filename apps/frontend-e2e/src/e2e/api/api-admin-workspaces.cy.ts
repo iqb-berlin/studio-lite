@@ -140,6 +140,7 @@ describe('API admin workspace tests', () => {
   });
   it('13. should be able to update the users of a workspace from its workspace id', () => {
     updateUsersOfWsAPI(Cypress.env(ws1.id));
+    cy.pause();
   });
 
   // TO DO, find out what does
