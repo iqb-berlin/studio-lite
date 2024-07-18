@@ -131,11 +131,19 @@ export class DownloadDocx {
     return variable.codes.map(code => new TableRow({
       cantSplit: true,
       children: [
-        DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.id)),
-        DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.label)),
+        DownloadDocx.createCodeCell(
+          DownloadDocx.createCellChildren(code.id),
+          DownloadDocx.getColumnWidths(contentSetting)[0]),
+        DownloadDocx.createCodeCell(
+          DownloadDocx.createCellChildren(code.label),
+          DownloadDocx.getColumnWidths(contentSetting)[1]),
         ...contentSetting.showScore ? [DownloadDocx
-          .createCodeCell(DownloadDocx.createCellChildren(code.score))] : [],
-        DownloadDocx.createCodeCell([...DownloadDocx.htmlToDocx(code.description)])
+          .createCodeCell(
+            DownloadDocx.createCellChildren(code.score),
+            DownloadDocx.getColumnWidths(contentSetting)[2])] : [],
+        DownloadDocx.createCodeCell(
+          [...DownloadDocx.htmlToDocx(code.description)],
+          DownloadDocx.getColumnWidths(contentSetting)[DownloadDocx.getColumnWidths(contentSetting).length - 1])
       ]
     })
     );
@@ -152,12 +160,13 @@ export class DownloadDocx {
     })];
   }
 
-  private static createCodeCell(children: Paragraph[]): TableCell {
+  private static createCodeCell(children: Paragraph[], width: number): TableCell {
     return new TableCell({
       borders: DownloadDocx.TableBoarders,
       children: children,
+      // Need for Word, but not for Writer
       width: {
-        size: 100,
+        size: width,
         type: WidthType.PERCENTAGE
       }
     });
@@ -238,7 +247,7 @@ export class DownloadDocx {
         size: 100,
         type: WidthType.PERCENTAGE
       },
-      columnWidths: DownloadDocx.getColumnWidths(contentSetting)
+      columnWidths: DownloadDocx.getColumnWidths(contentSetting) // Need for Writer, but not for Word
     });
   }
 
