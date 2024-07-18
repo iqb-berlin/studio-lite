@@ -19,7 +19,7 @@ import {
 import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { FileChild } from 'docx/build/file/file-child';
-import { AnyNode, BasicAcceptedElems } from 'cheerio';
+import { AnyNode, BasicAcceptedElems, Element } from 'cheerio';
 import { WebColors } from './webcolors';
 
 type AnyNodeWithName = AnyNode & { name: string; };
@@ -131,11 +131,19 @@ export class DownloadDocx {
     return variable.codes.map(code => new TableRow({
       cantSplit: true,
       children: [
-        DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.id)),
-        DownloadDocx.createCodeCell(DownloadDocx.createCellChildren(code.label)),
+        DownloadDocx.createCodeCell(
+          DownloadDocx.createCellChildren(code.id),
+          DownloadDocx.getColumnWidths(contentSetting)[0]),
+        DownloadDocx.createCodeCell(
+          DownloadDocx.createCellChildren(code.label),
+          DownloadDocx.getColumnWidths(contentSetting)[1]),
         ...contentSetting.showScore ? [DownloadDocx
-          .createCodeCell(DownloadDocx.createCellChildren(code.score))] : [],
-        DownloadDocx.createCodeCell([...DownloadDocx.htmlToDocx(code.description)])
+          .createCodeCell(
+            DownloadDocx.createCellChildren(code.score),
+            DownloadDocx.getColumnWidths(contentSetting)[2])] : [],
+        DownloadDocx.createCodeCell(
+          [...DownloadDocx.htmlToDocx(code.description)],
+          DownloadDocx.getColumnWidths(contentSetting)[DownloadDocx.getColumnWidths(contentSetting).length - 1])
       ]
     })
     );
@@ -152,12 +160,13 @@ export class DownloadDocx {
     })];
   }
 
-  private static createCodeCell(children: Paragraph[]): TableCell {
+  private static createCodeCell(children: Paragraph[], width: number): TableCell {
     return new TableCell({
       borders: DownloadDocx.TableBoarders,
       children: children,
+      // Need for Word, but not for Writer
       width: {
-        size: 100,
+        size: width,
         type: WidthType.PERCENTAGE
       }
     });
@@ -238,7 +247,7 @@ export class DownloadDocx {
         size: 100,
         type: WidthType.PERCENTAGE
       },
-      columnWidths: DownloadDocx.getColumnWidths(contentSetting)
+      columnWidths: DownloadDocx.getColumnWidths(contentSetting) // Need for Writer, but not for Word
     });
   }
 
@@ -359,6 +368,7 @@ export class DownloadDocx {
     const elements: Paragraph[] = [];
     cheerioAPI('p,h1,h2,h3,h4')
       .each((i, elem) => {
+        const isListParagraph = elem.parent && (elem.parent as Element).name === 'li';
         const span = cheerioAPI(elem)
           .find('span');
         try {
@@ -369,7 +379,8 @@ export class DownloadDocx {
               DownloadDocx.getTextAlignment(cheerioAPI, elem),
               DownloadDocx.getColor(cheerioAPI, span),
               DownloadDocx.getBackgroundColor(cheerioAPI, elem),
-              DownloadDocx.getSize(cheerioAPI, span)));
+              DownloadDocx.getSize(cheerioAPI, span),
+              isListParagraph));
         } catch (e) {
           elements.push(new Paragraph(
             {
@@ -431,17 +442,17 @@ export class DownloadDocx {
                                  textAlignment: string,
                                  colorParsed: string,
                                  backgroundColor: string,
-                                 size: string): Paragraph {
+                                 size: string,
+                                 isListParagraph: boolean
+  ): Paragraph {
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
         before: 100,
         after: 100
       },
-      indent: {
-        start: 100,
-        end: 100
-      },
+      indent: !isListParagraph ? { start: 100, end: 100 } : null,
+      bullet: isListParagraph ? { level: 0 } : null,
       children: DownloadDocx.getChildren(cheerioAPI, elem)
         .map((child: AnyNodeWithName) => DownloadDocx
           .getTextRun(cheerioAPI, child, colorParsed, backgroundColor, size))
