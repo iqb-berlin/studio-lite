@@ -252,13 +252,13 @@ export class DownloadWorkspacesClass {
           codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
         }
       });
-      if (!isDerived && codingVar.closed && contentSetting.hasClosedVars) {
-        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-      }
-      if (!isDerived && codingVar.manual && contentSetting.hasOnlyManualCoding) {
-        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-      }
-      if (isDerived && contentSetting.hasDerivedVars) {
+      if (!isDerived) {
+        if (codingVar.closed && contentSetting.hasClosedVars) {
+          DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+        } else if (codingVar.manual && contentSetting.hasOnlyManualCoding) {
+          DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+        }
+      } else if (contentSetting.hasDerivedVars) {
         DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
       }
     }
