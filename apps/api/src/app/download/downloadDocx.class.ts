@@ -357,12 +357,22 @@ export class DownloadDocx {
   }
 
   private static stripFromLeadingEmptyParagraph(html: string): string {
-    return html.replace(/<p><\/p>/g, '');
+    return html.replace(/^<p><\/p>/, '');
+  }
+
+  private static convertLineBreaksToHTMLBreaks(html: string): string {
+    return html.replace(/\n/g, '<br>');
+  }
+
+  private static prepareHtml(html: string): string {
+    return DownloadDocx.convertLineBreaksToHTMLBreaks(
+      DownloadDocx.stripFromLeadingEmptyParagraph(html)
+    );
   }
 
   private static htmlToDocx(html: string) {
     const cheerioAPI = cheerio
-      .load(DownloadDocx.stripFromLeadingEmptyParagraph(html),
+      .load(DownloadDocx.prepareHtml(html),
         null,
         false);
     const elements: Paragraph[] = [];
@@ -414,6 +424,7 @@ export class DownloadDocx {
       shading: {
         fill: backgroundColor
       },
+      break: tag === 'br' ? 1 : null,
       underline: tag === 'u' ? {} : null,
       bold: tag === 'strong',
       italics: tag === 'em',
@@ -473,10 +484,8 @@ export class DownloadDocx {
         // eslint-disable-next-line no-bitwise,no-mixed-operators
         return Math.min(Number.parseFloat(value) * max / 100, max);
       }
-
       return Math.min(Number.parseFloat(value), max);
     };
-
     const red = parseValue(parts[0], 255);
     const green = parseValue(parts[1], 255);
     const blue = parseValue(parts[2], 255);
