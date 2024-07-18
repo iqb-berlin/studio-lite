@@ -20,6 +20,10 @@ import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@stud
 import * as cheerio from 'cheerio';
 import { FileChild } from 'docx/build/file/file-child';
 import { AnyNode, BasicAcceptedElems, Element } from 'cheerio';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { imageSize } from 'image-size';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { WebColors } from './webcolors';
 
 type AnyNodeWithName = AnyNode & { name: string; };
@@ -142,7 +146,7 @@ export class DownloadDocx {
             DownloadDocx.createCellChildren(code.score),
             DownloadDocx.getColumnWidths(contentSetting)[2])] : [],
         DownloadDocx.createCodeCell(
-          [...DownloadDocx.htmlToDocx(code.description)],
+          [...DownloadDocx.htmlToDocx(code.description, contentSetting)],
           DownloadDocx.getColumnWidths(contentSetting)[DownloadDocx.getColumnWidths(contentSetting).length - 1])
       ]
     })
@@ -237,7 +241,8 @@ export class DownloadDocx {
     contentSetting: CodeBookContentSetting,
     codeBookVariable: CodeBookVariable
   ): Paragraph[] {
-    return contentSetting.hasGeneralInstructions ? DownloadDocx.htmlToDocx(codeBookVariable.generalInstruction) : [];
+    return contentSetting.hasGeneralInstructions ? DownloadDocx
+      .htmlToDocx(codeBookVariable.generalInstruction, contentSetting) : [];
   }
 
   private static getCodeTable(codeBookVariable: CodeBookVariable, contentSetting: CodeBookContentSetting): Table {
@@ -294,9 +299,31 @@ export class DownloadDocx {
     return children;
   }
 
-  private static addImages(cheerioAPI: cheerio.CheerioAPI, elements: Paragraph[]): void {
+  private static getImageSize(imageBuffer: Buffer): ISizeCalculationResult {
+    return imageSize(imageBuffer);
+  }
+
+  private static getTransformation(actualSize: ISizeCalculationResult, max: number): ISizeCalculationResult {
+    const transformedSize: ISizeCalculationResult = { width: actualSize.width, height: actualSize.height };
+    const maxWidth = max;
+    const maxHeight = max;
+    if (actualSize.width > maxWidth || actualSize.height > maxHeight) {
+      const ratio = Math.min(maxWidth / actualSize.width, maxHeight / actualSize.height);
+      transformedSize.width = actualSize.width * ratio;
+      transformedSize.height = actualSize.height * ratio;
+    }
+    return transformedSize;
+  }
+
+  private static addImages(
+    cheerioAPI: cheerio.CheerioAPI,
+    elements: Paragraph[],
+    contentSetting: CodeBookContentSetting
+  ): void {
     cheerioAPI('img')
       .each((i, elem) => {
+        const imageBuffer = Buffer.from(elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1), 'base64');
+        const size = DownloadDocx.getImageSize(imageBuffer);
         elements.push(new Paragraph(
           {
             spacing: {
@@ -308,13 +335,9 @@ export class DownloadDocx {
               end: 100
             },
             children: [new ImageRun({
-              data: Buffer.from(
-                elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1),
-                'base64'),
-              transformation: {
-                width: 200,
-                height: 200
-              }
+              data: imageBuffer,
+              transformation: DownloadDocx
+                .getTransformation(size, contentSetting.showScore ? 334 : 382)
             })]
           }
         ));
@@ -370,7 +393,7 @@ export class DownloadDocx {
     );
   }
 
-  private static htmlToDocx(html: string) {
+  private static htmlToDocx(html: string, contentSetting: CodeBookContentSetting) {
     const cheerioAPI = cheerio
       .load(DownloadDocx.prepareHtml(html),
         null,
@@ -400,7 +423,7 @@ export class DownloadDocx {
         }
       });
 
-    DownloadDocx.addImages(cheerioAPI, elements);
+    DownloadDocx.addImages(cheerioAPI, elements, contentSetting);
     return elements.filter(e => e !== undefined && e !== null);
   }
 
