@@ -87,7 +87,7 @@ create_backup() {
       exec -it db \
         pg_dumpall --username="$POSTGRES_USER" >"$PWD"/backup/database_dump/all.sql
     then
-      printf -- "- Current db dump has been saved at: '%s'\n" "$PWD/backup/release/database_dump/all.sql"
+      printf -- "- Current db dump has been saved at: '%s'\n" "$PWD/backup/database_dump/all.sql"
     fi
   else
     docker compose \
@@ -104,7 +104,7 @@ create_backup() {
       exec -it db \
         pg_dumpall --username="$POSTGRES_USER" >"$PWD"/backup/database_dump/all.sql
     then
-      printf -- "- Current db dump has been saved at: '%s'\n" "$PWD/backup/release/database_dump/all.sql"
+      printf -- "- Current db dump has been saved at: '%s'\n" "$PWD/backup/database_dump/all.sql"
     fi
     docker compose \
         --progress quiet \
