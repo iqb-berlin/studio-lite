@@ -315,33 +315,30 @@ export class DownloadDocx {
     return transformedSize;
   }
 
-  private static addImages(
-    cheerioAPI: cheerio.CheerioAPI,
-    elements: Paragraph[],
+  private static createImagePragraph(
+    elem: Element,
     contentSetting: CodeBookContentSetting
-  ): void {
-    cheerioAPI('img')
-      .each((i, elem) => {
-        const imageBuffer = Buffer.from(elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1), 'base64');
-        const size = DownloadDocx.getImageSize(imageBuffer);
-        elements.push(new Paragraph(
-          {
-            spacing: {
-              before: 100,
-              after: 100
-            },
-            indent: {
-              start: 100,
-              end: 100
-            },
-            children: [new ImageRun({
-              data: imageBuffer,
-              transformation: DownloadDocx
-                .getTransformation(size, contentSetting.showScore ? 334 : 382)
-            })]
-          }
-        ));
-      });
+  ): Paragraph {
+    const imageBuffer = Buffer
+      .from(elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1), 'base64');
+    const size = DownloadDocx.getImageSize(imageBuffer);
+    return new Paragraph(
+      {
+        spacing: {
+          before: 100,
+          after: 100
+        },
+        indent: {
+          start: 100,
+          end: 100
+        },
+        children: [new ImageRun({
+          data: imageBuffer,
+          transformation: DownloadDocx
+            .getTransformation(size, contentSetting.showScore ? 334 : 382)
+        })]
+      }
+    );
   }
 
   private static getBackgroundColor(cheerioAPI: cheerio.CheerioAPI, elem: cheerio.Element): string {
@@ -399,31 +396,33 @@ export class DownloadDocx {
         null,
         false);
     const elements: Paragraph[] = [];
-    cheerioAPI('p,h1,h2,h3,h4')
+    cheerioAPI('p,h1,h2,h3,h4,img')
       .each((i, elem) => {
-        const isListParagraph = elem.parent && (elem.parent as Element).name === 'li';
-        const span = cheerioAPI(elem)
-          .find('span');
-        try {
-          elements.push(DownloadDocx
-            .createParagraph(
-              cheerioAPI,
-              elem.children,
-              DownloadDocx.getTextAlignment(cheerioAPI, elem),
-              DownloadDocx.getColor(cheerioAPI, span),
-              DownloadDocx.getBackgroundColor(cheerioAPI, elem),
-              DownloadDocx.getSize(cheerioAPI, span),
-              isListParagraph));
-        } catch (e) {
-          elements.push(new Paragraph(
-            {
-              text: 'HTML konnte nicht verarbeitet werden.'
-            }
-          ));
+        if (elem.name === 'img') {
+          elements.push(DownloadDocx.createImagePragraph(elem, contentSetting));
+        } else {
+          const isListParagraph = elem.parent && (elem.parent as Element).name === 'li';
+          const span = cheerioAPI(elem)
+            .find('span');
+          try {
+            elements.push(DownloadDocx
+              .createParagraph(
+                cheerioAPI,
+                elem.children,
+                DownloadDocx.getTextAlignment(cheerioAPI, elem),
+                DownloadDocx.getColor(cheerioAPI, span),
+                DownloadDocx.getBackgroundColor(cheerioAPI, elem),
+                DownloadDocx.getSize(cheerioAPI, span),
+                isListParagraph));
+          } catch (e) {
+            elements.push(new Paragraph(
+              {
+                text: 'HTML konnte nicht verarbeitet werden.'
+              }
+            ));
+          }
         }
       });
-
-    DownloadDocx.addImages(cheerioAPI, elements, contentSetting);
     return elements.filter(e => e !== undefined && e !== null);
   }
 
