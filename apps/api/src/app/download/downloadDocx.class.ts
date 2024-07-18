@@ -156,7 +156,7 @@ export class DownloadDocx {
         before: 100,
         after: 100
       },
-      indent: { firstLine: 50 }
+      indent: { start: 100, end: 100 }
     })];
   }
 
@@ -252,7 +252,7 @@ export class DownloadDocx {
   }
 
   private static getColumnWidths(contentSetting: CodeBookContentSetting): number[] {
-    return contentSetting.showScore ? [10, 25, 10, 55] : [10, 25, 65];
+    return contentSetting.showScore ? [8, 24, 8, 60] : [8, 24, 68];
   }
 
   private static getVariables(codeBookVariable: CodeBookVariable[], contentSetting: CodeBookContentSetting): unknown[] {
