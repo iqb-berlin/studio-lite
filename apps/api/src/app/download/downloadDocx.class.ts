@@ -33,15 +33,24 @@ export class DownloadDocx {
                                contentSetting: CodeBookContentSetting): Promise<Buffer | []> {
     if (codingBookUnits.length) {
       const units: FileChild[] = [];
-      const missings: Paragraph[] = [];
+      let missings: Paragraph[] = [];
       codingBookUnits.forEach(variableCoding => {
-        const unitHeader = DownloadDocx.getUnitHeader(variableCoding);
-        DownloadDocx.addMissings(variableCoding, missings);
+        missings = DownloadDocx.getMissings(variableCoding);
         if (variableCoding.variables.length) {
-          DownloadDocx.addDocXForUnit(variableCoding.variables, contentSetting, unitHeader, units);
+          units.push(...(DownloadDocx
+            .createDocXForUnit(
+              variableCoding.variables,
+              contentSetting,
+              DownloadDocx.getUnitHeader(variableCoding)
+            ) as FileChild[])
+          );
         }
       });
-      const b64string = await Packer.toBase64String(DownloadDocx.setDocXDocument(units, missings));
+      const b64string = await Packer.toBase64String(
+        DownloadDocx.setDocXDocument(
+          units,
+          missings)
+      );
       return Buffer.from(b64string, 'base64');
     }
     return [];
@@ -71,7 +80,8 @@ export class DownloadDocx {
     });
   }
 
-  private static addMissings(variableCoding: CodebookUnitDto, missings: Paragraph[]): void {
+  private static getMissings(variableCoding: CodebookUnitDto): Paragraph[] {
+    const missings: Paragraph[] = [];
     try {
       variableCoding.missings.forEach(missing => {
         if (missing.code && missing.label && missing.description) {
@@ -104,6 +114,7 @@ export class DownloadDocx {
         }
       }));
     }
+    return missings;
   }
 
   private static get TableBoarders(): ITableCellBorders {
@@ -271,23 +282,21 @@ export class DownloadDocx {
     return variables;
   }
 
-  private static addDocXForUnit(
+  private static createDocXForUnit(
     codeBookVariable: CodeBookVariable[],
     contentSetting: CodeBookContentSetting,
-    unitHeader: Paragraph,
-    units: unknown[]): void {
-    units.push(
-      ...[
-        unitHeader,
-        ...DownloadDocx.getVariables(codeBookVariable, contentSetting),
-        new Paragraph({
-          text: '',
-          spacing: {
-            before: 100,
-            after: 100
-          }
-        })
-      ]);
+    unitHeader: Paragraph): unknown[] {
+    return [
+      unitHeader,
+      ...DownloadDocx.getVariables(codeBookVariable, contentSetting),
+      new Paragraph({
+        text: '',
+        spacing: {
+          before: 100,
+          after: 100
+        }
+      })
+    ];
   }
 
   private static getChildren(cheerioAPI: cheerio.CheerioAPI, elem: BasicAcceptedElems<AnyNode>) {
