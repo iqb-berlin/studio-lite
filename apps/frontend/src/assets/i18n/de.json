@@ -416,7 +416,7 @@
     "vars-with-codes-only": "Nur Variablen mit Codes anzeigen",
     "has-general-instructions": "Allgemeine Hinweise für jede Variable",
     "has-derived-vars": "Abgeleitete Variablen",
-    "has-only-manual-coding": "Nur manuell kodierte Variablen",
+    "has-only-manual-coding": "Manuell kodierte Variablen",
     "has-closed-vars": "Geschlossen kodierte Variablen",
     "show-score": "Bewertung anzeigen",
     "codebook-content": "Codebook Inhalte",
