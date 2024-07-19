@@ -390,6 +390,10 @@ export class DownloadDocx {
     );
   }
 
+  private static isListParagraph(elem: cheerio.Element): boolean {
+    return elem.parent && (elem.parent as Element).name === 'li';
+  }
+
   private static htmlToDocx(html: string, contentSetting: CodeBookContentSetting) {
     const cheerioAPI = cheerio
       .load(DownloadDocx.prepareHtml(html),
@@ -398,13 +402,11 @@ export class DownloadDocx {
     const elements: Paragraph[] = [];
     cheerioAPI('p,h1,h2,h3,h4,img')
       .each((i, elem) => {
-        if (elem.name === 'img') {
-          elements.push(DownloadDocx.createImagePragraph(elem, contentSetting));
-        } else {
-          const isListParagraph = elem.parent && (elem.parent as Element).name === 'li';
-          const span = cheerioAPI(elem)
-            .find('span');
-          try {
+        try {
+          const span = cheerioAPI(elem).find('span');
+          if (elem.name === 'img') {
+            elements.push(DownloadDocx.createImagePragraph(elem, contentSetting));
+          } else {
             elements.push(DownloadDocx
               .createParagraph(
                 cheerioAPI,
@@ -413,14 +415,14 @@ export class DownloadDocx {
                 DownloadDocx.getColor(cheerioAPI, span),
                 DownloadDocx.getBackgroundColor(cheerioAPI, elem),
                 DownloadDocx.getSize(cheerioAPI, span),
-                isListParagraph));
-          } catch (e) {
-            elements.push(new Paragraph(
-              {
-                text: 'HTML konnte nicht verarbeitet werden.'
-              }
-            ));
+                DownloadDocx.isListParagraph(elem)));
           }
+        } catch (e) {
+          elements.push(new Paragraph(
+            {
+              text: 'HTML konnte nicht verarbeitet werden.'
+            }
+          ));
         }
       });
     return elements.filter(e => e !== undefined && e !== null);
