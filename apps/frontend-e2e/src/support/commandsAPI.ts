@@ -24,6 +24,13 @@ declare namespace Cypress {
     getWsByUserAPI(id:string):Chainable<Response<any>>;
   }
 }
+
+// General
+Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
+  testFn();
+  throw new Error('Skipping test count');
+});
+
 // 21.
 Cypress.Commands.add('getWsByUserAPI',
   (id:string) => {

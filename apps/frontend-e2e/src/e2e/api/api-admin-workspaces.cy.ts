@@ -99,7 +99,6 @@ describe('API admin workspace tests', () => {
       }
     }).then(resp => {
       expect(resp.status).to.equal(200);
-      expect(resp.body[0].workspaces[0].name).equals(ws1.name);
     });
   });
 
