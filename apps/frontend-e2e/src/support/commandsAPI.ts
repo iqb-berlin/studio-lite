@@ -9,21 +9,13 @@
 // https://on.cypress.io/custom-commands
 // ***********************************************
 // eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace Cypress {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface Chainable<Subject> {
-    getWsByGroupAPI(groupKey: string, num_ws: number): void;
-    loginAPI(username: string, password: string): void;
-    // eslint-disable-next-line
-    getUsersAPI(): Chainable<Response<any>>;
-    // eslint-disable-next-line
-    getUsersFullAPI(): Chainable<Response<any>>;
-    // eslint-disable-next-line
-    getUserAPI(id:string): Chainable<Response<any>>;
-    // eslint-disable-next-line
-    getWsByUserAPI(id:string):Chainable<Response<any>>;
-  }
-}
+
+// General
+Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
+  testFn();
+  throw new Error('Skipping test count');
+});
+
 // 21.
 Cypress.Commands.add('getWsByUserAPI',
   (id:string) => {
