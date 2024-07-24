@@ -180,8 +180,6 @@ describe('API metadata tests', () => {
           resp.body[0].profiles[0];
         const profile2 = resp.body[0].url.replace('profile-config.json', '') +
           resp.body[0].profiles[1];
-        console.log(profile1);
-        console.log(profile2);
         Cypress.env('profile1', profile1);
         Cypress.env('profile2', profile2);
       });
