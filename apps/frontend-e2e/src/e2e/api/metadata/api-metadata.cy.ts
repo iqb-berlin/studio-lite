@@ -1,21 +1,15 @@
 import {
-  addFirstUserAPI,
-  createGroupAPI,
-  createWsAPI, deleteFirstUserAPI, deleteGroupAPI, deleteWsAPI,
-  getAdminOfGroupAPI,
-  getGroupAPI,
-  getUserIdAPI,
-  getUsersOfWsAPI,
-  getWsAPI,
-  setAdminOfGroupAPI,
-  updateUsersOfWsAPI
+  deleteFirstUserAPI, deleteGroupAPI,
+  setAdminOfGroupAPI
 } from '../../../support/utilAPI';
-import { GroupData, WsData } from '../../../support/testData';
+import {
+  AccessLevel, GroupData, UnitData, WsData
+} from '../../../support/testData';
 
 describe('API metadata tests', () => {
   const group1: GroupData = {
     id: 'id_group1',
-    name: 'VERA2002'
+    name: 'VERA2022'
   };
   const group2: GroupData = {
     id: 'id_group2',
@@ -29,123 +23,75 @@ describe('API metadata tests', () => {
     id: 'id_ws2',
     name: '02Vorlage'
   };
-  context('Preparing context', () => {
-    it('a. Add user', () => {
-      addFirstUserAPI();
-    });
-    it('1. should be able to create a new workspace group', () => {
-      getUserIdAPI(Cypress.env('username'), Cypress.env('token_admin'));
-      createGroupAPI(group1);
-    });
-
-    it('2. should be able to create modify details of a group', () => {
-      group1.name = 'VERA2022';
-      const authorization = `bearer ${Cypress.env('token_admin')}`;
-      cy.request({
-        method: 'PATCH',
-        url: '/api/admin/workspace-groups',
-        headers: {
-          'app-version': Cypress.env('version'),
-          authorization
-        },
-        body: {
-          id: `${Cypress.env(group1.id)}`,
-          name: `${group1.name}`,
-          defaultEditor: {},
-          defaultPlayer: {},
-          defaultSchemer: {},
-          profiles: [
-          ],
-          states: [
-          ]
-        }
-      }).then(resp => {
-        expect(resp.status).to.equal(200);
+  const unit1: UnitData = {
+    shortname: 'D01',
+    name: 'Maus',
+    group: ''
+  };
+  const unit2: UnitData = {
+    shortname: 'D02',
+    name: 'Hund',
+    group: ''
+  };
+  // 32
+  before(() => {
+    cy.addFirstUserAPI()
+      .then(resp => {
+        Cypress.env(`token_${Cypress.env('username')}`, resp.body);
+        expect(resp.status).to.equal(201);
+        cy.getUserIdAPI(Cypress.env('username'), resp.body)
+          .then(resp1 => {
+            expect(resp1.status).to.equal(200);
+            Cypress.env(`id_${Cypress.env('username')}`, resp1.body.userId);
+            cy.createGroupAPI(group1, Cypress.env(`token_${Cypress.env('username')}`))
+              .then(resp_g1 => {
+                Cypress.env(group1.id, resp_g1.body);
+                expect(resp_g1.status).to.equal(201);
+                setAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env(group1.id));
+                cy.createWsAPI(Cypress.env(group1.id), ws1, Cypress.env(`token_${Cypress.env('username')}`))
+                  .then(resp_w1 => {
+                    Cypress.env(ws1.id, resp_w1.body);
+                    expect(resp_w1.status).to.equal(201);
+                    cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`token_${Cypress.env('username')}`))
+                      .then(resp_level => {
+                        expect(resp_level.status).to.equal(200);
+                        cy.createUnitAPI(unit1, Cypress.env(ws1.id))
+                          .then(resp_u1 => {
+                            expect(resp_u1.status)
+                              .to
+                              .equal(201);
+                            Cypress.env(unit1.shortname, resp_u1.body);
+                          });
+                        cy.createUnitAPI(unit2, Cypress.env(ws1.id))
+                          .then(resp_u2 => {
+                            expect(resp_u2.status)
+                              .to
+                              .equal(201);
+                            Cypress.env(unit2.shortname, resp_u2.body);
+                          });
+                      });
+                  });
+              });
+            cy.createGroupAPI(group2, Cypress.env(`token_${Cypress.env('username')}`))
+              .then(resp_g2 => {
+                Cypress.env(group2.id, resp_g2.body);
+                expect(resp_g2.status).to.equal(201);
+                setAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env(group2.id));
+                cy.createWsAPI(Cypress.env(group2.id), ws2, Cypress.env(`token_${Cypress.env('username')}`))
+                  .then(resp_w2 => {
+                    Cypress.env(ws2.id, resp_w2.body);
+                    expect(resp_w2.status).to.equal(201);
+                  });
+              });
+          });
       });
-    });
-
-    it('3. should enable the access to a group to a user', () => {
-      setAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env(group1.id));
-    });
-
-    it('4. should enable the access to a group to a user', () => {
-      getAdminOfGroupAPI(Cypress.env(group1.id));
-    });
-
-    it('5. should be able to get details of a group', () => {
-      const authorization = `bearer ${Cypress.env('token_admin')}`;
-      cy.request({
-        method: 'GET',
-        url: '/api/admin/workspace-groups',
-        headers: {
-          'app-version': Cypress.env('version'),
-          authorization
-        }
-      }).then(resp => {
-        expect(resp.status).to.equal(200);
-        expect(resp.body.length).gt(0);
-      });
-    });
-
-    it('6. should be able to create a workspace in a group', () => {
-      // createWsAPI(Cypress.env(group1.id), '01Vorlage', 'id_ws1');
-      createWsAPI(Cypress.env(group1.id), ws1);
-    });
-
-    it('7. should be able to get all workspaces order by group', () => {
-      const authorization = `bearer ${Cypress.env('token_admin')}`;
-      cy.request({
-        method: 'GET',
-        url: '/api/admin/workspaces/groupwise',
-        headers: {
-          'app-version': Cypress.env('version'),
-          authorization
-        }
-      }).then(resp => {
-        expect(resp.status).to.equal(200);
-        expect(resp.body[0].workspaces[0].name).equals(ws1.name);
-      });
-    });
-
-    it('8.a create a second group', () => {
-      // createGroupAPI('GROUP2022', 'id_group2');
-      createGroupAPI(group2);
-    });
-
-    it('8. should be able to move a workspace to an another group', () => {
-      const authorization = `bearer ${Cypress.env('token_admin')}`;
-      setAdminOfGroupAPI(Cypress.env('id_admin'), Cypress.env(group2.id));
-      cy.request({
-        method: 'PATCH',
-        url: `/api/admin/workspaces/${Cypress.env(ws1.id)}/${Cypress.env(group2.id)}`,
-        headers: {
-          'app-version': Cypress.env('version'),
-          authorization
-        }
-      }).then(resp => {
-        expect(resp.status).to.equal(200);
-      });
-    });
-    it('9a. create a second workspace', () => {
-      createWsAPI(Cypress.env(group2.id), ws2);
-    });
-    it('9. should retrieve the workspaces associated to a workspace id', () => {
-      // TO DO try to recover the names of ws here and check for equality.
-      cy.getWsByGroupAPI(Cypress.env(group2.id), 2);
-    });
-    it('10. should be able to get details of a workspace group from its group id', () => {
-      getGroupAPI(Cypress.env(group1.id));
-    });
-    it('11. should be able to get details of a workspace from its workspace id', () => {
-      getWsAPI(Cypress.env(ws1.id));
-    });
-    it('12. should be able to get the users of a workspace from its workspace id', () => {
-      getUsersOfWsAPI(Cypress.env(ws1.id));
-    });
-    it('13. should be able to update the users of a workspace from its workspace id', () => {
-      updateUsersOfWsAPI(Cypress.env(ws1.id));
-    });
   });
+  after(() => {
+    deleteGroupAPI(Cypress.env(group1.id));
+    deleteGroupAPI(Cypress.env(group2.id));
+    deleteFirstUserAPI();
+  });
+
   context('Positive tests', () => {
     // 35
     it('1. Check the number of profiles in the profile registry', () => {
@@ -282,16 +228,16 @@ describe('API metadata tests', () => {
     it('2. ', () => {
     });
   });
-  context('Delete the context', () => {
-    it('15. should be able a workspace from its workspace id and group id', () => {
-      deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group2.id));
-    });
-    it('16. should be able to delete a workspace group', () => {
-      deleteGroupAPI(Cypress.env(group1.id));
-      deleteGroupAPI(Cypress.env(group2.id));
-    });
-    it('b. Delete the first user', () => {
-      deleteFirstUserAPI();
-    });
-  });
+  // context('Delete the context', () => {
+  //   it('15. should be able a workspace from its workspace id and group id', () => {
+  //     deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group2.id));
+  //   });
+  //   it('16. should be able to delete a workspace group', () => {
+  //     deleteGroupAPI(Cypress.env(group1.id));
+  //     deleteGroupAPI(Cypress.env(group2.id));
+  //   });
+  //   it('b. Delete the first user', () => {
+  //     deleteFirstUserAPI();
+  //   });
+  // });
 });
