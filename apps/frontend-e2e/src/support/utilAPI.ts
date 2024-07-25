@@ -130,7 +130,7 @@ export function changePasswordAPI(oldpass: string, newpass:string) {
     expect(resp.status).to.equal(200);
   });
 }
-// 18 .
+// 18 .DEL
 export function createUserAPI(userData:UserData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -387,7 +387,6 @@ export function createWsAPI(groupKey: string, ws1:WsData) {
     }
   }).then(resp => {
     Cypress.env(ws1.id, resp.body);
-    console.log(resp.body);
     expect(resp.status).to.equal(201);
   });
 }

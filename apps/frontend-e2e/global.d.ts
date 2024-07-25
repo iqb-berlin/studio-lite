@@ -1,7 +1,9 @@
 /// <reference types="cypress" />
-
 declare namespace Cypress {
-  import { UnitData } from 'support/testData';
+  import {
+    UnitData, GroupData, WsData, AccessLevel
+  } from 'support/testData';
+  import { UserData } from './src/support/testData';
 
   interface Chainable {
     // Commands UI
@@ -21,6 +23,13 @@ declare namespace Cypress {
     getUsersFullAPI(): Chainable<Response>;
     getUserAPI(id:string): Chainable<Response>;
     getWsByUserAPI(id:string):Chainable<Response>;
+    // commands-admin-api.ts
+    addFirstUserAPI():Chainable<Response>;
+    createUserAPI(userData:UserData):Chainable<Response>;
+    getUserIdAPI(username: string, token: string):Chainable<Response>;
+    createGroupAPI(group: GroupData, token: string):Chainable<Response>;
+    createWsAPI(groupKey: string, ws1:WsData, token: string):Chainable<Response>;
+    updateUsersOfWsAPI(wsKey:string, level:AccessLevel, token:string):Chainable<Response>;
     // commands-unit-api.ts
     createUnitAPI(unitData: UnitData, idGroup: string): Chainable<Response>;
     deleteUnitAPI(idUnit:string, idGroup:string): Chainable<Response>;
