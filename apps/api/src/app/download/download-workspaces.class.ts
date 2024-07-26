@@ -6,7 +6,7 @@ import {
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
 import {
-  CodeData, VariableCodingData, ToTextFactory, CodingScheme
+  CodeData, VariableCodingData, ToTextFactory, CodingScheme, CodeAsText
 } from '@iqb/responses';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UnitService } from '../database/services/unit.service';
@@ -201,6 +201,14 @@ export class DownloadWorkspacesClass {
     return variableCodingData.codes.some(codeData => codeData.manualInstruction);
   }
 
+  private static isManualWithoutClosed(variableCodingData: VariableCodingData): boolean {
+    return variableCodingData.codes.some(codeData => codeData.manualInstruction && codeData.type !== 'RESIDUAL_AUTO');
+  }
+
+  private static isClosedWithoutManual(variableCodingData: VariableCodingData): boolean {
+    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO' && !codeData.manualInstruction);
+  }
+
   private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
@@ -214,6 +222,18 @@ export class DownloadWorkspacesClass {
 
   private static getCodeInfoFromCodeAsText(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
     const codeAsText = ToTextFactory.codeAsText(code, 'SIMPLE');
+    const rulesDescription = contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars ? '' :
+      DownloadWorkspacesClass.getRulesDescription(codeAsText, code);
+    const codeInfo: CodeInfo = {
+      id: `${code.id}`,
+      label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
+      description: `${rulesDescription}${code.manualInstruction}`
+    };
+    if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();
+    return codeInfo;
+  }
+
+  private static getRulesDescription(codeAsText: CodeAsText, code: CodeData): string {
     let rulesDescription = '';
     codeAsText.ruleSetDescriptions.forEach(
       (ruleSetDescription: string) => {
@@ -222,14 +242,7 @@ export class DownloadWorkspacesClass {
         } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
       }
     );
-
-    const codeInfo: CodeInfo = {
-      id: `${code.id}`,
-      label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
-      description: `${rulesDescription}${code.manualInstruction}`
-    };
-    if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();
-    return codeInfo;
+    return rulesDescription;
   }
 
   private static setVariableCodingData(
@@ -241,7 +254,9 @@ export class DownloadWorkspacesClass {
       const codes: CodeInfo[] = [];
       const codingVar = {
         closed: DownloadWorkspacesClass.isClosed(variableCoding),
-        manual: DownloadWorkspacesClass.isManual(variableCoding)
+        manual: DownloadWorkspacesClass.isManual(variableCoding),
+        isManualWithoutClosed: DownloadWorkspacesClass.isManualWithoutClosed(variableCoding),
+        isClosedWithoutManual: DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
       };
       const isDerived: boolean = variableCoding.sourceType !== 'BASE';
       variableCoding.codes.forEach(code => {
@@ -255,7 +270,11 @@ export class DownloadWorkspacesClass {
       if (!isDerived) {
         if (codingVar.closed && contentSetting.hasClosedVars) {
           DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-        } else if (codingVar.manual && contentSetting.hasOnlyManualCoding) {
+        } else if (
+          codingVar.isManualWithoutClosed && contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars
+        ) {
+          DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+        } else if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
           DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
         }
       } else if (contentSetting.hasDerivedVars) {
