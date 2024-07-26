@@ -52,6 +52,7 @@ describe('API metadata tests', () => {
                   .then(resp_w1 => {
                     Cypress.env(ws1.id, resp_w1.body);
                     expect(resp_w1.status).to.equal(201);
+                    // eslint-disable-next-line max-len
                     cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`token_${Cypress.env('username')}`))
                       .then(resp_level => {
                         expect(resp_level.status).to.equal(200);
@@ -202,42 +203,96 @@ describe('API metadata tests', () => {
         expect(resp.status).to.equal(200);
       });
     });
-    // 39
-    it.skip('6. Set the workspace the vocabulary from a specific profile', () => {
+    // // 39
+    // it.skip('6. Set the workspace the vocabulary from a specific profile', () => {
+    //   const authorization = `bearer ${Cypress.env('token_admin')}`;
+    //   cy.request({
+    //     method: 'GET',
+    //     url: `/api/workspace/${Cypress.env('id_ws1')}/settings`,
+    //     headers: {
+    //       'app-version': Cypress.env('version'),
+    //       'app-version': Cypress.env('version'),
+    //       authorization
+    //     },
+    //     body: {
+    //       itemMDProfile: `${Cypress.env('profile2')}`,
+    //       unitMDProfile: `${Cypress.env('profile1')}`
+    //     }
+    //   }).then(resp => {
+    //     expect(resp.status).to.equal(200);
+    //   });
+    // });
+  });
+  context('Negative tests', () => {
+    // 35
+    it('1. Check the number of profiles in the profile registry is not higher as it expected', () => {
       const authorization = `bearer ${Cypress.env('token_admin')}`;
       cy.request({
         method: 'GET',
-        url: `/api/workspace/${Cypress.env('id_ws1')}/settings`,
+        url: '/api/metadata-profile/registry',
         headers: {
           'app-version': Cypress.env('version'),
           authorization
-        },
-        body: {
-          itemMDProfile: `${Cypress.env('profile2')}`,
-          unitMDProfile: `${Cypress.env('profile1')}`
         }
-      }).then(resp => {
-        expect(resp.status).to.equal(200);
-      });
+      })
+        .then(resp => {
+          expect(resp.status)
+            .to
+            .equal(200);
+          expect(resp.body.length)
+            .to
+            .not
+            .equal(9);
+        });
     });
-  });
-  context('Negative tests', () => {
-    it('1. ', () => {
+    it('2. Can not get the label of a inexistent profile ', () => {
+      const authorization = `bearer ${Cypress.env('token_admin')}`;
+      cy.request({
+        method: 'GET',
+        url: `/api/metadata-profile?url=${Cypress.env('profile3')}`,
+        headers: {
+          'app-version': Cypress.env('version'),
+          authorization
+        }
+      })
+        .then(resp => {
+          expect(resp.status)
+            .to
+            .equal(200);
+        });
     });
 
-    it('2. ', () => {
-    });
+    // // 37
+    // it('3. Should not able to set the profile data for an inexistent group', () => {
+    //   const authorization = `bearer ${Cypress.env('token_admin')}`;
+    //   cy.intercept({
+    //     method: 'PATCH',
+    //     url: `/api/workspace-groups/${Cypress.env('id_group3')}`,
+    //     headers: {
+    //       'app-version': Cypress.env('version'),
+    //       authorization
+    //     }
+    //   }).as('getApiEndpoint');
+    //   cy.request({
+    //     method: 'PATCH',
+    //     url: `/api/workspace-groups/${Cypress.env('id_group3')}`,
+    //     headers: {
+    //       'app-version': Cypress.env('version'),
+    //       authorization
+    //     },
+    //     failOnStatusCode: false
+    //   }).then(resp => {
+    //     cy.wait('@getApiEndpoint')
+    //       .then(interception => {
+    //         // Check if the response status code is 500
+    //         expect(resp.status)
+    //           .to
+    //           .equal(500);
+    //         expect(interception.response?.statusCode)
+    //           .to
+    //           .eq(500);
+    //       });
+    //   });
+    // });
   });
-  // context('Delete the context', () => {
-  //   it('15. should be able a workspace from its workspace id and group id', () => {
-  //     deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group2.id));
-  //   });
-  //   it('16. should be able to delete a workspace group', () => {
-  //     deleteGroupAPI(Cypress.env(group1.id));
-  //     deleteGroupAPI(Cypress.env(group2.id));
-  //   });
-  //   it('b. Delete the first user', () => {
-  //     deleteFirstUserAPI();
-  //   });
-  // });
 });
