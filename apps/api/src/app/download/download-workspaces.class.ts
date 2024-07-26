@@ -252,13 +252,6 @@ export class DownloadWorkspacesClass {
   ): void {
     if (variableCoding.codes.length) {
       const codes: CodeInfo[] = [];
-      const codingVar = {
-        closed: DownloadWorkspacesClass.isClosed(variableCoding),
-        manual: DownloadWorkspacesClass.isManual(variableCoding),
-        isManualWithoutClosed: DownloadWorkspacesClass.isManualWithoutClosed(variableCoding),
-        isClosedWithoutManual: DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
-      };
-      const isDerived: boolean = variableCoding.sourceType !== 'BASE';
       variableCoding.codes.forEach(code => {
         // Catch schemer version <1.5
         if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
@@ -267,19 +260,34 @@ export class DownloadWorkspacesClass {
           codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
         }
       });
+      const isDerived: boolean = variableCoding.sourceType !== 'BASE';
       if (!isDerived) {
-        if (codingVar.closed && contentSetting.hasClosedVars) {
-          DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-        } else if (
-          codingVar.isManualWithoutClosed && contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars
-        ) {
-          DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-        } else if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
-          DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-        }
+        DownloadWorkspacesClass.setBookVariable(contentSetting, codes, bookVariables, variableCoding);
       } else if (contentSetting.hasDerivedVars) {
-        DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+        DownloadWorkspacesClass.setBookVariable(contentSetting, codes, bookVariables, variableCoding);
       }
+    }
+  }
+
+  private static setBookVariable(contentSetting: CodeBookContentSetting,
+                                 codes: CodeInfo[],
+                                 bookVariables: BookVariable[],
+                                 variableCoding: VariableCodingData
+  ): void {
+    const codingVar = {
+      closed: DownloadWorkspacesClass.isClosed(variableCoding),
+      manual: DownloadWorkspacesClass.isManual(variableCoding),
+      isManualWithoutClosed: DownloadWorkspacesClass.isManualWithoutClosed(variableCoding),
+      isClosedWithoutManual: DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
+    };
+    if (codingVar.closed && contentSetting.hasClosedVars) {
+      DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+    } else if (
+      codingVar.isManualWithoutClosed && contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars
+    ) {
+      DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+    } else if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
+      DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
     }
   }
 
