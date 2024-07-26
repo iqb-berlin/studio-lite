@@ -2,6 +2,7 @@ import {
   AccessLevel, GroupData, UserData, WsData
 } from './testData';
 
+// 25
 Cypress.Commands.add('addFirstUserAPI', () => {
   cy.request({
     method: 'POST',
@@ -66,6 +67,7 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
   });
 });
 
+// 6
 Cypress.Commands.add('createWsAPI', (groupKey: string, ws1:WsData, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -83,6 +85,7 @@ Cypress.Commands.add('createWsAPI', (groupKey: string, ws1:WsData, token:string)
   });
 });
 
+// 13
 Cypress.Commands.add('updateUsersOfWsAPI', (wsKey:string, level:AccessLevel, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({

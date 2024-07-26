@@ -111,6 +111,14 @@ describe('API unit tests', () => {
 
     it('2.Get the data of a unit in the workspace ', () => {
     });
+    // 21.
+    it('3. should to retrieve the workspaces of a user (admin). /api/admin/users/{id}/workspaces', () => {
+      cy.getWsByUserAPI(Cypress.env('username'))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+          // expect(resp.body.length).to.equal(2);
+        });
+    });
   });
   context('Negative tests', () => {
     it('1. ', () => {
