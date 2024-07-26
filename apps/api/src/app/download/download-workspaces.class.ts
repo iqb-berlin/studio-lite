@@ -251,15 +251,7 @@ export class DownloadWorkspacesClass {
     bookVariables: BookVariable[]
   ): void {
     if (variableCoding.codes.length) {
-      const codes: CodeInfo[] = [];
-      variableCoding.codes.forEach(code => {
-        // Catch schemer version <1.5
-        if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
-          codes.push(DownloadWorkspacesClass.getCodeInfoFromCodeAsText(code, contentSetting));
-        } else {
-          codes.push(DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
-        }
-      });
+      const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(variableCoding.codes, contentSetting);
       const isDerived: boolean = variableCoding.sourceType !== 'BASE';
       if (!isDerived) {
         DownloadWorkspacesClass.setBookVariable(contentSetting, codes, bookVariables, variableCoding);
@@ -267,6 +259,16 @@ export class DownloadWorkspacesClass {
         DownloadWorkspacesClass.setBookVariable(contentSetting, codes, bookVariables, variableCoding);
       }
     }
+  }
+
+  private static getCodes(codes: CodeData[], contentSetting: CodeBookContentSetting): CodeInfo[] {
+    return codes.map(code => {
+      // Catch schemer version <1.5
+      if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
+        return (DownloadWorkspacesClass.getCodeInfoFromCodeAsText(code, contentSetting));
+      }
+      return (DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
+    });
   }
 
   private static setBookVariable(contentSetting: CodeBookContentSetting,
