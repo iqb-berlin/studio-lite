@@ -245,20 +245,16 @@ export class DownloadWorkspacesClass {
     return rulesDescription;
   }
 
-  private static setVariableCodingData(
+  private static getBaseOrDerivedBookVariable(
     variableCoding: VariableCodingData,
-    contentSetting: CodeBookContentSetting,
-    bookVariables: BookVariable[]
-  ): void {
-    if (variableCoding.codes.length) {
-      const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(variableCoding.codes, contentSetting);
-      const isDerived: boolean = variableCoding.sourceType !== 'BASE';
-      if (!isDerived) {
-        DownloadWorkspacesClass.setBookVariable(contentSetting, codes, bookVariables, variableCoding);
-      } else if (contentSetting.hasDerivedVars) {
-        DownloadWorkspacesClass.setBookVariable(contentSetting, codes, bookVariables, variableCoding);
-      }
+    contentSetting: CodeBookContentSetting
+  ): BookVariable | null {
+    const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(variableCoding.codes, contentSetting);
+    const isDerived: boolean = variableCoding.sourceType !== 'BASE';
+    if (!isDerived || contentSetting.hasDerivedVars) {
+      return DownloadWorkspacesClass.getManualOrClosedCodedBookVariable(contentSetting, codes, variableCoding);
     }
+    return null;
   }
 
   private static getCodes(codes: CodeData[], contentSetting: CodeBookContentSetting): CodeInfo[] {
@@ -271,11 +267,10 @@ export class DownloadWorkspacesClass {
     });
   }
 
-  private static setBookVariable(contentSetting: CodeBookContentSetting,
-                                 codes: CodeInfo[],
-                                 bookVariables: BookVariable[],
-                                 variableCoding: VariableCodingData
-  ): void {
+  private static getManualOrClosedCodedBookVariable(contentSetting: CodeBookContentSetting,
+                                                    codes: CodeInfo[],
+                                                    variableCoding: VariableCodingData
+  ): BookVariable | null {
     const codingVar = {
       closed: DownloadWorkspacesClass.isClosed(variableCoding),
       manual: DownloadWorkspacesClass.isManual(variableCoding),
@@ -283,30 +278,30 @@ export class DownloadWorkspacesClass {
       isClosedWithoutManual: DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
     };
     if (codingVar.closed && contentSetting.hasClosedVars) {
-      DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-    } else if (
-      codingVar.isManualWithoutClosed && contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars
-    ) {
-      DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
-    } else if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
-      DownloadWorkspacesClass.addBookVariable(contentSetting, codes, bookVariables, variableCoding);
+      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
     }
+    if (codingVar.isManualWithoutClosed && contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars) {
+      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+    }
+    if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
+      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+    }
+    return null;
   }
 
-  private static addBookVariable(
+  private static getBookVariable(
     contentSetting: CodeBookContentSetting,
     codes: CodeInfo[],
-    bookVariables: BookVariable[],
     variableCoding: VariableCodingData
-  ): void {
-    bookVariables.push({
+  ): BookVariable {
+    return {
       id: variableCoding.id,
       label: variableCoding.label,
       generalInstruction: contentSetting.hasGeneralInstructions ?
         variableCoding.manualInstruction :
         '',
       codes: codes
-    });
+    };
   }
 
   private static setCodeBookDataForUnit(
@@ -315,21 +310,28 @@ export class DownloadWorkspacesClass {
     missings: Missing[]
   ): void {
     const parsedScheme = new CodingScheme(unit.scheme);
-    const bookVariables: Array<BookVariable> = [];
-
     if (parsedScheme?.variableCodings) {
-      parsedScheme?.variableCodings.forEach(
-        (variableCoding: VariableCodingData) => {
-          DownloadWorkspacesClass.setVariableCodingData(variableCoding, contentSetting, bookVariables);
-        }
-      );
+      const bookVariables = DownloadWorkspacesClass
+        .getBookVariables(parsedScheme.variableCodings, contentSetting);
+      codebook.push({
+        key: unit.key,
+        name: unit.name,
+        variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
+        missings: missings
+      });
     }
-    codebook.push({
-      key: unit.key,
-      name: unit.name,
-      variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
-      missings: missings
-    });
+  }
+
+  private static getBookVariables(
+    variableCodings: VariableCodingData[],
+    contentSetting: CodeBookContentSetting
+  ): BookVariable[] {
+    return variableCodings.reduce((bookVariables: BookVariable[], variableCoding) => {
+      const bookVariable = DownloadWorkspacesClass
+        .getBaseOrDerivedBookVariable(variableCoding, contentSetting);
+      if (bookVariable) bookVariables.push(bookVariable);
+      return bookVariables;
+    }, []);
   }
 
   private static getSortedBookVariables(bookVariables: BookVariable[]): BookVariable[] {
