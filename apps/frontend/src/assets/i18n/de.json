@@ -373,7 +373,12 @@
     "users": "Nutzer:innen",
     "workspaces": "Arbeitsbereiche",
     "settings": "Einstellungen",
-    "units-count": "Anzahl der Aufgaben"
+    "units-count": "Anzahl der Aufgaben",
+    "select-drop-box-workspace": "Abgabebereich auswählen",
+    "select-drop-box-workspace-for": "Abgabebereich für \"{{workspace}}\" auswählen",
+    "workspace-drop-box-selected": "Abgabebereich geändert",
+    "workspace-not-drop-box-selected": "Konnte Abgabebereich nicht ändern",
+    "no-drop-box": "Kein Abgabebereich"
   },
   "workspace-settings": {
     "modules": "Verona Module",

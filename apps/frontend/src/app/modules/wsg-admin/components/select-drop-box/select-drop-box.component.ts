@@ -1,0 +1,38 @@
+import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle
+} from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
+import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatFormField, MatLabel, MatSelect } from '@angular/material/select';
+
+@Component({
+  selector: 'studio-lite-select-drop-box',
+  standalone: true,
+  imports: [CommonModule, MatButton, MatDialogActions, MatDialogContent, MatDialogTitle, TranslateModule, MatDialogClose, MatOption, MatSelect, MatLabel, MatFormField],
+  templateUrl: './select-drop-box.component.html',
+  styleUrl: './select-drop-box.component.scss'
+})
+export class SelectDropBoxComponent {
+  workspaces: WorkspaceInListDto[];
+  dropBoxWorkspaceId: number;
+  selectedWorkspaceName: string;
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: {
+      workspaces: WorkspaceInListDto[],
+      dropBoxWorkspaceId: number,
+      selectedWorkspaceName: string
+    }) {
+    this.workspaces = data.workspaces;
+    this.dropBoxWorkspaceId = data.dropBoxWorkspaceId;
+    this.selectedWorkspaceName = data.selectedWorkspaceName;
+  }
+}

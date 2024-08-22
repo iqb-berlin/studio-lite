@@ -214,4 +214,13 @@ export class WorkspaceController {
   async patchName(@WorkspaceId() workspaceId: number, @Param('name') newName: string) {
     return this.workspaceService.patchName(workspaceId, newName);
   }
+
+  @Patch('drop-box')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace')
+  async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxWorkspaceId') dropBoxWorkspaceId: number) {
+    return this.workspaceService.patchDropBoxWorkspaceId(workspaceId, dropBoxWorkspaceId);
+  }
 }

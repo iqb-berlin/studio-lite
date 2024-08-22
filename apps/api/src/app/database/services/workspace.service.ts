@@ -4,7 +4,7 @@ import { In, Not, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto
+  CodingReportDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -131,7 +131,7 @@ export class WorkspaceService {
     return myReturn;
   }
 
-  async findAllByGroup(workspaceGroupId: number): Promise<UsersWorkspaceInListDto[]> {
+  async findAllByGroup(workspaceGroupId: number): Promise<WorkspaceInListDto[]> {
     const workspaces: Workspace[] = await this.workspacesRepository.find({
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
@@ -140,10 +140,11 @@ export class WorkspaceService {
       id: workspace.id,
       name: workspace.name,
       groupId: workspaceGroupId,
+      dropBoxWorkspaceId: workspace.dropBoxWorkspaceId,
       unitsCount: (await this.unitsRepository.find({
         where: { workspaceId: workspace.id }
       })).length
-    } as UsersWorkspaceInListDto)));
+    })));
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
@@ -398,6 +399,14 @@ export class WorkspaceService {
       where: { id: id }
     });
     workspaceToUpdate.name = newName;
+    await this.workspacesRepository.save(workspaceToUpdate);
+  }
+
+  async patchDropBoxWorkspaceId(id: number, dropBoxWorkspaceId: number): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    workspaceToUpdate.dropBoxWorkspaceId = dropBoxWorkspaceId;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 

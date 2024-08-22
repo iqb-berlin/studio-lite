@@ -83,6 +83,15 @@ export class BackendService {
       );
   }
 
+  selectWorkspaceDropBox(workspaceId: number, dropBoxWorkspaceId: number): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/drop-box`, { dropBoxWorkspaceId })
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
   deleteWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`)

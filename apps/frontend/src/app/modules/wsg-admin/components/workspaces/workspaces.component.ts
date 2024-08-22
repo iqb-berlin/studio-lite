@@ -46,6 +46,7 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
+  workspaces: WorkspaceInListDto[] = [];
   displayedColumns = ['selectCheckbox', 'name', 'unitsCount'];
   tableSelectionCheckboxes = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
@@ -150,6 +151,8 @@ export class WorkspacesComponent implements OnInit {
     this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
       .subscribe(
         (dataResponse: WorkspaceInListDto[]) => {
+          console.log('dataResponse', dataResponse);
+          this.workspaces = dataResponse;
           this.setObjectsDatasource(dataResponse);
           this.tableSelectionCheckboxes.clear();
           this.tableSelectionRow.clear();
@@ -286,6 +289,30 @@ export class WorkspacesComponent implements OnInit {
         } else {
           this.snackBar.open(
             this.translateService.instant('wsg-admin.workspace-not-added'),
+            this.translateService.instant('error'),
+            { duration: 3000 }
+          );
+        }
+        this.appService.dataLoading = false;
+      }
+    );
+  }
+
+  selectDropBoxWorkspace(value: { selection: WorkspaceInListDto[], dropBoxWorkspaceId: number }) {
+    this.appService.dataLoading = true;
+    console.log(value.dropBoxWorkspaceId);
+    this.backendService.selectWorkspaceDropBox(value.selection[0].id, value.dropBoxWorkspaceId).subscribe(
+      respOk => {
+        if (respOk) {
+          this.snackBar.open(
+            this.translateService.instant('wsg-admin.workspace-drop-box-selected'),
+            '',
+            { duration: 1000 }
+          );
+          this.updateWorkspaceList();
+        } else {
+          this.snackBar.open(
+            this.translateService.instant('wsg-admin.workspace-not-drop-box-selected'),
             this.translateService.instant('error'),
             { duration: 3000 }
           );
