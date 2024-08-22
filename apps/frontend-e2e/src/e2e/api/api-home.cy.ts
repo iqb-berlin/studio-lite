@@ -3,6 +3,7 @@ import { addFirstUserAPI, deleteFirstUserAPI } from '../../support/utilAPI';
 describe('API home test', () => {
   before(() => addFirstUserAPI());
   after(() => deleteFirstUserAPI());
+  // 30
   it('my-data: retrieve user data', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
     cy.request({
@@ -16,7 +17,7 @@ describe('API home test', () => {
       expect(resp.status).to.equal(200);
     });
   });
-
+  // 31
   it('my-data: modify user data', () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
     cy.request({

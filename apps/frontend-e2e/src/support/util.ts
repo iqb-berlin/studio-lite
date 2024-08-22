@@ -117,14 +117,17 @@ export function login(username: string, password = '') {
   cy.buttonToContinue('Weiter', 201, '/api/login', 'POST', 'responseLogin');
 }
 
-export function addModule():void {
+export function addModules(filenames:string[]):void {
   cy.get('[data-cy="goto-admin"]').click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
-  cy.loadModule('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', 'iqb-schemer@1.5');
-  cy.loadModule('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', 'iqb-player-aspect@2.4.10');
-  cy.loadModule('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', 'iqb-editor-aspect@2.4.9');
+  // cy.loadModule('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', 'iqb-schemer@1.5');
+  // cy.loadModule('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', 'iqb-player-aspect@2.4.10');
+  // cy.loadModule('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', 'iqb-editor-aspect@2.4.9');
+  filenames.forEach(filename => {
+    cy.loadModule(filename);
+  });
 }
 
 export function deleteModule():void {

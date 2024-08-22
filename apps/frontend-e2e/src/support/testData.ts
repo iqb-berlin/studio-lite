@@ -26,4 +26,4 @@ export interface UserData {
   identity?: string;
 }
 
-export enum AccessLevel {Basic, Developer, Admin}
+export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
