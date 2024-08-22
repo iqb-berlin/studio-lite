@@ -18,7 +18,8 @@ class Workspace {
     groupId: number;
 
   @Column({
-    name: 'drop_box_workspace_id'
+    name: 'drop_box_workspace_id',
+    nullable: true
   })
     dropBoxWorkspaceId: number;
 

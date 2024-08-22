@@ -378,7 +378,8 @@
     "select-drop-box-workspace-for": "Abgabebereich für \"{{workspace}}\" auswählen",
     "workspace-drop-box-selected": "Abgabebereich geändert",
     "workspace-not-drop-box-selected": "Konnte Abgabebereich nicht ändern",
-    "no-drop-box": "Kein Abgabebereich"
+    "no-drop-box": "Kein Abgabebereich",
+    "drop-box-workspace": "Abgabebereich"
   },
   "workspace-settings": {
     "modules": "Verona Module",

@@ -33,6 +33,7 @@ import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.compone
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
+import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -42,12 +43,12 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
-    IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent]
+    IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent, WorkspaceNamePipe]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
-  displayedColumns = ['selectCheckbox', 'name', 'unitsCount'];
+  displayedColumns = ['selectCheckbox', 'name', 'unitsCount', 'dropBoxWorkspaceId'];
   tableSelectionCheckboxes = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
@@ -150,10 +151,9 @@ export class WorkspacesComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
       .subscribe(
-        (dataResponse: WorkspaceInListDto[]) => {
-          console.log('dataResponse', dataResponse);
-          this.workspaces = dataResponse;
-          this.setObjectsDatasource(dataResponse);
+        (workspaces: WorkspaceInListDto[]) => {
+          this.workspaces = workspaces;
+          this.setObjectsDatasource(workspaces);
           this.tableSelectionCheckboxes.clear();
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
@@ -300,7 +300,6 @@ export class WorkspacesComponent implements OnInit {
 
   selectDropBoxWorkspace(value: { selection: WorkspaceInListDto[], dropBoxWorkspaceId: number }) {
     this.appService.dataLoading = true;
-    console.log(value.dropBoxWorkspaceId);
     this.backendService.selectWorkspaceDropBox(value.selection[0].id, value.dropBoxWorkspaceId).subscribe(
       respOk => {
         if (respOk) {
