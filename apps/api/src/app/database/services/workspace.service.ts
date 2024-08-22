@@ -72,6 +72,7 @@ export class WorkspaceService {
             userAccessLevel: validWorkspaces
               .find(validWorkspace => validWorkspace.id === workspace.id)?.accessLevel || 0,
             groupId: workspace.groupId,
+            dropBoxWorkspaceId: workspace.dropBoxWorkspaceId,
             unitsCount: (await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
             })).length

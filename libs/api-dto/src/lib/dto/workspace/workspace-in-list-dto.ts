@@ -12,7 +12,8 @@ export class WorkspaceInListDto {
     groupId!: number;
 
   @ApiProperty()
+    dropBoxWorkspaceId!: number;
+
+  @ApiProperty()
     unitsCount!: number;
 }
-
-

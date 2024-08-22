@@ -18,6 +18,11 @@ class Workspace {
     groupId: number;
 
   @Column({
+    name: 'drop_box_workspace_id'
+  })
+    dropBoxWorkspaceId: number;
+
+  @Column({
     type: 'jsonb',
     array: false,
     default: () => "'{}'",
