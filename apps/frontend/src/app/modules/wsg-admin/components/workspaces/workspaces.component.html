@@ -20,66 +20,68 @@
       <studio-lite-search-filter [title]="'search-filter.filter-workspaces' | translate"
         (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
       </studio-lite-search-filter>
-      <mat-table [dataSource]="objectsDatasource"
-        matSort
-        matSortDisableClear
-        class="scroll-area">
-        <ng-container matColumnDef="selectCheckbox">
-          <mat-header-cell *matHeaderCellDef
-            class="fx-flex-row-fix-70">
-            <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-              [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-              (change)="$event ? masterToggle() : null">
-            </mat-checkbox>
-          </mat-header-cell>
-          <mat-cell *matCellDef="let row"
-            class="fx-flex-row-fix-70">
-            <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
-              (click)="$event.stopPropagation()"
-              (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
-            </mat-checkbox>
-          </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef
-            mat-sort-header="name">{{'wsg-admin.name' | translate}}
-          </mat-header-cell>
-          <mat-cell *matCellDef="let element">
-            {{element.name}}
-          </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="unitsCount">
-          <mat-header-cell *matHeaderCellDef
-            mat-sort-header="unitsCount">{{'wsg-admin.units-count' | translate}}
-          </mat-header-cell>
-          <mat-cell *matCellDef="let element">
-            <span class="center">{{element.unitsCount}}</span>
-          </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="dropBoxWorkspaceId">
-          <mat-header-cell *matHeaderCellDef
-                           mat-sort-header="dropBoxWorkspaceId">{{'wsg-admin.drop-box-workspace' | translate}}
-          </mat-header-cell>
-          <mat-cell *matCellDef="let element">
-            @if (element.dropBoxWorkspaceId) {
-              <mat-icon
-                class="center"
-                [matTooltip]="element.dropBoxWorkspaceId | workspaceName : workspaces"
-                matTooltipPosition="right"
-                color="primary">check_circle
-              </mat-icon>
-            } @else {
-              <mat-icon class="center">unpublished</mat-icon>
-            }
-          </mat-cell>
-        </ng-container>
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;"
-          [class.selected] = "row | isSelectedId: selectedWorkspaceId"
-          (click)="toggleRowSelection(row)">
-        </mat-row>
-      </mat-table>
     }
+    <mat-table
+      [class.hidden]="!objectsDatasource.data.length"
+      [dataSource]="objectsDatasource"
+      matSort
+      matSortDisableClear
+      class="scroll-area">
+      <ng-container matColumnDef="selectCheckbox">
+        <mat-header-cell *matHeaderCellDef
+          class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
+            [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
+            (change)="$event ? masterToggle() : null">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row"
+          class="fx-flex-row-fix-70">
+          <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
+            (click)="$event.stopPropagation()"
+            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef
+          mat-sort-header="name">{{'wsg-admin.name' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          {{element.name}}
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="unitsCount">
+        <mat-header-cell *matHeaderCellDef
+          mat-sort-header="unitsCount">{{'wsg-admin.units-count' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span class="center">{{element.unitsCount}}</span>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="dropBoxWorkspaceId">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="dropBoxWorkspaceId">{{'wsg-admin.drop-box-workspace' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (element.dropBoxWorkspaceId) {
+            <mat-icon class="center"
+                      [matTooltip]="element.dropBoxWorkspaceId | workspaceName : workspaces"
+                      matTooltipPosition="right"
+                      color="primary">
+              check_circle
+            </mat-icon>
+          } @else {
+            <mat-icon class="center">unpublished</mat-icon>
+          }
+        </mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+        [class.selected] = "row | isSelectedId: selectedWorkspaceId"
+        (click)="toggleRowSelection(row)">
+      </mat-row>
+    </mat-table>
   </div>
 
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
