@@ -107,9 +107,21 @@ describe('API unit tests', () => {
         expect(resp.status).to.equal(200);
         expect(resp.body.length).to.equal(2);
       });
+      cy.pause();
     });
 
-    it('2.Get the data of a unit in the workspace ', () => {
+    it('2.Get the metadadata of a workspace ', () => {
+      const authorization = `bearer ${Cypress.env('token_admin')}`;
+      cy.request({
+        method: 'GET',
+        url: `/api/workspace/${Cypress.env(ws1.id)}/${Cypress.env(unit1.shortname)}/metadata`,
+        headers: {
+          'app-version': Cypress.env('version'),
+          authorization
+        }
+      }).then(resp => {
+        expect(resp.status).to.equal(304);
+      });
     });
     // 21.
     it('3. should to retrieve the workspaces of a user (admin). /api/admin/users/{id}/workspaces', () => {
