@@ -72,7 +72,7 @@ export class WorkspaceService {
             userAccessLevel: validWorkspaces
               .find(validWorkspace => validWorkspace.id === workspace.id)?.accessLevel || 0,
             groupId: workspace.groupId,
-            dropBoxWorkspaceId: workspace.dropBoxWorkspaceId,
+            dropBoxId: workspace.dropBoxId,
             unitsCount: (await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
             })).length
@@ -140,7 +140,7 @@ export class WorkspaceService {
       id: workspace.id,
       name: workspace.name,
       groupId: workspaceGroupId,
-      dropBoxWorkspaceId: workspace.dropBoxWorkspaceId,
+      dropBoxId: workspace.dropBoxId,
       unitsCount: (await this.unitsRepository.find({
         where: { workspaceId: workspace.id }
       })).length
@@ -402,11 +402,11 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  async patchDropBoxWorkspaceId(id: number, dropBoxWorkspaceId: number): Promise<void> {
+  async patchDropBoxId(id: number, dropBoxId: number): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    workspaceToUpdate.dropBoxWorkspaceId = dropBoxWorkspaceId;
+    workspaceToUpdate.dropBoxId = dropBoxId;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 

@@ -16,23 +16,24 @@ import { MatFormField, MatLabel, MatSelect } from '@angular/material/select';
 @Component({
   selector: 'studio-lite-select-drop-box',
   standalone: true,
-  imports: [CommonModule, MatButton, MatDialogActions, MatDialogContent, MatDialogTitle, TranslateModule, MatDialogClose, MatOption, MatSelect, MatLabel, MatFormField],
+  imports: [CommonModule, MatButton, MatDialogActions, MatDialogContent, MatDialogTitle, TranslateModule,
+    MatDialogClose, MatOption, MatSelect, MatLabel, MatFormField],
   templateUrl: './select-drop-box.component.html',
   styleUrl: './select-drop-box.component.scss'
 })
 export class SelectDropBoxComponent {
   workspaces: WorkspaceInListDto[];
-  dropBoxWorkspaceId: number;
+  dropBoxId: number;
   selectedWorkspaceName: string;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
       workspaces: WorkspaceInListDto[],
-      dropBoxWorkspaceId: number,
+      dropBoxId: number,
       selectedWorkspaceName: string
     }) {
     this.workspaces = data.workspaces;
-    this.dropBoxWorkspaceId = data.dropBoxWorkspaceId;
+    this.dropBoxId = data.dropBoxId;
     this.selectedWorkspaceName = data.selectedWorkspaceName;
   }
 }

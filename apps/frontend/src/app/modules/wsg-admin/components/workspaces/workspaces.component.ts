@@ -48,7 +48,7 @@ import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
-  displayedColumns = ['selectCheckbox', 'name', 'unitsCount', 'dropBoxWorkspaceId'];
+  displayedColumns = ['selectCheckbox', 'name', 'unitsCount', 'dropBoxId'];
   tableSelectionCheckboxes = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
@@ -298,20 +298,20 @@ export class WorkspacesComponent implements OnInit {
     );
   }
 
-  selectDropBoxWorkspace(value: { selection: WorkspaceInListDto[], dropBoxWorkspaceId: number }) {
+  selectDropBox(value: { selection: WorkspaceInListDto[], dropBoxId: number }) {
     this.appService.dataLoading = true;
-    this.backendService.selectWorkspaceDropBox(value.selection[0].id, value.dropBoxWorkspaceId).subscribe(
+    this.backendService.selectWorkspaceDropBox(value.selection[0].id, value.dropBoxId).subscribe(
       respOk => {
         if (respOk) {
           this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-drop-box-selected'),
+            this.translateService.instant('wsg-admin.drop-box-selected'),
             '',
             { duration: 1000 }
           );
           this.updateWorkspaceList();
         } else {
           this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-not-drop-box-selected'),
+            this.translateService.instant('wsg-admin.drop-box-not-selected'),
             this.translateService.instant('error'),
             { duration: 3000 }
           );

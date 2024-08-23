@@ -83,9 +83,9 @@ export class BackendService {
       );
   }
 
-  selectWorkspaceDropBox(workspaceId: number, dropBoxWorkspaceId: number): Observable<boolean> {
+  selectWorkspaceDropBox(workspaceId: number, dropBoxId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/drop-box`, { dropBoxWorkspaceId })
+      .patch(`${this.serverUrl}workspace/${workspaceId}/drop-box`, { dropBoxId })
       .pipe(
         map(() => true),
         catchError(() => of(false))

@@ -18,8 +18,8 @@
   </button>
   <button mat-button
           [disabled]="!isWorkspaceGroupAdmin || (!selectedWorkspaceId && checkedRows.length !== 1)"
-          [matTooltip]="'wsg-admin.select-drop-box-workspace' | translate"
-          (click)="selectDropBoxWorkspace()">
+          [matTooltip]="'wsg-admin.select-drop-box' | translate"
+          (click)="selectDropBox()">
     <studio-lite-wrapped-icon icon="folder_special"></studio-lite-wrapped-icon>
   </button>
   <button mat-button

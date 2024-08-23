@@ -18,10 +18,10 @@ class Workspace {
     groupId: number;
 
   @Column({
-    name: 'drop_box_workspace_id',
+    name: 'drop_box_id',
     nullable: true
   })
-    dropBoxWorkspaceId: number;
+    dropBoxId: number;
 
   @Column({
     type: 'jsonb',

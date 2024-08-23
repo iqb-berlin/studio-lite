@@ -220,7 +220,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
-  async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxWorkspaceId') dropBoxWorkspaceId: number) {
-    return this.workspaceService.patchDropBoxWorkspaceId(workspaceId, dropBoxWorkspaceId);
+  async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxId') dropBoxId: number) {
+    return this.workspaceService.patchDropBoxId(workspaceId, dropBoxId);
   }
 }

@@ -36,8 +36,8 @@ export class WorkspaceMenuComponent {
   @Output() workspaceRenamed: EventEmitter<{ selection: WorkspaceInListDto[], name: string }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], name: string }>();
 
-  @Output() workspaceDropBoxSelected: EventEmitter<{ selection: WorkspaceInListDto[], dropBoxWorkspaceId: number }> =
-    new EventEmitter<{ selection: WorkspaceInListDto[], dropBoxWorkspaceId: number }>();
+  @Output() workspaceDropBoxSelected: EventEmitter<{ selection: WorkspaceInListDto[], dropBoxId: number }> =
+    new EventEmitter<{ selection: WorkspaceInListDto[], dropBoxId: number }>();
 
   @Output() workspaceChanged: EventEmitter<{ selection: WorkspaceInListDto[], settings: WorkspaceSettings }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], settings: WorkspaceSettings }>();
@@ -226,12 +226,12 @@ export class WorkspaceMenuComponent {
     }
   }
 
-  selectDropBoxWorkspace() {
+  selectDropBox() {
     const dialogRef = this.selectDropBoxDialog.open(SelectDropBoxComponent, {
       width: '400px',
       data: {
         workspaces: this.workspaces.filter(w => w.id !== this.selectedWorkspaceId),
-        dropBoxWorkspaceId: this.selectedRows[0].dropBoxWorkspaceId,
+        dropBoxId: this.selectedRows[0].dropBoxId,
         selectedWorkspaceName: this.selectedRows[0].name
       }
     });
@@ -239,7 +239,7 @@ export class WorkspaceMenuComponent {
       if (result !== undefined) {
         this.workspaceDropBoxSelected.emit({
           selection: this.selectedRows,
-          dropBoxWorkspaceId: result
+          dropBoxId: result
         });
       }
     });

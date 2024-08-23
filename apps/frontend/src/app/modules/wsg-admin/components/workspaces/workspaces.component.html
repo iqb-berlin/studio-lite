@@ -8,7 +8,7 @@
       [workspaces]="workspaces"
       (workspaceAdded)="addWorkspace($event)"
       (workspaceRenamed)="renameWorkspace($event)"
-      (workspaceDropBoxSelected)="selectDropBoxWorkspace($event)"
+      (workspaceDropBoxSelected)="selectDropBox($event)"
       (workspaceChanged)="changeWorkspace($event)"
       (workspaceNotLoaded)="onWorkspaceNotLoaded()"
       (workspaceMoved)="moveWorkspace($event)"
@@ -59,14 +59,14 @@
           <span class="center">{{element.unitsCount}}</span>
         </mat-cell>
       </ng-container>
-      <ng-container matColumnDef="dropBoxWorkspaceId">
+      <ng-container matColumnDef="dropBoxId">
         <mat-header-cell *matHeaderCellDef class="header-center"
-                         mat-sort-header="dropBoxWorkspaceId">{{'wsg-admin.drop-box-workspace' | translate}}
+                         mat-sort-header="dropBoxId">{{'wsg-admin.drop-box' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (element.dropBoxWorkspaceId) {
+          @if (element.dropBoxId) {
             <mat-icon class="center"
-                      [matTooltip]="element.dropBoxWorkspaceId | workspaceName : workspaces"
+                      [matTooltip]="element.dropBoxId | workspaceName : workspaces"
                       matTooltipPosition="right"
                       color="primary">
               check_circle
