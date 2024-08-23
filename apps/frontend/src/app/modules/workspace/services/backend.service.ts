@@ -73,9 +73,19 @@ export class BackendService {
       );
   }
 
+  // TOD0: queryParams Object
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspace/${workspaceId}/${units.join(';')}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspace/${workspaceId}/submit_units`, { dropBoxId, units })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -122,14 +132,6 @@ export class BackendService {
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
-      // const {
-      //   exportFormat,
-      //   hasOnlyManualCoding,
-      //   hasGeneralInstructions,
-      //   hasDerivedVars,
-      //   hasClosedVars
-      // } = contentOptions;
-
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
           params: new HttpParams()

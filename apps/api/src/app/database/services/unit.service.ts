@@ -17,6 +17,7 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
+import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -32,6 +33,8 @@ export class UnitService {
     private workspaceUserRepository: Repository<WorkspaceUser>,
     @InjectRepository(Workspace)
     private workspaceRepository: Repository<Workspace>,
+    @InjectRepository(UnitDropBoxHistory)
+    private unitDropBoxHistory: Repository<UnitDropBoxHistory>,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService
   ) {}
@@ -272,14 +275,23 @@ export class UnitService {
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  async patchWorkspace(unitIds: number[], newWorkspace: number, user: User): Promise<RequestReportDto> {
+  async patchDropBoxHistory(units: number[],
+                            dropBoxId: number,
+                            workspaceId: number,
+                            user: User): Promise<RequestReportDto> {
+    return this.patchWorkspace(units, dropBoxId, user, workspaceId);
+  }
+
+  async patchWorkspace(unitIds: number[],
+                       newWorkspaceId: number,
+                       user: User, workspaceId: number = 0): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
         select: ['id', 'key', 'workspaceId', 'variables', 'metadata']
       });
       const existingUnit = await this.unitsRepository.findOne({
-        where: { workspaceId: newWorkspace, key: unit.key },
+        where: { workspaceId: newWorkspaceId, key: unit.key },
         select: ['id']
       });
       if (existingUnit) {
@@ -293,8 +305,16 @@ export class UnitService {
           ]
         };
       }
-      unit.workspaceId = newWorkspace;
+      unit.workspaceId = newWorkspaceId;
       unit.groupName = '';
+      if (workspaceId) {
+        const unitDropBox = this.unitDropBoxHistory.create({
+          unitId: unit.id,
+          workspaceId: workspaceId,
+          createdAt: new Date()
+        });
+        await this.unitDropBoxHistory.save(unitDropBox);
+      }
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{

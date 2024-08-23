@@ -198,6 +198,18 @@ export class UnitsController {
     return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user);
   }
 
+  @Patch('submit_units')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchDropBoxHistory(@User() user: UserEntity,
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
+    @Body('units') units: number[],
+    @Body('dropBoxId') dropBoxId: number) {
+    return this.unitService.patchDropBoxHistory(units, dropBoxId, workspaceId, user);
+  }
+
   @Patch(':ids/copyto/:target')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()

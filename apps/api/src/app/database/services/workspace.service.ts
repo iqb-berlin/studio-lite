@@ -161,6 +161,7 @@ export class WorkspaceService {
         id: workspace.id,
         name: workspace.name,
         groupId: workspace.groupId,
+        dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
         settings: workspace.settings
       };
@@ -184,6 +185,7 @@ export class WorkspaceService {
         id: workspace.id,
         name: workspace.name,
         groupId: workspace.groupId,
+        dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
         userAccessLevel: workspaceUser.accessLevel,
         settings: workspace.settings
@@ -307,7 +309,7 @@ export class WorkspaceService {
   }
 
   // TODO: id als Parameter
-  async patch(workspaceData: WorkspaceFullDto): Promise<void> {
+  async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });

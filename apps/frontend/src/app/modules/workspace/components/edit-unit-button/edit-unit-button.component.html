@@ -76,6 +76,16 @@
     <mat-icon>content_copy</mat-icon>
     {{ 'workspace.copy-to' | translate }}
   </button>
+  @if (workspaceService.userAccessLevel > 1) {
+    <button mat-menu-item
+            [disabled]="!workspaceService.dropBoxId"
+            [matTooltip]="'workspace.show-submit-units' | translate"
+            matTooltipPosition="right"
+            (click)="submitUnits()">
+      <mat-icon>publish</mat-icon>
+      {{ 'workspace.submit-units' | translate }}
+    </button>
+  }
 </mat-menu>
 
 <mat-menu #reports>
