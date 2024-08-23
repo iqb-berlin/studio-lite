@@ -113,7 +113,7 @@ describe('API unit tests', () => {
         },
         failOnStatusCode: false,
         body: {
-          key: 'iqb-editor-aspect@2.4.8-alpha'
+          key: 'iqb-editor-aspYect@2.4.8-alpha'
         }
       }).then(resp => {
         expect(resp.status).to.equal(404);
