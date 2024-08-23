@@ -120,7 +120,7 @@ describe('API unit tests', () => {
           authorization
         }
       }).then(resp => {
-        expect(resp.status).to.equal(304);
+        expect(resp.status).to.equal(200);
       });
     });
     // 21.

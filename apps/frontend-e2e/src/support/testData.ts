@@ -26,4 +26,14 @@ export interface UserData {
   identity?: string;
 }
 
+export interface InterceptData {
+  operation: Operation;
+  name: string;
+  url: string;
+  status: string;
+  headers: string;
+  body: string;
+}
+
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
+export enum Operation { GET, POST, PATCH, DELETE }

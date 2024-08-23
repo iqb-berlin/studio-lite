@@ -14,15 +14,22 @@ export function addFirstUserAPI():void {
   }).then(resp => {
     Cypress.env('token_admin', resp.body);
     expect(resp.status).to.equal(201);
-    // const data:APIProps = {
-    //   username: Cypress.env('username'),
-    //   password: Cypress.env('password'),
-    //   token_admin: resp.body
-    // };
-    // const dataAdmin = new APIData(data);
-    // return dataAdmin;
   });
+  // cy.intercept('POST', '/api/init-login', req => {
+  //   Cypress.env(`token_${Cypress.env('username')}`, req.body);
+  //   req.reply({
+  //     statusCode: 201,
+  //     headers: {
+  //       'app-version': Cypress.env('version')
+  //     },
+  //     body: {
+  //       username: Cypress.env('username'),
+  //       password: Cypress.env('password')
+  //     }
+  //   });
+  // }).as(`addFirstUser${from}`);
 }
+
 // 26
 export function loginAPI(username:string, password:string) {
   cy.request({
