@@ -269,6 +269,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       return lastValueFrom(dialogRef.afterClosed()
         .pipe(
           map(dialogResult => {
+            console.log(dialogResult);
             if (typeof dialogResult !== 'undefined') {
               const dialogComponent = dialogRef.componentInstance;
               if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
@@ -290,21 +291,30 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
           this.workspaceService.dropBoxId,
           unitsToSubmit
         ).subscribe(
-          ok => {
-            if (ok) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-submitted'),
-                '',
-                { duration: 1000 }
-              );
-              this.updateUnitList();
-            } else {
+          uploadStatus => {
+            if (typeof uploadStatus === 'boolean') {
               this.snackBar.open(
                 this.translateService.instant('workspace.unit-not-submitted'),
                 this.translateService.instant('workspace.error'),
                 { duration: 3000 }
               );
-              this.appService.dataLoading = false;
+            } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+              console.log(uploadStatus);
+              const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
+                width: '500px',
+                data: uploadStatus
+              });
+              dialogRef2.afterClosed()
+                .subscribe(() => {
+                  this.updateUnitList();
+                });
+            } else {
+              this.snackBar.open(
+                this.translateService.instant('workspace.unit-submitted'),
+                '',
+                { duration: 5000 }
+              );
+              this.updateUnitList();
             }
           }
         );

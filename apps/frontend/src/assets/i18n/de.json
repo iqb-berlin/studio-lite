@@ -19,7 +19,7 @@
   "filter-by": "Filtern nach...",
   "hour": "Uhr",
   "unit-patch": {
-    "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
+    "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden"
   },
   "unit-upload": {
     "api-error": {
@@ -136,7 +136,8 @@
     "request-report-source": {
       "upload-units": "Import Aufgaben - Ergebnis",
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
-      "unit-copy": "Aufgaben kopieren - unvollständig"
+      "unit-copy": "Aufgaben kopieren - unvollständig",
+      "unit-submit": "Aufgaben abgeben - unvollständig"
     }
   },
   "directives": {

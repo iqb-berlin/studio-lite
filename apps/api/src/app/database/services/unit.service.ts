@@ -296,7 +296,7 @@ export class UnitService {
       });
       if (existingUnit) {
         return <RequestReportDto>{
-          source: 'unit-patch-workspace',
+          source: 'unit-submit',
           messages: [
             {
               objectKey: unit.key,
@@ -319,12 +319,12 @@ export class UnitService {
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
-        source: 'unit-patch-workspace',
+        source: 'unit-submit',
         messages: []
       };
     }));
     const report = <RequestReportDto>{
-      source: 'unit-patch-workspace',
+      source: 'unit-submit',
       messages: []
     };
     reports.forEach(r => {
