@@ -185,6 +185,7 @@ describe('API metadata tests', () => {
       }).then(resp => {
         expect(resp.status).to.equal(200);
       });
+      cy.pause();
     });
     // 38
     it('5. Get the vocabulary from a specific profile', () => {
