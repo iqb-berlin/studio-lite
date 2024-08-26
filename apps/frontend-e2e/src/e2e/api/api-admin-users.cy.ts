@@ -64,7 +64,7 @@ describe('API admin users test', () => {
         .then(resp => {
           expect(resp.status).to.equal(200);
         // TODO INSERT WS AND CHECK THE SIZE AFTER THAT
-        // expect(resp.body.lenght).to.equal(0);
+        // expect(resp.body.length).to.equal(0);
         });
     });
   });

@@ -3,20 +3,7 @@ import {
 } from './testData';
 
 // 25
-Cypress.Commands.add('addFirstUserAPI', () => {
-  cy.request({
-    method: 'POST',
-    url: '/api/init-login',
-    headers: {
-      'app-version': Cypress.env('version')
-    },
-    body: {
-      username: Cypress.env('username'),
-      password: Cypress.env('password')
-    },
-    failOnStatusCode: false
-  });
-});
+
 // 18
 Cypress.Commands.add('createUserAPI', (userData:UserData) => {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -33,19 +20,6 @@ Cypress.Commands.add('createUserAPI', (userData:UserData) => {
       isAdmin: `${userData.isAdmin}`
     },
     failOnStatusCode: false
-  });
-});
-
-// 27
-Cypress.Commands.add('getUserIdAPI', (username: string, token: string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: '/api/auth-data',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    }
   });
 });
 
