@@ -103,6 +103,7 @@ describe('API unit tests', () => {
             .equal(201);
           Cypress.env(unit1.shortname, resp.body);
         });
+      cy.pause();
     });
     // 33
     it('2. Delete a Unit POST /api/workspace/id_workspace/ids`', () => {
@@ -111,6 +112,7 @@ describe('API unit tests', () => {
           expect(resp.status).to.equal(200);
           Cypress.env(unit1.shortname, resp.body);
         });
+      cy.pause();
     });
   });
   context('Negative tests', () => {
