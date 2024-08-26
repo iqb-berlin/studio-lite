@@ -18,15 +18,13 @@ declare namespace Cypress {
     // commands-api.ts
     runAndIgnore(testFn:()=>void):void;
     getWsByGroupAPI(groupKey: string, num_ws: number): void;
-    loginAPI(username: string, password: string): void;
+
     getUsersAPI(): Chainable<Response>;
     getUsersFullAPI(): Chainable<Response>;
     getUserAPI(id:string): Chainable<Response>;
     getWsByUserAPI(id:string):Chainable<Response>;
     // commands-admin-api.ts
-    addFirstUserAPI():Chainable<Response>;
     createUserAPI(userData:UserData):Chainable<Response>;
-    getUserIdAPI(username: string, token: string):Chainable<Response>;
     createGroupAPI(group: GroupData, token: string):Chainable<Response>;
     createWsAPI(groupKey: string, ws1:WsData, token: string):Chainable<Response>;
     updateUsersOfWsAPI(wsKey:string, level:AccessLevel, token:string):Chainable<Response>;
@@ -37,5 +35,11 @@ declare namespace Cypress {
     addModuleAPI(module:string);
     getModulesAPI(token:string): Chainable<Response>
     getModuleAPI(module:string)
+    // commands-api
+    addFirstUserAPI():Chainable<Response>;
+    loginAPI(username: string, password: string):Chainable<Response>;
+    deleteFirstUserAPI():Chainable<Response>;
+    getUserIdAPI(username: string, token: string):Chainable<Response>;
+    updatePasswordAPI(token: string, oldPass: string, newPass:string):Chainable<Response>;
   }
 }

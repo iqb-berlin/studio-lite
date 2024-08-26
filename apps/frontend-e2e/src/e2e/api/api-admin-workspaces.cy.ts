@@ -139,18 +139,37 @@ describe('API admin workspace tests', () => {
   });
   it('13. should be able to update the users of a workspace from its workspace id', () => {
     updateUsersOfWsAPI(Cypress.env(ws1.id));
-    cy.pause();
   });
-
+  // 43 TODO does not work
+  it.skip('14. should be able to update the access right for a user in a group', () => {
+    cy.pause();
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/admin/users/${Cypress.env('id_admin')}/workspaces/${Cypress.env(group1.id)}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: [
+        {
+          accessLevel: 2,
+          id: Cypress.env('id_admin')
+        }
+      ]
+    }).then(resp => {
+      expect(resp.status).to.equal(200);
+    });
+  });
   // TO DO, find out what does
-  it('14. should be able to update a workspace ', () => {
+  it('15. should be able to update a workspace ', () => {
     ws1.name = 'LESEN';
     updateWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), ws1.name, group1.name);
   });
-  it('15. should be able a workspace from its workspace id and group id', () => {
+  it('16. should be able a workspace from its workspace id and group id', () => {
     deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group2.id));
   });
-  it('16. should be able to delete a workspace group', () => {
+  it('17. should be able to delete a workspace group', () => {
     deleteGroupAPI(Cypress.env(group1.id));
     deleteGroupAPI(Cypress.env(group2.id));
   });

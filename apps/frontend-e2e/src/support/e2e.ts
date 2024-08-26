@@ -20,3 +20,4 @@ import './commands-admin-api';
 import './commands-ws-api';
 import './commands-unit-api';
 import './commands-verona-api';
+import './commands-api';
