@@ -14,7 +14,10 @@ CREATE TABLE "public".unit_drop_box_history
   "unit_id" INTEGER NOT NULL
     REFERENCES "public"."unit"
       ON DELETE CASCADE,
-  "workspace_id" INTEGER NOT NULL
+  "source_workspace_id" INTEGER NOT NULL
+    REFERENCES "public"."workspace"
+      ON DELETE CASCADE,
+  "target_workspace_id" INTEGER NOT NULL
     REFERENCES "public"."workspace"
       ON DELETE CASCADE,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now()

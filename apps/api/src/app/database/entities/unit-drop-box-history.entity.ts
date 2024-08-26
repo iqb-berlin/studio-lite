@@ -11,9 +11,14 @@ class UnitDropBoxHistory {
     unitId: number;
 
   @Column({
-    name: 'workspace_id'
+    name: 'source_workspace_id'
   })
-    workspaceId: number;
+    sourceWorkspaceId: number;
+
+  @Column({
+    name: 'target_workspace_id'
+  })
+    targetWorkspaceId: number;
 
   @Column({
     type: 'timestamp with time zone',

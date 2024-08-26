@@ -310,7 +310,8 @@ export class UnitService {
       if (workspaceId) {
         const unitDropBox = this.unitDropBoxHistory.create({
           unitId: unit.id,
-          workspaceId: workspaceId,
+          sourceWorkspaceId: workspaceId,
+          targetWorkspaceId: newWorkspaceId,
           createdAt: new Date()
         });
         await this.unitDropBoxHistory.save(unitDropBox);
