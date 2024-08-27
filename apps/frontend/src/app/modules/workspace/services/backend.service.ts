@@ -92,6 +92,15 @@ export class BackendService {
       );
   }
 
+  returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
+    return this.http
+      .patch<RequestReportDto>(
+      `${this.serverUrl}workspace/${workspaceId}/return_submitted_units`, { units })
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
   moveOrCopyUnits(workspaceId: number, units: number[],
                   targetWorkspace: number, moveOnly: boolean): Observable<boolean | RequestReportDto> {
     const newUnitMode = moveOnly ? 'moveto' : 'copyto';

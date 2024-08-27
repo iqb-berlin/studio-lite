@@ -86,6 +86,16 @@
       {{ 'workspace.submit-units' | translate }}
     </button>
   }
+  @if (workspaceService.userAccessLevel > 1) {
+    <button mat-menu-item
+            [disabled]="!workspaceService.hasDroppedUnits"
+            [matTooltip]="'workspace.show-return-submitted-units' | translate"
+            matTooltipPosition="right"
+            (click)="returnSubmittedUnits()">
+      <mat-icon>publish</mat-icon>
+      {{ 'workspace.return-submitted-units' | translate }}
+    </button>
+  }
 </mat-menu>
 
 <mat-menu #reports>

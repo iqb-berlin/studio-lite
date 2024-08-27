@@ -19,8 +19,10 @@
     </form>
   }
   <mat-dialog-content>
-    <studio-lite-select-unit-list #unitSelectionTable
+    <studio-lite-select-unit-list
+      #unitSelectionTable
       [workspace]="ds.selectedWorkspaceId"
+      [queryParams]="data.queryParams"
       [multiple]="data.multiple"
       [selectedUnitId]="data.selectedUnitId">
     </studio-lite-select-unit-list>

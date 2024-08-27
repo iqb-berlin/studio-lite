@@ -42,6 +42,8 @@ export class WorkspaceService {
   states: State[] = [];
   codingSchemer!: CodingScheme;
   dropBoxId: number | null = null;
+  hasDroppedUnits: boolean = false;
+
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
   @Output() unitMetadataStoreChanged = new EventEmitter<UnitMetadataStore | undefined>();

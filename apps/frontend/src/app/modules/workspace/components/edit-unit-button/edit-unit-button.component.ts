@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { RequestReportDto, UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
@@ -9,11 +9,11 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
-
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatButton } from '@angular/material/button';
 import { lastValueFrom, map } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
 import { ReviewsComponent } from '../reviews/reviews.component';
@@ -269,7 +269,6 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
       return lastValueFrom(dialogRef.afterClosed()
         .pipe(
           map(dialogResult => {
-            console.log(dialogResult);
             if (typeof dialogResult !== 'undefined') {
               const dialogComponent = dialogRef.componentInstance;
               if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
@@ -283,43 +282,96 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
     return false;
   }
 
+  private async returnSubmittedUnitsDialog(): Promise<number[] | boolean> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+        width: '500px',
+        height: '700px',
+        data: <SelectUnitData>{
+          title: this.translateService.instant('workspace.submit-units-title'),
+          buttonLabel: this.translateService.instant('workspace.submit-units'),
+          fromOtherWorkspacesToo: false,
+          multiple: true,
+          selectedUnitId: this.workspaceService.selectedUnit$.getValue(),
+          queryParams: (new HttpParams())
+            .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId.toString())
+            .append('filterTargetWorkspaceId', true)
+        }
+      });
+      return lastValueFrom(dialogRef.afterClosed()
+        .pipe(
+          map(dialogResult => {
+            if (typeof dialogResult !== 'undefined') {
+              const dialogComponent = dialogRef.componentInstance;
+              if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+                return dialogComponent.selectedUnitIds;
+              }
+            }
+            return false;
+          })
+        ));
+    }
+    return false;
+  }
+
+  async returnSubmittedUnits(): Promise<void> {
+    this.returnSubmittedUnitsDialog().then((units: number[] | boolean) => {
+      if (typeof units !== 'boolean' && units.length && this.workspaceService.hasDroppedUnits) {
+        this.backendService.returnSubmittedUnits(
+          this.workspaceService.selectedWorkspaceId,
+          units
+        ).subscribe(
+          uploadStatus => {
+            this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
+          });
+      }
+    });
+  }
+
   async submitUnits(): Promise<void> {
-    this.submitUnitsDialog().then((unitsToSubmit: number[] | boolean) => {
-      if (typeof unitsToSubmit !== 'boolean' && unitsToSubmit.length && this.workspaceService.dropBoxId) {
+    this.submitUnitsDialog().then((units: number[] | boolean) => {
+      if (typeof units !== 'boolean' && units.length && this.workspaceService.dropBoxId) {
         this.backendService.submitUnits(
           this.workspaceService.selectedWorkspaceId,
           this.workspaceService.dropBoxId,
-          unitsToSubmit
+          units
         ).subscribe(
           uploadStatus => {
-            if (typeof uploadStatus === 'boolean') {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-not-submitted'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 }
-              );
-            } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-              console.log(uploadStatus);
-              const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
-                width: '500px',
-                data: uploadStatus
-              });
-              dialogRef2.afterClosed()
-                .subscribe(() => {
-                  this.updateUnitList();
-                });
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-submitted'),
-                '',
-                { duration: 5000 }
-              );
-              this.updateUnitList();
-            }
-          }
-        );
+            this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
+          });
       }
     });
+  }
+
+  private showRequestMessage(
+    uploadStatus: boolean | RequestReportDto,
+    errorKey: string,
+    successKey: string
+  ): void {
+    if (typeof uploadStatus === 'boolean') {
+      this.snackBar.open(
+        this.translateService.instant(errorKey),
+        this.translateService.instant('workspace.error'),
+        { duration: 3000 }
+      );
+    } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+      const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
+        width: '500px',
+        data: uploadStatus
+      });
+      dialogRef2.afterClosed()
+        .subscribe(() => {
+          this.updateUnitList();
+        });
+    } else {
+      this.snackBar.open(
+        this.translateService.instant(successKey),
+        '',
+        { duration: 5000 }
+      );
+      this.updateUnitList();
+    }
   }
 
   showMetadata(): void {
