@@ -64,6 +64,71 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
   });
 });
 
+// 6
+Cypress.Commands.add('deleteUserAPI', (userId: string) => {
+  const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users/${userId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    }
+  }).then(resp => {
+    expect(resp.status).to.equal(200);
+  });
+});
+
+// 7
+Cypress.Commands.add('createUserAPI', (userData:UserData) => {
+  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/users',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      name: `${userData.username}`,
+      password: `${userData.password}`,
+      isAdmin: `${userData.isAdmin}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 9.
+Cypress.Commands.add('getUsersFullAPI',
+  () => {
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
+    cy.request({
+      method: 'GET',
+      url: '/api/admin/users/full',
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      }
+    });
+  });
+
+// 10
+Cypress.Commands.add('getUserAPI',
+  (id:string) => {
+    const authorization = `bearer ${Cypress.env('token_admin')}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/users/${id}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 11
+
 // 110
 Cypress.Commands.add('deleteFirstUserAPI', () => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;

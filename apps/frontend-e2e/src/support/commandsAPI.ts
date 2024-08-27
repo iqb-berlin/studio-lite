@@ -30,20 +30,6 @@ Cypress.Commands.add('getWsByUserAPI',
       failOnStatusCode: false
     });
   });
-// 20
-Cypress.Commands.add('getUserAPI',
-  (id:string) => {
-    const authorization = `bearer ${Cypress.env('token_admin')}`;
-    cy.request({
-      method: 'GET',
-      url: `/api/admin/users/${id}`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
-      },
-      failOnStatusCode: false
-    });
-  });
 
 // 17.
 Cypress.Commands.add('getUsersAPI',
@@ -52,19 +38,6 @@ Cypress.Commands.add('getUsersAPI',
     cy.request({
       method: 'GET',
       url: '/api/admin/users',
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
-      }
-    });
-  });
-// 19.
-Cypress.Commands.add('getUsersFullAPI',
-  () => {
-    const authorization = `bearer ${Cypress.env('token_admin')}`;
-    cy.request({
-      method: 'GET',
-      url: '/api/admin/users/full',
       headers: {
         'app-version': Cypress.env('version'),
         authorization

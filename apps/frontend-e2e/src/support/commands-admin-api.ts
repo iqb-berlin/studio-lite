@@ -4,25 +4,6 @@ import {
 
 // 25
 
-// 18
-Cypress.Commands.add('createUserAPI', (userData:UserData) => {
-  const authorization = `bearer ${Cypress.env('token_admin')}`;
-  cy.request({
-    method: 'POST',
-    url: '/api/admin/users',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      name: `${userData.username}`,
-      password: `${userData.password}`,
-      isAdmin: `${userData.isAdmin}`
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 1
 Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
   const authorization = `bearer ${token}`;

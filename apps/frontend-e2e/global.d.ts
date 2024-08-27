@@ -41,5 +41,6 @@ declare namespace Cypress {
     deleteFirstUserAPI():Chainable<Response>;
     getUserIdAPI(username: string, token: string):Chainable<Response>;
     updatePasswordAPI(token: string, oldPass: string, newPass:string):Chainable<Response>;
+    deleteUserAPI(userId: string):Chainable<Response>;
   }
 }

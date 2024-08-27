@@ -7,6 +7,7 @@ import {
   loginAPI
 } from '../../support/utilAPI';
 
+// DONE
 describe('API Login and authorization tests', () => {
   // NOTE: Status response for the post is 201 instead of 200
   it('init-login: create first, log in and store token', () => {
