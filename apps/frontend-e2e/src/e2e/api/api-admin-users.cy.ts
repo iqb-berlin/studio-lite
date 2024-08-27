@@ -52,7 +52,7 @@ describe('API admin users test', () => {
         });
     });
     // 20.
-    it('6.Negativ test: should not be able to retrieve a false user', () => {
+    it('6.Negative test: should not be able to retrieve a false user', () => {
     // /api/admin/users/{id}
       cy.getUserAPI('999')
         .its('status')
