@@ -29,11 +29,11 @@ export abstract class RequestMessageDirective extends SelectUnitDirective {
         { duration: 3000 }
       );
     } else if (uploadStatus.messages && uploadStatus.messages.length) {
-      const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
+      const dialogRef = this.uploadReportDialog.open(RequestMessageComponent, {
         width: '500px',
         data: uploadStatus
       });
-      dialogRef2.afterClosed()
+      dialogRef.afterClosed()
         .subscribe(() => {
           this.updateUnitList();
         });

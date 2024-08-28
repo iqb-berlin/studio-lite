@@ -290,8 +290,8 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
         width: '500px',
         height: '700px',
         data: <SelectUnitData>{
-          title: this.translateService.instant('workspace.submit-units-title'),
-          buttonLabel: this.translateService.instant('workspace.submit-units'),
+          title: this.translateService.instant('workspace.return-submitted-units-title'),
+          buttonLabel: this.translateService.instant('workspace.return-submitted-units'),
           fromOtherWorkspacesToo: false,
           multiple: true,
           selectedUnitId: this.workspaceService.selectedUnit$.getValue(),
@@ -324,7 +324,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
           units
         ).subscribe(
           uploadStatus => {
-            this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
+            this.showRequestMessage(uploadStatus, 'workspace.units-not-returned', 'workspace.units-returned');
           });
       }
     });
@@ -339,7 +339,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
           units
         ).subscribe(
           uploadStatus => {
-            this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
+            this.showRequestMessage(uploadStatus, 'workspace.units-not-submitted', 'workspace.units-submitted');
           });
       }
     });

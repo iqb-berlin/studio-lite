@@ -145,22 +145,18 @@
                     <button mat-raised-button
                             color="primary"
                             [disabled]="!workspaceService.dropBoxId"
-                            [matTooltip]="'workspace.show-submit-unit' | translate"
-                            matTooltipPosition="right"
                             (click)="submitUnit()">
                       <mat-icon>assignment_turned_in</mat-icon>
-                      {{ 'workspace.submit-units' | translate }}
+                      {{ 'workspace.submit-unit' | translate }}
                     </button>
                   }
                   @if (workspaceService.userAccessLevel > 2) {
                     <button mat-raised-button
                             color="primary"
                             [disabled]="!(selectedUnitId | canReturnUnit : workspaceService.unitList)"
-                            [matTooltip]="'workspace.show-return-submitted-unit' | translate"
-                            matTooltipPosition="right"
                             (click)="returnSubmittedUnit()">
                       <mat-icon>assignment_return</mat-icon>
-                      {{ 'workspace.return-submitted-units' | translate }}
+                      {{ 'workspace.return-submitted-unit' | translate }}
                     </button>
                   }
                 </div>
