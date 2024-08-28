@@ -4,15 +4,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RequestMessageComponent } from '../../../components/request-message/request-message.component';
-import { WorkspaceService } from '../services/workspace.service';
-import { BackendService } from '../services/backend.service';
 import { SelectUnitDirective } from './select-unit.directive';
 
 @Directive()
 export abstract class RequestMessageDirective extends SelectUnitDirective {
-  abstract override workspaceService: WorkspaceService;
   abstract selectUnitDialog: MatDialog;
-  abstract override backendService: BackendService;
   abstract translateService: TranslateService;
   abstract snackBar: MatSnackBar;
   abstract uploadReportDialog: MatDialog;
