@@ -126,7 +126,8 @@ export function addModules(filenames:string[]):void {
   // cy.loadModule('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', 'iqb-player-aspect@2.4.10');
   // cy.loadModule('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', 'iqb-editor-aspect@2.4.9');
   filenames.forEach(filename => {
-    cy.loadModule(filename);
+    // TO DO CHECK 28.08.2024
+    cy.loadModule(filename, filename);
   });
 }
 
