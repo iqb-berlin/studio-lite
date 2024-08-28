@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RequestReportDto, UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
@@ -29,7 +29,6 @@ import {
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
 import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
@@ -38,6 +37,7 @@ import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dia
 import { CodingReportComponent } from '../coding-report/coding-report.component';
 import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 
 @Component({
@@ -48,19 +48,19 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider,
     TranslateModule]
 })
-export class EditUnitButtonComponent extends SelectUnitDirective {
+export class EditUnitButtonComponent extends RequestMessageDirective {
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
     public route: ActivatedRoute,
+    public snackBar: MatSnackBar,
+    public selectUnitDialog: MatDialog,
+    public backendService: BackendService,
+    public uploadReportDialog: MatDialog,
+    public translateService: TranslateService,
+    private appService: AppService,
     private editSettingsDialog: MatDialog,
     private appBackendService: AppBackendService,
-    private snackBar: MatSnackBar,
-    private selectUnitDialog: MatDialog,
-    public backendService: BackendService,
-    private uploadReportDialog: MatDialog,
-    private appService: AppService,
-    private translateService: TranslateService,
     private messageDialog: MatDialog,
     private showUsersDialog: MatDialog,
     private groupDialog: MatDialog,
@@ -73,6 +73,7 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
   }
 
   userListTitle: string = '';
+
   ngOnInit(): void {
     this.userListTitle = this.workspaceService.selectedWorkspaceName ?
       this.translateService
@@ -342,36 +343,6 @@ export class EditUnitButtonComponent extends SelectUnitDirective {
           });
       }
     });
-  }
-
-  private showRequestMessage(
-    uploadStatus: boolean | RequestReportDto,
-    errorKey: string,
-    successKey: string
-  ): void {
-    if (typeof uploadStatus === 'boolean') {
-      this.snackBar.open(
-        this.translateService.instant(errorKey),
-        this.translateService.instant('workspace.error'),
-        { duration: 3000 }
-      );
-    } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-      const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
-        width: '500px',
-        data: uploadStatus
-      });
-      dialogRef2.afterClosed()
-        .subscribe(() => {
-          this.updateUnitList();
-        });
-    } else {
-      this.snackBar.open(
-        this.translateService.instant(successKey),
-        '',
-        { duration: 5000 }
-      );
-      this.updateUnitList();
-    }
   }
 
   showMetadata(): void {
