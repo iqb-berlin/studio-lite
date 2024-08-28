@@ -8,7 +8,7 @@
       <td mat-cell *matCellDef="let element"> {{'access-rights.' + element.functionality | translate}} </td>
     </ng-container>
 
-    <ng-container matColumnDef="commentator">
+    <ng-container matColumnDef="commenter">
       <th mat-header-cell *matHeaderCellDef>
         <mat-icon color="primary"
                   [matTooltip]="'access-rights.access-level-1' | translate"
@@ -17,9 +17,9 @@
       </th>
       <td mat-cell *matCellDef="let element">
         <mat-icon color="primary"
-                  [matTooltip]="(element.commentator ? 'access-rights.true' : 'access-rights.false') | translate"
-                  [color]="element.commentator ? 'primary' : 'default'"
-                  [fontIcon]="element.commentator ? 'check_circle' : 'unpublished'">
+                  [matTooltip]="(element.commenter ? 'access-rights.true' : 'access-rights.false') | translate"
+                  [color]="element.commenter ? 'primary' : 'default'"
+                  [fontIcon]="element.commenter ? 'check_circle' : 'unpublished'">
         </mat-icon>
       </td>
     </ng-container>

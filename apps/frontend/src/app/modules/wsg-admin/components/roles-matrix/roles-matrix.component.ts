@@ -18,7 +18,7 @@ import {
 
 interface RoleAccess {
   functionality: string;
-  commentator: boolean;
+  commenter: boolean;
   developer: boolean;
   super: boolean;
 }
@@ -36,48 +36,48 @@ interface RoleAccess {
 export class RolesMatrixComponent {
   dataSource: RoleAccess[] = [
     {
-      functionality: 'unit-create', commentator: false, developer: true, super: true
+      functionality: 'unit-create', commenter: false, developer: true, super: true
     },
     {
-      functionality: 'unit-copy', commentator: true, developer: true, super: true
+      functionality: 'unit-copy', commenter: true, developer: true, super: true
     },
     {
-      functionality: 'unit-move', commentator: false, developer: false, super: true
+      functionality: 'unit-move', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'unit-delete', commentator: false, developer: false, super: true
+      functionality: 'unit-delete', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'unit-export', commentator: true, developer: true, super: true
+      functionality: 'unit-export', commenter: true, developer: true, super: true
     },
     {
-      functionality: 'unit-import', commentator: false, developer: false, super: true
+      functionality: 'unit-import', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'unit-submit', commentator: false, developer: true, super: true
+      functionality: 'unit-submit', commenter: false, developer: true, super: true
     },
     {
-      functionality: 'unit-return', commentator: false, developer: false, super: true
+      functionality: 'unit-return', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'review-create', commentator: false, developer: false, super: true
+      functionality: 'review-create', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'review-delete', commentator: false, developer: false, super: true
+      functionality: 'review-delete', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'manage-unit-group', commentator: false, developer: false, super: true
+      functionality: 'manage-unit-group', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'comment', commentator: true, developer: true, super: true
+      functionality: 'comment', commenter: true, developer: true, super: true
     },
     {
-      functionality: 'reports-create', commentator: true, developer: true, super: true
+      functionality: 'reports-create', commenter: true, developer: true, super: true
     },
     {
-      functionality: 'print-create', commentator: true, developer: true, super: true
+      functionality: 'print-create', commenter: true, developer: true, super: true
     }
   ];
 
-  displayedColumns: string[] = ['functionality', 'commentator', 'developer', 'super'];
+  displayedColumns: string[] = ['functionality', 'commenter', 'developer', 'super'];
 }
