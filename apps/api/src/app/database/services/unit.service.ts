@@ -351,7 +351,7 @@ export class UnitService {
         await this.unitDropBoxHistoryRepository.save(unitDropBox);
       } else if (action === 'return' && workspaceId) {
         await this.unitDropBoxHistoryRepository
-          .delete({ unitId: unit.id, targetWorkspaceId: newWorkspaceId });
+          .delete({ unitId: unit.id, sourceWorkspaceId: newWorkspaceId });
       }
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
