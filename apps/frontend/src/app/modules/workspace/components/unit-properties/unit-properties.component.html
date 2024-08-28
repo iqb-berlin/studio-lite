@@ -152,7 +152,7 @@
                       {{ 'workspace.submit-units' | translate }}
                     </button>
                   }
-                  @if (workspaceService.userAccessLevel > 1) {
+                  @if (workspaceService.userAccessLevel > 2) {
                     <button mat-raised-button
                             color="primary"
                             [disabled]="!(selectedUnitId | canReturnUnit : workspaceService.unitList)"
