@@ -1,6 +1,5 @@
+import { UserData, GroupData, WsData } from './testData';
 // 1
-import { UserData } from './testData';
-
 Cypress.Commands.add('addFirstUserAPI', () => {
   cy.request({
     method: 'POST',
@@ -65,11 +64,11 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
 });
 
 // 6
-Cypress.Commands.add('deleteUserAPI', (userId: string) => {
+Cypress.Commands.add('deleteUserAPI', (id: string) => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${userId}`,
+    url: `/api/admin/users/${id}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -98,7 +97,7 @@ Cypress.Commands.add('createUserAPI', (userData:UserData) => {
   });
 });
 
-// 9.
+// 8.
 Cypress.Commands.add('getUsersFullAPI',
   () => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -112,7 +111,7 @@ Cypress.Commands.add('getUsersFullAPI',
     });
   });
 
-// 10
+// 9
 Cypress.Commands.add('getUserAPI',
   (id:string) => {
     const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -127,7 +126,71 @@ Cypress.Commands.add('getUserAPI',
     });
   });
 
+// 10
+Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/admin/workspace-groups',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      name: `${group.name}`,
+      setting: {}
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 11
+Cypress.Commands.add('setAdminOfGroupAPI', (userId: string, groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      userId
+    ],
+    failOnStatusCode: false
+  });
+});
+// 12
+Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: `/api/admin/workspaces/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      groupId: `${groupId}`,
+      name: `${ws.name}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 40
+Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/workspace-groups/${id}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 
 // 110
 Cypress.Commands.add('deleteFirstUserAPI', () => {
@@ -138,6 +201,7 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
     headers: {
       'app-version': Cypress.env('version'),
       authorization
-    }
+    },
+    failOnStatusCode: false
   });
 });

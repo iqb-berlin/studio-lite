@@ -304,7 +304,7 @@ export function deleteWsAPI(wsKey: string, groupKey: string) {
   });
 }
 
-// 8.
+// 8. TO DELETE
 export function setAdminOfGroupAPI(userKey: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -371,7 +371,7 @@ export function getWsByGroupAPI(groupKey: string) {
     expect(resp.status).to.equal(304);
   });
 }
-// 16.
+// 16. TO DELETE
 export function deleteGroupAPI(groupID: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
