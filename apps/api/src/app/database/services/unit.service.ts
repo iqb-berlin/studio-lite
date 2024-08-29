@@ -341,17 +341,14 @@ export class UnitService {
       }
       unit.workspaceId = newWorkspaceId;
       unit.groupName = '';
-      if (action === 'submit' && workspaceId) {
-        const unitDropBox = this.unitDropBoxHistoryRepository.create({
+      if ((action === 'submit' || action === 'return') && workspaceId) {
+        await this.unitDropBoxHistoryRepository.upsert({
           unitId: unit.id,
-          sourceWorkspaceId: workspaceId,
-          targetWorkspaceId: newWorkspaceId,
-          createdAt: new Date()
-        });
-        await this.unitDropBoxHistoryRepository.save(unitDropBox);
-      } else if (action === 'return' && workspaceId) {
-        await this.unitDropBoxHistoryRepository
-          .delete({ unitId: unit.id, sourceWorkspaceId: newWorkspaceId });
+          sourceWorkspaceId: action === 'return' ? newWorkspaceId : workspaceId,
+          returned: action === 'return',
+          targetWorkspaceId: action === 'return' ? workspaceId : newWorkspaceId,
+          changedAt: new Date()
+        }, ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId']);
       }
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);

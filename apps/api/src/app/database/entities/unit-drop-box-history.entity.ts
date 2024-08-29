@@ -1,6 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column, Entity, PrimaryGeneratedColumn, Unique
+} from 'typeorm';
 
 @Entity()
+@Unique('unit_source_target', ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId'])
 class UnitDropBoxHistory {
   @PrimaryGeneratedColumn()
     id: number;
@@ -20,11 +23,14 @@ class UnitDropBoxHistory {
   })
     targetWorkspaceId: number;
 
+  @Column()
+    returned: boolean;
+
   @Column({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'changed_at'
   })
-    createdAt: Date;
+    changedAt: Date;
 }
 
 export default UnitDropBoxHistory;
