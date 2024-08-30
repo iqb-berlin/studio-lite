@@ -14,7 +14,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #FF5500;
+  background-color: #bbbbbb;
 }
 
 .unit-sort {
@@ -44,9 +44,12 @@
 }
 
 .state{
-  height:10px;
-  width:10px;
-  background-color: #ff9ee9;
+  height:6px;
+  width:6px;
+  background-color: #bbbbbb;
+  border-color: #bbbbbb;
+  border-width: 2px;
+  border-style: solid;
 }
 
 .unit-key{
@@ -56,17 +59,15 @@
 .submitted{
   width: 0;
   height: 0;
-  -webkit-transform:rotate(360deg);
   border-style: solid;
   border-width: 0 5px 10px 5px;
-  border-color: transparent transparent #2ad31c transparent;
+  border-color: transparent transparent #bbbbbb transparent;
 }
 
 .returned{
   width: 0;
   height: 0;
-  -webkit-transform:rotate(360deg);
   border-style: solid;
   border-width: 10px 5px 0 5px;
-  border-color: #d31c38 transparent transparent transparent;
+  border-color: #bbbbbb transparent transparent transparent;
 }
