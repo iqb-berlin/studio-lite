@@ -43,8 +43,11 @@ import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent, CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe, TranslateModule, MatIcon, MatMenuItem, MatTooltip, CanReturnUnitPipe]
+  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
+    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatMenuItem, MatTooltip,
+    MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
+    CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
+    TranslateModule, MatIcon, CanReturnUnitPipe]
 })
 
 export class UnitPropertiesComponent extends RequestMessageDirective implements OnInit, OnDestroy {

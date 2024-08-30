@@ -143,13 +143,18 @@
                   </mat-expansion-panel-header>
                   <div class="fx-column-start-start fx-gap-10">
                     @if (workspaceService.userAccessLevel > 1) {
-                      <button mat-raised-button
-                              color="primary"
-                              [disabled]="!workspaceService.dropBoxId"
-                              (click)="submitUnit()">
-                        <mat-icon>assignment_turned_in</mat-icon>
-                        {{ 'workspace.submit-unit' | translate }}
-                      </button>
+                      <div class="fx-row-start-center fx-gap-20">
+                        <button mat-raised-button
+                                color="primary"
+                                [disabled]="!workspaceService.dropBoxId"
+                                (click)="submitUnit()">
+                          <mat-icon>assignment_turned_in</mat-icon>
+                          {{ 'workspace.submit-unit' | translate }}
+                        </button>
+                        @if (!workspaceService.dropBoxId) {
+                          <p class="hint">{{ 'workspace.no-dropbox-defined' | translate }}</p>
+                        }
+                      </div>
                     }
                     @if (workspaceService.userAccessLevel > 2) {
                       <button mat-raised-button
