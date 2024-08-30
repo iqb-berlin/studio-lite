@@ -8,6 +8,7 @@ import {
   UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { CodingScheme } from '@iqb/responses';
+import { HttpParams } from '@angular/common/http';
 import { BackendService } from './backend.service';
 import {
   UnitMetadataStore
@@ -217,7 +218,11 @@ export class WorkspaceService {
       }
     }
     if (reloadUnitList) {
-      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId)
+      let queryParams = new HttpParams();
+      queryParams = queryParams
+        .append('targetWorkspaceId', this.selectedWorkspaceId)
+        .append('withLastSeenCommentTimeStamp', true);
+      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId, queryParams)
         .pipe(
           map(uResponse => {
             this.resetUnitList(uResponse);

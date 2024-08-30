@@ -101,12 +101,16 @@ export class UnitService {
     if (targetWorkspaceId) {
       units = await Promise.all(units.map(async unit => {
         const history = await this.unitDropBoxHistoryRepository.findOne({
-          where: { unitId: unit.id, targetWorkspaceId: targetWorkspaceId }
+          where: [
+            { unitId: unit.id, targetWorkspaceId: targetWorkspaceId },
+            { unitId: unit.id, sourceWorkspaceId: targetWorkspaceId }
+          ]
         });
         return {
           ...unit,
           targetWorkspaceId: history?.targetWorkspaceId || null,
-          sourceWorkspaceId: history?.sourceWorkspaceId || null
+          sourceWorkspaceId: history?.sourceWorkspaceId || null,
+          returned: history?.returned || false
         };
       }));
     }

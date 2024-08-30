@@ -23,6 +23,9 @@ export class UnitInListDto {
     targetWorkspaceId?: number;
 
   @ApiProperty()
+    returned?: boolean;
+
+  @ApiProperty()
     lastCommentChangedAt?: Date;
 
   @ApiProperty()

@@ -13,14 +13,16 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { State } from '../../../admin/models/state.type';
 import { GetStateColorPipe } from '../../pipes/get-state-color.pipe';
 import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
+import { UnitSubmittedTooltipPipe } from '../../pipes/unit-submitted-tooltip.pipe';
 
 @Component({
   selector: 'studio-lite-unit-table',
   templateUrl: './unit-table.component.html',
   styleUrls: ['./unit-table.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, TranslateModule, HasNewCommentsPipe, GetStateColorPipe]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
+    MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    TranslateModule, HasNewCommentsPipe, GetStateColorPipe, UnitSubmittedTooltipPipe]
 })
 export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSort) sortTable!: MatSort;
