@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { WorkspacesComponent } from './workspaces.component';
 
@@ -38,6 +39,7 @@ describe('WorkspacesComponent', () => {
         MockSearchFilterComponent
       ],
       imports: [
+        NoopAnimationsModule,
         MatDialogModule,
         MatTableModule,
         MatCheckboxModule,

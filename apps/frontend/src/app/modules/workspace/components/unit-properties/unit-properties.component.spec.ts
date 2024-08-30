@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { RouterTestingModule } from '@angular/router/testing';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { environment } from '../../../../../environments/environment';
 import { UnitPropertiesComponent } from './unit-properties.component';
@@ -37,6 +38,7 @@ describe('UnitPropertiesComponent', () => {
         MockSelectModuleComponent
       ],
       imports: [
+        RouterTestingModule,
         MatSelectModule,
         MatFormFieldModule,
         MatInputModule,

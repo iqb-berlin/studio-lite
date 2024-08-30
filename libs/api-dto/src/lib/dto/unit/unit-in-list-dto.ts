@@ -17,6 +17,15 @@ export class UnitInListDto {
     groupName?: string;
 
   @ApiProperty()
+    sourceWorkspaceId?: number;
+
+  @ApiProperty()
+    targetWorkspaceId?: number;
+
+  @ApiProperty()
+    returned?: boolean;
+
+  @ApiProperty()
     lastCommentChangedAt?: Date;
 
   @ApiProperty()

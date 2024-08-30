@@ -16,6 +16,7 @@ import {
   EditWorkspaceSettingsComponent
 } from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.component';
 
 @Component({
   selector: 'studio-lite-workspace-menu',
@@ -28,11 +29,15 @@ export class WorkspaceMenuComponent {
   @Input() selectedWorkspaceId!: number;
   @Input() selectedRows!: WorkspaceInListDto[];
   @Input() checkedRows!: WorkspaceInListDto[];
+  @Input() workspaces!: WorkspaceInListDto[];
   @Input() isWorkspaceGroupAdmin!: boolean;
 
   @Output() workspaceAdded: EventEmitter<string> = new EventEmitter<string>();
   @Output() workspaceRenamed: EventEmitter<{ selection: WorkspaceInListDto[], name: string }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], name: string }>();
+
+  @Output() workspaceDropBoxSelected: EventEmitter<{ selection: WorkspaceInListDto[], dropBoxId: number }> =
+    new EventEmitter<{ selection: WorkspaceInListDto[], dropBoxId: number }>();
 
   @Output() workspaceChanged: EventEmitter<{ selection: WorkspaceInListDto[], settings: WorkspaceSettings }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], settings: WorkspaceSettings }>();
@@ -48,6 +53,7 @@ export class WorkspaceMenuComponent {
     private editWorkspaceDialog: MatDialog,
     private editWorkspaceSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
+    private selectDropBoxDialog: MatDialog,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
     private translateService: TranslateService
@@ -218,5 +224,24 @@ export class WorkspaceMenuComponent {
         }
       });
     }
+  }
+
+  selectDropBox() {
+    const dialogRef = this.selectDropBoxDialog.open(SelectDropBoxComponent, {
+      width: '400px',
+      data: {
+        workspaces: this.workspaces.filter(w => w.id !== this.selectedWorkspaceId),
+        dropBoxId: this.selectedRows[0].dropBoxId,
+        selectedWorkspaceName: this.selectedRows[0].name
+      }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result !== undefined) {
+        this.workspaceDropBoxSelected.emit({
+          selection: this.selectedRows,
+          dropBoxId: result
+        });
+      }
+    });
   }
 }

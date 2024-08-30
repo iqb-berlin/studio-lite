@@ -18,5 +18,8 @@ export class UserWorkspaceFullDto {
     userAccessLevel!: number;
 
   @ApiProperty()
+    dropBoxId!: number;
+
+  @ApiProperty()
     settings?: WorkspaceSettingsDto;
 }

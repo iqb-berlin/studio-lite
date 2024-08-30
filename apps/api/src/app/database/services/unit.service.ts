@@ -17,6 +17,7 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
+import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -32,6 +33,8 @@ export class UnitService {
     private workspaceUserRepository: Repository<WorkspaceUser>,
     @InjectRepository(Workspace)
     private workspaceRepository: Repository<Workspace>,
+    @InjectRepository(UnitDropBoxHistory)
+    private unitDropBoxHistoryRepository: Repository<UnitDropBoxHistory>,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService
   ) {}
@@ -67,10 +70,12 @@ export class UnitService {
   }
 
   async findAllForWorkspace(workspaceId: number,
-                            userId:number = null,
-                            withLastSeenCommentTimeStamp:boolean = null): Promise<UnitInListDto[]> {
+                            userId: number = null,
+                            withLastSeenCommentTimeStamp: boolean = false,
+                            targetWorkspaceId: number = 0,
+                            filterTargetWorkspaceId: boolean = false): Promise<UnitInListDto[]> {
     this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
-    const units = await this.unitsRepository.find({
+    let units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
       select: {
@@ -80,9 +85,9 @@ export class UnitService {
         groupName: true,
         state: true
       }
-    });
+    }) as UnitInListDto[];
     if (userId && withLastSeenCommentTimeStamp) {
-      return Promise.all(units.map(async unit => {
+      units = await Promise.all(units.map(async unit => {
         const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id);
         return {
           ...unit,
@@ -92,6 +97,25 @@ export class UnitService {
             await this.unitUserService.findLastSeenCommentTimestamp(userId, unit.id)
         };
       }));
+    }
+    if (targetWorkspaceId) {
+      units = await Promise.all(units.map(async unit => {
+        const history = await this.unitDropBoxHistoryRepository.findOne({
+          where: [
+            { unitId: unit.id, targetWorkspaceId: targetWorkspaceId },
+            { unitId: unit.id, sourceWorkspaceId: targetWorkspaceId }
+          ]
+        });
+        return {
+          ...unit,
+          targetWorkspaceId: history?.targetWorkspaceId || null,
+          sourceWorkspaceId: history?.sourceWorkspaceId || null,
+          returned: history?.returned || false
+        };
+      }));
+    }
+    if (filterTargetWorkspaceId) {
+      units = units.filter(unit => unit.targetWorkspaceId === workspaceId);
     }
     return units;
   }
@@ -272,19 +296,45 @@ export class UnitService {
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  async patchWorkspace(unitIds: number[], newWorkspace: number, user: User): Promise<RequestReportDto> {
+  async patchDropBoxHistory(units: number[],
+                            dropBoxId: number,
+                            workspaceId: number,
+                            user: User): Promise<RequestReportDto> {
+    return this.patchWorkspace(units, dropBoxId, user, workspaceId, 'submit');
+  }
+
+  async patchReturnDropBoxHistory(units: number[],
+                                  workspaceId: number,
+                                  user: User): Promise<RequestReportDto> {
+    const reports = await Promise.all(units.map(async unitId => {
+      const unit = await this.unitDropBoxHistoryRepository
+        .findOne({ where: { unitId: unitId, targetWorkspaceId: workspaceId } });
+      return this.patchWorkspace([unitId], unit.sourceWorkspaceId, user, workspaceId, 'return');
+    }));
+    return {
+      source: 'unit-return-submitted',
+      messages: reports.map(r => r.messages).flat()
+    };
+  }
+
+  async patchWorkspace(unitIds: number[],
+                       newWorkspaceId: number,
+                       user: User,
+                       workspaceId: number = 0,
+                       action: string = null
+  ): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
         select: ['id', 'key', 'workspaceId', 'variables', 'metadata']
       });
       const existingUnit = await this.unitsRepository.findOne({
-        where: { workspaceId: newWorkspace, key: unit.key },
+        where: { workspaceId: newWorkspaceId, key: unit.key },
         select: ['id']
       });
       if (existingUnit) {
         return <RequestReportDto>{
-          source: 'unit-patch-workspace',
+          source: 'unit-submit',
           messages: [
             {
               objectKey: unit.key,
@@ -293,17 +343,26 @@ export class UnitService {
           ]
         };
       }
-      unit.workspaceId = newWorkspace;
+      unit.workspaceId = newWorkspaceId;
       unit.groupName = '';
+      if ((action === 'submit' || action === 'return') && workspaceId) {
+        await this.unitDropBoxHistoryRepository.upsert({
+          unitId: unit.id,
+          sourceWorkspaceId: action === 'return' ? newWorkspaceId : workspaceId,
+          returned: action === 'return',
+          targetWorkspaceId: action === 'return' ? workspaceId : newWorkspaceId,
+          changedAt: new Date()
+        }, ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId']);
+      }
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
-        source: 'unit-patch-workspace',
+        source: 'unit-submit',
         messages: []
       };
     }));
     const report = <RequestReportDto>{
-      source: 'unit-patch-workspace',
+      source: 'unit-submit',
       messages: []
     };
     reports.forEach(r => {

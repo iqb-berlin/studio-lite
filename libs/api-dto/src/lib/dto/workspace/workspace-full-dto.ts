@@ -15,5 +15,8 @@ export class WorkspaceFullDto {
     groupName?: string;
 
   @ApiProperty()
+    dropBoxId!: number;
+
+  @ApiProperty()
     settings?: WorkspaceSettingsDto;
 }

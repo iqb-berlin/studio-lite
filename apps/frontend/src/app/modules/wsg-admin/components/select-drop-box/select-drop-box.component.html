@@ -1,0 +1,31 @@
+<h1 mat-dialog-title>
+  {{'wsg-admin.select-drop-box-for' | translate : { workspace:  selectedWorkspaceName } }}
+</h1>
+<mat-dialog-content>
+  <mat-form-field class="full-width">
+    <mat-label>{{'wsg-admin.select-drop-box' | translate}}</mat-label>
+    <mat-select [(value)]="dropBoxId">
+      <mat-option [value]="null">
+        {{ 'wsg-admin.no-drop-box' | translate }}
+      </mat-option>
+      @for (workspace of workspaces; track workspaces) {
+        <mat-option [value]="workspace.id">
+          {{ workspace.name }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="dropBoxId">
+    {{'save' | translate}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="undefined">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>

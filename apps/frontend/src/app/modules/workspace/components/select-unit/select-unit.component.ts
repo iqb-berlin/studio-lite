@@ -13,6 +13,7 @@ import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatFormField } from '@angular/material/form-field';
 
+import { HttpParams } from '@angular/common/http';
 import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interface';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
@@ -24,6 +25,7 @@ export interface SelectUnitData {
   fromOtherWorkspacesToo: boolean;
   multiple: boolean;
   selectedUnitId: number;
+  queryParams: HttpParams;
 }
 
 @Component({
@@ -77,6 +79,6 @@ export class SelectUnitComponent implements OnInit {
   }
 
   updateWorkspace(newWorkspaceId: number) {
-    if (this.unitSelectionTable) this.unitSelectionTable.workspaceId = newWorkspaceId;
+    if (this.unitSelectionTable) this.unitSelectionTable.updateUnitList(newWorkspaceId);
   }
 }

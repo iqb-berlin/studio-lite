@@ -8,7 +8,7 @@ import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
 import { UnitMetadataValues, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatOption } from '@angular/material/core';
@@ -21,6 +21,12 @@ import {
   MatCard, MatCardHeader, MatCardTitle, MatCardContent
 } from '@angular/material/card';
 import { CodingScheme, VariableInfo } from '@iqb/responses';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenuItem } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -30,16 +36,21 @@ import { BackendService } from '../../services/backend.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
+import { RequestMessageDirective } from '../../directives/request-message.directive';
+import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 
 @Component({
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent, CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe, TranslateModule]
+  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
+    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatMenuItem, MatTooltip,
+    MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
+    CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
+    TranslateModule, MatIcon, CanReturnUnitPipe]
 })
 
-export class UnitPropertiesComponent implements OnInit, OnDestroy {
+export class UnitPropertiesComponent extends RequestMessageDirective implements OnInit, OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
@@ -59,7 +70,7 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
   form = new FormGroup({});
   selectedStateId = '0';
   selectedStateColor = '';
-
+  selectedUnitId = 0;
   initialTranscript = '';
   initialReference = '';
 
@@ -67,8 +78,15 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
-    public backendService: BackendService
+    public backendService: BackendService,
+    public router: Router,
+    public route: ActivatedRoute,
+    public snackBar: MatSnackBar,
+    public selectUnitDialog: MatDialog,
+    public uploadReportDialog: MatDialog,
+    public translateService: TranslateService
   ) {
+    super();
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
@@ -83,7 +101,8 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
-      .subscribe(() => {
+      .subscribe(id => {
+        this.selectedUnitId = id;
         this.readData();
       });
     this.initItemLoader();
@@ -274,6 +293,35 @@ export class UnitPropertiesComponent implements OnInit, OnDestroy {
     const propertyControl = this.unitForm.get(property);
     if (propertyControl) {
       propertyControl.setValue('');
+    }
+  }
+
+  async submitUnit(): Promise<void> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      this.backendService.submitUnits(
+        this.workspaceService.selectedWorkspaceId,
+        this.workspaceService.dropBoxId!,
+        [this.selectedUnitId]
+      )
+        .subscribe(
+          uploadStatus => {
+            this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
+          });
+    }
+  }
+
+  async returnSubmittedUnit(): Promise<void> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      this.backendService.returnSubmittedUnits(
+        this.workspaceService.selectedWorkspaceId,
+        [this.selectedUnitId]
+      )
+        .subscribe(
+          uploadStatus => {
+            this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
+          });
     }
   }
 }
