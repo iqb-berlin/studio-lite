@@ -296,24 +296,32 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     }
   }
 
-  submitUnit(): void {
-    this.backendService.submitUnits(
-      this.workspaceService.selectedWorkspaceId,
-      this.workspaceService.dropBoxId!,
-      [this.selectedUnitId]
-    ).subscribe(
-      uploadStatus => {
-        this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
-      });
+  async submitUnit(): Promise<void> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      this.backendService.submitUnits(
+        this.workspaceService.selectedWorkspaceId,
+        this.workspaceService.dropBoxId!,
+        [this.selectedUnitId]
+      )
+        .subscribe(
+          uploadStatus => {
+            this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
+          });
+    }
   }
 
-  returnSubmittedUnit(): void {
-    this.backendService.returnSubmittedUnits(
-      this.workspaceService.selectedWorkspaceId,
-      [this.selectedUnitId]
-    ).subscribe(
-      uploadStatus => {
-        this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
-      });
+  async returnSubmittedUnit(): Promise<void> {
+    const routingOk = await this.selectUnit(0);
+    if (routingOk) {
+      this.backendService.returnSubmittedUnits(
+        this.workspaceService.selectedWorkspaceId,
+        [this.selectedUnitId]
+      )
+        .subscribe(
+          uploadStatus => {
+            this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
+          });
+    }
   }
 }
