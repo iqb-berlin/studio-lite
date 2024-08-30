@@ -18,6 +18,10 @@ describe('API general tests', () => {
     id: 'id_group2',
     name: 'GROUP2022'
   };
+  const groupN: GroupData = {
+    id: 'id_group3',
+    name: 'GROUPNegative'
+  };
   const ws1: WsData = {
     id: 'id_ws1',
     name: '01Vorlage'
@@ -39,7 +43,7 @@ describe('API general tests', () => {
   context('Positive tests', () => {
     // admin-auth
     it('1. POST /api/init-login: should be able to add the first user /api/init-login', () => {
-      cy.addFirstUserAPI()
+      cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
         .then(resp => {
           Cypress.env(`token_${Cypress.env('username')}`, resp.body);
           expect(resp.status).to.equal(201);
@@ -256,7 +260,39 @@ describe('API general tests', () => {
       //   .then(resp => {
       //     expect(resp.status).to.equal(200);
       //   });
-      // cy.pause();
+    });
+    it('22. GET /api/admin/workspace-groups/id: Admin workspace-group retrieved successfully.', () => {
+      // Positive test
+      cy.getGroupByIdAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.body.name).to.equal(group1.name);
+          expect(resp.status).to.equal(200);
+        });
+      // Negative tests
+      cy.getGroupByIdAPI(Cypress.env(groupN.id), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      cy.getGroupByIdAPI(Cypress.env(group1.id), 'no_token')
+        .then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      // 404 Not found
+    });
+    it('23. PATCH /api/admin/workspace-groups/id/admins: List of admins for workspace-group retrieved successfully.',
+      () => {
+        const ids: string[] = [Cypress.env(`id_${Cypress.env(Cypress.env('username'))}`), Cypress.env(user2.username)];
+        // Create the list of admin ids
+        // Positive test
+        cy.setGroupFromAdminsAPI(ids, group1.id, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status.to.equal(200));
+          });
+        cy.pause();
+      });
+    it(' : ', () => {
+    });
+    it(' : ', () => {
     });
     it('40. DELETE /api/admin/workspace-groups: should be able to delete one group g1', () => {
       cy.deleteGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
@@ -271,7 +307,6 @@ describe('API general tests', () => {
         });
     });
     it('109. 6(repeat) should be able to delete residuals', () => {
-      cy.pause();
       cy.deleteUserAPI(Cypress.env(user2.username));
     });
     it('110. DELETE /api/admin/users/id should be able to add the first user', () => {

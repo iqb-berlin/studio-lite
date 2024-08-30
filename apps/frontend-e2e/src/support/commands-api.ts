@@ -3,7 +3,7 @@ import {
 } from './testData';
 
 // 1
-Cypress.Commands.add('addFirstUserAPI', () => {
+Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {
   cy.request({
     method: 'POST',
     url: '/api/init-login',
@@ -11,8 +11,8 @@ Cypress.Commands.add('addFirstUserAPI', () => {
       'app-version': Cypress.env('version')
     },
     body: {
-      username: Cypress.env('username'),
-      password: Cypress.env('password')
+      username: username,
+      password: password
     },
     failOnStatusCode: false
   });
@@ -304,6 +304,34 @@ Cypress.Commands.add('updateWsAPI', (token:string) => {
     failOnStatusCode: false
   });
 });
+// 22
+Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 23
+Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: userIds,
+    failOnStatusCode: false
+  });
+});
 
 // 40
 Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
@@ -318,6 +346,11 @@ Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
     failOnStatusCode: false
   });
 });
+
+// Cypress.Commands.add('', () => {});
+// Cypress.Commands.add('', () => {});
+// Cypress.Commands.add('', () => {});
+// Cypress.Commands.add('', () => {});
 
 // 110 and 6 is the same
 Cypress.Commands.add('deleteFirstUserAPI', () => {
