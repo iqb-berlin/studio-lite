@@ -28,4 +28,4 @@ CREATE TABLE "public"."unit_drop_box_history"
 -- changeset jojohoch:3
 alter table "public"."unit_drop_box_history" add constraint unit_source_target
   unique (unit_id, source_workspace_id, target_workspace_id);
--- rollback alter table "public"."unit_drop_box_history" drop constraint source_target;
+-- rollback alter table "public"."unit_drop_box_history" drop constraint unit_source_target;
