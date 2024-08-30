@@ -17,13 +17,13 @@
         [matTooltip]="!(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
       </div>
       <div [style.opacity]="element.sourceWorkspaceId ? 1: 0"
-           [matTooltip]=" element | UnitSubmittedTooltip"
+           [matTooltip]=" element | unitDropBoxTooltip"
            [class]="element.returned ? 'returned' : 'submitted'">
       </div>
-      <div [style.opacity]="(element.state | getStateColor:'color': this.states) ? 1:0   "
-           [style.background-color]="(element.state | getStateColor:'color': this.states)"
+      <div [style.opacity]="(element.state | stateColor:'color': this.states) ? 1:0   "
+           [style.background-color]="(element.state | stateColor:'color': this.states)"
            class="state"
-           [matTooltip]="(element.state | getStateColor:'label': this.states)">
+           [matTooltip]="(element.state | stateColor:'label': this.states)">
       </div>
       <span class="unit-key">{{element.key}}</span>
     </mat-cell>

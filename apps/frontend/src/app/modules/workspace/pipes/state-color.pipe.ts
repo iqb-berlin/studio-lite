@@ -1,16 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { WorkspaceService } from '../services/workspace.service';
 import { State } from '../../admin/models/state.type';
 
 @Pipe({
-  name: 'getStateColor',
+  name: 'stateColor',
   standalone: true
 })
-export class GetStateColorPipe implements PipeTransform {
-  constructor(
-    public workspaceService: WorkspaceService
-  ) {}
-
+export class StateColorPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(id: string, property: 'label' | 'color', states: State[]): string {
     if (states) {

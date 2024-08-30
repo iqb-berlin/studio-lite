@@ -78,7 +78,7 @@ import { UnitGroupsComponent } from './components/unit-groups/unit-groups.compon
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 import { MetadataModule } from '../metadata/metadata.module';
-import { GetStateColorPipe } from './pipes/get-state-color.pipe';
+import { StateColorPipe } from './pipes/state-color.pipe';
 import { ShowMetadataComponent } from './components/show-metadata/show-metadata.component';
 import { PrintUnitsDialogComponent } from './components/print-units-dialog/print-units-dialog.component';
 
@@ -147,7 +147,7 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     UpdateUnitsButtonComponent,
     HasNewCommentsPipe,
     NamedRouterLinkPipe,
-    GetStateColorPipe,
+    StateColorPipe,
     PrintReviewButtonComponent,
     DeleteReviewButtonComponent,
     AddReviewButtonComponent,

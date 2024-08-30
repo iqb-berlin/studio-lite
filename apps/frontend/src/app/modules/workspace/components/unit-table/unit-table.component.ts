@@ -11,9 +11,9 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { MatTooltip } from '@angular/material/tooltip';
 import { State } from '../../../admin/models/state.type';
-import { GetStateColorPipe } from '../../pipes/get-state-color.pipe';
+import { StateColorPipe } from '../../pipes/state-color.pipe';
 import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
-import { UnitSubmittedTooltipPipe } from '../../pipes/unit-submitted-tooltip.pipe';
+import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
 
 @Component({
   selector: 'studio-lite-unit-table',
@@ -22,7 +22,7 @@ import { UnitSubmittedTooltipPipe } from '../../pipes/unit-submitted-tooltip.pip
   standalone: true,
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-    TranslateModule, HasNewCommentsPipe, GetStateColorPipe, UnitSubmittedTooltipPipe]
+    TranslateModule, HasNewCommentsPipe, StateColorPipe, UnitDropBoxTooltipPipe]
 })
 export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSort) sortTable!: MatSort;
