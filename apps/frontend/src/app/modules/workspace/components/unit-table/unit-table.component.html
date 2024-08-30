@@ -20,10 +20,10 @@
            [matTooltip]=" element | unitDropBoxTooltip"
            [class]="element.returned ? 'returned' : 'submitted'">
       </div>
-      <div [style.opacity]="(element.state | stateColor:'color': this.states) ? 1:0   "
-           [style.background-color]="(element.state | stateColor:'color': this.states)"
+      <div [style.opacity]="(element.state | state:'color': this.states) ? 1:0   "
+           [style.background-color]="(element.state | state:'color': this.states)"
            class="state"
-           [matTooltip]="(element.state | stateColor:'label': this.states)">
+           [matTooltip]="(element.state | state:'label': this.states)">
       </div>
       <span class="unit-key">{{element.key}}</span>
     </mat-cell>

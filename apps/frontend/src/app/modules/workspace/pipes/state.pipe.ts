@@ -2,10 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { State } from '../../admin/models/state.type';
 
 @Pipe({
-  name: 'stateColor',
+  name: 'state',
   standalone: true
 })
-export class StateColorPipe implements PipeTransform {
+export class StatePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(id: string, property: 'label' | 'color', states: State[]): string {
     if (states) {

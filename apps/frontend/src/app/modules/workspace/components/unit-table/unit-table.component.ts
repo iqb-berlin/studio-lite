@@ -11,7 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { MatTooltip } from '@angular/material/tooltip';
 import { State } from '../../../admin/models/state.type';
-import { StateColorPipe } from '../../pipes/state-color.pipe';
+import { StatePipe } from '../../pipes/state.pipe';
 import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
 import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
 
@@ -22,7 +22,7 @@ import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
   standalone: true,
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-    TranslateModule, HasNewCommentsPipe, StateColorPipe, UnitDropBoxTooltipPipe]
+    TranslateModule, HasNewCommentsPipe, StatePipe, UnitDropBoxTooltipPipe]
 })
 export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSort) sortTable!: MatSort;
