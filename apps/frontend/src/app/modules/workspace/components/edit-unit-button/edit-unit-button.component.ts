@@ -132,6 +132,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
           title: moveOnly ?
             this.translateService.instant('workspace.move-units') :
             this.translateService.instant('workspace.copy-units'),
+          subtitle: moveOnly ? this.translateService.instant('workspace.unit-dropbox-history-deleted') : '',
           buttonLabel: moveOnly ?
             this.translateService.instant('workspace.move') :
             this.translateService.instant('workspace.copy'),

@@ -353,6 +353,8 @@ export class UnitService {
           targetWorkspaceId: action === 'return' ? workspaceId : newWorkspaceId,
           changedAt: new Date()
         }, ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId']);
+      } else if (action === 'moveTo') {
+        await this.unitDropBoxHistoryRepository.delete({ unitId: unit.id });
       }
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);

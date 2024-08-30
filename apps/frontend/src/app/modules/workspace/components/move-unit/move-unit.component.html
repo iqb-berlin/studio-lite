@@ -17,7 +17,11 @@
       </mat-form-field>
     </form>
   }
+
   <mat-dialog-content>
+    @if (data.subtitle) {
+      <div>{{ data.subtitle }}</div>
+    }
     <studio-lite-select-unit-list #unitSelectionTable
       [workspace]="data.currentWorkspaceId">
     </studio-lite-select-unit-list>

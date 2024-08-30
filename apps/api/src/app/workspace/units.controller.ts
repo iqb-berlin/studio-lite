@@ -200,10 +200,11 @@ export class UnitsController {
   @ApiTags('workspace unit')
   async patchWorkspace(@Param('ids') ids: string,
     @User() user: UserEntity,
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Param('target', ParseIntPipe) targetWorkspaceId: number) {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user);
+    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user, workspaceId, 'moveTo');
   }
 
   @Patch('submit_units')
