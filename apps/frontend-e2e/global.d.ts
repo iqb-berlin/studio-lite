@@ -30,7 +30,7 @@ declare namespace Cypress {
     getModulesAPI(token:string): Chainable<Response>
     getModuleAPI(module:string)
     // commands-api
-    addFirstUserAPI():Chainable<Response>; // 1
+    addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
     loginAPI(username: string, password: string):Chainable<Response>; // 2
     getUserIdAPI(username: string, token: string):Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass:string):Chainable<Response>; // 4
@@ -49,6 +49,8 @@ declare namespace Cypress {
     getUsersOfWsAPI(wsId:string, token:string):Chainable<Response>; // 19
     updateGroupAPI(token:string):Chainable<Response>; // 20
     updateWsAPI(token:string):Chainable<Response>; // 21
+    getGroupByIdAPI(groupId: string, token:string):Chainable<Response>// 22
+    setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>
 
     deleteGroupAPI(id: string, token:string):Chainable<Response>; // 40
     deleteFirstUserAPI():Chainable<Response>; // 110

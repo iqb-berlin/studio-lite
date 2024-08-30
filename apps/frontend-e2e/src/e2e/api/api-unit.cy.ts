@@ -36,7 +36,7 @@ describe('API unit tests', () => {
   };
   // 32
   before(() => {
-    cy.addFirstUserAPI()
+    cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
       .then(resp => {
         Cypress.env(`token_${Cypress.env('username')}`, resp.body);
         expect(resp.status).to.equal(201);
