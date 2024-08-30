@@ -589,6 +589,7 @@
     "return-submitted-unit": "Aufgabe zurückgeben",
     "unit-actions": "Arbeitsablauf",
     "no-dropbox-defined": "Kein Abgabebereich definiert",
+    "unit-dropbox-history-deleted": "Beim Verschieben von abgegebene Aufgaben wird die Information zum Zurückgeben gelöscht.",
     "no-units": "Dieser Arbeitsbereich enthält keine Aufgaben!",
     "user-list": "Liste der Nutzer:innen",
     "unit-saved": "Änderungen an Aufgabedaten gespeichert",
