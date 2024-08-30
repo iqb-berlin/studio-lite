@@ -134,33 +134,35 @@
                 </div>
               </mat-expansion-panel>
 
-              <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    {{ 'workspace.unit-actions' | translate }}
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="fx-column-start-start fx-gap-10">
-                  @if (workspaceService.userAccessLevel > 1) {
-                    <button mat-raised-button
-                            color="primary"
-                            [disabled]="!workspaceService.dropBoxId"
-                            (click)="submitUnit()">
-                      <mat-icon>assignment_turned_in</mat-icon>
-                      {{ 'workspace.submit-unit' | translate }}
-                    </button>
-                  }
-                  @if (workspaceService.userAccessLevel > 2) {
-                    <button mat-raised-button
-                            color="primary"
-                            [disabled]="!(selectedUnitId | canReturnUnit : workspaceService.unitList)"
-                            (click)="returnSubmittedUnit()">
-                      <mat-icon>assignment_return</mat-icon>
-                      {{ 'workspace.return-submitted-unit' | translate }}
-                    </button>
-                  }
-                </div>
-              </mat-expansion-panel>
+              @if (workspaceService.userAccessLevel > 1) {
+                <mat-expansion-panel>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{ 'workspace.unit-actions' | translate }}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="fx-column-start-start fx-gap-10">
+                    @if (workspaceService.userAccessLevel > 1) {
+                      <button mat-raised-button
+                              color="primary"
+                              [disabled]="!workspaceService.dropBoxId"
+                              (click)="submitUnit()">
+                        <mat-icon>assignment_turned_in</mat-icon>
+                        {{ 'workspace.submit-unit' | translate }}
+                      </button>
+                    }
+                    @if (workspaceService.userAccessLevel > 2) {
+                      <button mat-raised-button
+                              color="primary"
+                              [disabled]="!(selectedUnitId | canReturnUnit : workspaceService.unitList)"
+                              (click)="returnSubmittedUnit()">
+                        <mat-icon>assignment_return</mat-icon>
+                        {{ 'workspace.return-submitted-unit' | translate }}
+                      </button>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              }
               <mat-expansion-panel>
                 <mat-expansion-panel-header>
                   <mat-panel-title>
