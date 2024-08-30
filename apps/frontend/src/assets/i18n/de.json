@@ -173,6 +173,7 @@
     "functionality": "Funktionalität",
     "unit-create": "Aufgaben anlegen",
     "unit-copy": "Aufgaben kopieren",
+    "unit-copy-from": "Aufgabe aus vorhandener Aufgabe erstellen",
     "unit-move": "Aufgaben verschieben",
     "unit-submit": "Aufgaben abgeben",
     "unit-return": "Aufgaben zurückgeben",

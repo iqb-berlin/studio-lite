@@ -54,6 +54,9 @@ export class RolesMatrixComponent {
       functionality: 'unit-import', commenter: false, developer: false, super: true
     },
     {
+      functionality: 'unit-copy-from', commenter: false, developer: false, super: true
+    },
+    {
       functionality: 'unit-submit', commenter: false, developer: true, super: true
     },
     {
