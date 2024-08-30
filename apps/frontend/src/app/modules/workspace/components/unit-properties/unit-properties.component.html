@@ -221,10 +221,12 @@
                                     cdkTextareaAutosize
                                     cdkAutosizeMinRows="6"></textarea>
                         </mat-form-field>
-                        <button mat-raised-button
-                                (click)="deleteDeprecatedProperty('transcript')">
-                          {{ 'delete' | translate }}
-                        </button>
+                        @if (workspaceService.userAccessLevel > 2) {
+                          <button mat-raised-button
+                                  (click)="deleteDeprecatedProperty('transcript')">
+                            {{ 'delete' | translate }}
+                          </button>
+                        }
                       </div>
                     }
                     @if (initialReference) {
@@ -238,10 +240,12 @@
                                     cdkTextareaAutosize
                                     cdkAutosizeMinRows="6"></textarea>
                         </mat-form-field>
-                        <button mat-raised-button
-                                (click)="deleteDeprecatedProperty('reference')">
-                          {{ 'delete' | translate }}
-                        </button>
+                        @if (workspaceService.userAccessLevel > 2) {
+                          <button mat-raised-button
+                                  (click)="deleteDeprecatedProperty('reference')">
+                            {{ 'delete' | translate }}
+                          </button>
+                        }
                       </div>
                     }
                   </div>
