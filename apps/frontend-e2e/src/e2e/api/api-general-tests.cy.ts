@@ -1,4 +1,5 @@
 import {
+  AccessLevel,
   GroupData,
   UserData, WsData
 } from '../../support/testData';
@@ -147,8 +148,8 @@ describe('API general tests', () => {
           expect(resp.status).to.equal(201);
         });
     });
-    it.skip('11. PATCH /api/admin/workspaces/id/groupId: ', () => {
-      cy.setAdminOfGroupAPI(`id_${Cypress.env('username')}`,
+    it('11. PATCH /api/admin/workspaces/id/groupId: ', () => {
+      cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
         Cypress.env(group1.id),
         Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
@@ -162,15 +163,24 @@ describe('API general tests', () => {
           expect(resp.status).to.equal(201);
         });
     });
-
-    it.skip('. PATCH /api/admin/workspaces/id/groupId: should be able to move a workspace to an another group', () => {
+    it('13. PATCH /api/admin/workspaces/id/groupId: should be able to move a workspace to an another group', () => {
       cy.createGroupAPI(group2, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           Cypress.env(group2.id, resp.body);
           expect(resp.status).to.equal(201);
+          cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
+            Cypress.env(group2.id),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp2 => {
+              expect(resp2.status).to.equal(200);
+              cy.moveWsAPI(Cypress.env(ws1.id), Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
+                .then(resp3 => {
+                  expect(resp3.status).to.equal(200);
+                });
+            });
         });
     });
-    it('13. GET /api/admin/workspaces/groupwise: should be able to get all workspaces order by group', () => {
+    it('15. GET /api/admin/workspaces/groupwise: get workspace groupwise ordered.', () => {
       const authorization = `bearer ${Cypress.env('token_admin')}`;
       cy.request({
         method: 'GET',
@@ -183,17 +193,82 @@ describe('API general tests', () => {
         expect(resp.status).to.equal(200);
       });
     });
+    it('16. GET /api/admin/workspace-groups/id: get the group data with the group id', () => {
+      cy.getGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.body.name).to.equal(group1.name);
+          expect(resp.status).to.equal(200);
+        });
+    });
+    it('17. GET /api/admin/workspaces/id: get the workspace data with the workspace id', () => {
+      cy.getWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.body.name).to.equal(ws1.name);
+          expect(resp.status).to.equal(200);
+        });
+    });
+    it('18. PATCH /api/admin/workspaces/id/users: update the workspace data with the workspace id', () => {
+      // TODO replace the body by a interface
+      cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+    });
+    it('19. GET /api/admin/workspaces/id/users: get the workspace data with the workspace id', () => {
+      cy.getUsersOfWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.body.length).to.equal(1);
+          expect(resp.status).to.equal(200);
+        });
+    });
+    it('20. PATCH /api/admin/workspace-groups: update a workspace-groups with the data of the request body', () => {
+      const authorization = `bearer ${Cypress.env('token_admin')}`;
+      cy.intercept('PATCH', '/api/admin/workspace-groups/', req => {
+        req.reply({
+          statusCode: 200,
+          headers: {
+            'app-version': Cypress.env('version'),
+            authorization
+          },
+          body: {
+            id: `${Cypress.env('id_group1')}`,
+            name: 'VERA2024'
+          }
+        });
+      }).as('updateGroupAPI');
+    });
+    it('21. PATCH /api/admin/workspaces: update a workspace with the data of the request body', () => {
+      const authorization = `bearer ${Cypress.env('token_admin')}`;
+      cy.intercept('PATCH', '/api/admin/workspaces/', req => {
+        req.reply({
+          statusCode: 200,
+          headers: {
+            'app-version': Cypress.env('version'),
+            authorization
+          },
+          body: {
+            id: `${Cypress.env('id_ws1')}`,
+            name: 'NewVorlage'
+          }
+        });
+      }).as('updateWsAPI');
+      // cy.updateWsAPI(Cypress.env(`token_${Cypress.env('username')}`))
+      //   .then(resp => {
+      //     expect(resp.status).to.equal(200);
+      //   });
+      // cy.pause();
+    });
     it('40. DELETE /api/admin/workspace-groups: should be able to delete one group g1', () => {
       cy.deleteGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           Cypress.env(group1.id, '');
           expect(resp.status).to.equal(200);
         });
-      // cy.deleteGroupAPI(Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
-      //   .then(resp => {
-      //     Cypress.env(group2.id, '');
-      //     expect(resp.status).to.equal(200);
-      //   });
+      cy.deleteGroupAPI(Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          Cypress.env(group2.id, '');
+          expect(resp.status).to.equal(200);
+        });
     });
     it('109. 6(repeat) should be able to delete residuals', () => {
       cy.pause();
