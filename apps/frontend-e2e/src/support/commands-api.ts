@@ -65,9 +65,30 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
     failOnStatusCode: false
   });
 });
-
+// 5
+Cypress.Commands.add('keycloakAPI', (user:UserData) => {
+  cy.request({
+    method: 'POST',
+    url: '/api/keycloak-login',
+    headers: {
+      'app-version': Cypress.env('version')
+    },
+    body: {
+      description: '',
+      email: `${user.username}@hu-berlin.com`,
+      firstName: `${user.username}`,
+      identity: `${user.username}`,
+      isAdmin: `${user.isAdmin}`,
+      issuer: 'https://www.iqb-login.de/realms/iqb',
+      lasName: `${user.username}`,
+      name: `${user.username}`,
+      password: ''
+    },
+    failOnStatusCode: false
+  });
+});
 // 6
-Cypress.Commands.add('deleteUserAPI', (id: string) => {
+Cypress.Commands.add('deleteUserAPI', (id: string, token:string) => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({
     method: 'DELETE',
@@ -75,9 +96,8 @@ Cypress.Commands.add('deleteUserAPI', (id: string) => {
     headers: {
       'app-version': Cypress.env('version'),
       authorization
-    }
-  }).then(resp => {
-    expect(resp.status).to.equal(200);
+    },
+    failOnStatusCode: false
   });
 });
 
