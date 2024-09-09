@@ -6,7 +6,16 @@ describe('Studio API tests', () => {
     password: 'paso',
     isAdmin: false
   };
-
+  const cloakUser1:UserData = {
+    username: 'xxx',
+    password: 'xxx',
+    isAdmin: false
+  };
+  const cloakUser2:UserData = {
+    username: 'yyy',
+    password: 'yyy',
+    isAdmin: false
+  };
   describe('Auth API tests', () => {
     describe('1. POST /api/init-login', () => {
       it('201 positive test: should create a first user.', () => {
@@ -93,17 +102,80 @@ describe('Studio API tests', () => {
             expect(resp.status).to.equal(200);
             expect(resp.body).to.equal(false);
           });
-        cy.pause();
       });
+    });
+    describe('5. POST /api/keycloak-login', () => {
+      it('201 Positive test', () => {
+        cy.keycloakAPI(cloakUser1)
+          .then(resp => {
+            Cypress.env(`token_${cloakUser1.username}`, resp.body);
+            expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+            cy.getUserIdAPI('cloak', resp.body)
+              .then(resp2 => {
+                Cypress.env(`id_${cloakUser1.username}`, resp2.body.userId);
+                expect(resp2.status).to.equal(200);
+              });
+          });
+        cy.keycloakAPI(cloakUser2)
+          .then(resp => {
+            Cypress.env(`token_${cloakUser2.username}`, resp.body);
+            expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+            cy.getUserIdAPI('cloak', resp.body)
+              .then(resp2 => {
+                Cypress.env(`id_${cloakUser2.username}`, resp2.body.userId);
+                expect(resp2.status).to.equal(200);
+              });
+          });
+      });
+
+      // it('500 Negative test: should not create a login with wrongParameter', () => {
+      //   // Return success instead of bad response in all cases
+      //   cy.request({
+      //     method: 'POST',
+      //     url: '/api/keycloak-login',
+      //     headers: {
+      //       'app-version': Cypress.env('version')
+      //     },
+      //     body: {
+      //       description: '',
+      //       email: 'xAx@hu-berlin.com',
+      //       firstPameas: 'xAx',
+      //       identity: 'xAx',
+      //       isAdmin: 'false',
+      //       issuer: 'https://www.iqb-login.de/realms/iqb',
+      //       lasName: 'xAx',
+      //       name: 'xAx',
+      //       password: ''
+      //     }
+      //   }).then(resp => {
+      //     Cypress.env('token_cloak', resp.body);
+      //     expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+      //     cy.getUserIdAPI('cloak', resp.body)
+      //       .then(resp2 => {
+      //         expect(resp2.status).to.equal(200);
+      //       });
+      //   });
+      // });
     });
   });
   describe('Admin workspaces API tests', () => {
-    describe('4. PATCH /api/password', () => {
-      it('', () => {
-
+    describe('6. DELETE /api/admin/users/id', () => {
+      it('200 positive test', () => {
+        cy.deleteUserAPI(Cypress.env(`id_${cloakUser1.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        cy.deleteUserAPI(Cypress.env(`id_${cloakUser2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        cy.pause();
       });
-      it('', () => {
-
+      it('500 Negative test', () => {
+        cy.deleteUserAPI('99', Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
       });
     });
   });

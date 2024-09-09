@@ -34,7 +34,8 @@ declare namespace Cypress {
     loginAPI(username: string, password: string):Chainable<Response>; // 2
     getUserIdAPI(username: string, token: string):Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass:string):Chainable<Response>; // 4
-    deleteUserAPI(id: string):Chainable<Response>; // 6
+    keycloakAPI(user:UserData):Chainable<Response>;
+    deleteUserAPI(id: string, token: string):Chainable<Response>; // 6
     createUserAPI(userData:UserData):Chainable<Response>; // 7
     getUsersFullAPI(): Chainable<Response>; // 8
     getUserAPI(id:string): Chainable<Response>; // 9
