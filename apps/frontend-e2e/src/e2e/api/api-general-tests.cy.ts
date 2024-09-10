@@ -117,7 +117,7 @@ describe('API general tests', () => {
       });
     });
     it('6. DELETE /api/admin/users/id should be able to delete a user with the id ', () => {
-      cy.deleteUserAPI(Cypress.env('id_key_login'));
+      cy.deleteUserAPI(Cypress.env('id_key_login'), Cypress.env(`token_${Cypress.env('username')}`));
     });
     // admin-users
     it('7. POST api/admin/users should be able to create a new user and retrieve partial data', () => {
@@ -307,7 +307,7 @@ describe('API general tests', () => {
         });
     });
     it('109. 6(repeat) should be able to delete residuals', () => {
-      cy.deleteUserAPI(Cypress.env(user2.username));
+      cy.deleteUserAPI(Cypress.env(user2.username), Cypress.env(`token_${Cypress.env('username')}`));
     });
     it('110. DELETE /api/admin/users/id should be able to add the first user', () => {
       cy.deleteFirstUserAPI().then(resp => {
