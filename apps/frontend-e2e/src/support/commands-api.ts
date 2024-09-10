@@ -50,7 +50,7 @@ Cypress.Commands.add('getUserIdAPI', (username: string, token: string) => {
 
 // 4
 Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPass:string) => {
-  const authorization = `bearer ${Cypress.env('token_admin')}`;
+  const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
     url: '/api/password',
@@ -88,8 +88,8 @@ Cypress.Commands.add('keycloakAPI', (user:UserData) => {
   });
 });
 // 6
-Cypress.Commands.add('deleteUserAPI', (id: string, token:string) => {
-  const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
+Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
+  const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
     url: `/api/admin/users/${id}`,
