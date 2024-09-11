@@ -87,7 +87,7 @@ Cypress.Commands.add('keycloakAPI', (user:UserData) => {
     failOnStatusCode: false
   });
 });
-// 6
+// 7
 Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -101,9 +101,9 @@ Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   });
 });
 
-// 7
-Cypress.Commands.add('createUserAPI', (userData:UserData) => {
-  const authorization = `bearer ${Cypress.env('token_admin')}`;
+// 6
+Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
+  const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
     url: '/api/admin/users',
@@ -122,15 +122,16 @@ Cypress.Commands.add('createUserAPI', (userData:UserData) => {
 
 // 8.
 Cypress.Commands.add('getUsersFullAPI',
-  () => {
-    const authorization = `bearer ${Cypress.env('token_admin')}`;
+  (token: string) => {
+    const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
       url: '/api/admin/users/full',
       headers: {
         'app-version': Cypress.env('version'),
         authorization
-      }
+      },
+      failOnStatusCode: false
     });
   });
 

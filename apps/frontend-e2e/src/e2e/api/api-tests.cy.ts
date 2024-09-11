@@ -6,6 +6,11 @@ describe('Studio API tests', () => {
     password: 'paso',
     isAdmin: false
   };
+  const user2:UserData = {
+    username: 'normalUser',
+    password: 'paso',
+    isAdmin: false
+  };
 
   describe('Auth API tests', () => {
     describe('1. POST /api/init-login', () => {
@@ -86,6 +91,7 @@ describe('Studio API tests', () => {
             expect(resp.body).to.equal(true);
           });
       });
+
       it('200 negative test: should not update user password with false old pass', () => {
         // Should return 400
         cy.updatePasswordAPI(Cypress.env(`token_${Cypress.env('username')}`), '1111', '4567')
@@ -97,11 +103,51 @@ describe('Studio API tests', () => {
     });
   });
   describe('Admin workspaces API tests', () => {
-    describe('6. DELETE /api/admin/users/id', () => {
-      it('200 positive test', () => {
+    describe('6. POST api/admin/users: should create a new user', () => {
+      it('201 positive test: ', () => {
+        cy.createUserAPI(user2, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(res => {
+            Cypress.env(`id_${user2.username}`, res.body);
+            expect(res.status).to.equal(201);
+            cy.getUsersAPI()
+              .then(resp => {
+                expect(resp.status).to.equal(200);
+                expect(resp.body.length).to.equal(2);
+              });
+            cy.loginAPI(user2.username, user2.password)
+              .then(resp => {
+                Cypress.env(`token_${user2.username}`, resp.body);
+                expect(resp.status).to.equal(201);
+              });
+          });
       });
-      it('500 Negative test', () => {
-        cy.deleteUserAPI('99', Cypress.env(`token_${Cypress.env('username')}`))
+      // No negative tests found
+    });
+
+    describe('8. GET /api/admin/users/full', () => {
+      it('200 positive test', () => {
+        cy.getUsersFullAPI(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).to.equal(2);
+          });
+      });
+      it('401 negative test: normal user can not use this api call', () => {
+        cy.getUsersFullAPI(Cypress.env(`token_${user2.username}`))
+          .then(resp2 => {
+            expect(resp2.status).to.equal(401);
+          });
+      });
+    });
+    describe('7. DELETE /api/admin/users/id ', () => {
+      it('200 positive test', () => {
+        cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('No negative test', () => {
+        cy.deleteUserAPI('1000', Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
@@ -118,6 +164,7 @@ describe('Studio API tests', () => {
       });
     });
   });
+
   describe('Delete the contents of the database', () => {
     describe('110. DELETE /api/admin/users/id', () => {
       it('200 positive test: should be possible to delete the first user', () => {
