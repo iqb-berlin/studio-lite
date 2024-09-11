@@ -121,7 +121,7 @@ describe('API general tests', () => {
     });
     // admin-users
     it('7. POST api/admin/users should be able to create a new user and retrieve partial data', () => {
-      cy.createUserAPI(user2)
+      cy.createUserAPI(user2, Cypress.env(`token_${Cypress.env('username')}`))
         .then(res => {
           Cypress.env(user2.username, res.body);
           expect(res.status).to.equal(201);
@@ -133,7 +133,7 @@ describe('API general tests', () => {
         });
     });
     it('8. GET /api/admin/users/full: should be able to get the data of all users', () => {
-      cy.getUsersFullAPI()
+      cy.getUsersFullAPI(Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.length).to.equal(2);
