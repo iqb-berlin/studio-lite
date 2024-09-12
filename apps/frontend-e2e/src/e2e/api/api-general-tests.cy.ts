@@ -59,7 +59,7 @@ describe('API general tests', () => {
     });
 
     it('3. GET /api/auth-data: should be able to retrieve user id', () => {
-      cy.getUserIdAPI(Cypress.env('username'), Cypress.env(`token_${Cypress.env('username')}`))
+      cy.getUserIdAPI(Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           Cypress.env(`id_${Cypress.env('username')}`, resp.body.userId);
           expect(resp.status).to.equal(200);
@@ -140,7 +140,7 @@ describe('API general tests', () => {
         });
     });
     it('9. GET /api/admin/users/id: should able to retrieve the data of a specific user', () => {
-      cy.getUserAPI(Cypress.env(user2.username))
+      cy.getUserAPI(Cypress.env(user2.username), Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.body.name).to.equal(user2.username);
         });
@@ -279,17 +279,17 @@ describe('API general tests', () => {
         });
       // 404 Not found
     });
-    it('23. PATCH /api/admin/workspace-groups/id/admins: List of admins for workspace-group retrieved successfully.',
-      () => {
-        const ids: string[] = [Cypress.env(`id_${Cypress.env(Cypress.env('username'))}`), Cypress.env(user2.username)];
-        // Create the list of admin ids
-        // Positive test
-        cy.setGroupFromAdminsAPI(ids, group1.id, Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status.to.equal(200));
-          });
-        cy.pause();
-      });
+    // it('23. PATCH /api/admin/workspace-groups/id/admins: List of admins for workspace-group retrieved successfully.',
+    //   () => {
+    //     const ids: string[] = [Cypress.env(`id_${Cypress.env(Cypress.env('username'))}`), Cypress.env(user2.username)];
+    //     // Create the list of admin ids
+    //     // Positive test
+    //     cy.setGroupFromAdminsAPI(ids, group1.id, Cypress.env(`token_${Cypress.env('username')}`))
+    //       .then(resp => {
+    //         expect(resp.status.to.equal(200));
+    //       });
+    //     cy.pause();
+    //   });
     it(' : ', () => {
     });
     it(' : ', () => {

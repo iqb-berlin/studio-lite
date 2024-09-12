@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-
 declare namespace Cypress {
   import {
     UnitData, GroupData, WsData, AccessLevel
@@ -32,13 +31,16 @@ declare namespace Cypress {
     // commands-api
     addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
     loginAPI(username: string, password: string):Chainable<Response>; // 2
-    getUserIdAPI(username: string, token: string):Chainable<Response>; // 3
+    getUserIdAPI(token: string):Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass:string):Chainable<Response>; // 4
-    keycloakAPI(user:UserData):Chainable<Response>;
-    deleteUserAPI(id: string, token: string):Chainable<Response>; // 6
-    createUserAPI(userData:UserData, token:string):Chainable<Response>; // 7
-    getUsersFullAPI(token:string): Chainable<Response>; // 8
-    getUserAPI(id:string): Chainable<Response>; // 9
+    keycloakAPI(user:UserData):Chainable<Response>; // 5
+
+    createUserAPI(userData:UserData, token:string):Chainable<Response>; // 6
+    getUsersFullAPI(token:string): Chainable<Response>; // 7
+    getUserAPI(id:string, token:string): Chainable<Response>; // 8
+    getUserNoIdAPI(token:string): Chainable<Response>; // 9
+    updateUserAPI(user:UserData, token:string): Chainable<Response> // 10
+    deleteUserAPI(id: string, token: string): Chainable<Response>; // 20
     createGroupAPI(group: GroupData, token: string):Chainable<Response>; // 10
     setAdminOfGroupAPI(userId: string, groupId: string, token:string):Chainable<Response>; // 11
     createWsAPI(groupId: string, ws:WsData, token: string):Chainable<Response>; // 12
