@@ -423,7 +423,7 @@
     "status": "Status",
     "code": "Code",
     "score": "Bewertung",
-    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen",
+    "has-only-vars-with-codes": "Nur Variablen mit Codes",
     "has-general-instructions": "Allgemeine Hinweise für jede Variable",
     "has-derived-vars": "Abgeleitete Variablen",
     "has-only-manual-coding": "Manuell kodierte Variablen",

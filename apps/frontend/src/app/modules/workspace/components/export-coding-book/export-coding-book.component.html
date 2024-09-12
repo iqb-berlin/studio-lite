@@ -1,6 +1,5 @@
 <div class="fx-column-start-stretch">
   <h2 mat-dialog-title>{{ 'workspace.export-coding-book' | translate }}</h2>
-
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <div class="fx-row-space-between-stretch">
       <studio-lite-select-unit-list #unitSelectionTable
@@ -8,9 +7,12 @@
         (selectionChanged)="unitList = $event">
       </studio-lite-select-unit-list>
       <div class="settings">
-        {{ 'workspace.export-warning-no-coding-vars' | translate }}
         <section class="example-section fx-column-start-start">
           <h4>{{'coding.codebook-content' | translate}}</h4>
+          <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.hasOnlyVarsWithCodes">
+            {{'coding.has-only-vars-with-codes' | translate}}
+          </mat-checkbox>
           <mat-checkbox class="example-margin"
                         [(ngModel)]="contentOptions.hasGeneralInstructions">
             {{'coding.has-general-instructions' | translate}}
