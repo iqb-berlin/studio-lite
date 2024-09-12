@@ -40,7 +40,7 @@ describe('API unit tests', () => {
       .then(resp => {
         Cypress.env(`token_${Cypress.env('username')}`, resp.body);
         expect(resp.status).to.equal(201);
-        cy.getUserIdAPI(Cypress.env('username'), resp.body)
+        cy.getUserIdAPI(resp.body)
           .then(resp1 => {
             expect(resp1.status).to.equal(200);
             Cypress.env(`id_${Cypress.env('username')}`, resp1.body.userId);
@@ -110,7 +110,7 @@ describe('API unit tests', () => {
       cy.pause();
     });
 
-    it('2.Get the metadadata of a workspace ', () => {
+    it('2.cGet the metadata of a workspace ', () => {
       const authorization = `bearer ${Cypress.env('token_admin')}`;
       cy.request({
         method: 'GET',

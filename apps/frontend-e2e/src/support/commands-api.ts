@@ -35,7 +35,7 @@ Cypress.Commands.add('loginAPI', (username: string, password:string) => {
 });
 
 // 3
-Cypress.Commands.add('getUserIdAPI', (username: string, token: string) => {
+Cypress.Commands.add('getUserIdAPI', (token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -80,7 +80,7 @@ Cypress.Commands.add('keycloakAPI', (user:UserData) => {
       identity: `${user.username}`,
       isAdmin: `${user.isAdmin}`,
       issuer: 'https://www.iqb-login.de/realms/iqb',
-      lasName: `${user.username}`,
+      lastName: `${user.username}`,
       name: `${user.username}`,
       password: ''
     },
@@ -120,7 +120,7 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
   });
 });
 
-// 8.
+// 7.
 Cypress.Commands.add('getUsersFullAPI',
   (token: string) => {
     const authorization = `bearer ${token}`;
@@ -135,16 +135,51 @@ Cypress.Commands.add('getUsersFullAPI',
     });
   });
 
-// 9
+// 8
 Cypress.Commands.add('getUserAPI',
-  (id:string) => {
-    const authorization = `bearer ${Cypress.env('token_admin')}`;
+  (id:string, token:string) => {
+    const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
       url: `/api/admin/users/${id}`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 9
+Cypress.Commands.add('getUserNoIdAPI',
+  (token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: '/api/admin/users',
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 10
+Cypress.Commands.add('updateUserAPI',
+  (user:UserData, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: '/api/admin/users',
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        id: `${Cypress.env(`id_${user.username}`)}`,
+        name: `${user.username}`,
+        isAdmin: true
       },
       failOnStatusCode: false
     });
