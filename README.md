@@ -6,7 +6,7 @@
 
 Mit dieser Web-Anwendung werden Aufgaben und einzelne Seiten für die Verwendung in einem [Verona](https://verona-interfaces.github.io)-kompatiblen
 Testsystem erstellt.
-Die Dokumentation dazu finden Sie [hier](https://iqb-berlin.github.io/).
+Die Dokumentation dazu finden Sie [hier](https://iqb-berlin.github.io/tba-info/).
 
 # Installation
 Um dieses Autorensystem zu verwenden, muss es auf einem Server installiert sein.
