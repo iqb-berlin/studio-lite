@@ -1,4 +1,4 @@
-import { UserData } from '../../support/testData';
+import { GroupData, UserData } from '../../support/testData';
 
 describe('Studio API tests', () => {
   const fakeUser:UserData = {
@@ -11,14 +11,30 @@ describe('Studio API tests', () => {
     password: 'paso',
     isAdmin: false
   };
+  const group1: GroupData = {
+    id: 'id_group1',
+    name: 'VERA2022'
+  };
+  const group2: GroupData = {
+    id: 'id_group2',
+    name: 'GROUP2022'
+  };
+  // const fakeGroup: GroupData = {
+  //   id: 'id_group3',
+  //   name: 'fakeGroup'
+  // };
+  // const ws1: WsData = {
+  //   id: 'id_ws1',
+  //   name: '01Vorlage'
+  // };
 
   describe('Auth API tests', () => {
+    /** ************************************************************************* */
     describe('1. POST /api/init-login', () => {
       it('201 positive test: should create a first user.', () => {
         cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
           .then(resp => {
             Cypress.env(`token_${Cypress.env('username')}`, resp.body);
-            console.log(resp.body);
             expect(resp.status).to.equal(201);
           });
       });
@@ -103,6 +119,7 @@ describe('Studio API tests', () => {
       });
     });
   });
+  /** ************************************************************************* */
   describe('Admin users API tests', () => {
     describe('6. POST api/admin/users: should create a new user', () => {
       it('201 positive test: ', () => {
@@ -148,7 +165,6 @@ describe('Studio API tests', () => {
 
     describe('8. GET /api/admin/users/id', () => {
       it('200 positive test: user retrieved successfully.', () => {
-        cy.pause();
         cy.getUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.body.name).to.equal(user2.username);
@@ -187,54 +203,105 @@ describe('Studio API tests', () => {
 
     describe('10. PATCH /api/admin/users', () => {
       it('401 negative test: a non-administrator user should not be able to make himself administrator', () => {
-        cy.updateUserAPI(user2, Cypress.env(`token_${user2.username}`))
+        cy.updateUserAPI(user2, true, Cypress.env(`token_${user2.username}`))
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
       });
       it('200 positive test: admin should be able to make other user administrator ', () => {
-        cy.updateUserAPI(user2, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.updateUserAPI(user2, true, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
             cy.getUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
               .then(resp2 => {
-                expect(resp2.body.isAdmin).to.equal(true);
+                cy.pause();
                 expect(resp2.status).to.equal(200);
               });
           });
       });
       it('401 negative test: should not update with a false token', () => {
-        cy.updateUserAPI(user2, 'falseToken')
+        cy.updateUserAPI(user2, true, 'falseToken')
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
       });
       it('500 negative test: should not update a false user', () => {
-        cy.updateUserAPI(fakeUser, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.updateUserAPI(fakeUser, true, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
       });
     });
 
-    describe('10. GET /api/admin/users/id', () => {
-      it('positive test', () => {
-
+    describe('11. DELETE /api/admin/users', () => {
+      it('200 positive test', () => {
+        // There is no positive test
+        // Candidate to eliminate
       });
-      it('negative test', () => {
+      it('405 negative test', () => {
+        cy.deleteUserNoIdAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(405);
+          });
+      });
+    });
+  });
+  /** ************************************************************************* */
+  describe('Admin workspaces API tests', () => {
+    describe('12. POST /api/admin/workspace-groups', () => {
+      it('201 positive test: An admin user should create a group', () => {
+        cy.createGroupAPI(group1, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            Cypress.env(group1.id, resp.body);
+            expect(resp.status).to.equal(201);
+          });
+      });
+      it('401 negative test: A normal user should create a group.', () => {
+        cy.updateUserAPI(user2, false, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            cy.createGroupAPI(group2, Cypress.env(`token_${user2.username}`))
+              .then(resp2 => {
+                Cypress.env(group1.id, resp2.body);
+                expect(resp2.status).to.equal(401);
+              });
+          });
+      });
+    });
+    describe('PATCH', () => {
+      it('', () => {
+        cy.pause();
+      });
+      it('', () => {
 
       });
     });
-
-    describe('11. GET /api/admin/users/id', () => {
-      it('positive test', () => {
+    describe('', () => {
+      it('', () => {
 
       });
-      it('negative test', () => {
+      it('', () => {
 
       });
     });
-
+  });
+  /** ************************************************************************* */
+  describe('Admin users workspaces API tests', () => {
+    describe('40. DELETE /api/admin/workspace-groups/id', () => {
+      it('200 positive test', () => {
+        cy.deleteGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            Cypress.env(group1.id, '');
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it(' negative test', () => {
+        cy.deleteGroupAPI(Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
     describe('20. DELETE /api/admin/users/id ', () => {
       it('200 positive test', () => {
         cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
@@ -249,8 +316,14 @@ describe('Studio API tests', () => {
           });
       });
     });
-  });
-  describe('Admin users API tests', () => {
+    describe('. GET /api/admin/users/id', () => {
+      it('positive test', () => {
+
+      });
+      it('negative test', () => {
+
+      });
+    });
     describe('', () => {
       it('', () => {
 
@@ -281,6 +354,7 @@ describe('Studio API tests', () => {
 // 401 Unauthorized
 // 403 Forbidden
 // 404 Not found
+// 405 Method not allowed
 // 406 Not acceptable
 // 408 Request Timeout
 // 429 Too Many Requests

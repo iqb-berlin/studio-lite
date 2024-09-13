@@ -87,7 +87,7 @@ Cypress.Commands.add('keycloakAPI', (user:UserData) => {
     failOnStatusCode: false
   });
 });
-// 7
+// 20
 Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -167,7 +167,7 @@ Cypress.Commands.add('getUserNoIdAPI',
 
 // 10
 Cypress.Commands.add('updateUserAPI',
-  (user:UserData, token:string) => {
+  (user:UserData, credentials: boolean, token:string) => {
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'PATCH',
@@ -179,13 +179,28 @@ Cypress.Commands.add('updateUserAPI',
       body: {
         id: `${Cypress.env(`id_${user.username}`)}`,
         name: `${user.username}`,
-        isAdmin: true
+        isAdmin: `${credentials}`
       },
       failOnStatusCode: false
     });
   });
 
-// 10
+// 11
+Cypress.Commands.add('deleteUserNoIdAPI',
+  (id:string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'DELETE',
+      url: `/api/admin/users?id=${id}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 12
 Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -421,3 +436,15 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
     failOnStatusCode: false
   });
 });
+
+// 400 Bad Request
+// 401 Unauthorized
+// 403 Forbidden
+// 404 Not found
+// 405 Method not allowed
+// 406 Not acceptable
+// 408 Request Timeout
+// 429 Too Many Requests
+// 500 Internal Server Error
+// 502: Bad Gateway
+// 504: Gateway timeout

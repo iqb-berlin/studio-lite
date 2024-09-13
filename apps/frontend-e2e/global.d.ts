@@ -39,9 +39,13 @@ declare namespace Cypress {
     getUsersFullAPI(token:string): Chainable<Response>; // 7
     getUserAPI(id:string, token:string): Chainable<Response>; // 8
     getUserNoIdAPI(token:string): Chainable<Response>; // 9
-    updateUserAPI(user:UserData, token:string): Chainable<Response> // 10
+    updateUserAPI(user:UserData, credentials:boolean, token:string): Chainable<Response> // 10
+    deleteUserNoIdAPI(id:string, token:string): Chainable<Response> // 11
+
+    createGroupAPI(group: GroupData, token: string):Chainable<Response>; // 12
+
     deleteUserAPI(id: string, token: string): Chainable<Response>; // 20
-    createGroupAPI(group: GroupData, token: string):Chainable<Response>; // 10
+
     setAdminOfGroupAPI(userId: string, groupId: string, token:string):Chainable<Response>; // 11
     createWsAPI(groupId: string, ws:WsData, token: string):Chainable<Response>; // 12
     moveWsAPI(ws:string, newGroup: string, token:string):Chainable<Response>; // 13
