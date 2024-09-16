@@ -198,7 +198,7 @@ describe('API general tests', () => {
       });
     });
     it('16. GET /api/admin/workspace-groups/id: get the group data with the group id', () => {
-      cy.getGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+      cy.getGroupAPI(Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.body.name).to.equal(group1.name);
           expect(resp.status).to.equal(200);
