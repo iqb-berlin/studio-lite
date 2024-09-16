@@ -37,6 +37,7 @@ export class DownloadController {
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('missingsProfile')missingsProfile: string,
     @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
+    @Query('hasOnlyVarsWithCodes', new ParseBoolPipe()) hasOnlyVarsWithCodes: boolean,
     @Query('generalInstructions', new ParseBoolPipe()) hasGeneralInstructions: boolean,
     @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
     @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
@@ -50,7 +51,8 @@ export class DownloadController {
       hasDerivedVars: hasDerivedVars,
       hasClosedVars: hasClosedVars,
       showScore: showScore,
-      codeLabelToUpper: codeLabelToUpper
+      codeLabelToUpper: codeLabelToUpper,
+      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes
     };
 
     const file = await DownloadWorkspacesClass

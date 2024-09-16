@@ -151,7 +151,9 @@ export class BackendService {
             .set('closed', contentOptions.hasClosedVars)
             .set('derived', contentOptions.hasDerivedVars)
             .set('showScore', contentOptions.showScore)
-            .set('codeLabelToUpper', contentOptions.codeLabelToUpper),
+            .set('codeLabelToUpper', contentOptions.codeLabelToUpper)
+            .set('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes),
+
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },
