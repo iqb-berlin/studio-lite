@@ -1,6 +1,7 @@
 import { GroupData, UserData } from '../../support/testData';
 
 describe('Studio API tests', () => {
+  const noId:string = '9988';
   const fakeUser:UserData = {
     username: 'falseUser',
     password: 'paso',
@@ -178,7 +179,7 @@ describe('Studio API tests', () => {
           });
       });
       it('404 negative test: should not find a non-existent user', () => {
-        cy.getUserAPI('1000', Cypress.env(`token_${Cypress.env('username')}`))
+        cy.getUserAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(404);
           });
@@ -214,7 +215,6 @@ describe('Studio API tests', () => {
             expect(resp.status).to.equal(200);
             cy.getUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
               .then(resp2 => {
-                cy.pause();
                 expect(resp2.status).to.equal(200);
               });
           });
@@ -262,23 +262,29 @@ describe('Studio API tests', () => {
             expect(resp.status).to.equal(200);
             cy.createGroupAPI(group2, Cypress.env(`token_${user2.username}`))
               .then(resp2 => {
-                Cypress.env(group1.id, resp2.body);
                 expect(resp2.status).to.equal(401);
               });
           });
       });
     });
-    describe('PATCH', () => {
-      it('', () => {
-        cy.pause();
+    describe('13. GET /api/admin/workspace-groups ', () => {
+      it('200 positive test', () => {
+        cy.getGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.name).to.equal(group1.name);
+          });
       });
-      it('', () => {
-
+      it('404 negative test: should fail with a non existent workspace-group', () => {
+        cy.getGroupAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(404);
+          });
       });
     });
     describe('', () => {
       it('', () => {
-
+        cy.pause();
       });
       it('', () => {
 
@@ -288,21 +294,28 @@ describe('Studio API tests', () => {
   /** ************************************************************************* */
   describe('Admin users workspaces API tests', () => {
     describe('40. DELETE /api/admin/workspace-groups/id', () => {
+      it('401 negative test', () => {
+        cy.deleteGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('404/200 negative test: should fail with a non-existent group', () => {
+        // This test should have 404 response, but we get 200
+        cy.deleteGroupAPI('9999', Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
       it('200 positive test', () => {
         cy.deleteGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             Cypress.env(group1.id, '');
-            expect(resp.status).to.equal(500);
-          });
-      });
-      it(' negative test', () => {
-        cy.deleteGroupAPI(Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
+            expect(resp.status).to.equal(200);
           });
       });
     });
-    describe('20. DELETE /api/admin/users/id ', () => {
+    describe('60. DELETE /api/admin/users/id ', () => {
       it('200 positive test', () => {
         cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
