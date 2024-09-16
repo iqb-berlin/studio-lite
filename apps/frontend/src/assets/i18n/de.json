@@ -432,6 +432,7 @@
     "codebook-content": "Codebook Inhalte",
     "export-format": "Exportformat",
     "code-label-to-upper": "Code-Label in Großbuchstaben",
+    "hide-item-var-relation": "Item-Variable-Relation ausblenden",
     "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!"
   },
 

@@ -68,13 +68,15 @@ export class ExportCodingBookComponent implements OnInit {
     hasOnlyVarsWithCodes: true,
     hasClosedVars: true,
     codeLabelToUpper: true,
-    showScore: true
+    showScore: true,
+    hideItemVarRelation: true
   };
 
   exportCodingBook() {
     this.appService.dataLoading = true;
     this.backendService
-      .getCodingBook(this.workspaceService.selectedWorkspaceId,
+      .getCodingBook(
+        this.workspaceService.selectedWorkspaceId,
         this.selectedMissingsProfile,
         this.contentOptions,
         this.unitList)

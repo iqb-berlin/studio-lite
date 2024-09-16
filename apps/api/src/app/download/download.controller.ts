@@ -42,6 +42,7 @@ export class DownloadController {
     @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
     @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
     @Query('showScore', new ParseBoolPipe()) showScore: boolean,
+    @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
     @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
     const options:CodeBookContentSetting = {
       exportFormat,
@@ -52,7 +53,8 @@ export class DownloadController {
       hasClosedVars: hasClosedVars,
       showScore: showScore,
       codeLabelToUpper: codeLabelToUpper,
-      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes
+      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes,
+      hideItemVarRelation: hideItemVarRelation
     };
 
     const file = await DownloadWorkspacesClass

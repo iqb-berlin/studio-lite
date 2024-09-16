@@ -69,6 +69,9 @@ export class CodeBookContentSetting {
     showScore!: boolean;
 
   @ApiProperty()
+    hideItemVarRelation!: boolean;
+
+  @ApiProperty()
     hasOnlyVarsWithCodes!: boolean;
 }
 
