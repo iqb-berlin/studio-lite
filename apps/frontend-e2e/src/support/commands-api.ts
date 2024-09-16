@@ -206,7 +206,7 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
 });
 
 // 13
-Cypress.Commands.add('getGroupAPI', (groupId: string, token:string) => {
+Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -219,7 +219,39 @@ Cypress.Commands.add('getGroupAPI', (groupId: string, token:string) => {
   });
 });
 
-// 11
+// 14
+Cypress.Commands.add('getGroupAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/workspace-groups',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 15 Not used because we use request to simulate the command
+// Cypress.Commands.add('updateGroupAPI', (token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'PATCH',
+//     url: '/api/admin/workspace-groups/',
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     body: {
+//       id: `${Cypress.env('id_group1')}`,
+//       name: 'VERA2024'
+//     },
+//     failOnStatusCode: false
+//   });
+// });
+
+// 16
 Cypress.Commands.add('setAdminOfGroupAPI', (userId: string, groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -235,6 +267,53 @@ Cypress.Commands.add('setAdminOfGroupAPI', (userId: string, groupId: string, tok
     failOnStatusCode: false
   });
 });
+
+// 16
+Cypress.Commands.add('setAdminOfGroupAPI', (userId: string, groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: [
+      userId
+    ],
+    failOnStatusCode: false
+  });
+});
+
+// 16a
+Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: userIds,
+    failOnStatusCode: false
+  });
+});
+
+// 17
+Cypress.Commands.add('getAdminOfGroupAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 12
 Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) => {
   const authorization = `bearer ${token}`;
@@ -328,24 +407,6 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId: string, token:string) => {
   });
 });
 
-// 20 Not used because we use request to simulate the command
-Cypress.Commands.add('updateGroupAPI', (token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: '/api/admin/workspace-groups/',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      id: `${Cypress.env('id_group1')}`,
-      name: 'VERA2024'
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 21 Not used because we use request to simulate the command
 Cypress.Commands.add('updateWsAPI', (token:string) => {
   const authorization = `bearer ${token}`;
@@ -359,19 +420,6 @@ Cypress.Commands.add('updateWsAPI', (token:string) => {
     body: {
       id: `${Cypress.env('id_ws1')}`,
       name: 'NewVorlage'
-    },
-    failOnStatusCode: false
-  });
-});
-// 22
-Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/admin/workspace-groups/${groupId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
     },
     failOnStatusCode: false
   });
