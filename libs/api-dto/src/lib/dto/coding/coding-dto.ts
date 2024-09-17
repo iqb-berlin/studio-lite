@@ -67,6 +67,9 @@ export class CodeBookContentSetting {
 
   @ApiProperty()
     showScore!: boolean;
+
+  @ApiProperty()
+    hasOnlyVarsWithCodes!: boolean;
 }
 
 export class Missing {

@@ -65,6 +65,7 @@ export class ExportCodingBookComponent implements OnInit {
     hasOnlyManualCoding: true,
     hasGeneralInstructions: true,
     hasDerivedVars: true,
+    hasOnlyVarsWithCodes: true,
     hasClosedVars: true,
     codeLabelToUpper: true,
     showScore: true

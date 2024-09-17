@@ -286,6 +286,9 @@ export class DownloadWorkspacesClass {
     if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
       return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
     }
+    if (!contentSetting.hasOnlyVarsWithCodes) {
+      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+    }
     return null;
   }
 
