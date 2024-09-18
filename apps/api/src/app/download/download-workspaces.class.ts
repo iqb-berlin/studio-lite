@@ -175,7 +175,13 @@ export class DownloadWorkspacesClass {
     }
 
     return new Promise(resolve => {
-      const data = JSON.stringify(codebook);
+      const noItemsCodebook = codebook.map((unit: CodebookUnitDto) => ({
+        key: unit.key,
+        name: unit.name,
+        variables: unit.variables,
+        missings: unit.missings
+      }));
+      const data = JSON.stringify(noItemsCodebook);
       resolve(Buffer.from(data, 'utf-8'));
     });
   }
@@ -320,7 +326,8 @@ export class DownloadWorkspacesClass {
         key: unit.key,
         name: unit.name,
         variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
-        missings: missings
+        missings: missings,
+        items: unit.metadata.items
       });
     }
   }
