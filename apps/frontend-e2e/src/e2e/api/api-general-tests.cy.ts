@@ -213,13 +213,13 @@ describe('API general tests', () => {
     });
     it('18. PATCH /api/admin/workspaces/id/users: update the workspace data with the workspace id', () => {
       // TODO replace the body by a interface
-      cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`token_${Cypress.env('username')}`))
+      cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
     it('19. GET /api/admin/workspaces/id/users: get the workspace data with the workspace id', () => {
-      cy.getUsersOfWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+      cy.getUsersOfWsAPI(Cypress.env(ws1.id), Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.body.length).to.equal(1);
           expect(resp.status).to.equal(200);
@@ -241,6 +241,7 @@ describe('API general tests', () => {
         });
       }).as('updateGroupAPI');
     });
+
     it('21. PATCH /api/admin/workspaces: update a workspace with the data of the request body', () => {
       const authorization = `bearer ${Cypress.env('token_admin')}`;
       cy.intercept('PATCH', '/api/admin/workspaces/', req => {
