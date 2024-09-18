@@ -48,16 +48,15 @@ declare namespace Cypress {
     // updateGroupAPI(token:string):Chainable<Response>; // 15
     setAdminOfGroupAPI(userId: string, groupId: string, token:string):Chainable<Response>; // 16
     setAdminsOfGroupAPI(userIds: string[], groupId: string, token:string):Chainable<Response>; // 16
-    getAdminOfGroupAPI(groupId: string, token:string):Chainable<Response>; // 16
+    getAdminOfGroupAPI(groupId: string, token:string):Chainable<Response>; // 17
+    createWsAPI(groupId: string, ws:WsData, token: string):Chainable<Response>; // 18
+    moveWsAPI(ws:string, newGroup: string, token:string):Chainable<Response>; // 19
+    getWsAPI(wsId: string, token: string):Chainable<Response>; // 20
+    updateUsersOfWsAPI(wsId:string, level:AccessLevel, userId: string, token:string):Chainable<Response>; // 21
+    getUsersOfWsAPI(wsId:string, userId:string, token:string):Chainable<Response>; // 22
 
+    deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 20
     deleteUserAPI(id: string, token: string): Chainable<Response>; // 60
-    createWsAPI(groupId: string, ws:WsData, token: string):Chainable<Response>; // 12
-    moveWsAPI(ws:string, newGroup: string, token:string):Chainable<Response>; // 13
-    deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 14
-
-    getWsAPI(wsId: string, token: string):Chainable<Response>; // 17
-    updateUsersOfWsAPI(wsId:string, level:AccessLevel, token:string):Chainable<Response>; // 18
-    getUsersOfWsAPI(wsId:string, token:string):Chainable<Response>; // 19
 
     updateWsAPI(token:string):Chainable<Response>; // 21
     setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>
