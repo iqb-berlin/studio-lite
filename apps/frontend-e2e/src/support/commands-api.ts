@@ -252,23 +252,6 @@ Cypress.Commands.add('getGroupAPI', (token:string) => {
 // });
 
 // 16
-Cypress.Commands.add('setAdminOfGroupAPI', (userId: string, groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/admin/workspace-groups/${groupId}/admins`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: [
-      userId
-    ],
-    failOnStatusCode: false
-  });
-});
-
-// 16a
 Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -371,6 +354,20 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId: string, userId:string, token:stri
   cy.request({
     method: 'GET',
     url: `/api/admin/workspaces/${wsId}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 23
+Cypress.Commands.add('getWsGroupwiseAPI', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/workspaces/groupwise',
     headers: {
       'app-version': Cypress.env('version'),
       authorization

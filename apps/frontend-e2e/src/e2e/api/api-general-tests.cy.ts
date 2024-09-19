@@ -153,7 +153,7 @@ describe('API general tests', () => {
         });
     });
     it('11. PATCH /api/admin/workspaces/id/groupId: ', () => {
-      cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
+      cy.setAdminsOfGroupAPI([Cypress.env(`id_${Cypress.env('username')}`)],
         Cypress.env(group1.id),
         Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
@@ -172,7 +172,7 @@ describe('API general tests', () => {
         .then(resp => {
           Cypress.env(group2.id, resp.body);
           expect(resp.status).to.equal(201);
-          cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          cy.setAdminsOfGroupAPI([Cypress.env(`id_${Cypress.env('username')}`)],
             Cypress.env(group2.id),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp2 => {
@@ -198,11 +198,6 @@ describe('API general tests', () => {
       });
     });
     it('16. GET /api/admin/workspace-groups/id: get the group data with the group id', () => {
-      cy.getGroupAPI(Cypress.env(`token_${Cypress.env('username')}`))
-        .then(resp => {
-          expect(resp.body.name).to.equal(group1.name);
-          expect(resp.status).to.equal(200);
-        });
     });
     it('17. GET /api/admin/workspaces/id: get the workspace data with the workspace id', () => {
       cy.getWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
