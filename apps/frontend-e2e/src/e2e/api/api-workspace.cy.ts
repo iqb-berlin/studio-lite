@@ -53,7 +53,7 @@ describe('API unit tests', () => {
                   .then(resp_w1 => {
                     Cypress.env(ws1.id, resp_w1.body);
                     expect(resp_w1.status).to.equal(201);
-                    cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`token_${Cypress.env('username')}`))
+                    cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
                       .then(resp_level => {
                         expect(resp_level.status).to.equal(200);
                         cy.createUnitAPI(unit1, Cypress.env(ws1.id))

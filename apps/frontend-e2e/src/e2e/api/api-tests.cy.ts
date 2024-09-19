@@ -356,40 +356,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe.skip('16. /api/admin/workspace-groups/{workspace_group_id}/admins', () => {
-      it('200 positive test: should set an admin user for workspace-group', () => {
-        cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(group1.id),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-        cy.setAdminOfGroupAPI(Cypress.env(`id_${user2.username}`),
-          Cypress.env(group1.id),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-      it('401 negative test:  A normal user should not grant credentials on a group.', () => {
-        cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(group2.id),
-          Cypress.env(user2.username))
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-      it('500 negative test: should not grant credentials on a non existent group', () => {
-        cy.setAdminOfGroupAPI(Cypress.env(`id_${Cypress.env('username')}`),
-          noId,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-    });
-
-    describe('16a. PATCH /api/admin/workspace-groups/{workspace_group_id}/admins', () => {
+    describe('16. PATCH /api/admin/workspace-groups/{workspace_group_id}/admins', () => {
       it('200 positive test: should set a list of admin users for workspace-group', () => {
         cy.setAdminsOfGroupAPI([Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`id_${user2.username}`)],
           Cypress.env(group1.id),
@@ -417,11 +384,19 @@ describe('Studio API tests', () => {
     });
 
     describe('17. GET /api/admin/workspace-groups/{workspace_group_id}/admins', () => {
-      it('200 positive test: should retrieve the lost of admins for workspace-group', () => {
+      it('200 positive test: should retrieve the lost of admins for workspace-group group1', () => {
         cy.getAdminOfGroupAPI(Cypress.env(group1.id),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.body.length).to.equal(2);
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('200 positive test: should retrieve the lost of admins for workspace-group group2', () => {
+        cy.getAdminOfGroupAPI(Cypress.env(group2.id),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.body.length).to.equal(0);
             expect(resp.status).to.equal(200);
           });
       });
@@ -614,6 +589,36 @@ describe('Studio API tests', () => {
         });
       });
     });
+    describe('23. /api/admin/workspaces/groupwise', () => {
+      it('200 positive test: should retrieve groupwise ordered admin workspaces successfully.', () => {
+        cy.getWsGroupwiseAPI(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.body.length).to.equal(2);
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('401 negative test: you should not get the workspace of which you are not a user.', () => {
+        cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('401 negative test: you should not get the workspace only if you are the first user.', () => {
+        cy.updateUserAPI(user2, true, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(() => {
+            cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
+              .then(resp2 => {
+                expect(resp2.status).to.equal(401);
+              });
+          });
+      });
+      it('401 negative test: you should not get the workspace of which you are not a user.', () => {
+        cy.getWsGroupwiseAPI(noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
   });
   /** ************************************************************************* */
   describe('Admin users workspaces API tests', () => {
@@ -671,6 +676,14 @@ describe('Studio API tests', () => {
 
       });
       it('', () => {
+
+      });
+    });
+    describe('23. /api/admin/workspaces/groupwise', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
 
       });
     });

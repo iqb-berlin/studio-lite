@@ -1,6 +1,5 @@
 import {
-  deleteFirstUserAPI, deleteGroupAPI,
-  setAdminOfGroupAPI
+  deleteFirstUserAPI, deleteGroupAPI, setAdminOfGroupAPI
 } from '../../../support/utilAPI';
 import {
   AccessLevel, GroupData, UnitData, WsData
@@ -39,7 +38,7 @@ describe('API metadata tests', () => {
       .then(resp => {
         Cypress.env(`token_${Cypress.env('username')}`, resp.body);
         expect(resp.status).to.equal(201);
-        cy.getUserIdAPI(Cypress.env('username'), resp.body)
+        cy.getUserIdAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp1 => {
             expect(resp1.status).to.equal(200);
             Cypress.env(`id_${Cypress.env('username')}`, resp1.body.userId);
@@ -53,7 +52,7 @@ describe('API metadata tests', () => {
                     Cypress.env(ws1.id, resp_w1.body);
                     expect(resp_w1.status).to.equal(201);
                     // eslint-disable-next-line max-len
-                    cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`token_${Cypress.env('username')}`))
+                    cy.updateUsersOfWsAPI(Cypress.env(ws1.id), AccessLevel.Admin, Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
                       .then(resp_level => {
                         expect(resp_level.status).to.equal(200);
                         cy.createUnitAPI(unit1, Cypress.env(ws1.id))
