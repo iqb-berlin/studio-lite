@@ -53,12 +53,12 @@ declare namespace Cypress {
     getWsAPI(wsId: string, token: string):Chainable<Response>; // 20
     updateUsersOfWsAPI(wsId:string, level:AccessLevel, userId: string, token:string):Chainable<Response>; // 21
     getUsersOfWsAPI(wsId:string, userId:string, token:string):Chainable<Response>; // 22
-    getWsGroupwiseAPI(token:string):Chainable<Response>;
+    getWsGroupwiseAPI(token:string):Chainable<Response>; // 23
+    updateWsAPI(ws:WsData, group:GroupData, token:string):Chainable<Response>; // 24
 
     deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 20
     deleteUserAPI(id: string, token: string): Chainable<Response>; // 60
 
-    updateWsAPI(token:string):Chainable<Response>; // 21
     setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>
 
     deleteGroupAPI(id: string, token:string):Chainable<Response>; // 40

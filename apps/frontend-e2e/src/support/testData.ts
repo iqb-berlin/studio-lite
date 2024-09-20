@@ -1,6 +1,7 @@
 export interface WsData {
   id: string;
   name: string;
+  state?: string[];
 }
 
 export interface GroupData {
