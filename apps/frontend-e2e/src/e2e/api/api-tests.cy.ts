@@ -25,7 +25,8 @@ describe('Studio API tests', () => {
   };
   const ws1: WsData = {
     id: 'id_ws1',
-    name: '01Vorlage'
+    name: '01Vorlage',
+    state: ['Initial', 'Final']
   };
   const ws2: WsData = {
     id: 'id_ws2',
@@ -515,7 +516,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
-        cy.pause();
       });
       it('500 negative test: should not update a non existing existing workspace', () => {
         cy.updateUsersOfWsAPI(noId,
@@ -619,6 +619,70 @@ describe('Studio API tests', () => {
           });
       });
     });
+    describe('24. PATCH /api/admin/workspaces/}', () => {
+      it('200 positive test: should update the ws data', () => {
+        const wsN: WsData = {
+          id: 'id_ws1',
+          name: 'NewVorlage',
+          state: ['Initial', 'Final']
+        };
+        cy.updateWsAPI(wsN, group1, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            cy.getWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+              .then(resp2 => {
+                expect(resp2.body.name).to.equal(wsN.name);
+              });
+          });
+      });
+      it('500 negative test:  should not update the workspace with no group data', () => {
+        cy.updateWsAPI(ws1, noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('401 negative test: should not update the workspace of which you are not a user', () => {
+        cy.updateWsAPI(ws1, group1, noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
+
+    describe('39. DELETE /api/admin/workspaces/{ids}/{workspace_group_id}', () => {
+      it('200 positive test: should delete a workspace ', () => {
+        cy.deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('404 negative test: should fail by not passing the workspace', () => {
+        cy.deleteWsAPI(noId, Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('500 negative test: should fail if you try to delete an already deleted workspace', () => {
+        cy.deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('401 negative test: should fail without token', () => {
+        cy.deleteWsAPI(Cypress.env(ws2.id), Cypress.env(group1.id), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should fail by passing a incorrect workspace group', () => {
+        cy.deleteWsAPI(Cypress.env(ws2.id), Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
   });
   /** ************************************************************************* */
   describe('Admin users workspaces API tests', () => {
@@ -661,22 +725,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
-      });
-    });
-    describe('. GET /api/admin/users/id', () => {
-      it('positive test', () => {
-
-      });
-      it('negative test', () => {
-
-      });
-    });
-    describe('', () => {
-      it('', () => {
-
-      });
-      it('', () => {
-
       });
     });
     describe('23. /api/admin/workspaces/groupwise', () => {

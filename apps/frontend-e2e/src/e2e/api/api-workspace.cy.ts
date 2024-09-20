@@ -110,7 +110,7 @@ describe('API unit tests', () => {
       cy.pause();
     });
 
-    it('2.cGet the metadata of a workspace ', () => {
+    it('2.Get the metadata of a workspace ', () => {
       const authorization = `bearer ${Cypress.env('token_admin')}`;
       cy.request({
         method: 'GET',

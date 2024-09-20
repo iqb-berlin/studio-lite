@@ -376,8 +376,8 @@ Cypress.Commands.add('getWsGroupwiseAPI', (token: string) => {
   });
 });
 
-// 21 Not used because we use request to simulate the command
-Cypress.Commands.add('updateWsAPI', (token:string) => {
+// 24 Not used because we use request to simulate the command
+Cypress.Commands.add('updateWsAPI', (ws:WsData, group:GroupData, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -387,18 +387,20 @@ Cypress.Commands.add('updateWsAPI', (token:string) => {
       authorization
     },
     body: {
-      id: `${Cypress.env('id_ws1')}`,
-      name: 'NewVorlage'
+      id: `${Cypress.env(ws.id)}`,
+      name: `${ws.name}`,
+      groupId: `${Cypress.env(group.id)}`,
+      groupName: `${group.name}`
     },
     failOnStatusCode: false
   });
 });
 
-// 14
+// 39
 Cypress.Commands.add('deleteWsAPI', (ws:string, group: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
-    method: 'PATCH',
+    method: 'DELETE',
     url: `/api/admin/workspaces/${ws}/${group}`,
     headers: {
       'app-version': Cypress.env('version'),
