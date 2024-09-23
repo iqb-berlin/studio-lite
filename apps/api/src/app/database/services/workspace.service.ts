@@ -285,7 +285,7 @@ export class WorkspaceService {
                 codingType = 'keine Regeln';
               }
               unitDataRows.push({
-                unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+                unit: `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
                 variable: codingVariable.id || '–',
                 item: foundItem?.id || '–',
                 validation: validationResultText,
@@ -295,7 +295,7 @@ export class WorkspaceService {
           }
         } else {
           unitDataRows.push({
-            unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+            unit: `<a href=#/a/${id}/${unit.id}>${unit.id}#${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
             variable: '',
             item: '',
             validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
