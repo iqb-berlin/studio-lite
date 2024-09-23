@@ -18,6 +18,10 @@
             {{'coding.has-general-instructions' | translate}}
           </mat-checkbox>
           <mat-checkbox class="example-margin"
+                        [(ngModel)]="contentOptions.hideItemVarRelation">
+            {{'coding.hide-item-var-relation' | translate}}
+          </mat-checkbox>
+          <mat-checkbox class="example-margin"
                         [(ngModel)]="contentOptions.hasDerivedVars">
             {{'coding.has-derived-vars' | translate}}
           </mat-checkbox>
