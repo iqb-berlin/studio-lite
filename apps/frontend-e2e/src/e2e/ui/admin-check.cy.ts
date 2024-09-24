@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import {
   addFirstUser,
-  addModule,
+  addModules,
   createGroup,
   createNewUser,
   createWs,
@@ -14,6 +14,7 @@ import {
 import { AccessLevel, UserData } from '../../support/testData';
 
 describe('UI Administration Management', () => {
+  const modules:string[] = ['iqb-schemer-2.0.0-beta.html', 'iqb-editor-aspect-2.5.0-beta5.html', 'iqb-player-aspect-2.5.0-beta5.html'];
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
   const newUser: UserData = {
@@ -44,7 +45,7 @@ describe('UI Administration Management', () => {
   });
 
   it('user with admin credentials can Modules upload', () => {
-    addModule();
+    addModules(modules);
   });
 
   it('user with admin credentials delete Modules', () => {

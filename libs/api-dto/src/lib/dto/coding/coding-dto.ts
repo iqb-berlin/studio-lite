@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
+import { ItemsMetadataValues } from '../unit/profile-metadata-values.class';
 
 export class CodebookUnitDto {
   @ApiProperty()
@@ -13,6 +14,9 @@ export class CodebookUnitDto {
 
   @ApiProperty()
     missings?: Missing[];
+
+  @ApiProperty()
+    items?: ItemsMetadataValues[];
 }
 
 export class CodeBookVariable {
@@ -67,6 +71,12 @@ export class CodeBookContentSetting {
 
   @ApiProperty()
     showScore!: boolean;
+
+  @ApiProperty()
+    hideItemVarRelation!: boolean;
+
+  @ApiProperty()
+    hasOnlyVarsWithCodes!: boolean;
 }
 
 export class Missing {

@@ -10,19 +10,22 @@
       [sortActionDescription]="'workspace.sort-by-key' | translate">
       {{'workspace.unit-key' | translate}}
     </mat-header-cell>
-    <mat-cell *matCellDef="let element" class="unit-cell">
-      <div [style.opacity]="(element.state | getStateColor:'color': this.states) ? 1:0   "
-        [style.background-color]="(element.state | getStateColor:'color': this.states)"
-        class="state"
-        [matTooltip]="(element.state | getStateColor:'label': this.states)">
+    <mat-cell *matCellDef="let element" class="unit-cell fx-gap-2">
+      <div
+        [style.opacity]="!(element | hasNewComments) ? 1:0"
+        class="new-comments"
+        [matTooltip]="!(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
       </div>
-      @if (element | hasNewComments) {
-        <div
-          class="new-comments"
-          [matTooltip]="'workspace.new-comments' | translate">
-        </div>
-      }
-      {{element.key}}
+      <div [style.opacity]="element.sourceWorkspaceId ? 1: 0"
+           [matTooltip]=" element | unitDropBoxTooltip"
+           [class]="element.returned ? 'returned' : 'submitted'">
+      </div>
+      <div [style.opacity]="(element.state | state:'color': this.states) ? 1:0   "
+           [style.background-color]="(element.state | state:'color': this.states)"
+           class="state"
+           [matTooltip]="(element.state | state:'label': this.states)">
+      </div>
+      <span class="unit-key">{{element.key}}</span>
     </mat-cell>
   </ng-container>
 

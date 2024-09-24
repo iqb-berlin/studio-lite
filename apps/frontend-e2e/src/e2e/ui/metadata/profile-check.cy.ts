@@ -13,7 +13,6 @@ import { UserData } from '../../../support/testData';
 describe('Load metadata profile', () => {
   const groups = ['Mathematik Primär und Sek I',
     'Deutsch Primär und Sek I',
-    'Französisch Sek I',
     'Englisch Sek I'];
   const newUser: UserData = {
     username: 'normaluser',

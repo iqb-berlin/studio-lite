@@ -4,7 +4,7 @@ import { In, Not, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto
+  CodingReportDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -72,6 +72,7 @@ export class WorkspaceService {
             userAccessLevel: validWorkspaces
               .find(validWorkspace => validWorkspace.id === workspace.id)?.accessLevel || 0,
             groupId: workspace.groupId,
+            dropBoxId: workspace.dropBoxId,
             unitsCount: (await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
             })).length
@@ -130,7 +131,7 @@ export class WorkspaceService {
     return myReturn;
   }
 
-  async findAllByGroup(workspaceGroupId: number): Promise<UsersWorkspaceInListDto[]> {
+  async findAllByGroup(workspaceGroupId: number): Promise<WorkspaceInListDto[]> {
     const workspaces: Workspace[] = await this.workspacesRepository.find({
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
@@ -139,10 +140,11 @@ export class WorkspaceService {
       id: workspace.id,
       name: workspace.name,
       groupId: workspaceGroupId,
+      dropBoxId: workspace.dropBoxId,
       unitsCount: (await this.unitsRepository.find({
         where: { workspaceId: workspace.id }
       })).length
-    } as UsersWorkspaceInListDto)));
+    })));
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
@@ -159,6 +161,7 @@ export class WorkspaceService {
         id: workspace.id,
         name: workspace.name,
         groupId: workspace.groupId,
+        dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
         settings: workspace.settings
       };
@@ -182,6 +185,7 @@ export class WorkspaceService {
         id: workspace.id,
         name: workspace.name,
         groupId: workspace.groupId,
+        dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
         userAccessLevel: workspaceUser.accessLevel,
         settings: workspace.settings
@@ -281,7 +285,7 @@ export class WorkspaceService {
                 codingType = 'keine Regeln';
               }
               unitDataRows.push({
-                unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+                unit: `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
                 variable: codingVariable.id || '–',
                 item: foundItem?.id || '–',
                 validation: validationResultText,
@@ -291,7 +295,7 @@ export class WorkspaceService {
           }
         } else {
           unitDataRows.push({
-            unit: `${unit.key}${unit.name ? ':' : ''}${unit.name}` || '-',
+            unit: `<a href=#/a/${id}/${unit.id}>${unit.id}#${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
             variable: '',
             item: '',
             validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
@@ -305,7 +309,7 @@ export class WorkspaceService {
   }
 
   // TODO: id als Parameter
-  async patch(workspaceData: WorkspaceFullDto): Promise<void> {
+  async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
     });
@@ -397,6 +401,14 @@ export class WorkspaceService {
       where: { id: id }
     });
     workspaceToUpdate.name = newName;
+    await this.workspacesRepository.save(workspaceToUpdate);
+  }
+
+  async patchDropBoxId(id: number, dropBoxId: number): Promise<void> {
+    const workspaceToUpdate = await this.workspacesRepository.findOne({
+      where: { id: id }
+    });
+    workspaceToUpdate.dropBoxId = dropBoxId;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 

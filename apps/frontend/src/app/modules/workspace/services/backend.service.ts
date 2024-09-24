@@ -73,11 +73,30 @@ export class BackendService {
       );
   }
 
+  // TOD0: queryParams Object
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspace/${workspaceId}/${units.join(';')}`)
       .pipe(
         map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean | RequestReportDto> {
+    return this.http
+      .patch<RequestReportDto>(
+      `${this.serverUrl}workspace/${workspaceId}/submit_units`, { dropBoxId, units })
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
+  returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
+    return this.http
+      .patch<RequestReportDto>(
+      `${this.serverUrl}workspace/${workspaceId}/return_submitted_units`, { units })
+      .pipe(
         catchError(() => of(false))
       );
   }
@@ -122,14 +141,6 @@ export class BackendService {
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
-      // const {
-      //   exportFormat,
-      //   hasOnlyManualCoding,
-      //   hasGeneralInstructions,
-      //   hasDerivedVars,
-      //   hasClosedVars
-      // } = contentOptions;
-
       return this.http
         .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
           params: new HttpParams()
@@ -140,7 +151,10 @@ export class BackendService {
             .set('closed', contentOptions.hasClosedVars)
             .set('derived', contentOptions.hasDerivedVars)
             .set('showScore', contentOptions.showScore)
-            .set('codeLabelToUpper', contentOptions.codeLabelToUpper),
+            .set('codeLabelToUpper', contentOptions.codeLabelToUpper)
+            .set('hideItemVarRelation', contentOptions.hideItemVarRelation)
+            .set('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes),
+
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },

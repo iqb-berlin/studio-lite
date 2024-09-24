@@ -22,6 +22,7 @@ import UnitDefinition from './entities/unit-definition.entity';
 import WorkspaceGroupAdmin from './entities/workspace-group-admin.entity';
 import { WorkspaceGroupAdminService } from './services/workspace-group-admin.service';
 import UnitComment from './entities/unit-comment.entity';
+import UnitDropBoxHistory from './entities/unit-drop-box-history.entity';
 import UnitUser from './entities/unit-user.entity';
 import { UnitUserService } from './services/unit-user.service';
 import { UnitCommentService } from './services/unit-comment.service';
@@ -51,6 +52,7 @@ import RegisteredMetadataProfile from './entities/registered-metadata-profile.en
     VeronaModule,
     UnitDefinition,
     UnitComment,
+    UnitDropBoxHistory,
     MetadataProfile,
     MetadataVocabulary,
     MetadataProfileRegistry,
@@ -81,6 +83,7 @@ import RegisteredMetadataProfile from './entities/registered-metadata-profile.en
           Setting,
           Unit,
           UnitComment,
+          UnitDropBoxHistory,
           MetadataProfile,
           MetadataVocabulary,
           MetadataProfileRegistry,
@@ -106,6 +109,7 @@ import RegisteredMetadataProfile from './entities/registered-metadata-profile.en
       Setting,
       Unit,
       UnitComment,
+      UnitDropBoxHistory,
       MetadataProfile,
       MetadataVocabulary,
       MetadataProfileRegistry,
@@ -139,6 +143,7 @@ import RegisteredMetadataProfile from './entities/registered-metadata-profile.en
     Unit,
     UnitDefinition,
     UnitComment,
+    UnitDropBoxHistory,
     UnitUser,
     Workspace,
     WorkspaceUser,

@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnDestroy, Output, ViewChild
+  Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild
 } from '@angular/core';
 import {
   // eslint-disable-next-line max-len
@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 
+import { HttpParams } from '@angular/common/http';
 import { BackendService } from '../../services/backend.service';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
@@ -27,7 +28,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   // eslint-disable-next-line max-len
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule]
 })
-export class SelectUnitListComponent implements OnDestroy {
+export class SelectUnitListComponent implements OnChanges, OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = ['selectCheckbox', 'key', 'groupName'];
   tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(true, []);
@@ -37,17 +38,17 @@ export class SelectUnitListComponent implements OnDestroy {
   @Input() filter!: number[];
   @Input() initialSelection!: number[];
   @Input() selectedUnitId!: number;
+  @Input() queryParams!: HttpParams;
+  @Input() workspace!: number;
 
   @Input('show-groups')
   set showGroups(value: boolean) {
     this.displayedColumns = value ? ['selectCheckbox', 'key', 'groupName'] : ['selectCheckbox', 'key'];
   }
 
-  // TODO: move to ngChanges
-  @Input('workspace')
-  set workspaceId(value: number) {
+  updateUnitList(value: number) {
     this.tableSelectionCheckboxes.clear();
-    this.backendService.getUnitList(value)
+    this.backendService.getUnitList(value, this.queryParams)
       .subscribe(units => {
         this.setObjectsDatasource(units);
         this.setInitialSelection();
@@ -154,5 +155,10 @@ export class SelectUnitListComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     if (this.selectionChangedSubscription) this.selectionChangedSubscription.unsubscribe();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const { workspace } = changes;
+    if (workspace && workspace.currentValue) this.updateUnitList(workspace.currentValue);
   }
 }

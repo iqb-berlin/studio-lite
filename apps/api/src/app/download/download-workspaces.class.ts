@@ -175,7 +175,13 @@ export class DownloadWorkspacesClass {
     }
 
     return new Promise(resolve => {
-      const data = JSON.stringify(codebook);
+      const noItemsCodebook = codebook.map((unit: CodebookUnitDto) => ({
+        key: unit.key,
+        name: unit.name,
+        variables: unit.variables,
+        missings: unit.missings
+      }));
+      const data = JSON.stringify(noItemsCodebook);
       resolve(Buffer.from(data, 'utf-8'));
     });
   }
@@ -286,6 +292,9 @@ export class DownloadWorkspacesClass {
     if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
       return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
     }
+    if (!contentSetting.hasOnlyVarsWithCodes) {
+      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+    }
     return null;
   }
 
@@ -317,7 +326,8 @@ export class DownloadWorkspacesClass {
         key: unit.key,
         name: unit.name,
         variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
-        missings: missings
+        missings: missings,
+        items: unit.metadata.items
       });
     }
   }

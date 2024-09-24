@@ -37,10 +37,12 @@ export class DownloadController {
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('missingsProfile')missingsProfile: string,
     @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
+    @Query('hasOnlyVarsWithCodes', new ParseBoolPipe()) hasOnlyVarsWithCodes: boolean,
     @Query('generalInstructions', new ParseBoolPipe()) hasGeneralInstructions: boolean,
     @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
     @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
     @Query('showScore', new ParseBoolPipe()) showScore: boolean,
+    @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
     @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
     const options:CodeBookContentSetting = {
       exportFormat,
@@ -50,7 +52,9 @@ export class DownloadController {
       hasDerivedVars: hasDerivedVars,
       hasClosedVars: hasClosedVars,
       showScore: showScore,
-      codeLabelToUpper: codeLabelToUpper
+      codeLabelToUpper: codeLabelToUpper,
+      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes,
+      hideItemVarRelation: hideItemVarRelation
     };
 
     const file = await DownloadWorkspacesClass

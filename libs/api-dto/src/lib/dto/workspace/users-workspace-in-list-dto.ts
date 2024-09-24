@@ -11,6 +11,9 @@ export class UsersWorkspaceInListDto {
     groupId!: number;
 
   @ApiProperty()
+    dropBoxId!: number;
+
+  @ApiProperty()
     userAccessLevel!: number;
 
   @ApiProperty()

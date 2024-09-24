@@ -31,3 +31,17 @@
   }
 }
 
+.center {
+  margin: auto;
+}
+
+.header-center {
+  ::ng-deep .mat-sort-header-container {
+    margin: auto;
+  }
+}
+
+.hidden {
+  display: none;
+}
+

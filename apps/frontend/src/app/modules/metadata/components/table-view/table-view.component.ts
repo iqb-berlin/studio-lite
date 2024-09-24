@@ -17,6 +17,7 @@ import {
 import { ItemsMetadataValues, MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 interface ColumnValues {
   key?: string;
@@ -40,6 +41,7 @@ interface ColumnValues {
 export class TableViewComponent implements OnInit {
   constructor(
     private metadataService: MetadataService,
+    private workspaceService: WorkspaceService,
     private translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: { units: UnitMetadataDto[] }
   ) {
@@ -47,7 +49,7 @@ export class TableViewComponent implements OnInit {
 
   @ViewChild('tabGroup') tabGroup!: MatTabGroup;
   viewMode = 'units';
-
+  workspaceId = this.workspaceService.selectedWorkspaceId;
   displayedColumns: string[] = ['key', 'id', 'variableId', 'weighting', 'description'];
   columnsToDisplay: string[] = this.viewMode === 'units' ?
     this.getTableUnitsColumnsDefinitions().slice() :
@@ -105,7 +107,7 @@ export class TableViewComponent implements OnInit {
                               addKey: boolean): ColumnValues {
     this.displayedColumns.forEach(column => {
       if (column === 'key' && addKey) {
-        values.key = unit.key || '–';
+        values.key = `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–';
       } else {
         values[column] = item[column] ? item[column]?.toString() : '';
       }
@@ -140,12 +142,12 @@ export class TableViewComponent implements OnInit {
         if (activeProfile.entries) {
           activeProfile.entries.forEach(entry => {
             values = TableViewComponent.setColumnValues(values, entry);
-            values.key = unit.key || '–';
+            values.key = `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–';
           });
         }
         totalValues.push(values);
       } else {
-        totalValues.push({ key: unit.key || '–' });
+        totalValues.push({ key: `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–' });
       }
     });
     this.tableData = totalValues.flat();

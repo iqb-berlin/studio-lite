@@ -19,7 +19,7 @@
   "filter-by": "Filtern nach...",
   "hour": "Uhr",
   "unit-patch": {
-    "duplicate-unit-id": "Unit bereits im Arbeitsbereich vorhanden"
+    "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden"
   },
   "unit-upload": {
     "api-error": {
@@ -136,7 +136,8 @@
     "request-report-source": {
       "upload-units": "Import Aufgaben - Ergebnis",
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
-      "unit-copy": "Aufgaben kopieren - unvollständig"
+      "unit-copy": "Aufgaben kopieren - unvollständig",
+      "unit-submit": "Aufgaben abgeben - unvollständig"
     }
   },
   "directives": {
@@ -172,7 +173,10 @@
     "functionality": "Funktionalität",
     "unit-create": "Aufgaben anlegen",
     "unit-copy": "Aufgaben kopieren",
+    "unit-copy-from": "Aufgabe aus vorhandener Aufgabe erstellen",
     "unit-move": "Aufgaben verschieben",
+    "unit-submit": "Aufgaben abgeben",
+    "unit-return": "Aufgaben zurückgeben",
     "unit-delete": "Aufgaben löschen",
     "unit-export": "Aufgaben exportieren",
     "unit-import": "Aufgaben importieren",
@@ -373,7 +377,13 @@
     "users": "Nutzer:innen",
     "workspaces": "Arbeitsbereiche",
     "settings": "Einstellungen",
-    "units-count": "Anzahl der Aufgaben"
+    "units-count": "Anzahl der Aufgaben",
+    "select-drop-box": "Abgabebereich auswählen",
+    "select-drop-box-for": "Abgabebereich für \"{{workspace}}\" auswählen",
+    "drop-box-selected": "Abgabebereich geändert",
+    "drop-box-not-selected": "Konnte Abgabebereich nicht ändern",
+    "no-drop-box": "Kein Abgabebereich",
+    "drop-box": "Abgabebereich"
   },
   "workspace-settings": {
     "modules": "Verona Module",
@@ -413,7 +423,7 @@
     "status": "Status",
     "code": "Code",
     "score": "Bewertung",
-    "vars-with-codes-only": "Nur Variablen mit Codes anzeigen",
+    "has-only-vars-with-codes": "Nur Variablen mit Codes",
     "has-general-instructions": "Allgemeine Hinweise für jede Variable",
     "has-derived-vars": "Abgeleitete Variablen",
     "has-only-manual-coding": "Manuell kodierte Variablen",
@@ -422,6 +432,7 @@
     "codebook-content": "Codebook Inhalte",
     "export-format": "Exportformat",
     "code-label-to-upper": "Code-Label in Großbuchstaben",
+    "hide-item-var-relation": "Item-Variable-Relation ausblenden",
     "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!"
   },
 
@@ -559,7 +570,28 @@
     "state": "Status",
     "unit-moved-or-copied": "Aufgabe(n) {{action}}",
     "unit-not-moved-or-copied": "Konnte Aufgabe(n) nicht {{action}}",
-    "no-units": "Dieser Arbeitsbereich enthält keine Units!",
+    "show-submit-units": "Aufgabe(n) abgeben",
+    "show-return-submitted-units": "Abgegebene Aufgabe(n) zurückgeben",
+    "unit-not-returned": "Konnte Aufgabe nicht zurückgeben",
+    "unit-returned": "Aufgabe zurückgegeben",
+    "returned-unit": "Zurückgegebene Aufgabe",
+    "unit-not-submitted": "Konnte Aufgabe nicht abgeben",
+    "unit-submitted": "Aufgabe abgegeben",
+    "submitted-unit": "Abgegebene Aufgabe",
+    "submit-units-title": "Aufgabe(n) abgeben",
+    "return-submitted-units-title": "Abgegebene Aufgabe(n) zurückgeben",
+    "units-not-returned": "Konnte Aufgabe(n) nicht zurückgeben",
+    "units-returned": "Aufgabe(n) zurückgegeben",
+    "units-not-submitted": "Konnte Aufgabe(n) nicht abgeben",
+    "units-submitted": "Aufgabe(n) abgegeben",
+    "submit-units": "Abgeben",
+    "return-submitted-units": "Zurückgeben",
+    "submit-unit": "Aufgabe abgeben",
+    "return-submitted-unit": "Aufgabe zurückgeben",
+    "unit-actions": "Arbeitsablauf",
+    "no-dropbox-defined": "Kein Abgabebereich definiert",
+    "unit-dropbox-history-deleted": "Beim Verschieben von abgegebene Aufgaben wird die Information zum Zurückgeben gelöscht.",
+    "no-units": "Dieser Arbeitsbereich enthält keine Aufgaben!",
     "user-list": "Liste der Nutzer:innen",
     "unit-saved": "Änderungen an Aufgabedaten gespeichert",
     "unit-not-saved": "Konnte Aufgabendaten nicht speichern",

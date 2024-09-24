@@ -1,26 +1,3 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace Cypress {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface Chainable<Subject> {
-    login(username: string, password: string): void;
-    clickButton(text: string):void;
-    buttonToContinue(text: string, code: number, url: string, rest: string, alias: string):void;
-    dialogButtonToContinue(text: string, code: number, url: string, rest: string, alias: string):void;
-    loadModule(filename: string, name: string):void;
-    selectModule(name: string):void;
-    visitWs(ws:string):void;
-  }
-}
 // -- This is a parent command --
 Cypress.Commands.add('login', (username:string, password:string) => {
   cy.get('[data-cy="home-user-name"]')
@@ -64,9 +41,11 @@ Cypress.Commands.add('dialogButtonToContinue',
       .should('eq', code);
   });
 
-Cypress.Commands.add('loadModule', (filename:string, name:string) => {
+Cypress.Commands.add('loadModule', (filename:string) => {
+  const path:string = `../frontend-e2e/src/fixtures/${filename}`;
+  const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
   cy.get('input[type=file]')
-    .selectFile(filename, {
+    .selectFile(path, {
       action: 'select',
       force: true
     });

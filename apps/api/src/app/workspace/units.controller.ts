@@ -1,9 +1,9 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards
+  Body, Controller, Delete, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
   ApiUnauthorizedResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse,
-  ApiParam, ApiQuery, ApiTags
+  ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
@@ -21,6 +21,7 @@ import { WriteAccessGuard } from './write-access.guard';
 import { DeleteAccessGuard } from './delete-access.guard';
 import { User } from './user.decorator';
 import UserEntity from '../database/entities/user.entity';
+import { ManageAccessGuard } from './manage-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -37,16 +38,23 @@ export class UnitsController {
   @ApiCreatedResponse({
     type: [UnitInListDto]
   })
-  @ApiQuery({
-    name: 'withLastSeenCommentTimeStamp',
-    type: Boolean
-  })
   @ApiTags('workspace')
   async findAll(
     @Req() request,
-      @WorkspaceId() workspaceId: number,
-      @Query('withLastSeenCommentTimeStamp') withLastSeenCommentTimeStamp): Promise<UnitInListDto[]> {
-    return this.unitService.findAllForWorkspace(workspaceId, request.user.id, withLastSeenCommentTimeStamp);
+      @WorkspaceId(ParseIntPipe) workspaceId: number,
+      @Query('filterTargetWorkspaceId', new ParseBoolPipe({ optional: true }))
+           filterTargetWorkspaceId: boolean,
+      @Query('withLastSeenCommentTimeStamp', new ParseBoolPipe({ optional: true }))
+           withLastSeenCommentTimeStamp: boolean,
+      @Query('targetWorkspaceId', new ParseIntPipe({ optional: true }))
+           targetWorkspaceId: number):
+      Promise<UnitInListDto[]> {
+    return this.unitService.findAllForWorkspace(
+      workspaceId,
+      request.user.id,
+      withLastSeenCommentTimeStamp,
+      targetWorkspaceId,
+      filterTargetWorkspaceId);
   }
 
   @Get('units/metadata')
@@ -192,10 +200,34 @@ export class UnitsController {
   @ApiTags('workspace unit')
   async patchWorkspace(@Param('ids') ids: string,
     @User() user: UserEntity,
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Param('target', ParseIntPipe) targetWorkspaceId: number) {
     const idsAsNumberArray: number[] = [];
     ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user);
+    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user, workspaceId, 'moveTo');
+  }
+
+  @Patch('submit_units')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchDropBoxHistory(@User() user: UserEntity,
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
+    @Body('units') units: number[],
+    @Body('dropBoxId') dropBoxId: number) {
+    return this.unitService.patchDropBoxHistory(units, dropBoxId, workspaceId, user);
+  }
+
+  @Patch('return_submitted_units')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  async patchReturnDropBoxHistory(@User() user: UserEntity,
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
+    @Body('units') units: number[]) {
+    return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
   }
 
   @Patch(':ids/copyto/:target')
