@@ -13,9 +13,9 @@ import { MatRadioButton } from '@angular/material/radio';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
-import { CodingReportDto } from '../../../../../../../../libs/api-dto/src/lib/dto/workspace/coding-report-dto';
 
 @Component({
   selector: 'coding-report',

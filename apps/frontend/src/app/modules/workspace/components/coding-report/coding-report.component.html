@@ -16,8 +16,8 @@
     <table mat-table [dataSource]="dataSource" matSort>
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'coding-report.' + column | translate}}</th>
-          <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'coding-report.' + column | translate}}</th>
+            <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
         </ng-container>
       }
       <tr mat-header-row  *matHeaderRowDef="displayedColumns;sticky:true"></tr>
