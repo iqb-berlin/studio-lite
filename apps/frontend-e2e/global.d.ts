@@ -19,14 +19,12 @@ declare namespace Cypress {
     runAndIgnore(testFn:()=>void):void;
     getWsByGroupAPI(groupKey: string, num_ws: number): void;
     getUsersAPI(): Chainable<Response>;
-    getWsByUserAPI(id:string):Chainable<Response>;
 
     // commands-unit-api.ts
     createUnitAPI(unitData: UnitData, idGroup: string): Chainable<Response>;
     deleteUnitAPI(idUnit:string, idGroup:string): Chainable<Response>;
     // commands-verona-api.ts
     addModuleAPI(module:string);
-    getModulesAPI(token:string): Chainable<Response>
     getModuleAPI(module:string)
     // commands-api
     addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
@@ -56,7 +54,14 @@ declare namespace Cypress {
     getWsGroupwiseAPI(token:string):Chainable<Response>; // 23
     updateWsAPI(ws:WsData, group:GroupData, token:string):Chainable<Response>; // 24
 
-    deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 20
+    getModulesAPI(token:string): Chainable<Response>; // 25
+    getModuleAPI(module:string, token:string): Chainable<Response>; // 26
+    downloadModuleAPI(module:string, token:string): Chainable<Response>; // 27
+    deleteModuleAPI(module:string, token:string): Chainable<Response>; // 28
+
+    getWsByUserAPI(id:string, token:string):Chainable<Response>; // 37
+    getGroupsByUserAPI(id:string, token:string):Chainable<Response>; // 38
+    deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 39
     deleteUserAPI(id: string, token: string): Chainable<Response>; // 60
 
     setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>

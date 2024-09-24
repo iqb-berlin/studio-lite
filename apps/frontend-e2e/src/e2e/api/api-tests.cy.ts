@@ -1,15 +1,23 @@
 import {
   AccessLevel, GroupData, UserData, WsData
 } from '../../support/testData';
+import { addModules, login } from '../../support/util';
 
+function getName(initialName: string): string {
+  return initialName.replace(/-+(?=[^-\d]*\d)/, '%40').replace(/.html$/, '');
+}
+
+function getNameAt(initialName: string): string {
+  return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
+}
 describe('Studio API tests', () => {
-  const noId:string = '9988';
-  const fakeUser:UserData = {
+  const noId: string = '9988';
+  const fakeUser: UserData = {
     username: 'falseUser',
     password: 'paso',
     isAdmin: false
   };
-  const user2:UserData = {
+  const user2: UserData = {
     username: 'normalUser',
     password: 'paso',
     isAdmin: false
@@ -32,6 +40,9 @@ describe('Studio API tests', () => {
     id: 'id_ws2',
     name: '02Vorlage'
   };
+  const modules:string[] = ['iqb-schemer-2.0.0-beta.html',
+    'iqb-editor-aspect-2.5.0-beta5.html',
+    'iqb-player-aspect-2.5.0-beta5.html'];
   // const fakeGroup: GroupData = {
   //   id: 'id_group3',
   //   name: 'fakeGroup'
@@ -560,6 +571,7 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
+        cy.pause();
       });
       it('200 positive test: without user id and with user token', () => {
         cy.getUsersOfWsAPI(Cypress.env(ws1.id),
@@ -646,6 +658,229 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
+        cy.pause();
+      });
+    });
+  });
+  describe('Admin verona API tests', () => {
+    describe('25. POST /api/verona-modules', () => {
+      it('200 positive test: Get the modules ', () => {
+        cy.visit('/');
+        login(Cypress.env('username'), Cypress.env('password'));
+        addModules(modules);
+      });
+    });
+    describe('26. GET /api/verona-modules', () => {
+      it('200 positive test', () => {
+        cy.getModulesAPI(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).equal(3);
+          });
+      });
+      it('401 negative test: should not get modules without token', () => {
+        cy.getModulesAPI(noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
+    describe('27. GET /api/verona-module/{module}', () => {
+      it('200 positive test', () => {
+        cy.getModuleAPI(getName(modules[0]), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('401 negative test', () => {
+        cy.getModuleAPI(getName(modules[0]), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+        cy.pause();
+      });
+      it('404 negative test', () => {
+        cy.getModuleAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(404);
+          });
+      });
+    });
+    describe('28. GET /api/admin/verona-module/{module}', () => {
+      it('200 positive test: should download with id of the module', () => {
+        cy.downloadModuleAPI(getNameAt(modules[0]),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            const parser = new DOMParser();
+            expect(resp.status).to.equal(200);
+            const dom = parser.parseFromString(resp.body, 'text/html');
+            console.log(dom);
+          });
+        cy.pause();
+      });
+      it('401 negative test: should not download if we do not have a token', () => {
+        cy.downloadModuleAPI(getNameAt(modules[0]), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('404 negative test', () => {
+        cy.downloadModuleAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(404);
+          });
+      });
+    });
+
+    describe('29. DELETE /api/admin/verona-module/{module}', () => {
+      it('200 positive test: should download delete by key', () => {
+        modules.forEach(mo => {
+          cy.deleteModuleAPI(getNameAt(mo), Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+        });
+      });
+      it('401 negative test', () => {
+        cy.deleteModuleAPI(getNameAt(modules[0]), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+        cy.pause();
+      });
+      it('200/404 negative test', () => {
+        cy.deleteModuleAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+    });
+  });
+
+  describe('Admin workspace API tests', () => {
+    describe('. ', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('. ', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+  });
+
+  describe('Admin workspace unit API tests', () => {
+    describe('. ', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('. ', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+  });
+
+  /** ************************************************************************* */
+  describe('Admin users workspaces API tests', () => {
+    describe('37. GET /api/admin/users/{id}/workspaces', () => {
+      it('200 positive test: should get the workspaces by admin user id', () => {
+        cy.getWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body[0].userAccessLevel).to.equal(4);
+          });
+      });
+      it('200 positive test: should get the workspaces by normal user id', () => {
+        cy.getWsByUserAPI(Cypress.env(`id_${user2.username}`),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body[0].name).to.equal(ws2.name);
+          });
+      });
+      it('200/401 negative test: should not get the workspaces of which you are not a user', () => {
+        // This test should be negative 401, we can not retrieve if we only have the token from other user
+        cy.getWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body[0].userAccessLevel).to.equal(4);
+          });
+      });
+      it('401 negative test: should not get the workspaces without token', () => {
+        cy.getWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('200/500 negative test: should not get the workspaces with a false user Id', () => {
+        // This test should be negative 500, but it returns an empty array
+        cy.getWsByUserAPI(noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+    });
+    describe('38. GET /api/admin/users/{id}/workspace-groups', () => {
+      it('200 positive test: should get the workspace-group by admin user id', () => {
+        cy.pause();
+        cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body[0].name).to.equal(group2.name);
+          });
+      });
+      it('200 positive test: should get the workspace-groups by normal user id', () => {
+        cy.getGroupsByUserAPI(Cypress.env(`id_${user2.username}`),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).to.equal(2);
+          });
+      });
+      it('200/401 negative test: should not get the workspace-groups of which you are not a user', () => {
+        // This test should be negative 401
+        cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).to.equal(2);
+          });
+      });
+      it('401 negative test: should not get the workspace-groups  without token', () => {
+        cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('200/500 negative test: should not get the workspace-groups  with a false user Id', () => {
+        // This test should be negative 500, but it returns an empty array
+        cy.getGroupsByUserAPI(noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).to.equal(0);
+          });
       });
     });
 
@@ -683,9 +918,6 @@ describe('Studio API tests', () => {
           });
       });
     });
-  });
-  /** ************************************************************************* */
-  describe('Admin users workspaces API tests', () => {
     describe('40. DELETE /api/admin/workspace-groups/id', () => {
       it('401 negative test', () => {
         cy.deleteGroupAPI(Cypress.env(group1.id), Cypress.env(`token_${user2.username}`))
