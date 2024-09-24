@@ -152,6 +152,7 @@ export class BackendService {
             .set('derived', contentOptions.hasDerivedVars)
             .set('showScore', contentOptions.showScore)
             .set('codeLabelToUpper', contentOptions.codeLabelToUpper)
+            .set('hideItemVarRelation', contentOptions.hideItemVarRelation)
             .set('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes),
 
           headers: {

@@ -16,7 +16,12 @@ import {
   ITableCellBorders
 } from 'docx';
 
-import { CodeBookContentSetting, CodebookUnitDto, CodeBookVariable } from '@studio-lite-lib/api-dto';
+import {
+  CodeBookContentSetting,
+  CodebookUnitDto,
+  CodeBookVariable,
+  ItemsMetadataValues
+} from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { FileChild } from 'docx/build/file/file-child';
 import { AnyNode, BasicAcceptedElems, Element } from 'cheerio';
@@ -39,6 +44,7 @@ export class DownloadDocx {
         if (variableCoding.variables.length) {
           units.push(...(DownloadDocx
             .createDocXForUnit(
+              variableCoding.items,
               variableCoding.variables,
               contentSetting,
               DownloadDocx.getUnitHeader(variableCoding)
@@ -248,6 +254,27 @@ export class DownloadDocx {
     });
   }
 
+  private static getVariableItems(variable: CodeBookVariable, varItems:ItemsMetadataValues[]): Paragraph | [] {
+    const filteredVarItems = varItems.filter(item => item.variableId === variable.id);
+    let itemString = '';
+    filteredVarItems.forEach(item => {
+      itemString += `${item.id}   `;
+    });
+    if (filteredVarItems.length === 0) {
+      return [];
+    }
+
+    return new Paragraph({
+      text: `Item(s): ${itemString}`,
+      heading: HeadingLevel.HEADING_3,
+      alignment: AlignmentType.LEFT,
+      spacing: {
+        before: 200,
+        after: 200
+      }
+    });
+  }
+
   private static getGeneralInstructions(
     contentSetting: CodeBookContentSetting,
     codeBookVariable: CodeBookVariable
@@ -271,11 +298,14 @@ export class DownloadDocx {
     return contentSetting.showScore ? [8, 24, 8, 60] : [8, 24, 68];
   }
 
-  private static getVariables(codeBookVariable: CodeBookVariable[], contentSetting: CodeBookContentSetting): unknown[] {
+  private static getVariables(codeBookVariable: CodeBookVariable[],
+                              contentSetting: CodeBookContentSetting,
+                              varItems:ItemsMetadataValues[]): unknown[] {
     const variables: unknown[] = [];
     codeBookVariable.forEach(variable => {
       variables.push(...[
         DownloadDocx.getVariableHeader(variable),
+        contentSetting.hideItemVarRelation ? [] : DownloadDocx.getVariableItems(variable, varItems),
         ...DownloadDocx.getGeneralInstructions(contentSetting, variable),
         DownloadDocx.getCodeTable(variable, contentSetting)]);
     });
@@ -283,12 +313,13 @@ export class DownloadDocx {
   }
 
   private static createDocXForUnit(
+    varItems: ItemsMetadataValues[],
     codeBookVariable: CodeBookVariable[],
     contentSetting: CodeBookContentSetting,
     unitHeader: Paragraph): unknown[] {
     return [
       unitHeader,
-      ...DownloadDocx.getVariables(codeBookVariable, contentSetting),
+      ...DownloadDocx.getVariables(codeBookVariable, contentSetting, varItems),
       new Paragraph({
         text: '',
         spacing: {
