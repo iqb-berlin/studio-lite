@@ -12,9 +12,9 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let element" class="unit-cell fx-gap-2">
       <div
-        [style.opacity]="!(element | hasNewComments) ? 1:0"
+        [style.opacity]="(element | hasNewComments) ? 1:0"
         class="new-comments"
-        [matTooltip]="!(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
+        [matTooltip]="(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
       </div>
       <div [style.opacity]="element.sourceWorkspaceId ? 1: 0"
            [matTooltip]=" element | unitDropBoxTooltip"
