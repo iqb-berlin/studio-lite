@@ -19,9 +19,9 @@ declare namespace Cypress {
     runAndIgnore(testFn:()=>void):void;
     getWsByGroupAPI(groupKey: string, num_ws: number): void;
     getUsersAPI(): Chainable<Response>;
+    setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>;
 
     // commands-unit-api.ts
-    createUnitAPI(unitData: UnitData, idGroup: string): Chainable<Response>;
     deleteUnitAPI(idUnit:string, idGroup:string): Chainable<Response>;
     // commands-verona-api.ts
     addModuleAPI(module:string);
@@ -59,14 +59,17 @@ declare namespace Cypress {
     downloadModuleAPI(module:string, token:string): Chainable<Response>; // 27
     deleteModuleAPI(module:string, token:string): Chainable<Response>; // 28
 
-    getWsByUserAPI(id:string, token:string):Chainable<Response>; // 37
-    getGroupsByUserAPI(id:string, token:string):Chainable<Response>; // 38
-    deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 39
-    deleteUserAPI(id: string, token: string): Chainable<Response>; // 60
+    createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
+    getUnitsByWsAPI(token:string): Chainable<Response>; // 31
 
-    setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>
+    deleteUnitAPI(unitId:string, wsId:string, token: string): Chainable<Response>; // 50
 
-    deleteGroupAPI(id: string, token:string):Chainable<Response>; // 40
+    getWsByUserAPI(id:string, token:string):Chainable<Response>; // 77
+    getGroupsByUserAPI(id:string, token:string):Chainable<Response>; // 78
+    deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 79
+    deleteGroupAPI(id: string, token:string):Chainable<Response>; // 80
+
+    deleteUserAPI(id: string, token: string): Chainable<Response>; // 90
     deleteFirstUserAPI():Chainable<Response>; // 110
   }
 }
