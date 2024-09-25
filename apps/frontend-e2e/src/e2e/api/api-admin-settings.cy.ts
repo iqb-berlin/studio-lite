@@ -1,14 +1,4 @@
-import { addModules, login } from '../../support/util';
-
-
-describe('Admin settings, resource packages and verona-modules  API tests', () => {
-  const modules:string[] = ['iqb-schemer-2.0.0-beta.html',
-    'iqb-editor-aspect-2.5.0-beta5.html',
-    'iqb-player-aspect-2.5.0-beta5.html'];
-  //  const module = modules[0].replace(/-+(?=[^-\d]*\d)/, '%40').replace(/.html$/, '');
-  //  const moduleAt = module.replace('%40', '@');
-  const noId: string = '9988';
-  // 32
+describe('Admin settings', () => {
   before(() => {
     cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
       .then(resp => {
