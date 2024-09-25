@@ -27,5 +27,5 @@ export class AppVersionGuard implements CanActivate {
 
 export const AppVersionProvider = {
   provide: 'APP_VERSION',
-  useValue: '9.0.0'
+  useValue: '9.0.1'
 };

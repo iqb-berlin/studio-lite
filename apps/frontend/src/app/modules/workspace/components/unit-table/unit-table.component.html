@@ -12,15 +12,15 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let element" class="unit-cell fx-gap-2">
       <div
-        [style.opacity]="!(element | hasNewComments) ? 1:0"
+        [style.opacity]="(element | hasNewComments) ? 1: 0"
         class="new-comments"
-        [matTooltip]="!(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
+        [matTooltip]="(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
       </div>
       <div [style.opacity]="element.sourceWorkspaceId ? 1: 0"
            [matTooltip]=" element | unitDropBoxTooltip"
            [class]="element.returned ? 'returned' : 'submitted'">
       </div>
-      <div [style.opacity]="(element.state | state:'color': this.states) ? 1:0   "
+      <div [style.opacity]="(element.state | state:'color': this.states) ? 1: 0"
            [style.background-color]="(element.state | state:'color': this.states)"
            class="state"
            [matTooltip]="(element.state | state:'label': this.states)">
