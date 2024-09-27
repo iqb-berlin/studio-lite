@@ -7,7 +7,7 @@ services:
       - "--baseUrl=http://frontend:8080"
       - "--browser=chrome"
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -18,7 +18,7 @@ services:
       - "frontend-e2e"
       - "--baseUrl=http://frontend:8080"
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -31,7 +31,7 @@ services:
       - "--browser=chrome"
       - "--spec=\"./apps/frontend-e2e/src/e2e/api/*\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -44,7 +44,7 @@ services:
       - "--browser=chrome"
       - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -58,7 +58,7 @@ services:
       - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
       - "--config=\"viewportWidth=375,viewportHeight=667\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -71,7 +71,7 @@ services:
       - "--browser=firefox"
       - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -85,7 +85,7 @@ services:
       - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
       - "--config=\"viewportWidth=375,viewportHeight=667\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -98,7 +98,7 @@ services:
       - "--browser=edge"
       - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
@@ -112,7 +112,7 @@ services:
       - "--spec=\"./apps/frontend-e2e/src/e2e/ui/*\""
       - "--config=\"viewportWidth=375,viewportHeight=667\""
     volumes:
-      - ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
     networks:
       - application-network
 
