@@ -3,7 +3,7 @@ declare namespace Cypress {
   import {
     UnitData, GroupData, WsData, AccessLevel
   } from 'support/testData';
-  import { UserData } from './src/support/testData';
+  import { UserData, WsSettings } from './src/support/testData';
 
   interface Chainable {
     // Commands UI
@@ -54,13 +54,13 @@ declare namespace Cypress {
     getWsGroupwiseAPI(token:string):Chainable<Response>; // 23
     updateWsAPI(ws:WsData, group:GroupData, token:string):Chainable<Response>; // 24
 
-    getModulesAPI(token:string): Chainable<Response>; // 25
-    getModuleAPI(module:string, token:string): Chainable<Response>; // 26
-    downloadModuleAPI(module:string, token:string): Chainable<Response>; // 27
-    deleteModuleAPI(module:string, token:string): Chainable<Response>; // 28
+    getModulesAPI(token:string): Chainable<Response>; // 26
+    getModuleAPI(module:string, token:string): Chainable<Response>; // 27
+    downloadModuleAPI(module:string, token:string): Chainable<Response>; // 28
 
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
     getUnitsByWsAPI(token:string): Chainable<Response>; // 31
+    updateWsSettings(wsId:string, settings: WsSettings, token:string):Chainable<Response>; // 32
 
     deleteUnitAPI(unitId:string, wsId:string, token: string): Chainable<Response>; // 50
 
@@ -69,6 +69,7 @@ declare namespace Cypress {
     deleteWsAPI(ws:string, group: string, token:string):Chainable<Response>; // 79
     deleteGroupAPI(id: string, token:string):Chainable<Response>; // 80
 
+    deleteModuleAPI(module:string, token:string): Chainable<Response>; // 89
     deleteUserAPI(id: string, token: string): Chainable<Response>; // 90
     deleteFirstUserAPI():Chainable<Response>; // 110
   }
