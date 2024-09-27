@@ -1,7 +1,12 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData
+  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings
 } from './testData';
 
+// General
+Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
+  testFn();
+  throw new Error('Skipping test count');
+});
 // 1
 Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {
   cy.request({
@@ -395,7 +400,7 @@ Cypress.Commands.add('updateWsAPI', (ws:WsData, group:GroupData, token:string) =
     failOnStatusCode: false
   });
 });
-
+// 25
 // Cypress.Commands.add('addModuleAPI', (module:string) => {
 //   const authorization = `bearer ${Cypress.env('token_admin')}`;
 //   cy.readFile(`../frontend-e2e/src/fixtures/${module}`)
@@ -499,6 +504,21 @@ Cypress.Commands.add('getUnitsByWsAPI', (token:string) => {
       'app-version': Cypress.env('version'),
       authorization
     },
+    failOnStatusCode: false
+  });
+});
+
+// 32
+Cypress.Commands.add('updateWsSettings', (wsId:string, settings:WsSettings, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/settings`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: `${settings}`,
     failOnStatusCode: false
   });
 });

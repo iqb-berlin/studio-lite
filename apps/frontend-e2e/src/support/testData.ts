@@ -36,5 +36,16 @@ export interface InterceptData {
   body: string;
 }
 
+export interface WsSettings {
+  defaultEditor?: string;
+  defaultPlayer?: string,
+  defaultSchemer?: string,
+  unitGroups?: string[],
+  stableModulesOnly: boolean,
+  unitMDProfile?: string,
+  itemMDProfile?: string,
+  states?: string[]
+}
+
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 export enum Operation { GET, POST, PATCH, DELETE }
