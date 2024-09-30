@@ -523,6 +523,19 @@ Cypress.Commands.add('updateWsSettings', (wsId:string, settings:WsSettings, toke
   });
 });
 
+// 33
+Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 // 50
 Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
