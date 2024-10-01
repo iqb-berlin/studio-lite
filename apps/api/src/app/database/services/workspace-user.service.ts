@@ -31,6 +31,16 @@ export class WorkspaceUserService {
     }));
   }
 
+  async canComment(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return (workspaceUser?.accessLevel || 0) > 0;
+  }
+
   async canWrite(userId: number, workspaceId: number) {
     const workspaceUser = await this.workspaceUserRepository.findOne({
       where: {
