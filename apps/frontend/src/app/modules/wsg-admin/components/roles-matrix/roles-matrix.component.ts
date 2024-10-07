@@ -57,10 +57,10 @@ export class RolesMatrixComponent {
       functionality: 'unit-copy-from', commenter: false, developer: false, super: true
     },
     {
-      functionality: 'unit-submit', commenter: false, developer: true, super: true
+      functionality: 'unit-submit', commenter: true, developer: true, super: true
     },
     {
-      functionality: 'unit-return', commenter: false, developer: false, super: true
+      functionality: 'unit-return', commenter: true, developer: true, super: true
     },
     {
       functionality: 'review-create', commenter: false, developer: false, super: true
