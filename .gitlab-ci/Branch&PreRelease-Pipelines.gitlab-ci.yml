@@ -509,7 +509,10 @@ test-app-e2e:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx serve api --verbose --watch=false & # start backend
+    - nohup bash -c "npx nx serve api --watch=false &"  # start backend in background
+    - sleep 60
+    - curl localhost:3333/api
+    - ps aux
     - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
