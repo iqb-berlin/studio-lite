@@ -510,6 +510,7 @@ test-app-e2e:
     - export POSTGRES_HOST=docker
   script:
     - npx nx serve api --verbose --watch=false & # start backend
+    - sleep 60
     - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
