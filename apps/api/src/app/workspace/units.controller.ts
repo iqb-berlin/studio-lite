@@ -21,7 +21,7 @@ import { WriteAccessGuard } from './write-access.guard';
 import { DeleteAccessGuard } from './delete-access.guard';
 import { User } from './user.decorator';
 import UserEntity from '../database/entities/user.entity';
-import { ManageAccessGuard } from './manage-access.guard';
+import { CommentAccessGuard } from './comment-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -208,7 +208,7 @@ export class UnitsController {
   }
 
   @Patch('submit_units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -220,7 +220,7 @@ export class UnitsController {
   }
 
   @Patch('return_submitted_units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
