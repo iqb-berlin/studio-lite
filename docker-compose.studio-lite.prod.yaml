@@ -11,6 +11,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certResolver=iqbresolver"
+      - "traefik.http.routers.backend.tls.domains[0].main=${SERVER_NAME}"
+      - "traefik.http.routers.backend.tls.domains[0].sans=www.${SERVER_NAME}"
       - "traefik.http.routers.backend.rule=(HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.middlewares=security-headers"
       - "traefik.http.routers.backend.service=backend"
@@ -18,7 +21,7 @@ services:
       - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
     volumes:
-      - backend_vol:/usr/src/studio-lite-api/packages
+      - "backend_vol:/usr/src/studio-lite-api/packages"
     restart: always
 
   frontend:
@@ -26,6 +29,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certResolver=iqbresolver"
+      - "traefik.http.routers.frontend.tls.domains[0].main=${SERVER_NAME}"
+      - "traefik.http.routers.frontend.tls.domains[0].sans=www.${SERVER_NAME}"
       - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
       - "traefik.http.routers.frontend.middlewares=security-headers"
       - "traefik.http.routers.frontend.service=frontend"
@@ -33,5 +39,5 @@ services:
       - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     volumes:
-      - ./config/frontend/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - "./config/frontend/default.conf.template:/etc/nginx/templates/default.conf.template:ro"
     restart: always
