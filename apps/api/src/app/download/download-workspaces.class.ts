@@ -71,13 +71,18 @@ export class DownloadWorkspacesClass {
               }
               if (i === 0) values.Aufgabe = unit.key || '–';
               values['Item-Id'] = item.id || '–';
-              values.Variablen = item.variableId || '';
+              values.Variable = item.variableId || '';
               values.Wichtung = item.weighting || '';
               values.Notiz = item.description || '';
             });
             totalValues.push(values);
           } else {
-            totalValues.push({ 'Item-Id': '–' });
+            totalValues.push({
+              'Item-Id': item.id || '–',
+              Variable: item.variableId,
+              Wichtung: item.weighting?.toString(),
+              Beschreibung: item.description
+            });
           }
         });
       }

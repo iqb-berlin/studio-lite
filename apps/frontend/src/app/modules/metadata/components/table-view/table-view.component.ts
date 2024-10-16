@@ -92,7 +92,12 @@ export class TableViewComponent implements OnInit {
             });
             totalValues.push(values);
           } else {
-            totalValues.push({ id: '–' });
+            totalValues.push({
+              id: item.id || '–',
+              variableId: item.variableId,
+              weighting: item.weighting?.toString(),
+              description: item.description
+            });
           }
         });
       }
