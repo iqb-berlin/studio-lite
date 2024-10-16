@@ -43,7 +43,7 @@ export class TableViewComponent implements OnInit {
     private metadataService: MetadataService,
     private workspaceService: WorkspaceService,
     private translateService: TranslateService,
-    @Inject(MAT_DIALOG_DATA) public data: { units: UnitMetadataDto[] }
+    @Inject(MAT_DIALOG_DATA) public data: { units: UnitMetadataDto[], warning: string }
   ) {
   }
 
