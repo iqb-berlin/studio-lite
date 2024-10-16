@@ -363,7 +363,6 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
                 .filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
               this.showMetadataDialog.open(TableViewComponent, {
                 width: '80%',
-                height: '80%',
                 data: { units: selectedUnits, warning: '' },
                 autoFocus: false
               });

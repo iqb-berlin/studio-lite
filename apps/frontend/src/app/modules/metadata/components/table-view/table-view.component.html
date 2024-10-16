@@ -1,11 +1,18 @@
- <div class="container fx-column-space-between-stretch">
-    <mat-dialog-content>
+
+
+    <mat-dialog-content class="container">
       <mat-tab-group animationDuration="0ms" #tabGroup (selectedTabChange)="tabChanged($event)">
         <mat-tab label="{{ 'metadata.units' | translate }}">
-          <table mat-table [dataSource]="tableData">
+          <div mat-dialog-title class="fx-column-start-start title">
+            <mat-form-field class="filter">
+              <mat-label>{{'filter-by' | translate}}</mat-label>
+              <input matInput (keyup)="applyFilter($event)" #input>
+            </mat-form-field>
+          </div>
+          <table mat-table [dataSource]="dataSource" matSort>
             @for (column of columnsToDisplay; track column) {
               <ng-container [matColumnDef]="column">
-                <th mat-header-cell *matHeaderCellDef>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
                   {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
                 </th>
                 <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
@@ -16,10 +23,16 @@
           </table>
         </mat-tab>
         <mat-tab label="{{ 'metadata.items' | translate }}">
-          <table mat-table [dataSource]="tableData">
+          <div mat-dialog-title class="fx-column-start-start title">
+            <mat-form-field class="filter">
+              <mat-label>{{'filter-by' | translate}}</mat-label>
+              <input matInput (keyup)="applyFilter($event)" #input>
+            </mat-form-field>
+          </div>
+          <table mat-table [dataSource]="dataSource" matSort>
             @for (column of columnsToDisplay; track column) {
               <ng-container [matColumnDef]="column">
-                <th mat-header-cell *matHeaderCellDef>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
                   {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
                 </th>
                 <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
@@ -40,6 +53,5 @@
         {{ 'close' | translate }}
       </button>
     </mat-dialog-actions>
-  </div>
 
 

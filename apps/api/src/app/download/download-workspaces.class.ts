@@ -74,10 +74,12 @@ export class DownloadWorkspacesClass {
               values.Variable = item.variableId || '';
               values.Wichtung = item.weighting || '';
               values.Notiz = item.description || '';
+              values.Aufgabe = unit.key || '–';
             });
             totalValues.push(values);
           } else {
             totalValues.push({
+              Aufgabe: unit.key || '-',
               'Item-Id': item.id || '–',
               Variable: item.variableId,
               Wichtung: item.weighting?.toString(),
