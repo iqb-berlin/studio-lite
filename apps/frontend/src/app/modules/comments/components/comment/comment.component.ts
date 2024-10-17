@@ -17,7 +17,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-into-view.directive';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';
-import { FullTimestampPipe } from "../../pipes/full-timestamp.pipe";
+import { FullTimestampPipe } from '../../pipes/full-timestamp.pipe';
 
 @Component({
   selector: 'studio-lite-comment',

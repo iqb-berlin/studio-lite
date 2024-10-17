@@ -1,4 +1,4 @@
-import { FullTimestampPipe } from "./full-timestamp.pipe";
+import { FullTimestampPipe } from './full-timestamp.pipe';
 
 describe('FullTimestampPipe', () => {
   it('create an instance', () => {

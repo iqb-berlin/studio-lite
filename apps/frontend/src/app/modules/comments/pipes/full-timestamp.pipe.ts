@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 @Pipe({
   name: 'fullTimestamp',
