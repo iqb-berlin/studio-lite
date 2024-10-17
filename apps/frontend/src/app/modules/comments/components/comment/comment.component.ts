@@ -17,6 +17,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-into-view.directive';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';
+import { FullTimestampPipe } from "../../pipes/full-timestamp.pipe";
 
 @Component({
   selector: 'studio-lite-comment',
@@ -24,7 +25,7 @@ import { CommentBadgeComponent } from '../comment-badge/comment-badge.component'
   styleUrls: ['./comment.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FromNowPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FromNowPipe, FullTimestampPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;
