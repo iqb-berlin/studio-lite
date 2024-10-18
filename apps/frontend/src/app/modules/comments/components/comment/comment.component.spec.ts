@@ -16,9 +16,9 @@ describe('CommentBadgeComponent', () => {
   let fixture: ComponentFixture<CommentComponent>;
 
   @Pipe({
-    name: 'momentFromNow'
+    name: 'fullTimestamp'
   })
-  class MockMomentFromNowPipe implements PipeTransform {
+  class MockMomentFullTimestampPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
     transform(date: Date): string {
       return date.toString();
@@ -64,7 +64,7 @@ describe('CommentBadgeComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         MockCommentBadgeComponent,
-        MockMomentFromNowPipe,
+        MockMomentFullTimestampPipe,
         MockIsEditingPipe,
         MockIsReplyingPipe,
         MockSafeResourceHTMLPipe
