@@ -147,7 +147,7 @@ export class DownloadWorkspacesClass {
         header: column,
         key: column,
         width: 30,
-        style: { alignment: { wrapText: true } }
+        style: { alignment: { wrapText: true, vertical: 'top' } }
       }));
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);
