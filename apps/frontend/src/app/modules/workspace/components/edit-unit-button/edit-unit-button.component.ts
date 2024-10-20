@@ -347,9 +347,14 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
   }
 
   showMetadata(): void {
-    if (Object.keys(this.workspaceService.unitList).length > 0) {
+    if (this.metadataService.unitProfileColumns.length === 0) {
+      this.showMetadataDialog.open(ShowMetadataComponent, {
+        width: '600px',
+        data: { warning: this.translateService.instant('metadata.profile-missing-warning') }
+      });
+    } else if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.selectUnitDialog.open(ShowMetadataComponent, {
-        width: '600px'
+        data: { warning: '' }
       }).afterClosed().subscribe(res => {
         this.metadataService.createMetadataReport()
           .subscribe((units: UnitMetadataDto[] | boolean) => {
@@ -358,8 +363,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
                 .filter((unit: UnitMetadataDto) => res.selectedUnits.includes(unit.id));
               this.showMetadataDialog.open(TableViewComponent, {
                 width: '80%',
-                height: '80%',
-                data: { units: selectedUnits },
+                data: { units: selectedUnits, warning: '' },
                 autoFocus: false
               });
             }
