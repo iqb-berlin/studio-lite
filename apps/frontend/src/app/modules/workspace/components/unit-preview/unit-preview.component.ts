@@ -125,8 +125,9 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
               } else {
                 this.playerApiVersion = 1;
               }
-              this.sessionId = Math.floor(Math.random() * 20000000 + 10000000)
-                .toString();
+              const array = new Uint32Array(1);
+              window.crypto.getRandomValues(array);
+              this.sessionId = (array[0] % 20000000 + 10000000).toString();
               this.postMessageTarget = m.source as Window;
               this.sendUnitData();
               break;
