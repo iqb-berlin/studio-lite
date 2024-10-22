@@ -247,7 +247,7 @@ export class TableViewComponent implements OnInit {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
             b,
-            `${thisDate} ${this.translateService.instant(
+            `${this.translateService.instant(
               'metadata.unitMetadataReportFileName',
               { date: thisDate }
             )}.xlsx`
@@ -261,7 +261,7 @@ export class TableViewComponent implements OnInit {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
             b,
-            `${thisDate} ${this.translateService.instant(
+            `${this.translateService.instant(
               'metadata.itemsMetadataReportFileName',
               { date: thisDate }
             )}.xlsx`
