@@ -1,43 +1,57 @@
-<div class="container fx-column-space-between-stretch">
-  <mat-dialog-content>
-    <mat-tab-group animationDuration="0ms" #tabGroup (selectedTabChange)="tabChanged($event)">
-      <mat-tab label="{{ 'metadata.units' | translate }}">
-        <table mat-table [dataSource]="tableData">
-          @for (column of columnsToDisplay; track column) {
-            <ng-container [matColumnDef]="column">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
-              </th>
-              <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
-            </ng-container>
-          }
-          <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
-          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-        </table>
-      </mat-tab>
-      <mat-tab label="{{ 'metadata.items' | translate }}">
-        <table mat-table [dataSource]="tableData">
-          @for (column of columnsToDisplay; track column) {
-            <ng-container [matColumnDef]="column">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
-              </th>
-              <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
-            </ng-container>
-          }
-          <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
-          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-        </table>
-      </mat-tab>
-    </mat-tab-group>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end" >
-    <button mat-raised-button  (click)="downloadMetadata()">{{'download' | translate}}</button>
-    <button mat-raised-button
-      color="primary"
-      type="submit"
-      [mat-dialog-close]="">
-      {{ 'close' | translate }}
-    </button>
-  </mat-dialog-actions>
-</div>
+
+
+    <mat-dialog-content class="container">
+      <mat-tab-group animationDuration="0ms" #tabGroup (selectedTabChange)="tabChanged($event)">
+        <mat-tab label="{{ 'metadata.units' | translate }}">
+          <div mat-dialog-title class="fx-column-start-start title">
+            <mat-form-field class="filter">
+              <mat-label>{{'filter-by' | translate}}</mat-label>
+              <input matInput (keyup)="applyFilter($event)" #input>
+            </mat-form-field>
+          </div>
+          <table mat-table [dataSource]="dataSource" matSort>
+            @for (column of columnsToDisplay; track column) {
+              <ng-container [matColumnDef]="column">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
+                </th>
+                <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+              </ng-container>
+            }
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+          </table>
+        </mat-tab>
+        <mat-tab label="{{ 'metadata.items' | translate }}">
+          <div mat-dialog-title class="fx-column-start-start title">
+            <mat-form-field class="filter">
+              <mat-label>{{'filter-by' | translate}}</mat-label>
+              <input matInput (keyup)="applyFilter($event)" #input>
+            </mat-form-field>
+          </div>
+          <table mat-table [dataSource]="dataSource" matSort>
+            @for (column of columnsToDisplay; track column) {
+              <ng-container [matColumnDef]="column">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
+                </th>
+                <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+              </ng-container>
+            }
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+          </table>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end" >
+      <button mat-raised-button  (click)="downloadMetadata()">{{'download' | translate}}</button>
+      <button mat-raised-button
+              color="primary"
+              type="submit"
+              [mat-dialog-close]="">
+        {{ 'close' | translate }}
+      </button>
+    </mat-dialog-actions>
+
+

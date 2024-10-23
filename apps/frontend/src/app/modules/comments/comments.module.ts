@@ -28,7 +28,7 @@ import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
 import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-view.directive';
-import { MomentFromNowPipe } from './pipes/moment-from-now.pipe';
+import { FromNowPipe } from './pipes/from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 
@@ -60,7 +60,7 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
     ScrollCommentIntoViewDirective,
     ScrollEditorIntoViewDirective,
     CommentBadgeComponent,
-    MomentFromNowPipe,
+    FromNowPipe,
     IsCommentCommittablePipe
   ],
   exports: [CommentsComponent],

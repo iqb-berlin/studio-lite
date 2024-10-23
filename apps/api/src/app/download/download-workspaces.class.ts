@@ -71,13 +71,20 @@ export class DownloadWorkspacesClass {
               }
               if (i === 0) values.Aufgabe = unit.key || '–';
               values['Item-Id'] = item.id || '–';
-              values.Variablen = item.variableId || '';
+              values.Variable = item.variableId || '';
               values.Wichtung = item.weighting || '';
               values.Notiz = item.description || '';
+              values.Aufgabe = unit.key || '–';
             });
             totalValues.push(values);
           } else {
-            totalValues.push({ 'Item-Id': '–' });
+            totalValues.push({
+              Aufgabe: unit.key || '-',
+              'Item-Id': item.id || '–',
+              Variable: item.variableId,
+              Wichtung: item.weighting?.toString(),
+              Beschreibung: item.description
+            });
           }
         });
       }
@@ -140,7 +147,7 @@ export class DownloadWorkspacesClass {
         header: column,
         key: column,
         width: 30,
-        style: { alignment: { wrapText: true } }
+        style: { alignment: { wrapText: true, vertical: 'top' } }
       }));
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);

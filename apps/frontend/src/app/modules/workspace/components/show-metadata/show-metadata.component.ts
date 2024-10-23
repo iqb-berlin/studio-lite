@@ -11,13 +11,19 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
   templateUrl: './show-metadata.component.html',
   styleUrls: ['show-metadata.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    SelectUnitListComponent,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslateModule]
 })
 
 export class ShowMetadataComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
+    @Inject(MAT_DIALOG_DATA) public data: { units: number[], warning: string },
     public workspaceService: WorkspaceService
   ) {
   }
