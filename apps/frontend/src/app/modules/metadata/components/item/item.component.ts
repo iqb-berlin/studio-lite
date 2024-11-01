@@ -123,10 +123,10 @@ export class ItemComponent implements OnInit, OnChanges {
       this.model.variableReadOnlyId = this.metadata[this.itemIndex].variableReadOnlyId;
       this.model.variableId = this.variables
         .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
-    } else {
-      // old data
-      if (this.metadata[this.itemIndex].variableId) this.model.variableId = this.metadata[this.itemIndex].variableId;
+    } else if (this.metadata[this.itemIndex].variableId) { // old Metadata
       this.model.variableReadOnlyId = this.metadata[this.itemIndex].variableId;
+      this.model.variableId = this.variables
+        .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
     }
     if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
     if (this.metadata[this.itemIndex].weighting) this.model.weighting = this.metadata[this.itemIndex].weighting;
