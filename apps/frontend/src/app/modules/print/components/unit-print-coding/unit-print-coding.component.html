@@ -11,7 +11,7 @@
     <table class="codings">
       <tr>
         <td class="left-cell">
-          <h4>{{coding.id}}</h4>
+          <h4>{{coding.alias || coding.id}}</h4>
         </td>
         <td>
           {{coding.sourceType === 'BASE' ? 'B' : 'A'}}
