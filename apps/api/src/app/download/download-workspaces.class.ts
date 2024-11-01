@@ -311,7 +311,7 @@ export class DownloadWorkspacesClass {
     variableCoding: VariableCodingData
   ): BookVariable {
     return {
-      id: variableCoding.id,
+      id: variableCoding.alias || variableCoding.id,
       label: variableCoding.label,
       generalInstruction: contentSetting.hasGeneralInstructions ?
         variableCoding.manualInstruction :
