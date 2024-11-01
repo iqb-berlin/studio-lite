@@ -18,7 +18,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
-  selector: 'coding-report',
+  selector: 'studio-lite-coding-report',
   templateUrl: './coding-report.component.html',
   styleUrls: ['coding-report.component.scss'],
   standalone: true,

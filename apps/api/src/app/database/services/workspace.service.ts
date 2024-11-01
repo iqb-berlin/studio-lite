@@ -252,7 +252,11 @@ export class WorkspaceService {
             let validationResultText: string;
             parsedUnitScheme.variableCodings?.forEach((codingVariable: VariableCodingData) => {
               const validationResult = validation
-                .find((v: CodingSchemeProblem) => v.variableId === codingVariable.id);
+                .find((v: CodingSchemeProblem) => {
+                  // fallback to id if alias is not set
+                  const codingVariableId = codingVariable.alias || codingVariable.id;
+                  return v.variableId === codingVariableId;
+                });
               if (validationResult) {
                 if (validationResult.breaking) {
                   validationResultText = 'Fehler';
@@ -260,8 +264,9 @@ export class WorkspaceService {
               } else {
                 validationResultText = 'OK';
               }
-              /* eslint-disable  @typescript-eslint/no-explicit-any */
-              const foundItem = unit.metadata.items?.find((item: any) => item.variableId === codingVariable.id);
+              // fallback to id if alias is not set
+              const codingVariableId = codingVariable.alias || codingVariable.id;
+              const foundItem = unit.metadata.items?.find(item => item.variableId === codingVariableId);
               let closedCoding = false;
               let manualCodingOnly = true;
               let hasRules = false;
@@ -286,7 +291,7 @@ export class WorkspaceService {
               }
               unitDataRows.push({
                 unit: `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
-                variable: codingVariable.id || '–',
+                variable: codingVariableId || '–',
                 item: foundItem?.id || '–',
                 validation: validationResultText,
                 codingType: codingType

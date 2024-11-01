@@ -20,6 +20,7 @@ export class ItemsMetadataValues extends ProfileMetadataValues {
   id?: string;
   description?: string;
   variableId?: string;
+  variableReadOnlyId?: string;
   weighting?: number;
   [key: string]: string | number | MetadataValues[] | undefined;
 }

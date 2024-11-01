@@ -7,10 +7,12 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
+import { AliasId } from '../../models/alias-id.interface';
 
 interface ItemModel {
   id?: string;
   variableId?: string;
+  variableReadOnlyId?: string;
   description?: string;
   weighting?: number;
   [key: string]: string | number | undefined;
@@ -26,7 +28,7 @@ interface ItemModel {
 })
 export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }
-  @Input() variables!: string[];
+  @Input() variables!: AliasId[];
   @Input() metadata!: ItemsMetadataValues[];
   @Input() profileUrl!: string | undefined;
   @Input() itemIndex!: number;
@@ -70,10 +72,24 @@ export class ItemComponent implements OnInit, OnChanges {
               placeholder: this.translateService.instant('metadata.choose-item-variable'),
               label: this.translateService.instant('metadata.choose-item-variable'),
               options: [{ value: '', label: '' }, ...this.variables.map(variable => ({
-                value: variable,
-                label: variable
+                value: variable.alias,
+                label: variable.alias
               }))]
+            },
+            expressions: {
+              'model.variableReadOnlyId': (field: FormlyFieldConfig) => this.variables
+                .find(variable => variable.alias === field.model.variableId)?.id
             }
+          },
+          {
+            type: 'input',
+            key: 'variableReadOnlyId',
+            props: {
+              hide: 'true',
+              placeholder: this.translateService.instant('metadata.choose-item-variable'),
+              label: this.translateService.instant('metadata.choose-item-variable')
+            }
+
           },
           {
             type: 'input',
@@ -103,7 +119,15 @@ export class ItemComponent implements OnInit, OnChanges {
 
   private initModel(): void {
     if (this.metadata[this.itemIndex].id) this.model.id = this.metadata[this.itemIndex].id;
-    if (this.metadata[this.itemIndex].variableId) this.model.variableId = this.metadata[this.itemIndex].variableId;
+    if (this.metadata[this.itemIndex].variableReadOnlyId) {
+      this.model.variableReadOnlyId = this.metadata[this.itemIndex].variableReadOnlyId;
+      this.model.variableId = this.variables
+        .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
+    } else if (this.metadata[this.itemIndex].variableId) { // old Metadata
+      this.model.variableReadOnlyId = this.metadata[this.itemIndex].variableId;
+      this.model.variableId = this.variables
+        .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
+    }
     if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
     if (this.metadata[this.itemIndex].weighting) this.model.weighting = this.metadata[this.itemIndex].weighting;
   }
