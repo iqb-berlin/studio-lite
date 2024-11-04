@@ -126,13 +126,17 @@ export class DownloadWorkspacesClass {
     reportType: string,
     unitService: UnitService,
     workspaceId: number,
-    columns: string
+    selection: string
   ): Promise<Buffer> {
-    const data = await unitService.findAllWithMetadata(workspaceId);
+    const columnNames = selection.split('@')[1];
+    const selectedUnits = selection.split('@')[0].split(',');
+    const unitsFromWorkspace = await unitService.findAllWithMetadata(workspaceId);
+    const unitsFiltered = unitsFromWorkspace.filter(
+      unit => selectedUnits.find(su => Number(su) === unit.id));
     const rows =
       reportType === 'units' ?
-        this.setUnitsDataRows(data) :
-        this.setUnitsItemsDataRows(data);
+        this.setUnitsDataRows(unitsFiltered) :
+        this.setUnitsItemsDataRows(unitsFiltered);
     const SHEET_NAME =
       reportType === 'units' ? 'Aufgaben Metadaten ' : ' Items Metadaten ';
     const wb = new Excel.Workbook();
@@ -141,7 +145,7 @@ export class DownloadWorkspacesClass {
     wb.title = 'Webanwendung IQB Studio';
     wb.subject =
       reportType === 'units' ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
-    ws.columns = decodeURIComponent(columns)
+    ws.columns = decodeURIComponent(columnNames)
       .split(',')
       .map((column: string) => ({
         header: column,
