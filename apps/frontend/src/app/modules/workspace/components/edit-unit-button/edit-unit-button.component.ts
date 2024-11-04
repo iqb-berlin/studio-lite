@@ -347,12 +347,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
   }
 
   showMetadata(): void {
-    if (this.metadataService.unitProfileColumns.length === 0) {
-      this.showMetadataDialog.open(ShowMetadataComponent, {
-        width: '600px',
-        data: { warning: this.translateService.instant('metadata.profile-missing-warning') }
-      });
-    } else if (Object.keys(this.workspaceService.unitList).length > 0) {
+    if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.selectUnitDialog.open(ShowMetadataComponent, {
         data: { warning: '' }
       }).afterClosed().subscribe(res => {

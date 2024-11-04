@@ -275,8 +275,7 @@
     "key": "Aufgabe",
     "variableId": "Variable",
     "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
-    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten",
-    "profile-missing-warning": "Öffnen Sie zuerst eine Aufgabe aus der Aufgabenliste und überprüfen Sie ob das Metadatenprofil korrekt geladen ist."
+    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
