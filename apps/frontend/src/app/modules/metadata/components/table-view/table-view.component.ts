@@ -204,11 +204,11 @@ export class TableViewComponent implements OnInit {
         if (activeProfile.entries) {
           activeProfile.entries.forEach(entry => {
             values = TableViewComponent.setColumnValues(values, entry);
-            values.key =
-              `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` ||
-              '–';
           });
         }
+        values.key =
+          `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` ||
+          '–';
         totalValues.push(values);
       } else {
         totalValues.push({
@@ -242,7 +242,10 @@ export class TableViewComponent implements OnInit {
     const datePipe = new DatePipe('de-DE');
     if (this.viewMode === 'units') {
       this.metadataService
-        .downloadUnitsMetadataReport(this.getTableUnitsColumnsDefinitions())
+        .downloadUnitsMetadataReport(
+          this.getTableUnitsColumnsDefinitions(),
+          this.data.units.map(unit => unit.id)
+        )
         .subscribe(b => {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
@@ -256,7 +259,10 @@ export class TableViewComponent implements OnInit {
     }
     if (this.viewMode === 'items') {
       this.metadataService
-        .downloadItemsMetadataReport(this.getTableItemsColumnsDefinitions())
+        .downloadItemsMetadataReport(
+          this.getTableItemsColumnsDefinitions(),
+          this.data.units.map(unit => unit.id)
+        )
         .subscribe(b => {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
