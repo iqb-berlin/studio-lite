@@ -14,6 +14,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { ItemComponent } from '../item/item.component';
 // eslint-disable-next-line max-len
 import { MetadataReadonlyItemsComponent } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
+import { AliasId } from '../../models/alias-id.interface';
 
 @Component({
   selector: 'studio-lite-items',
@@ -26,11 +27,11 @@ import { MetadataReadonlyItemsComponent } from '../../../shared/components/metad
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   items: ItemsMetadataValues[] = [];
-  variables!: string[];
+  variables!: AliasId[];
   isTextOnlyView = false;
   private ngUnsubscribe = new Subject<void>();
 
-  @Input() variablesLoader!: BehaviorSubject<string[]>;
+  @Input() variablesLoader!: BehaviorSubject<AliasId[]>;
   @Input() profileUrl!: string | undefined;
   @Input() metadata: Partial<UnitMetadataValues> = {};
   @Input() language!: string;

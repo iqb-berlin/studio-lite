@@ -487,7 +487,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     if (schemeData) {
       codingScheme = JSON.parse(schemeData.scheme);
       if (codingScheme === null) {
-        if (this.getResponses()) {
+        if (responses) {
           this.dialog
             .open(ShowResponsesComponent, {
               data: { responses: responses, table: !this.isIqbStandardResponse() },
@@ -509,7 +509,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
-        .map(vc => vc.id);
+        .map(vc => (vc.alias ? vc.alias : vc.id));
       const newResponses = this.workspaceService.codingSchemer?.code(responses!);
       this.showCodingResults(newResponses, varsWithCodes);
     }

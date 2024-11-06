@@ -38,6 +38,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
+import { AliasId } from '../../../metadata/models/alias-id.interface';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -64,7 +65,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   metadata!: UnitMetadataValues;
   workspaceSettings!: WorkspaceSettingsDto;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
-  variablesLoader: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+  variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>([]);
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
@@ -256,19 +257,25 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       });
   }
 
-  private getItems(): string[] {
+  private getItems(): AliasId[] {
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
       const variables: VariableInfo[] = this.workspaceService
         .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
       if (variables) {
-        const variableIds = variables.map(variable => variable.id);
+        const variableAliasIds = variables.map(variable => ({ id: variable.id, alias: variable.alias || variable.id }));
         const scheme: CodingScheme = JSON.parse(data.scheme);
         const variableCodings = scheme?.variableCodings || [];
-        const variableCodingIds = variableCodings.map(item => item.id);
+        const variableCodingIds = variableCodings.map(item => ({ id: item.id, alias: item.alias || item.id }));
         // merge without duplicates
-        return [...new Set([...variableIds, ...variableCodingIds])];
+        return [...variableAliasIds, ...variableCodingIds]
+          .reduce((acc: AliasId[], current: AliasId) => {
+            if (!acc.find(aliasId => aliasId.id === current.id && aliasId.alias === current.alias)) {
+              acc.push(current);
+            }
+            return acc;
+          }, []);
       }
     }
     return [];

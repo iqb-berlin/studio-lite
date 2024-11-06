@@ -10,6 +10,7 @@ import {
   UnitMetadataDto,
   UnitSchemeDto, MetadataValues, UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
+import { VariableCodingData } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -495,8 +496,35 @@ export class UnitService {
     if (unitDefinitionDto.variables || newUnitDefinitionId >= 0) {
       if (unitDefinitionDto.variables) unitToUpdate.variables = unitDefinitionDto.variables;
       if (newUnitDefinitionId >= 0) unitToUpdate.definitionId = newUnitDefinitionId;
+
+      const aliasIds = unitDefinitionDto.variables.map(item => ({ id: item.id, alias: item.alias || item.id }));
+      if (unitToUpdate.scheme) {
+        unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
+      }
+      UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
       await this.unitsRepository.save(unitToUpdate);
     }
+  }
+
+  private static updateMetadataVariableId(unit: Unit, variableAliasId: { id: string; alias: string }[]): void {
+    if (unit.metadata && (unit.metadata as UnitMetadataValues).items) {
+      (unit.metadata as UnitMetadataValues).items.forEach(item => {
+        if (item.variableReadOnlyId) {
+          item.variableId = variableAliasId.find(v => v.id === item.variableReadOnlyId)?.alias;
+        }
+      });
+    }
+  }
+
+  private static getUpdatedScheme(scheme: string, variableAliasId: { id: string; alias: string }[]): string {
+    const schemeObject = JSON.parse(scheme);
+    if (schemeObject.variableCodings) {
+      schemeObject.variableCodings.forEach(item => {
+        item.alias = variableAliasId.find(v => v.id === item.id)?.alias;
+      });
+      return JSON.stringify(schemeObject);
+    }
+    return scheme;
   }
 
   async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: User) {
@@ -506,6 +534,9 @@ export class UnitService {
     const displayName = await this.getDisplayNameForUser(user.id);
     const unitToUpdate = await this.repairDefinition(unit, user);
     unitToUpdate.scheme = unitSchemeDto.scheme;
+    const scheme = JSON.parse(unitSchemeDto.scheme);
+    UnitService.updateMetadataVariableId(unitToUpdate, scheme.variableCodings
+      .map((item: VariableCodingData) => ({ id: item.id, alias: item.alias || item.id })));
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = new Date();
     unitToUpdate.lastChangedSchemeUser = displayName;

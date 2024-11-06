@@ -11,7 +11,7 @@
   @for (c of allVariables; track c) {
     <div class="unit-info-coding-content">
       <div class="fx-row-space-between-stretch">
-        <h4>{{c.id}}</h4>
+        <h4>{{c.alias || c.id}}</h4>
         <h4>{{c.sourceType === 'BASE' ? 'B' : 'A'}}</h4>
       </div>
       @if (c.label) {

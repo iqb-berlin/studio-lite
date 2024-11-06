@@ -89,7 +89,7 @@ export class MetadataService {
     return this.idLabelDictionary;
   }
 
-  downloadItemsMetadataReport(columns:string[]): Observable<Blob> {
+  downloadItemsMetadataReport(columns:string[], units:number[]): Observable<Blob> {
     const joinedString = columns.join(',')
       .replace(/key/g, 'Aufgabe')
       .replace(/description/g, 'Beschreibung')
@@ -98,7 +98,7 @@ export class MetadataService {
       .replace(/id/g, 'Item-Id');
     return this.http.get(
       // eslint-disable-next-line max-len
-      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${encodeURIComponent(joinedString)}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${units.join(',')}@${encodeURIComponent(joinedString)}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
@@ -106,11 +106,11 @@ export class MetadataService {
       });
   }
 
-  downloadUnitsMetadataReport(columns:string[]): Observable<Blob> {
-    const joinedString = columns.join(',').replace(/key/g, 'Aufgabe');
+  downloadUnitsMetadataReport(columns:string[], units:number[]): Observable<Blob> {
+    const joinedKeyString = columns.join(',').replace(/key/g, 'Aufgabe');
     return this.http.get(
       // eslint-disable-next-line max-len
-      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${encodeURIComponent(joinedString)}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${units.join(',')}@${encodeURIComponent(joinedKeyString)}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
