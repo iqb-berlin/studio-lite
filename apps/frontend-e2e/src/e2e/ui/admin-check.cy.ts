@@ -1,13 +1,11 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser,
-  addModules,
+  addFirstUser, addModules,
   createGroup,
   createNewUser,
   createWs,
   deleteFirstUser,
-  deleteGroup,
-  deleteModule,
+  deleteGroup, deleteModule,
   deleteUser,
   grantRemovePrivilege
 } from '../../support/util';
