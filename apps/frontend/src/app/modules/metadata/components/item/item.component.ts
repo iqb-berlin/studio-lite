@@ -85,16 +85,6 @@ export class ItemComponent implements OnInit, OnChanges {
           },
           {
             type: 'input',
-            key: 'variableReadOnlyId',
-            props: {
-              hide: 'true',
-              placeholder: this.translateService.instant('metadata.choose-item-variable'),
-              label: this.translateService.instant('metadata.choose-item-variable')
-            }
-
-          },
-          {
-            type: 'input',
             key: 'weighting',
             props: {
               type: 'number',
