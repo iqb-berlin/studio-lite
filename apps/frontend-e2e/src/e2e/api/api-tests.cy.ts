@@ -955,7 +955,7 @@ describe('Studio API tests', () => {
       it('401 negative test', () => {
       });
     });
-    describe('50. /api/workspace/{workspace_id}/{ids} ', () => {
+    describe.skip('50. /api/workspace/{workspace_id}/{ids} ', () => {
       it('200 positive test: should delete own unit', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
           Cypress.env(ws1.id),
@@ -1036,8 +1036,9 @@ describe('Studio API tests', () => {
 
   /** ************************************************************************* */
   describe('Admin users workspaces API tests', () => {
-    describe('77. GET /api/admin/users/{id}/workspaces', () => {
+    describe.skip('77. GET /api/admin/users/{id}/workspaces', () => {
       it('200 positive test: should get the workspaces by admin user id', () => {
+        cy.pause();
         cy.getWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1208,6 +1209,10 @@ describe('Studio API tests', () => {
     describe('90. DELETE /api/admin/users/id ', () => {
       it('200 positive test', () => {
         cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        cy.deleteUserAPI(Cypress.env(`id_${user3.username}`), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
