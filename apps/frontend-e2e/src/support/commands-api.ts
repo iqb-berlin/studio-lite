@@ -161,6 +161,8 @@ Cypress.Commands.add('getUserNoIdAPI',
 Cypress.Commands.add('updateUserAPI',
   (user:UserData, credentials: boolean, token:string) => {
     const authorization = `bearer ${token}`;
+    const nu = parseInt(`${Cypress.env(`id_${user.username}`)}`, 10);
+    console.log(nu);
     cy.request({
       method: 'PATCH',
       url: '/api/admin/users',
@@ -169,9 +171,8 @@ Cypress.Commands.add('updateUserAPI',
         authorization
       },
       body: {
-        id: `${Cypress.env(`id_${user.username}`)}`,
-        name: `${user.username}`,
-        isAdmin: `${credentials}`
+        id: nu,
+        isAdmin: credentials
       },
       failOnStatusCode: false
     });
@@ -550,6 +551,20 @@ Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
     failOnStatusCode: false
   });
 });
+//
+// // 34
+// Cypress.Commands.add('getGroupsByWsIdAPI', (wsId:string, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'GET',
+//     url: `/api/workspace/${wsId}/groups`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     failOnStatusCode: false
+//   });
+// });
 
 // 50
 Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
