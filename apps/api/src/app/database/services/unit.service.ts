@@ -494,14 +494,18 @@ export class UnitService {
       newUnitDefinitionId = newUnitDefinition.id;
     }
     if (unitDefinitionDto.variables || newUnitDefinitionId >= 0) {
-      if (unitDefinitionDto.variables) unitToUpdate.variables = unitDefinitionDto.variables;
       if (newUnitDefinitionId >= 0) unitToUpdate.definitionId = newUnitDefinitionId;
-
-      const aliasIds = unitDefinitionDto.variables.map(item => ({ id: item.id, alias: item.alias || item.id }));
-      if (unitToUpdate.scheme) {
-        unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
+      if (unitDefinitionDto.variables) {
+        unitToUpdate.variables = unitDefinitionDto.variables;
+        const aliasIds = unitDefinitionDto.variables.map(item => ({
+          id: item.id,
+          alias: item.alias || item.id
+        }));
+        if (unitToUpdate.scheme) {
+          unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
+        }
+        UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
       }
-      UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
       await this.unitsRepository.save(unitToUpdate);
     }
   }

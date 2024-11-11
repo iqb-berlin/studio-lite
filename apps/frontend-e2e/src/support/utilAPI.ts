@@ -14,15 +14,22 @@ export function addFirstUserAPI():void {
   }).then(resp => {
     Cypress.env('token_admin', resp.body);
     expect(resp.status).to.equal(201);
-    // const data:APIProps = {
-    //   username: Cypress.env('username'),
-    //   password: Cypress.env('password'),
-    //   token_admin: resp.body
-    // };
-    // const dataAdmin = new APIData(data);
-    // return dataAdmin;
   });
+  // cy.intercept('POST', '/api/init-login', req => {
+  //   Cypress.env(`token_${Cypress.env('username')}`, req.body);
+  //   req.reply({
+  //     statusCode: 201,
+  //     headers: {
+  //       'app-version': Cypress.env('version')
+  //     },
+  //     body: {
+  //       username: Cypress.env('username'),
+  //       password: Cypress.env('password')
+  //     }
+  //   });
+  // }).as(`addFirstUser${from}`);
 }
+
 // 26
 export function loginAPI(username:string, password:string) {
   cy.request({
@@ -71,21 +78,6 @@ export function getUserIdAPI(username: string, token: string):void {
   });
 }
 
-export function getCloakIdAPI():void {
-  const authorization = `bearer ${Cypress.env('token_admin')}`;
-  cy.request({
-    method: 'GET',
-    url: '/api/admin/users',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    }
-  }).then(resp => {
-    cy.wrap(resp.body[1].id).as('IdCloak');
-    expect(resp.status).to.equal(200);
-    Cypress.env('id_cloak', resp.body[1].id);
-  });
-}
 // 28
 export function changePasswordAPI(oldpass: string, newpass:string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -139,7 +131,7 @@ export function deleteUserAPI(userId: string) {
     expect(resp.status).to.equal(200);
   });
 }
-// admin-workspaces
+// admin-workspaces to delete
 export function createGroupAPI(group: GroupData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -158,7 +150,7 @@ export function createGroupAPI(group: GroupData) {
     expect(resp.status).to.equal(201);
   });
 }
-// TO DO 10.
+// TO DO 10. TO DELETE
 export function getGroupAPI(groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -174,7 +166,7 @@ export function getGroupAPI(groupKey: string) {
   });
 }
 
-// 11.
+// 11. TO DELETE
 export function getWsAPI(wsKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -190,7 +182,7 @@ export function getWsAPI(wsKey: string) {
   });
 }
 
-// 12.
+// 12. TO DELETE
 export function getUsersOfWsAPI(wsKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -225,7 +217,7 @@ export function updateUsersOfWsAPI(wsKey: string) {
     expect(resp.status).to.equal(200);
   });
 }
-// 13.Option 2
+// 13.Option 2 TO DELETE
 export function grantAccessWsAPI(wsKey: string, userId:string, accessLevel:number) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -297,7 +289,7 @@ export function deleteWsAPI(wsKey: string, groupKey: string) {
   });
 }
 
-// 8.
+// 8. TO DELETE
 export function setAdminOfGroupAPI(userKey: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
@@ -364,7 +356,7 @@ export function getWsByGroupAPI(groupKey: string) {
     expect(resp.status).to.equal(304);
   });
 }
-// 16.
+// 16. TO DELETE
 export function deleteGroupAPI(groupID: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
