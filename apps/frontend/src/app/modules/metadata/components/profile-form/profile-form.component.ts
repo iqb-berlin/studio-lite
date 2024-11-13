@@ -85,7 +85,8 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     const metadata = 'metadata';
     if (changes[metadata] &&
       !changes[metadata].firstChange &&
-      changes[metadata].previousValue !== changes[metadata].currentValue) {
+      changes[metadata].previousValue !== changes[metadata].currentValue &&
+      this.profile) {
       this.model = this.mapMetadataValuesToFormlyModel(
         this.findCurrentProfileMetadata(this.metadata.profiles)
       );

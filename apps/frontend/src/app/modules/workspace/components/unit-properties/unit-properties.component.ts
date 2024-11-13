@@ -98,21 +98,26 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       transcript: this.fb.control(''),
       reference: this.fb.control('')
     });
+    this.metadataLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(metadata => { this.metadata = metadata; });
+    this.addSubscriptionForUnitDefinitionChanges();
+    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
+      .subscribe(id => this.readDataForUnitId(id));
+    this.updateVariables();
   }
 
   async ngOnInit(): Promise<void> {
-    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
-      .subscribe(id => {
-        this.selectedUnitId = id;
-        this.readData();
-      });
-    this.initItemLoader();
-    this.addSubscriptionForUnitDefinitionChanges();
-    this.metadataLoader
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => {
-        this.metadata = metadata;
-      });
+    // load studio with selected unit
+    if (this.workspaceService.selectedUnit$.getValue()) {
+      this.readDataForUnitId(this.workspaceService.selectedUnit$.getValue());
+    }
+    this.updateVariables();
+  }
+
+  private readDataForUnitId(unitId: number): void {
+    this.selectedUnitId = unitId;
+    this.readData();
   }
 
   // properties
@@ -125,7 +130,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
     this.workspaceService.loadUnitMetadata().then(() => {
       this.setupForm();
-      this.initItemLoader();
+      this.updateVariables();
       this.loadMetaData();
     });
   }
@@ -213,16 +218,16 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   // metadata
 
   private loadMetaData() {
-    this.workspaceSettings = this.workspaceService.workspaceSettings;
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
+      this.workspaceSettings = this.workspaceService.workspaceSettings;
       const unitMetadata = unitMetadataStore.getData();
       this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
     }
   }
 
-  private initItemLoader(): void {
+  private updateVariables(): void {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (!this.workspaceService.getUnitSchemeStore()) {
       this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
