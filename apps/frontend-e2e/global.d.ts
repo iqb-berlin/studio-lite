@@ -15,6 +15,13 @@ declare namespace Cypress {
     selectModule(name: string):void;
     visitWs(ws:string):void;
     // Commands API
+    // commands-metadata.ts
+    getRegistryAPI(token:string):Chainable<Response>; // 35
+    getMetadataAPI(profile:string, token:string):Chainable<Response>; // 36
+    updateGroupMetadataAPI(groupId: string, token:string): Chainable<Response>; // 37
+    getVocabularyMetadataAPI(profile: string, token:string): Chainable<Response>; // 38
+    // updateGroupMetadataAPI(groupId: string, profiles: ProfileData[], token:string): Chainable<Response>// 38
+    updateWsMetadataAPI(wsId: string, unitProfile: string, itemProfile:string, token:string): Chainable<Response> // 39
     // commands-api.ts
     runAndIgnore(testFn:()=>void):void;
     getWsByGroupAPI(groupKey: string, num_ws: number): void;

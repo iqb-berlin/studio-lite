@@ -551,6 +551,20 @@ Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
     failOnStatusCode: false
   });
 });
+
+// Cypress.Commands.add('updateWsGroupAPI', (wsId:string, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'GET',
+//     url: `/api/workspace/${wsId}/users`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     failOnStatusCode: false
+//   });
+// });
+
 //
 // // 34
 // Cypress.Commands.add('getGroupsByWsIdAPI', (wsId:string, token:string) => {

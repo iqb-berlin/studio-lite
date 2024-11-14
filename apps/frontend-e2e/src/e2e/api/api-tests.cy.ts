@@ -62,6 +62,7 @@ describe('Studio API tests', () => {
     defaultEditor: 'iqb-editor-aspect-2.5.0-beta5.html',
     stableModulesOnly: false
   };
+
   // const setPlayer: WsSettings = {
   //   defaultEditor: 'iqb-player-aspect-2.5.0-beta5.html',
   //   stableModulesOnly: true
@@ -681,6 +682,7 @@ describe('Studio API tests', () => {
       });
     });
   });
+  /** ************************************************************************* */
   describe('Admin verona API tests', () => {
     describe('25. POST /api/verona-modules', () => {
       it('200 positive test: Get the modules ', () => {
@@ -749,7 +751,7 @@ describe('Studio API tests', () => {
       });
     });
   });
-
+  /** ************************************************************************* */
   describe('Admin workspace unit API tests', () => {
     describe('30. POST /api/workspace/{id}/units ', () => {
       it('201 positive test: should create a unit inside in ws1', () => {
@@ -941,6 +943,11 @@ describe('Studio API tests', () => {
                   .then(resp2 => {
                     expect(resp2.status).to.equal(200);
                   });
+                cy.loginAPI(user3.username, user3.password)
+                  .then(resp3 => {
+                    Cypress.env(`token_${user3.username}`, resp.body);
+                    expect(resp3.status).to.equal(201);
+                  });
               });
           });
         cy.getUsersByWsIdAPI(Cypress.env(ws1.id),
@@ -963,30 +970,187 @@ describe('Studio API tests', () => {
           });
       });
     });
-    describe('. ', () => {
-      it('200 positive test', () => {
 
+    // METADATEN BLOCK
+    describe('35. GET /api/metadata-profile/registry', () => {
+      it('200 positive test: should get at least one profile', () => {
+        cy.getRegistryAPI(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).greaterThan(1);
+          });
       });
-      it('401 negative test', () => {
-
+      it('200 positive test: should get the first profile', () => {
+        cy.getRegistryAPI(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            const profile1 = resp.body[0].url.replace('profile-config.json', '') + resp.body[0].profiles[0];
+            const profile2 = resp.body[0].url.replace('profile-config.json', '') + resp.body[0].profiles[1];
+            Cypress.env('profile1', profile1);
+            Cypress.env('profile2', profile2);
+          });
+      });
+      it('401 negative test: without credentials is not allowed to get profiles', () => {
+        cy.getRegistryAPI(noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
       });
     });
-    describe('. ', () => {
-      it('200 positive test', () => {
 
+    describe('36. GET /api/metadata-profile', () => {
+      it('200 positive test: should get data from the profile', () => {
+        cy.getMetadataAPI(Cypress.env('profile1'), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            Cypress.env('label1', resp.body.label[0].value);
+          });
+        cy.getMetadataAPI(Cypress.env('profile2'), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            Cypress.env('label2', resp.body.label[0].value);
+          });
       });
-      it('401 negative test', () => {
-
+      it('401 negative test: without credentials is not allowed to get profiles', () => {
+        cy.getMetadataAPI(Cypress.env('profile2'), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      // Should be Internal Server error
+      it('200 negative test: should fail if we ask for an inexistent profile', () => {
+        //
+        cy.getMetadataAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        cy.pause();
       });
     });
-    describe('. ', () => {
-      it('200 positive test', () => {
 
+    describe('37. UPDATE /api/workspace-groups/', () => {
+      it('200 positive test: should set metadata profile for a group ', () => {
+        // const profile1: ProfileData = {
+        //   profile: Cypress.env('profile1'),
+        //   label: Cypress.env('label1')
+        // };
+        // const profile2: ProfileData = {
+        //   profile: Cypress.env('profile2'),
+        //   label: Cypress.env('label2')
+        // };
+        // const profiles: ProfileData[] = [profile1, profile2];
+        // cy.updateGroupMetadataAPI(
+        //   Cypress.env(group1.id),
+        //   profiles,
+        //   Cypress.env(`token_${Cypress.env('username')}`))
+        //   .then(resp => {
+        //     expect(resp.status).to.equal(200);
+        //   });
+        cy.updateGroupMetadataAPI(
+          Cypress.env(group1.id),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
       });
-      it('401 negative test', () => {
-
+      it('500 negative test: should not work with false group', () => {
+        cy.updateGroupMetadataAPI(
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('401 negative test: should not work with false user', () => {
+        cy.updateGroupMetadataAPI(
+          Cypress.env(group1.id),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('401 negative test: should not work without admin privileges', () => {
+        cy.updateGroupMetadataAPI(
+          Cypress.env(group1.id),
+          Cypress.env(`token_${user3.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
       });
     });
+    describe('38. /api/metadata-profile/vocabularies', () => {
+      it('200 positive test: should get the vocabulary of a specific profiöe', () => {
+        cy.getVocabularyMetadataAPI(
+          Cypress.env('profile1'),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            console.log(resp.body);
+          });
+      });
+      it('200 negative test: should fail with a false profile', () => {
+        // An empty return would be accepted
+        cy.getVocabularyMetadataAPI(
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('401 negative test: should fail with a false user', () => {
+        cy.getVocabularyMetadataAPI(
+          Cypress.env('profile1'),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
+
+    describe('39. PATCH /api/workspace/{workspace_id}/settings', () => {
+      it('401 negative test: should not load metadata with admin privileges in the ws', () => {
+        cy.updateWsMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env('profile1'),
+          Cypress.env('profile2'),
+          Cypress.env(`token_${user3.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('401 negative test: should not load metadata with no token', () => {
+        cy.updateWsMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env('profile1'),
+          Cypress.env('profile2'),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('500 negative test: should not load metadata if we pass an non-existent ws', () => {
+        cy.updateWsMetadataAPI(
+          noId,
+          Cypress.env('profile1'),
+          Cypress.env('profile2'),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('200 positive test: set metadata for a ws', () => {
+        cy.updateWsMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env('profile1'),
+          Cypress.env('profile2'),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+    });
+
+    // METADATEN BLOCK
     describe.skip('50. /api/workspace/{workspace_id}/{ids} ', () => {
       it('200 positive test: should delete own unit', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
@@ -1038,7 +1202,7 @@ describe('Studio API tests', () => {
       });
     });
   });
-
+  /** ************************************************************************* */
   describe('Admin workspace unit API tests', () => {
     describe('. ', () => {
       it('200 positive test', () => {
@@ -1149,6 +1313,7 @@ describe('Studio API tests', () => {
 
     describe('79. DELETE /api/admin/workspaces/{ids}/{workspace_group_id}', () => {
       it('200 positive test: should delete a workspace ', () => {
+        cy.pause();
         cy.deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
