@@ -1,5 +1,5 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings
+  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser
 } from './testData';
 
 // General
@@ -353,7 +353,48 @@ Cypress.Commands.add('updateUsersOfWsAPI', (wsId:string, level:AccessLevel,
     failOnStatusCode: false
   });
 });
-
+// 21a
+Cypress.Commands.add(
+  'updateUserListOfWsAPI',
+  (wsId: string, l: AccessUser[], token: string) => {
+    const authorization = `bearer ${token}`;
+    // const num = l.length;
+    // let addText: string;
+    // addText =
+    //   '{\n' +
+    //   ` accessLevel: '${l[0].access}',\n` +
+    //   ` id: '${l[0].id}'\n` +
+    //   '}';
+    //
+    // for (let i = 1; i < num; i++) {
+    //   addText =
+    //     `${addText},{\n` +
+    //     ` accessLevel: '${l[i].access}',\n` +
+    //     ` id: '${l[i].id}'\n` +
+    //     '}';
+    // }
+    // console.log(addText);
+    cy.request({
+      method: 'PATCH',
+      url: `/api/admin/workspaces/${wsId}/users`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: [
+        {
+          accessLevel: `${l[0].access}`,
+          id: `${l[0].id}`
+        },
+        {
+          accessLevel: `${l[1].access}`,
+          id: `${l[1].id}`
+        }
+      ],
+      failOnStatusCode: false
+    });
+  }
+);
 // 22
 Cypress.Commands.add('getUsersOfWsAPI', (wsId: string, userId:string, token:string) => {
   const authorization = `bearer ${token}`;
