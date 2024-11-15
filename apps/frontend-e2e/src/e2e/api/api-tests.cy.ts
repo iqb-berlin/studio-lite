@@ -62,7 +62,6 @@ describe('Studio API tests', () => {
     defaultEditor: 'iqb-editor-aspect-2.5.0-beta5.html',
     stableModulesOnly: false
   };
-
   // const setPlayer: WsSettings = {
   //   defaultEditor: 'iqb-player-aspect-2.5.0-beta5.html',
   //   stableModulesOnly: true
@@ -557,8 +556,21 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
+        cy.pause();
       });
       it('200 positive test: should update the user of a workspace', () => {
+        // const ac: AccessUser = {
+        //   id: Cypress.env(`id_${Cypress.env('username')}`),
+        //   access: AccessLevel.Admin
+        // };
+        // const ac2: AccessUser = {
+        //   id: Cypress.env(`id_${user2.username}`),
+        //   access: AccessLevel.Admin
+        // };
+        // cy.updateUserListOfWsAPI(Cypress.env(ws.id), [ac, ac2], Cypress.env(`token_${Cypress.env('username')}`))
+        //   .then(resp => {
+        //     expect(resp.status).to.equal(200);
+        //   });
         cy.updateUsersOfWsAPI(Cypress.env(ws1.id),
           AccessLevel.Admin,
           Cypress.env(`id_${Cypress.env('username')}`),
@@ -1024,7 +1036,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
-        cy.pause();
       });
     });
 
@@ -1151,15 +1162,15 @@ describe('Studio API tests', () => {
     });
 
     // METADATEN BLOCK
-    describe.skip('50. /api/workspace/{workspace_id}/{ids} ', () => {
-      it('200 positive test: should delete own unit', () => {
-        cy.deleteUnitAPI(Cypress.env(unit1.shortname),
-          Cypress.env(ws1.id),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
+    describe('. ', () => {
+      it('200 positive test', () => {
+        cy.pause();
       });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('50. /api/workspace/{workspace_id}/{ids} ', () => {
       it('403 negative test: should not delete the unit from other user', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
           Cypress.env(ws1.id),
@@ -1226,7 +1237,6 @@ describe('Studio API tests', () => {
   describe('Admin users workspaces API tests', () => {
     describe.skip('77. GET /api/admin/users/{id}/workspaces', () => {
       it('200 positive test: should get the workspaces by admin user id', () => {
-        cy.pause();
         cy.getWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {

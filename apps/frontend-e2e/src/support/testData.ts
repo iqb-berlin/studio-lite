@@ -51,5 +51,11 @@ export interface ProfileData {
   profile: string;
   label: string;
 }
+
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 export enum Operation { GET, POST, PATCH, DELETE }
+
+export interface AccessUser {
+  id: string;
+  access: AccessLevel;
+}
