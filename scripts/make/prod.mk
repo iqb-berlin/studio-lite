@@ -228,6 +228,8 @@ studio-lite-restore-db: studio-lite-down .EXPORT_ALL_VARIABLES
 					--single-transaction\
 					--username=$(POSTGRES_USER)\
 					--dbname=$(POSTGRES_DB)\
+					--clean\
+					--if-exists\
 				/tmp/$(POSTGRES_DB).tar
 	docker compose\
 			--file $(STUDIO_LITE_BASE_DIR)/docker-compose.studio-lite.yaml\

@@ -50,6 +50,7 @@ export class ItemComponent implements OnInit, OnChanges {
     const variables: string = 'variables';
     if (changes[variables] &&
       !changes[variables].firstChange) {
+      this.updateModelVariableId();
       this.initField();
     }
   }
@@ -111,6 +112,12 @@ export class ItemComponent implements OnInit, OnChanges {
 
   private initModel(): void {
     if (this.metadata[this.itemIndex].id) this.model.id = this.metadata[this.itemIndex].id;
+    if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
+    if (this.metadata[this.itemIndex].weighting) this.model.weighting = this.metadata[this.itemIndex].weighting;
+    this.updateModelVariableId();
+  }
+
+  private updateModelVariableId(): void {
     if (this.metadata[this.itemIndex].variableReadOnlyId) {
       this.model.variableReadOnlyId = this.metadata[this.itemIndex].variableReadOnlyId;
       this.model.variableId = this.variables
@@ -120,8 +127,6 @@ export class ItemComponent implements OnInit, OnChanges {
       this.model.variableId = this.variables
         .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
     }
-    if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
-    if (this.metadata[this.itemIndex].weighting) this.model.weighting = this.metadata[this.itemIndex].weighting;
   }
 
   onModelChange(): void {

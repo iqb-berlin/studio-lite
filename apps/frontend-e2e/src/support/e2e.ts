@@ -17,3 +17,4 @@
 import './commands';
 import './commands-unit-api';
 import './commands-api';
+import './metadata/commands-metadata';
