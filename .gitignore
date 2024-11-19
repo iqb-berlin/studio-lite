@@ -5,7 +5,6 @@
 /profiles
 /data
 /database/changelogDocs
-/backup
 
 # Caches
 .angular
