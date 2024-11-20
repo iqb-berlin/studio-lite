@@ -3,7 +3,7 @@ declare namespace Cypress {
   import {
     UnitData, GroupData, WsData, AccessLevel
   } from 'support/testData';
-  import { UserData, WsSettings } from './src/support/testData';
+  import { MetadataType, UserData, WsSettings } from './src/support/testData';
 
   interface Chainable {
     // Commands UI
@@ -67,10 +67,14 @@ declare namespace Cypress {
     downloadModuleAPI(module:string, token:string): Chainable<Response>; // 28
 
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
-    getUnitsByWsAPI(token:string): Chainable<Response>; // 31
+    getUnitsByWsGAPI(token:string): Chainable<Response>; // 31
     updateWsSettings(wsId:string, settings: WsSettings, token:string):Chainable<Response>; // 32
     getWsNormalAPI(wsId:string, token:string): Chainable<Response>; // 33
     getUsersByWsIdAPI(wsId:string, token:string): Chainable<Response>; // 34
+    updateUnitMetadataAPI(wsId:string, unitId:string, data: MetadataType[], token:string): chainable<Responsable>; // 40
+    getUnitMetadataAPI(wsId:string, unitId:string, token:string): chainable<Responsable>; // 41
+    getUnitsByWsAPI(wsId:string, token:string): Chainable<Response> // 42
+
     deleteUnitAPI(unitId:string, wsId:string, token: string): Chainable<Response>; // 50
 
     getWsByUserAPI(id:string, token:string):Chainable<Response>; // 77
