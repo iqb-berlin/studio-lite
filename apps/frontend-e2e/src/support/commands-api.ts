@@ -537,7 +537,7 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
 });
 
 // 31
-Cypress.Commands.add('getUnitsByWsAPI', (token:string) => {
+Cypress.Commands.add('getUnitsByWsGAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -585,6 +585,20 @@ Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
   cy.request({
     method: 'GET',
     url: `/api/workspace/${wsId}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 42
+Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

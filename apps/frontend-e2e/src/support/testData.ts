@@ -47,6 +47,11 @@ export interface WsSettings {
   states?: string[]
 }
 
+export interface MetadataType {
+  (id: string): string,
+  (label: string): string,
+  (value: string): string,
+}
 export interface ProfileData {
   profile: string;
   label: string;
