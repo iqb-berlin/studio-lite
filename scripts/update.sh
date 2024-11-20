@@ -191,9 +191,9 @@ download_file() {
 update_files() {
   printf "4. File download\n"
 
-  download_file "${APP_DIR}/docker-compose.studio-lite.yaml docker-compose.yaml"
-  download_file "${APP_DIR}/docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml"
-  download_file "${APP_DIR}/scripts/make/studio-lite.mk scripts/make/prod.mk"
+  download_file "${APP_DIR}/docker-compose.studio-lite.yaml" docker-compose.yaml
+  download_file "${APP_DIR}/docker-compose.studio-lite.prod.yaml" docker-compose.studio-lite.prod.yaml
+  download_file "${APP_DIR}/scripts/make/studio-lite.mk" scripts/make/prod.mk
 
   printf "File download done.\n\n"
 }
