@@ -1,7 +1,7 @@
 import {
   AccessLevel, AccessUser, GroupData, UnitData, UserData, WsData, WsSettings
 } from '../../support/testData';
-import { addModules, login } from '../../support/util';
+import { addModules, login, logout } from '../../support/util';
 
 function getName(initialName: string): string {
   return initialName.replace(/-+(?=[^-\d]*\d)/, '%40').replace(/.html$/, '');
@@ -620,7 +620,7 @@ describe('Studio API tests', () => {
     });
     describe('22. GET /api/admin/workspaces/{id}/users', () => {
       it('200 positive test: should get the users of a workspace', () => {
-        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+        cy.getUsersOfWsAdminAPI(Cypress.env(ws1.id),
           Cypress.env(`id_${Cypress.env('username')}`),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -629,7 +629,7 @@ describe('Studio API tests', () => {
           });
       });
       it('200 positive test: without user id, but admin token', () => {
-        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+        cy.getUsersOfWsAdminAPI(Cypress.env(ws1.id),
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -637,7 +637,7 @@ describe('Studio API tests', () => {
           });
       });
       it('200 positive test: without user id and with user token', () => {
-        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+        cy.getUsersOfWsAdminAPI(Cypress.env(ws1.id),
           noId,
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -645,7 +645,7 @@ describe('Studio API tests', () => {
           });
       });
       it('401 negative test: should not return the users without an admin token', () => {
-        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+        cy.getUsersOfWsAdminAPI(Cypress.env(ws1.id),
           Cypress.env(`id_${Cypress.env('username')}`),
           noId)
           .then(resp => {
@@ -655,7 +655,7 @@ describe('Studio API tests', () => {
       it('200 negative test: should not return the workspace if the ' +
         'user does not have credentials in the workspace', () => {
         // #852 Should return 401s
-        cy.getUsersOfWsAPI(
+        cy.getUsersOfWsAdminAPI(
           Cypress.env(ws1.id),
           Cypress.env(`id_${Cypress.env('username')}`),
           Cypress.env(`token_${user2.username}`)
@@ -1098,7 +1098,6 @@ describe('Studio API tests', () => {
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-            console.log(resp.body);
           });
       });
       it('200 negative test: should fail with a false profile', () => {
@@ -1164,7 +1163,7 @@ describe('Studio API tests', () => {
     });
     describe('40. PATCH /api/workspace/{workspace_id}/{id}/metadata', () => {
       it('200 positive test', () => {
-
+        // TO DO
       });
       it('401 negative test', () => {
 
@@ -1173,7 +1172,7 @@ describe('Studio API tests', () => {
 
     describe('41. GET /api/workspace/{workspace_id}/{id}/metadata ', () => {
       it('200 positive test', () => {
-
+        // TO DO
       });
       it('401 negative test', () => {
 
@@ -1203,7 +1202,56 @@ describe('Studio API tests', () => {
         cy.pause();
       });
     });
-    describe('. ', () => {
+    describe('43. GET /api/workspaces/{id}/users', () => {
+      it('200 positive test: should get the users of a workspace with admin token', () => {
+        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.body.users.length).to.equal(0);
+            expect(resp.body.workspaceGroupAdmins.length).to.equal(1);
+            expect(resp.body.admins.length).to.equal(1);
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('401 negative test: should fail with user does not have credentials on the workspace', () => {
+        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('401 negative test: should not return the users without an valid token', () => {
+        cy.getUsersOfWsAPI(Cypress.env(ws1.id),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('500 negative test: without ws id should not return anything', () => {
+        cy.getUsersOfWsAPI(noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
+    describe('44.', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('43. ', () => {
+      it('200 positive test', () => {
+
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('43. ', () => {
       it('200 positive test', () => {
 
       });
@@ -1479,6 +1527,12 @@ describe('Studio API tests', () => {
           expect(resp.status).to.equal(401);
         });
       });
+    });
+  });
+  describe('Logout UI', () => {
+    it('This test is necessary because we user UI calls for verona module', () => {
+      cy.visit('/');
+      logout();
     });
   });
 });
