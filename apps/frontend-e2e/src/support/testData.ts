@@ -41,10 +41,12 @@ export interface WsSettings {
   defaultPlayer?: string,
   defaultSchemer?: string,
   unitGroups?: string[],
-  stableModulesOnly: boolean,
+  stableModulesOnly?: boolean,
   unitMDProfile?: string,
   itemMDProfile?: string,
-  states?: string[]
+  states?: string[],
+  groupName?: string,
+  id?: number
 }
 export interface MetaValue {
   name: string,
