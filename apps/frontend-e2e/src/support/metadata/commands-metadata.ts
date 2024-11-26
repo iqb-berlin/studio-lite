@@ -1,5 +1,5 @@
 // 35
-import { MetadataType } from '../testData';
+import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
 
 Cypress.Commands.add('getRegistryAPI',
   (token:string) => {
@@ -96,14 +96,28 @@ Cypress.Commands.add('updateWsMetadataAPI',
 // 40
 Cypress.Commands.add(
   'updateUnitMetadataAPI',
-  (wsId: string, unitId: string, data: MetadataType[], token: string) => {
+  (wsId: string, unitId: string, profile:string, entry: MetadataValuesEntry, token: string) => {
     const authorization = `bearer ${token}`;
+    console.log(entry);
+    console.log(wsId);
+    console.log(unitId);
+    console.log(profile);
     cy.request({
       method: 'PATCH',
       url: `/api/workspace/${wsId}/${unitId}/metadata`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
+      },
+      body: {
+        id: `${unitId}`,
+        metadata: {
+          profiles: [{
+            isCurrent: true,
+            profileId: `${profile}`,
+            entries: [`${entry}`]
+          }]
+        }
       },
       failOnStatusCode: false
     });
