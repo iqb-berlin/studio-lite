@@ -1,3 +1,6 @@
+// import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
+import { TextWithLanguage } from '@iqb/metadata';
 import {
   AccessLevel, AccessUser, GroupData, UnitData, UserData, WsData, WsSettings
 } from '../../support/testData';
@@ -998,6 +1001,7 @@ describe('Studio API tests', () => {
         cy.getRegistryAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
+            console.log(resp.body);
             const profile1 = resp.body[0].url.replace('profile-config.json', '') + resp.body[0].profiles[0];
             const profile2 = resp.body[0].url.replace('profile-config.json', '') + resp.body[0].profiles[1];
             Cypress.env('profile1', profile1);
@@ -1018,6 +1022,7 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
             Cypress.env('label1', resp.body.label[0].value);
+            console.log(resp.body.label[0].value);
           });
         cy.getMetadataAPI(Cypress.env('profile2'), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1161,23 +1166,79 @@ describe('Studio API tests', () => {
           });
       });
     });
-    describe('40. PATCH /api/workspace/{workspace_id}/{id}/metadata', () => {
-      it('200 positive test', () => {
-        // TO DO
-      });
-      it('401 negative test', () => {
-
-      });
-    });
 
     describe('41. GET /api/workspace/{workspace_id}/{id}/metadata ', () => {
       it('200 positive test', () => {
-        // TO DO
+        cy.getUnitMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env(unit1.shortname),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            Cypress.env('metadata1', resp.body);
+            console.log(resp.body);
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('500 negative test', () => {
+        cy.getUnitMetadataAPI(
+          noId,
+          Cypress.env(unit1.shortname),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('500 negative test', () => {
+        cy.getUnitMetadataAPI(
+          Cypress.env(ws1.id),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('401 negative test', () => {
+        cy.getUnitMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env(unit1.shortname),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
+
+    describe('40. PATCH /api/workspace/{workspace_id}/{id}/metadata', () => {
+      it('200 positive test: should be possible update metadata', () => {
+        cy.pause();
+        const t1: TextWithLanguage = {
+          lang: 'de',
+          value: 'Entwickler:in'
+        };
+        const t2: TextWithLanguage = {
+          lang: 'de',
+          value: 'aa'
+        };
+        const entry: MetadataValuesEntry = {
+          id: 'iqb_author',
+          label: [t1],
+          value: [t2],
+          valueAsText: [t2]
+        };
+        cy.updateUnitMetadataAPI(Cypress.env(ws1.id),
+          Cypress.env(unit1.shortname),
+          Cypress.env('profile1'),
+          entry,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
       });
       it('401 negative test', () => {
 
       });
     });
+
     // METADATEN BLOCK
     describe('42. GET /api/workspace/{workspace_id}/units', () => {
       // We add two user to the workspace
@@ -1199,7 +1260,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
-        cy.pause();
       });
     });
     describe('43. GET /api/workspaces/{id}/users', () => {
@@ -1412,7 +1472,6 @@ describe('Studio API tests', () => {
 
     describe('79. DELETE /api/admin/workspaces/{ids}/{workspace_group_id}', () => {
       it('200 positive test: should delete a workspace ', () => {
-        cy.pause();
         cy.deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
