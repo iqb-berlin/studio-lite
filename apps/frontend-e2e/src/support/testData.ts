@@ -46,16 +46,20 @@ export interface WsSettings {
   itemMDProfile?: string,
   states?: string[]
 }
+export interface MetaValue {
+  name: string,
+  value: string
+}
 
-export interface MetadataType {
-  (id: string): string,
-  (label: string): string,
-  (value: string): string,
-}
-export interface ProfileData {
-  profile: string;
-  label: string;
-}
+// export interface MetadataType {
+//   (id: string): string,
+//   (label: string): string,
+//   (value: string): string,
+// }
+// export interface ProfileData {
+//   profile: string;
+//   label: string;
+// }
 
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 export enum Operation { GET, POST, PATCH, DELETE }
