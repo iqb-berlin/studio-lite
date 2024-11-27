@@ -1,5 +1,5 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser
+  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData
 } from './testData';
 
 // General
@@ -620,7 +620,8 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
     failOnStatusCode: false
   });
 });
-// 44
+
+// 45
 Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -629,6 +630,60 @@ Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:stri
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 45
+Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: `/api/workspace/${wsId}/${unitId}/comments`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      body: `${comment.body}`,
+      userName: `${comment.userName}`,
+      userId: `${comment.userId}`,
+      unitId: `${comment.unitId}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 46
+Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/${unitId}/comments`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 47
+Cypress.Commands.add('updateCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
+  const authorization = `bearer ${token}`;
+  const now = new Date();
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/${unitId}/comments`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      userId: `${comment.userId}`,
+      userName: `${comment.userName}`,
+      lastSeenCommentChangedAt: now
     },
     failOnStatusCode: false
   });

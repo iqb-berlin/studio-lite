@@ -4,7 +4,7 @@ declare namespace Cypress {
     UnitData, GroupData, WsData, AccessLevel
   } from 'support/testData';
   import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
-  import { UserData, WsSettings } from './src/support/testData';
+  import { UserData, WsSettings, CommentData } from './src/support/testData';
 
   interface Chainable {
     // Commands UI
@@ -158,6 +158,9 @@ declare namespace Cypress {
       token: string
     ): Chainable<Response>; // 44
 
+    postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 45
+    getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 46
+    updateCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 47
     deleteUnitAPI(
       unitId: string,
       wsId: string,

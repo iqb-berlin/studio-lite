@@ -38,19 +38,38 @@ export interface InterceptData {
 
 export interface WsSettings {
   defaultEditor?: string;
-  defaultPlayer?: string,
-  defaultSchemer?: string,
-  unitGroups?: string[],
-  stableModulesOnly?: boolean,
-  unitMDProfile?: string,
-  itemMDProfile?: string,
-  states?: string[],
-  groupName?: string,
-  id?: number
+  defaultPlayer?: string;
+  defaultSchemer?: string;
+  unitGroups?: string[];
+  stableModulesOnly?: boolean;
+  unitMDProfile?: string;
+  itemMDProfile?: string;
+  states?: string[];
+  groupName?: string;
+  id?: number;
+}
+
+export interface DownloadSettings {
+  unitList: number[];
+  addPlayers: boolean;
+  addTestTakersReview: number;
+  addTestTakersMonitor: number;
+  addTestTakersHot:number;
+  passwordLess: boolean;
+  bookletSettings:string[];
 }
 export interface MetaValue {
   name: string,
   value: string
+}
+
+export interface CommentData {
+  body?: string;
+  userName?: string;
+  userId?: number;
+  parentId?: number;
+  unitId?: number;
+  lastSeenCommentChangedAt?: string;
 }
 
 // export interface MetadataType {

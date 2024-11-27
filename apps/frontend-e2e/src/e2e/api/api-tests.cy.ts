@@ -2,7 +2,7 @@
 import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
 import { TextWithLanguage } from '@iqb/metadata';
 import {
-  AccessLevel, AccessUser, GroupData, UnitData, UserData, WsData, WsSettings
+  AccessLevel, AccessUser, CommentData, GroupData, UnitData, UserData, WsData, WsSettings
 } from '../../support/testData';
 import { addModules, login, logout } from '../../support/util';
 
@@ -1313,7 +1313,6 @@ describe('Studio API tests', () => {
     });
     describe('43. GET /api/workspaces/{id}/users', () => {
       it('200 positive test: should get the users of a workspace with admin token', () => {
-        cy.pause();
         cy.getUsersOfWsAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1348,6 +1347,7 @@ describe('Studio API tests', () => {
     describe('44. PATCH /api/workspace/{workspace_id}/settings', () => {
       it('200 positive test: should be able to add a group for a unit', () => {
         cy.pause();
+        // Do not work, update the metadata.
         const setGroup: WsSettings = {
           unitGroups: ['Group1']
         };
@@ -1355,13 +1355,84 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('45. /api/workspace/{workspace_id}/download/{settings}', () => {
+      it('200 positive test: should be able to add a group for a unit', () => {
+        // no write answer
+        // eslint-disable-next-line max-len
+        const setting = `{"unitList":[${Cypress.env(unit1.shortname)}],"addPlayers":false,"addTestTakersReview":0,"addTestTakersMonitor":0,"addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}`;
+        cy.downloadWsAPI(Cypress.env(ws1.id), setting, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
         cy.pause();
       });
       it('401 negative test', () => {
 
       });
     });
-    describe('43. ', () => {
+    // COMMENTS
+    describe('45. POST /api/workspace/{workspace_id}/{id}/comments', () => {
+      it('200 positive test', () => {
+        const comment: CommentData = {
+          body: '<p>Kommentare 1 zur Aufgabe 1</p>',
+          userName: `${user2.username}`,
+          userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+          unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
+        };
+        cy.postCommentAPI(Cypress.env(ws1.id),
+          Cypress.env(unit1.shortname),
+          comment,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(201);
+          });
+        cy.pause();
+      });
+      it('401 negative test', () => {
+      });
+    });
+    describe('46. GET /api/workspace/{workspace_id}/{id}/comments', () => {
+      it('200 positive test', () => {
+        cy.getCommentsAPI(Cypress.env(ws1.id),
+          Cypress.env(unit1.shortname),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.be.equal(200);
+            expect(resp.body.length).to.be.equal(1);
+          });
+        cy.pause();
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('47. PATCH /api/workspace/{workspace_id}/{id}/comments', () => {
+      it('200 positive test', () => {
+        const comment: CommentData = {
+          body: '<p>Kommentare 1 zur Aufgabe 1</p>',
+          userName: `${user2.username}`,
+          userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+          unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
+        };
+        cy.updateCommentAPI(Cypress.env(ws1.id),
+          Cypress.env(unit1.shortname),
+          comment,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.be.equal(200);
+          });
+        cy.pause();
+      });
+      it('401 negative test', () => {
+
+      });
+    });
+    describe('48. ', () => {
       it('200 positive test', () => {
 
       });
@@ -1369,7 +1440,7 @@ describe('Studio API tests', () => {
 
       });
     });
-    describe('43. ', () => {
+    describe('49. ', () => {
       it('200 positive test', () => {
 
       });
@@ -1377,6 +1448,7 @@ describe('Studio API tests', () => {
 
       });
     });
+    // COMMENTS
     describe('50. /api/workspace/{workspace_id}/{ids} ', () => {
       it('401 negative test: should not delete the unit from other user', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
