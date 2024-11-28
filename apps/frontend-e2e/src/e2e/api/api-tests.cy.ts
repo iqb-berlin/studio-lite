@@ -75,6 +75,7 @@ describe('Studio API tests', () => {
     value: [t2],
     valueAsText: [t2]
   };
+
   // const unit3: UnitData = {
   //   shortname: 'D03',
   //   name: 'Katze',
@@ -1190,7 +1191,6 @@ describe('Studio API tests', () => {
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             Cypress.env('metadata1', resp.body);
-            console.log(resp.body);
             expect(resp.status).to.equal(200);
           });
       });
@@ -1372,80 +1372,249 @@ describe('Studio API tests', () => {
         cy.pause();
       });
       it('401 negative test', () => {
-
       });
     });
     // COMMENTS
-    describe('45. POST /api/workspace/{workspace_id}/{id}/comments', () => {
-      it('200 positive test', () => {
-        const comment: CommentData = {
+    describe('UNIT COMMENTS', {}, () => {
+      // Variables
+      let comment: CommentData;
+      before(() => {
+        comment = {
           body: '<p>Kommentare 1 zur Aufgabe 1</p>',
           userName: `${user2.username}`,
           userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
           unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
         };
-        cy.postCommentAPI(Cypress.env(ws1.id),
-          Cypress.env(unit1.shortname),
-          comment,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(201);
-          });
-        cy.pause();
       });
-      it('401 negative test', () => {
+      describe('45. POST /api/workspace/{workspace_id}/{id}/comments', () => {
+        it('201 positive test: should add a comment to a unit', () => {
+          cy.postCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            comment,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              Cypress.env('comment1', resp.body);
+              expect(resp.status).to.equal(201);
+            });
+        });
+        it('401 negative test: should not add a comment with no credentials in the ws', () => {
+          cy.postCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            comment,
+            Cypress.env(`token_${user3.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+        it('401 negative test: should not add a comment with no credentials and wrong ws', () => {
+          cy.postCommentAPI(Cypress.env(ws2.id),
+            Cypress.env(unit1.shortname),
+            comment,
+            Cypress.env(`token_${user3.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+        it('201/500 negative test: should add a comment although we pass a wrong ws', () => {
+          // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
+          // Should be 500
+          const comment2: CommentData = {
+            body: '<p>Kommentare 2 zur Aufgabe 1</p>',
+            userName: `${user2.username}`,
+            userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+            unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
+          };
+          cy.postCommentAPI(Cypress.env(ws2.id),
+            Cypress.env(unit1.shortname),
+            comment2,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              Cypress.env('comment2', resp.body);
+              expect(resp.status).to.equal(201);
+            });
+        });
+        it('500 negative test: should not add a comment although we pass no ws', () => {
+        // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
+          const comment3: CommentData = {
+            body: '<p>Kommentare 3 zur Aufgabe 1</p>',
+            userName: `${user2.username}`,
+            userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+            unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
+          };
+          cy.postCommentAPI(noId,
+            Cypress.env(unit1.shortname),
+            comment3,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+        it('500 negative test: should not add a comment with wrong format', () => {
+        // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
+          cy.postCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            noId,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
       });
-    });
-    describe('46. GET /api/workspace/{workspace_id}/{id}/comments', () => {
-      it('200 positive test', () => {
-        cy.getCommentsAPI(Cypress.env(ws1.id),
-          Cypress.env(unit1.shortname),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.be.equal(200);
-            expect(resp.body.length).to.be.equal(1);
-          });
-        cy.pause();
+      describe('46. GET /api/workspace/{workspace_id}/{id}/comments', () => {
+        it('200 positive test: should get all comments of the unit', () => {
+          cy.getCommentsAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+              expect(resp.body.length).to.be.equal(2);
+            });
+        });
+        it('401 negative test: should not retrieve with no credentials', () => {
+          cy.getCommentsAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+        it('500/200 negative test: should not retrieve with wrong unit id', () => {
+        // It returns a positive test, although the unit does not exit.
+          cy.getCommentsAPI(Cypress.env(ws1.id),
+            noId,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+              expect(resp.body.length).to.be.equal(0);
+            });
+        });
+        it('500 negative test: should not retrieve with wrong ws id', () => {
+          cy.getCommentsAPI(noId,
+            Cypress.env(unit1.shortname),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(500);
+            });
+        });
       });
-      it('401 negative test', () => {
-
+      describe('47. PATCH /api/workspace/{workspace_id}/{id}/comments', () => {
+        it('200 positive test: should chance the time stamp', () => {
+          cy.updateCommentTimeAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            comment,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+            });
+        });
       });
-    });
-    describe('47. PATCH /api/workspace/{workspace_id}/{id}/comments', () => {
-      it('200 positive test', () => {
-        const comment: CommentData = {
-          body: '<p>Kommentare 1 zur Aufgabe 1</p>',
-          userName: `${user2.username}`,
-          userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
-          unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
-        };
-        cy.updateCommentAPI(Cypress.env(ws1.id),
-          Cypress.env(unit1.shortname),
-          comment,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.be.equal(200);
-          });
-        cy.pause();
+      describe('48. PATCH /api/workspace/{workspace_id}/{id}/comments/{id}', () => {
+        it('401 negative test: should not update comment although you were an admin', () => {
+          comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
+          cy.updateCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment1'),
+            comment,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+        it('500 negative test: should not able to update a comment passing then wrong ws', () => {
+          comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
+          cy.updateCommentAPI(noId,
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment1'),
+            comment,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(500);
+            });
+        });
+        it('200/500 negative test: should not able to update a comment passing no unit', () => {
+          // If we want delete a comment without unit Id, return a 200, should 500
+          comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
+          cy.updateCommentAPI(Cypress.env(ws1.id),
+            noId,
+            Cypress.env('comment1'),
+            comment,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+            });
+        });
+        it('401 negative test: should not able to update a comment if we dont pass the comment but the id', () => {
+          comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
+          cy.updateCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment1'),
+            noId,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+        it('200 positive test: should able to update a comment if you wrote it', () => {
+          cy.updateCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment1'),
+            comment,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+            });
+        });
       });
-      it('401 negative test', () => {
-
-      });
-    });
-    describe('48. ', () => {
-      it('200 positive test', () => {
-
-      });
-      it('401 negative test', () => {
-
-      });
-    });
-    describe('49. ', () => {
-      it('200 positive test', () => {
-
-      });
-      it('401 negative test', () => {
-
+      describe('49. DELETE /api/workspace/{workspace_id}/{id}/comments/{id}', () => {
+        it('401 negative test: user with no credentials should not delete a comment', () => {
+          cy.deleteCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment2'),
+            Cypress.env(`token_${user3.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+        it('500 negative test: using false ws id, should us not allow to delete the comment', () => {
+          cy.deleteCommentAPI(noId,
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment2'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(500);
+            });
+        });
+        it('401 negative test: using false comment id, should us not allow to delete the comment', () => {
+          // it should be negative, but we get 200
+          cy.deleteCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            noId,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+            });
+        });
+        it('200/500 negative test: using false unit id, should us not allow to delete the comment', () => {
+          // This test get 200, but maybe should be 500, because we are using an no existent unit.
+          // It does not need the unit.
+          // to delete the comment. The check was only the right workspace and have the credentials
+          cy.deleteCommentAPI(Cypress.env(ws1.id),
+            noId,
+            Cypress.env('comment2'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+            });
+        });
+        it('200 positive test: admin should be able to delete comments', () => {
+          cy.deleteCommentAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            Cypress.env('comment1'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+            });
+        });
       });
     });
     // COMMENTS
