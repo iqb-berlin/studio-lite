@@ -160,7 +160,10 @@ declare namespace Cypress {
 
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 45
     getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 46
-    updateCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 47
+    updateCommentTimeAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 47
+    updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
+    Chainable<Response>; // 48
+    deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<response>; // 49
     deleteUnitAPI(
       unitId: string,
       wsId: string,

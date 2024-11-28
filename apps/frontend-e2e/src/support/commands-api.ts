@@ -670,12 +670,12 @@ Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:stri
 });
 
 // 47
-Cypress.Commands.add('updateCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
+Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
   const now = new Date();
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/${unitId}/comments`,
+    url: `/api/workspace/${wsId}/${unitId}/comments/`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -688,6 +688,41 @@ Cypress.Commands.add('updateCommentAPI', (wsId: string, unitId: string, comment:
     failOnStatusCode: false
   });
 });
+
+// 48
+Cypress.Commands.add('updateCommentAPI',
+  (wsId: string, unitId: string, commentId:string, comment: CommentData, token:string) => {
+    const authorization = `bearer ${token}`;
+    const nu = parseInt(`${comment.userId}`, 10);
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspace/${wsId}/${unitId}/comments/${commentId}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        body: `${comment.body}`,
+        userId: nu
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 49
+Cypress.Commands.add('deleteCommentAPI',
+  (wsId: string, unitId: string, commentId:string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'DELETE',
+      url: `/api/workspace/${wsId}/${unitId}/comments/${commentId}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
 
 //
 // // 34
