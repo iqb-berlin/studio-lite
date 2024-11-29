@@ -152,23 +152,23 @@ declare namespace Cypress {
 
     getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 42
     getUsersOfWsAPI(wsId: string, token: string): Chainable<Response>; // 43
-    downloadWsAPI(
-      wsId: string,
-      settings: string,
-      token: string
-    ): Chainable<Response>; // 44
-
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 45
     getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 46
     updateCommentTimeAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 47
     updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
     Chainable<Response>; // 48
-    deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<response>; // 49
+    deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 49
+    moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>
+    downloadWsAPI(
+      wsId: string,
+      settings: string,
+      token: string
+    ): Chainable<Response>; // 59
     deleteUnitAPI(
       unitId: string,
       wsId: string,
       token: string
-    ): Chainable<Response>; // 50
+    ): Chainable<Response>; // 60
 
     getWsByUserAPI(id: string, token: string): Chainable<Response>; // 77
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 78
