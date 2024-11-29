@@ -622,20 +622,6 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
 });
 
 // 45
-Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspace/${wsId}/download/${settings}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 45
 Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -669,10 +655,11 @@ Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:stri
   });
 });
 
-// 47
+// 47 NOT FINISH
 Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
   const now = new Date();
+  const nu = parseInt(`${comment.userId}`, 10);
   cy.request({
     method: 'PATCH',
     url: `/api/workspace/${wsId}/${unitId}/comments/`,
@@ -681,8 +668,7 @@ Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comm
       authorization
     },
     body: {
-      userId: `${comment.userId}`,
-      userName: `${comment.userName}`,
+      userId: nu,
       lastSeenCommentChangedAt: now
     },
     failOnStatusCode: false
@@ -724,22 +710,35 @@ Cypress.Commands.add('deleteCommentAPI',
     });
   });
 
-//
-// // 34
-// Cypress.Commands.add('getGroupsByWsIdAPI', (wsId:string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'GET',
-//     url: `/api/workspace/${wsId}/groups`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
 // 50
+Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsOriginId}/${unitId}/moveTo/${wsDestinyId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 59
+Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/download/${settings}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 60
 Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
