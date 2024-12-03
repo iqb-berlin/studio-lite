@@ -1,6 +1,7 @@
 import {
   UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData
 } from './testData';
+import { UnitExport } from '../e2e/api/api-settings.cy';
 
 // General
 Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
@@ -865,6 +866,158 @@ Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: strin
 // Cypress.Commands.add('', () => {});
 // Cypress.Commands.add('', () => {});
 // Cypress.Commands.add('', () => {});
+
+// 100
+Cypress.Commands.add('getSettingConfigAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/settings/config',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 101
+Cypress.Commands.add('updateSettingConfigAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/settings/config',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      appTitle: 'IQB-Studio',
+      introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
+      imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
+      globalWarningText: 'Warnung Aktung 2',
+      globalWarningExpiredHour: 17,
+      globalWarningExpiredDay: '2024-12-03T12:14:37.507Z',
+      hasUsers: true
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 101
+Cypress.Commands.add('updateSettingConfigAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/settings/config',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      appTitle: 'IQB-Studio',
+      globalWarningText: 'Warnung Aktung 3',
+      globalWarningExpiredHour: 17,
+      globalWarningExpiredDay: '2024-12-03T12:14:37.507Z'
+    },
+    failOnStatusCode: false
+  });
+});
+// 102
+Cypress.Commands.add('getSettingLogoAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/settings/app-logo',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 103
+Cypress.Commands.add('updateSettingLogoAPI', (token:string, color: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/settings/app-logo',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      data: '',
+      alt: '',
+      bodyBackground: `${color}`,
+      boxBackground: ''
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 104
+Cypress.Commands.add('getSettingUnitExportAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/settings/unit-export-config',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 105
+Cypress.Commands.add('updateSettingUnitExportAPI', (token:string, unitExport: UnitExport) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/settings/unit-export-config',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      unitXsdUrl: `${unitExport.unitXsdUrl}`,
+      bookletXsdUrl: `${unitExport.bookletXsdUrl}`,
+      testTakersXsdUrl: `${unitExport.testTakersXsdUrl}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 106
+Cypress.Commands.add('getSettingMissingProfilesAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/settings/missings-profiles',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 107
+Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/admin/settings/missings-profiles',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: `${profile}`,
+    failOnStatusCode: false
+  });
+});
 
 // 110 and 6 is the same
 Cypress.Commands.add('deleteFirstUserAPI', () => {

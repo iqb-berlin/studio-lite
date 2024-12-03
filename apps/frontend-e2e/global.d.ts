@@ -1,10 +1,14 @@
 /// <reference types="cypress" />
+
 declare namespace Cypress {
   import {
     UnitData, GroupData, WsData, AccessLevel
   } from 'support/testData';
   import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
-  import { UserData, WsSettings, CommentData } from './src/support/testData';
+  import {
+    UserData, WsSettings, CommentData, AccessUser
+  } from './src/support/testData';
+  import { UnitExport } from './src/e2e/api/api-settings.cy';
 
   interface Chainable {
     // Commands UI
@@ -177,6 +181,15 @@ declare namespace Cypress {
 
     deleteModuleAPI(module: string, token: string): Chainable<Response>; // 89
     deleteUserAPI(id: string, token: string): Chainable<Response>; // 90
+
+    getSettingConfigAPI(token:string): Chainable<Response>; // 100
+    updateSettingConfigAPI(token:string): Chainable<Response>; // 101
+    getSettingLogoAPI(token:string): Chainable<Response>; // 102
+    updateSettingLogoAPI(token:string, color: string): Chainable<Response>; // 103
+    getSettingUnitExportAPI(token:string): Chainable<Response>; // 104
+    updateSettingUnitExportAPI(token:string, unitExport:UnitExport): Chainable<Response>; // 105
+    getSettingMissingProfilesAPI(token:string): Chainable<Response>; // 106
+    updateSettingMissingProfilesAPI(token:string, profile:string): Chainable<Response>; // 107
     deleteFirstUserAPI(): Chainable<Response>; // 110
   }
 }
