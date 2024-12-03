@@ -1,4 +1,4 @@
-STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 ## Docker Hub Proxy (Docker Hub: REGISTRY_PATH := )
 REGISTRY_PATH := scm.cms.hu-berlin.de:443/iqb/dependency_proxy/containers/
@@ -25,12 +25,12 @@ scan-app: scan-db scan-liquibase scan-backend scan-frontend
 
 ## scans db image for security vulnerabilities
 scan-db: scan-registry-login
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
-				--file $(STUDIO_LITE_BASE_DIR)/database/Postgres.Dockerfile\
+				--file $(STUDIO_BASE_DIR)/database/Postgres.Dockerfile\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-db:scan\
 			.
 		docker run\
@@ -57,12 +57,12 @@ scan-db: scan-registry-login
 
 ## scans liquibase image for security vulnerabilities
 scan-liquibase: scan-registry-login
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
-				--file $(STUDIO_LITE_BASE_DIR)/database/Liquibase.Dockerfile\
+				--file $(STUDIO_BASE_DIR)/database/Liquibase.Dockerfile\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-liquibase:scan\
 			.
 		docker run\
@@ -89,21 +89,21 @@ scan-liquibase: scan-registry-login
 
 ## scans backend image for security vulnerabilities
 scan-backend: scan-registry-login
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--tag studio-lite-base:scan\
 			.
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--target=prod\
 				--build-arg PROJECT=api\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--build-arg BASE_IMAGE_NAME=studio-lite-base:scan\
-				--file $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
+				--file $(STUDIO_BASE_DIR)/apps/api/Dockerfile\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-backend:scan\
 			.
 		docker run\
@@ -130,21 +130,21 @@ scan-backend: scan-registry-login
 
 ## scans frontend image for security vulnerabilities
 scan-frontend: scan-registry-login
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--tag studio-lite-base:scan\
 			.
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--target=prod\
 				--build-arg PROJECT=frontend\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
 				--build-arg BASE_IMAGE_NAME=studio-lite-base:scan\
-				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
+				--file $(STUDIO_BASE_DIR)/apps/frontend/Dockerfile\
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-frontend:scan\
 			.
 		docker run\

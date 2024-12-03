@@ -1,5 +1,5 @@
-STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
-MK_FILE_DIR := $(STUDIO_LITE_BASE_DIR)/scripts/make
+STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
+MK_FILE_DIR := $(STUDIO_BASE_DIR)/scripts/make
 
 audit-app:
 	$(MAKE) -f $(MK_FILE_DIR)/audit.mk -C $(MK_FILE_DIR) $@
@@ -143,6 +143,10 @@ studio-lite-restore-db:
 studio-lite-dump-db-data-only:
 	$(MAKE) -f $(MK_FILE_DIR)/prod.mk -C $(MK_FILE_DIR) $@
 studio-lite-restore-db-data-only:
+	$(MAKE) -f $(MK_FILE_DIR)/prod.mk -C $(MK_FILE_DIR) $@
+studio-lite-export-backend-vol:
+	$(MAKE) -f $(MK_FILE_DIR)/prod.mk -C $(MK_FILE_DIR) $@
+studio-lite-import-backend-vol:
 	$(MAKE) -f $(MK_FILE_DIR)/prod.mk -C $(MK_FILE_DIR) $@
 studio-lite-update:
 	$(MAKE) -f $(MK_FILE_DIR)/prod.mk -C $(MK_FILE_DIR) $@

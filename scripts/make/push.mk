@@ -1,4 +1,4 @@
-STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 TAG := dev
 
 ## prevents collisions of make target names with possible file names
@@ -6,27 +6,27 @@ TAG := dev
 
 ## Build and tag all docker images
 .build:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
 				--no-cache\
 				--rm\
-				--file $(STUDIO_LITE_BASE_DIR)/database/Postgres.Dockerfile\
+				--file $(STUDIO_BASE_DIR)/database/Postgres.Dockerfile\
 				--tag iqbberlin/studio-lite-db:$(TAG)\
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-db:$(TAG)\
 			.
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
 				--no-cache\
 				--rm\
-				--file $(STUDIO_LITE_BASE_DIR)/database/Liquibase.Dockerfile\
+				--file $(STUDIO_BASE_DIR)/database/Liquibase.Dockerfile\
 				--tag iqbberlin/studio-lite-liquibase:$(TAG)\
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-liquibase:$(TAG)\
 			.
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--pull\
@@ -34,7 +34,7 @@ TAG := dev
 				--rm\
 				--tag studio-lite-base:$(TAG)\
 			.
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--no-cache\
@@ -42,11 +42,11 @@ TAG := dev
 				--target=prod\
 				--build-arg PROJECT=api\
 				--build-arg BASE_IMAGE_NAME=studio-lite-base:$(TAG)\
-				--file $(STUDIO_LITE_BASE_DIR)/apps/api/Dockerfile\
+				--file $(STUDIO_BASE_DIR)/apps/api/Dockerfile\
 				--tag iqbberlin/studio-lite-backend:$(TAG)\
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-backend:$(TAG)\
 			.
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--no-cache\
@@ -54,7 +54,7 @@ TAG := dev
 				--target=prod\
 				--build-arg PROJECT=frontend\
 				--build-arg BASE_IMAGE_NAME=studio-lite-base:$(TAG)\
-				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend/Dockerfile\
+				--file $(STUDIO_BASE_DIR)/apps/frontend/Dockerfile\
 				--tag iqbberlin/studio-lite-frontend:$(TAG)\
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend:$(TAG)\
 			.
