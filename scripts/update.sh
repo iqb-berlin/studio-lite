@@ -5,8 +5,8 @@ declare APP_NAME='studio-lite'
 declare REPO_URL="https://raw.githubusercontent.com/iqb-berlin/${APP_NAME}"
 declare REPO_API="https://api.github.com/repos/iqb-berlin/${APP_NAME}"
 
-declare SOURCE_VERSION="${1}"
-declare TARGET_VERSION="${2}"
+declare SOURCE_VERSION
+declare TARGET_VERSION="${1}"
 declare MAKE_BASE_DIR_NAME='STUDIO_BASE_DIR'
 declare RELEASE_REGEX='^((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))$'
 declare PRERELEASE_REGEX='^(0|([1-9][0-9]*))\.(0|([1-9][0-9]*))\.(0|([1-9][0-9]*))(-((alpha|beta|rc)((\.)?([1-9][0-9]*))?))$'
@@ -267,6 +267,7 @@ run_optional_migration_scripts() {
 
 load_docker_environment_variables() {
   source ".env.${APP_NAME}"
+  SOURCE_VERSION="${TAG}"
 }
 
 data_services_up() {
@@ -404,8 +405,8 @@ run_update_script_in_selected_version() {
       printf "compare it with the old one\n(e.g.: 'diff %s %s').\n\n" \
         "scripts/update_${APP_NAME}.sh" "backup/release/${SOURCE_VERSION}/scripts/update_${APP_NAME}.sh"
 
-      printf "  If you want to resume this update process, please type: 'bash scripts/update_%s.sh %s %s'\n\n" \
-        "${APP_NAME}" "${SOURCE_VERSION}" "${TARGET_VERSION}"
+      printf "  If you want to resume this update process, please type: 'bash scripts/update_%s.sh %s'\n\n" \
+        "${APP_NAME}" "${TARGET_VERSION}"
 
       printf "'%s' update script finished.\n\n" "${APP_NAME}"
 
@@ -414,7 +415,7 @@ run_update_script_in_selected_version() {
 
     printf "Update script modification check done.\n\n"
 
-    bash "${APP_DIR}/scripts/update_${APP_NAME}.sh" "${SOURCE_VERSION}" "${TARGET_VERSION}"
+    bash "${APP_DIR}/scripts/update_${APP_NAME}.sh" "${TARGET_VERSION}"
     exit ${?}
 
   else
@@ -839,10 +840,10 @@ main() {
       if [ "${choice}" = 1 ]; then
         printf "\n=== UPDATE '%s' application ===\n\n" "${APP_NAME}"
 
+        load_docker_environment_variables
         get_new_release_version
         create_app_dir_backup
         run_optional_migration_scripts
-        load_docker_environment_variables
         create_data_backup
         run_update_script_in_selected_version
         prepare_installation_dir
