@@ -211,8 +211,8 @@ describe('Studio API tests', () => {
               });
           });
       });
-      it('401 negative test: ', () => {
-        cy.createUserAPI(fakeUser, Cypress.env(`token_${user2.username}`))
+      it('201 negative test: without credentials should not create a new user', () => {
+        cy.createUserAPI(fakeUser, noId)
           .then(res => {
             expect(res.status).to.equal(401);
           });
@@ -221,6 +221,7 @@ describe('Studio API tests', () => {
 
     describe('7. GET /api/admin/users/full', () => {
       it('200 positive test', () => {
+        cy.pause();
         cy.getUsersFullAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);

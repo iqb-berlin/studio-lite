@@ -97,6 +97,7 @@ Cypress.Commands.add('keycloakAPI', (user:UserData) => {
 // 6
 Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
   const authorization = `bearer ${token}`;
+  const isAdmin = userData.isAdmin;
   cy.request({
     method: 'POST',
     url: '/api/admin/users',
@@ -107,7 +108,7 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
     body: {
       name: `${userData.username}`,
       password: `${userData.password}`,
-      isAdmin: `${userData.isAdmin}`
+      isAdmin: isAdmin
     },
     failOnStatusCode: false
   });
@@ -163,7 +164,6 @@ Cypress.Commands.add('updateUserAPI',
   (user:UserData, credentials: boolean, token:string) => {
     const authorization = `bearer ${token}`;
     const nu = parseInt(`${Cypress.env(`id_${user.username}`)}`, 10);
-    console.log(nu);
     cy.request({
       method: 'PATCH',
       url: '/api/admin/users',
@@ -882,7 +882,7 @@ Cypress.Commands.add('getSettingConfigAPI', (token:string) => {
 });
 
 // 101
-Cypress.Commands.add('updateSettingConfigAPI', (token:string) => {
+Cypress.Commands.add('updateSettingConfigAPI', (token:string, hour:number) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -893,36 +893,15 @@ Cypress.Commands.add('updateSettingConfigAPI', (token:string) => {
     },
     body: {
       appTitle: 'IQB-Studio',
-      introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
-      imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
       globalWarningText: 'Warnung Aktung 2',
-      globalWarningExpiredHour: 17,
-      globalWarningExpiredDay: '2024-12-03T12:14:37.507Z',
+      globalWarningExpiredHour: `${hour}`,
+      globalWarningExpiredDay: new Date(),
       hasUsers: true
     },
     failOnStatusCode: false
   });
 });
 
-// 101
-Cypress.Commands.add('updateSettingConfigAPI', (token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: '/api/admin/settings/config',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      appTitle: 'IQB-Studio',
-      globalWarningText: 'Warnung Aktung 3',
-      globalWarningExpiredHour: 17,
-      globalWarningExpiredDay: '2024-12-03T12:14:37.507Z'
-    },
-    failOnStatusCode: false
-  });
-});
 // 102
 Cypress.Commands.add('getSettingLogoAPI', (token:string) => {
   const authorization = `bearer ${token}`;
@@ -1014,7 +993,10 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
       'app-version': Cypress.env('version'),
       authorization
     },
-    body: `${profile}`,
+    body: [{
+      label: 'IQB-Standard',
+      missings: profile
+    }],
     failOnStatusCode: false
   });
 });
