@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
+declare APP_DIR
 declare APP_NAME='studio-lite'
-
-declare INSTALL_SCRIPT_NAME=${0}
-declare SELECTED_VERSION=${1}
 declare REPO_URL="https://raw.githubusercontent.com/iqb-berlin/${APP_NAME}"
 declare REPO_API="https://api.github.com/repos/iqb-berlin/${APP_NAME}"
-declare TRAEFIK_REPO_URL="https://raw.githubusercontent.com/iqb-berlin/traefik"
-declare TRAEFIK_REPO_API="https://api.github.com/repos/iqb-berlin/traefik"
+
+declare INSTALL_SCRIPT_NAME="${0}"
+declare TARGET_VERSION="${1}"
+declare MAKE_BASE_DIR_NAME='STUDIO_BASE_DIR'
 declare REQUIRED_PACKAGES=("docker -v" "docker compose version")
 declare OPTIONAL_PACKAGES=("make -v")
 
@@ -19,9 +19,9 @@ ENV_VARS[POSTGRES_DB]="${APP_NAME}"
 
 declare ENV_VAR_ORDER=(POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB)
 
-declare TARGET_TAG
-declare TARGET_DIR
 declare TRAEFIK_DIR
+declare TRAEFIK_REPO_URL="https://raw.githubusercontent.com/iqb-berlin/traefik"
+declare TRAEFIK_REPO_API="https://api.github.com/repos/iqb-berlin/traefik"
 
 get_release_version() {
   declare latest_release
@@ -32,8 +32,8 @@ get_release_version() {
     tr -d , | \
     tr -d " ")
 
-  while read -p '1. Please name the desired release tag: ' -er -i "${latest_release}" TARGET_TAG; do
-    if ! curl --head --silent --fail --output /dev/null "${REPO_URL}/${TARGET_TAG}/README.md" 2>/dev/null; then
+  while read -p '1. Please name the desired release tag: ' -er -i "${latest_release}" TARGET_VERSION; do
+    if ! curl --head --silent --fail --output /dev/null "${REPO_URL}/${TARGET_VERSION}/README.md" 2>/dev/null; then
       printf "This version tag does not exist.\n"
     else
       break
@@ -41,7 +41,7 @@ get_release_version() {
   done
 
   # Check install script matches the selected release ...
-  declare new_install_script="${REPO_URL}/${TARGET_TAG}/scripts/install.sh"
+  declare new_install_script="${REPO_URL}/${TARGET_VERSION}/scripts/install.sh"
   if ! curl --stderr /dev/null "${new_install_script}" | diff -q - "${INSTALL_SCRIPT_NAME}" &>/dev/null; then
     printf -- '- Current install script does not match the selected release install script!\n'
     printf '  Downloading a new install script for the selected release ...\n'
@@ -60,23 +60,24 @@ get_release_version() {
     read -p "  Do you want to continue? [Y/n] " -er -n 1 is_continue
     if [[ ${is_continue} =~ ^[nN]$ ]]; then
       printf "\n  You can check the the new install script (e.g.: 'less %s') or " "install_${APP_NAME}.sh"
-      printf "compare it with the old one (e.g.: 'diff %s %s').\n\n" "install_${APP_NAME}.sh" "${INSTALL_SCRIPT_NAME}_old"
+      printf "compare it with the old one (e.g.: 'diff %s %s').\n\n" \
+        "install_${APP_NAME}.sh" "${INSTALL_SCRIPT_NAME}_old"
 
       printf "  If you want to resume this install process, please type: 'bash install_%s.sh %s'\n\n" \
-        "${APP_NAME}" "${TARGET_TAG}"
+        "${APP_NAME}" "${TARGET_VERSION}"
 
       printf "'%s' install script finished.\n" "${APP_NAME}"
       exit 0
     fi
 
-    bash "install_${APP_NAME}.sh" "${TARGET_TAG}"
+    bash "install_${APP_NAME}.sh" "${TARGET_VERSION}"
 
     # remove old install script
     if [ -f "${INSTALL_SCRIPT_NAME}_old" ]; then
       rm "${INSTALL_SCRIPT_NAME}_old"
     fi
 
-    exit $?
+    exit ${?}
   fi
 
   printf "\n"
@@ -116,7 +117,7 @@ check_prerequisites() {
   done
   printf "Optional packages successfully checked.\n\n"
 
-  printf "2.3 Checking IQB infrastructure software is installed ...\n"
+  printf "2.3 Checking application infrastructure software is installed ...\n"
   # Check edge router (traefik) is already installed
   declare traefik_dir_array
   readarray -d '' traefik_dir_array < <(find / -name ".env.traefik" -print0 2>/dev/null)
@@ -174,7 +175,7 @@ install_application_infrastructure() {
       tr -d , | \
       tr -d " ")
 
-    printf "2.4 Installing missing IQB application infrastructure software:\n"
+    printf "2.4 Installing missing application infrastructure software:\n"
     printf "Downloading traefik installation script version %s ...\n" "${LATEST_TRAEFIK_RELEASE}"
     if curl -s --fail -o install_traefik.sh "${TRAEFIK_REPO_URL}/${LATEST_TRAEFIK_RELEASE}/scripts/install.sh"; then
       chmod +x install_traefik.sh
@@ -195,7 +196,7 @@ install_application_infrastructure() {
 
     declare traefik_dir_count=${#traefik_dir_array[*]}
     if [ "${traefik_dir_count}" -eq 0 ]; then
-      printf -- '- No IQB Infrastructure environment file found.\n'
+      printf -- '- No application infrastructure settings found.\n'
       printf 'Install script finished with error\n'
       exit 1
 
@@ -217,22 +218,24 @@ install_application_infrastructure() {
       done
     fi
 
-    printf 'Infrastructure installation checked.\n'
-
-    printf "\nMissing IQB application infrastructure successfully installed.\n\n"
-    printf "\n------------------------------------------------------------\n"
-    printf "Proceed with the original '%s' installation ..." "${APP_NAME}"
-    printf "\n------------------------------------------------------------\n"
+    printf "Infrastructure installation checked.\n"
+    printf "\n"
+    printf "Missing application infrastructure successfully installed.\n"
+    printf "\n"
+    printf "\n"
+    printf -- "------------------------------------------------------------\n"
+    printf "Proceed with the original '%s' installation ...\n" "${APP_NAME}"
+    printf -- "------------------------------------------------------------\n"
     printf "\n"
   fi
 }
 
 prepare_installation_dir() {
-  while read -p '3. Determine installation directory: ' -er -i "$PWD/${APP_NAME}" TARGET_DIR; do
-    if [ ! -e "${TARGET_DIR}" ]; then
+  while read -p '3. Determine installation directory: ' -er -i "${PWD}/${APP_NAME}" APP_DIR; do
+    if [ ! -e "${APP_DIR}" ]; then
       break
 
-    elif [ -d "${TARGET_DIR}" ] && [ -z "$(find "${TARGET_DIR}" -maxdepth 0 -type d -empty 2>/dev/null)" ]; then
+    elif [ -d "${APP_DIR}" ] && [ -z "$(find "${APP_DIR}" -maxdepth 0 -type d -empty 2>/dev/null)" ]; then
       declare is_continue
       read -p "You have selected a non empty directory. Continue anyway? [y/N] " -er -n 1 is_continue
       if [[ ! ${is_continue} =~ ^[yY]$ ]]; then
@@ -243,29 +246,32 @@ prepare_installation_dir() {
       break
 
     else
-      printf "'%s' is not a directory!\n\n" "${TARGET_DIR}"
+      printf "'%s' is not a directory!\n\n" "${APP_DIR}"
     fi
 
   done
 
   printf "\n"
 
-  mkdir -p "${TARGET_DIR}/backup/release"
-  mkdir -p "${TARGET_DIR}/backup/database_dump"
-  mkdir -p "${TARGET_DIR}/config/frontend"
-  mkdir -p "${TARGET_DIR}/scripts/make"
-  mkdir -p "${TARGET_DIR}/scripts/migration"
+  mkdir -p "${APP_DIR}/backup/release"
+  mkdir -p "${APP_DIR}/backup/temp"
+  mkdir -p "${APP_DIR}/config/frontend"
+  mkdir -p "${APP_DIR}/scripts/make"
+  mkdir -p "${APP_DIR}/scripts/migration"
 
-  cd "${TARGET_DIR}"
+  cd "${APP_DIR}"
 }
 
 download_file() {
-  if curl --silent --fail --output "${1}" "${REPO_URL}/${TARGET_TAG}/${2}"; then
-    printf -- "- File '%s' successfully downloaded.\n" "${1}"
+  declare local_file="${1}"
+  declare remote_file="${REPO_URL}/${TARGET_VERSION}/${2}"
 
+  if curl --silent --fail --output "${local_file}" "${remote_file}"; then
+    printf -- "- File '%s' successfully downloaded.\n" "${1}"
   else
     printf -- "- File '%s' download failed.\n\n" "${1}"
-    printf "'%s' installation script finished with error.\n" "${APP_NAME}"
+    printf "'%s' installation script finished with error.\n\n" "${APP_NAME}"
+
     exit 1
   fi
 }
@@ -273,11 +279,11 @@ download_file() {
 download_files() {
   printf "4. Downloading files:\n"
 
-  download_file docker-compose.studio-lite.yaml docker-compose.yaml
-  download_file docker-compose.studio-lite.prod.yaml docker-compose.studio-lite.prod.yaml
-  download_file .env.studio-lite.template .env.studio-lite.template
+  download_file "docker-compose.${APP_NAME}.yaml" docker-compose.yaml
+  download_file "docker-compose.${APP_NAME}.prod.yaml" "docker-compose.${APP_NAME}.prod.yaml"
+  download_file ".env.${APP_NAME}.template" ".env.${APP_NAME}.template"
   download_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template
-  download_file scripts/make/studio-lite.mk scripts/make/prod.mk
+  download_file "scripts/make/${APP_NAME}.mk" scripts/make/prod.mk
   download_file "scripts/update_${APP_NAME}.sh" scripts/update.sh
   chmod +x "scripts/update_${APP_NAME}.sh"
 
@@ -286,16 +292,18 @@ download_files() {
 
 customize_settings() {
   # Activate environment file
-  cp .env.studio-lite.template .env.studio-lite
+  cp ".env.${APP_NAME}.template" ".env.${APP_NAME}"
 
   # Set Edge Router Directory
-  sed -i.bak "s|TRAEFIK_DIR.*|TRAEFIK_DIR=${TRAEFIK_DIR}|" .env.studio-lite && rm .env.studio-lite.bak
+  sed -i.bak "s|^TRAEFIK_DIR.*|TRAEFIK_DIR=${TRAEFIK_DIR}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   # Load defaults
-  source .env.studio-lite
+  source ".env.${APP_NAME}"
 
   # Setup environment variables
   printf "5. Set Environment variables (default postgres password is generated randomly):\n\n"
+
+  sed -i.bak "s|^TAG.*|TAG=${TARGET_VERSION}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   declare server_name
   if [ -n "${TRAEFIK_DIR}" ]; then
@@ -303,34 +311,32 @@ customize_settings() {
   else
     read -p "SERVER_NAME: " -er -i "${server_name}" server_name
   fi
-  sed -i.bak "s|SERVER_NAME.*|SERVER_NAME=${server_name}|" .env.studio-lite && rm .env.studio-lite.bak
-
-  sed -i.bak "s|TAG.*|TAG=${TARGET_TAG}|" .env.studio-lite && rm .env.studio-lite.bak
+  sed -i.bak "s|^SERVER_NAME.*|SERVER_NAME=${server_name}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   declare env_var_name
   for env_var_name in "${ENV_VAR_ORDER[@]}"; do
     declare env_var_value
     read -p "${env_var_name}: " -er -i "${ENV_VARS[${env_var_name}]}" env_var_value
-    sed -i.bak "s|${env_var_name}.*|${env_var_name}=${env_var_value}|" .env.studio-lite && rm .env.studio-lite.bak
+    sed -i.bak "s|^${env_var_name}.*|${env_var_name}=${env_var_value}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
   done
 
   declare jwt_secret
   jwt_secret=$(openssl rand -base64 32 | tr -- '+/' '-_')
-  sed -i.bak "s|JWT_SECRET.*|JWT_SECRET=${jwt_secret}|" .env.studio-lite && rm .env.studio-lite.bak
+  sed -i.bak "s|JWT_SECRET.*|JWT_SECRET=${jwt_secret}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   # Setup makefiles
-  sed -i.bak "s|STUDIO_LITE_BASE_DIR :=.*|STUDIO_LITE_BASE_DIR := \\${TARGET_DIR}|" scripts/make/studio-lite.mk &&
-    rm scripts/make/studio-lite.mk.bak
-  sed -i.bak "s|scripts/update.sh|scripts/update_${APP_NAME}.sh|" scripts/make/studio-lite.mk &&
-    rm scripts/make/studio-lite.mk.bak
+  sed -i.bak "s|${MAKE_BASE_DIR_NAME} :=.*|${MAKE_BASE_DIR_NAME} := \\${APP_DIR}|" "scripts/make/${APP_NAME}.mk" &&
+    rm "scripts/make/${APP_NAME}.mk.bak"
+  sed -i.bak "s|scripts/update.sh|scripts/update_${APP_NAME}.sh|" "scripts/make/${APP_NAME}.mk" &&
+    rm "scripts/make/${APP_NAME}.mk.bak"
 
-  if [ -n "${TRAEFIK_DIR}" ] && [ "${TRAEFIK_DIR}" != "${TARGET_DIR}" ]; then
-    cp "${TRAEFIK_DIR}/Makefile" "${TARGET_DIR}/Makefile"
-    printf "include %s/scripts/make/studio-lite.mk\n" "${TARGET_DIR}" >>"${TARGET_DIR}/Makefile"
-  elif [ -n "${TRAEFIK_DIR}" ] && [ "${TRAEFIK_DIR}" == "${TARGET_DIR}" ]; then
-    printf "include %s/scripts/make/studio-lite.mk\n" "${TARGET_DIR}" >>"${TARGET_DIR}/Makefile"
+  if [ -n "${TRAEFIK_DIR}" ] && [ "${TRAEFIK_DIR}" != "${APP_DIR}" ]; then
+    cp "${TRAEFIK_DIR}/Makefile" Makefile
+    printf "include %s/scripts/make/%s.mk\n" "${APP_DIR}" "${APP_NAME}" >>Makefile
+  elif [ -n "${TRAEFIK_DIR}" ] && [ "${TRAEFIK_DIR}" == "${APP_DIR}" ]; then
+    printf "include %s/scripts/make/%s.mk\n" "${APP_DIR}" "${APP_NAME}" >>Makefile
   else
-    printf "include %s/scripts/make/studio-lite.mk\n" "${TARGET_DIR}" >"${TARGET_DIR}/Makefile"
+    printf "include %s/scripts/make/%s.mk\n" "${APP_DIR}" "${APP_NAME}" >Makefile
   fi
 
   # Init nginx http configuration
@@ -342,26 +348,31 @@ customize_settings() {
 application_start() {
   printf "'%s' installation done.\n\n" "${APP_NAME}"
 
-  if command make -v >/dev/null 2>&1; then
     declare is_start_now
     read -p "Do you want to start ${APP_NAME} now? [Y/n] " -er -n 1 is_start_now
     printf '\n'
     if [[ ! ${is_start_now} =~ [nN] ]]; then
-      make studio-lite-up
+      if ! test "$(docker network ls -q --filter name=app-net)"; then
+        docker network create app-net
+      fi
+      docker compose \
+        --env-file ".env.${APP_NAME}" \
+        --file "docker-compose.${APP_NAME}.yaml" \
+        --file "docker-compose.${APP_NAME}.prod.yaml" \
+        pull
+      docker compose \
+        --env-file ".env.${APP_NAME}" \
+        --file "docker-compose.${APP_NAME}.yaml" \
+        --file "docker-compose.${APP_NAME}.prod.yaml" \
+        up -d
     else
       printf "'%s' installation script finished.\n" "${APP_NAME}"
       exit 0
     fi
-
-  else
-    printf 'You can start the docker services now.\n\n'
-    printf "'%s' installation script finished.\n" "${APP_NAME}"
-    exit 0
-  fi
 }
 
 main() {
-  if [ -z "${SELECTED_VERSION}" ]; then
+  if [ -z "${TARGET_VERSION}" ]; then
     printf "\n==================================================\n"
     printf "'%s' installation script started ..." "${APP_NAME}" | tr '[:lower:]' '[:upper:]'
     printf "\n==================================================\n"
@@ -382,8 +393,6 @@ main() {
     application_start
 
   else
-
-    TARGET_TAG="${SELECTED_VERSION}"
 
     check_prerequisites
 

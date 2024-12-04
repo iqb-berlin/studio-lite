@@ -1,6 +1,6 @@
-STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-include $(STUDIO_LITE_BASE_DIR)/.env.dev
+include $(STUDIO_BASE_DIR)/.env.dev
 
 ## exports all variables (especially those of the included .env.dev file!)
 .EXPORT_ALL_VARIABLES:
@@ -15,11 +15,11 @@ dev-test-app: dev-test-backend dev-test-frontend
 
 ## Run backend tests (only in combination with 'make dev-up')
 dev-test-backend:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev exec -it backend bash -c "nx test api"
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev exec -it backend bash -c "nx test api"
 
 ## Run frontend tests (only in combination with 'make dev-up')
 dev-test-frontend:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev exec -it frontend bash -c "nx test frontend"
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev exec -it frontend bash -c "nx test frontend"
 
 ## disables printing the recipe of a make target before executing it
 .SILENT: dev-test-registry-login dev-test-registry-logout
@@ -34,17 +34,17 @@ dev-test-registry-logout:
 
 ## Build docker e2e test image (e.g. at nx workspace updates)
 dev-test-build-e2e: dev-test-registry-login
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
 				--build-arg REGISTRY_PATH=$(REGISTRY_PATH)\
-				--file $(STUDIO_LITE_BASE_DIR)/apps/frontend-e2e/Dockerfile\
+				--file $(STUDIO_BASE_DIR)/apps/frontend-e2e/Dockerfile\
 				--tag studio-lite-frontend-e2e:$(TAG)\
 			.
 
 ## Run all e2e tests in dev environment (only in combination with 'make dev-up')
 dev-test-e2e:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -55,7 +55,7 @@ dev-test-e2e:
 
 ## Run all e2e api tests in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-api:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -67,7 +67,7 @@ dev-test-e2e-api:
 
 ## Run all e2e ui tests with chrome browser in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-chrome:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -79,7 +79,7 @@ dev-test-e2e-ui-chrome:
 
 ## Run all e2e ui tests with chrome browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-chrome-mobile:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -92,7 +92,7 @@ dev-test-e2e-ui-chrome-mobile:
 
 ## Run all e2e ui tests with firefox browser in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-firefox:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -104,7 +104,7 @@ dev-test-e2e-ui-firefox:
 
 ## Run all e2e ui tests with firefox browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-firefox-mobile:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -117,7 +117,7 @@ dev-test-e2e-ui-firefox-mobile:
 
 ## Run all e2e ui tests with edge browser in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-edge:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
@@ -129,7 +129,7 @@ dev-test-e2e-ui-edge:
 
 ## Run all e2e ui tests with edge browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-edge-mobile:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\

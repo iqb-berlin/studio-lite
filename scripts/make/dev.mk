@@ -1,6 +1,6 @@
-STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-include $(STUDIO_LITE_BASE_DIR)/.env.dev
+include $(STUDIO_BASE_DIR)/.env.dev
 
 ## exports all variables (especially those of the included .env.dev file!)
 .EXPORT_ALL_VARIABLES:
@@ -23,19 +23,19 @@ dev-registry-logout:
 ## Build docker images
 # Param (optional): SERVICE - Build the specified service only, e.g. `SERVICE=db make dev-build`
 dev-build: dev-registry-login
-	cd $(STUDIO_LITE_BASE_DIR) && docker build --progress plain --pull -t studio-lite-base:latest .
-	docker compose --progress plain --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev build $(SERVICE)
+	cd $(STUDIO_BASE_DIR) && docker build --progress plain --pull -t studio-lite-base:latest .
+	docker compose --progress plain --env-file $(STUDIO_BASE_DIR)/.env.dev build $(SERVICE)
 
 ## Create and start all docker containers
 dev-up:
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
 	fi
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev up --no-build --pull never -d
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev up --no-build --pull never -d
 
 ## Stop and remove all docker containers, preserve data volumes
 dev-down:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev down
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev down
 	@if test $(shell docker network ls -q --filter name=app-net);\
 		then docker network rm $(shell docker network ls -q -f name=app-net);\
 	fi
@@ -43,27 +43,27 @@ dev-down:
 ## Start docker containers
 # Param (optional): SERVICE - Start the specified service only, e.g. `SERVICE=db make dev-start`
 dev-start:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev start $(SERVICE)
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev start $(SERVICE)
 
 ## Stop docker containers
 # Param (optional): SERVICE - Stop the specified service only, e.g. `SERVICE=db make dev-stop`
 dev-stop:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev stop $(SERVICE)
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev stop $(SERVICE)
 
 ## Show status of containers
 # Param (optional): SERVICE - Show status of the specified service only, e.g. `SERVICE=db make dev-status`
 dev-status:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev ps -a $(SERVICE)
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev ps -a $(SERVICE)
 
 ## Show service logs
 # Param (optional): SERVICE - Show log of the specified service only, e.g. `SERVICE=db make dev-logs`
 dev-logs:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev logs -f $(SERVICE)
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev logs -f $(SERVICE)
 
 ## Show services configuration
 # Param (optional): SERVICE - Show config of the specified service only, e.g. `SERVICE=db make dev-config`
 dev-config:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev config $(SERVICE)
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev config $(SERVICE)
 
 ## Remove all stopped containers, all unused networks, all dangling images, and all dangling cache
 dev-system-prune:
