@@ -1,7 +1,7 @@
 SHELL:=/bin/bash -O extglob
-STUDIO_LITE_BASE_DIR := $(shell git rev-parse --show-toplevel)
+STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-include $(STUDIO_LITE_BASE_DIR)/.env.dev
+include $(STUDIO_BASE_DIR)/.env.dev
 
 ## exports all variables (especially those of the included .env.dev file!)
 .EXPORT_ALL_VARIABLES:
@@ -24,18 +24,18 @@ dev-db-registry-logout:
 
 ## Build docker images
 dev-db-build: dev-db-registry-login
-	docker compose --progress plain --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev build --pull db liquibase
+	docker compose --progress plain --env-file $(STUDIO_BASE_DIR)/.env.dev build --pull db liquibase
 
 ## Start db container (e.g. for a localhost dev environment with non containerized frontend and backend servers)
 dev-db-up:
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
 	fi
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev up --no-build --pull never -d db liquibase
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev up --no-build --pull never -d db liquibase
 
 ## Stop db container
 dev-db-down:
-	docker compose --env-file $(STUDIO_LITE_BASE_DIR)/.env.dev down
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev down
 	@if test $(shell docker network ls -q --filter name=app-net);\
 		then docker network rm $(shell docker network ls -q -f name=app-net);\
 	fi
@@ -56,7 +56,7 @@ dev-db-images-clean:
 ## Outputs the count of changesets that have not been deployed
 # (https://docs.liquibase.com/commands/status/status.html)
 dev-db-update-status:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -72,7 +72,7 @@ dev-db-update-status:
 ## Lists all deployed changesets and their deploymentIds
 # (https://docs.liquibase.com/commands/status/history.html)
 dev-db-update-history:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -88,7 +88,7 @@ dev-db-update-history:
 ## Checks and identifies any possible errors in a changelog that may cause the update command to fail
 # (https://docs.liquibase.com/commands/maintenance/validate.html)
 dev-db-validate-changelog:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -104,7 +104,7 @@ dev-db-validate-changelog:
 ## Displays the SQL Liquibase will run while using the update command
 # (https://docs.liquibase.com/commands/update/update-sql.html)
 dev-db-update-display-sql:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -120,7 +120,7 @@ dev-db-update-display-sql:
 ## Updates the database, then rolls back changes before updating again
 # (https://docs.liquibase.com/commands/update/update-testing-rollback.html)
 dev-db-update-testing-rollback:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -136,7 +136,7 @@ dev-db-update-testing-rollback:
 ## Updates database to current version
 # (https://docs.liquibase.com/commands/update/update.html)
 dev-db-update:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -152,7 +152,7 @@ dev-db-update:
 ## Rolls back the last changeset
 # (https://docs.liquibase.com/commands/rollback/rollback-count.html)
 dev-db-rollback-lastchangeset:
-	cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
@@ -168,7 +168,7 @@ dev-db-rollback-lastchangeset:
 ## Generates Javadoc-like documentation based on current database and changelog
 # (https://docs.liquibase.com/commands/docs/db-doc.html)
 dev-db-generate-docs:
-	cd $(STUDIO_LITE_BASE_DIR)/database/changelogDocs && rm -vrf !(".gitignore") && cd $(STUDIO_LITE_BASE_DIR) &&\
+	cd $(STUDIO_BASE_DIR)/database/changelogDocs && rm -vrf !(".gitignore") && cd $(STUDIO_BASE_DIR) &&\
 	docker compose run --rm liquibase\
 		liquibase\
 				--headless=true\
