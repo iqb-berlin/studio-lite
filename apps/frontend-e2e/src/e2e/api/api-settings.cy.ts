@@ -70,7 +70,7 @@ describe('Admin settings API tests', () => {
     });
   });
   describe('101. UPDATE /api/admin/settings/config', () => {
-    it('200 positive test: can update the configuration text settings the admin', () => {
+    it('200 positive test: should update the configuration text settings the admin', () => {
       cy.updateSettingConfigAPI(Cypress.env(`token_${Cypress.env('username')}`), 17)
         .then(resp => {
           expect(resp.status).to.equal(200);

@@ -1001,7 +1001,37 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
   });
 });
 
-// 110 and 6 is the same
+// 108
+
+// 109
+Cypress.Commands.add('getPackageAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/resource-packages',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 110
+Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/resource-packages?id=${packageId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 120 and 6 is the same
 Cypress.Commands.add('deleteFirstUserAPI', () => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({

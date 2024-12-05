@@ -190,6 +190,8 @@ declare namespace Cypress {
     updateSettingUnitExportAPI(token:string, unitExport:UnitExport): Chainable<Response>; // 105
     getSettingMissingProfilesAPI(token:string): Chainable<Response>; // 106
     updateSettingMissingProfilesAPI(token:string, profile:string): Chainable<Response>; // 107
-    deleteFirstUserAPI(): Chainable<Response>; // 110
+    getPackageAPI(token:string): Chainable<Response>; // 109
+    deletePackageAPI(token:string, packageId:string): Chainable<Response>; // 110
+    deleteFirstUserAPI(): Chainable<Response>; // 120
   }
 }
