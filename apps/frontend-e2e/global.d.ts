@@ -6,7 +6,7 @@ declare namespace Cypress {
   } from 'support/testData';
   import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
   import {
-    UserData, WsSettings, CommentData, AccessUser
+    UserData, WsSettings, CommentData, AccessUser, ReviewData
   } from './src/support/testData';
   import { UnitExport } from './src/e2e/api/api-settings.cy';
 
@@ -162,7 +162,12 @@ declare namespace Cypress {
     updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
     Chainable<Response>; // 48
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 49
-    moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>
+    moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 50
+    addReviewAPI(wsId:string, reviewName: string, token:string): Chainable<Response>; // 51
+    getReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response>; // 52
+    updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 53
+    getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 54
+    deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 55
     downloadWsAPI(
       wsId: string,
       settings: string,
