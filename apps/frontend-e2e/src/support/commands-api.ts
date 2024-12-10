@@ -1,5 +1,5 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData
+  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 
@@ -725,6 +725,83 @@ Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitI
   });
 });
 
+// 51
+Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(`${wsId}`, 10);
+  cy.request({
+    method: 'POST',
+    url: `/api/workspace/${wsId}/reviews/`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      name: `${reviewName}`,
+      workspaceId: nu
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 52
+Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/reviews/${reviewId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// 53
+Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:string) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(`${review.id}`, 10);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/reviews/${review.id}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: nu,
+      name: `${review.name}`,
+      link: `${review.link}`
+    },
+    failOnStatusCode: false
+  });
+});
+// 54
+Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/reviews/`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// 55
+Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/workspace/${wsId}/reviews/${reviewId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 // 59
 Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;

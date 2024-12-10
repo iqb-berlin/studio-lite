@@ -2,7 +2,14 @@
 import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
 import { TextWithLanguage } from '@iqb/metadata';
 import {
-  AccessLevel, AccessUser, CommentData, GroupData, UnitData, UserData, WsData, WsSettings
+  AccessLevel,
+  AccessUser,
+  CommentData,
+  GroupData, ReviewData,
+  UnitData,
+  UserData,
+  WsData,
+  WsSettings
 } from '../../support/testData';
 import { addModules, login, logout } from '../../support/util';
 
@@ -221,7 +228,6 @@ describe('Studio API tests', () => {
 
     describe('7. GET /api/admin/users/full', () => {
       it('200 positive test', () => {
-        cy.pause();
         cy.getUsersFullAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
@@ -1601,7 +1607,7 @@ describe('Studio API tests', () => {
       });
     });
     // COMMENTS
-    describe('50. /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
+    describe('50. PATCH /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
       it('401 negative test', () => {
         cy.moveToAPI(Cypress.env(ws1.id),
           Cypress.env(ws2.id),
@@ -1630,6 +1636,182 @@ describe('Studio API tests', () => {
           });
       });
     });
+    // WORKSPACE REVIEWS
+    describe('WORKSPACE REVIEWS', {}, () => {
+      const reviewName1:string = 'Teil1';
+      const reviewName2:string = 'Teil2';
+      // Variables
+      describe('51. POST /api/workspace/{workspace_id}/reviews', () => {
+        it('200 positive test: should add a new review in a workspace with credentials', () => {
+          cy.addReviewAPI(Cypress.env(ws2.id),
+            reviewName1,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(201);
+              Cypress.env('id_review1', resp.body);
+            });
+          cy.addReviewAPI(Cypress.env(ws2.id),
+            reviewName2,
+            Cypress.env(`token_${user2.username}`))
+            .then(res => {
+              expect(res.status).to.be.equal(201);
+              Cypress.env('id_review2', res.body);
+            });
+        });
+        it('500 negative test: should not add a new review without a valid ws id', () => {
+          cy.addReviewAPI(noId,
+            reviewName2,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(500);
+            });
+        });
+        it('401 negative test: should not add a new review without token', () => {
+          cy.addReviewAPI(Cypress.env(ws2.id),
+            reviewName2,
+            noId)
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+      });
+      describe('52. GET /api/workspace/{workspace_id}/reviews/{ids}', () => {
+        it('200 positive test: should get the reviews of a workspace with credentials', () => {
+          cy.getReviewAPI(Cypress.env(ws2.id),
+            Cypress.env('id_review1'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(200);
+              Cypress.env('link_review1', resp.body.link);
+            });
+          cy.getReviewAPI(Cypress.env(ws2.id),
+            Cypress.env('id_review2'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp2 => {
+              expect(resp2.status).to.be.equal(200);
+              Cypress.env('link_review2', resp2.body.link);
+            });
+        });
+        it('500 negative test: should not get the reviews without a valid workspace', () => {
+          cy.getReviewAPI(noId,
+            Cypress.env('id_review1'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(500);
+            });
+        });
+        it('401 negative test: should not get the reviews without credentials', () => {
+          cy.getReviewAPI(Cypress.env(ws2.id),
+            Cypress.env('id_review1'),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+        it('401 negative test: should not get the reviews without credentials', () => {
+          cy.getReviewAPI(Cypress.env(ws2.id),
+            Cypress.env('id_review1'),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+        });
+      });
+      describe('53. PATCH /api/workspace/{workspace_id}/reviews/{id}', () => {
+        // Variables
+        let review1: ReviewData;
+        before(() => {
+          review1 = {
+            link: Cypress.env('link_review1'),
+            id: parseInt(Cypress.env('id_review1'), 10),
+            name: reviewName2
+          };
+        });
+        it('200 positive test: should update a review with credentials', () => {
+          cy.updateReviewAPI(Cypress.env(ws2.id),
+            review1,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+        });
+        it('500 negative test: should not update a review without ws id', () => {
+          cy.updateReviewAPI(noId,
+            review1,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+        it('401 negative test: should not update a review without credentials', () => {
+          cy.updateReviewAPI(Cypress.env(ws2.id),
+            review1,
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+      });
+      describe('54. GET /api/workspace/{workspace_id}/reviews/', () => {
+        it('200 positive test: should all reviews with credentials', () => {
+          cy.getAllReviewAPI(Cypress.env(ws2.id),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.length).to.equal(2);
+            });
+        });
+        it('500 negative test: should not get reviews without ws id', () => {
+          cy.getAllReviewAPI(noId,
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+        it('401 negative test: should not retrieve reviews without credentials', () => {
+          cy.getAllReviewAPI(Cypress.env(ws2.id),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+      });
+      describe('55. DELETE /api/workspace/{workspace_id}/reviews/{ids}', () => {
+        it('200 positive test: should delete a review with credentials', () => {
+          cy.deleteReviewAPI(Cypress.env(ws2.id),
+            Cypress.env('id_review1'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+          cy.pause();
+        });
+        it('500 negative test: should not delete already deleted', () => {
+          cy.deleteReviewAPI(noId,
+            Cypress.env('id_review2'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+        it('500 negative test: should not delete a review without ws id', () => {
+          cy.deleteReviewAPI(noId,
+            Cypress.env('id_review2'),
+            Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+        it('401 negative test: should not delete a review without credentials', () => {
+          cy.deleteReviewAPI(Cypress.env(ws2.id),
+            Cypress.env('id_review2'),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+      });
+    });
     describe.skip('59. /api/workspace/{workspace_id}/download/{settings}', () => {
       it('200 positive test: should be able to add a group for a unit', () => {
         // no write answer
@@ -1643,7 +1825,7 @@ describe('Studio API tests', () => {
       it('401 negative test', () => {
       });
     });
-    describe('60. /api/workspace/{workspace_id}/{ids} ', () => {
+    describe('60. DELETE /api/workspace/{workspace_id}/{ids}', () => {
       it('401 negative test: should not delete the unit from other user', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
           Cypress.env(ws1.id),

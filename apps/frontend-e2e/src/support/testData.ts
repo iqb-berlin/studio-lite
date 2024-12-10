@@ -72,6 +72,15 @@ export interface CommentData {
   lastSeenCommentChangedAt?: string;
 }
 
+export interface ReviewData {
+  id: number;
+  link: string;
+  name: string;
+  password?: string;
+  settings?: string;
+  units?: number[]
+}
+
 // export interface MetadataType {
 //   (id: string): string,
 //   (label: string): string,
