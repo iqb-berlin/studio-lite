@@ -622,6 +622,62 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
   });
 });
 
+// a1
+Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/rename/${wsName}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// a2
+Cypress.Commands.add('copyToAPI', (wsOriginId:string, wsDestinationId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsOriginId}/${unitId}/rename/${wsDestinationId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b1
+Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/download/xlsx/workspaces/${wsId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b2
+Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/download/xlsx/workspaces',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 45
 Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
@@ -789,7 +845,22 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
     failOnStatusCode: false
   });
 });
+
 // 55
+// Cypress.Commands.add('getReviewMetadataAPI', (wsId:string, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'GET',
+//     url: `/api/workspace/${wsId}/reviews/`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     failOnStatusCode: false
+//   });
+// });
+
+// 68
 Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -802,8 +873,8 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
     failOnStatusCode: false
   });
 });
-// 59
-Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:string) => {
+// 69
+Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -816,7 +887,7 @@ Cypress.Commands.add('downloadWsAPI', (wsId:string, settings: string, token:stri
   });
 });
 
-// 60
+// 70
 Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
