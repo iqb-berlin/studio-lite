@@ -58,10 +58,10 @@ export interface DownloadSettings {
   passwordLess: boolean;
   bookletSettings:string[];
 }
-export interface MetaValue {
-  name: string,
-  value: string
-}
+// export interface MetaValue {
+//   name: string,
+//   value: string
+// }
 
 export interface CommentData {
   body?: string;
@@ -81,11 +81,12 @@ export interface ReviewData {
   units?: number[]
 }
 
-// export interface MetadataType {
-//   (id: string): string,
-//   (label: string): string,
-//   (value: string): string,
-// }
+export interface MetadataType {
+  id: string,
+  editor?: string,
+  player?: string,
+  schemer?: string,
+}
 // export interface ProfileData {
 //   profile: string;
 //   label: string;
