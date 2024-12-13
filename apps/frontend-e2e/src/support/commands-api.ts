@@ -641,7 +641,7 @@ Cypress.Commands.add('copyToAPI', (wsOriginId:string, wsDestinationId:string, un
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/${unitId}/rename/${wsDestinationId}`,
+    url: `/api/workspace/${wsOriginId}/${unitId}/copyto/${wsDestinationId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

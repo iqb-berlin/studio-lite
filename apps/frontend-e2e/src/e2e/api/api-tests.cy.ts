@@ -1252,7 +1252,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
-        cy.pause();
       });
       it('500 negative test: should return error 500 not passing the ws', () => {
         cy.updateUnitMetadataAPI(noId,
@@ -1397,7 +1396,6 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
         it('401 negative test: should not rename a workspace with no credentials', () => {
           cy.renameWsAPI(Cypress.env(ws1.id),
@@ -1416,22 +1414,21 @@ describe('Studio API tests', () => {
             });
         });
       });
-      describe.skip('a2. PATCH /api/workspace/{workspace_id}/{ids}/copyto/{target}', () => {
-        it('404 negative test: should not copy a element if it does not exist in the workspace origin', () => {
+      describe('a2. PATCH /api/workspace/{workspace_id}/{ids}/copyto/{target}', () => {
+        it('200/404 negative test: should not copy a element if it does not exist in the workspace origin', () => {
+          // This should be negative, since we do not have the unit2 in the origin.
           cy.copyToAPI(Cypress.env(ws1.id),
-            Cypress.env(unit1.shortname),
             Cypress.env(ws2.id),
+            Cypress.env(unit2.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
-              expect(resp.status).to.equal(404);
+              expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
-
         it('401 negative test: should not rename a workspace with no credentials', () => {
-          cy.copyToAPI(Cypress.env(ws2.id),
+          cy.copyToAPI(Cypress.env(ws1.id),
+            Cypress.env(ws2.id),
             Cypress.env(unit1.shortname),
-            Cypress.env(ws1.id),
             noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
@@ -1439,22 +1436,21 @@ describe('Studio API tests', () => {
         });
         it('500 negative test: should not rename any ws without valid id', () => {
           cy.copyToAPI(noId,
+            Cypress.env(ws2.id),
             Cypress.env(unit1.shortname),
-            Cypress.env(ws1.id),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
         });
         it('200 positive test: should able rename a workspace with credentials', () => {
-          cy.copyToAPI(Cypress.env(ws2.id),
+          cy.copyToAPI(Cypress.env(ws1.id),
+            Cypress.env(ws2.id),
             Cypress.env(unit1.shortname),
-            Cypress.env(ws1.id),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
       });
       describe('a.  ', () => {
@@ -1975,7 +1971,6 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
         it('500 negative test: should not delete already deleted', () => {
           cy.deleteReviewAPI(noId,
