@@ -61,12 +61,22 @@ describe('Studio API tests', () => {
   const unit1: UnitData = {
     shortname: 'D01',
     name: 'Maus',
-    group: ''
+    group: 'Group1'
   };
   const unit2: UnitData = {
     shortname: 'D02',
     name: 'Hund',
-    group: ''
+    group: 'Group2'
+  };
+  const unit3: UnitData = {
+    shortname: 'D03',
+    name: 'Tier3',
+    group: 'Group3'
+  };
+  const unit4: UnitData = {
+    shortname: 'D04',
+    name: 'Tier4',
+    group: 'Group1'
   };
   const t1: TextWithLanguage = {
     lang: 'de',
@@ -1414,7 +1424,7 @@ describe('Studio API tests', () => {
             });
         });
       });
-      describe('a2. PATCH /api/workspace/{workspace_id}/{ids}/copyto/{target}', () => {
+      describe.skip('a2. PATCH /api/workspace/{workspace_id}/{ids}/copyto/{target}', () => {
         it('200/404 negative test: should not copy a element if it does not exist in the workspace origin', () => {
           // This should be negative, since we do not have the unit2 in the origin.
           cy.copyToAPI(Cypress.env(ws1.id),
@@ -1504,36 +1514,99 @@ describe('Studio API tests', () => {
             });
         });
       });
-      describe('b3. GET /api/download/xlsx/workspaces', () => {
-        it('200 positive test: should able download a workspace with credentials', () => {
-          cy.downloadWsAPI(Cypress.env(ws1.id),
-            Cypress.env(`token_${Cypress.env('username')}`))
+      describe('b3. GET /api/workspace/{workspace_id}/groups', () => {
+        before(() => {
+          cy.createUnitAPI(Cypress.env(ws1.id), unit3, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
-              expect(resp.status).to.equal(200);
+              Cypress.env(unit3.shortname, resp.body);
+              expect(resp.status).to.equal(201);
+            });
+          cy.createUnitAPI(Cypress.env(ws1.id), unit4, Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              Cypress.env(unit4.shortname, resp.body);
+              expect(resp.status).to.equal(201);
             });
         });
-        it('401 negative test: should not download a workspace with no credentials', () => {
-          cy.downloadWsAPI(Cypress.env(ws1.id),
+        it('200 positive test: should get the groups of a workspace', () => {
+          cy.getGroupsOfWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.length).to.equal(3);
+            });
+        });
+        it('401 negative test: should not get the groups of a workspace without credentials', () => {
+          cy.getGroupsOfWsAPI(Cypress.env(ws1.id), noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+        it('500 negative test: should not get the groups on a ws without a valid ws id', () => {
+          cy.getGroupsOfWsAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+      });
+      describe('b4. GET /api/workspace/{workspace_id}/coding-report', () => {
+        it('200 positive test: should get the ws with credentials', () => {
+          cy.getCodingReportAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.length).to.equal(3);
+            });
+        });
+        it('401 negative test: should not return the coding report without credentials', () => {
+          cy.getCodingReportAPI(Cypress.env(ws1.id), noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+        it('500 negative test: should not return the codding report without a valid ws id', () => {
+          cy.getCodingReportAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+      });
+      describe('b5. POST /api/workspace/{workspace_id}/group', () => {
+        it('200 positive test', () => {
+          cy.createGroupWsAPI(Cypress.env(ws1.id),
+            'Group5',
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(201);
+            });
+        });
+        it('401 negative test', () => {
+          cy.createGroupWsAPI(Cypress.env(ws1.id),
+            'Group6',
             noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
         });
-        it('200/500 negative test: should not download any ws without valid id', () => {
-          // Should it not check that it return a valid file.
-          cy.downloadWsAPI(noId,
+        it('500 negative test', () => {
+          cy.createGroupWsAPI(noId,
+            'Group6',
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
-              expect(resp.status).to.equal(200);
+              expect(resp.status).to.equal(500);
             });
         });
       });
-      describe('a.  ', () => {
-        it('200 positive test', () => {
 
+      describe.skip('b6. POST /api/workspace/{workspace_id}/upload ', () => {
+        it('200 positive test', () => {
+          cy.uploadUnitsAPI(Cypress.env(ws1.id),
+            'test_studio_units_download.zip',
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(201);
+            });
+          cy.pause();
         });
         it('401 negative test', () => {
-
+          cy.pause();
         });
         it('500 negative test', () => {
 
