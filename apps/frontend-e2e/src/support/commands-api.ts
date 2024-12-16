@@ -531,7 +531,8 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
     },
     body: {
       key: `${unit.shortname}`,
-      name: `${unit.name}`
+      name: `${unit.name}`,
+      groupName: `${unit.group}`
     },
     failOnStatusCode: false
   });
@@ -675,6 +676,81 @@ Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
       authorization
     },
     failOnStatusCode: false
+  });
+});
+
+// b3
+Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/groups`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// b4
+Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/coding-report`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b5
+Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: `/api/workspace/${wsId}/group`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      body: `${groupName}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b6
+Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  // const path:string = `../frontend-e2e/src/fixtures/${filename}`;
+  // cy.request({
+  //   method: 'POST',
+  //   url: `/api/workspace/${wsId}/upload`,
+  //   headers: {
+  //     'app-version': Cypress.env('version'),
+  //     authorization
+  //   },
+  //   failOnStatusCode: false
+  // }).selectFile(
+  //   path, {
+  //     action: 'select',
+  //     force: true
+  //   });
+  cy.fixture(filename).then(file => {
+    cy.request({
+      method: 'POST',
+      url: `/api/workspace/${wsId}/upload`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: file,
+      failOnStatusCode: false
+    });
   });
 });
 
