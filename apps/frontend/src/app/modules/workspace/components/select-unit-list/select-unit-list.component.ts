@@ -30,7 +30,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
-  displayedColumns = ['selectCheckbox', 'key', 'groupName'];
+  displayedColumns = ['selectCheckbox', 'key', 'name', 'groupName'];
   tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(true, []);
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
@@ -65,7 +65,7 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
       this.objectsDatasource = new MatTableDataSource(units);
     }
     this.objectsDatasource
-      .filterPredicate = (unitList: UnitInListDto, filter) => ['key', 'groupName']
+      .filterPredicate = (unitList: UnitInListDto, filter) => ['key', 'name', 'groupName']
         .some(column => (unitList[column as keyof UnitInListDto] as string || '')
           .toLowerCase()
           .includes(filter)
