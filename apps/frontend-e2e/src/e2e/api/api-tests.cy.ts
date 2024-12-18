@@ -1592,11 +1592,13 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
+          cy.pause();
         });
       });
-
+      // CONTINUE HERE
       describe.skip('b6. POST /api/workspace/{workspace_id}/upload ', () => {
         it('200 positive test', () => {
+          cy.pause();
           cy.uploadUnitsAPI(Cypress.env(ws1.id),
             'test_studio_units_download.zip',
             Cypress.env(`token_${Cypress.env('username')}`))
@@ -1609,6 +1611,31 @@ describe('Studio API tests', () => {
           cy.pause();
         });
         it('500 negative test', () => {
+
+        });
+      });
+      // STATES
+      describe('b7. ', () => {
+        it('200 positive test', () => {
+          cy.pause();
+          cy.updateGroupStatesAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+          cy.pause();
+        });
+        it('401 negative test', () => {
+
+        });
+        it('500 negative test', () => {
+
+        });
+      });
+      describe('. ', () => {
+        it('200 positive test', () => {
+
+        });
+        it('401 negative test', () => {
 
         });
       });

@@ -163,6 +163,7 @@ declare namespace Cypress {
     getCodingReportAPI(wsId: string, token:string): Chainable<Response>; // b4
     createGroupWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // b5
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6
+    updateGroupStatesAPI(groupId: string, token:string): Chainable<Response>; // b7
 
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 45
     getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 46
