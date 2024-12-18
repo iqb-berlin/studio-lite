@@ -126,7 +126,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
     const routingOk = moveOnly ? await this.selectUnit(0) : true;
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
-        width: '500px',
+        width: '800px',
         height: '700px',
         data: <MoveUnitData>{
           title: moveOnly ?
@@ -258,7 +258,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '500px',
+        width: '800px',
         height: '700px',
         data: <SelectUnitData>{
           title: this.translateService.instant('workspace.submit-units-title'),
@@ -288,7 +288,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '500px',
+        width: '800px',
         height: '700px',
         data: <SelectUnitData>{
           title: this.translateService.instant('workspace.return-submitted-units-title'),
@@ -349,6 +349,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
   showMetadata(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.selectUnitDialog.open(ShowMetadataComponent, {
+        width: '800px',
         data: { warning: '' }
       }).afterClosed().subscribe(res => {
         this.metadataService.createMetadataReport()

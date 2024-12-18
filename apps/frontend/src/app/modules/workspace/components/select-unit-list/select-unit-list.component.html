@@ -14,7 +14,7 @@
   }
 
   <studio-lite-search-filter [title]="'search-filter.filter-units' | translate"
-    (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+                             (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
   </studio-lite-search-filter>
 
   <mat-table class="unit-list"
@@ -26,8 +26,8 @@
     <ng-container matColumnDef="selectCheckbox">
       <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
         <mat-checkbox (change)="$event ? masterToggle() : null"
-          [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-          [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)">
+                      [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
+                      [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)">
         </mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
@@ -40,18 +40,26 @@
     </ng-container>
 
     <ng-container matColumnDef="key">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="key">{{'workspace.unit' | translate}}</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header="key">{{'workspace.unit-key' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
-        [class.disabled-element]="disabledUnits | include : element.id">
-        {{element.key}}{{element.name ? ' - ' + element.name : ''}}
+                [class.disabled-element]="disabledUnits | include : element.id">
+                {{element.key}}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef mat-sort-header="name">{{'workspace.unit-name' | translate}}</mat-header-cell>
+      <mat-cell *matCellDef="let element"
+                [class.disabled-element]="disabledUnits | include : element.id">
+                {{element.name}}
       </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="groupName">
       <mat-header-cell *matHeaderCellDef mat-sort-header="groupName">{{'workspace.group' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
-        [class.disabled-element]="disabledUnits | include : element.id">
-        {{element.groupName}}
+                [class.disabled-element]="disabledUnits | include : element.id">
+                {{element.groupName}}
       </mat-cell>
     </ng-container>
 

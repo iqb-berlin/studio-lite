@@ -672,7 +672,7 @@ check_application_infrastructure() {
   declare traefik_dir_count
   declare return_code
 
-  readarray -d '' traefik_dir_array < <(find / -name ".env.traefik" -mmin -5 -print0 2>/dev/null)
+  readarray -d '' traefik_dir_array < <(find / -name ".env.traefik" -print0 2>/dev/null)
   traefik_dir_count=${#traefik_dir_array[*]}
 
   if [ "${traefik_dir_count}" -eq 0 ]; then

@@ -70,7 +70,7 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '500px',
+        width: '800px',
         height: '700px',
         data: <SelectUnitData>{
           title: this.translateService.instant('workspace.delete-units'),
