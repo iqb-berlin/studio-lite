@@ -1,3 +1,4 @@
+import { HttpRequest } from '@angular/common/http';
 import {
   UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData
 } from './testData';
@@ -746,11 +747,52 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
       url: `/api/workspace/${wsId}/upload`,
       headers: {
         'app-version': Cypress.env('version'),
+        'content-type': 'binary',
         authorization
       },
-      body: file,
-      failOnStatusCode: false
+      body: file
+    }).then(resp => {
+      expect(resp.status).to.equal(204);
     });
+  });
+});
+
+// b7
+Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: `${groupId}`,
+      settings: {
+        profiles: [
+          {
+            id: `${Cypress.env('profile1')}`,
+            label: `${Cypress.env('label1')}`
+          },
+          {
+            id: `${Cypress.env('profile2')}`,
+            label: `${Cypress.env('label2')}`
+          }],
+        states: [
+          {
+            id: 1,
+            color: '#a51d2d',
+            label: 'Initial'
+          },
+          {
+            id: 2,
+            color: '#edb211',
+            label: 'Finale'
+          }]
+      }
+    },
+    failOnStatusCode: false
   });
 });
 
