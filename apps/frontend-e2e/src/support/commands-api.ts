@@ -1,4 +1,3 @@
-import { HttpRequest } from '@angular/common/http';
 import {
   UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData
 } from './testData';
@@ -791,6 +790,109 @@ Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => 
             label: 'Finale'
           }]
       }
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b8
+Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(`${unitId}`, 10);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/${unitId}/metadata`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: nu,
+      state: `${state}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b9
+Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/workspace/${wsId}/${state}/state`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b10
+Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/units/metadata`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b11
+Cypress.Commands.add('dropboxWsAPI', (wsId: string, wsDe: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(`${wsDe}`, 10);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/drop-box`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      dropBoxId: nu
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b12
+Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(`${wsDe}`, 10);
+  const unitNumber = parseInt(`${unit}`, 10);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsId}/submit_units`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      dropBoxId: nu,
+      units: [unitNumber]
+    },
+    failOnStatusCode: false
+  });
+});
+
+// b13
+Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  const unitNumber = parseInt(`${unit}`, 10);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsDe}/return_submitted_units`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      units: [unitNumber]
     },
     failOnStatusCode: false
   });
