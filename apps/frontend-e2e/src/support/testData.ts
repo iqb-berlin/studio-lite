@@ -38,18 +38,64 @@ export interface InterceptData {
 
 export interface WsSettings {
   defaultEditor?: string;
-  defaultPlayer?: string,
-  defaultSchemer?: string,
-  unitGroups?: string[],
-  stableModulesOnly: boolean,
-  unitMDProfile?: string,
-  itemMDProfile?: string,
-  states?: string[]
+  defaultPlayer?: string;
+  defaultSchemer?: string;
+  unitGroups?: string[];
+  stableModulesOnly?: boolean;
+  unitMDProfile?: string;
+  itemMDProfile?: string;
+  states?: string[];
+  groupName?: string;
+  id?: number;
 }
 
-export interface ProfileData {
-  profile: string;
-  label: string;
+export interface DownloadSettings {
+  unitList: number[];
+  addPlayers: boolean;
+  addTestTakersReview: number;
+  addTestTakersMonitor: number;
+  addTestTakersHot:number;
+  passwordLess: boolean;
+  bookletSettings:string[];
 }
+// export interface MetaValue {
+//   name: string,
+//   value: string
+// }
+
+export interface CommentData {
+  body?: string;
+  userName?: string;
+  userId?: number;
+  parentId?: number;
+  unitId?: number;
+  lastSeenCommentChangedAt?: string;
+}
+
+export interface ReviewData {
+  id: number;
+  link: string;
+  name: string;
+  password?: string;
+  settings?: string;
+  units?: number[]
+}
+
+export interface MetadataType {
+  id: string,
+  editor?: string,
+  player?: string,
+  schemer?: string,
+}
+// export interface ProfileData {
+//   profile: string;
+//   label: string;
+// }
+
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 export enum Operation { GET, POST, PATCH, DELETE }
+
+export interface AccessUser {
+  id: string;
+  access: AccessLevel;
+}

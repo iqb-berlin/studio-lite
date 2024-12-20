@@ -28,8 +28,8 @@ describe('UI check: workspace', () => {
     group: 'Gruppe D'
   };
   const newUnit: UnitData = {
-    shortname: 'Neu_AUF_D1',
-    name: 'New Name Auf 1',
+    shortname: 'Neu_Ex_D1',
+    name: 'New Auf 1',
     group: 'Group D'
   };
   before(() => {
