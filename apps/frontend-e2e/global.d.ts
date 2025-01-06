@@ -6,7 +6,7 @@ declare namespace Cypress {
   } from 'support/testData';
   import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
   import {
-    UserData, WsSettings, CommentData, AccessUser, ReviewData
+    UserData, WsSettings, CommentData, AccessUser, ReviewData, MyData
   } from './src/support/testData';
   import { UnitExport } from './src/e2e/api/api-settings.cy';
 
@@ -194,6 +194,8 @@ declare namespace Cypress {
       wsId: string,
       token: string
     ): Chainable<Response>; // 70
+    getMyData(token:string): Chainable<Response>; // 71
+    updateMyData(token:string, data:MyData): Chainable<Response>; // 72
 
     getWsByUserAPI(id: string, token: string): Chainable<Response>; // 77
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 78

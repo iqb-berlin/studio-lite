@@ -5,7 +5,7 @@ import {
   AccessLevel,
   AccessUser,
   CommentData,
-  GroupData, ReviewData,
+  GroupData, MyData, ReviewData,
   UnitData,
   UserData,
   WsData,
@@ -2363,6 +2363,50 @@ describe('Studio API tests', () => {
       });
     });
   });
+  /** ************************************************************************* */
+  describe('Home API tests', () => {
+    describe('71. GET /api/my-data', () => {
+      it('200 positive test', () => {
+        cy.getMyData(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('200/401 negative test', () => {
+        cy.getMyData(noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
+    describe('72. ', () => {
+      // Variables
+      let data: MyData;
+      before(() => {
+        data = {
+          id: `${Cypress.env(`id_${Cypress.env('username')}`)}`,
+          description: '',
+          email: 'second@user.es',
+          lastName: 'Ramon',
+          firstName: 'User',
+          emailPublishApproved: false
+        };
+      });
+      it('200 positive test', () => {
+        cy.updateMyData(Cypress.env(`token_${Cypress.env('username')}`), data)
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('401 negative test', () => {
+        cy.pause();
+      });
+      it('500 negative test', () => {
+
+      });
+    });
+  });
+
   /** ************************************************************************* */
   describe('Admin workspace unit API tests', () => {
     describe('. ', () => {

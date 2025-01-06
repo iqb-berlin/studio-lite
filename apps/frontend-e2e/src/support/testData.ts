@@ -81,6 +81,15 @@ export interface ReviewData {
   units?: number[]
 }
 
+export interface MyData {
+  id: string;
+  description: string;
+  email: string;
+  lastName: string;
+  firstName: string;
+  emailPublishApproved: boolean;
+}
+
 export interface MetadataType {
   id: string,
   editor?: string,

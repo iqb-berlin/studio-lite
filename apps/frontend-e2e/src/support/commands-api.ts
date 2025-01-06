@@ -1,5 +1,5 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData
+  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData, MyData
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 
@@ -1093,6 +1093,7 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
     failOnStatusCode: false
   });
 });
+
 // 69
 Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1116,6 +1117,43 @@ Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 71
+Cypress.Commands.add('getMyData', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/my-data',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 72
+Cypress.Commands.add('updateMyData', (token: string, data: MyData) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(data.id, 10);
+  cy.request({
+    method: 'PATCH',
+    url: '/api/my-data',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: nu,
+      description: `${data.description}`,
+      email: `${data.email}`,
+      lastName: `${data.lastName}`,
+      firstName: `${data.firstName}`,
+      emailPublishApproved: false
     },
     failOnStatusCode: false
   });
