@@ -1299,7 +1299,7 @@ Cypress.Commands.add('updateSettingConfigAPI', (token:string, hour:number) => {
     },
     body: {
       appTitle: 'IQB-Studio',
-      globalWarningText: 'Warnung Aktung 2',
+      globalWarningText: 'Warnung Achtung 2',
       globalWarningExpiredHour: `${hour}`,
       globalWarningExpiredDay: new Date(),
       hasUsers: true

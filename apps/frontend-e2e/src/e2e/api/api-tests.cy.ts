@@ -1492,7 +1492,7 @@ describe('Studio API tests', () => {
             });
         });
         it('200/500 negative test: should not download any ws without valid id', () => {
-          // Should it not check that it return a valid file.
+          // Should it not check that it returns a valid file.
           cy.downloadWsAPI(noId,
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -1733,7 +1733,7 @@ describe('Studio API tests', () => {
         });
       });
       describe('b11. PATCH /api/workspace/{workspace_id}/drop-box', () => {
-        it('401 negative test: should not assign as ws a dropbox wihout credentials', () => {
+        it('401 negative test: should not assign as ws a dropbox without credentials', () => {
           cy.dropboxWsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
             noId)
@@ -1972,7 +1972,8 @@ describe('Studio API tests', () => {
         });
       });
       describe('47. PATCH /api/workspace/{workspace_id}/{id}/comments', () => {
-        it.skip('200 positive test: should chance the time stamp', () => {
+        it('200 positive test: should change the time stamp', () => {
+          comment.lastSeenCommentChangedAt = new Date();
           cy.updateCommentTimeAPI(Cypress.env(ws1.id),
             Cypress.env(unit1.shortname),
             comment,
@@ -1980,6 +1981,29 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.be.equal(200);
             });
+          cy.pause();
+        });
+        it('401 negative test: should chance the', () => {
+          comment.lastSeenCommentChangedAt = new Date();
+          cy.updateCommentTimeAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            comment,
+            noId)
+            .then(resp => {
+              expect(resp.status).to.be.equal(401);
+            });
+          cy.pause();
+        });
+        it('500 negative test: could not update the time stamp with wrong data', () => {
+          comment.lastSeenCommentChangedAt = new Date();
+          cy.updateCommentTimeAPI(noId,
+            Cypress.env(unit1.shortname),
+            comment,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.be.equal(500);
+            });
+          cy.pause();
         });
       });
       describe('48. PATCH /api/workspace/{workspace_id}/{id}/comments/{id}', () => {
@@ -2260,6 +2284,32 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
+          cy.pause();
+        });
+      });
+
+      describe('55. GET /api/review/{review_id}', () => {
+        it('200 positive test: should all reviews with credentials', () => {
+        });
+        it('500 negative test: should not get reviews without ws id', () => {
+        });
+        it('401 negative test: should not retrieve reviews without credentials', () => {
+        });
+      });
+      describe('56. GET /api/review/{review_id}', () => {
+        it('200 positive test: should all reviews with credentials', () => {
+        });
+        it('500 negative test: should not get reviews without ws id', () => {
+        });
+        it('401 negative test: should not retrieve reviews without credentials', () => {
+        });
+      });
+      describe('57. GET /api/review/{review_id}', () => {
+        it('200 positive test: should all reviews with credentials', () => {
+        });
+        it('500 negative test: should not get reviews without ws id', () => {
+        });
+        it('401 negative test: should not retrieve reviews without credentials', () => {
         });
       });
 
@@ -2366,43 +2416,80 @@ describe('Studio API tests', () => {
   /** ************************************************************************* */
   describe('Home API tests', () => {
     describe('71. GET /api/my-data', () => {
-      it('200 positive test', () => {
+      it('200 positive test: should be able to get owndata', () => {
         cy.getMyData(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
+            expect(resp.body.description).to.equal('first initial user');
           });
+        cy.pause();
       });
-      it('200/401 negative test', () => {
+      it('401 negative test: should not retrieve own data without credentials', () => {
         cy.getMyData(noId)
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
       });
+      it('401 negative test: a normal user should not retrieve their own data', () => {
+        cy.getMyData(Cypress.env(`token_${user3.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('200 positive test: a super user should retrieve their own data', () => {
+        cy.getMyData(Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.description).to.equal(null);
+          });
+      });
     });
-    describe('72. ', () => {
+    describe('72. PATCH /api/my-data', () => {
       // Variables
       let data: MyData;
+      let data1: MyData;
       before(() => {
         data = {
           id: `${Cypress.env(`id_${Cypress.env('username')}`)}`,
           description: '',
+          email: 'first@user.es',
+          lastName: 'First',
+          firstName: 'User',
+          emailPublishApproved: false
+        };
+        data1 = {
+          id: `${Cypress.env(`id_${user2.username}`)}`,
+          description: '',
           email: 'second@user.es',
-          lastName: 'Ramon',
+          lastName: 'Second',
           firstName: 'User',
           emailPublishApproved: false
         };
       });
-      it('200 positive test', () => {
+      it('200 positive test: should update own data', () => {
         cy.updateMyData(Cypress.env(`token_${Cypress.env('username')}`), data)
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
       });
-      it('401 negative test', () => {
-        cy.pause();
+      it('401 negative test: should able to update other superadmin data', () => {
+        cy.updateMyData(Cypress.env(`token_${Cypress.env('username')}`), data1)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
       });
-      it('500 negative test', () => {
-
+      it('401 negative test: should not able to modify a non-existent user data', () => {
+        data.id = noId;
+        cy.updateMyData(Cypress.env(`token_${Cypress.env('username')}`), data)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('401 negative test: should not modify data without credentials', () => {
+        cy.updateMyData(noId, data)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
       });
     });
   });

@@ -69,7 +69,7 @@ export interface CommentData {
   userId?: number;
   parentId?: number;
   unitId?: number;
-  lastSeenCommentChangedAt?: string;
+  lastSeenCommentChangedAt?: Date;
 }
 
 export interface ReviewData {
