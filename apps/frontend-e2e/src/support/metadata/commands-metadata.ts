@@ -93,7 +93,10 @@ Cypress.Commands.add('updateWsMetadataAPI',
       body: {
         unitGroups: ['Bista'],
         itemMDProfile: `${settings.itemMDProfile}`,
-        unitMDProfile: `${settings.unitMDProfile}`
+        unitMDProfile: `${settings.unitMDProfile}`,
+        defaultEditor: `${settings.defaultEditor}`,
+        defaultPlayer: `${settings.defaultPlayer}`,
+        defaultSchemer: `${settings.defaultSchemer}`
       },
       failOnStatusCode: false
     });
