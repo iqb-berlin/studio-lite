@@ -1037,6 +1037,7 @@ Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string
 Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${review.id}`, 10);
+
   cy.request({
     method: 'PATCH',
     url: `/api/workspace/${wsId}/reviews/${review.id}`,
@@ -1047,7 +1048,8 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
     body: {
       id: nu,
       name: `${review.name}`,
-      link: `${review.link}`
+      link: `${review.link}`,
+      units: [`${review.units[0]}`]
     },
     failOnStatusCode: false
   });
@@ -1067,18 +1069,18 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
 });
 
 // 55
-// Cypress.Commands.add('getReviewMetadataAPI', (wsId:string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'GET',
-//     url: `/api/workspace/${wsId}/reviews/`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
+Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/review/${reviewId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 
 // 68
 Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:string) => {

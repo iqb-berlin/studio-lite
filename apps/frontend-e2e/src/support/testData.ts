@@ -78,7 +78,7 @@ export interface ReviewData {
   name: string;
   password?: string;
   settings?: string;
-  units?: number[]
+  units?: number[];
 }
 
 export interface MyData {

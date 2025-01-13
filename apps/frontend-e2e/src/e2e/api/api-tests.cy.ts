@@ -1983,7 +1983,7 @@ describe('Studio API tests', () => {
             });
           cy.pause();
         });
-        it('401 negative test: should chance the', () => {
+        it('401 negative test: should not update the time stamp without credentials', () => {
           comment.lastSeenCommentChangedAt = new Date();
           cy.updateCommentTimeAPI(Cypress.env(ws1.id),
             Cypress.env(unit1.shortname),
@@ -1994,7 +1994,7 @@ describe('Studio API tests', () => {
             });
           cy.pause();
         });
-        it('500 negative test: could not update the time stamp with wrong data', () => {
+        it('500 negative test: should not update the time stamp with wrong data', () => {
           comment.lastSeenCommentChangedAt = new Date();
           cy.updateCommentTimeAPI(noId,
             Cypress.env(unit1.shortname),
@@ -2158,6 +2158,7 @@ describe('Studio API tests', () => {
             Cypress.env(`token_${user2.username}`))
             .then(resp => {
               expect(resp.status).to.be.equal(201);
+              console.log(`soy el id del review 1 ${resp.body}`);
               Cypress.env('id_review1', resp.body);
             });
           cy.addReviewAPI(Cypress.env(ws2.id),
@@ -2166,6 +2167,7 @@ describe('Studio API tests', () => {
             .then(res => {
               expect(res.status).to.be.equal(201);
               Cypress.env('id_review2', res.body);
+              console.log(`soy el id del review 2 ${res.body}`);
             });
         });
         it('500 negative test: should not add a new review without a valid ws id', () => {
@@ -2234,7 +2236,8 @@ describe('Studio API tests', () => {
           review1 = {
             link: Cypress.env('link_review1'),
             id: parseInt(Cypress.env('id_review1'), 10),
-            name: reviewName2
+            name: 'Teil1',
+            units: [Cypress.env(unit2.shortname)]
           };
         });
         it('200 positive test: should update a review with credentials', () => {
@@ -2290,10 +2293,23 @@ describe('Studio API tests', () => {
 
       describe('55. GET /api/review/{review_id}', () => {
         it('200 positive test: should all reviews with credentials', () => {
+          cy.getReviewWindowAPI(Cypress.env('id_review1'), Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.units[0]).equal(parseInt(Cypress.env(unit2.shortname), 10));
+            });
         });
-        it('500 negative test: should not get reviews without ws id', () => {
+        it('404 negative test: should not get reviews without review id', () => {
+          cy.getReviewWindowAPI(noId, Cypress.env(`token_${user2.username}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
         });
         it('401 negative test: should not retrieve reviews without credentials', () => {
+          cy.getReviewWindowAPI(Cypress.env('id_review1'), noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
         });
       });
       describe('56. GET /api/review/{review_id}', () => {
