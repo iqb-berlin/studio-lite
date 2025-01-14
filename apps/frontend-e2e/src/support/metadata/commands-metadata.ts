@@ -103,6 +103,20 @@ Cypress.Commands.add('updateWsMetadataAPI',
   });
 
 // 40
+Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/${unitId}/metadata`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 41
 Cypress.Commands.add(
   'updateUnitMetadataAPI',
   (wsId: string, unitId: string, profile:string, entry: MetadataValuesEntry, token: string) => {
@@ -131,20 +145,6 @@ Cypress.Commands.add(
     });
   }
 );
-
-// 41
-Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspace/${wsId}/${unitId}/metadata`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
 
 // So should be 37.
 // Cypress.Commands.add('updateGroupMetadataAPI', (groupId: string, profiles: ProfileData[], token:string) => {

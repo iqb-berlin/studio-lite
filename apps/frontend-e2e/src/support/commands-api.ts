@@ -505,20 +505,6 @@ Cypress.Commands.add('downloadModuleAPI', (module:string, token:string) => {
   });
 });
 
-// 29
-Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'DELETE',
-    url: `/api/admin/verona-modules/${module}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 30
 Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string) => {
   const authorization = `bearer ${token}`;
@@ -615,6 +601,20 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
   cy.request({
     method: 'GET',
     url: `/api/workspace/${wsId}/users`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 50
+Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsOriginId}/${unitId}/moveTo/${wsDestinyId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -987,20 +987,6 @@ Cypress.Commands.add('deleteCommentAPI',
     });
   });
 
-// 50
-Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/${unitId}/moveTo/${wsDestinyId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 51
 Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1299,10 +1285,19 @@ Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: strin
   });
 });
 
-// Cypress.Commands.add('', () => {});
-// Cypress.Commands.add('', () => {});
-// Cypress.Commands.add('', () => {});
-// Cypress.Commands.add('', () => {});
+// 89
+Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/verona-modules/${module}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 
 // 100
 Cypress.Commands.add('getSettingConfigAPI', (token:string) => {
