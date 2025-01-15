@@ -1,5 +1,15 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData, MyData
+  UserData,
+  GroupData,
+  WsData,
+  AccessLevel,
+  UnitData,
+  WsSettings,
+  AccessUser,
+  CommentData,
+  ReviewData,
+  MyData,
+  DefinitionUnit
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 
@@ -580,6 +590,52 @@ Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
     failOnStatusCode: false
   });
 });
+
+// 40
+Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/${unitId}/metadata`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 41
+Cypress.Commands.add(
+  'updateUnitMetadataAPI',
+  (wsId: string, unitId: string, profile:string, entry: DefinitionUnit, token: string) => {
+    // console.log(entry);
+    // eslint-disable-next-line max-len
+    // const jsonObj = JSON.parse('[{"id":"a1","label":[{"lang":"de","value":"Für SPF geeignet"}],"value":"false","valueAsText":{"lang":"de","value":"ja"}},{"id":"iqb_phones","label":[{"lang":"de","value":"Kopfhörer"}],"value":[],"valueAsText":[]},{"id":"w8","label":[{"lang":"de","value":"Leitidee"}],"value":[],"valueAsText":[]},{"id":"iqb_author","label":[{"lang":"de","value":"Entwickler:in"}],"value":[{"lang":"de","value":"Ana Maier"}],"valueAsText":[{"lang":"de","value":"Ana Maier"}]}]');
+    // metadata: {
+    //   profiles: [{
+    //     entries: `${jsonObj}`,
+    //     profileId: `${profile}`,
+    //     isCurrent: true
+    //   }]
+    // }
+    const authorization = `bearer ${token}`;
+    const nu = parseInt(`${unitId}`, 10);
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspace/${wsId}/${unitId}/metadata`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        id: nu,
+        groupName: `${entry.groupName}`
+      },
+      failOnStatusCode: false
+    });
+  }
+);
 
 // 42
 Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {

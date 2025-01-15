@@ -91,10 +91,18 @@ export interface MyData {
 }
 
 export interface MetadataType {
-  id: string,
-  editor?: string,
-  player?: string,
-  schemer?: string,
+  id: string;
+  editor?: string;
+  player?: string;
+  schemer?: string;
+}
+
+export interface DefinitionUnit {
+  id: number;
+  key?: string;
+  groupName?: string;
+  state?: string;
+  variables?: string[];
 }
 // export interface ProfileData {
 //   profile: string;
