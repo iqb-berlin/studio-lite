@@ -25,6 +25,35 @@ export class UnitCommentService {
       });
   }
 
+  async copyComments(oldUnitId: number, newUnitId: number): Promise<void> {
+    const comments = await this.findOnesComments(oldUnitId);
+    const parentComments = comments.filter(c => !c.parentId);
+    await Promise.all(parentComments.map(async comment => {
+      await this.copyComment(comment, newUnitId, comments, comment.parentId);
+    }));
+  }
+
+  private async copyComment(comment: UnitCommentDto,
+                            newUnitId: number,
+                            comments: UnitCommentDto[],
+                            parentId: number | null): Promise<number> {
+    const newComment = this.unitCommentsRepository
+      .create({
+        ...comment,
+        id: undefined,
+        parentId: parentId,
+        unitId: newUnitId
+      });
+    await this.unitCommentsRepository.save(newComment);
+    if (parentId === null) {
+      const childComments = comments.filter(c => c.parentId === comment.id);
+      await Promise.all(childComments.map(async child => {
+        await this.copyComment(child, newUnitId, comments, newComment.id);
+      }));
+    }
+    return newComment.id;
+  }
+
   async findOnesLastChangedComment(unitId: number): Promise<UnitCommentDto | null> {
     const comments = await this.unitCommentsRepository
       .find({
