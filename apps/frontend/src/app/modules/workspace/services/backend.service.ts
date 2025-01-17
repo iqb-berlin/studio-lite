@@ -114,11 +114,16 @@ export class BackendService {
       );
   }
 
-  downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob | number | null> {
-    return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download/${JSON.stringify(settings)}`, {
+  downloadUnits(
+    workspaceId: number, settings: UnitDownloadSettingsDto
+  ): Observable<Blob | number | null> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('settings', encodeURIComponent(JSON.stringify(settings)));
+    return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download`, {
       headers: {
         Accept: 'application/zip'
       },
+      params: queryParams,
       responseType: 'blob',
       reportProgress: true,
       observe: 'events'

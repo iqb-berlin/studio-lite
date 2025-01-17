@@ -1,5 +1,17 @@
 import {
-  Body, Controller, Delete, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Post,
+  Query,
+  StreamableFile,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
@@ -175,7 +187,7 @@ export class WorkspaceController {
     return this.workspaceService.uploadUnits(workspaceId, files, user);
   }
 
-  @Get('download/:settings')
+  @Get('download')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -184,8 +196,9 @@ export class WorkspaceController {
   @Header('Content-Type', 'application/zip')
   @ApiTags('workspace')
   async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-    @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
-    const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
+    @Query('settings') unitDownloadSettingsEncoded: string): Promise<StreamableFile> {
+    const unitDownloadSettingsDecoded = decodeURIComponent(unitDownloadSettingsEncoded);
+    const unitDownloadSettings = JSON.parse(unitDownloadSettingsDecoded);
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,

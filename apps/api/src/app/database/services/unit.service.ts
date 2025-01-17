@@ -165,6 +165,7 @@ export class UnitService {
         if (unitSourceScheme && unitSourceScheme.scheme) {
           await this.patchScheme(newUnit.id, unitSourceScheme, user);
         }
+        await this.unitCommentService.copyComments(unit.createFrom, newUnit.id);
       }
     } else {
       if (unit.player) newUnit.player = unit.player;
