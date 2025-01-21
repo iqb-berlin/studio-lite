@@ -37,12 +37,14 @@ import { UsersService } from '../database/services/users.service';
 import { ManageAccessGuard } from './manage-access.guard';
 import UserEntity from '../database/entities/user.entity';
 import { User } from './user.decorator';
+import { UnitCommentService } from '../database/services/unit-comment.service';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
+    private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
     private usersService: UsersService
@@ -202,6 +204,7 @@ export class WorkspaceController {
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
+      this.unitCommentService,
       this.veronaModuleService,
       this.settingService,
       unitDownloadSettings

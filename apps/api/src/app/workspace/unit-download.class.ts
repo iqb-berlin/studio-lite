@@ -1,4 +1,5 @@
 import {
+  UnitCommentDto,
   UnitDefinitionDto,
   UnitDownloadSettingsDto,
   UnitExportConfigDto,
@@ -14,11 +15,13 @@ import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import { UnitService } from '../database/services/unit.service';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
 import { SettingService } from '../database/services/setting.service';
+import { UnitCommentService } from '../database/services/unit-comment.service';
 
 export class UnitDownloadClass {
   static async get(
     workspaceId: number,
     unitService: UnitService,
+    unitCommentService: UnitCommentService,
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
     unitDownloadSettings: UnitDownloadSettingsDto
@@ -30,7 +33,7 @@ export class UnitDownloadClass {
 
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
       await UnitDownloadClass.getUnitData(
-        unitService, unitId, workspaceId, unitExportConfig, unitsMetadata, usedPlayers, zip
+        unitService, unitCommentService, unitId, workspaceId, unitExportConfig, unitsMetadata, usedPlayers, zip
       );
     }));
 
@@ -64,6 +67,7 @@ export class UnitDownloadClass {
 
   private static async getUnitData(
     unitService: UnitService,
+    unitCommentService: UnitCommentService,
     unitId: number,
     workspaceId: number,
     unitExportConfig: UnitExportConfigDto,
@@ -76,6 +80,8 @@ export class UnitDownloadClass {
     const definitionData = await unitService.findOnesDefinition(unitId);
     UnitDownloadClass.addUnitDefinition(definitionData, unitXml, unitMetadata, zip);
     UnitDownloadClass.addVariables(definitionData, unitXml);
+    const comments = await unitCommentService.findOnesComments(unitId);
+    UnitDownloadClass.addComments(comments, unitXml, unitMetadata, zip);
     const schemeData = await unitService.findOnesScheme(unitId);
     UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
     zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
@@ -160,6 +166,19 @@ export class UnitDownloadClass {
           });
         }
       });
+    }
+  }
+
+  private static addComments(
+    comments: UnitCommentDto[], unitXml: XMLBuilder, unitMetadata: UnitMetadataDto, zip: AdmZip
+  ): void {
+    if (comments && comments.length) {
+      unitXml.root().ele({
+        UnitCommentsRef: {
+          '#': `${unitMetadata.key}.vouc`
+        }
+      });
+      zip.addFile(`${unitMetadata.key}.vouc`, Buffer.from(JSON.stringify(comments)));
     }
   }
 
