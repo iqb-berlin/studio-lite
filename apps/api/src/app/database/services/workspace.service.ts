@@ -436,6 +436,89 @@ export class WorkspaceService {
       source: 'upload-units',
       messages: []
     };
+    const files = WorkspaceService.getZippedFiles(originalFiles, functionReturn);
+
+    const { unitData, notXmlFiles, usedFiles } = WorkspaceService.readImportData(files, functionReturn);
+
+    await Promise.all(unitData.map(async u => {
+      await this.uploadUnit(usedFiles, u, id, user, functionReturn, notXmlFiles);
+    }));
+
+    files.forEach(f => {
+      if (usedFiles.indexOf(f.originalname) < 0) {
+        functionReturn.messages.push({
+          objectKey: f.originalname, messageKey: 'unit-upload.api-warning.ignore-file'
+        });
+      }
+    });
+    return functionReturn;
+  }
+
+  private static readImportData(files: FileIo[], functionReturn: RequestReportDto): {
+    unitData: UnitImportData[],
+    notXmlFiles: { [fName: string]: FileIo },
+    usedFiles: string[]
+  } {
+    const unitData: UnitImportData[] = [];
+    const notXmlFiles: { [fName: string]: FileIo } = {};
+    const usedFiles: string[] = [];
+    files.forEach(f => {
+      if (f.mimetype === 'text/xml') {
+        try {
+          unitData.push(new UnitImportData(f));
+        } catch (e) {
+          functionReturn.messages
+            .push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.xml-parse' });
+          usedFiles.push(f.originalname);
+        }
+      } else {
+        notXmlFiles[f.originalname] = f;
+      }
+    });
+    return {
+      unitData, notXmlFiles, usedFiles
+    };
+  }
+
+  private async uploadUnit(
+    usedFiles: string[],
+    unitImportData: UnitImportData,
+    id: number,
+    user: UserEntity,
+    functionReturn: RequestReportDto,
+    notXmlFiles: { [fName: string]: FileIo }
+  ) {
+    usedFiles.push(unitImportData.fileName);
+    const newUnitId = await this.unitService.create(id, {
+      key: unitImportData.key,
+      name: unitImportData.name
+    }, user);
+    if (newUnitId > 0) {
+      if (unitImportData.definitionFileName && notXmlFiles[unitImportData.definitionFileName]) {
+        unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();
+        usedFiles.push(unitImportData.definitionFileName);
+      }
+      await this.patchDefinition(newUnitId, unitImportData, user);
+
+      if (unitImportData.metadataFileName && notXmlFiles[unitImportData.metadataFileName]) {
+        unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
+        usedFiles.push(unitImportData.metadataFileName);
+      }
+      await this.patchMetadata(newUnitId, unitImportData, user);
+
+      if (unitImportData.codingSchemeFileName && notXmlFiles[unitImportData.codingSchemeFileName]) {
+        unitImportData.codingScheme = notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
+        usedFiles.push(unitImportData.codingSchemeFileName);
+        await this.patchScheme(newUnitId, unitImportData, user);
+      }
+    } else {
+      functionReturn.messages.push({
+        objectKey: unitImportData.fileName, messageKey: 'unit-patch.duplicate-unit-id'
+      });
+    }
+  }
+
+  private static getZippedFiles(originalFiles: FileIo[], functionReturn: RequestReportDto): FileIo[] {
     const files: FileIo[] = [];
     const zipMimeTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'];
     originalFiles.forEach(f => {
@@ -462,76 +545,51 @@ export class WorkspaceService {
         files.push(f);
       }
     });
-    const unitData: UnitImportData[] = [];
-    const notXmlFiles: { [fName: string]: FileIo } = {};
-    const usedFiles: string[] = [];
-    files.forEach(f => {
-      if (f.mimetype === 'text/xml') {
-        try {
-          unitData.push(new UnitImportData(f));
-        } catch (e) {
-          functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.xml-parse' });
-          usedFiles.push(f.originalname);
-        }
-      } else {
-        notXmlFiles[f.originalname] = f;
-      }
-    });
-    await Promise.all(unitData.map(async u => {
-      usedFiles.push(u.fileName);
-      const newUnitId = await this.unitService.create(id, {
-        key: u.key,
-        name: u.name
-      }, user);
-      if (newUnitId > 0) {
-        if (u.definitionFileName && notXmlFiles[u.definitionFileName]) {
-          u.definition = notXmlFiles[u.definitionFileName].buffer.toString();
-          usedFiles.push(u.definitionFileName);
-        }
+    return files;
+  }
 
-        if (u.metadataFileName && notXmlFiles[u.metadataFileName]) {
-          u.metadata = JSON.parse(notXmlFiles[u.metadataFileName].buffer.toString());
-          usedFiles.push(u.metadataFileName);
-        }
-        await this.unitService.patchDefinition(newUnitId, {
-          definition: u.definition,
-          variables: u.baseVariables
-        }, user);
-        if (u.codingSchemeFileName && notXmlFiles[u.codingSchemeFileName]) {
-          u.codingScheme = notXmlFiles[u.codingSchemeFileName].buffer.toString();
-          usedFiles.push(u.codingSchemeFileName);
-          await this.unitService.patchScheme(newUnitId, {
-            scheme: u.codingScheme,
-            schemeType: u.schemeType
-          }, user);
-        }
-        await this.unitService.patchMetadata(newUnitId, {
-          id: newUnitId,
-          editor: u.editor,
-          player: u.player,
-          schemer: u.schemer,
-          metadata: u.metadata as UnitMetadataValues,
-          description: u.description,
-          transcript: u.transcript,
-          reference: u.reference,
-          lastChangedMetadata: u.lastChangedMetadata,
-          lastChangedDefinition: u.lastChangedDefinition,
-          lastChangedScheme: u.lastChangedScheme,
-          lastChangedMetadataUser: u.lastChangedMetadataUser,
-          lastChangedDefinitionUser: u.lastChangedDefinitionUser,
-          lastChangedSchemeUser: u.lastChangedSchemeUser
-        }, user);
-      } else {
-        functionReturn.messages.push({
-          objectKey: u.fileName, messageKey: 'unit-patch.duplicate-unit-id'
-        });
-      }
-    }));
-    files.forEach(f => {
-      if (usedFiles.indexOf(f.originalname) < 0) {
-        functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.ignore-file' });
-      }
-    });
-    return functionReturn;
+  private async patchMetadata(
+    newUnitId: number,
+    unitImportData: UnitImportData,
+    user: UserEntity
+  ) {
+    await this.unitService.patchMetadata(newUnitId, {
+      id: newUnitId,
+      editor: unitImportData.editor,
+      player: unitImportData.player,
+      schemer: unitImportData.schemer,
+      metadata: unitImportData.metadata as UnitMetadataValues,
+      description: unitImportData.description,
+      transcript: unitImportData.transcript,
+      reference: unitImportData.reference,
+      lastChangedMetadata: unitImportData.lastChangedMetadata,
+      lastChangedDefinition: unitImportData.lastChangedDefinition,
+      lastChangedScheme: unitImportData.lastChangedScheme,
+      lastChangedMetadataUser: unitImportData.lastChangedMetadataUser,
+      lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
+      lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
+    }, user);
+  }
+
+  private async patchDefinition(
+    newUnitId: number,
+    unitImportData: UnitImportData,
+    user: UserEntity
+  ) {
+    await this.unitService.patchDefinition(newUnitId, {
+      definition: unitImportData.definition,
+      variables: unitImportData.baseVariables
+    }, user);
+  }
+
+  private async patchScheme(
+    newUnitId: number,
+    unitImportData: UnitImportData,
+    user: UserEntity
+  ) {
+    await this.unitService.patchScheme(newUnitId, {
+      scheme: unitImportData.codingScheme,
+      schemeType: unitImportData.schemeType
+    }, user);
   }
 }
