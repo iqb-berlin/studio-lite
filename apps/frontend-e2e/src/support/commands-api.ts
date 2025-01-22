@@ -1075,6 +1075,7 @@ Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string
     failOnStatusCode: false
   });
 });
+
 // 53
 Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1097,6 +1098,7 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
     });
   }
 });
+
 // 54
 Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
