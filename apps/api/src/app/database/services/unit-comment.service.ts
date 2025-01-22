@@ -75,6 +75,30 @@ export class UnitCommentService {
     return newComment.id;
   }
 
+  private async importComment(comment: UnitCommentDto, comments: UnitCommentDto[], parentId: number): Promise<number> {
+    const newComment = this.unitCommentsRepository
+      .create({
+        ...comment,
+        id: undefined,
+        parentId: parentId
+      });
+    await this.unitCommentsRepository.save(newComment);
+    if (parentId === null) {
+      const childComments = comments.filter(c => c.parentId === comment.id);
+      await Promise.all(childComments.map(async child => {
+        await this.importComment(child, comments, newComment.id);
+      }));
+    }
+    return newComment.id;
+  }
+
+  async importComments(comments: UnitCommentDto[]): Promise<void> {
+    const parentComments = comments.filter(c => !c.parentId);
+    await Promise.all(parentComments.map(async comment => {
+      await this.importComment(comment, comments, comment.parentId);
+    }));
+  }
+
   async removeComment(id: number): Promise<void> {
     this.logger.log(`Deleting comment with id: ${id}`);
     const allChildren = await this.unitCommentsRepository.find({

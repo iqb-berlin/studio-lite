@@ -26,6 +26,7 @@ import {
   UserWorkspaceGroupNotAdminException
 } from '../../exceptions/user-workspace-group-not-admin';
 import UserEntity from '../entities/user.entity';
+import { UnitCommentService } from './unit-comment.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -45,7 +46,8 @@ export class WorkspaceService {
     private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
     private unitService: UnitService,
-    private unitUserService: UnitUserService
+    private unitUserService: UnitUserService,
+    private unitCommentService: UnitCommentService
   ) {
   }
 
@@ -506,6 +508,12 @@ export class WorkspaceService {
       }
       await this.patchMetadata(newUnitId, unitImportData, user);
 
+      if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {
+        const comments = notXmlFiles[unitImportData.commentsFileName].buffer.toString();
+        usedFiles.push(unitImportData.commentsFileName);
+        await this.patchComments(newUnitId, comments);
+      }
+
       if (unitImportData.codingSchemeFileName && notXmlFiles[unitImportData.codingSchemeFileName]) {
         unitImportData.codingScheme = notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
         usedFiles.push(unitImportData.codingSchemeFileName);
@@ -591,5 +599,11 @@ export class WorkspaceService {
       scheme: unitImportData.codingScheme,
       schemeType: unitImportData.schemeType
     }, user);
+  }
+
+  private async patchComments(unitId: number, comments: string) {
+    const importComments = JSON.parse(comments);
+    const newComments = importComments.map(c => ({ ...c, unitId: unitId }));
+    await this.unitCommentService.importComments(newComments);
   }
 }
