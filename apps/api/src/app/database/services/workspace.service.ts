@@ -500,7 +500,7 @@ export class WorkspaceService {
         unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();
         usedFiles.push(unitImportData.definitionFileName);
       }
-      await this.patchDefinition(newUnitId, unitImportData, user);
+      await this.importDefinition(newUnitId, unitImportData, user);
 
       if (unitImportData.metadataFileName && notXmlFiles[unitImportData.metadataFileName]) {
         unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
@@ -511,13 +511,13 @@ export class WorkspaceService {
       if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {
         const comments = notXmlFiles[unitImportData.commentsFileName].buffer.toString();
         usedFiles.push(unitImportData.commentsFileName);
-        await this.patchComments(newUnitId, comments);
+        await this.importComments(newUnitId, comments);
       }
 
       if (unitImportData.codingSchemeFileName && notXmlFiles[unitImportData.codingSchemeFileName]) {
         unitImportData.codingScheme = notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
         usedFiles.push(unitImportData.codingSchemeFileName);
-        await this.patchScheme(newUnitId, unitImportData, user);
+        await this.importScheme(newUnitId, unitImportData, user);
       }
     } else {
       functionReturn.messages.push({
@@ -579,7 +579,7 @@ export class WorkspaceService {
     }, user);
   }
 
-  private async patchDefinition(
+  private async importDefinition(
     newUnitId: number,
     unitImportData: UnitImportData,
     user: UserEntity
@@ -590,7 +590,7 @@ export class WorkspaceService {
     }, user);
   }
 
-  private async patchScheme(
+  private async importScheme(
     newUnitId: number,
     unitImportData: UnitImportData,
     user: UserEntity
@@ -601,7 +601,7 @@ export class WorkspaceService {
     }, user);
   }
 
-  private async patchComments(unitId: number, comments: string) {
+  private async importComments(unitId: number, comments: string) {
     const importComments = JSON.parse(comments);
     const newComments = importComments.map(c => ({ ...c, unitId: unitId }));
     await this.unitCommentService.importComments(newComments);
