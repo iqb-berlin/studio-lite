@@ -602,8 +602,6 @@ export class WorkspaceService {
   }
 
   private async importComments(unitId: number, comments: string) {
-    const importComments = JSON.parse(comments);
-    const newComments = importComments.map(c => ({ ...c, unitId: unitId }));
-    await this.unitCommentService.importComments(newComments);
+    await this.unitCommentService.createComments(JSON.parse(comments), unitId);
   }
 }
