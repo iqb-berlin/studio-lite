@@ -11,7 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
-import { TestConfigComponent } from '../test-config/test-config.component';
+import { ExportTestTakerConfigComponent } from '../export-test-taker-config/export-test-taker-config.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
 
@@ -20,7 +20,7 @@ import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export
   styleUrls: ['export-unit.component.scss'],
   standalone: true,
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, TestConfigComponent, BookletConfigEditComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, FormsModule, ExportUnitFileConfigComponent]
+  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, ExportTestTakerConfigComponent, BookletConfigEditComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, FormsModule, ExportUnitFileConfigComponent]
 })
 export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {

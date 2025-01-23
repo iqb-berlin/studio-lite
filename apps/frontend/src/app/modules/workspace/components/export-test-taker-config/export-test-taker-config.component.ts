@@ -8,13 +8,13 @@ import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
-  selector: 'studio-lite-test-config',
-  templateUrl: './test-config.component.html',
-  styleUrls: ['./test-config.component.scss'],
+  selector: 'studio-lite-export-test-taker-config',
+  templateUrl: './export-test-taker-config.component.html',
+  styleUrls: ['./export-test-taker-config.component.scss'],
   standalone: true,
   imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule]
 })
-export class TestConfigComponent {
+export class ExportTestTakerConfigComponent {
   @Input() addTestTakersReview!: number;
   @Input() addTestTakersHot!: number;
   @Input() addTestTakersMonitor!: number;

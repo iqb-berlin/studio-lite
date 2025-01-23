@@ -58,7 +58,9 @@ import { UnitsAreaComponent } from './components/units-area/units-area.component
 import { UnitTableComponent } from './components/unit-table/unit-table.component';
 import { UnitGroupComponent } from './components/unit-group/unit-group.component';
 import { UpdateUnitsButtonComponent } from './components/update-units-button/update-units-button.component';
-import { TestConfigComponent } from './components/test-config/test-config.component';
+import {
+  ExportTestTakerConfigComponent
+} from './components/export-test-taker-config/export-test-taker-config.component';
 import { PrintReviewButtonComponent } from './components/print-review-button/print-review-button.component';
 import { DeleteReviewButtonComponent } from './components/delete-review-button/delete-review-button.component';
 import { AddReviewButtonComponent } from './components/add-review-button/add-review-button.component';
@@ -116,7 +118,7 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     TranslateModule,
     CommentsModule,
     MatBadgeModule,
-    TestConfigComponent,
+    ExportTestTakerConfigComponent,
     WorkspaceComponent,
     NewUnitComponent,
     SelectUnitComponent,

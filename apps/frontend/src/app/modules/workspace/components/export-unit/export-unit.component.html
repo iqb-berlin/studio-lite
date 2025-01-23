@@ -22,11 +22,11 @@
               {{'workspace.test-taker-settings' | translate}}
             </mat-panel-title>
           </mat-expansion-panel-header>
-            <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
+            <studio-lite-export-test-taker-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
                                      [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
                                      [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
                                      [(passwordLess)]="unitExportSettings.passwordLess">
-            </studio-lite-test-config>
+            </studio-lite-export-test-taker-config>
           </mat-expansion-panel>
           <mat-expansion-panel expanded="false"
                                [disabled]="!(unitExportSettings.addTestTakersReview +
