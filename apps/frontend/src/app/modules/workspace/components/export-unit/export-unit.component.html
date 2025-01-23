@@ -9,6 +9,11 @@
                       (selectionChanged)="unitExportSettings.unitIdList = $event">
     </studio-lite-select-unit-list>
     <div class="fx-flex-row-50 settings">
+      <studio-lite-export-unit-file-config
+        [(addPlayers)]="unitExportSettings.addPlayers"
+        [(addComments)]="unitExportSettings.addComments"
+        (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+      </studio-lite-export-unit-file-config>
       <mat-accordion>
         <mat-expansion-panel
           [expanded]="true">
@@ -20,9 +25,7 @@
             <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
                                      [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
                                      [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
-                                     [(addPlayers)]="unitExportSettings.addPlayers"
-                                     [(passwordLess)]="unitExportSettings.passwordLess"
-                                     (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+                                     [(passwordLess)]="unitExportSettings.passwordLess">
             </studio-lite-test-config>
           </mat-expansion-panel>
           <mat-expansion-panel expanded="false"

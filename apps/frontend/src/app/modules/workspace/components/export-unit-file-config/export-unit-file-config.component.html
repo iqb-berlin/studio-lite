@@ -1,0 +1,26 @@
+<mat-card class="files">
+  <div class="header">{{'unit-download.add-files' | translate}}</div>
+  <mat-checkbox [ngModel]="addComments"
+                (ngModelChange)="addCommentsChange.emit($event)">
+    {{'unit-download.add-comments' | translate}}
+  </mat-checkbox>
+  <mat-checkbox [disabled]="!enablePlayerOption"
+                [ngModel]="addPlayers" class="margin-bottom"
+                (ngModelChange)="addPlayersChange.emit($event);
+                unitsWithOutPlayerChange.emit($event ? unitsWithOutPlayer : [])">
+    {{'unit-download.add-player' | translate}}
+  </mat-checkbox>
+
+  @if (!enablePlayerOption) {
+    <div class="config-message margin-bottom">
+      {{'unit-download.no-player' | translate}}hallo
+    </div>
+  }
+
+  @if (addPlayers && unitsWithOutPlayer.length > 0) {
+    <div
+      class="config-message margin-bottom">
+      {{'unit-download.units-without-player' | translate}}
+    </div>
+  }
+</mat-card>

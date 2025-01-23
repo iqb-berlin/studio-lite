@@ -33,7 +33,15 @@ export class UnitDownloadClass {
 
     await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
       await UnitDownloadClass.getUnitData(
-        unitService, unitCommentService, unitId, workspaceId, unitExportConfig, unitsMetadata, usedPlayers, zip
+        unitService,
+        unitCommentService,
+        unitId,
+        workspaceId,
+        unitDownloadSettings,
+        unitExportConfig,
+        unitsMetadata,
+        usedPlayers,
+        zip
       );
     }));
 
@@ -70,9 +78,11 @@ export class UnitDownloadClass {
     unitCommentService: UnitCommentService,
     unitId: number,
     workspaceId: number,
+    unitDownloadSettings: UnitDownloadSettingsDto,
     unitExportConfig: UnitExportConfigDto,
     unitsMetadata: UnitMetadataDto[],
-    usedPlayers: string[], zip: AdmZip
+    usedPlayers: string[],
+    zip: AdmZip
   ): Promise<void> {
     const unitMetadata = await unitService.findOnesMetadata(unitId, workspaceId);
     const unitXml = UnitDownloadClass.createUnitXML(unitExportConfig, unitMetadata);
@@ -80,8 +90,10 @@ export class UnitDownloadClass {
     const definitionData = await unitService.findOnesDefinition(unitId);
     UnitDownloadClass.addUnitDefinition(definitionData, unitXml, unitMetadata, zip);
     UnitDownloadClass.addVariables(definitionData, unitXml);
-    const comments = await unitCommentService.findOnesComments(unitId);
-    UnitDownloadClass.addComments(comments, unitXml, unitMetadata, zip);
+    if (unitDownloadSettings.addComments) {
+      const comments = await unitCommentService.findOnesComments(unitId);
+      UnitDownloadClass.addComments(comments, unitXml, unitMetadata, zip);
+    }
     const schemeData = await unitService.findOnesScheme(unitId);
     UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
     zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
