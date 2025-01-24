@@ -49,6 +49,7 @@ describe('Admin settings API tests', () => {
       expect(resp.status).to.equal(200);
     });
   });
+
   describe('100. GET /api/admin/settings/config', () => {
     it('200 positive test: should get the configuration text settings the admin', () => {
       cy.getSettingConfigAPI(Cypress.env(`token_${Cypress.env('username')}`))
@@ -56,12 +57,14 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200 positive test: should get the configuration text settings a normal user', () => {
       cy.getSettingConfigAPI(Cypress.env(`id_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200/401 negative test: should not also configuration settings without token', () => {
       cy.getSettingConfigAPI(noId)
         .then(resp => {
@@ -69,6 +72,7 @@ describe('Admin settings API tests', () => {
         });
     });
   });
+
   describe('101. UPDATE /api/admin/settings/config', () => {
     it('200 positive test: should update the configuration text settings the admin', () => {
       cy.updateSettingConfigAPI(Cypress.env(`token_${Cypress.env('username')}`), 17)
@@ -80,12 +84,14 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('401 negative test: should not update the configuration text settings without token', () => {
       cy.updateSettingConfigAPI(noId, 17)
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
     });
+
     it('401 negative test: should not update the configuration text settings a normal user', () => {
       cy.updateSettingConfigAPI(Cypress.env(`token_${user2.username}`), 17)
         .then(resp => {
@@ -93,6 +99,7 @@ describe('Admin settings API tests', () => {
         });
     });
   });
+
   describe('102. GET /api/admin/settings/app-logo', () => {
     it('200 positive test: should get the configuration logo-color settings the admin ', () => {
       cy.getSettingLogoAPI(Cypress.env(`token_${Cypress.env('username')}`))
@@ -100,12 +107,14 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200 positive test: should get the configuration logo-color settings a normal user', () => {
       cy.getSettingLogoAPI(Cypress.env(`token_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200/401 negative test: should not get the configuration logo-color settings a non user', () => {
       cy.getSettingLogoAPI(noId)
         .then(resp => {
@@ -113,6 +122,7 @@ describe('Admin settings API tests', () => {
         });
     });
   });
+
   describe('103. UPDATE /api/admin/settings/app-logo', () => {
     it('200 positive test: should update the configuration logo-color settings the admin', () => {
       // Set the background to colour red
@@ -121,17 +131,20 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
       // Set the background to the original colour
+
       cy.updateSettingLogoAPI(Cypress.env(`token_${Cypress.env('username')}`), '')
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('401 negative test: should not update the configuration logo-color settings a non user', () => {
       cy.updateSettingLogoAPI(noId, 'Gelb')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
     });
+
     it('401 negative test: should not update the configuration logo-color settings a normal user', () => {
       cy.updateSettingLogoAPI(Cypress.env(`token_${user2.username}`), 'Gelb')
         .then(resp => {
@@ -139,6 +152,7 @@ describe('Admin settings API tests', () => {
         });
     });
   });
+
   describe('104. GET /api/admin/settings/unit-export-config', () => {
     it('200 positive test: should get the configuration unit export settings the admin', () => {
       cy.getSettingLogoAPI(Cypress.env(`token_${Cypress.env('username')}`))
@@ -146,12 +160,14 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200 positive test: should get the configuration unit export settings a normal user', () => {
       cy.getSettingUnitExportAPI(Cypress.env(`token_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200/401 negative test: should not get the configuration unit export settings a non user', () => {
       cy.getSettingUnitExportAPI(noId)
         .then(resp => {
@@ -173,6 +189,7 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('401 negative test: should not update the configuration unit export parameters a normal user', () => {
       unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/vo_Unit.xsd';
       cy.updateSettingUnitExportAPI(Cypress.env(`token_${user2.username}`), unitExport)
@@ -180,6 +197,7 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(401);
         });
     });
+
     it('401 negative test: should not update the configuration unit export parameters a non user', () => {
       unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/vo_Unit.xsd';
       cy.updateSettingUnitExportAPI(noId, unitExport)
@@ -196,12 +214,14 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200 positive test: should get the configuration missing profile setting a normal user', () => {
       cy.getSettingMissingProfilesAPI(noId)
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('200/401 negative test: should not get the configuration missing profile setting a non user', () => {
       cy.getSettingMissingProfilesAPI(noId)
         .then(resp => {
@@ -219,12 +239,14 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
+
     it('401 negative test: should not update the configuration missing profiles a normal user ', () => {
       cy.updateSettingMissingProfilesAPI(Cypress.env(`token_${user2.username}`), '')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
     });
+
     it('401 negative test should not update the configuration missing profiles a non user ', () => {
       cy.updateSettingMissingProfilesAPI(noId, '')
         .then(resp => {

@@ -42,6 +42,7 @@ describe('Admin settings API tests', () => {
     cy.visit('/');
     logout();
   });
+
   describe('108. POST /api/admin/resource-packages', () => {
     it('200 positive test: should add a resource package the admin', () => {
       const filename = 'GeoGebra.itcr.zip';
@@ -59,6 +60,7 @@ describe('Admin settings API tests', () => {
         });
     });
   });
+
   describe('109. GET /api/admin/resource-packages', () => {
     it('200 positive test: should get a resource package the admin', () => {
       cy.getPackageAPI(Cypress.env(`token_${Cypress.env('username')}`))
@@ -66,34 +68,38 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(200);
         });
     });
-    it('200 positive test: should get a resource package text settings without token', () => {
+
+    it('200 positive test: should not update the configuration text settings a normal user', () => {
       cy.getPackageAPI(Cypress.env(`token_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
-    it('200/401 negative test: should not update the configuration text settings a normal user', () => {
+
+    it('200/401 negative test:  should get a resource package text settings without token', () => {
       cy.getPackageAPI(noId)
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
   });
-  describe.skip('110. DELETE /api/admin/resource-packages', () => {
+
+  describe('110. DELETE /api/admin/resource-packages', () => {
     it('401 negative test: should get the a normal user', () => {
       cy.deletePackageAPI(Cypress.env(`token_${user2.username}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
-      cy.pause();
     });
-    it('200/401 negative test: should not delete the resource package a non user', () => {
+
+    it('401 negative test: should not delete the resource package a non user', () => {
       cy.deletePackageAPI(noId, '1')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
       cy.pause();
     });
+
     it('200 positive test: should delete the package the admin ', () => {
       cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
         .then(resp => {
