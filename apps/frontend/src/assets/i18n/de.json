@@ -766,7 +766,7 @@
     "999": "Fehler in der Netzwerkverbindung",
     "400": "Server meldet fehlerhaften Aufruf.",
     "401": "Bitte für diese Aktion erst anmelden!",
-    "403": "Für diese Funktion haben Sie keine Berechtigung.",
+    "403": "Für diese Aktion haben Sie keine Berechtigung.",
     "404": "Daten/Objekt nicht gefunden.",
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "500": "Allgemeines Server-Problem.",
