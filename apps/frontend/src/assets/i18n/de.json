@@ -37,8 +37,9 @@
     "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },
   "unit-download": {
-    "title": "Zusätzliche Dateien z. B. für Testcenter",
+    "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
+    "add-comments": "Kommentare hinzufügen",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
     "add-login": "Logins hinzufügen",
     "add-test-takers-review": "Anzahl für Review",
@@ -484,6 +485,7 @@
     "move-unit": "Aufgaben in anderen Arbeitsbereich verschieben",
     "move-to": "Verschieben",
     "copy-unit": "Aufgaben in anderen Arbeitsbereich kopieren",
+    "copy-unit-comments": "Kommentare der Aufgaben kopieren",
     "copy-to": "Kopieren nach...",
     "manage-groups": "Gruppen verwalten",
     "manage-unit-groups": "Aufgabengruppen verwalten",

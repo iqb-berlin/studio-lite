@@ -8,12 +8,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
-import { TestConfigComponent } from './test-config.component';
 import { environment } from '../../../../../environments/environment';
+import { ExportUnitFileConfigComponent } from './export-unit-file-config.component';
 
-describe('TestConfigComponent', () => {
-  let component: TestConfigComponent;
-  let fixture: ComponentFixture<TestConfigComponent>;
+describe('ExportUnitFileConfigComponent', () => {
+  let component: ExportUnitFileConfigComponent;
+  let fixture: ComponentFixture<ExportUnitFileConfigComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -34,7 +34,7 @@ describe('TestConfigComponent', () => {
       }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TestConfigComponent);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -3,38 +3,27 @@ import {
 } from '@angular/core';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatInput } from '@angular/material/input';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatCard } from '@angular/material/card';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
 
 @Component({
-  selector: 'studio-lite-test-config',
-  templateUrl: './test-config.component.html',
-  styleUrls: ['./test-config.component.scss'],
+  selector: 'studio-lite-export-unit-file-config',
+  templateUrl: './export-unit-file-config.component.html',
+  styleUrls: ['./export-unit-file-config.component.scss'],
   standalone: true,
-  imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule]
+  imports: [MatCheckbox, FormsModule, TranslateModule, MatCard]
 })
-export class TestConfigComponent implements OnInit {
+export class ExportUnitFileConfigComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
-
-  @Input() addTestTakersReview!: number;
-  @Input() addTestTakersHot!: number;
-  @Input() addTestTakersMonitor!: number;
   @Input() addPlayers!: boolean;
-  @Input() passwordLess!: boolean;
-
-  @Output() addTestTakersReviewChange: EventEmitter<number> = new EventEmitter<number>();
-  @Output() addTestTakersHotChange: EventEmitter<number> = new EventEmitter<number>();
-  @Output() addTestTakersMonitorChange: EventEmitter<number> = new EventEmitter<number>();
+  @Input() addComments!: boolean;
   @Output() addPlayersChange: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Output() passwordLessChange: EventEmitter<boolean> = new EventEmitter<boolean>();
-
+  @Output() addCommentsChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
 
   constructor(

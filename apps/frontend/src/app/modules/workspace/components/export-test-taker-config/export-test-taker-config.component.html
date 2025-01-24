@@ -1,24 +1,3 @@
-<div class="margin-bottom">{{'unit-download.title' | translate}}</div>
-<mat-checkbox [disabled]="!enablePlayerOption"
-  [ngModel]="addPlayers" class="margin-bottom"
-              (ngModelChange)="addPlayersChange.emit($event);
-              unitsWithOutPlayerChange.emit($event ? unitsWithOutPlayer : [])">
-  {{'unit-download.add-player' | translate}}
-</mat-checkbox>
-
-@if (!enablePlayerOption) {
-  <div class="config-message margin-bottom">
-    {{'unit-download.no-player' | translate}}
-  </div>
-}
-
-@if (addPlayers && unitsWithOutPlayer.length > 0) {
-  <div
-    class="config-message margin-bottom">
-    {{'unit-download.units-without-player' | translate}}
-  </div>
-}
-
 <div class="fx-row-space-between-start">
   <label class="fx-flex-row-50">
     {{'unit-download.add-login' | translate}}

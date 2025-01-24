@@ -9,6 +9,9 @@ export class UnitDownloadSettingsDto {
     addPlayers = false;
 
   @ApiProperty()
+    addComments = false;
+
+  @ApiProperty()
     addTestTakersReview = 0;
 
   @ApiProperty()

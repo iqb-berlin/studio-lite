@@ -1,5 +1,17 @@
 import {
-  Body, Controller, Delete, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Post,
+  Query,
+  StreamableFile,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
@@ -25,12 +37,14 @@ import { UsersService } from '../database/services/users.service';
 import { ManageAccessGuard } from './manage-access.guard';
 import UserEntity from '../database/entities/user.entity';
 import { User } from './user.decorator';
+import { UnitCommentService } from '../database/services/unit-comment.service';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
+    private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
     private usersService: UsersService
@@ -175,7 +189,7 @@ export class WorkspaceController {
     return this.workspaceService.uploadUnits(workspaceId, files, user);
   }
 
-  @Get('download/:settings')
+  @Get('download')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -184,11 +198,12 @@ export class WorkspaceController {
   @Header('Content-Type', 'application/zip')
   @ApiTags('workspace')
   async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-    @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
-    const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
+    @Query('settings') settings: string): Promise<StreamableFile> {
+    const unitDownloadSettings = JSON.parse(settings);
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
+      this.unitCommentService,
       this.veronaModuleService,
       this.settingService,
       unitDownloadSettings

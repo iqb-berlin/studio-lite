@@ -101,24 +101,44 @@ export class BackendService {
       );
   }
 
-  moveOrCopyUnits(workspaceId: number, units: number[],
-                  targetWorkspace: number, moveOnly: boolean): Observable<boolean | RequestReportDto> {
-    const newUnitMode = moveOnly ? 'moveto' : 'copyto';
-    return this.http
-      .patch<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/${units.join(';')}/${newUnitMode}/${targetWorkspace}`,
-      {}
+  moveUnits(workspaceId: number,
+            units: number[],
+            targetWorkspace: number): Observable<boolean | RequestReportDto> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('units', JSON.stringify(units));
+    return this.http.patch<RequestReportDto>(
+      `${this.serverUrl}workspace/${workspaceId}/moveUnits`, { targetWorkspace }, { params: queryParams }
     )
       .pipe(
         catchError(() => of(false))
       );
   }
 
-  downloadUnits(workspaceId: number, settings: UnitDownloadSettingsDto): Observable<Blob | number | null> {
-    return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download/${JSON.stringify(settings)}`, {
+  copyUnits(workspaceId: number,
+            units: number[],
+            targetWorkspace: number,
+            addComments?: boolean
+  ): Observable<boolean | RequestReportDto> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('units', JSON.stringify(units));
+    return this.http.post<RequestReportDto>(
+      `${this.serverUrl}workspace/${workspaceId}/copyUnits`, { targetWorkspace, addComments }, { params: queryParams }
+    )
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
+  downloadUnits(
+    workspaceId: number, settings: UnitDownloadSettingsDto
+  ): Observable<Blob | number | null> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('settings', JSON.stringify(settings));
+    return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download`, {
       headers: {
         Accept: 'application/zip'
       },
+      params: queryParams,
       responseType: 'blob',
       reportProgress: true,
       observe: 'events'
