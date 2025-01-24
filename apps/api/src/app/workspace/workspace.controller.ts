@@ -198,9 +198,8 @@ export class WorkspaceController {
   @Header('Content-Type', 'application/zip')
   @ApiTags('workspace')
   async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-    @Query('settings') unitDownloadSettingsEncoded: string): Promise<StreamableFile> {
-    const unitDownloadSettingsDecoded = decodeURIComponent(unitDownloadSettingsEncoded);
-    const unitDownloadSettings = JSON.parse(unitDownloadSettingsDecoded);
+    @Query('settings') settings: string): Promise<StreamableFile> {
+    const unitDownloadSettings = JSON.parse(settings);
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,

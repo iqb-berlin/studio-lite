@@ -118,7 +118,7 @@ export class BackendService {
     workspaceId: number, settings: UnitDownloadSettingsDto
   ): Observable<Blob | number | null> {
     let queryParams = new HttpParams();
-    queryParams = queryParams.append('settings', encodeURIComponent(JSON.stringify(settings)));
+    queryParams = queryParams.append('settings', JSON.stringify(settings));
     return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download`, {
       headers: {
         Accept: 'application/zip'
