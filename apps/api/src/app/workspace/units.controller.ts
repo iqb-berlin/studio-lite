@@ -193,18 +193,17 @@ export class UnitsController {
     return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
-  @Patch(':ids/moveto/:target')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
+  @Patch('moveUnits')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchWorkspace(@Param('ids') ids: string,
+  async moveUnits(@Query('units') units: string,
     @User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Param('target', ParseIntPipe) targetWorkspaceId: number) {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user, workspaceId, 'moveTo');
+    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
+    const unitIds = JSON.parse(units);
+    return this.unitService.patchWorkspace(unitIds, targetWorkspace, user, workspaceId, 'moveTo');
   }
 
   @Patch('submit_units')
@@ -230,17 +229,16 @@ export class UnitsController {
     return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
   }
 
-  @Patch(':ids/copyto/:target')
+  @Post('copyUnits')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async copy(@Param('ids') ids: string,
+  async copyUnits(@Query('units') units: string,
     @User() user: UserEntity,
-    @Param('target', ParseIntPipe) targetWorkspaceId: number) {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.copy(idsAsNumberArray, targetWorkspaceId, user);
+    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
+    const unitIds = JSON.parse(units);
+    return this.unitService.copy(unitIds, targetWorkspace, user);
   }
 
   @Patch(':id/definition')
