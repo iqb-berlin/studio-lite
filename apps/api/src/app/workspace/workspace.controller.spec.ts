@@ -8,6 +8,7 @@ import { VeronaModulesService } from '../database/services/verona-modules.servic
 import { SettingService } from '../database/services/setting.service';
 import { UsersService } from '../database/services/users.service';
 import { WorkspaceUserService } from '../database/services/workspace-user.service';
+import { UnitCommentService } from '../database/services/unit-comment.service';
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController;
@@ -43,6 +44,10 @@ describe('WorkspaceController', () => {
         {
           provide: WorkspaceUserService,
           useValue: createMock<WorkspaceUserService>()
+        },
+        {
+          provide: UnitCommentService,
+          useValue: createMock<UnitCommentService>()
         }
       ]
     }).compile();

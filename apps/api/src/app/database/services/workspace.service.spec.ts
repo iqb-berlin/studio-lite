@@ -12,6 +12,7 @@ import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
+import { UnitCommentService } from './unit-comment.service';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -34,6 +35,10 @@ describe('WorkspaceService', () => {
         },
         {
           provide: UnitUserService,
+          useValue: createMock<UnitUserService>()
+        },
+        {
+          provide: UnitCommentService,
           useValue: createMock<UnitUserService>()
         },
         {
