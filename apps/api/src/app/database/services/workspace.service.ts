@@ -491,10 +491,12 @@ export class WorkspaceService {
     notXmlFiles: { [fName: string]: FileIo }
   ) {
     usedFiles.push(unitImportData.fileName);
-    const newUnitId = await this.unitService.create(id, {
-      key: unitImportData.key,
-      name: unitImportData.name
-    }, user);
+    const newUnitId = await this.unitService.create(
+      id,
+      { key: unitImportData.key, name: unitImportData.name },
+      user,
+      true
+    );
     if (newUnitId > 0) {
       if (unitImportData.definitionFileName && notXmlFiles[unitImportData.definitionFileName]) {
         unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();

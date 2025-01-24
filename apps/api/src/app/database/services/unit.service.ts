@@ -121,7 +121,7 @@ export class UnitService {
     return units;
   }
 
-  async create(workspaceId: number, unit: CreateUnitDto, user: User): Promise<number> {
+  async create(workspaceId: number, unit: CreateUnitDto, user: User, addComments: boolean): Promise<number> {
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
       select: ['id']
@@ -165,7 +165,7 @@ export class UnitService {
         if (unitSourceScheme && unitSourceScheme.scheme) {
           await this.patchScheme(newUnit.id, unitSourceScheme, user);
         }
-        await this.unitCommentService.copyComments(unit.createFrom, newUnit.id);
+        if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id);
       }
     } else {
       if (unit.player) newUnit.player = unit.player;
@@ -375,7 +375,7 @@ export class UnitService {
     return report;
   }
 
-  async copy(unitIds: number[], newWorkspace: number, user: User): Promise<RequestReportDto> {
+  async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
@@ -390,7 +390,8 @@ export class UnitService {
       const newUnitId = await this.create(
         newWorkspace,
         { ...keysToCopy, createFrom: unitToCopy.id },
-        user);
+        user,
+        addComments);
       return <RequestReportDto>{
         source: 'unit-copy',
         messages: newUnitId > 0 ? [] : [{

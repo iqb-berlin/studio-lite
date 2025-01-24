@@ -236,9 +236,10 @@ export class UnitsController {
   @ApiTags('workspace unit')
   async copyUnits(@Query('units') units: string,
     @User() user: UserEntity,
+    @Body('addComments', ParseBoolPipe) addComments: boolean,
     @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
     const unitIds = JSON.parse(units);
-    return this.unitService.copy(unitIds, targetWorkspace, user);
+    return this.unitService.copy(unitIds, targetWorkspace, user, addComments);
   }
 
   @Patch(':id/definition')
@@ -275,7 +276,7 @@ export class UnitsController {
   async create(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @Body() createUnitDto: CreateUnitDto) {
-    return this.unitService.create(workspaceId, createUnitDto, user);
+    return this.unitService.create(workspaceId, createUnitDto, user, false);
   }
 
   @Delete(':ids')

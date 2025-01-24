@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { Component, OnInit } from '@angular/core';
+import { RequestReportDto, UnitDownloadSettingsDto, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
@@ -48,7 +48,7 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider,
     TranslateModule]
 })
-export class EditUnitButtonComponent extends RequestMessageDirective {
+export class EditUnitButtonComponent extends RequestMessageDirective implements OnInit {
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -133,6 +133,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
             this.translateService.instant('workspace.move-units') :
             this.translateService.instant('workspace.copy-units'),
           subtitle: moveOnly ? this.translateService.instant('workspace.unit-dropbox-history-deleted') : '',
+          commentsOption: !moveOnly,
           buttonLabel: moveOnly ?
             this.translateService.instant('workspace.move') :
             this.translateService.instant('workspace.copy'),
@@ -146,45 +147,58 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
             if (result !== false) {
               const dialogComponent = dialogRef.componentInstance;
               if (dialogComponent.targetWorkspace > 0) {
-                this.backendService.moveOrCopyUnits(
-                  this.workspaceService.selectedWorkspaceId,
-                  dialogComponent.selectedUnits,
-                  dialogComponent.targetWorkspace,
-                  moveOnly
-                )
-                  .subscribe(uploadStatus => {
-                    if (typeof uploadStatus === 'boolean') {
-                      this.snackBar.open(
-                        this.translateService
-                          .instant('workspace.unit-not-moved-or-copied',
-                            { action: moveOnly ? 'verschieben' : 'kopieren' }),
-                        this.translateService.instant('workspace.error'),
-                        { duration: 3000 }
-                      );
-                    } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-                      const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
-                        width: '500px',
-                        data: uploadStatus
-                      });
-                      dialogRef2.afterClosed()
-                        .subscribe(() => {
-                          this.updateUnitList();
-                        });
-                    } else {
-                      this.snackBar.open(
-                        this.translateService
-                          .instant('workspace.unit-moved-or-copied',
-                            { action: moveOnly ? 'verschoben' : 'kopiert' }),
-                        '',
-                        { duration: 5000 }
-                      );
-                      this.updateUnitList();
-                    }
+                if (moveOnly) {
+                  this.backendService.moveUnits(
+                    this.workspaceService.selectedWorkspaceId,
+                    dialogComponent.selectedUnits,
+                    dialogComponent.targetWorkspace
+                  ).subscribe(uploadStatus => {
+                    this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
                   });
+                } else {
+                  this.backendService.copyUnits(
+                    this.workspaceService.selectedWorkspaceId,
+                    dialogComponent.selectedUnits,
+                    dialogComponent.targetWorkspace,
+                    dialogComponent.copyComments
+                  ).subscribe(uploadStatus => {
+                    this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
+                  });
+                }
               }
             }
           }
         });
+    }
+  }
+
+  moveOrCopyUnitSubscription(uploadStatus: boolean | RequestReportDto, moveOnly: boolean): void {
+    if (typeof uploadStatus === 'boolean') {
+      this.snackBar.open(
+        this.translateService
+          .instant('workspace.unit-not-moved-or-copied',
+            { action: moveOnly ? 'verschieben' : 'kopieren' }),
+        this.translateService.instant('workspace.error'),
+        { duration: 3000 }
+      );
+    } else if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+      const dialogRef2 = this.uploadReportDialog.open(RequestMessageComponent, {
+        width: '500px',
+        data: uploadStatus
+      });
+      dialogRef2.afterClosed()
+        .subscribe(() => {
+          this.updateUnitList();
+        });
+    } else {
+      this.snackBar.open(
+        this.translateService
+          .instant('workspace.unit-moved-or-copied',
+            { action: moveOnly ? 'verschoben' : 'kopiert' }),
+        '',
+        { duration: 5000 }
+      );
+      this.updateUnitList();
     }
   }
 
@@ -196,7 +210,6 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
 
         }
       });
-
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
         if (result) {
           this.appService.dataLoading = true;

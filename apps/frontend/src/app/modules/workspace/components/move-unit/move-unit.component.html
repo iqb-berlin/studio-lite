@@ -23,6 +23,9 @@
     }
     <studio-lite-select-unit-list #unitSelectionTable
       [workspace]="data.currentWorkspaceId">
+      @if (data.commentsOption) {
+        <mat-checkbox [(ngModel)]="copyComments">{{ 'workspace.copy-unit-comments' | translate }}</mat-checkbox>
+      }
     </studio-lite-select-unit-list>
   </mat-dialog-content>
 
