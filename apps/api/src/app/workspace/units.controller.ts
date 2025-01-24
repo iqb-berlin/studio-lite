@@ -22,6 +22,7 @@ import { DeleteAccessGuard } from './delete-access.guard';
 import { User } from './user.decorator';
 import UserEntity from '../database/entities/user.entity';
 import { CommentAccessGuard } from './comment-access.guard';
+import { WorkspaceAccessGuard } from './workspace-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -32,7 +33,7 @@ export class UnitsController {
   ) {}
 
   @Get('units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -58,7 +59,7 @@ export class UnitsController {
   }
 
   @Get('units/metadata')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -70,7 +71,7 @@ export class UnitsController {
   }
 
   @Get(':id/metadata')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -84,7 +85,7 @@ export class UnitsController {
   }
 
   @Get(':id/definition')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -98,7 +99,7 @@ export class UnitsController {
   }
 
   @Get(':id/scheme')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -112,7 +113,7 @@ export class UnitsController {
   }
 
   @Get(':id/comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
@@ -122,7 +123,7 @@ export class UnitsController {
   }
 
   @Get(':id/comments/last-seen')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
@@ -132,7 +133,7 @@ export class UnitsController {
   }
 
   @Patch(':id/comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
@@ -145,7 +146,7 @@ export class UnitsController {
   }
 
   @Post(':id/comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -158,7 +159,7 @@ export class UnitsController {
   }
 
   @Patch(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
@@ -171,7 +172,7 @@ export class UnitsController {
 
   // todo CommentDeleteGuard: but include workspacegroupadmin
   @Delete(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
@@ -194,7 +195,7 @@ export class UnitsController {
   }
 
   @Patch('units/move')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -229,7 +230,7 @@ export class UnitsController {
   }
 
   @Post('units/copy')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
