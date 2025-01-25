@@ -193,17 +193,16 @@ export class UnitsController {
     return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
-  @Patch('moveUnits')
+  @Patch('units/move')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async moveUnits(@Query('units') units: string,
+  async moveUnits(@Body('units') units: number[],
     @User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
-    const unitIds = JSON.parse(units);
-    return this.unitService.patchWorkspace(unitIds, targetWorkspace, user, workspaceId, 'moveTo');
+    return this.unitService.patchWorkspace(units, targetWorkspace, user, workspaceId, 'moveTo');
   }
 
   @Patch('submit_units')
@@ -229,17 +228,16 @@ export class UnitsController {
     return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
   }
 
-  @Post('copyUnits')
+  @Post('units/copy')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async copyUnits(@Query('units') units: string,
+  async copyUnits(@Body('units') units: number[],
     @User() user: UserEntity,
     @Body('addComments', ParseBoolPipe) addComments: boolean,
     @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
-    const unitIds = JSON.parse(units);
-    return this.unitService.copy(unitIds, targetWorkspace, user, addComments);
+    return this.unitService.copy(units, targetWorkspace, user, addComments);
   }
 
   @Patch(':id/definition')

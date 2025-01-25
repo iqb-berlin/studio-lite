@@ -104,11 +104,8 @@ export class BackendService {
   moveUnits(workspaceId: number,
             units: number[],
             targetWorkspace: number): Observable<boolean | RequestReportDto> {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('units', JSON.stringify(units));
     return this.http.patch<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/moveUnits`, { targetWorkspace }, { params: queryParams }
-    )
+      `${this.serverUrl}workspace/${workspaceId}/units/move`, { targetWorkspace, units })
       .pipe(
         catchError(() => of(false))
       );
@@ -119,11 +116,8 @@ export class BackendService {
             targetWorkspace: number,
             addComments?: boolean
   ): Observable<boolean | RequestReportDto> {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('units', JSON.stringify(units));
     return this.http.post<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/copyUnits`, { targetWorkspace, addComments }, { params: queryParams }
-    )
+      `${this.serverUrl}workspace/${workspaceId}/units/copy`, { targetWorkspace, units, addComments })
       .pipe(
         catchError(() => of(false))
       );
