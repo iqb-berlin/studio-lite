@@ -9,7 +9,7 @@ import {
   CommentData,
   ReviewData,
   MyData,
-  DefinitionUnit
+  DefinitionUnit, CopyUnit
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 
@@ -694,14 +694,20 @@ Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) =
 });
 
 // 52
-Cypress.Commands.add('copyToAPI', (wsOriginId:string, wsDestinationId:string, unitId:string, token:string) => {
+Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
-    method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/${unitId}/copyto/${wsDestinationId}`,
+    method: 'POST',
+    url: `/api/workspace/${wsDestinationId}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      createForm: copyUnit.createForm,
+      groupName: copyUnit.groupName,
+      key: copyUnit.key,
+      name: copyUnit.name
     },
     failOnStatusCode: false
   });

@@ -97,6 +97,12 @@ export interface MetadataType {
   schemer?: string;
 }
 
+export interface CopyUnit {
+  createForm: number;
+  groupName: string;
+  key: string;
+  name: string;
+}
 export interface DefinitionUnit {
   id: number;
   key?: string;
