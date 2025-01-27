@@ -30,18 +30,6 @@ describe('Admin settings API tests', () => {
           });
       });
   });
-  after(() => {
-    cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
-      .then(resp => {
-        expect(resp.status).to.equal(200);
-      });
-    cy.deleteFirstUserAPI().then(resp => {
-      Cypress.env('token_admin', '');
-      expect(resp.status).to.equal(200);
-    });
-    cy.visit('/');
-    logout();
-  });
 
   describe('108. POST /api/admin/resource-packages', () => {
     it('200 positive test: should add a resource package the admin', () => {
@@ -97,14 +85,31 @@ describe('Admin settings API tests', () => {
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
-      cy.pause();
     });
 
     it('200 positive test: should delete the package the admin ', () => {
+      cy.wait(2000);
       cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
+    });
+  });
+
+  describe('Erase the database', () => {
+    it('Deletes users', () => {
+      cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      cy.deleteFirstUserAPI().then(resp => {
+        Cypress.env('token_admin', '');
+        expect(resp.status).to.equal(200);
+      });
+    });
+    it('Log out', () => {
+      cy.visit('/');
+      logout();
     });
   });
 });
