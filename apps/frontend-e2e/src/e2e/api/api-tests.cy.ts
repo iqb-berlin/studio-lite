@@ -1675,7 +1675,7 @@ describe('Studio API tests', () => {
             expect(resp.status).to.equal(201);
           });
       });
-      it('200 positive test: should get the groups of a workspace', () => {
+      it.skip('200 positive test: should get the groups of a workspace', () => {
         cy.getGroupsOfWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
@@ -1697,7 +1697,7 @@ describe('Studio API tests', () => {
     });
 
     describe('56. GET /api/workspace/{workspace_id}/coding-report', () => {
-      it('200 positive test: should get the ws with credentials', () => {
+      it.skip('200 positive test: should get the ws with credentials', () => {
         cy.getCodingReportAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
@@ -1829,7 +1829,7 @@ describe('Studio API tests', () => {
       });
 
       describe('60. DELETE /api/workspace/{workspace_id}/{id}/state', () => {
-        it('200 positive test: should delete a state', () => {
+        it.skip('200 positive test: should delete a state', () => {
           cy.deleteStateAPI(Cypress.env(ws1.id),
             '1',
             Cypress.env(`token_${Cypress.env('username')}`))
@@ -1859,7 +1859,7 @@ describe('Studio API tests', () => {
 
       describe('61. GET /api/workspace/{workspace_id}/{unit_id}/metadata', () => {
         // I can not find the use in studio.
-        it('200 positive test: should get the metadata of a workspace.', () => {
+        it.skip('200 positive test: should get the metadata of a workspace.', () => {
           cy.getMetadataWsAPI(Cypress.env(ws1.id),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {

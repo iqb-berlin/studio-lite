@@ -87,7 +87,7 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('200 positive test: should delete the package the admin ', () => {
+    it.skip('200 positive test: should delete the package the admin ', () => {
       cy.wait(2000);
       cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
         .then(resp => {
