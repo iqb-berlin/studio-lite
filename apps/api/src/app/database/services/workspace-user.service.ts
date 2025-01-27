@@ -31,6 +31,16 @@ export class WorkspaceUserService {
     }));
   }
 
+  async hasAccess(userId: number, workspaceId: number) {
+    const workspaceUser = await this.workspaceUserRepository.findOne({
+      where: {
+        userId: userId,
+        workspaceId: workspaceId
+      }
+    });
+    return !!workspaceUser;
+  }
+
   async canComment(userId: number, workspaceId: number) {
     const workspaceUser = await this.workspaceUserRepository.findOne({
       where: {

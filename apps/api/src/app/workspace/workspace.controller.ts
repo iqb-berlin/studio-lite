@@ -38,6 +38,8 @@ import { ManageAccessGuard } from './manage-access.guard';
 import UserEntity from '../database/entities/user.entity';
 import { User } from './user.decorator';
 import { UnitCommentService } from '../database/services/unit-comment.service';
+import { WorkspaceAccessGuard } from './workspace-access.guard';
+import { CommentAccessGuard } from './comment-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
@@ -51,7 +53,7 @@ export class WorkspaceController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -63,7 +65,7 @@ export class WorkspaceController {
   }
 
   @Get('users/:user_id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
@@ -163,7 +165,7 @@ export class WorkspaceController {
   }
 
   @Get('coding-report')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -190,7 +192,7 @@ export class WorkspaceController {
   }
 
   @Get('download')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard) // because comments are exported
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @Header('Content-Disposition', 'attachment; filename="studio-export-units.zip"')
