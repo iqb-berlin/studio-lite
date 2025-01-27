@@ -2590,7 +2590,8 @@ describe('Studio API tests', () => {
     //   it('200 positive test: should be able to add a group for a unit', () => {
     //     // no write answer
     //     // eslint-disable-next-line max-len
-    //     const setting = `{"unitList":[${Cypress.env(unit1.shortname)}],"addPlayers":false,"addTestTakersReview":0,"addTestTakersMonitor":0,
+    //     const setting = `{"unitList":[${Cypress.env(unit1.shortname)}],
+    //     "addPlayers":false,"addTestTakersReview":0,"addTestTakersMonitor":0,
     //     "addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}`;
     //     cy.FdownloadWsAPI(Cypress.env(ws1.id), setting, Cypress.env(`token_${Cypress.env('username')}`))
     //       .then(resp => {
