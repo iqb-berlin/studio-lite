@@ -667,13 +667,20 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
 
 // 50
 Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
+  // TO DO replace the unitId by an ids array
   const authorization = `bearer ${token}`;
+  const nu = parseInt(`${wsDestinyId}`, 10);
+  const unitIdNumber = parseInt(`${unitId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/${unitId}/moveTo/${wsDestinyId}`,
+    url: `/api/workspace/${wsOriginId}/units/move`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      targetWorkspace: nu,
+      units: [unitIdNumber]
     },
     failOnStatusCode: false
   });

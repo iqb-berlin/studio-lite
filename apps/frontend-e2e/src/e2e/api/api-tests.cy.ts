@@ -1498,7 +1498,8 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe.skip('50. PATCH /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
+    // describe.skip('50. PATCH /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
+    describe('50. PATCH /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
       it('401 negative test: should not move a test a user without credentials in the ws', () => {
         cy.moveToAPI(Cypress.env(ws1.id),
           Cypress.env(ws2.id),
@@ -2589,7 +2590,8 @@ describe('Studio API tests', () => {
     //   it('200 positive test: should be able to add a group for a unit', () => {
     //     // no write answer
     //     // eslint-disable-next-line max-len
-    //     const setting = `{"unitList":[${Cypress.env(unit1.shortname)}],"addPlayers":false,"addTestTakersReview":0,"addTestTakersMonitor":0,"addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}`;
+    //     const setting = `{"unitList":[${Cypress.env(unit1.shortname)}],"addPlayers":false,"addTestTakersReview":0,"addTestTakersMonitor":0,
+    //     "addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}`;
     //     cy.FdownloadWsAPI(Cypress.env(ws1.id), setting, Cypress.env(`token_${Cypress.env('username')}`))
     //       .then(resp => {
     //         expect(resp.status).to.equal(500);
