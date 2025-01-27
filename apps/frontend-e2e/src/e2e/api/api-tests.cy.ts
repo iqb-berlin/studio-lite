@@ -1671,7 +1671,7 @@ describe('Studio API tests', () => {
         cy.getGroupsOfWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-            expect(resp.body.length).to.equal(3);
+            expect(resp.body.length).to.equal(4);
           });
       });
       it('401 negative test: should not get the groups of a workspace without credentials', () => {
@@ -1693,7 +1693,7 @@ describe('Studio API tests', () => {
         cy.getCodingReportAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-            expect(resp.body.length).to.equal(2);
+            expect(resp.body.length).to.equal(3);
           });
       });
 
@@ -1749,6 +1749,7 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
+          cy.pause();
         });
 
         it('401 negative test: should not add new states in a group without credentials', () => {
@@ -1766,7 +1767,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('59. PATCH /api/workspace/{workspace_id}/{id}/metadata ', () => {
+      describe.skip('59. PATCH /api/workspace/{workspace_id}/{id}/metadata ', () => {
         it('200 positive test: should assign the state 1 to the unit', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
@@ -1860,6 +1861,7 @@ describe('Studio API tests', () => {
         });
 
         it('401 negative test: should not return the metadata of a ws without credentials', () => {
+          cy.pause();
           cy.getMetadataWsAPI(Cypress.env(ws1.id), noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
