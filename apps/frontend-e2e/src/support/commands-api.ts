@@ -1,5 +1,15 @@
 import {
-  UserData, GroupData, WsData, AccessLevel, UnitData, WsSettings, AccessUser, CommentData, ReviewData
+  UserData,
+  GroupData,
+  WsData,
+  AccessLevel,
+  UnitData,
+  WsSettings,
+  AccessUser,
+  CommentData,
+  ReviewData,
+  MyData,
+  DefinitionUnit, CopyUnit
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 
@@ -505,20 +515,6 @@ Cypress.Commands.add('downloadModuleAPI', (module:string, token:string) => {
   });
 });
 
-// 29
-Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'DELETE',
-    url: `/api/admin/verona-modules/${module}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 30
 Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string) => {
   const authorization = `bearer ${token}`;
@@ -595,6 +591,52 @@ Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
   });
 });
 
+// 40
+Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace/${wsId}/${unitId}/metadata`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 41
+Cypress.Commands.add(
+  'updateUnitMetadataAPI',
+  (wsId: string, unitId: string, profile:string, entry: DefinitionUnit, token: string) => {
+    // console.log(entry);
+    // eslint-disable-next-line max-len
+    // const jsonObj = JSON.parse('[{"id":"a1","label":[{"lang":"de","value":"Für SPF geeignet"}],"value":"false","valueAsText":{"lang":"de","value":"ja"}},{"id":"iqb_phones","label":[{"lang":"de","value":"Kopfhörer"}],"value":[],"valueAsText":[]},{"id":"w8","label":[{"lang":"de","value":"Leitidee"}],"value":[],"valueAsText":[]},{"id":"iqb_author","label":[{"lang":"de","value":"Entwickler:in"}],"value":[{"lang":"de","value":"Ana Maier"}],"valueAsText":[{"lang":"de","value":"Ana Maier"}]}]');
+    // metadata: {
+    //   profiles: [{
+    //     entries: `${jsonObj}`,
+    //     profileId: `${profile}`,
+    //     isCurrent: true
+    //   }]
+    // }
+    const authorization = `bearer ${token}`;
+    const nu = parseInt(`${unitId}`, 10);
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspace/${wsId}/${unitId}/metadata`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        id: nu,
+        groupName: `${entry.groupName}`
+      },
+      failOnStatusCode: false
+    });
+  }
+);
+
 // 42
 Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -623,7 +665,28 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
   });
 });
 
-// a1
+// 50
+Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
+  // TO DO replace the unitId by an ids array
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(`${wsDestinyId}`, 10);
+  const unitIdNumber = parseInt(`${unitId}`, 10);
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace/${wsOriginId}/units/move`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      targetWorkspace: nu,
+      units: [unitIdNumber]
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 51
 Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -637,21 +700,27 @@ Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) =
   });
 });
 
-// a2
-Cypress.Commands.add('copyToAPI', (wsOriginId:string, wsDestinationId:string, unitId:string, token:string) => {
+// 52
+Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
-    method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/${unitId}/copyto/${wsDestinationId}`,
+    method: 'POST',
+    url: `/api/workspace/${wsDestinationId}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      createForm: copyUnit.createForm,
+      groupName: copyUnit.groupName,
+      key: copyUnit.key,
+      name: copyUnit.name
     },
     failOnStatusCode: false
   });
 });
 
-// b1
+// 53
 Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -665,7 +734,7 @@ Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
   });
 });
 
-// b2
+// 54
 Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -679,7 +748,7 @@ Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
   });
 });
 
-// b3
+// 55
 Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -692,7 +761,7 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
     failOnStatusCode: false
   });
 });
-// b4
+// 56
 Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -706,7 +775,7 @@ Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
   });
 });
 
-// b5
+// 57
 Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -723,40 +792,7 @@ Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:
   });
 });
 
-// b6
-Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  // const path:string = `../frontend-e2e/src/fixtures/${filename}`;
-  // cy.request({
-  //   method: 'POST',
-  //   url: `/api/workspace/${wsId}/upload`,
-  //   headers: {
-  //     'app-version': Cypress.env('version'),
-  //     authorization
-  //   },
-  //   failOnStatusCode: false
-  // }).selectFile(
-  //   path, {
-  //     action: 'select',
-  //     force: true
-  //   });
-  cy.fixture(filename).then(file => {
-    cy.request({
-      method: 'POST',
-      url: `/api/workspace/${wsId}/upload`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        'content-type': 'binary',
-        authorization
-      },
-      body: file
-    }).then(resp => {
-      expect(resp.status).to.equal(204);
-    });
-  });
-});
-
-// b7
+// 58
 Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -795,7 +831,7 @@ Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => 
   });
 });
 
-// b8
+// 59
 Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state: string, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${unitId}`, 10);
@@ -814,7 +850,7 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
   });
 });
 
-// b9
+// 60
 Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -828,7 +864,7 @@ Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:strin
   });
 });
 
-// b10
+// 61
 Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -842,7 +878,7 @@ Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
   });
 });
 
-// b11
+// 62
 Cypress.Commands.add('dropboxWsAPI', (wsId: string, wsDe: string, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${wsDe}`, 10);
@@ -860,7 +896,7 @@ Cypress.Commands.add('dropboxWsAPI', (wsId: string, wsDe: string, token:string) 
   });
 });
 
-// b12
+// 63
 Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${wsDe}`, 10);
@@ -880,7 +916,7 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
   });
 });
 
-// b13
+// 64
 Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string) => {
   const authorization = `bearer ${token}`;
   const unitNumber = parseInt(`${unit}`, 10);
@@ -898,7 +934,7 @@ Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string)
   });
 });
 
-// 45
+// 65
 Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -918,7 +954,7 @@ Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: C
   });
 });
 
-// 46
+// 66
 Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -932,7 +968,7 @@ Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:stri
   });
 });
 
-// 47 NOT FINISH
+// 67
 Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
   const now = new Date();
@@ -952,7 +988,7 @@ Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comm
   });
 });
 
-// 48
+// 68
 Cypress.Commands.add('updateCommentAPI',
   (wsId: string, unitId: string, commentId:string, comment: CommentData, token:string) => {
     const authorization = `bearer ${token}`;
@@ -972,7 +1008,7 @@ Cypress.Commands.add('updateCommentAPI',
     });
   });
 
-// 49
+// 69
 Cypress.Commands.add('deleteCommentAPI',
   (wsId: string, unitId: string, commentId:string, token:string) => {
     const authorization = `bearer ${token}`;
@@ -987,21 +1023,7 @@ Cypress.Commands.add('deleteCommentAPI',
     });
   });
 
-// 50
-Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/${unitId}/moveTo/${wsDestinyId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 51
+// 70
 Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${wsId}`, 10);
@@ -1020,7 +1042,7 @@ Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:str
   });
 });
 
-// 52
+// 71
 Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1033,26 +1055,31 @@ Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string
     failOnStatusCode: false
   });
 });
-// 53
+
+// 72
 Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${review.id}`, 10);
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspace/${wsId}/reviews/${review.id}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      id: nu,
-      name: `${review.name}`,
-      link: `${review.link}`
-    },
-    failOnStatusCode: false
-  });
+  if (review.units) {
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspace/${wsId}/reviews/${review.id}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        id: nu,
+        name: `${review.name}`,
+        link: `${review.link}`,
+        units: [`${review.units[0]}`]
+      },
+      failOnStatusCode: false
+    });
+  }
 });
-// 54
+
+// 73
 Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1066,21 +1093,49 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   });
 });
 
-// 55
-// Cypress.Commands.add('getReviewMetadataAPI', (wsId:string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'GET',
-//     url: `/api/workspace/${wsId}/reviews/`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
+// 74
+Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/review/${reviewId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 
-// 68
+// 75
+Cypress.Commands.add('getReviewMetadataAPI', (reviewId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/review/${reviewId}/${unitId}/metadata`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 76
+Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/review/${reviewId}/${unitId}/definition`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 81
 Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1093,7 +1148,8 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
     failOnStatusCode: false
   });
 });
-// 69
+
+// 82
 Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1107,7 +1163,7 @@ Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:str
   });
 });
 
-// 70
+// 83
 Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1121,7 +1177,44 @@ Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string
   });
 });
 
-// 77
+// 84
+Cypress.Commands.add('getMyData', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/my-data',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 85
+Cypress.Commands.add('updateMyData', (token: string, data: MyData) => {
+  const authorization = `bearer ${token}`;
+  const nu = parseInt(data.id, 10);
+  cy.request({
+    method: 'PATCH',
+    url: '/api/my-data',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: nu,
+      description: `${data.description}`,
+      email: `${data.email}`,
+      lastName: `${data.lastName}`,
+      firstName: `${data.firstName}`,
+      emailPublishApproved: false
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 86
 Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1135,7 +1228,7 @@ Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
   });
 });
 
-// 78
+// 87
 Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1149,21 +1242,7 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   });
 });
 
-// Use not found
-// Cypress.Commands.add('updateGroupsByUserAPI', (userId:string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'PATCH',
-//     url: `/api/admin/users/${userId}/workspace-groups`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
-// 79
+// 88
 Cypress.Commands.add('deleteWsAPI', (ws:string, group: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1177,7 +1256,7 @@ Cypress.Commands.add('deleteWsAPI', (ws:string, group: string, token:string) => 
   });
 });
 
-// 80
+// 89
 Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1190,7 +1269,22 @@ Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
     failOnStatusCode: false
   });
 });
-// 60
+
+// 90
+Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/verona-modules/${module}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 91
 Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1203,37 +1297,6 @@ Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
     failOnStatusCode: false
   });
 });
-
-// 400 Bad Request
-// 401 Unauthorized
-// 403 Forbidden
-// 404 Not found
-// 405 Method not allowed
-// 406 Not acceptable
-// 408 Request Timeout
-// 429 Too Many Requests
-// 500 Internal Server Error
-// 502: Bad Gateway
-// 504: Gateway timeout
-// 23
-Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/admin/workspace-groups/${groupId}/admins`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: userIds,
-    failOnStatusCode: false
-  });
-});
-
-// Cypress.Commands.add('', () => {});
-// Cypress.Commands.add('', () => {});
-// Cypress.Commands.add('', () => {});
-// Cypress.Commands.add('', () => {});
 
 // 100
 Cypress.Commands.add('getSettingConfigAPI', (token:string) => {
@@ -1261,7 +1324,7 @@ Cypress.Commands.add('updateSettingConfigAPI', (token:string, hour:number) => {
     },
     body: {
       appTitle: 'IQB-Studio',
-      globalWarningText: 'Warnung Aktung 2',
+      globalWarningText: 'Warnung Achtung 2',
       globalWarningExpiredHour: `${hour}`,
       globalWarningExpiredDay: new Date(),
       hasUsers: true
@@ -1369,8 +1432,6 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
   });
 });
 
-// 108
-
 // 109
 Cypress.Commands.add('getPackageAPI', (token:string) => {
   const authorization = `bearer ${token}`;
@@ -1390,7 +1451,7 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/resource-packages?id=${packageId}`,
+    url: `/api/admin/resource-packages/${packageId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1399,7 +1460,7 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
   });
 });
 
-// 120 and 6 is the same
+// 111
 Cypress.Commands.add('deleteFirstUserAPI', () => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({
@@ -1412,3 +1473,63 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
     failOnStatusCode: false
   });
 });
+
+// not used
+Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  // const path:string = `../frontend-e2e/src/fixtures/${filename}`;
+  // cy.request({
+  //   method: 'POST',
+  //   url: `/api/workspace/${wsId}/upload`,
+  //   headers: {
+  //     'app-version': Cypress.env('version'),
+  //     authorization
+  //   },
+  //   failOnStatusCode: false
+  // }).selectFile(
+  //   path, {
+  //     action: 'select',
+  //     force: true
+  //   });
+  cy.fixture(filename).then(file => {
+    cy.request({
+      method: 'POST',
+      url: `/api/workspace/${wsId}/upload`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        'content-type': 'binary',
+        authorization
+      },
+      body: file
+    }).then(resp => {
+      expect(resp.status).to.equal(204);
+    });
+  });
+});
+
+// 23
+Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: userIds,
+    failOnStatusCode: false
+  });
+});
+
+// 400 Bad Request
+// 401 Unauthorized
+// 403 Forbidden
+// 404 Not found
+// 405 Method not allowed
+// 406 Not acceptable
+// 408 Request Timeout
+// 429 Too Many Requests
+// 500 Internal Server Error
+// 502: Bad Gateway
+// 504: Gateway timeout

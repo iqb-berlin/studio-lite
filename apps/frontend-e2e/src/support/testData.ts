@@ -69,7 +69,7 @@ export interface CommentData {
   userId?: number;
   parentId?: number;
   unitId?: number;
-  lastSeenCommentChangedAt?: string;
+  lastSeenCommentChangedAt?: Date;
 }
 
 export interface ReviewData {
@@ -78,14 +78,37 @@ export interface ReviewData {
   name: string;
   password?: string;
   settings?: string;
-  units?: number[]
+  units?: number[];
+}
+
+export interface MyData {
+  id: string;
+  description: string;
+  email: string;
+  lastName: string;
+  firstName: string;
+  emailPublishApproved: boolean;
 }
 
 export interface MetadataType {
-  id: string,
-  editor?: string,
-  player?: string,
-  schemer?: string,
+  id: string;
+  editor?: string;
+  player?: string;
+  schemer?: string;
+}
+
+export interface CopyUnit {
+  createForm: number;
+  groupName: string;
+  key: string;
+  name: string;
+}
+export interface DefinitionUnit {
+  id: number;
+  key?: string;
+  groupName?: string;
+  state?: string;
+  variables?: string[];
 }
 // export interface ProfileData {
 //   profile: string;

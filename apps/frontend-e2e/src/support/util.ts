@@ -334,7 +334,8 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
     .click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/*/moveto/*', 'PATCH', 'createUnitFromExisting');
+  // cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/moveUnits', 'PATCH', 'createUnitFromExisting');
+  cy.clickButton('Verschieben');
 }
 export function importExercise(): void {
   cy.get('[data-cy="workspace-add-units"]')
