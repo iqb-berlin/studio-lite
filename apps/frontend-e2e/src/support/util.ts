@@ -215,7 +215,7 @@ export function deleteUnit(unit: UnitData):void {
     .should('exist')
     .click()
     .type(unit.shortname);
-  cy.get(`mat-cell:contains("${unit.shortname} - ${unit.name}")`).prev().click();
+  cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
   cy.buttonToContinue('Löschen', 200, '/api/workspace/*/*', 'DELETE', 'deleteUnit');
 }
 
@@ -287,7 +287,7 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
   cy.get('mat-select')
     .click();
   cy.get(`mat-option:contains("${ws}")`).click();
-  cy.get(`mat-cell:contains("${unit1.shortname} - ${unit1.name}")`).prev().click();
+  cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
   cy.clickButton('Fortsetzen');
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
@@ -333,8 +333,9 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
   cy.get('mat-select')
     .click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
-  cy.get(`mat-cell:contains("${unit.shortname} - ${unit.name}")`).prev().click();
-  cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/*/moveto/*', 'PATCH', 'createUnitFromExisting');
+  cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
+  // cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/moveUnits', 'PATCH', 'createUnitFromExisting');
+  cy.clickButton('Verschieben');
 }
 export function importExercise(): void {
   cy.get('[data-cy="workspace-add-units"]')

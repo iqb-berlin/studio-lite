@@ -1,0 +1,34 @@
+<div class="fx-row-space-between-start">
+  <label class="fx-flex-row-50">
+    {{'unit-download.add-login' | translate}}
+  </label>
+  <div class="fx-column-start-stretch fx-flex-row-50">
+    <mat-form-field>
+      <mat-label>{{'unit-download.add-test-takers-review' | translate}}</mat-label>
+      <input matInput type="number" min="0"
+        [placeholder]="'unit-download.add-test-takers-review' | translate"
+        [ngModel]="addTestTakersReview"
+        (ngModelChange)="addTestTakersReviewChange.emit($event)">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{'unit-download.add-test-takers-monitor' | translate}}</mat-label>
+      <input matInput type="number"
+        [placeholder]="'unit-download.add-test-takers-monitor' | translate"
+        [ngModel]="addTestTakersMonitor"
+        (ngModelChange)="addTestTakersMonitorChange.emit($event)">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{'unit-download.add-test-takers-hot' | translate}}</mat-label>
+      <input matInput type="number" min="0"
+        [placeholder]="'unit-download.add-test-takers-hot' | translate"
+        [ngModel]="addTestTakersHot"
+        (ngModelChange)="addTestTakersHotChange.emit($event)">
+    </mat-form-field>
+  </div>
+</div>
+<mat-checkbox [disabled]="(addTestTakersReview + addTestTakersMonitor + addTestTakersHot) === 0"
+  class="margin-bottom"
+  [ngModel]="passwordLess"
+  (ngModelChange)="passwordLessChange.emit($event)">
+  <div>{{'unit-download.without-password' | translate}}</div>
+</mat-checkbox>

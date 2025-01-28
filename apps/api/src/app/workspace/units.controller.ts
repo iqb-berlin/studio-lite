@@ -22,6 +22,7 @@ import { DeleteAccessGuard } from './delete-access.guard';
 import { User } from './user.decorator';
 import UserEntity from '../database/entities/user.entity';
 import { CommentAccessGuard } from './comment-access.guard';
+import { WorkspaceAccessGuard } from './workspace-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class UnitsController {
@@ -32,7 +33,7 @@ export class UnitsController {
   ) {}
 
   @Get('units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -58,7 +59,7 @@ export class UnitsController {
   }
 
   @Get('units/metadata')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -70,7 +71,7 @@ export class UnitsController {
   }
 
   @Get(':id/metadata')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -84,7 +85,7 @@ export class UnitsController {
   }
 
   @Get(':id/definition')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -98,7 +99,7 @@ export class UnitsController {
   }
 
   @Get(':id/scheme')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -112,7 +113,7 @@ export class UnitsController {
   }
 
   @Get(':id/comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
@@ -122,7 +123,7 @@ export class UnitsController {
   }
 
   @Get(':id/comments/last-seen')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
@@ -132,7 +133,7 @@ export class UnitsController {
   }
 
   @Patch(':id/comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
@@ -145,7 +146,7 @@ export class UnitsController {
   }
 
   @Post(':id/comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -158,7 +159,7 @@ export class UnitsController {
   }
 
   @Patch(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
@@ -171,7 +172,7 @@ export class UnitsController {
 
   // todo CommentDeleteGuard: but include workspacegroupadmin
   @Delete(':unit_id/comments/:id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
@@ -193,18 +194,16 @@ export class UnitsController {
     return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
-  @Patch(':ids/moveto/:target')
+  @Patch('units/move')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchWorkspace(@Param('ids') ids: string,
+  async moveUnits(@Body('units') units: number[],
     @User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Param('target', ParseIntPipe) targetWorkspaceId: number) {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.patchWorkspace(idsAsNumberArray, targetWorkspaceId, user, workspaceId, 'moveTo');
+    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
+    return this.unitService.patchWorkspace(units, targetWorkspace, user, workspaceId, 'moveTo');
   }
 
   @Patch('submit_units')
@@ -230,17 +229,16 @@ export class UnitsController {
     return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
   }
 
-  @Patch(':ids/copyto/:target')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @Post('units/copy')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async copy(@Param('ids') ids: string,
+  async copyUnits(@Body('units') units: number[],
     @User() user: UserEntity,
-    @Param('target', ParseIntPipe) targetWorkspaceId: number) {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.copy(idsAsNumberArray, targetWorkspaceId, user);
+    @Body('addComments', ParseBoolPipe) addComments: boolean,
+    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
+    return this.unitService.copy(units, targetWorkspace, user, addComments);
   }
 
   @Patch(':id/definition')
@@ -277,7 +275,7 @@ export class UnitsController {
   async create(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @Body() createUnitDto: CreateUnitDto) {
-    return this.unitService.create(workspaceId, createUnitDto, user);
+    return this.unitService.create(workspaceId, createUnitDto, user, false);
   }
 
   @Delete(':ids')

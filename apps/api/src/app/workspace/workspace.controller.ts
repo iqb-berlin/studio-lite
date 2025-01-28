@@ -1,5 +1,17 @@
 import {
-  Body, Controller, Delete, Get, Header, Param, Patch, Post, StreamableFile, UploadedFiles, UseGuards, UseInterceptors
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Post,
+  Query,
+  StreamableFile,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
@@ -25,19 +37,23 @@ import { UsersService } from '../database/services/users.service';
 import { ManageAccessGuard } from './manage-access.guard';
 import UserEntity from '../database/entities/user.entity';
 import { User } from './user.decorator';
+import { UnitCommentService } from '../database/services/unit-comment.service';
+import { WorkspaceAccessGuard } from './workspace-access.guard';
+import { CommentAccessGuard } from './comment-access.guard';
 
 @Controller('workspace/:workspace_id')
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
+    private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
     private usersService: UsersService
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -49,7 +65,7 @@ export class WorkspaceController {
   }
 
   @Get('users/:user_id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
@@ -149,7 +165,7 @@ export class WorkspaceController {
   }
 
   @Get('coding-report')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -175,8 +191,8 @@ export class WorkspaceController {
     return this.workspaceService.uploadUnits(workspaceId, files, user);
   }
 
-  @Get('download/:settings')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @Get('download')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard) // because comments are exported
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @Header('Content-Disposition', 'attachment; filename="studio-export-units.zip"')
@@ -184,11 +200,12 @@ export class WorkspaceController {
   @Header('Content-Type', 'application/zip')
   @ApiTags('workspace')
   async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-    @Param('settings') unitDownloadSettingsString: string): Promise<StreamableFile> {
-    const unitDownloadSettings = JSON.parse(unitDownloadSettingsString);
+    @Query('settings') settings: string): Promise<StreamableFile> {
+    const unitDownloadSettings = JSON.parse(settings);
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
+      this.unitCommentService,
       this.veronaModuleService,
       this.settingService,
       unitDownloadSettings

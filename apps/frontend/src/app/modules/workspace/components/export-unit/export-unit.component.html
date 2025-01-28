@@ -9,6 +9,11 @@
                       (selectionChanged)="unitExportSettings.unitIdList = $event">
     </studio-lite-select-unit-list>
     <div class="fx-flex-row-50 settings">
+      <studio-lite-export-unit-file-config
+        [(addPlayers)]="unitExportSettings.addPlayers"
+        [(addComments)]="unitExportSettings.addComments"
+        (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+      </studio-lite-export-unit-file-config>
       <mat-accordion>
         <mat-expansion-panel
           [expanded]="true">
@@ -17,13 +22,11 @@
               {{'workspace.test-taker-settings' | translate}}
             </mat-panel-title>
           </mat-expansion-panel-header>
-            <studio-lite-test-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
+            <studio-lite-export-test-taker-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
                                      [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
                                      [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
-                                     [(addPlayers)]="unitExportSettings.addPlayers"
-                                     [(passwordLess)]="unitExportSettings.passwordLess"
-                                     (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
-            </studio-lite-test-config>
+                                     [(passwordLess)]="unitExportSettings.passwordLess">
+            </studio-lite-export-test-taker-config>
           </mat-expansion-panel>
           <mat-expansion-panel expanded="false"
                                [disabled]="!(unitExportSettings.addTestTakersReview +

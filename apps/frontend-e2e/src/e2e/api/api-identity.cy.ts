@@ -96,7 +96,7 @@ describe('Identity tests users API tests', () => {
           });
       });
     });
-    it('201 negative test identity: should not create a user if we do not type correctly the parameter identity.', () => {
+    it('200 negative test identity: should not create a user if we do not type correctly the parameter identity.', () => {
       // It does not create the user, if we don't type identity parameter correctly but other parameters.
       // create the token but not the id
       cy.request({

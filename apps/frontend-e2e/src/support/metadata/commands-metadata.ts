@@ -1,3 +1,5 @@
+import { WsSettings } from '../testData';
+
 // 35
 Cypress.Commands.add('getRegistryAPI',
   (token:string) => {
@@ -74,8 +76,12 @@ Cypress.Commands.add('getVocabularyMetadataAPI', (profile: string, token:string)
 
 // 39
 Cypress.Commands.add('updateWsMetadataAPI',
-  (wsId: string, unitProfile: string, itemProfile:string, token:string) => {
+  (wsId: string, settings: WsSettings, token:string) => {
     const authorization = `bearer ${token}`;
+    // defaultEditor: `${settings.defaultEditor}`,
+    // defaultPlayer: `${settings.defaultPlayer}`,
+    // defaultSchemer: `${settings.defaultSchemer}`,
+    // stableModulesOnly: `${settings.stableModulesOnly}`,
     cy.request({
       method: 'PATCH',
       url: `/api/workspace/${wsId}/settings`,
@@ -84,14 +90,49 @@ Cypress.Commands.add('updateWsMetadataAPI',
         authorization
       },
       body: {
-        itemMDProfile: `${itemProfile}`,
-        unitMDProfile: `${unitProfile}`
+        unitGroups: ['Bista'],
+        itemMDProfile: `${settings.itemMDProfile}`,
+        unitMDProfile: `${settings.unitMDProfile}`,
+        defaultEditor: `${settings.defaultEditor}`,
+        defaultPlayer: `${settings.defaultPlayer}`,
+        defaultSchemer: `${settings.defaultSchemer}`
       },
       failOnStatusCode: false
     });
   });
 
-// So should be 37.
+// 41
+// Cypress.Commands.add(
+//   'updateUnitMetadataAPI',
+//   (wsId: string, unitId: string, profile:string, entry: MetadataValuesEntry, token: string) => {
+//     console.log(entry);
+// eslint-disable-next-line max-len
+//     const jsonObj = JSON.parse('[{"id":"a1","label":[{"lang":"de","value":"Für SPF geeignet"}],"value":"false","valueAsText":{"lang":"de","value":"ja"}},{"id":"iqb_phones","label":[{"lang":"de","value":"Kopfhörer"}],"value":[],"valueAsText":[]},{"id":"w8","label":[{"lang":"de","value":"Leitidee"}],"value":[],"valueAsText":[]},{"id":"iqb_author","label":[{"lang":"de","value":"Entwickler:in"}],"value":[{"lang":"de","value":"Ana Maier"}],"valueAsText":[{"lang":"de","value":"Ana Maier"}]}]');
+//     const authorization = `bearer ${token}`;
+//     const nu = parseInt(`${unitId}`, 10);
+//     cy.request({
+//       method: 'PATCH',
+//       url: `/api/workspace/${wsId}/${unitId}/metadata`,
+//       headers: {
+//         'app-version': Cypress.env('version'),
+//         authorization
+//       },
+//       body: {
+//         id: nu,
+//         metadata: {
+//           profiles: [{
+//             entries: `${jsonObj}`,
+//             profileId: `${profile}`,
+//             isCurrent: true
+//           }]
+//         }
+//       },
+//       failOnStatusCode: false
+//     });
+//   }
+// );
+//
+// should be 37.
 // Cypress.Commands.add('updateGroupMetadataAPI', (groupId: string, profiles: ProfileData[], token:string) => {
 //   const authorization = `bearer ${token}`;
 //   const num = profiles.length;
