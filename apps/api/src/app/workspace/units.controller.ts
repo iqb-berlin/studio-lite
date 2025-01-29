@@ -39,7 +39,7 @@ export class UnitsController {
   @ApiCreatedResponse({
     type: [UnitInListDto]
   })
-  @ApiTags('workspace')
+  @ApiTags('workspace unit')
   async findAll(
     @Req() request,
       @WorkspaceId(ParseIntPipe) workspaceId: number,
@@ -65,7 +65,7 @@ export class UnitsController {
   @ApiCreatedResponse({
     type: [UnitMetadataDto]
   })
-  @ApiTags('workspace')
+  @ApiTags('workspace unit')
   async findAllWithMetadata(@WorkspaceId() workspaceId: number): Promise<UnitMetadataDto[]> {
     return this.unitService.findAllWithMetadata(workspaceId);
   }
@@ -293,7 +293,7 @@ export class UnitsController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace')
+  @ApiTags('workspace unit')
   async deleteUnitState(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity) {
     return this.unitService.removeUnitState(unitId, user);
