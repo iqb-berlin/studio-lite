@@ -76,7 +76,7 @@ export class BackendService {
 
   renameWorkspace(workspaceId: number, newName: string): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/rename/${newName}`, {})
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/rename/${newName}`, {})
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -85,7 +85,7 @@ export class BackendService {
 
   selectWorkspaceDropBox(workspaceId: number, dropBoxId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/drop-box`, { dropBoxId })
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/drop-box`, { dropBoxId })
       .pipe(
         map(() => true),
         catchError(() => of(false))

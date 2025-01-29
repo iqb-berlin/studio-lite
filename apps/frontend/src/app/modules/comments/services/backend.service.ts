@@ -14,8 +14,8 @@ export class BackendService {
 
   getComments(workspaceId: number, unitId: number, reviewId: number): Observable<Comment[]> {
     const url = reviewId > 0 ?
-      `${this.serverUrl}review/${reviewId}/${unitId}/comments` :
-      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`;
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments`;
     return this.httpClient
       .get<Comment[]>(url)
       .pipe(
@@ -26,7 +26,7 @@ export class BackendService {
 
   updateComments(updateUnitUser: UpdateUnitUserDto, workspaceId: number, unitId: number): Observable<boolean> {
     return this.httpClient
-      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`, updateUnitUser)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments`, updateUnitUser)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -37,8 +37,8 @@ export class BackendService {
     comment: Partial<Comment>, workspaceId: number, unitId: number, reviewId: number
   ): Observable<number | null> {
     const url = reviewId > 0 ?
-      `${this.serverUrl}review/${reviewId}/${unitId}/comments` :
-      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments`;
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments`;
     return this.httpClient
       .post<number>(url, comment)
       .pipe(
@@ -51,8 +51,8 @@ export class BackendService {
     id: number, body: Partial<Comment>, workspaceId: number, unitId: number, reviewId: number
   ): Observable<boolean> {
     const url = reviewId > 0 ?
-      `${this.serverUrl}review/${reviewId}/${unitId}/comments/${id}` :
-      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`;
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${id}` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}`;
     return this.httpClient
       .patch(url, body)
       .pipe(
@@ -63,8 +63,8 @@ export class BackendService {
 
   deleteComment(id: number, workspaceId: number, unitId: number, reviewId: number): Observable<unknown> {
     const url = reviewId > 0 ?
-      `${this.serverUrl}review/${reviewId}/${unitId}/comments/${id}` :
-      `${this.serverUrl}workspace/${workspaceId}/${unitId}/comments/${id}`;
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${id}` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}`;
     return this.httpClient
       .delete(url)
       .pipe(

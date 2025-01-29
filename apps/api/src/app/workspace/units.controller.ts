@@ -24,7 +24,7 @@ import UserEntity from '../database/entities/user.entity';
 import { CommentAccessGuard } from './comment-access.guard';
 import { WorkspaceAccessGuard } from './workspace-access.guard';
 
-@Controller('workspace/:workspace_id')
+@Controller('workspaces/:workspace_id/units')
 export class UnitsController {
   constructor(
     private unitService: UnitService,
@@ -32,7 +32,7 @@ export class UnitsController {
     private unitCommentService: UnitCommentService
   ) {}
 
-  @Get('units')
+  @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -58,7 +58,7 @@ export class UnitsController {
       filterTargetWorkspaceId);
   }
 
-  @Get('units/metadata')
+  @Get('metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -194,7 +194,7 @@ export class UnitsController {
     return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
-  @Patch('units/move')
+  @Patch('move')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -229,7 +229,7 @@ export class UnitsController {
     return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
   }
 
-  @Post('units/copy')
+  @Post('copy')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -263,7 +263,7 @@ export class UnitsController {
     return this.unitService.patchScheme(unitId, unitSchemeDto, user);
   }
 
-  @Post('units')
+  @Post()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })

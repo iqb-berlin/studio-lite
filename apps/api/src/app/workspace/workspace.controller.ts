@@ -41,7 +41,7 @@ import { UnitCommentService } from '../database/services/unit-comment.service';
 import { WorkspaceAccessGuard } from './workspace-access.guard';
 import { CommentAccessGuard } from './comment-access.guard';
 
-@Controller('workspace/:workspace_id')
+@Controller('workspaces/:workspace_id')
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
