@@ -25,7 +25,7 @@ import { CommentAccessGuard } from './comment-access.guard';
 import { WorkspaceAccessGuard } from './workspace-access.guard';
 
 @Controller('workspaces/:workspace_id/units')
-export class UnitsController {
+export class UnitController {
   constructor(
     private unitService: UnitService,
     private unitUserService: UnitUserService,
