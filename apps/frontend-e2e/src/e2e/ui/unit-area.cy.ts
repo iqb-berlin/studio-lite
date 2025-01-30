@@ -42,14 +42,14 @@ describe('UI check: workspace', () => {
     cy.visit('/');
   });
 
-  it('prepare the context for unit test', () => {
+  it('prepares the context for unit test', () => {
     createGroup(group1);
     cy.visit('/');
     createWs(ws1, group1);
     grantRemovePrivilege(Cypress.env('username'), ws1, AccessLevel.Admin);
   });
 
-  it('should be add button present and we can add new exercises', () => {
+  it('should the add button be present and we could add new exercises', () => {
     cy.visitWs(ws1);
     addUnitPred(unit1);
     cy.visit('/');
@@ -60,12 +60,12 @@ describe('UI check: workspace', () => {
     addUnitPred(unit3);
   });
 
-  it('should be add button present and can a exercise from existing exercises', () => {
+  it('should the add button be present and we could add an exercise from existing exercises', () => {
     cy.visitWs(ws1);
     addUnitFromExisting(`${group1}: ${ws1}`, unit1, newUnit);
   });
 
-  it('should be add button present and the button to import file is present', () => {
+  it('should the add button, and the button to import file be present', () => {
     cy.visitWs(ws1);
     importExercise();
   });
@@ -81,7 +81,7 @@ describe('UI check: workspace', () => {
     moveUnit(ws1, ws2, unit2);
   });
 
-  it('delete the context ', () => {
+  it('deletes the context ', () => {
     deleteGroup(group1);
   });
 });

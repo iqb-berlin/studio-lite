@@ -28,7 +28,7 @@ describe('Load metadata profile', () => {
     cy.visit('/');
   });
 
-  it('user admin prepare the Context', () => {
+  it('user admin prepares the Context', () => {
     createNewUser(newUser);
     cy.visit('/');
     groups.forEach(area => {
@@ -80,7 +80,7 @@ describe('Load metadata profile', () => {
     cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   });
 
-  it('remove the Context', () => {
+  it('removes the Context', () => {
     deleteUser(newUser.username);
     cy.visit('/');
     groups.forEach(group => {

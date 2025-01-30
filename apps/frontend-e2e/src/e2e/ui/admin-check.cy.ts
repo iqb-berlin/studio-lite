@@ -46,11 +46,11 @@ describe('UI Administration Management', () => {
     addModules(modules);
   });
 
-  it('user with admin credentials delete Modules', () => {
+  it('user with admin credentials deletes Modules', () => {
     deleteModule();
   });
 
-  it('user with admin credentials can delete groups', () => {
+  it('user with admin credentials can deletes groups', () => {
     deleteGroup(group1);
   });
 });
