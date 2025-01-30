@@ -1,22 +1,20 @@
 <div class="fx-row-end-center">
   @if (!isTextOnlyView) {
     <button type="button" mat-icon-button
-      matTooltip="{{'metadata.items-read-only-view' | translate}}"
-      [matTooltipPosition]="'above'"
-      [matTooltipShowDelay]="300"
-      (click)="togglePresentation()"
-      >
+            matTooltip="{{'metadata.items-read-only-view' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            (click)="togglePresentation()">
       <studio-lite-wrapped-icon icon="visibility"></studio-lite-wrapped-icon>
     </button>
   }
 
   @if (isTextOnlyView) {
     <button type="button" mat-icon-button
-      matTooltip="{{'metadata.items-editable-view' | translate}}"
-      [matTooltipPosition]="'above'"
-      [matTooltipShowDelay]="300"
-      (click)="togglePresentation()"
-      >
+            matTooltip="{{'metadata.items-editable-view' | translate}}"
+            [matTooltipPosition]="'above'"
+            [matTooltipShowDelay]="300"
+            (click)="togglePresentation()">
       <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
     </button>
   }
@@ -44,13 +42,13 @@
         </div>
       </div>
     }
-    <button mat-fab extended
-      color="primary"
-      type="button"
-      class="add-button"
-      (click)="add()">
+    <button mat-fab extended="true"
+            color="primary"
+            type="button"
+            class="add-button"
+            (click)="add()">
       <mat-icon>add</mat-icon>
-      Item hinzufügen
+      {{'metadata.add-item' | translate}}
     </button>
   </div>
 }
