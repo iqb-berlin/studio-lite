@@ -8,7 +8,6 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { DownloadModule } from './download/download.module';
 import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.module';
-import { MetadataProfileModule } from './metadata-profile/metadata-profile.module';
 import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
 import { UserController } from './controllers/user.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
@@ -16,6 +15,7 @@ import { SettingController } from './controllers/setting.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
+import { MetadataProfileController } from './controllers/metadata-profile.controller';
 
 @Module({
   imports: [
@@ -29,8 +29,7 @@ import { ReviewController } from './controllers/review.controller';
     WorkspaceModule,
     DownloadModule,
     MulterModule,
-    WorkspaceGroupsModule,
-    MetadataProfileModule
+    WorkspaceGroupsModule
   ],
   controllers: [
     AppController,
@@ -40,7 +39,8 @@ import { ReviewController } from './controllers/review.controller';
     SettingController,
     ResourcePackageController,
     VeronaModuleController,
-    ReviewController
+    ReviewController,
+    MetadataProfileController
   ],
   providers: [AppVersionProvider],
   exports: [AppVersionProvider]
