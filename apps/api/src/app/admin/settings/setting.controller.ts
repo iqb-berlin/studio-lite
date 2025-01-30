@@ -10,7 +10,7 @@ import {
 import { SettingService } from '../../database/services/setting.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { IsAdminGuard } from '../is-admin.guard';
-import { AppVersionGuard } from '../../app-version.guard';
+import { AppVersionGuard } from '../../guards/app-version.guard';
 
 @Controller('admin/settings')
 export class SettingController {

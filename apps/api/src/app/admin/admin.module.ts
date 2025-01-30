@@ -8,7 +8,7 @@ import { WorkspaceGroupsController } from './workspaces/workspace-groups.control
 import { SettingController } from './settings/setting.controller';
 import { VeronaModulesController } from './verona-modules/verona-modules.controller';
 import { ResourcePackageController } from './resource-packages/resource-package.controller';
-import { AppVersionProvider } from '../app-version.guard';
+import { AppVersionProvider } from '../guards/app-version.guard';
 
 @Module({
   imports: [

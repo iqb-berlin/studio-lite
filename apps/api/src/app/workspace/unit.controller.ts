@@ -16,7 +16,7 @@ import { WorkspaceId } from './workspace.decorator';
 import { CommentWriteGuard } from './comment-write.guard';
 import { UnitUserService } from '../database/services/unit-user.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
-import { AppVersionGuard } from '../app-version.guard';
+import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from './write-access.guard';
 import { DeleteAccessGuard } from './delete-access.guard';
 import { User } from './user.decorator';

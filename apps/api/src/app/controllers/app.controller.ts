@@ -11,15 +11,15 @@ import {
   VeronaModuleInListDto
   // eslint-disable-next-line import/no-duplicates, import/order
 } from '@studio-lite-lib/api-dto';
-import { LocalAuthGuard } from './auth/local-auth.guard';
-import { AuthService } from './auth/service/auth.service';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { WorkspaceService } from './database/services/workspace.service';
-import { UsersService } from './database/services/users.service';
-import { ReviewId, UserId, UserName } from './auth/user.decorator';
-import { ReviewService } from './database/services/review.service';
-import { AppVersionGuard } from './app-version.guard';
-import { VeronaModulesService } from './database/services/verona-modules.service';
+import { LocalAuthGuard } from '../auth/local-auth.guard';
+import { AuthService } from '../auth/service/auth.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WorkspaceService } from '../database/services/workspace.service';
+import { UsersService } from '../database/services/users.service';
+import { ReviewId, UserId, UserName } from '../auth/user.decorator';
+import { ReviewService } from '../database/services/review.service';
+import { AppVersionGuard } from '../guards/app-version.guard';
+import { VeronaModulesService } from '../database/services/verona-modules.service';
 // eslint-disable-next-line import/no-duplicates, import/order
 import { CreateUserDto } from '@studio-lite-lib/api-dto';
 // eslint-disable-next-line import/no-duplicates, import/order
