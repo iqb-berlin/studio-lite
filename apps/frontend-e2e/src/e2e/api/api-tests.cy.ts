@@ -916,7 +916,7 @@ describe('Studio API tests', () => {
   });
 
   describe('Admin/ workspace unit API tests', () => {
-    describe('30. POST /api/workspace/{id}/units ', () => {
+    describe('30. POST /api/workspaces/{id}/units ', () => {
       it('201 positive test: should create a unit inside in ws1', () => {
         cy.createUnitAPI(Cypress.env(ws1.id), unit1, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -984,7 +984,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('32. PATCH /api/workspace/{workspace_id}/settings', () => {
+    describe('32. PATCH /api/workspaces/{workspace_id}/settings', () => {
       it('200 positive test: should enable the use of selected editor, ' +
         'player and schemer for units in a workspace', () => {
         cy.updateWsSettings(Cypress.env(ws2.id), setEditor, Cypress.env(`token_${user2.username}`))
@@ -1042,7 +1042,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('33. GET /api/workspace/{workspace_id}', () => {
+    describe('33. GET /api/workspaces/{workspace_id}', () => {
       // Tests to delete, it seems that 20 and 33 is the same
       it('200 positive test: should retrieve the a ws by id', () => {
         cy.getWsNormalAPI(Cypress.env(ws2.id),
@@ -1086,7 +1086,7 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('1. Check difference between /api/admin/workspaces/{id} and /api/workspace/{workspace_id}', () => {
+      it('1. Check difference between /api/admin/workspaces/{id} and /api/workspaces/{workspace_id}', () => {
         cy.getWsNormalAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -1095,7 +1095,7 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('2. Check difference between /api/admin/workspaces/{id} and /api/workspace/{workspace_id}', () => {
+      it('2. Check difference between /api/admin/workspaces/{id} and /api/workspaces/{workspace_id}', () => {
         cy.getWsAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -1105,7 +1105,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('34. GET /api/workspace/{workspace_id}/users', () => {
+    describe('34. GET /api/workspaces/{workspace_id}/users', () => {
       it('200 positive test: retrieve the user of a ws', () => {
         cy.getUsersByWsIdAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${Cypress.env('username')}`))
@@ -1259,7 +1259,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('39. PATCH /api/workspace/{workspace_id}/settings', () => {
+      describe('39. PATCH /api/workspaces/{workspace_id}/settings', () => {
         let newSettings: WsSettings;
         before(() => {
           newSettings = {
@@ -1314,7 +1314,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('40. GET /api/workspace/{workspace_id}/{id}/metadata ', () => {
+    describe('40. GET /api/workspaces/{workspace_id}/units/{id}/metadata ', () => {
       it('200 positive test: should get the characteristics of an unit. ', () => {
         cy.getUnitMetadataAPI(
           Cypress.env(ws1.id),
@@ -1356,7 +1356,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('41. PATCH /api/workspace/{workspace_id}/{id}/metadata', () => {
+    describe('41. PATCH /api/workspaces/{workspace_id}/units/{id}/metadata', () => {
       // TO DO It does not work, all values we changes get undefined.
       let entry1: DefinitionUnit;
       before(() => {
@@ -1435,7 +1435,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('42. GET /api/workspace/{workspace_id}/units', () => {
+    describe('42. GET /api/workspaces/{workspace_id}/units', () => {
       it('200 positive test: should get the units from a workspace', () => {
         // Sweagger has other parameter
         cy.getUnitsByWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
@@ -1498,8 +1498,9 @@ describe('Studio API tests', () => {
       });
     });
 
-    // describe.skip('50. PATCH /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
-    describe('50. PATCH /api/workspace/{workspace_id}/{ids}/moveto/{target} ', () => {
+    // describe.skip('50. PATCH /api/workspaces/{workspace_id}/units/{ids}/moveto/{target} ', () => {
+    // TODO: new
+    describe('50. PATCH /api/workspaces/{workspace_id}/units/{ids}/moveto/{target} ', () => {
       it('401 negative test: should not move a test a user without credentials in the ws', () => {
         cy.moveToAPI(Cypress.env(ws1.id),
           Cypress.env(ws2.id),
@@ -1541,7 +1542,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('51. PATCH /api/workspace/{workspace_id}/rename/{name}', () => {
+    describe('51. PATCH /api/workspaces/{workspace_id}/rename/{name}', () => {
       it('200 positive test: should able rename a workspace with credentials', () => {
         cy.renameWsAPI(Cypress.env(ws1.id),
           '01Vorlage-New',
@@ -1570,8 +1571,8 @@ describe('Studio API tests', () => {
       });
     });
 
-    // describe.skip('52. PATCH /api/workspace/{workspace_id}/{ids}/copyto/{target}', () => {
-    describe('52. POST /api/workspace/{workspace_id}/units', () => {
+    // describe.skip('52. PATCH /api/workspaces/{workspace_id}/units/{ids}/copyto/{target}', () => {
+    describe('52. POST /api/workspaces/{workspace_id}/units', () => {
       let copyUnit: CopyUnit;
       before(() => {
         copyUnit = {
@@ -1662,7 +1663,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('55. GET /api/workspace/{workspace_id}/groups', () => {
+    describe('55. GET /api/workspaces/{workspace_id}/groups', () => {
       before(() => {
         cy.createUnitAPI(Cypress.env(ws1.id), unit3, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1696,7 +1697,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('56. GET /api/workspace/{workspace_id}/coding-report', () => {
+    describe('56. GET /api/workspaces/{workspace_id}/coding-report', () => {
       it.skip('200 positive test: should get the ws with credentials', () => {
         cy.getCodingReportAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1720,7 +1721,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('57. POST /api/workspace/{workspace_id}/group', () => {
+    describe('57. POST /api/workspaces/{workspace_id}/group', () => {
       it('200 positive test: should create a new group for the ws', () => {
         cy.createGroupWsAPI(Cypress.env(ws1.id),
           'Group5',
@@ -1774,7 +1775,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe.skip('59. PATCH /api/workspace/{workspace_id}/{id}/metadata ', () => {
+      describe.skip('59. PATCH /api/workspaces/{workspace_id}/units/{id}/metadata ', () => {
         it('200 positive test: should assign the state 1 to the unit', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
@@ -1828,7 +1829,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('60. DELETE /api/workspace/{workspace_id}/{id}/state', () => {
+      describe('60. DELETE /api/workspaces/{workspace_id}/units/{id}/state', () => {
         it.skip('200 positive test: should delete a state', () => {
           cy.deleteStateAPI(Cypress.env(ws1.id),
             '1',
@@ -1857,7 +1858,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('61. GET /api/workspace/{workspace_id}/{unit_id}/metadata', () => {
+      describe('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
         // I can not find the use in studio.
         it.skip('200 positive test: should get the metadata of a workspace.', () => {
           cy.getMetadataWsAPI(Cypress.env(ws1.id),
@@ -1886,7 +1887,7 @@ describe('Studio API tests', () => {
     });
 
     describe('Dropbox block', () => {
-      describe('62. PATCH /api/workspace/{workspace_id}/drop-box', () => {
+      describe('62. PATCH /api/workspaces/{workspace_id}/drop-box', () => {
         it('401 negative test: should not assign as ws a dropbox without credentials', () => {
           cy.dropboxWsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
@@ -1921,7 +1922,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('63. PATCH /api/workspace/{workspace_id}/submit_units', () => {
+      describe('63. PATCH /api/workspaces/{workspace_id}/submit_units', () => {
         it('401 negative test: should not submit units without credentials ', () => {
           cy.submitUnitsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
@@ -1969,7 +1970,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('64. PATCH /api/workspace/{workspace_id}/return_submitted_units', () => {
+      describe('64. PATCH /api/workspaces/{workspace_id}/return_submitted_units', () => {
         it('401 negative test: should not return a submit unit without credentials', () => {
           cy.returnUnitsAPI(Cypress.env(ws2.id),
             Cypress.env(unit3.shortname),
@@ -2016,7 +2017,7 @@ describe('Studio API tests', () => {
         };
       });
 
-      describe('65. POST /api/workspace/{workspace_id}/{id}/comments', () => {
+      describe('65. POST /api/workspaces/{workspace_id}/units/{id}/comments', () => {
         it('201 positive test: should add a comment to a unit', () => {
           cy.postCommentAPI(Cypress.env(ws1.id),
             Cypress.env(unit1.shortname),
@@ -2096,7 +2097,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('66. GET /api/workspace/{workspace_id}/{id}/comments', () => {
+      describe('66. GET /api/workspaces/{workspace_id}/units/{id}/comments', () => {
         it('200 positive test: should get all comments of the unit', () => {
           cy.getCommentsAPI(Cypress.env(ws1.id),
             Cypress.env(unit1.shortname),
@@ -2136,7 +2137,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('67. PATCH /api/workspace/{workspace_id}/{id}/comments', () => {
+      describe('67. PATCH /api/workspaces/{workspace_id}/units/{id}/comments', () => {
         it('200 positive test: should change the time stamp', () => {
           comment.lastSeenCommentChangedAt = new Date();
           cy.updateCommentTimeAPI(Cypress.env(ws1.id),
@@ -2171,7 +2172,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('68. PATCH /api/workspace/{workspace_id}/{id}/comments/{id}', () => {
+      describe('68. PATCH /api/workspaces/{workspace_id}/units/{id}/comments/{id}', () => {
         it('401 negative test: should not update comment although you were an admin', () => {
           comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
           cy.updateCommentAPI(Cypress.env(ws1.id),
@@ -2234,7 +2235,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('69. DELETE /api/workspace/{workspace_id}/{id}/comments/{id}', () => {
+      describe('69. DELETE /api/workspaces/{workspace_id}/units/{id}/comments/{id}', () => {
         it('401 negative test: user with no credentials should not delete a comment', () => {
           cy.deleteCommentAPI(Cypress.env(ws1.id),
             Cypress.env(unit1.shortname),
@@ -2295,7 +2296,7 @@ describe('Studio API tests', () => {
       const reviewName1:string = 'Teil1';
       const reviewName2:string = 'Teil2';
 
-      describe('70. POST /api/workspace/{workspace_id}/reviews', () => {
+      describe('70. POST /api/workspaces/{workspace_id}/reviews', () => {
         it('201 positive test: should add a new review in a workspace with credentials', () => {
           cy.addReviewAPI(Cypress.env(ws2.id),
             reviewName1,
@@ -2332,7 +2333,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('71. GET /api/workspace/{workspace_id}/reviews/{ids}', () => {
+      describe('71. GET /api/workspaces/{workspace_id}/reviews/{ids}', () => {
         it('200 positive test: should get the reviews of a workspace with credentials', () => {
           cy.getReviewAPI(Cypress.env(ws2.id),
             Cypress.env('id_review1'),
@@ -2378,7 +2379,8 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('72. PATCH /api/workspace/{workspace_id}/reviews/{id}', () => {
+      // TODO:  Description and url are different: Mistake?
+      describe('72. PATCH /api/workspaces/{workspace_id}/reviews/{id}', () => {
         let review1: ReviewData;
         before(() => {
           const authorization = `bearer ${Cypress.env(`token_${user2.username}`)}`;
@@ -2435,7 +2437,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('73. GET /api/workspace/{workspace_id}/reviews/', () => {
+      describe('73. GET /api/workspaces/{workspace_id}/reviews/', () => {
         it('200 positive test: should get all reviews with credentials', () => {
           cy.getAllReviewAPI(Cypress.env(ws2.id),
             Cypress.env(`token_${user2.username}`))
@@ -2462,7 +2464,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('74. GET /api/review/{review_id}', () => {
+      describe('74. GET /api/reviews/{review_id}', () => {
         it('200 positive test: should all reviews with credentials', () => {
           cy.getReviewWindowAPI(Cypress.env('id_review1'), Cypress.env(`token_${user2.username}`))
             .then(resp => {
@@ -2486,7 +2488,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('75. GET /api/review/{review_id}/{id}/metadata', () => {
+      describe('75. GET /api/reviews/{review_id}/units/{id}/metadata', () => {
         it('200 positive test: should the metadata with credentials', () => {
           cy.getReviewMetadataAPI(Cypress.env('id_review1'),
             Cypress.env(unit2.shortname),
@@ -2516,7 +2518,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('76. GET /api/review/{review_id}/{id}/definition', () => {
+      describe('76. GET /api/reviews/{review_id}/units/{id}/definition', () => {
         it('200 positive test: should the metadata with credentials', () => {
           cy.getReviewDefinitionAPI(Cypress.env('id_review1'),
             Cypress.env(unit2.shortname),
@@ -2547,7 +2549,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('81. DELETE /api/workspace/{workspace_id}/reviews/{ids}', () => {
+      describe('81. DELETE /api/workspaces/{workspace_id}/reviews/{ids}', () => {
         it('200 positive test: should delete a review with credentials', () => {
           cy.deleteReviewAPI(Cypress.env(ws2.id),
             Cypress.env('id_review1'),
@@ -2586,7 +2588,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    // describe.skip('82. /api/workspace/{workspace_id}/download/{settings}', () => {
+    // describe.skip('82. /api/workspaces/{workspace_id}/download/{settings}', () => {
     //   it('200 positive test: should be able to add a group for a unit', () => {
     //     // no write answer
     //     // eslint-disable-next-line max-len
@@ -2600,7 +2602,7 @@ describe('Studio API tests', () => {
     //   });
     // });
 
-    describe('83. DELETE /api/workspace/{workspace_id}/{ids}', () => {
+    describe('83. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
       it('401 negative test: should not delete the unit from other user', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
           Cypress.env(ws1.id),

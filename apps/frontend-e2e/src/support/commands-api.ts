@@ -520,7 +520,7 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: `/api/workspace/${wsId}/units`,
+    url: `/api/workspaces/${wsId}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -553,7 +553,7 @@ Cypress.Commands.add('updateWsSettings', (wsId:string, settings:WsSettings, toke
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/settings`,
+    url: `/api/workspaces/${wsId}/settings`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -568,7 +568,7 @@ Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}`,
+    url: `/api/workspaces/${wsId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -582,7 +582,7 @@ Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/users`,
+    url: `/api/workspaces/${wsId}/users`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -596,7 +596,7 @@ Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:st
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/${unitId}/metadata`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -623,7 +623,7 @@ Cypress.Commands.add(
     const nu = parseInt(`${unitId}`, 10);
     cy.request({
       method: 'PATCH',
-      url: `/api/workspace/${wsId}/${unitId}/metadata`,
+      url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -642,7 +642,7 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/units`,
+    url: `/api/workspaces/${wsId}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -656,7 +656,7 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/users`,
+    url: `/api/workspaces/${wsId}/users`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -673,7 +673,7 @@ Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitI
   const unitIdNumber = parseInt(`${unitId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsOriginId}/units/move`,
+    url: `/api/workspaces/${wsOriginId}/units/move`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -691,7 +691,7 @@ Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) =
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/rename/${wsName}`,
+    url: `/api/workspaces/${wsId}/rename/${wsName}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -705,7 +705,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: `/api/workspace/${wsDestinationId}/units`,
+    url: `/api/workspaces/${wsDestinationId}/units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -753,7 +753,7 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/groups`,
+    url: `/api/workspaces/${wsId}/groups`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -766,7 +766,7 @@ Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/coding-report`,
+    url: `/api/workspaces/${wsId}/coding-report`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -780,7 +780,7 @@ Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: `/api/workspace/${wsId}/group`,
+    url: `/api/workspaces/${wsId}/group`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -837,7 +837,7 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
   const nu = parseInt(`${unitId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/${unitId}/metadata`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -851,6 +851,7 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
 });
 
 // 60
+// TODO: Shouldn't the state parameter be unitId? Then url would be `/api/workspaces/${wsId}/units/${unitId}/state`
 Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -869,7 +870,7 @@ Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/units/metadata`,
+    url: `/api/workspaces/${wsId}/units/metadata`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -884,7 +885,7 @@ Cypress.Commands.add('dropboxWsAPI', (wsId: string, wsDe: string, token:string) 
   const nu = parseInt(`${wsDe}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/drop-box`,
+    url: `/api/workspaces/${wsId}/drop-box`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -903,7 +904,7 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/submit_units`,
+    url: `/api/workspaces/${wsId}/submit_units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -922,7 +923,7 @@ Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string)
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsDe}/return_submitted_units`,
+    url: `/api/workspaces/${wsDe}/return_submitted_units`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -939,7 +940,7 @@ Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: C
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: `/api/workspace/${wsId}/${unitId}/comments`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/comments`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -959,7 +960,7 @@ Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:stri
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/${unitId}/comments`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/comments`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -975,7 +976,7 @@ Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comm
   const nu = parseInt(`${comment.userId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspace/${wsId}/${unitId}/comments/`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/comments/`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -995,7 +996,7 @@ Cypress.Commands.add('updateCommentAPI',
     const nu = parseInt(`${comment.userId}`, 10);
     cy.request({
       method: 'PATCH',
-      url: `/api/workspace/${wsId}/${unitId}/comments/${commentId}`,
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -1014,7 +1015,7 @@ Cypress.Commands.add('deleteCommentAPI',
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'DELETE',
-      url: `/api/workspace/${wsId}/${unitId}/comments/${commentId}`,
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -1029,7 +1030,7 @@ Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:str
   const nu = parseInt(`${wsId}`, 10);
   cy.request({
     method: 'POST',
-    url: `/api/workspace/${wsId}/reviews/`,
+    url: `/api/workspaces/${wsId}/reviews/`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1047,7 +1048,7 @@ Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/reviews/${reviewId}`,
+    url: `/api/workspaces/${wsId}/reviews/${reviewId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1063,7 +1064,7 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
   if (review.units) {
     cy.request({
       method: 'PATCH',
-      url: `/api/workspace/${wsId}/reviews/${review.id}`,
+      url: `/api/workspaces/${wsId}/reviews/${review.id}`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -1084,7 +1085,7 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/reviews/`,
+    url: `/api/workspaces/${wsId}/reviews/`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1098,7 +1099,7 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/review/${reviewId}`,
+    url: `/api/reviews/${reviewId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1112,7 +1113,7 @@ Cypress.Commands.add('getReviewMetadataAPI', (reviewId:string, unitId:string, to
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/review/${reviewId}/${unitId}/metadata`,
+    url: `/api/reviews/${reviewId}/units/${unitId}/metadata`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1126,7 +1127,7 @@ Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, 
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/review/${reviewId}/${unitId}/definition`,
+    url: `/api/reviews/${reviewId}/units/${unitId}/definition`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1140,7 +1141,7 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/workspace/${wsId}/reviews/${reviewId}`,
+    url: `/api/workspaces/${wsId}/reviews/${reviewId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1154,7 +1155,7 @@ Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:str
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace/${wsId}/download/${settings}`,
+    url: `/api/workspaces/${wsId}/download/${settings}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1168,7 +1169,7 @@ Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/workspace/${wsId}/${unitId}`,
+    url: `/api/workspaces/${wsId}/units/${unitId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1480,7 +1481,7 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
   // const path:string = `../frontend-e2e/src/fixtures/${filename}`;
   // cy.request({
   //   method: 'POST',
-  //   url: `/api/workspace/${wsId}/upload`,
+  //   url: `/api/workspaces/${wsId}/upload`,
   //   headers: {
   //     'app-version': Cypress.env('version'),
   //     authorization
@@ -1494,7 +1495,7 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
   cy.fixture(filename).then(file => {
     cy.request({
       method: 'POST',
-      url: `/api/workspace/${wsId}/upload`,
+      url: `/api/workspaces/${wsId}/upload`,
       headers: {
         'app-version': Cypress.env('version'),
         'content-type': 'binary',
