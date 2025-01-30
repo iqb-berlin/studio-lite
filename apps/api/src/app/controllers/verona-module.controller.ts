@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 
 @Controller('admin/verona-modules')
-export class VeronaModulesController {
+export class VeronaModuleController {
   constructor(
     private veronaModulesService: VeronaModulesService
   ) {}

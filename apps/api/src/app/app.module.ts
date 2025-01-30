@@ -15,7 +15,7 @@ import { UserController } from './controllers/user.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
-import { VeronaModulesController } from './controllers/verona-modules.controller';
+import { VeronaModuleController } from './controllers/verona-module.controller';
 
 @Module({
   imports: [
@@ -40,7 +40,7 @@ import { VeronaModulesController } from './controllers/verona-modules.controller
     WorkspaceGroupController,
     SettingController,
     ResourcePackageController,
-    VeronaModulesController
+    VeronaModuleController
   ],
   providers: [AppVersionProvider],
   exports: [AppVersionProvider]
