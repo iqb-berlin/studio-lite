@@ -25,7 +25,7 @@ import { UsersService } from '../../database/services/users.service';
 import { UnitService } from '../../database/services/unit.service';
 
 @Controller('admin/workspace-groups')
-export class WorkspaceGroupsController {
+export class WorkspaceGroupController {
   constructor(
     private workspaceGroupService: WorkspaceGroupService,
     private workspaceService: WorkspaceService,
