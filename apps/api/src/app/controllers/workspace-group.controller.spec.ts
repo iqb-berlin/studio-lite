@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { WorkspaceGroupController } from './workspace-group.controller';
-import { AuthService } from '../../auth/service/auth.service';
-import { WorkspaceService } from '../../database/services/workspace.service';
-import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
-import { UsersService } from '../../database/services/users.service';
-import { UnitService } from '../../database/services/unit.service';
+import { AuthService } from '../auth/service/auth.service';
+import { WorkspaceService } from '../database/services/workspace.service';
+import { WorkspaceGroupService } from '../database/services/workspace-group.service';
+import { UsersService } from '../database/services/users.service';
+import { UnitService } from '../database/services/unit.service';
 
 describe('WorkspaceGroupController', () => {
   let controller: WorkspaceGroupController;

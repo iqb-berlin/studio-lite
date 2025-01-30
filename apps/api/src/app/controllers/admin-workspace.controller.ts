@@ -11,13 +11,13 @@ import {
   WorkspaceUserInListDto,
   UserWorkspaceAccessDto
 } from '@studio-lite-lib/api-dto';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { WorkspaceService } from '../../database/services/workspace.service';
-import { UsersService } from '../../database/services/users.service';
-import { IsAdminGuard } from '../is-admin.guard';
-import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
-import { WorkspaceGroupId } from '../workspace-group.decorator';
-import { HttpExceptionFilter } from '../../exceptions/http-exception.filter';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WorkspaceService } from '../database/services/workspace.service';
+import { UsersService } from '../database/services/users.service';
+import { IsAdminGuard } from '../guards/is-admin.guard';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
+import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 
 @Controller('admin/workspaces')
 @UseFilters(HttpExceptionFilter)

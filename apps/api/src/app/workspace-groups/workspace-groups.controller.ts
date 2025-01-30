@@ -11,8 +11,8 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WorkspaceGroupService } from '../database/services/workspace-group.service';
-import { WorkspaceGroupId } from '../admin/workspace-group.decorator';
-import { IsWorkspaceGroupAdminGuard } from '../admin/is-workspace-group-admin.guard';
+import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { UnitService } from '../database/services/unit.service';
 
 @Controller('workspace-groups/:workspace_group_id')

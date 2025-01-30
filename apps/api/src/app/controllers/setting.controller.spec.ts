@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { SettingController } from './setting.controller';
-import { AuthService } from '../../auth/service/auth.service';
-import { SettingService } from '../../database/services/setting.service';
+import { AuthService } from '../auth/service/auth.service';
+import { SettingService } from '../database/services/setting.service';
 
 describe('SettingController', () => {
   let controller: SettingController;

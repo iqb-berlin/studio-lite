@@ -12,13 +12,13 @@ import {
   WorkspaceGroupInListDto,
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
-import { UsersService } from '../../database/services/users.service';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { WorkspaceService } from '../../database/services/workspace.service';
-import { IsAdminGuard } from '../is-admin.guard';
-import { WorkspaceGroupService } from '../../database/services/workspace-group.service';
-import { IsWorkspaceGroupAdminGuard } from '../is-workspace-group-admin.guard';
-import { WorkspaceGroupId } from '../workspace-group.decorator';
+import { UsersService } from '../database/services/users.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WorkspaceService } from '../database/services/workspace.service';
+import { IsAdminGuard } from '../guards/is-admin.guard';
+import { WorkspaceGroupService } from '../database/services/workspace-group.service';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 
 @Controller('admin/users')
 export class UserController {

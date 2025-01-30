@@ -17,12 +17,12 @@ import {
 import { Express } from 'express';
 import 'multer';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
-import { ResourcePackageService } from '../../database/services/resource-package.service';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { IsAdminGuard } from '../is-admin.guard';
-import { ApiFile } from './api-file.decorator';
-import { fileMimetypeFilter } from './file-mimetype-filter';
-import { ParseFile } from './parse-file-pipe';
+import { ResourcePackageService } from '../database/services/resource-package.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { IsAdminGuard } from '../guards/is-admin.guard';
+import { ApiFile } from '../decorators/api-file.decorator';
+import { fileMimetypeFilter } from '../utils/file-mimetype-filter';
+import { ParseFile } from '../pipes/parse-file-pipe';
 
 @Controller('admin/resource-packages')
 export class ResourcePackageController {
