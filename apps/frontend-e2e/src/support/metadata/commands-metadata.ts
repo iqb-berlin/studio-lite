@@ -84,7 +84,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
     // stableModulesOnly: `${settings.stableModulesOnly}`,
     cy.request({
       method: 'PATCH',
-      url: `/api/workspace/${wsId}/settings`,
+      url: `/api/workspaces/${wsId}/settings`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -112,7 +112,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
 //     const nu = parseInt(`${unitId}`, 10);
 //     cy.request({
 //       method: 'PATCH',
-//       url: `/api/workspace/${wsId}/${unitId}/metadata`,
+//       url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
 //       headers: {
 //         'app-version': Cypress.env('version'),
 //         authorization

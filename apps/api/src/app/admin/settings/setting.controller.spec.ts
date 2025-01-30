@@ -4,7 +4,7 @@ import { SettingController } from './setting.controller';
 import { AuthService } from '../../auth/service/auth.service';
 import { SettingService } from '../../database/services/setting.service';
 
-describe('ConfigController', () => {
+describe('SettingController', () => {
   let controller: SettingController;
 
   beforeEach(async () => {

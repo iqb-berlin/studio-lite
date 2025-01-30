@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
-import { UsersController } from './users/users.controller';
+import { UserController } from './users/user.controller';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { WorkspacesController } from './workspaces/workspaces.controller';
@@ -18,7 +18,7 @@ import { AppVersionProvider } from '../app-version.guard';
   ],
   controllers: [
     WorkspacesController,
-    UsersController,
+    UserController,
     WorkspaceGroupsController,
     SettingController,
     ResourcePackageController,

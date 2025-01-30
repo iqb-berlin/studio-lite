@@ -14,7 +14,7 @@ import { ReviewService } from '../database/services/review.service';
 import { UnitService } from '../database/services/unit.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
 
-@Controller('review/:review_id')
+@Controller('reviews/:review_id')
 export class ReviewController {
   constructor(
     private reviewService: ReviewService,
@@ -36,7 +36,7 @@ export class ReviewController {
     return this.reviewService.findOne(reviewId);
   }
 
-  @Get(':id/metadata')
+  @Get('units/:id/metadata')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
@@ -44,7 +44,7 @@ export class ReviewController {
   })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
-  @ApiTags('review')
+  @ApiTags('review unit')
   async getUnitMetadata(
     @Param('review_id', ParseIntPipe) reviewId: number,
       @Param('id', ParseIntPipe) unitId: number
@@ -52,21 +52,21 @@ export class ReviewController {
     return this.reviewService.findUnitMetadata(unitId, reviewId);
   }
 
-  @Get(':id/definition')
+  @Get('units/:id/definition')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: UnitDefinitionDto
   })
   @ApiParam({ name: 'id', type: Number })
-  @ApiTags('review')
+  @ApiTags('review unit')
   async getUnitDefinition(
     @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitDefinitionDto> {
     return this.unitService.findOnesDefinition(unitId);
   }
 
-  @Get(':id/comments')
+  @Get('units/:id/comments')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
@@ -75,7 +75,7 @@ export class ReviewController {
     return this.unitCommentService.findOnesComments(unitId);
   }
 
-  @Get(':id/scheme')
+  @Get('units/:id/scheme')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
@@ -88,7 +88,7 @@ export class ReviewController {
     return this.unitService.findOnesScheme(unitId);
   }
 
-  @Post(':id/comments')
+  @Post('units/:id/comments')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
@@ -100,7 +100,7 @@ export class ReviewController {
     return this.unitCommentService.createComment(createUnitCommentDto);
   }
 
-  @Patch(':unit_id/comments/:id')
+  @Patch('units/:unit_id/comments/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
@@ -111,7 +111,7 @@ export class ReviewController {
     return this.unitCommentService.patchCommentBody(id, comment);
   }
 
-  @Delete(':unit_id/comments/:id')
+  @Delete('units/:unit_id/comments/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment successfully updated.' })

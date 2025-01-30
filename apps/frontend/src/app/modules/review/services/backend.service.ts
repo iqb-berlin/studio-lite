@@ -20,7 +20,7 @@ export class BackendService {
 
   getUnitMetadata(reviewId: number, unitId: number): Observable<UnitMetadataDto | null> {
     return this.http
-      .get<UnitMetadataDto>(`${this.serverUrl}review/${reviewId}/${unitId}/metadata`)
+      .get<UnitMetadataDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/metadata`)
       .pipe(
         catchError(() => of(null))
       );
@@ -28,7 +28,7 @@ export class BackendService {
 
   getUnitDefinition(reviewId: number, unitId: number): Observable<UnitDefinitionDto | null> {
     return this.http
-      .get<UnitDefinitionDto>(`${this.serverUrl}review/${reviewId}/${unitId}/definition`)
+      .get<UnitDefinitionDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/definition`)
       .pipe(
         catchError(() => of(null))
       );
@@ -36,7 +36,7 @@ export class BackendService {
 
   getReview(reviewId: number): Observable <ReviewFullDto | null> {
     return this.http
-      .get<ReviewFullDto>(`${this.serverUrl}review/${reviewId}`)
+      .get<ReviewFullDto>(`${this.serverUrl}reviews/${reviewId}`)
       .pipe(
         map(r => {
           if (r.settings) {
@@ -55,7 +55,7 @@ export class BackendService {
 
   getUnitCoding(reviewId: number, unitId: number): Observable<UnitSchemeDto | null> {
     return this.http
-      .get<UnitSchemeDto>(`${this.serverUrl}review/${reviewId}/${unitId}/scheme`)
+      .get<UnitSchemeDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/scheme`)
       .pipe(
         catchError(() => of(null))
       );
@@ -63,7 +63,7 @@ export class BackendService {
 
   getUnitComments(reviewId: number, unitId: number): Observable<Comment[]> {
     return this.http
-      .get<Comment[]>(`${this.serverUrl}review/${reviewId}/${unitId}/comments`)
+      .get<Comment[]>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments`)
       .pipe(
         catchError(() => of([])),
         map(comments => comments)

@@ -161,7 +161,7 @@ export class BackendService {
   getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
     return this.http
       .get<WorkspaceFullDto>(
-      `${this.serverUrl}workspace/${workspaceId}`
+      `${this.serverUrl}workspaces/${workspaceId}`
     )
       .pipe(
         catchError(() => of(null))
@@ -171,7 +171,7 @@ export class BackendService {
   getUserWorkspaceData(workspaceId: number, userId: number): Observable<UserWorkspaceFullDto | null> {
     return this.http
       .get<UserWorkspaceFullDto>(
-      `${this.serverUrl}workspace/${workspaceId}/users/${userId}`
+      `${this.serverUrl}workspaces/${workspaceId}/users/${userId}`
     )
       .pipe(
         catchError(() => of(null))
@@ -180,7 +180,7 @@ export class BackendService {
 
   setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/settings`, settings)
       .pipe(
         map(() => true),
         catchError(() => of(false))

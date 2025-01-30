@@ -120,7 +120,7 @@ export class MetadataService {
 
   createMetadataReport(): Observable<boolean | UnitMetadataDto[]> {
     return this.http
-      .get<UnitMetadataDto[]>(`${this.serverUrl}workspace/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
+      .get<UnitMetadataDto[]>(`${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
       .pipe(
         catchError(() => of(false)),
         map(report => report)

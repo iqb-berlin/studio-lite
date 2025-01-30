@@ -24,22 +24,22 @@ import UserEntity from '../database/entities/user.entity';
 import { CommentAccessGuard } from './comment-access.guard';
 import { WorkspaceAccessGuard } from './workspace-access.guard';
 
-@Controller('workspace/:workspace_id')
-export class UnitsController {
+@Controller('workspaces/:workspace_id/units')
+export class UnitController {
   constructor(
     private unitService: UnitService,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService
   ) {}
 
-  @Get('units')
+  @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [UnitInListDto]
   })
-  @ApiTags('workspace')
+  @ApiTags('workspace unit')
   async findAll(
     @Req() request,
       @WorkspaceId(ParseIntPipe) workspaceId: number,
@@ -58,14 +58,14 @@ export class UnitsController {
       filterTargetWorkspaceId);
   }
 
-  @Get('units/metadata')
+  @Get('metadata')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
     type: [UnitMetadataDto]
   })
-  @ApiTags('workspace')
+  @ApiTags('workspace unit')
   async findAllWithMetadata(@WorkspaceId() workspaceId: number): Promise<UnitMetadataDto[]> {
     return this.unitService.findAllWithMetadata(workspaceId);
   }
@@ -194,7 +194,7 @@ export class UnitsController {
     return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
-  @Patch('units/move')
+  @Patch('move')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -229,7 +229,7 @@ export class UnitsController {
     return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
   }
 
-  @Post('units/copy')
+  @Post('copy')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -263,7 +263,7 @@ export class UnitsController {
     return this.unitService.patchScheme(unitId, unitSchemeDto, user);
   }
 
-  @Post('units')
+  @Post()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -293,7 +293,7 @@ export class UnitsController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace')
+  @ApiTags('workspace unit')
   async deleteUnitState(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity) {
     return this.unitService.removeUnitState(unitId, user);
