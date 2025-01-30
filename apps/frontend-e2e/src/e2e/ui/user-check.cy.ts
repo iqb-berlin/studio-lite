@@ -26,7 +26,7 @@ describe('UI User Management', () => {
     cy.visit('/');
   });
 
-  it('prepare the Context', () => {
+  it('prepares the context', () => {
     createNewUser(newUser);
     cy.visit('/');
     logout();
@@ -45,7 +45,7 @@ describe('UI User Management', () => {
     updatePersonalData();
   });
 
-  it('should be possible change the password', () => {
+  it('should be possible to change the password', () => {
     changePassword('newpass', newUser.password);
     cy.visit('/');
     logout();
@@ -62,7 +62,7 @@ describe('UI User Management', () => {
     cy.buttonToContinue('Weiter', 401, '/api/login', 'POST', 'loginFail');
   });
 
-  it('delete the user', () => {
+  it('deletes the user', () => {
     // TODO test with a username as user: check mat-cell
     login(Cypress.env('username'), Cypress.env('password'));
     deleteUser('normaluser');
