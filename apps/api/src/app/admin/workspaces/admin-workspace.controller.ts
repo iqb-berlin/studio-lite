@@ -21,7 +21,7 @@ import { HttpExceptionFilter } from '../../exceptions/http-exception.filter';
 
 @Controller('admin/workspaces')
 @UseFilters(HttpExceptionFilter)
-export class WorkspacesController {
+export class AdminWorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private userService: UsersService

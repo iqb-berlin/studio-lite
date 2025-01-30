@@ -3,7 +3,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { UserController } from './users/user.controller';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
-import { WorkspacesController } from './workspaces/workspaces.controller';
+import { AdminWorkspaceController } from './workspaces/admin-workspace.controller';
 import { WorkspaceGroupsController } from './workspaces/workspace-groups.controller';
 import { SettingController } from './settings/setting.controller';
 import { VeronaModulesController } from './verona-modules/verona-modules.controller';
@@ -17,7 +17,7 @@ import { AppVersionProvider } from '../guards/app-version.guard';
     MulterModule
   ],
   controllers: [
-    WorkspacesController,
+    AdminWorkspaceController,
     UserController,
     WorkspaceGroupsController,
     SettingController,
