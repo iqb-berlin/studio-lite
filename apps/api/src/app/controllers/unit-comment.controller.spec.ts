@@ -1,16 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { UnitController } from './unit.controller';
 import { AuthService } from '../services/auth.service';
-import { UnitService } from '../services/unit.service';
+import { UnitUserService } from '../services/unit-user.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
+import { UnitCommentController } from './unit-comment.controller';
 
-describe('UnitController', () => {
-  let controller: UnitController;
+describe('UnitCommentController', () => {
+  let controller: UnitCommentController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UnitController],
+      controllers: [UnitCommentController],
       providers: [
         {
           provide: 'APP_VERSION',
@@ -21,17 +22,21 @@ describe('UnitController', () => {
           useValue: createMock<AuthService>()
         },
         {
-          provide: UnitService,
-          useValue: createMock<UnitService>()
+          provide: UnitUserService,
+          useValue: createMock<UnitUserService>()
         },
         {
           provide: WorkspaceUserService,
           useValue: createMock<WorkspaceUserService>()
+        },
+        {
+          provide: UnitCommentService,
+          useValue: createMock<UnitCommentService>()
         }
       ]
     }).compile();
 
-    controller = module.get<UnitController>(UnitController);
+    controller = module.get<UnitCommentController>(UnitCommentController);
   });
 
   it('should be defined', () => {
