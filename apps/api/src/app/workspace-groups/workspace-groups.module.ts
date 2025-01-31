@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
-import { WorkspaceGroupsController } from './workspace-groups.controller';
+import { WorkspaceGroupController } from './workspace-group.controller';
 
 @Module({
   imports: [
@@ -9,7 +9,7 @@ import { WorkspaceGroupsController } from './workspace-groups.controller';
     AuthModule
   ],
   controllers: [
-    WorkspaceGroupsController
+    WorkspaceGroupController
   ]
 })
 export class WorkspaceGroupsModule {}

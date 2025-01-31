@@ -16,7 +16,7 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 import { UnitService } from '../database/services/unit.service';
 
 @Controller('workspace-groups/:workspace_group_id')
-export class WorkspaceGroupsController {
+export class WorkspaceGroupController {
   constructor(
     private workspaceGroupService: WorkspaceGroupService,
     private unitService:UnitService
