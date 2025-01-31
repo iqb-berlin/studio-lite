@@ -7,7 +7,6 @@ import { DatabaseModule } from './database/database.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { DownloadModule } from './download/download.module';
-import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.module';
 import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
 import { UserController } from './controllers/user.controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
@@ -16,6 +15,7 @@ import { ResourcePackageController } from './controllers/resource-package.contro
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
 import { MetadataProfileController } from './controllers/metadata-profile.controller';
+import { WorkspaceGroupController } from './controllers/workspace-group.controller';
 
 @Module({
   imports: [
@@ -28,8 +28,7 @@ import { MetadataProfileController } from './controllers/metadata-profile.contro
     DatabaseModule,
     WorkspaceModule,
     DownloadModule,
-    MulterModule,
-    WorkspaceGroupsModule
+    MulterModule
   ],
   controllers: [
     AppController,
@@ -40,7 +39,8 @@ import { MetadataProfileController } from './controllers/metadata-profile.contro
     ResourcePackageController,
     VeronaModuleController,
     ReviewController,
-    MetadataProfileController
+    MetadataProfileController,
+    WorkspaceGroupController
   ],
   providers: [AppVersionProvider],
   exports: [AppVersionProvider]
