@@ -10,8 +10,8 @@ import {
   CreateReviewDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { WorkspaceGuard } from './workspace.guard';
-import { WorkspaceId } from './workspace.decorator';
+import { WorkspaceGuard } from '../guards/workspace.guard';
+import { WorkspaceId } from '../decorators/workspace.decorator';
 import { ReviewService } from '../database/services/review.service';
 
 @Controller('workspaces/:workspace_id/reviews')

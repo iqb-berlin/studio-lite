@@ -11,7 +11,7 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { UnitService } from '../database/services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
-import { WorkspaceGuard } from '../workspace/workspace.guard';
+import { WorkspaceGuard } from '../guards/workspace.guard';
 import { SettingService } from '../database/services/setting.service';
 
 @Controller('download')

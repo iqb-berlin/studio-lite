@@ -15,7 +15,7 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
 import { FileIo } from '../../interfaces/file-io.interface';
-import { UnitImportData } from '../../workspace/unit-import-data.class';
+import { UnitImportData } from '../../classes/unit-import-data.class';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';

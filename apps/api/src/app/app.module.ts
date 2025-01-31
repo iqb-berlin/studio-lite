@@ -4,7 +4,6 @@ import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './controllers/app.controller';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
-import { WorkspaceModule } from './workspace/workspace.module';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
 import { UserController } from './controllers/user.controller';
@@ -16,6 +15,9 @@ import { ReviewController } from './controllers/review.controller';
 import { MetadataProfileController } from './controllers/metadata-profile.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
 import { DownloadController } from './controllers/download.controller';
+import { UnitController } from './controllers/unit.controller';
+import { WorkspaceController } from './controllers/workspace.controller';
+import { WorkspaceReviewController } from './controllers/workspace-review.controller';
 
 @Module({
   imports: [
@@ -26,7 +28,6 @@ import { DownloadController } from './controllers/download.controller';
     }),
     AuthModule,
     DatabaseModule,
-    WorkspaceModule,
     MulterModule
   ],
   controllers: [
@@ -37,6 +38,9 @@ import { DownloadController } from './controllers/download.controller';
     SettingController,
     ResourcePackageController,
     VeronaModuleController,
+    UnitController,
+    WorkspaceController,
+    WorkspaceReviewController,
     ReviewController,
     MetadataProfileController,
     WorkspaceGroupController,

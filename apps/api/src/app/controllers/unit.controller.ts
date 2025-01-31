@@ -11,18 +11,18 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../database/services/unit.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { WorkspaceGuard } from './workspace.guard';
-import { WorkspaceId } from './workspace.decorator';
-import { CommentWriteGuard } from './comment-write.guard';
+import { WorkspaceGuard } from '../guards/workspace.guard';
+import { WorkspaceId } from '../decorators/workspace.decorator';
+import { CommentWriteGuard } from '../guards/comment-write.guard';
 import { UnitUserService } from '../database/services/unit-user.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
-import { WriteAccessGuard } from './write-access.guard';
-import { DeleteAccessGuard } from './delete-access.guard';
-import { User } from './user.decorator';
+import { WriteAccessGuard } from '../guards/write-access.guard';
+import { DeleteAccessGuard } from '../guards/delete-access.guard';
+import { User } from '../decorators/user.decorator';
 import UserEntity from '../database/entities/user.entity';
-import { CommentAccessGuard } from './comment-access.guard';
-import { WorkspaceAccessGuard } from './workspace-access.guard';
+import { CommentAccessGuard } from '../guards/comment-access.guard';
+import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 
 @Controller('workspaces/:workspace_id/units')
 export class UnitController {
