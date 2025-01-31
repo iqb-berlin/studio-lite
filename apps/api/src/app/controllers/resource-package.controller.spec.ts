@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { ResourcePackageController } from './resource-package.controller';
-import { AuthService } from '../auth/service/auth.service';
+import { AuthService } from '../service/auth.service';
 import { ResourcePackageService } from '../database/services/resource-package.service';
 
 describe('ResourcePackageController', () => {

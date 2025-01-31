@@ -11,14 +11,14 @@ import {
   VeronaModuleInListDto
   // eslint-disable-next-line import/no-duplicates, import/order
 } from '@studio-lite-lib/api-dto';
-import { LocalAuthGuard } from '../auth/local-auth.guard';
-import { AuthService } from '../auth/service/auth.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { AuthService } from '../service/auth.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UsersService } from '../database/services/users.service';
-import { ReviewId } from '../auth/review-id.decorator';
-import { UserId } from '../auth/user-id.decorator';
-import { UserName } from '../auth/user-name.decorator';
+import { ReviewId } from '../decorators/review-id.decorator';
+import { UserId } from '../decorators/user-id.decorator';
+import { UserName } from '../decorators/user-name.decorator';
 import { ReviewService } from '../database/services/review.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
 import { VeronaModulesService } from '../database/services/verona-modules.service';

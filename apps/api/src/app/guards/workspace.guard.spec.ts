@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { WorkspaceGuard } from './workspace.guard';
-import { AuthService } from '../auth/service/auth.service';
+import { AuthService } from '../service/auth.service';
 
 describe('WorkspaceGuard', () => {
   let workspaceGuard: WorkspaceGuard;

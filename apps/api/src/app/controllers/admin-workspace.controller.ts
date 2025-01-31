@@ -11,7 +11,7 @@ import {
   WorkspaceUserInListDto,
   UserWorkspaceAccessDto
 } from '@studio-lite-lib/api-dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { UsersService } from '../database/services/users.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';

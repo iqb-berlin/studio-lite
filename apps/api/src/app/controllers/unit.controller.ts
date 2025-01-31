@@ -10,7 +10,7 @@ import {
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../database/services/unit.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { CommentWriteGuard } from '../guards/comment-write.guard';

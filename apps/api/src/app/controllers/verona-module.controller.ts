@@ -8,7 +8,7 @@ import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { VeronaModulesService } from '../database/services/verona-modules.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 
 @Controller('admin/verona-modules')

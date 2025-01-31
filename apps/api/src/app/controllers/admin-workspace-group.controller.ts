@@ -15,7 +15,7 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../database/services/workspace-group.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceService } from '../database/services/workspace.service';

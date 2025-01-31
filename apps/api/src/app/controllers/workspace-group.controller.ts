@@ -9,7 +9,7 @@ import {
 
   WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../database/services/workspace-group.service';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';

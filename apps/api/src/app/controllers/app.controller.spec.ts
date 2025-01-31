@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { AppController } from './app.controller';
-import { AuthService } from '../auth/service/auth.service';
+import { AuthService } from '../service/auth.service';
 import { UsersService } from '../database/services/users.service';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { ReviewService } from '../database/services/review.service';

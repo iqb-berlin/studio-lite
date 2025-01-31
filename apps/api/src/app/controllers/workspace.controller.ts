@@ -25,7 +25,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../database/services/workspace.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { UnitDownloadClass } from '../classes/unit-download.class';

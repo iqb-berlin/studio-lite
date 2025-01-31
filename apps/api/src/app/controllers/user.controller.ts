@@ -13,7 +13,7 @@ import {
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../database/services/users.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../database/services/workspace.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGroupService } from '../database/services/workspace-group.service';

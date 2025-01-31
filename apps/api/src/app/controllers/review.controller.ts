@@ -9,7 +9,7 @@ import {
   CreateUnitCommentDto,
   ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewService } from '../database/services/review.service';
 import { UnitService } from '../database/services/unit.service';
 import { UnitCommentService } from '../database/services/unit-comment.service';

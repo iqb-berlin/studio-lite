@@ -1,7 +1,7 @@
 import {
   CanActivate, ExecutionContext, Injectable, UnauthorizedException
 } from '@nestjs/common';
-import { AuthService } from '../auth/service/auth.service';
+import { AuthService } from '../service/auth.service';
 import { WorkspaceService } from '../database/services/workspace.service';
 
 @Injectable()

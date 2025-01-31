@@ -9,7 +9,7 @@ import {
   ReviewFullDto,
   CreateReviewDto
 } from '@studio-lite-lib/api-dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { ReviewService } from '../database/services/review.service';

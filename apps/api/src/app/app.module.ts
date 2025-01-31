@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './controllers/app.controller';
-import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
@@ -18,6 +19,9 @@ import { DownloadController } from './controllers/download.controller';
 import { UnitController } from './controllers/unit.controller';
 import { WorkspaceController } from './controllers/workspace.controller';
 import { WorkspaceReviewController } from './controllers/workspace-review.controller';
+import { AuthService } from './service/auth.service';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -26,7 +30,14 @@ import { WorkspaceReviewController } from './controllers/workspace-review.contro
       envFilePath: '.env.dev',
       cache: true
     }),
-    AuthModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: '24h' }
+      }),
+      inject: [ConfigService]
+    }),
     DatabaseModule,
     MulterModule
   ],
@@ -46,7 +57,7 @@ import { WorkspaceReviewController } from './controllers/workspace-review.contro
     WorkspaceGroupController,
     DownloadController
   ],
-  providers: [AppVersionProvider],
+  providers: [AppVersionProvider, AuthService, LocalStrategy, JwtStrategy],
   exports: [AppVersionProvider]
 })
 export class AppModule {}

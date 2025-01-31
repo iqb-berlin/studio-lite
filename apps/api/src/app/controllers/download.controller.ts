@@ -5,7 +5,7 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../database/services/workspace.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { UnitService } from '../database/services/unit.service';
