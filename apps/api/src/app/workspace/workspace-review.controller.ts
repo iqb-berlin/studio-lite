@@ -15,7 +15,7 @@ import { WorkspaceId } from './workspace.decorator';
 import { ReviewService } from '../database/services/review.service';
 
 @Controller('workspaces/:workspace_id/reviews')
-export class ReviewController {
+export class WorkspaceReviewController {
   constructor(
     private reviewService: ReviewService
   ) {}
