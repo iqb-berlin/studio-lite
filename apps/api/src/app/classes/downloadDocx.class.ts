@@ -29,7 +29,7 @@ import { AnyNode, BasicAcceptedElems, Element } from 'cheerio';
 import { imageSize } from 'image-size';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { WebColors } from './webcolors';
+import { WebColors } from '../utils/webcolors';
 
 type AnyNodeWithName = AnyNode & { name: string; };
 

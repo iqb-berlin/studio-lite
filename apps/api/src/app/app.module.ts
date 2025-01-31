@@ -6,7 +6,6 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AppVersionProvider } from './guards/app-version.guard';
-import { DownloadModule } from './download/download.module';
 import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
 import { UserController } from './controllers/user.controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
@@ -16,6 +15,7 @@ import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
 import { MetadataProfileController } from './controllers/metadata-profile.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
+import { DownloadController } from './controllers/download.controller';
 
 @Module({
   imports: [
@@ -27,7 +27,6 @@ import { WorkspaceGroupController } from './controllers/workspace-group.controll
     AuthModule,
     DatabaseModule,
     WorkspaceModule,
-    DownloadModule,
     MulterModule
   ],
   controllers: [
@@ -40,7 +39,8 @@ import { WorkspaceGroupController } from './controllers/workspace-group.controll
     VeronaModuleController,
     ReviewController,
     MetadataProfileController,
-    WorkspaceGroupController
+    WorkspaceGroupController,
+    DownloadController
   ],
   providers: [AppVersionProvider],
   exports: [AppVersionProvider]
