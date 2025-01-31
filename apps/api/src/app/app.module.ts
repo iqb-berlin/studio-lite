@@ -10,7 +10,7 @@ import { DownloadModule } from './download/download.module';
 import { WorkspaceGroupsModule } from './workspace-groups/workspace-groups.module';
 import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
 import { UserController } from './controllers/user.controller';
-import { WorkspaceGroupController } from './controllers/workspace-group.controller';
+import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
@@ -35,7 +35,7 @@ import { MetadataProfileController } from './controllers/metadata-profile.contro
     AppController,
     AdminWorkspaceController,
     UserController,
-    WorkspaceGroupController,
+    AdminWorkspaceGroupController,
     SettingController,
     ResourcePackageController,
     VeronaModuleController,
