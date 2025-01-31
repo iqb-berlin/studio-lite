@@ -12,10 +12,10 @@ import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
-import { UnitService } from '../database/services/unit.service';
-import { VeronaModulesService } from '../database/services/verona-modules.service';
-import { SettingService } from '../database/services/setting.service';
-import { UnitCommentService } from '../database/services/unit-comment.service';
+import { UnitService } from '../services/unit.service';
+import { VeronaModulesService } from '../services/verona-modules.service';
+import { SettingService } from '../services/setting.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 
 export class UnitDownloadClass {
   static async get(

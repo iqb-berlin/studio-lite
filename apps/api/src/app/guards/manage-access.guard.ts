@@ -1,7 +1,7 @@
 import {
   CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
-import { WorkspaceUserService } from '../database/services/workspace-user.service';
+import { WorkspaceUserService } from '../services/workspace-user.service';
 
 @Injectable()
 export class ManageAccessGuard implements CanActivate {

@@ -4,15 +4,15 @@ import {
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
-import { WorkspaceService } from '../database/services/workspace.service';
+import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
-import { UnitService } from '../database/services/unit.service';
+import { UnitService } from '../services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
-import { SettingService } from '../database/services/setting.service';
+import { SettingService } from '../services/setting.service';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)

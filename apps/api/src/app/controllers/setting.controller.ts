@@ -7,7 +7,7 @@ import {
 import {
   MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto
 } from '@studio-lite-lib/api-dto';
-import { SettingService } from '../database/services/setting.service';
+import { SettingService } from '../services/setting.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';

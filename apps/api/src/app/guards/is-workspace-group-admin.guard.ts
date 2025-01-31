@@ -1,8 +1,8 @@
 import {
   CanActivate, ExecutionContext, Injectable, UnauthorizedException
 } from '@nestjs/common';
-import { AuthService } from '../service/auth.service';
-import { WorkspaceService } from '../database/services/workspace.service';
+import { AuthService } from '../services/auth.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 @Injectable()
 export class IsWorkspaceGroupAdminGuard implements CanActivate {

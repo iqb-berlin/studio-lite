@@ -5,7 +5,7 @@ import { VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto } f
 import * as cheerio from 'cheerio';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import VeronaModule from '../entities/verona-module.entity';
-import { AdminVeronaModulesNotFoundException } from '../../exceptions/admin-verona-modules-not-found.exception';
+import { AdminVeronaModulesNotFoundException } from '../exceptions/admin-verona-modules-not-found.exception';
 
 @Injectable()
 export class VeronaModulesService {

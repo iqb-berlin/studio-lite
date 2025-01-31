@@ -8,10 +8,10 @@ import {
 import {
   CodeData, VariableCodingData, ToTextFactory, CodingScheme, CodeAsText
 } from '@iqb/responses';
-import { WorkspaceService } from '../database/services/workspace.service';
-import { UnitService } from '../database/services/unit.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { UnitService } from '../services/unit.service';
 import { DownloadDocx } from './downloadDocx.class';
-import { SettingService } from '../database/services/setting.service';
+import { SettingService } from '../services/setting.service';
 
 interface WorkspaceData {
   id: number;

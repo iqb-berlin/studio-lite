@@ -10,10 +10,10 @@ import {
   WorkspaceGroupFullDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { WorkspaceGroupService } from '../database/services/workspace-group.service';
+import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
-import { UnitService } from '../database/services/unit.service';
+import { UnitService } from '../services/unit.service';
 
 @Controller('workspace-groups/:workspace_group_id')
 export class WorkspaceGroupController {

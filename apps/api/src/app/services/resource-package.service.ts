@@ -9,7 +9,7 @@ import 'multer';
 import * as AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import * as util from 'util';
-import { ResourcePackageNotFoundException } from '../../exceptions/resource-package-not-found.exception';
+import { ResourcePackageNotFoundException } from '../exceptions/resource-package-not-found.exception';
 import ResourcePackage from '../entities/resource-package.entity';
 
 @Injectable()

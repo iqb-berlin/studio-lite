@@ -8,7 +8,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
 import WorkspaceGroup from '../entities/workspace-group.entity';
-import { AdminWorkspaceGroupNotFoundException } from '../../exceptions/admin-workspace-group-not-found.exception';
+import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 
 @Injectable()
@@ -86,7 +86,7 @@ export class WorkspaceGroupService {
       if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);
     } else {
-      throw new ArgumentOutOfRangeError(); // TODO: Warum ist das hier anders als bei den anderen patches ?
+      throw new ArgumentOutOfRangeError();
     }
   }
 

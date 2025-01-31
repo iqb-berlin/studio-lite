@@ -9,18 +9,18 @@ import {
   CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto,
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
-import { UnitService } from '../database/services/unit.service';
+import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { CommentWriteGuard } from '../guards/comment-write.guard';
-import { UnitUserService } from '../database/services/unit-user.service';
-import { UnitCommentService } from '../database/services/unit-comment.service';
+import { UnitUserService } from '../services/unit-user.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from '../guards/write-access.guard';
 import { DeleteAccessGuard } from '../guards/delete-access.guard';
 import { User } from '../decorators/user.decorator';
-import UserEntity from '../database/entities/user.entity';
+import UserEntity from '../entities/user.entity';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 

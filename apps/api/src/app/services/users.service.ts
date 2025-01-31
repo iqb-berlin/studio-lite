@@ -13,7 +13,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
-import { AdminUserNotFoundException } from '../../exceptions/admin-user-not-found.exception';
+import { AdminUserNotFoundException } from '../exceptions/admin-user-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 import Review from '../entities/review.entity';

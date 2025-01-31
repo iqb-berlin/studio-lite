@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { AdminWorkspaceController } from './admin-workspace.controller';
-import { AuthService } from '../service/auth.service';
-import { WorkspaceService } from '../database/services/workspace.service';
-import { UsersService } from '../database/services/users.service';
+import { AuthService } from '../services/auth.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { UsersService } from '../services/users.service';
 
 describe('AdminWorkspaceController', () => {
   let controller: AdminWorkspaceController;

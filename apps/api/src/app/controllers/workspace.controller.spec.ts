@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { WorkspaceController } from './workspace.controller';
-import { AuthService } from '../service/auth.service';
-import { WorkspaceService } from '../database/services/workspace.service';
-import { UnitService } from '../database/services/unit.service';
-import { VeronaModulesService } from '../database/services/verona-modules.service';
-import { SettingService } from '../database/services/setting.service';
-import { UsersService } from '../database/services/users.service';
-import { WorkspaceUserService } from '../database/services/workspace-user.service';
-import { UnitCommentService } from '../database/services/unit-comment.service';
+import { AuthService } from '../services/auth.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { UnitService } from '../services/unit.service';
+import { VeronaModulesService } from '../services/verona-modules.service';
+import { SettingService } from '../services/setting.service';
+import { UsersService } from '../services/users.service';
+import { WorkspaceUserService } from '../services/workspace-user.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController;

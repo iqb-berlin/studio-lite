@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { VeronaModuleController } from './verona-module.controller';
-import { AuthService } from '../service/auth.service';
-import { VeronaModulesService } from '../database/services/verona-modules.service';
+import { AuthService } from '../services/auth.service';
+import { VeronaModulesService } from '../services/verona-modules.service';
 
 describe('VeronaModuleController', () => {
   let controller: VeronaModuleController;

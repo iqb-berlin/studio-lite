@@ -5,8 +5,8 @@ import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { MetadataProfileService } from '../database/services/metadata-profile.service';
-import { RegisteredMetadataProfileService } from '../database/services/registered-metadata-profile.service';
+import { MetadataProfileService } from '../services/metadata-profile.service';
+import { RegisteredMetadataProfileService } from '../services/registered-metadata-profile.service';
 
 @Controller('metadata-profile')
 @UseFilters(HttpExceptionFilter)

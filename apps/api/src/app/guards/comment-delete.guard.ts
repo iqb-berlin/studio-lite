@@ -1,7 +1,7 @@
 import {
   CanActivate, ExecutionContext, Injectable, UnauthorizedException
 } from '@nestjs/common';
-import { UnitCommentService } from '../database/services/unit-comment.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 
 @Injectable()
 export class CommentDeleteGuard implements CanActivate {

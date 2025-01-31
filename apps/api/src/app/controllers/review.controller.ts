@@ -10,9 +10,9 @@ import {
   ReviewFullDto, UnitCommentDto, UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { ReviewService } from '../database/services/review.service';
-import { UnitService } from '../database/services/unit.service';
-import { UnitCommentService } from '../database/services/unit-comment.service';
+import { ReviewService } from '../services/review.service';
+import { UnitService } from '../services/unit.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 
 @Controller('reviews/:review_id')
 export class ReviewController {

@@ -5,7 +5,7 @@ import {
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
 } from '@studio-lite-lib/api-dto';
 import UnitComment from '../entities/unit-comment.entity';
-import { UnitCommentNotFoundException } from '../../exceptions/unit-comment-not-found.exception';
+import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 
 @Injectable()
 export class UnitCommentService {

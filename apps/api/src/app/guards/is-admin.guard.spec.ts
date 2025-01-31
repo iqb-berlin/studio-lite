@@ -1,7 +1,7 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IsAdminGuard } from './is-admin.guard';
-import { AuthService } from '../service/auth.service';
+import { AuthService } from '../services/auth.service';
 
 describe('IsAdminGuard', () => {
   let isAdminGuard: IsAdminGuard;

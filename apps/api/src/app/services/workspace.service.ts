@@ -14,17 +14,17 @@ import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
-import { FileIo } from '../../interfaces/file-io.interface';
-import { UnitImportData } from '../../classes/unit-import-data.class';
+import { FileIo } from '../interfaces/file-io.interface';
+import { UnitImportData } from '../classes/unit-import-data.class';
 import { UnitService } from './unit.service';
-import { AdminWorkspaceNotFoundException } from '../../exceptions/admin-workspace-not-found.exception';
+import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
-} from '../../exceptions/user-workspace-group-not-admin';
+} from '../exceptions/user-workspace-group-not-admin';
 import UserEntity from '../entities/user.entity';
 import { UnitCommentService } from './unit-comment.service';
 

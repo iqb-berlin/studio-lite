@@ -12,16 +12,16 @@ import {
   // eslint-disable-next-line import/no-duplicates, import/order
 } from '@studio-lite-lib/api-dto';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
-import { AuthService } from '../service/auth.service';
+import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { WorkspaceService } from '../database/services/workspace.service';
-import { UsersService } from '../database/services/users.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { UsersService } from '../services/users.service';
 import { ReviewId } from '../decorators/review-id.decorator';
 import { UserId } from '../decorators/user-id.decorator';
 import { UserName } from '../decorators/user-name.decorator';
-import { ReviewService } from '../database/services/review.service';
+import { ReviewService } from '../services/review.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
-import { VeronaModulesService } from '../database/services/verona-modules.service';
+import { VeronaModulesService } from '../services/verona-modules.service';
 // eslint-disable-next-line import/no-duplicates, import/order
 import { CreateUserDto } from '@studio-lite-lib/api-dto';
 // eslint-disable-next-line import/no-duplicates, import/order

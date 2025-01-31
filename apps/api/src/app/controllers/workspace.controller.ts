@@ -24,20 +24,20 @@ import {
   UsersInWorkspaceDto, UserWorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { WorkspaceService } from '../database/services/workspace.service';
+import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { UnitDownloadClass } from '../classes/unit-download.class';
-import { UnitService } from '../database/services/unit.service';
-import { VeronaModulesService } from '../database/services/verona-modules.service';
-import { SettingService } from '../database/services/setting.service';
+import { UnitService } from '../services/unit.service';
+import { VeronaModulesService } from '../services/verona-modules.service';
+import { SettingService } from '../services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
-import { UsersService } from '../database/services/users.service';
+import { UsersService } from '../services/users.service';
 import { ManageAccessGuard } from '../guards/manage-access.guard';
-import UserEntity from '../database/entities/user.entity';
+import UserEntity from '../entities/user.entity';
 import { User } from '../decorators/user.decorator';
-import { UnitCommentService } from '../database/services/unit-comment.service';
+import { UnitCommentService } from '../services/unit-comment.service';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 

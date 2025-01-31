@@ -1,8 +1,8 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '@studio-lite-lib/api-dto';
-import { UsersService } from '../database/services/users.service';
-import { ReviewService } from '../database/services/review.service';
+import { UsersService } from './users.service';
+import { ReviewService } from './review.service';
 
 @Injectable()
 export class AuthService {
