@@ -76,7 +76,7 @@ export class BackendService {
   // TOD0: body Object
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${units.join(';')}`)
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/`, { body: { ids: units } })
       .pipe(
         map(() => true),
         catchError(() => of(false))

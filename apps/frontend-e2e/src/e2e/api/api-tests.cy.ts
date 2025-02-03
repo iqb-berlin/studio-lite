@@ -2601,7 +2601,6 @@ describe('Studio API tests', () => {
     //       });
     //   });
     // });
-
     describe('83. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
       it('401 negative test: should not delete the unit from other user', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),
