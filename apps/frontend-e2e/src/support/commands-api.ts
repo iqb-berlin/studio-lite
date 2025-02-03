@@ -904,7 +904,7 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/submit_units`,
+    url: `/api/workspaces/${wsId}/submit`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

@@ -128,7 +128,7 @@ export class UnitController {
     return this.unitService.patchWorkspace(units, targetWorkspace, user, workspaceId, 'moveTo');
   }
 
-  @Patch('submit_units')
+  @Patch('submit')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })

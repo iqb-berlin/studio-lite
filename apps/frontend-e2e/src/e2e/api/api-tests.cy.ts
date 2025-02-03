@@ -1922,7 +1922,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('63. PATCH /api/workspaces/{workspace_id}/submit_units', () => {
+      describe('63. PATCH /api/workspaces/{workspace_id}/submit', () => {
         it('401 negative test: should not submit units without credentials ', () => {
           cy.submitUnitsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
