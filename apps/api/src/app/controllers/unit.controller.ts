@@ -5,7 +5,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto, DeleteUnitsDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -200,15 +200,14 @@ export class UnitController {
     return this.unitService.create(workspaceId, createUnitDto, user, false);
   }
 
-  @Delete(':ids')
+  @Delete()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit')
-  async remove(@WorkspaceId() workspaceId: number,
-    @Param('ids') ids: string): Promise<void> {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.unitService.remove(idsAsNumberArray);
+  async remove(
+    @Body() body: DeleteUnitsDto
+  ): Promise<void> {
+    return this.unitService.remove(body.ids);
   }
 
   @Delete(':id/state')
