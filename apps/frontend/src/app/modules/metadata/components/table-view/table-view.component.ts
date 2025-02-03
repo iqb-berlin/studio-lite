@@ -17,7 +17,6 @@ import {
 import { ItemsMetadataValues, MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
@@ -61,7 +60,6 @@ interface ColumnValues {
     MatFormField,
     MatInput,
     MatLabel,
-    MatSlideToggle,
     MatSort
   ]
 })
