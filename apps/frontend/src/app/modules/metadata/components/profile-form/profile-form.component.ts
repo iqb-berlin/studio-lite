@@ -232,7 +232,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     if (type === 'boolean') {
       return {
         lang: this.language,
-        value: this.getBooleanTypeLabel(modelValueEntry[0])
+        value: this.getBooleanTypeLabel(modelValueEntry[0], modelValueEntry[1] as boolean)
       };
     }
     if (type === 'number') {
@@ -250,11 +250,11 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
     };
   }
 
-  private getBooleanTypeLabel(value: string): string {
+  private getBooleanTypeLabel(key: string, value: boolean): string {
     if (value) {
-      return (this.profileItemKeys[value].parameters as ProfileEntryParametersBoolean).trueLabel || value.toString();
+      return (this.profileItemKeys[key].parameters as ProfileEntryParametersBoolean).trueLabel || value.toString();
     }
-    return (this.profileItemKeys[value].parameters as ProfileEntryParametersBoolean).falseLabel || value.toString();
+    return (this.profileItemKeys[key].parameters as ProfileEntryParametersBoolean).falseLabel || value.toString();
   }
 
   // //////////////////////////////////
