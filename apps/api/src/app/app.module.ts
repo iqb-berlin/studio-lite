@@ -59,6 +59,8 @@ import { VeronaModulesService } from './services/verona-modules.service';
 import { SettingService } from './services/setting.service';
 import { ReviewService } from './services/review.service';
 import { WorkspaceUnitCommentController } from './controllers/workspace-unit-comment.controller';
+import { ReviewUnitController } from './controllers/review-unit.controller';
+import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 
 @Module({
   imports: [
@@ -168,6 +170,8 @@ import { WorkspaceUnitCommentController } from './controllers/workspace-unit-com
     WorkspaceController,
     WorkspaceReviewController,
     ReviewController,
+    ReviewUnitController,
+    ReviewUnitCommentController,
     MetadataProfileController,
     WorkspaceGroupController,
     DownloadController
