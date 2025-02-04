@@ -118,7 +118,7 @@ export class BackendService {
             addComments?: boolean
   ): Observable<boolean | RequestReportDto> {
     return this.http.post<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/copy`, { targetWorkspace, units, addComments })
+      `${this.serverUrl}workspaces/${workspaceId}/units/copy`, { targetId: targetWorkspace, ids: units, addComments })
       .pipe(
         catchError(() => of(false))
       );

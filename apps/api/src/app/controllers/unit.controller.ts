@@ -5,6 +5,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
+  CopyUnitDto,
   CreateUnitDto, IdArrayDto, MoveToDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
@@ -153,11 +154,10 @@ export class UnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async copyUnits(@Body('units') units: number[],
-    @User() user: UserEntity,
-    @Body('addComments', ParseBoolPipe) addComments: boolean,
-    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
-    return this.unitService.copy(units, targetWorkspace, user, addComments);
+  async copyUnits(@Body() body: CopyUnitDto,
+    @User() user: UserEntity
+  ) {
+    return this.unitService.copy(body.ids, body.targetId, user, body.addComments);
   }
 
   @Patch(':id/definition')
