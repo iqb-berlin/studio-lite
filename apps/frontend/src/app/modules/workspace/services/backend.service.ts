@@ -106,7 +106,7 @@ export class BackendService {
             units: number[],
             targetWorkspace: number): Observable<boolean | RequestReportDto> {
     return this.http.patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/move`, { targetWorkspace, units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/move`, { targetId: targetWorkspace, ids: units })
       .pipe(
         catchError(() => of(false))
       );

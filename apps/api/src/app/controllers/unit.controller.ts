@@ -121,11 +121,10 @@ export class UnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async moveUnits(@Body('units') units: number[],
+  async moveUnits(@Body() body: MoveToDto,
     @User() user: UserEntity,
-    @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
-    return this.unitService.patchWorkspace(units, targetWorkspace, user, workspaceId, 'moveTo');
+    @Param('workspace_id', ParseIntPipe) workspaceId: number) {
+    return this.unitService.patchWorkspace(body.ids, body.targetId, user, workspaceId, 'moveTo');
   }
 
   @Patch('submit')
