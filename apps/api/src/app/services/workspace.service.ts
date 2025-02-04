@@ -25,8 +25,11 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../exceptions/user-workspace-group-not-admin';
+// eslint-disable-next-line import/no-duplicates
 import UserEntity from '../entities/user.entity';
 import { UnitCommentService } from './unit-comment.service';
+// eslint-disable-next-line import/no-duplicates
+import User from '../entities/user.entity';
 
 @Injectable()
 export class WorkspaceService {
@@ -329,10 +332,20 @@ export class WorkspaceService {
     }
   }
 
-  async patchWorkspaceGroups(ids:number[], newWorkspaceGroupId:number, userId:number): Promise<void> {
+  async patchWorkspaceGroups(ids:number[], newWorkspaceGroupId:number, user: User): Promise<void> {
     await Promise.all(ids.map(async id => {
-      const workspaceById = await this.findOne(id);
-      if (await this.usersService.isWorkspaceGroupAdmin(userId, workspaceById.groupId)) {
+      const workspace = await this.findOne(id);
+
+      if (workspace.groupId !== newWorkspaceGroupId) {
+        // TODO move to backend
+        this.unitService.findAllForWorkspace(workspace.id).then(async units => {
+          await Promise
+            .all(units
+              .map(async unit => this.unitService.removeUnitState(unit.id, user))
+            );
+        });
+      }
+      if (await this.usersService.isWorkspaceGroupAdmin(user.id, workspace.groupId)) {
         await this.patch({ id, groupId: newWorkspaceGroupId });
       } else {
         throw new UserWorkspaceGroupNotAdminException(newWorkspaceGroupId, 'PATCH');

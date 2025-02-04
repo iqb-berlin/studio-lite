@@ -239,19 +239,7 @@ export class WorkspacesComponent implements OnInit {
 
   moveWorkspace(value: { selection: WorkspaceInListDto[], workspaceGroupId: number }) {
     this.appService.dataLoading = true;
-    const workspacesToMove: number[] = [];
-    value.selection.forEach((workspace: WorkspaceInListDto) => {
-      if (workspace.groupId !== value.workspaceGroupId) {
-        // TODO move to backend
-        this.workspaceBackendService.getUnitList(workspace.id).subscribe(async units => {
-          // eslint-disable-next-line no-restricted-syntax
-          for await (const unit of units) {
-            this.workspaceBackendService.deleteUnitState(workspace.id, unit.id).subscribe(() => null);
-          }
-        });
-      }
-      workspacesToMove.push(workspace.id);
-    });
+    const workspacesToMove: number[] = value.selection.map(workspace => workspace.id);
     this.backendService.moveWorkspaces(value.workspaceGroupId, workspacesToMove).subscribe(
       respOk => {
         if (respOk) {

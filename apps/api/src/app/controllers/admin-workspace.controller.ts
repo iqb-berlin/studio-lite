@@ -93,7 +93,7 @@ export class AdminWorkspaceController {
   async patchGroups(
     @Req() req: Request,
       @Body() body: MoveToDto): Promise<void> {
-    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, req['user'].id);
+    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, req['user']);
   }
 
   @Post(':workspace_group_id')

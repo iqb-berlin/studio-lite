@@ -212,14 +212,4 @@ export class WorkspaceUnitController {
   ): Promise<void> {
     return this.unitService.remove(ids);
   }
-
-  @Delete(':id/state')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace unit')
-  async deleteUnitState(@Param('id', ParseIntPipe) unitId: number,
-    @User() user: UserEntity) {
-    return this.unitService.removeUnitState(unitId, user);
-  }
 }

@@ -851,19 +851,19 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
 });
 
 // 60
-// TODO: Shouldn't the state parameter be unitId? Then url would be `/api/workspaces/${wsId}/units/${unitId}/state`
-Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'DELETE',
-    url: `/api/workspace/${wsId}/${state}/state`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
+// TODO: Endpoint is removed
+// Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'DELETE',
+//     url: `/api/workspace/${wsId}/${state}/state`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     failOnStatusCode: false
+//   });
+// });
 
 // 61
 Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {

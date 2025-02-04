@@ -1829,34 +1829,34 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('60. DELETE /api/workspaces/{workspace_id}/units/{id}/state', () => {
-        it.skip('200 positive test: should delete a state', () => {
-          cy.deleteStateAPI(Cypress.env(ws1.id),
-            '1',
-            Cypress.env(`token_${Cypress.env('username')}`))
-            .then(resp => {
-              expect(resp.status).to.equal(200);
-            });
-        });
-
-        it('401 negative test: should not delete a state without credentials', () => {
-          cy.deleteStateAPI(Cypress.env(ws1.id),
-            '2',
-            noId)
-            .then(resp => {
-              expect(resp.status).to.equal(401);
-            });
-        });
-
-        it('500 negative test: should not delete a state passing a non valid ws id ', () => {
-          cy.deleteStateAPI(noId,
-            '2',
-            Cypress.env(`token_${Cypress.env('username')}`))
-            .then(resp => {
-              expect(resp.status).to.equal(500);
-            });
-        });
-      });
+      // describe('60. DELETE /api/workspaces/{workspace_id}/units/{id}/state', () => {
+      //   it.skip('200 positive test: should delete a state', () => {
+      //     cy.deleteStateAPI(Cypress.env(ws1.id),
+      //       '1',
+      //       Cypress.env(`token_${Cypress.env('username')}`))
+      //       .then(resp => {
+      //         expect(resp.status).to.equal(200);
+      //       });
+      //   });
+      //
+      //   it('401 negative test: should not delete a state without credentials', () => {
+      //     cy.deleteStateAPI(Cypress.env(ws1.id),
+      //       '2',
+      //       noId)
+      //       .then(resp => {
+      //         expect(resp.status).to.equal(401);
+      //       });
+      //   });
+      //
+      //   it('500 negative test: should not delete a state passing a non valid ws id ', () => {
+      //     cy.deleteStateAPI(noId,
+      //       '2',
+      //       Cypress.env(`token_${Cypress.env('username')}`))
+      //       .then(resp => {
+      //         expect(resp.status).to.equal(500);
+      //       });
+      //   });
+      // });
 
       describe('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
         // I can not find the use in studio.

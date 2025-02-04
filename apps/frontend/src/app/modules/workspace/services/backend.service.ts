@@ -359,15 +359,6 @@ export class BackendService {
       );
   }
 
-  deleteUnitState(workspaceId: number, unitId:number): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/state`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
-  }
-
   renameUnitGroup(workspaceId: number, oldGroupName: string, newGroupName: string): Observable<boolean> {
     return this.http
       .patch(
