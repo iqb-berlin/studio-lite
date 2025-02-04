@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { WorkspaceUnitController } from './workspace-unit-controller';
+import { WorkspaceUnitController } from './workspace-unit.controller';
 import { AuthService } from '../services/auth.service';
 import { UnitService } from '../services/unit.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
