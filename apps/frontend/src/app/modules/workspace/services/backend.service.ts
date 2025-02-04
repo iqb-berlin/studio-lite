@@ -73,10 +73,11 @@ export class BackendService {
       );
   }
 
-  // TOD0: body Object
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    units.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/`, { body: { ids: units } })
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/`, { params: queryParams })
       .pipe(
         map(() => true),
         catchError(() => of(false))

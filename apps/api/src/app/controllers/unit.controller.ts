@@ -1,11 +1,11 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, Req, UseGuards
+  Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateUnitDto, DeleteUnitsDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -204,10 +204,16 @@ export class UnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: true
+  })
   async remove(
-    @Body() body: DeleteUnitsDto
+    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[]
   ): Promise<void> {
-    return this.unitService.remove(body.ids);
+    return this.unitService.remove(ids);
   }
 
   @Delete(':id/state')
