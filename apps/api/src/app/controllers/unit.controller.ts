@@ -5,7 +5,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateUnitDto, MoveToDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto, IdArrayDto, MoveToDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -145,9 +145,8 @@ export class UnitController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchReturnDropBoxHistory(@User() user: UserEntity,
-    @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body('units') units: number[]) {
-    return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
+    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Body() body: IdArrayDto) {
+    return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
   }
 
   @Post('copy')
