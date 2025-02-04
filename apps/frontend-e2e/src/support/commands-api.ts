@@ -904,7 +904,7 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/submit_units`,
+    url: `/api/workspaces/${wsId}/submit`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -923,7 +923,7 @@ Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string)
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsDe}/return_submitted_units`,
+    url: `/api/workspaces/${wsDe}/return-submitted`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

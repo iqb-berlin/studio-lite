@@ -87,7 +87,7 @@ export class BackendService {
   submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/submit_units`, { dropBoxId, units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/submit`, { targetId: dropBoxId, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -96,7 +96,7 @@ export class BackendService {
   returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/return_submitted_units`, { units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/return-submitted`, { ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -106,7 +106,7 @@ export class BackendService {
             units: number[],
             targetWorkspace: number): Observable<boolean | RequestReportDto> {
     return this.http.patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/move`, { targetWorkspace, units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/move`, { targetId: targetWorkspace, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -118,7 +118,7 @@ export class BackendService {
             addComments?: boolean
   ): Observable<boolean | RequestReportDto> {
     return this.http.post<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/copy`, { targetWorkspace, units, addComments })
+      `${this.serverUrl}workspaces/${workspaceId}/units/copy`, { targetId: targetWorkspace, ids: units, addComments })
       .pipe(
         catchError(() => of(false))
       );

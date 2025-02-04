@@ -5,7 +5,8 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateUnitDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CopyUnitDto,
+  CreateUnitDto, IdArrayDto, MoveToDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -121,34 +122,31 @@ export class UnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async moveUnits(@Body('units') units: number[],
+  async moveUnits(@Body() body: MoveToDto,
     @User() user: UserEntity,
-    @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
-    return this.unitService.patchWorkspace(units, targetWorkspace, user, workspaceId, 'moveTo');
+    @Param('workspace_id', ParseIntPipe) workspaceId: number) {
+    return this.unitService.patchWorkspace(body.ids, body.targetId, user, workspaceId, 'moveTo');
   }
 
-  @Patch('submit_units')
+  @Patch('submit')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body('units') units: number[],
-    @Body('dropBoxId') dropBoxId: number) {
-    return this.unitService.patchDropBoxHistory(units, dropBoxId, workspaceId, user);
+    @Body() body: MoveToDto) {
+    return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
   }
 
-  @Patch('return_submitted_units')
+  @Patch('return-submitted')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchReturnDropBoxHistory(@User() user: UserEntity,
-    @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body('units') units: number[]) {
-    return this.unitService.patchReturnDropBoxHistory(units, workspaceId, user);
+    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Body() body: IdArrayDto) {
+    return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
   }
 
   @Post('copy')
@@ -156,11 +154,10 @@ export class UnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async copyUnits(@Body('units') units: number[],
-    @User() user: UserEntity,
-    @Body('addComments', ParseBoolPipe) addComments: boolean,
-    @Body('targetWorkspace', ParseIntPipe) targetWorkspace: number) {
-    return this.unitService.copy(units, targetWorkspace, user, addComments);
+  async copyUnits(@Body() body: CopyUnitDto,
+    @User() user: UserEntity
+  ) {
+    return this.unitService.copy(body.ids, body.targetId, user, body.addComments);
   }
 
   @Patch(':id/definition')
