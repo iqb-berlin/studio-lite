@@ -9,7 +9,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceFullDto,
   WorkspaceUserInListDto,
-  UserWorkspaceAccessDto
+  UserWorkspaceAccessDto, MoveToDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
@@ -84,8 +84,7 @@ export class AdminWorkspaceController {
     return this.workspaceService.remove(idsAsNumberArray);
   }
 
-  @Patch(':ids/:workspace_group_id')
-  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @Patch('move')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
@@ -93,11 +92,8 @@ export class AdminWorkspaceController {
   @ApiTags('admin workspaces')
   async patchGroups(
     @Req() req: Request,
-      @Param('ids') ids: string,
-      @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
-    const splitIds = ids.split(';');
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    return this.workspaceService.patchWorkspaceGroups(splitIds, workspace_group_id, req['user'].id);
+      @Body() body: MoveToDto): Promise<void> {
+    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, req['user'].id);
   }
 
   @Post(':workspace_group_id')
