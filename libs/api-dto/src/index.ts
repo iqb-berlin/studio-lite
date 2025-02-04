@@ -38,6 +38,7 @@ export { CreateWorkspaceDto } from './lib/dto/workspace/create-workspace-dto';
 export { CreateUserDto } from './lib/dto/user/create-user-dto';
 export { UserInListDto } from './lib/dto/user/user-in-list-dto';
 export { UserFullDto } from './lib/dto/user/user-full-dto';
+export { MoveToDto } from './lib/dto/unit/move-to-dto';
 export { UnitCommentDto } from './lib/dto/unit-comment/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dto/unit-comment/create-unit-comment-dto';
 export { UpdateUnitCommentDto } from './lib/dto/unit-comment/update-unit-comment-dto';
