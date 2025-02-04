@@ -96,7 +96,7 @@ export class BackendService {
   returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/return_submitted_units`, { units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/return-submitted`, { units })
       .pipe(
         catchError(() => of(false))
       );

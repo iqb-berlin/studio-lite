@@ -139,7 +139,7 @@ export class UnitController {
     return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
   }
 
-  @Patch('return_submitted_units')
+  @Patch('return-submitted')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })

@@ -1970,7 +1970,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('64. PATCH /api/workspaces/{workspace_id}/return_submitted_units', () => {
+      describe('64. PATCH /api/workspaces/{workspace_id}/return-submitted', () => {
         it('401 negative test: should not return a submit unit without credentials', () => {
           cy.returnUnitsAPI(Cypress.env(ws2.id),
             Cypress.env(unit3.shortname),
