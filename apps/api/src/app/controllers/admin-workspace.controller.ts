@@ -9,7 +9,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceFullDto,
   WorkspaceUserInListDto,
-  UserWorkspaceAccessDto, MoveToDto
+  UserWorkspaceAccessDto, ChangeIdArrayDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
@@ -92,7 +92,7 @@ export class AdminWorkspaceController {
   @ApiTags('admin workspaces')
   async patchGroups(
     @Req() req: Request,
-      @Body() body: MoveToDto): Promise<void> {
+      @Body() body: ChangeIdArrayDto): Promise<void> {
     return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, req['user']);
   }
 
