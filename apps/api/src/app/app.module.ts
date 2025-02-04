@@ -17,7 +17,7 @@ import { ReviewController } from './controllers/review.controller';
 import { MetadataProfileController } from './controllers/metadata-profile.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
 import { DownloadController } from './controllers/download.controller';
-import { UnitController } from './controllers/unit.controller';
+import { WorkspaceUnitController } from './controllers/workspace-unit-controller';
 import { WorkspaceController } from './controllers/workspace.controller';
 import { WorkspaceReviewController } from './controllers/workspace-review.controller';
 import { AuthService } from './services/auth.service';
@@ -58,7 +58,9 @@ import { UnitUserService } from './services/unit-user.service';
 import { VeronaModulesService } from './services/verona-modules.service';
 import { SettingService } from './services/setting.service';
 import { ReviewService } from './services/review.service';
-import { UnitCommentController } from './controllers/unit-comment.controller';
+import { WorkspaceUnitCommentController } from './controllers/workspace-unit-comment.controller';
+import { ReviewUnitController } from './controllers/review-unit.controller';
+import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 
 @Module({
   imports: [
@@ -163,11 +165,13 @@ import { UnitCommentController } from './controllers/unit-comment.controller';
     SettingController,
     ResourcePackageController,
     VeronaModuleController,
-    UnitController,
-    UnitCommentController,
     WorkspaceController,
+    WorkspaceUnitController,
+    WorkspaceUnitCommentController,
     WorkspaceReviewController,
     ReviewController,
+    ReviewUnitController,
+    ReviewUnitCommentController,
     MetadataProfileController,
     WorkspaceGroupController,
     DownloadController
