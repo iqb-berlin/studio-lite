@@ -21,7 +21,6 @@ export { UnitDefinitionDto } from './lib/dto/unit/unit-definition-dto';
 export { UnitMetadataDto } from './lib/dto/unit/unit-metadata-dto';
 export { WorkspaceSettingsDto } from './lib/dto/workspace/workspace-settings-dto';
 export { CreateUnitDto } from './lib/dto/unit/create-unit-dto';
-export { DeleteUnitsDto } from './lib/dto/unit/delete-units-dto';
 export { UnitInListDto } from './lib/dto/unit/unit-in-list-dto';
 export { UnitByDefinitionIdDto } from './lib/dto/unit/unit-by-definition-id-dto';
 export { VeronaModuleMetadataDto } from './lib/dto/verona-module/verona-module-metadata-dto';
