@@ -4,14 +4,14 @@ import { AuthService } from '../services/auth.service';
 import { UnitUserService } from '../services/unit-user.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
-import { UnitCommentController } from './unit-comment.controller';
+import { WorkspaceUnitCommentController } from './workspace-unit-comment.controller';
 
-describe('UnitCommentController', () => {
-  let controller: UnitCommentController;
+describe('WorkspaceUnitCommentController', () => {
+  let controller: WorkspaceUnitCommentController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UnitCommentController],
+      controllers: [WorkspaceUnitCommentController],
       providers: [
         {
           provide: 'APP_VERSION',
@@ -36,7 +36,7 @@ describe('UnitCommentController', () => {
       ]
     }).compile();
 
-    controller = module.get<UnitCommentController>(UnitCommentController);
+    controller = module.get<WorkspaceUnitCommentController>(WorkspaceUnitCommentController);
   });
 
   it('should be defined', () => {

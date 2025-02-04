@@ -58,7 +58,7 @@ import { UnitUserService } from './services/unit-user.service';
 import { VeronaModulesService } from './services/verona-modules.service';
 import { SettingService } from './services/setting.service';
 import { ReviewService } from './services/review.service';
-import { UnitCommentController } from './controllers/unit-comment.controller';
+import { WorkspaceUnitCommentController } from './controllers/workspace-unit-comment.controller';
 
 @Module({
   imports: [
@@ -164,7 +164,7 @@ import { UnitCommentController } from './controllers/unit-comment.controller';
     ResourcePackageController,
     VeronaModuleController,
     UnitController,
-    UnitCommentController,
+    WorkspaceUnitCommentController,
     WorkspaceController,
     WorkspaceReviewController,
     ReviewController,
