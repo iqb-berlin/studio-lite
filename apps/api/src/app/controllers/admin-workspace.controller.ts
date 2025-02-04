@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, Req, Request, UseFilters, UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
@@ -18,6 +18,8 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
+import { User } from '../decorators/user.decorator';
+import UserEntity from '../entities/user.entity';
 
 @Controller('admin/workspaces')
 @UseFilters(HttpExceptionFilter)
@@ -90,10 +92,8 @@ export class AdminWorkspaceController {
   @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('admin workspaces')
-  async patchGroups(
-    @Req() req: Request,
-      @Body() body: ChangeIdArrayDto): Promise<void> {
-    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, req['user']);
+  async patchGroups(@User() user: UserEntity, @Body() body: ChangeIdArrayDto): Promise<void> {
+    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
   }
 
   @Post(':workspace_group_id')
