@@ -67,7 +67,7 @@ export class BackendService {
 
   addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspaces/${createWorkspaceDto.groupId}`, createWorkspaceDto)
+      .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
