@@ -118,7 +118,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
 
 export function checkProfile(profile: string):void {
   const alias = `load${profile}`;
-  cy.intercept('GET', '/api/metadata-profile?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
+  cy.intercept('GET', '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
     .as(alias);
   cy.wait(`@${alias}`)
     .its('response.statusCode')
@@ -139,7 +139,7 @@ export function checkProfile(profile: string):void {
 }
 
 export function checkMultipleProfiles(profiles: string[]):void {
-  cy.intercept('GET', '/api/metadata-profile?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
+  cy.intercept('GET', '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p16/master/item.json')
     .as('selectedProfiles');
   cy.wait('@selectedProfiles')
     .its('response.statusCode')

@@ -8,7 +8,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { MetadataProfileService } from '../services/metadata-profile.service';
 import { RegisteredMetadataProfileService } from '../services/registered-metadata-profile.service';
 
-@Controller('metadata-profile')
+@Controller('metadata')
 @UseFilters(HttpExceptionFilter)
 export class MetadataProfileController {
   constructor(
@@ -17,7 +17,7 @@ export class MetadataProfileController {
   ) {
   }
 
-  @Get()
+  @Get('profiles')
   @ApiQuery({
     name: 'url',
     type: String
