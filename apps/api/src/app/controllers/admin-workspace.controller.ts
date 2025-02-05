@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, Req, Request, UseFilters, UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
@@ -9,7 +9,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceFullDto,
   WorkspaceUserInListDto,
-  UserWorkspaceAccessDto
+  UserWorkspaceAccessDto, ChangeIdArrayDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
@@ -18,6 +18,8 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
+import { User } from '../decorators/user.decorator';
+import UserEntity from '../entities/user.entity';
 
 @Controller('admin/workspaces')
 @UseFilters(HttpExceptionFilter)
@@ -84,20 +86,14 @@ export class AdminWorkspaceController {
     return this.workspaceService.remove(idsAsNumberArray);
   }
 
-  @Patch(':ids/:workspace_group_id')
-  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @Patch('move')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('admin workspaces')
-  async patchGroups(
-    @Req() req: Request,
-      @Param('ids') ids: string,
-      @Param('workspace_group_id') workspace_group_id: number): Promise<void> {
-    const splitIds = ids.split(';');
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    return this.workspaceService.patchWorkspaceGroups(splitIds, workspace_group_id, req['user'].id);
+  async patchGroups(@User() user: UserEntity, @Body() body: ChangeIdArrayDto): Promise<void> {
+    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
   }
 
   @Post(':workspace_group_id')

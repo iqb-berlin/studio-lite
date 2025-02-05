@@ -14,7 +14,7 @@ import { saveAs } from 'file-saver-es';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
@@ -43,7 +43,7 @@ import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
-    IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent, WorkspaceNamePipe]
+    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
@@ -239,18 +239,7 @@ export class WorkspacesComponent implements OnInit {
 
   moveWorkspace(value: { selection: WorkspaceInListDto[], workspaceGroupId: number }) {
     this.appService.dataLoading = true;
-    const workspacesToMove: number[] = [];
-    value.selection.forEach((workspace: WorkspaceInListDto) => {
-      if (workspace.groupId !== value.workspaceGroupId) {
-        this.workspaceBackendService.getUnitList(workspace.id).subscribe(async units => {
-          // eslint-disable-next-line no-restricted-syntax
-          for await (const unit of units) {
-            this.workspaceBackendService.deleteUnitState(workspace.id, unit.id).subscribe(() => null);
-          }
-        });
-      }
-      workspacesToMove.push(workspace.id);
-    });
+    const workspacesToMove: number[] = value.selection.map(workspace => workspace.id);
     this.backendService.moveWorkspaces(value.workspaceGroupId, workspacesToMove).subscribe(
       respOk => {
         if (respOk) {
