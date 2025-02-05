@@ -23,7 +23,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     queryParams = queryParams.append('url', url);
     return this.http
-      .get(`${this.serverUrl}metadata-profile/vocabularies`, { params: queryParams })
+      .get(`${this.serverUrl}metadata/vocabularies`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(vocab => vocab as MetadataVocabularyDto[])
@@ -35,7 +35,7 @@ export class BackendService {
     queryParams = queryParams.append('url', url);
 
     return this.http
-      .get(`${this.serverUrl}metadata-profile`, { params: queryParams })
+      .get(`${this.serverUrl}metadata/profiles`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(profile => profile as MetadataProfileDto)
@@ -44,7 +44,7 @@ export class BackendService {
 
   getRegisteredProfiles():Observable<RegisteredMetadataProfileDto[] | boolean> {
     return this.http
-      .get(`${this.serverUrl}metadata-profile/registry`)
+      .get(`${this.serverUrl}metadata/registry`)
       .pipe(
         catchError(() => of(false)),
         map(vocab => vocab as RegisteredMetadataProfileDto[])

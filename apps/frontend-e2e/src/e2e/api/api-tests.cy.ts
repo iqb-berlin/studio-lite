@@ -1134,7 +1134,7 @@ describe('Studio API tests', () => {
     });
 
     describe('Metadata block', () => {
-      describe('35. GET /api/metadata-profile/registry', () => {
+      describe('35. GET /api/metadata/registry', () => {
         it('200 positive test: should get at least one profile', () => {
           cy.getRegistryAPI(Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -1162,7 +1162,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('36. GET /api/metadata-profile', () => {
+      describe('36. GET /api/metadata/profiles', () => {
         it('200 positive test: should get data from the profile', () => {
           cy.getMetadataAPI(Cypress.env('profile1'), Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -1230,7 +1230,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('38. GET /api/metadata-profile/vocabularies', () => {
+      describe('38. GET /api/metadata/vocabularies', () => {
         it('200 positive test: should get the vocabulary of a specific profile', () => {
           cy.getVocabularyMetadataAPI(
             Cypress.env('profile1'),
