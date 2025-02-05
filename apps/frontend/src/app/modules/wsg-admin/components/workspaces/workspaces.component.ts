@@ -214,27 +214,25 @@ export class WorkspacesComponent implements OnInit {
     this.appService.dataLoading = true;
     const workspacesToDelete: number[] = [];
     selectedRows.forEach((r: WorkspaceInListDto) => workspacesToDelete.push(r.id));
-    this.backendService.deleteWorkspaces(
-      this.wsgAdminService.selectedWorkspaceGroupId, workspacesToDelete
-    ).subscribe(
-      respOk => {
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspaces-deleted'),
-            '',
-            { duration: 1000 }
-          );
-          this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspaces-not-deleted'),
-            this.translateService.instant('error'),
-            { duration: 1000 }
-          );
-          this.appService.dataLoading = false;
-        }
-      }
-    );
+    this.backendService.deleteWorkspaces(workspacesToDelete)
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspaces-deleted'),
+              '',
+              { duration: 1000 }
+            );
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspaces-not-deleted'),
+              this.translateService.instant('error'),
+              { duration: 1000 }
+            );
+            this.appService.dataLoading = false;
+          }
+        });
   }
 
   moveWorkspace(value: { selection: WorkspaceInListDto[], workspaceGroupId: number }) {
