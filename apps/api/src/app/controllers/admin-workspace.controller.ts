@@ -5,7 +5,6 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  WorkspaceGroupDto,
   CreateWorkspaceDto,
   WorkspaceFullDto,
   WorkspaceUserInListDto,
@@ -14,7 +13,6 @@ import {
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
-import { IsAdminGuard } from '../guards/is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { User } from '../decorators/user.decorator';
@@ -27,15 +25,6 @@ export class AdminWorkspaceController {
     private workspaceService: WorkspaceService,
     private userService: UsersService
   ) {}
-
-  @Get('groupwise')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Groupwise ordered admin workspaces retrieved successfully.' })
-  @ApiTags('admin workspace')
-  async findAllGroupwise(): Promise<WorkspaceGroupDto[]> {
-    return this.workspaceService.findAllGroupwise();
-  }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)

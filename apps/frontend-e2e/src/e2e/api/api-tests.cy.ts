@@ -751,40 +751,41 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('23. /api/admin/workspaces/groupwise', () => {
-      it('200 positive test: should retrieve groupwise ordered admin workspaces successfully.', () => {
-        cy.getWsGroupwiseAPI(Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.body.length).to.equal(2);
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: you should not get the workspace of which you are not a user.', () => {
-        cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('200 positive test: you should the workspaces you are admin.', () => {
-        cy.updateUserAPI(user2, true, Cypress.env(`token_${Cypress.env('username')}`))
-          .then(() => {
-            cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
-              .then(resp2 => {
-                expect(resp2.status).to.equal(200);
-              });
-          });
-        cy.updateUserAPI(user2, false, Cypress.env(`token_${Cypress.env('username')}`));
-      });
-
-      it('401 negative test: you should not get the workspace of which you are not a user.', () => {
-        cy.getWsGroupwiseAPI(noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-    });
+    // Todo: Endpoint is removed
+    // describe('23. /api/admin/workspaces/groupwise', () => {
+    //   it('200 positive test: should retrieve groupwise ordered admin workspaces successfully.', () => {
+    //     cy.getWsGroupwiseAPI(Cypress.env(`token_${Cypress.env('username')}`))
+    //       .then(resp => {
+    //         expect(resp.body.length).to.equal(2);
+    //         expect(resp.status).to.equal(200);
+    //       });
+    //   });
+    //
+    //   it('401 negative test: you should not get the workspace of which you are not a user.', () => {
+    //     cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
+    //       .then(resp => {
+    //         expect(resp.status).to.equal(401);
+    //       });
+    //   });
+    //
+    //   it('200 positive test: you should the workspaces you are admin.', () => {
+    //     cy.updateUserAPI(user2, true, Cypress.env(`token_${Cypress.env('username')}`))
+    //       .then(() => {
+    //         cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
+    //           .then(resp2 => {
+    //             expect(resp2.status).to.equal(200);
+    //           });
+    //       });
+    //     cy.updateUserAPI(user2, false, Cypress.env(`token_${Cypress.env('username')}`));
+    //   });
+    //
+    //   it('401 negative test: you should not get the workspace of which you are not a user.', () => {
+    //     cy.getWsGroupwiseAPI(noId)
+    //       .then(resp => {
+    //         expect(resp.status).to.equal(401);
+    //       });
+    //   });
+    // });
 
     describe('24. PATCH /api/admin/workspaces/}', () => {
       it('200 positive test: should update the ws data', () => {
