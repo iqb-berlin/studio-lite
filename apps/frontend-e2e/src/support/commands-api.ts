@@ -421,18 +421,19 @@ Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, userId:string, token
 });
 
 // 23
-Cypress.Commands.add('getWsGroupwiseAPI', (token: string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: '/api/admin/workspaces/groupwise',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
+// TODO: Endpoint is removed
+// Cypress.Commands.add('getWsGroupwiseAPI', (token: string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'GET',
+//     url: '/api/admin/workspaces/groupwise',
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     failOnStatusCode: false
+//   });
+// });
 
 // 24 Not used because we use request to simulate the command
 Cypress.Commands.add('updateWsAPI', (ws:WsData, group:GroupData, token:string) => {
