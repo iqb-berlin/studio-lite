@@ -71,14 +71,14 @@ export class WorkspaceReviewController {
     return this.reviewService.create(createReviewDto);
   }
 
-  @Delete(':ids')
+  @Delete(':id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
   @ApiTags('workspace review')
-  async remove(@WorkspaceId() workspaceId: number,
-    @Param('ids') ids: string): Promise<void> {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.reviewService.remove(idsAsNumberArray);
+  async remove(
+    @Param('id', ParseIntPipe) reviewId: number): Promise<void> {
+    return this.reviewService.remove(reviewId);
   }
 }
