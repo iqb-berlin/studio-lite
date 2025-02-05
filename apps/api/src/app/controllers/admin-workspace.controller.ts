@@ -1,8 +1,8 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, UseFilters, UseGuards
+  Body, Controller, Delete, Get, Param, ParseArrayPipe, Patch, Post, Query, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   WorkspaceGroupDto,
@@ -67,23 +67,19 @@ export class AdminWorkspaceController {
     return this.userService.setUsersByWorkspace(id, users);
   }
 
-  @Delete(':ids/:workspace_group_id')
-  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @Delete()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
-  // TODO: not implemented in workspaceService.remove
   @ApiTags('admin workspaces')
-  async remove(@WorkspaceGroupId() workspaceGroupId: number, @Param('ids') ids: string): Promise<void> {
-    const idsAsNumberArray: number[] = [];
-    const validWorkspaces = await this.workspaceService.findAllByGroup(workspaceGroupId);
-    const validWorkspaceIds = validWorkspaces.map(ws => ws.id);
-    ids.split(';').forEach(s => {
-      const idAsNumber = parseInt(s, 10);
-      if (validWorkspaceIds.indexOf(idAsNumber) >= 0) idsAsNumberArray.push(idAsNumber);
-    });
-    return this.workspaceService.remove(idsAsNumberArray);
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: true
+  })
+  async remove(@Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[]): Promise<void> {
+    return this.workspaceService.remove(ids);
   }
 
   @Patch('move')

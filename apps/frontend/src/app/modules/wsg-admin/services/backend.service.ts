@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
@@ -92,9 +92,11 @@ export class BackendService {
       );
   }
 
-  deleteWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
+  deleteWorkspaces(workspaces: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    workspaces.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`)
+      .delete(`${this.serverUrl}admin/workspaces`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)

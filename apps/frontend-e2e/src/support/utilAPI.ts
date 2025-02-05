@@ -275,12 +275,12 @@ export function updateWsAPI(wsKey: string, groupKey: string, wsName:string, grou
 }
 
 // 15.
-// TODO changed /api/admin/workspaces/move
+// TODO changed /api/admin/workspaces
 export function deleteWsAPI(wsKey: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/workspaces/${wsKey}/${groupKey}`,
+    url: `/api/admin/workspaces/${wsKey}/${groupKey}`, // /api/admin/workspaces
     headers: {
       'app-version': Cypress.env('version'),
       authorization
