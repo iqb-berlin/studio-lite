@@ -103,15 +103,6 @@ export class BackendService {
       );
   }
 
-  deleteStateInWorkspaceGroupUnits(workspaceGroupId:number, stateId:number):Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}workspace-groups/${workspaceGroupId}/${stateId}`)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
     return this.http
       .patch(`${this.serverUrl}admin/workspaces/move`, { targetId: workspaceGroupId, ids: workspaces })
