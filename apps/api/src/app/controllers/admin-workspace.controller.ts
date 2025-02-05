@@ -2,7 +2,7 @@ import {
   Body, Controller, Delete, Get, Param, ParseArrayPipe, Patch, Post, Query, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   WorkspaceGroupDto,
@@ -16,7 +16,6 @@ import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
-import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { User } from '../decorators/user.decorator';
 import UserEntity from '../entities/user.entity';
@@ -92,8 +91,7 @@ export class AdminWorkspaceController {
     return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
   }
 
-  @Post(':workspace_group_id')
-  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @Post()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
@@ -101,8 +99,7 @@ export class AdminWorkspaceController {
     type: Number
   })
   @ApiTags('admin workspaces')
-  async create(@WorkspaceGroupId() id: number, @Body() createWorkspaceDto: CreateWorkspaceDto) {
-    createWorkspaceDto.groupId = id;
+  async create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
     return this.workspaceService.create(createWorkspaceDto);
   }
 
