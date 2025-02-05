@@ -1,7 +1,7 @@
 import {
   Controller, Get, Query, UseFilters, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -24,6 +24,7 @@ export class MetadataController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiTags('metadata')
   async getMetadataProfileByUrl(@Query('url') url: string) {
     return this.metadataProfileService.getMetadataProfile(url);
   }
@@ -35,6 +36,7 @@ export class MetadataController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiTags('metadata')
   async getMetadataVocabulariesForProfile(@Query('url') url: string): Promise<MetadataVocabularyDto[]> {
     return this.metadataProfileService.getProfileVocabularies(url);
   }
@@ -42,6 +44,7 @@ export class MetadataController {
   @Get('registry')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiTags('metadata')
   async getRegistry() {
     return this.registeredMetadataProfileService.getRegisteredMetadataProfiles();
   }
