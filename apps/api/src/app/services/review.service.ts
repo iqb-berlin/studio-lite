@@ -167,7 +167,7 @@ export class ReviewService {
     }
   }
 
-  async remove(id: number | number[]): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.reviewRepository.delete(id);
   }
 

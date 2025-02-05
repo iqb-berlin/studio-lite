@@ -27,7 +27,7 @@ export class WorkspaceReviewController {
   @ApiCreatedResponse({
     type: [ReviewInListDto]
   })
-  @ApiTags('workspace reviews')
+  @ApiTags('workspace review')
   async findAll(@WorkspaceId() workspaceId: number): Promise<ReviewInListDto[]> {
     return this.reviewService.findAll(workspaceId);
   }
@@ -38,7 +38,7 @@ export class WorkspaceReviewController {
   @ApiCreatedResponse({
     type: ReviewFullDto
   })
-  @ApiTags('workspace reviews')
+  @ApiTags('workspace review')
   async findOne(
     @Param('id', ParseIntPipe) reviewId: number
   ): Promise<ReviewFullDto> {
@@ -50,7 +50,7 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
-  @ApiTags('workspace reviews')
+  @ApiTags('workspace review')
   async patchOnesUnits(
     @Param('id', ParseIntPipe) reviewId: number,
       @Body() updateReview: ReviewFullDto
@@ -66,19 +66,19 @@ export class WorkspaceReviewController {
     description: 'Sends back the id of the new review in database',
     type: Number
   })
-  @ApiTags('workspace reviews')
+  @ApiTags('workspace review')
   async create(@Body() createReviewDto: CreateReviewDto) {
     return this.reviewService.create(createReviewDto);
   }
 
-  @Delete(':ids')
+  @Delete(':id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiTags('workspace reviews')
-  async remove(@WorkspaceId() workspaceId: number,
-    @Param('ids') ids: string): Promise<void> {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.reviewService.remove(idsAsNumberArray);
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
+  @ApiTags('workspace review')
+  async remove(
+    @Param('id', ParseIntPipe) reviewId: number): Promise<void> {
+    return this.reviewService.remove(reviewId);
   }
 }

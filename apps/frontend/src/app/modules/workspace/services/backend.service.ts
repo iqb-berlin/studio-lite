@@ -317,9 +317,9 @@ export class BackendService {
       );
   }
 
-  deleteReviews(workspaceId: number, reviews: number[]): Observable<boolean> {
+  deleteReview(workspaceId: number, review: number): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/reviews/${reviews.join(';')}`)
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/reviews/${review}`)
       .pipe(
         map(() => true),
         catchError(() => of(false))
