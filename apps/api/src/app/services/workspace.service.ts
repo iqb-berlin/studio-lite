@@ -337,7 +337,6 @@ export class WorkspaceService {
       const workspace = await this.findOne(id);
 
       if (workspace.groupId !== newWorkspaceGroupId) {
-        // TODO move to backend
         this.unitService.findAllForWorkspace(workspace.id).then(async units => {
           await Promise
             .all(units

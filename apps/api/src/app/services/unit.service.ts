@@ -357,6 +357,17 @@ export class UnitService {
         }, ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId']);
       } else if (action === 'moveTo') {
         await this.unitDropBoxHistoryRepository.delete({ unitId: unit.id });
+        const workspace = await this.workspaceRepository.findOne({
+          where: { id: workspaceId },
+          select: ['groupId']
+        });
+        const newWorkspace = await this.workspaceRepository.findOne({
+          where: { id: newWorkspaceId },
+          select: ['groupId']
+        });
+        if (workspace.groupId !== newWorkspace.groupId) {
+          unit.state = '0';
+        }
       }
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
