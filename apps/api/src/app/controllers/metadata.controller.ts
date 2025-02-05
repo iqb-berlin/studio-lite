@@ -10,7 +10,7 @@ import { RegisteredMetadataProfileService } from '../services/registered-metadat
 
 @Controller('metadata')
 @UseFilters(HttpExceptionFilter)
-export class MetadataProfileController {
+export class MetadataController {
   constructor(
     private metadataProfileService: MetadataProfileService,
     private registeredMetadataProfileService: RegisteredMetadataProfileService

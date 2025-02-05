@@ -14,7 +14,7 @@ import { SettingController } from './controllers/setting.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
-import { MetadataProfileController } from './controllers/metadata-profile.controller';
+import { MetadataController } from './controllers/metadata.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
 import { DownloadController } from './controllers/download.controller';
 import { WorkspaceUnitController } from './controllers/workspace-unit.controller';
@@ -172,7 +172,7 @@ import { ReviewUnitCommentController } from './controllers/review-unit-comment.c
     ReviewController,
     ReviewUnitController,
     ReviewUnitCommentController,
-    MetadataProfileController,
+    MetadataController,
     WorkspaceGroupController,
     DownloadController
   ],
