@@ -163,8 +163,10 @@ export class BackendService {
   }
 
   deleteWorkspaceGroups(ids: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspace-groups/${ids.join(';')}`)
+      .delete(`${this.serverUrl}admin/workspace-groups`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
