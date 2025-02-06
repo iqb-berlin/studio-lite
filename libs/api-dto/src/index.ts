@@ -39,7 +39,7 @@ export { CreateUserDto } from './lib/dtos/user/create-user-dto';
 export { UserInListDto } from './lib/dtos/user/user-in-list-dto';
 export { UserFullDto } from './lib/dtos/user/user-full-dto';
 export { IdArrayDto } from './lib/dtos/id-array-dto';
-export { ChangeIdArrayDto } from './lib/dtos/change-id-array-dto';
+export { MoveToDto } from './lib/dtos/move-to-dto';
 export { CopyUnitDto } from './lib/dtos/unit/copy-unit-dto';
 export { UnitCommentDto } from './lib/dtos/unit-comment/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dtos/unit-comment/create-unit-comment-dto';

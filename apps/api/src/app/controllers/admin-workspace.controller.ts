@@ -8,7 +8,7 @@ import {
   CreateWorkspaceDto,
   WorkspaceFullDto,
   WorkspaceUserInListDto,
-  UserWorkspaceAccessDto, ChangeIdArrayDto
+  UserWorkspaceAccessDto, MoveToDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
@@ -76,7 +76,7 @@ export class AdminWorkspaceController {
   @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('admin workspace')
-  async patchGroups(@User() user: UserEntity, @Body() body: ChangeIdArrayDto): Promise<void> {
+  async patchGroups(@User() user: UserEntity, @Body() body: MoveToDto): Promise<void> {
     return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
   }
 
