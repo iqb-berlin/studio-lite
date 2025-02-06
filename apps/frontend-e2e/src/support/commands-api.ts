@@ -507,7 +507,7 @@ Cypress.Commands.add('downloadModuleAPI', (module:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/verona-modules/download/${module}`,
+    url: `/api/admin/verona-modules/${module}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

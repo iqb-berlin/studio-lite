@@ -265,7 +265,7 @@ export class BackendService {
 
   downloadModule(moduleKey: string): Observable<Blob> {
     return this.http.get(
-      `${this.serverUrl}admin/verona-modules/download/${moduleKey}`,
+      `${this.serverUrl}admin/verona-modules/${moduleKey}`,
       {
         headers: {
           Accept: 'text/html'

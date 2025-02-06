@@ -888,7 +888,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('28. GET /api/admin/verona-modules/download/{key}', () => {
+    describe('28. GET /api/admin/verona-modules/{key}', () => {
       it('200 positive test: should download with id of the module', () => {
         cy.downloadModuleAPI(getNameAt(modules[0]),
           Cypress.env(`token_${Cypress.env('username')}`))

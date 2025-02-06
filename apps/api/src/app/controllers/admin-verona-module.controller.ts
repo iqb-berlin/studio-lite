@@ -28,7 +28,7 @@ export class AdminVeronaModuleController {
     private veronaModulesService: VeronaModulesService
   ) {}
 
-  @Get('download/:key')
+  @Get(':key')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
@@ -37,13 +37,8 @@ export class AdminVeronaModuleController {
   async downloadModuleById(
     @Param('key') key: string,
       @Res({ passthrough: true }) res: Response
-  ): Promise<StreamableFile> {
-    const fileData = await this.veronaModulesService.findFileById(key);
-    res.set({
-      'Content-Type': 'text/html',
-      'Content-Disposition': `attachment; filename="${fileData.fileName}"`
-    });
-    return new StreamableFile(Buffer.from(fileData.file, 'utf8'));
+  ): Promise<StreamableFile | void> {
+    return this.veronaModulesService.downloadModuleById(key, res);
   }
 
   @Post()
