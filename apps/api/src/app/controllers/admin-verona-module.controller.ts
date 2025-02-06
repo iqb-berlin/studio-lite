@@ -1,8 +1,19 @@
 import {
-  Controller, Delete, Get, Param, Post, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseArrayPipe,
+  Post,
+  Query,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -40,7 +51,7 @@ export class AdminVeronaModuleController {
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Verona module created successfully.',
-    type: [VeronaModuleInListDto] // TODO: In anderen Fällen gibt die Api immer nur die ID bei Create zurück
+    type: [VeronaModuleInListDto]
   })
   @ApiNotAcceptableResponse({ description: 'Verona module not accepted.' })
   @UseInterceptors(FileInterceptor('file'))
@@ -49,15 +60,20 @@ export class AdminVeronaModuleController {
     return this.veronaModulesService.upload(file.buffer);
   }
 
-  // TODO: keys als query params umsetzen und eigenen endpunkt vermeiden
-  @Delete(':keys')
+  @Delete()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Verona modules deleted successfully.' }) // TODO: Exception hinzufügen
+  @ApiOkResponse({ description: 'Verona modules deleted successfully.' })
   @ApiTags('admin verona-module')
-  async remove(@Param('keys') keys: string): Promise<void> {
-    const keysAsStringArray: string[] = [];
-    keys.split(';').forEach(s => keysAsStringArray.push(s));
-    return this.veronaModulesService.remove(keysAsStringArray);
+  @ApiQuery({
+    name: 'key',
+    type: String,
+    isArray: true,
+    required: true
+  })
+  async remove(
+    @Query('key', new ParseArrayPipe({ items: String, separator: ',' })) keys: string[]
+  ): Promise<void> {
+    return this.veronaModulesService.remove(keys);
   }
 }

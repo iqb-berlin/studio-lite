@@ -138,8 +138,10 @@ export class BackendService {
   }
 
   deleteVeronaModules(files: string[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    files.forEach(file => { queryParams = queryParams.append('key', file); });
     return this.http
-      .delete(`${this.serverUrl}admin/verona-modules/${files.join(';')}`)
+      .delete(`${this.serverUrl}admin/verona-modules`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
