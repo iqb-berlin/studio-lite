@@ -2,11 +2,11 @@ import {
   Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CopyUnitDto,
-  CreateUnitDto, IdArrayDto, MoveToDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -140,23 +140,18 @@ export class WorkspaceUnitController {
     return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
   }
 
-  @Patch('groups/:name')
+  @Patch('group-name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiParam({
-    name: 'name',
-    type: 'String',
-    description: 'hexadecimal representation of the group name'
-  })
   @ApiTags('workspace unit')
+  @ApiOkResponse({ description: 'Unit group name changed' })
   async patchUnitsGroup(
   @WorkspaceId() workspaceId: number,
-    @Param('name') groupName: string,
-    @Body() body
+    @Body() body: NewNameDto
   ) {
     return this.unitService
-      .patchUnitGroup(workspaceId, Buffer.from(groupName, 'hex').toString(), body.units);
+      .patchUnitGroup(workspaceId, body.name, body.ids);
   }
 
   @Patch('return-submitted')

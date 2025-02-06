@@ -373,8 +373,8 @@ export class BackendService {
   setGroupUnits(workspaceId: number, groupName: string, units: number[]): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}workspaces/${workspaceId}/units/groups/${BackendService.utf8AsHexString(groupName)}`,
-        { units })
+        `${this.serverUrl}workspaces/${workspaceId}/units/group-name`,
+        { name: groupName, ids: units })
       .pipe(
         map(() => true),
         catchError(() => of(false))
