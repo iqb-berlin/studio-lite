@@ -777,6 +777,7 @@ Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
 });
 
 // 57
+// TODO: Endpoint has changed
 Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({

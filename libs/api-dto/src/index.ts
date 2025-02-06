@@ -25,6 +25,8 @@ export { UnitInListDto } from './lib/dtos/unit/unit-in-list-dto';
 export { UnitByDefinitionIdDto } from './lib/dtos/unit/unit-by-definition-id-dto';
 export { VeronaModuleMetadataDto } from './lib/dtos/verona-module/verona-module-metadata-dto';
 export { VeronaModuleInListDto } from './lib/dtos/verona-module/verona-module-in-list-dto';
+export { GroupNameDto } from './lib/dtos/workspace/group-name-dto';
+export { RenameGroupNameDto } from './lib/dtos/workspace/rename-group-name-dto';
 export {
   AuthDataDto, WorkspaceDto, WorkspaceGroupDto, ReviewDto
 } from './lib/dtos/auth-data-dto';
@@ -39,7 +41,8 @@ export { CreateUserDto } from './lib/dtos/user/create-user-dto';
 export { UserInListDto } from './lib/dtos/user/user-in-list-dto';
 export { UserFullDto } from './lib/dtos/user/user-full-dto';
 export { IdArrayDto } from './lib/dtos/id-array-dto';
-export { ChangeIdArrayDto } from './lib/dtos/change-id-array-dto';
+export { MoveToDto } from './lib/dtos/move-to-dto';
+export { NewNameDto } from './lib/dtos/new-name-dto';
 export { CopyUnitDto } from './lib/dtos/unit/copy-unit-dto';
 export { UnitCommentDto } from './lib/dtos/unit-comment/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dtos/unit-comment/create-unit-comment-dto';

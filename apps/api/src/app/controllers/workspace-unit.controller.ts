@@ -2,11 +2,11 @@ import {
   Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, Req, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CopyUnitDto,
-  CreateUnitDto, IdArrayDto, ChangeIdArrayDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -19,6 +19,7 @@ import { User } from '../decorators/user.decorator';
 import UserEntity from '../entities/user.entity';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
+import { ManageAccessGuard } from '../guards/manage-access.guard';
 
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
@@ -122,7 +123,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async moveUnits(@Body() body: ChangeIdArrayDto,
+  async moveUnits(@Body() body: MoveToDto,
     @User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number) {
     return this.unitService.patchWorkspace(body.ids, body.targetId, user, workspaceId, 'moveTo');
@@ -135,8 +136,22 @@ export class WorkspaceUnitController {
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body() body: ChangeIdArrayDto) {
+    @Body() body: MoveToDto) {
     return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
+  }
+
+  @Patch('group-name')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  @ApiOkResponse({ description: 'Unit group name changed' })
+  async patchUnitsGroup(
+  @WorkspaceId() workspaceId: number,
+    @Body() body: NewNameDto
+  ) {
+    return this.unitService
+      .patchUnitGroup(workspaceId, body.name, body.ids);
   }
 
   @Patch('return-submitted')
