@@ -22,7 +22,7 @@ export class AdminVeronaModuleController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Verona module not found.' })
-  @ApiTags('verona-modules')
+  @ApiTags('admin verona-module')
   async downloadModuleById(
     @Param('key') key: string,
       @Res({ passthrough: true }) res: Response
@@ -44,7 +44,7 @@ export class AdminVeronaModuleController {
   })
   @ApiNotAcceptableResponse({ description: 'Verona module not accepted.' })
   @UseInterceptors(FileInterceptor('file'))
-  @ApiTags('admin verona-modules')
+  @ApiTags('admin verona-module')
   async addModuleFile(@UploadedFile() file) {
     return this.veronaModulesService.upload(file.buffer);
   }
@@ -54,7 +54,7 @@ export class AdminVeronaModuleController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona modules deleted successfully.' }) // TODO: Exception hinzufügen
-  @ApiTags('admin verona-modules')
+  @ApiTags('admin verona-module')
   async remove(@Param('keys') keys: string): Promise<void> {
     const keysAsStringArray: string[] = [];
     keys.split(';').forEach(s => keysAsStringArray.push(s));
