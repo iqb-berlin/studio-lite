@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { VeronaModuleController } from './verona-module.controller';
+import { AdminVeronaModuleController } from './admin-verona-module.controller';
 import { AuthService } from '../services/auth.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 
 describe('VeronaModuleController', () => {
-  let controller: VeronaModuleController;
+  let controller: AdminVeronaModuleController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [VeronaModuleController],
+      controllers: [AdminVeronaModuleController],
       providers: [
         {
           provide: AuthService,
@@ -22,7 +22,7 @@ describe('VeronaModuleController', () => {
       ]
     }).compile();
 
-    controller = module.get<VeronaModuleController>(VeronaModuleController);
+    controller = module.get<AdminVeronaModuleController>(AdminVeronaModuleController);
   });
 
   it('should be defined', () => {

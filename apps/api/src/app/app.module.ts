@@ -12,7 +12,7 @@ import { UserController } from './controllers/user.controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
-import { VeronaModuleController } from './controllers/verona-module.controller';
+import { AdminVeronaModuleController } from './controllers/admin-verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
 import { MetadataController } from './controllers/metadata.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
@@ -164,7 +164,7 @@ import { ReviewUnitCommentController } from './controllers/review-unit-comment.c
     AdminWorkspaceGroupController,
     SettingController,
     ResourcePackageController,
-    VeronaModuleController,
+    AdminVeronaModuleController,
     WorkspaceController,
     WorkspaceUnitController,
     WorkspaceUnitCommentController,
