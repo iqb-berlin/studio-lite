@@ -341,7 +341,7 @@ export class BackendService {
   addUnitGroup(workspaceId: number, newGroup: string): Observable <boolean> {
     return this.http
       .post(
-        `${this.serverUrl}workspaces/${workspaceId}/group`,
+        `${this.serverUrl}workspaces/${workspaceId}/groups`,
         { body: newGroup }
       )
       .pipe(
@@ -352,7 +352,7 @@ export class BackendService {
 
   deleteUnitGroup(workspaceId: number, group: string): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/group/${BackendService.utf8AsHexString(group)}`)
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/groups/${BackendService.utf8AsHexString(group)}`)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -362,7 +362,7 @@ export class BackendService {
   renameUnitGroup(workspaceId: number, oldGroupName: string, newGroupName: string): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}workspaces/${workspaceId}/group/${BackendService.utf8AsHexString(oldGroupName)}`,
+        `${this.serverUrl}workspaces/${workspaceId}/groups/${BackendService.utf8AsHexString(oldGroupName)}`,
         { body: newGroupName })
       .pipe(
         map(() => true),
@@ -373,7 +373,7 @@ export class BackendService {
   setGroupUnits(workspaceId: number, groupName: string, units: number[]): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}workspaces/${workspaceId}/group/${BackendService.utf8AsHexString(groupName)}/units`,
+        `${this.serverUrl}workspaces/${workspaceId}/groups/${BackendService.utf8AsHexString(groupName)}/units`,
         { units })
       .pipe(
         map(() => true),

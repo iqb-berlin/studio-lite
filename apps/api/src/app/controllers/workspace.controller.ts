@@ -103,7 +103,7 @@ export class WorkspaceController {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
   }
 
-  @Post('group')
+  @Post('groups')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -114,7 +114,7 @@ export class WorkspaceController {
     return this.workspaceService.createGroup(workspaceId, newGroup.body);
   }
 
-  @Patch('group/:name')
+  @Patch('groups/:name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -132,7 +132,7 @@ export class WorkspaceController {
       .patchGroupName(workspaceId, Buffer.from(oldGroupName, 'hex').toString(), newGroupName.body);
   }
 
-  @Patch('group/:name/units')
+  @Patch('groups/:name/units')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -150,7 +150,7 @@ export class WorkspaceController {
       .patchUnitsGroup(workspaceId, Buffer.from(groupName, 'hex').toString(), body.units);
   }
 
-  @Delete('group/:name')
+  @Delete('groups/:name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
