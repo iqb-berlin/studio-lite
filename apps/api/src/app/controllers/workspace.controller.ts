@@ -132,24 +132,6 @@ export class WorkspaceController {
       .patchGroupName(workspaceId, Buffer.from(oldGroupName, 'hex').toString(), newGroupName.body);
   }
 
-  @Patch('groups/:name/units')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiParam({
-    name: 'name',
-    type: 'String',
-    description: 'hexadecimal representation of the group name'
-  })
-  @ApiTags('workspace')
-  async patchUnitsGroup(@WorkspaceId() workspaceId: number,
-    @Param('name') groupName: string,
-    @Body() body
-  ) {
-    return this.workspaceService
-      .patchUnitsGroup(workspaceId, Buffer.from(groupName, 'hex').toString(), body.units);
-  }
-
   @Delete('groups/:name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
@@ -373,24 +373,6 @@ export class WorkspaceService {
     },
     {
       groupName: newName
-    });
-  }
-
-  async patchUnitsGroup(id: number, groupName: string, units: number[]): Promise<void> {
-    await this.unitsRepository.update({
-      workspaceId: id,
-      groupName: groupName,
-      id: Not(In(units))
-    },
-    {
-      groupName: ''
-    });
-    await this.unitsRepository.update({
-      workspaceId: id,
-      id: In(units)
-    },
-    {
-      groupName: groupName
     });
   }
 

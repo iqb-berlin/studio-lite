@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import {
   CreateUnitDto,
   RequestReportDto,
@@ -452,6 +452,24 @@ export class UnitService {
       scheme: unit.scheme,
       schemeType: unit.schemeType
     };
+  }
+
+  async patchUnitGroup(id: number, groupName: string, units: number[]): Promise<void> {
+    await this.unitsRepository.update({
+      workspaceId: id,
+      groupName: groupName,
+      id: Not(In(units))
+    },
+    {
+      groupName: ''
+    });
+    await this.unitsRepository.update({
+      workspaceId: id,
+      id: In(units)
+    },
+    {
+      groupName: groupName
+    });
   }
 
   async deleteState(workspaceGroup:number, state_id: string): Promise<void> {

@@ -19,6 +19,7 @@ import { User } from '../decorators/user.decorator';
 import UserEntity from '../entities/user.entity';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
+import { ManageAccessGuard } from '../guards/manage-access.guard';
 
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
@@ -137,6 +138,25 @@ export class WorkspaceUnitController {
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Body() body: ChangeIdArrayDto) {
     return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
+  }
+
+  @Patch('groups/:name')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiParam({
+    name: 'name',
+    type: 'String',
+    description: 'hexadecimal representation of the group name'
+  })
+  @ApiTags('workspace unit')
+  async patchUnitsGroup(
+  @WorkspaceId() workspaceId: number,
+    @Param('name') groupName: string,
+    @Body() body
+  ) {
+    return this.unitService
+      .patchUnitGroup(workspaceId, Buffer.from(groupName, 'hex').toString(), body.units);
   }
 
   @Patch('return-submitted')
