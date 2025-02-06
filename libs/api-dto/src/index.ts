@@ -25,6 +25,8 @@ export { UnitInListDto } from './lib/dtos/unit/unit-in-list-dto';
 export { UnitByDefinitionIdDto } from './lib/dtos/unit/unit-by-definition-id-dto';
 export { VeronaModuleMetadataDto } from './lib/dtos/verona-module/verona-module-metadata-dto';
 export { VeronaModuleInListDto } from './lib/dtos/verona-module/verona-module-in-list-dto';
+export { GroupNameDto } from './lib/dtos/workspace/group-name-dto';
+export { RenameGroupNameDto } from './lib/dtos/workspace/rename-group-name-dto';
 export {
   AuthDataDto, WorkspaceDto, WorkspaceGroupDto, ReviewDto
 } from './lib/dtos/auth-data-dto';

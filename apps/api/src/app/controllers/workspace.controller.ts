@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Header,
   Param,
@@ -14,14 +13,14 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
   CodingReportDto,
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
-  UsersInWorkspaceDto, UserWorkspaceFullDto
+  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WorkspaceService } from '../services/workspace.service';
@@ -103,47 +102,37 @@ export class WorkspaceController {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
   }
 
-  @Post('groups')
+  @Patch('new-group')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Group data changed' })
   @ApiTags('workspace')
-  // todo: declare body parameter {body: 'xxx'} or parse body as string
   async addUnitGroup(@WorkspaceId() workspaceId: number,
-    @Body() newGroup) {
-    return this.workspaceService.createGroup(workspaceId, newGroup.body);
+    @Body() body: GroupNameDto) {
+    return this.workspaceService.createGroup(workspaceId, body.groupName);
   }
 
-  @Patch('groups/:name')
+  @Patch('rename-group')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Group data changed' })
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiParam({
-    name: 'name',
-    type: 'String',
-    description: 'hexadecimal representation of the group name'
-  })
   @ApiTags('workspace')
-  // todo: declare body parameter {body: 'xxx'} or parse body as string
   async renameUnitGroup(@WorkspaceId() workspaceId: number,
-    @Param('name') oldGroupName: string,
-    @Body() newGroupName) {
+    @Body() body: RenameGroupNameDto) {
     return this.workspaceService
-      .patchGroupName(workspaceId, Buffer.from(oldGroupName, 'hex').toString(), newGroupName.body);
+      .patchGroupName(workspaceId, body.groupName, body.newGroupName);
   }
 
-  @Delete('groups/:name')
+  @Patch('remove-group')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Group data changed' })
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiParam({
-    name: 'name',
-    type: 'String',
-    description: 'hexadecimal representation of the group name'
-  })
   @ApiTags('workspace')
-  async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Param('name') groupName: string) {
-    return this.workspaceService.removeGroup(workspaceId, Buffer.from(groupName, 'hex').toString());
+  async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Body() body: GroupNameDto) {
+    return this.workspaceService.removeGroup(workspaceId, body.groupName);
   }
 
   @Get('coding-report')
