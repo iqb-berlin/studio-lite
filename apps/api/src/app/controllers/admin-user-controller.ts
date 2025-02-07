@@ -21,7 +21,7 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 
 @Controller('admin/users')
-export class UserController {
+export class AdminUserController {
   constructor(
     private usersService: UsersService,
     private workspaceService: WorkspaceService,

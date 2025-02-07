@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { UserController } from './user.controller';
+import { AdminUserController } from './admin-user-controller';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 
-describe('UserController', () => {
-  let controller: UserController;
+describe('AdminUserController', () => {
+  let controller: AdminUserController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UserController],
+      controllers: [AdminUserController],
       providers: [
         {
           provide: AuthService,
@@ -32,7 +32,7 @@ describe('UserController', () => {
       ]
     }).compile();
 
-    controller = module.get<UserController>(UserController);
+    controller = module.get<AdminUserController>(AdminUserController);
   });
 
   it('should be defined', () => {
