@@ -1498,7 +1498,7 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
   cy.fixture(filename).then(file => {
     cy.request({
       method: 'POST',
-      url: `/api/workspaces/${wsId}/upload`,
+      url: `/api/workspaces/${wsId}`,
       headers: {
         'app-version': Cypress.env('version'),
         'content-type': 'binary',

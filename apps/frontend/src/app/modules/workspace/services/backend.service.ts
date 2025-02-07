@@ -230,7 +230,7 @@ export class BackendService {
       for (let i = 0; i < files.length; i++) {
         formData.append('files', files[i]);
       }
-      return this.http.post<RequestReportDto>(`${this.serverUrl}workspaces/${workspaceId}/upload`, formData, {
+      return this.http.post<RequestReportDto>(`${this.serverUrl}workspaces/${workspaceId}`, formData, {
         reportProgress: true,
         observe: 'events'
       }).pipe(

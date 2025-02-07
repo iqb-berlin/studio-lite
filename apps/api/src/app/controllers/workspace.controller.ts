@@ -147,7 +147,7 @@ export class WorkspaceController {
     return this.workspaceService.getCodingReport(workspaceId);
   }
 
-  @Post('upload')
+  @Post()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -159,7 +159,7 @@ export class WorkspaceController {
   async addUnitFiles(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @UploadedFiles() files): Promise<RequestReportDto> {
-    return this.workspaceService.uploadUnits(workspaceId, files, user);
+    return this.workspaceService.uploadFiles(workspaceId, files, user);
   }
 
   @Get('download')
