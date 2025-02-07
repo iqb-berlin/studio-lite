@@ -32,7 +32,7 @@ export class AdminResourcePackageController {
 
   @Get()
   @ApiOkResponse({ description: 'Resource Packages retrieved successfully.' }) // TODO Exception
-  @ApiTags('admin resource-packages')
+  @ApiTags('admin resource-package')
   async findResourcePackages(): Promise<ResourcePackageDto[]> {
     return this.resourcePackageService.findResourcePackages();
   }
@@ -42,7 +42,7 @@ export class AdminResourcePackageController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Resource Package deleted successfully.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
-  @ApiTags('admin resource-packages')
+  @ApiTags('admin resource-package')
   async removeResourcePackage(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.resourcePackageService.removeResourcePackage(id);
   }
@@ -50,7 +50,7 @@ export class AdminResourcePackageController {
   @Delete()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiTags('admin resource-packages')
+  @ApiTags('admin resource-package')
   @ApiQuery({
     name: 'id',
     type: Number,
@@ -70,7 +70,7 @@ export class AdminResourcePackageController {
   @Header('Content-Type', 'application/zip')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiTags('admin resource-packages')
+  @ApiTags('admin resource-package')
   async getZippedResourcePackage(@Param('name') name: string): Promise<StreamableFile> {
     const file = this.resourcePackageService.getZippedResourcePackage(name);
     return new StreamableFile(file);
@@ -86,7 +86,7 @@ export class AdminResourcePackageController {
     description: 'Sends back the id of the new resource package in database',
     type: Number
   })
-  @ApiTags('admin resource-packages')
+  @ApiTags('admin resource-package')
   async create(@UploadedFile(ParseFile) zippedResourcePackage: Express.Multer.File): Promise<number> {
     return this.resourcePackageService.create(zippedResourcePackage);
   }
