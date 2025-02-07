@@ -128,8 +128,9 @@ export class BackendService {
     workspaceId: number, settings: UnitDownloadSettingsDto
   ): Observable<Blob | number | null> {
     let queryParams = new HttpParams();
+    queryParams = queryParams.append('download', true);
     queryParams = queryParams.append('settings', JSON.stringify(settings));
-    return this.http.get(`${this.serverUrl}workspaces/${workspaceId}/download`, {
+    return this.http.get(`${this.serverUrl}workspaces/${workspaceId}`, {
       headers: {
         Accept: 'application/zip'
       },
@@ -230,7 +231,7 @@ export class BackendService {
       for (let i = 0; i < files.length; i++) {
         formData.append('files', files[i]);
       }
-      return this.http.post<RequestReportDto>(`${this.serverUrl}workspaces/${workspaceId}/upload`, formData, {
+      return this.http.post<RequestReportDto>(`${this.serverUrl}workspaces/${workspaceId}`, formData, {
         reportProgress: true,
         observe: 'events'
       }).pipe(

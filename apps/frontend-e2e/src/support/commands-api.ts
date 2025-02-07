@@ -1154,6 +1154,7 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
 });
 
 // 82
+// TODO: Endpoint changed
 Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1498,7 +1499,7 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
   cy.fixture(filename).then(file => {
     cy.request({
       method: 'POST',
-      url: `/api/workspaces/${wsId}/upload`,
+      url: `/api/workspaces/${wsId}`,
       headers: {
         'app-version': Cypress.env('version'),
         'content-type': 'binary',

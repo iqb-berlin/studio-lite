@@ -426,7 +426,7 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadUnits(id: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
+  async uploadFiles(id: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
@@ -436,7 +436,7 @@ export class WorkspaceService {
     const { unitData, notXmlFiles, usedFiles } = WorkspaceService.readImportData(files, functionReturn);
 
     await Promise.all(unitData.map(async u => {
-      await this.uploadUnit(usedFiles, u, id, user, functionReturn, notXmlFiles);
+      await this.uploadFile(usedFiles, u, id, user, functionReturn, notXmlFiles);
     }));
 
     files.forEach(f => {
@@ -475,7 +475,7 @@ export class WorkspaceService {
     };
   }
 
-  private async uploadUnit(
+  private async uploadFile(
     usedFiles: string[],
     unitImportData: UnitImportData,
     id: number,
