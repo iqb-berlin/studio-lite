@@ -1,4 +1,4 @@
-import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -481,12 +481,5 @@ export class UsersService {
 
   private static getPasswordHash(stringToHash: string): string {
     return bcrypt.hashSync(stringToHash, 11);
-  }
-
-  removeIds(ids: number[]) {
-    if (ids && ids.length) {
-      ids.forEach(id => this.remove(id));
-    }
-    throw new MethodNotAllowedException();
   }
 }

@@ -89,8 +89,10 @@ export class BackendService {
   }
 
   deleteUsers(users: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    users.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/users/${users.join(';')}`)
+      .delete(`${this.serverUrl}admin/users`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)

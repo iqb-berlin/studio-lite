@@ -1,8 +1,8 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, UseGuards
+  Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiMethodNotAllowedResponse, ApiNotFoundResponse, ApiOkResponse,
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse,
   ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
@@ -25,8 +25,8 @@ export class AdminUserController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin user retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin user not found.' })
+  @ApiOkResponse({ description: 'User retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'User not found.' })
   @ApiTags('admin users')
   async findOne(@Param('id') id: number): Promise<UserFullDto> {
     return this.usersService.findOne(id);
@@ -52,33 +52,19 @@ export class AdminUserController {
     return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, workspaceGroups);
   }
 
-  // TODO: Delete mit id (statt ids) nur für ein Element (für mehrere s.u.)
-  @Delete(':ids')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiTags('admin users')
-  @ApiOkResponse({ description: 'Admin users deleted successfully.' })
-  async remove(@Param('ids') ids: string): Promise<void> {
-    const idsAsNumberArray: number[] = [];
-    ids.split(';').forEach(s => idsAsNumberArray.push(parseInt(s, 10)));
-    return this.usersService.remove(idsAsNumberArray);
-  }
-
-  // TODO: Delete mit QueryParam für mehrere Elemente im Frontend implementieren
   @Delete()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin users')
+  @ApiOkResponse({ description: 'Users deleted successfully.' })
   @ApiQuery({
     name: 'id',
     type: Number,
     isArray: true,
-    required: false
+    required: true
   })
-  @ApiOkResponse({ description: 'Admin users deleted successfully.' })
-  @ApiMethodNotAllowedResponse({ description: 'Active admin user must not be deleted.' })
-  async removeIds(ids: number[]): Promise<void> {
-    return this.usersService.removeIds(ids);
+  async remove(@Query('id') ids: number[]): Promise<void> {
+    return this.usersService.remove(ids);
   }
 
   @Post()
