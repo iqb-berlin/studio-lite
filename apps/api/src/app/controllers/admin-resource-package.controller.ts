@@ -25,7 +25,7 @@ import { fileMimetypeFilter } from '../utils/file-mimetype-filter';
 import { ParseFile } from '../pipes/parse-file-pipe';
 
 @Controller('admin/resource-packages')
-export class ResourcePackageController {
+export class AdminResourcePackageController {
   constructor(
     private resourcePackageService: ResourcePackageService
   ) {}

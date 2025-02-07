@@ -11,7 +11,7 @@ import { AdminWorkspaceController } from './controllers/admin-workspace.controll
 import { UserController } from './controllers/user.controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
-import { ResourcePackageController } from './controllers/resource-package.controller';
+import { AdminResourcePackageController } from './controllers/admin-resource-package.controller';
 import { AdminVeronaModuleController } from './controllers/admin-verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
 import { MetadataController } from './controllers/metadata.controller';
@@ -164,7 +164,7 @@ import { VeronaModuleController } from './controllers/verona-module.controller';
     UserController,
     AdminWorkspaceGroupController,
     SettingController,
-    ResourcePackageController,
+    AdminResourcePackageController,
     AdminVeronaModuleController,
     VeronaModuleController,
     WorkspaceController,
