@@ -14,7 +14,6 @@ import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
-import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 
 @Controller('group-admin/users')
 export class GroupAdminUserController {
@@ -40,14 +39,13 @@ export class GroupAdminUserController {
     return this.usersService.findAllUsers();
   }
 
-  @Patch(':id')
+  @Patch(':id/workspaces')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
   @ApiNotFoundResponse({ description: 'Group admin user not found.' }) // TODO: Exception implementieren?
   @ApiTags('group-admin users')
   async patchOnesWorkspaces(@Param('id') id: number,
-    @WorkspaceGroupId() workspaceGroupId: number,
     @Body() body: UserWorkspaceAccessForGroupDto) {
     return this.workspaceService.setWorkspacesByUser(id, body.groupId, body.workspaces);
   }
