@@ -30,8 +30,10 @@ export class BackendService {
   }
 
   getUsersFull(): Observable<UserFullDto[]> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('full', true);
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users/full`)
+      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, { params: queryParams })
       .pipe(
         catchError(() => of([]))
       );

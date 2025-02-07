@@ -125,6 +125,7 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
 });
 
 // 7.
+// TODO Endpoint changed
 Cypress.Commands.add('getUsersFullAPI',
   (token: string) => {
     const authorization = `bearer ${token}`;
