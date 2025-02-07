@@ -18,7 +18,7 @@ import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { User } from '../decorators/user.decorator';
 import UserEntity from '../entities/user.entity';
 
-@Controller('admin/workspaces')
+@Controller('group-admin/workspaces')
 @UseFilters(HttpExceptionFilter)
 export class GroupAdminWorkspaceController {
   constructor(
@@ -27,7 +27,7 @@ export class GroupAdminWorkspaceController {
   ) {}
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin Workspace not found.' })

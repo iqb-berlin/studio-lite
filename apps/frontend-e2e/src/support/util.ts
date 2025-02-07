@@ -65,7 +65,7 @@ export function createWs(ws:string, group:string):void {
     .click();
   cy.get('input[placeholder="Bitte Namen eingeben"]')
     .type(ws);
-  cy.buttonToContinue('Anlegen', 201, '/api/admin/workspaces/*', 'POST', 'createWs');
+  cy.buttonToContinue('Anlegen', 201, '/api/group-admin/workspaces/*', 'POST', 'createWs');
 }
 
 export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {

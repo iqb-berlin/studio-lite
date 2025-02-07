@@ -67,7 +67,7 @@ export class BackendService {
 
   addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspaces`, createWorkspaceDto)
+      .post<boolean>(`${this.serverUrl}group-admin/workspaces`, createWorkspaceDto)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -96,7 +96,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     workspaces.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspaces`, { params: queryParams })
+      .delete(`${this.serverUrl}group-admin/workspaces`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -105,7 +105,7 @@ export class BackendService {
 
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspaces/move`, { targetId: workspaceGroupId, ids: workspaces })
+      .patch(`${this.serverUrl}group-admin/workspaces/move`, { targetId: workspaceGroupId, ids: workspaces })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -115,7 +115,7 @@ export class BackendService {
   // *******************************************************************
   getUsersByWorkspace(workspaceId: number): Observable<WorkspaceUserInListDto[]> {
     return this.http
-      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
+      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`)
       .pipe(
         catchError(() => of([]))
       );
@@ -123,7 +123,7 @@ export class BackendService {
 
   setUsersByWorkspace(workspaceId: number, accessTo: UserWorkspaceAccessDto[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspaces/${workspaceId}/users`, accessTo)
+      .patch(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

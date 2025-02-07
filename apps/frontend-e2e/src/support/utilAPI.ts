@@ -171,7 +171,7 @@ export function getWsAPI(wsKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/workspaces/${wsKey}`,
+    url: `/api/group-admin/workspaces/${wsKey}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -187,7 +187,7 @@ export function getUsersOfWsAPI(wsKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/workspaces/${wsKey}/users`,
+    url: `/api/group-admin/workspaces/${wsKey}/users`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -202,7 +202,7 @@ export function updateUsersOfWsAPI(wsKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/admin/workspaces/${wsKey}/users`,
+    url: `/api/group-admin/workspaces/${wsKey}/users`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -222,7 +222,7 @@ export function grantAccessWsAPI(wsKey: string, userId:string, accessLevel:numbe
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/admin/workspaces/${wsKey}/users`,
+    url: `/api/group-admin/workspaces/${wsKey}/users`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -243,7 +243,7 @@ export function updateWsAPI(wsKey: string, groupKey: string, wsName:string, grou
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/admin/workspaces',
+    url: '/api/group-admin/workspaces',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -275,12 +275,12 @@ export function updateWsAPI(wsKey: string, groupKey: string, wsName:string, grou
 }
 
 // 15.
-// TODO changed /api/admin/workspaces
+// TODO changed /api/group-admin/workspaces
 export function deleteWsAPI(wsKey: string, groupKey: string) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/workspaces/${wsKey}/${groupKey}`, // /api/admin/workspaces
+    url: `/api/group-group-admin/workspaces/${wsKey}/${groupKey}`, // /api/group-admin/workspaces
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -329,7 +329,7 @@ export function createWsAPI(groupKey: string, ws1:WsData) {
   const authorization = `bearer ${Cypress.env('token_admin')}`;
   cy.request({
     method: 'POST',
-    url: `/api/admin/workspaces/${groupKey}`,
+    url: `/api/group-admin/workspaces/${groupKey}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
