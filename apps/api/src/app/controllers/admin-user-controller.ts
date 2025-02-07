@@ -3,22 +3,18 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiMethodNotAllowedResponse, ApiNotFoundResponse, ApiOkResponse,
-  ApiParam, ApiQuery, ApiTags
+  ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUserDto,
   UserFullDto, UsersWorkspaceInListDto,
-  UserWorkspaceAccessDto,
-  WorkspaceGroupInListDto,
-  WorkspaceUserInListDto
+  WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
-import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
-import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 
 @Controller('admin/users')
 export class AdminUserController {
@@ -27,26 +23,6 @@ export class AdminUserController {
     private workspaceService: WorkspaceService,
     private workspaceGroupService: WorkspaceGroupService
   ) {}
-
-  @Get()
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin users retrieved successfully.' })
-  @ApiTags('admin users')
-  async findAll(): Promise<WorkspaceUserInListDto[]> {
-    return this.usersService.findAllUsers();
-  }
-
-  @Get('full')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [UserFullDto]
-  })
-  @ApiTags('admin users')
-  async findAllFull(): Promise<UserFullDto[]> {
-    return this.usersService.findAllFull();
-  }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
@@ -77,19 +53,6 @@ export class AdminUserController {
   @ApiTags('admin users')
   async findOnesWorkspaceGroups(@Param('id') id: number): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll(id);
-  }
-
-  @Patch(':id/workspaces/:workspace_group_id')
-  @ApiParam({ name: 'workspace_group_id', type: Number })
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin user workspaces updated successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin user not found.' }) // TODO: Exception implementieren?
-  @ApiTags('admin users')
-  async patchOnesWorkspaces(@Param('id') id: number,
-    @WorkspaceGroupId() workspaceGroupId: number,
-    @Body() workspaces: UserWorkspaceAccessDto[]) {
-    return this.workspaceService.setWorkspacesByUser(id, workspaceGroupId, workspaces);
   }
 
   @Patch(':id/workspace-groups')

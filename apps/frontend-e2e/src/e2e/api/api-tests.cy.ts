@@ -234,7 +234,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('7. GET /api/admin/users/full', () => {
+    describe('7. GET /api/admin/group-users/full', () => {
       it('200 positive test: admin user can retrieve all users data', () => {
         cy.getUsersFullAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -275,7 +275,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('9. GET /api/admin/users', () => {
+    describe('9. GET /api/group-admin/users', () => {
       it('200 positive test: ', () => {
         cy.getUserNoIdAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {

@@ -54,7 +54,7 @@ export class BackendService {
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
+      .get<UserInListDto[]>(`${this.serverUrl}group-admin/users`)
       .pipe(
         catchError(() => of([]))
       );
@@ -62,7 +62,7 @@ export class BackendService {
 
   getUsersFull(): Observable<UserFullDto[]> {
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}admin/users/full`)
+      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users/full`)
       .pipe(
         catchError(() => of([]))
       );
