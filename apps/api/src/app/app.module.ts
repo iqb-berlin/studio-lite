@@ -7,7 +7,7 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
-import { AdminWorkspaceController } from './controllers/admin-workspace.controller';
+import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
 import { UserController } from './controllers/user.controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
@@ -161,7 +161,7 @@ import { ResourcePackageController } from './controllers/resource-package.contro
   ],
   controllers: [
     AppController,
-    AdminWorkspaceController,
+    GroupAdminWorkspaceController,
     UserController,
     AdminWorkspaceGroupController,
     SettingController,

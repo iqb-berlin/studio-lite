@@ -20,7 +20,7 @@ import UserEntity from '../entities/user.entity';
 
 @Controller('admin/workspaces')
 @UseFilters(HttpExceptionFilter)
-export class AdminWorkspaceController {
+export class GroupAdminWorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private userService: UsersService
