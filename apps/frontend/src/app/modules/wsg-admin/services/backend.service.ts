@@ -52,7 +52,7 @@ export class BackendService {
     accessTo: UserWorkspaceAccessDto[],
     workspaceGroupId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
+      .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

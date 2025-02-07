@@ -42,7 +42,8 @@ export class VeronaModuleController {
   @ApiTags('verona-module')
   @ApiQuery({
     name: 'download',
-    type: Boolean
+    type: Boolean,
+    required: false
   })
   async findFileById(
     @Param('key') key: string,
