@@ -211,9 +211,11 @@ export class BackendService {
       );
   }
 
-  deleteResourcePackages(params: HttpParams): Observable<boolean> {
+  deleteResourcePackages(ids: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/resource-packages`, { params: params })
+      .delete(`${this.serverUrl}admin/resource-packages`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
