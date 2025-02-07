@@ -1154,6 +1154,7 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
 });
 
 // 82
+// TODO: Endpoint changed
 Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({

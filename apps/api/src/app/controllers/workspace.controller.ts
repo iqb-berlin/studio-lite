@@ -2,18 +2,17 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   Param,
   Patch,
   Post,
-  Query,
+  Query, Res,
   StreamableFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CodingReportDto,
@@ -23,6 +22,7 @@ import {
   UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
@@ -38,7 +38,6 @@ import UserEntity from '../entities/user.entity';
 import { User } from '../decorators/user.decorator';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
-import { CommentAccessGuard } from '../guards/comment-access.guard';
 
 @Controller('workspaces/:workspace_id')
 export class WorkspaceController {
@@ -58,8 +57,39 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: WorkspaceFullDto
   })
+  @ApiQuery({
+    name: 'download',
+    type: Boolean,
+    required: false
+  })
+  @ApiQuery({
+    name: 'settings',
+    type: String,
+    required: false
+  })
   @ApiTags('workspace')
-  async find(@WorkspaceId() workspaceId: number): Promise<WorkspaceFullDto> {
+  async find(
+    @WorkspaceId() workspaceId: number,
+      @Query('download') download: boolean,
+      @Query('settings') settings: string,
+      @Res({ passthrough: true }) res: Response
+  ): Promise<WorkspaceFullDto | StreamableFile> {
+    if (download) {
+      const unitDownloadSettings = JSON.parse(settings);
+      const file = await UnitDownloadClass.get(
+        workspaceId,
+        this.unitService,
+        this.unitCommentService,
+        this.veronaModuleService,
+        this.settingService,
+        unitDownloadSettings
+      );
+      res.set({
+        'Content-Type': 'text/html',
+        'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
+      });
+      return new StreamableFile(file);
+    }
     return this.workspaceService.findOne(workspaceId);
   }
 
@@ -160,28 +190,6 @@ export class WorkspaceController {
     @User() user: UserEntity,
     @UploadedFiles() files): Promise<RequestReportDto> {
     return this.workspaceService.uploadFiles(workspaceId, files, user);
-  }
-
-  @Get('download')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard) // because comments are exported
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @Header('Content-Disposition', 'attachment; filename="studio-export-units.zip"')
-  @Header('Cache-Control', 'none')
-  @Header('Content-Type', 'application/zip')
-  @ApiTags('workspace')
-  async downloadUnitsZip(@WorkspaceId() workspaceId: number,
-    @Query('settings') settings: string): Promise<StreamableFile> {
-    const unitDownloadSettings = JSON.parse(settings);
-    const file = await UnitDownloadClass.get(
-      workspaceId,
-      this.unitService,
-      this.unitCommentService,
-      this.veronaModuleService,
-      this.settingService,
-      unitDownloadSettings
-    );
-    return new StreamableFile(file);
   }
 
   @Patch('settings')
