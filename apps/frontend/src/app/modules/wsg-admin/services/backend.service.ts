@@ -9,8 +9,9 @@ import {
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   WorkspaceGroupFullDto,
-  WorkspaceUserInListDto
-, UserWorkspaceAccessForGroupDto } from '@studio-lite-lib/api-dto';
+  WorkspaceUserInListDto,
+  UserWorkspaceAccessForGroupDto
+} from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +42,7 @@ export class BackendService {
 
   getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}group-admin/users/${userId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );

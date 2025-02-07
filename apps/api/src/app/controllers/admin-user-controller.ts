@@ -7,12 +7,11 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateUserDto,
-  UserFullDto, UsersWorkspaceInListDto,
+  UserFullDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { WorkspaceService } from '../services/workspace.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 
@@ -20,7 +19,6 @@ import { WorkspaceGroupService } from '../services/workspace-group.service';
 export class AdminUserController {
   constructor(
     private usersService: UsersService,
-    private workspaceService: WorkspaceService,
     private workspaceGroupService: WorkspaceGroupService
   ) {}
 
@@ -32,16 +30,6 @@ export class AdminUserController {
   @ApiTags('admin users')
   async findOne(@Param('id') id: number): Promise<UserFullDto> {
     return this.usersService.findOne(id);
-  }
-
-  @Get(':id/workspaces')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin user workspaces retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin user not found.' }) // TODO: Exception implementieren?
-  @ApiTags('admin users')
-  async findOnesWorkspaces(@Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
-    return this.workspaceService.findAll(id);
   }
 
   @Get(':id/workspace-groups')

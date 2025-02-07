@@ -6,7 +6,7 @@ import {
   ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  UserFullDto,
+  UserFullDto, UsersWorkspaceInListDto,
   UserWorkspaceAccessForGroupDto,
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
@@ -50,5 +50,15 @@ export class GroupAdminUserController {
     @WorkspaceGroupId() workspaceGroupId: number,
     @Body() body: UserWorkspaceAccessForGroupDto) {
     return this.workspaceService.setWorkspacesByUser(id, body.groupId, body.workspaces);
+  }
+
+  @Get(':id/workspaces')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Group admin user workspaces retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'User not found.' }) // TODO: Exception implementieren?
+  @ApiTags('group-admin users')
+  async findOnesWorkspaces(@Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
+    return this.workspaceService.findAll(id);
   }
 }
