@@ -10,7 +10,7 @@ import {
   UserWorkspaceAccessDto,
   WorkspaceGroupFullDto,
   WorkspaceUserInListDto
-} from '@studio-lite-lib/api-dto';
+, UserWorkspaceAccessForGroupDto } from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -49,10 +49,9 @@ export class BackendService {
 
   setWorkspacesByUser(
     userId: number,
-    accessTo: UserWorkspaceAccessDto[],
-    workspaceGroupId: number): Observable<boolean> {
+    accessTo: UserWorkspaceAccessForGroupDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
+      .patch(`${this.serverUrl}group-admin/users/${userId}`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

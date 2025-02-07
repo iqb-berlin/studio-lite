@@ -3,11 +3,11 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse,
-  ApiParam, ApiQuery, ApiTags
+  ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   UserFullDto,
-  UserWorkspaceAccessDto,
+  UserWorkspaceAccessForGroupDto,
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
@@ -40,8 +40,7 @@ export class GroupAdminUserController {
     return this.usersService.findAllUsers();
   }
 
-  @Patch(':id/workspaces/:workspace_group_id')
-  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @Patch(':id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
@@ -49,7 +48,7 @@ export class GroupAdminUserController {
   @ApiTags('group-admin users')
   async patchOnesWorkspaces(@Param('id') id: number,
     @WorkspaceGroupId() workspaceGroupId: number,
-    @Body() workspaces: UserWorkspaceAccessDto[]) {
-    return this.workspaceService.setWorkspacesByUser(id, workspaceGroupId, workspaces);
+    @Body() body: UserWorkspaceAccessForGroupDto) {
+    return this.workspaceService.setWorkspacesByUser(id, body.groupId, body.workspaces);
   }
 }
