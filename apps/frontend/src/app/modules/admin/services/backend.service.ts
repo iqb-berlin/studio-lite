@@ -138,8 +138,10 @@ export class BackendService {
   }
 
   deleteVeronaModules(files: string[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    files.forEach(file => { queryParams = queryParams.append('key', file); });
     return this.http
-      .delete(`${this.serverUrl}admin/verona-modules/${files.join(';')}`)
+      .delete(`${this.serverUrl}admin/verona-modules`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -262,12 +264,15 @@ export class BackendService {
   }
 
   downloadModule(moduleKey: string): Observable<Blob> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('download', true);
     return this.http.get(
-      `${this.serverUrl}admin/verona-modules/download/${moduleKey}`,
+      `${this.serverUrl}verona-modules/${moduleKey}`,
       {
         headers: {
           Accept: 'text/html'
         },
+        params: queryParams,
         responseType: 'blob'
       }
     );

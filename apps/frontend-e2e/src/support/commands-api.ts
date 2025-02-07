@@ -503,18 +503,19 @@ Cypress.Commands.add('getModuleAPI', (module:string, token:string) => {
 });
 
 // 28
-Cypress.Commands.add('downloadModuleAPI', (module:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/admin/verona-modules/download/${module}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
+// TODO: Moved and changed
+// Cypress.Commands.add('downloadModuleAPI', (module:string, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'GET',
+//     url: `/api/admin/verona-modules/${module}`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     failOnStatusCode: false
+//   });
+// });
 
 // 30
 Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string) => {

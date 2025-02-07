@@ -1,63 +1,54 @@
 import {
-  Controller, Delete, Get, Param, Post, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors
+  Controller,
+  Get,
+  Param,
+  Query, Res, StreamableFile,
+  UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
-import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { VeronaModuleFileDto, VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { IsAdminGuard } from '../guards/is-admin.guard';
 
-@Controller('admin/verona-modules')
+@Controller('verona-modules')
 export class VeronaModuleController {
   constructor(
     private veronaModulesService: VeronaModulesService
   ) {}
 
-  @Get('download/:key')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'type',
+    type: String,
+    description: 'specify the type of module if needed: schemer, editor, player',
+    required: false
+  })
+  @ApiOkResponse({ description: 'Verona modules retrieved successfully.' })
+  @ApiTags('verona-module')
+  async findAllByType(@Query('type') type: string): Promise<VeronaModuleInListDto[]> {
+    return this.veronaModulesService.findAll(type);
+  }
+
+  @Get(':key')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Verona module not found.' })
-  @ApiTags('verona-modules')
-  async downloadModuleById(
-    @Param('key') key: string,
-      @Res({ passthrough: true }) res: Response
-  ): Promise<StreamableFile> {
-    const fileData = await this.veronaModulesService.findFileById(key);
-    res.set({
-      'Content-Type': 'text/html',
-      'Content-Disposition': `attachment; filename="${fileData.fileName}"`
-    });
-    return new StreamableFile(Buffer.from(fileData.file, 'utf8'));
-  }
-
-  @Post()
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiCreatedResponse({
-    description: 'Verona module created successfully.',
-    type: [VeronaModuleInListDto] // TODO: In anderen Fällen gibt die Api immer nur die ID bei Create zurück
+  @ApiTags('verona-module')
+  @ApiQuery({
+    name: 'download',
+    type: Boolean
   })
-  @ApiNotAcceptableResponse({ description: 'Verona module not accepted.' })
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiTags('admin verona-modules')
-  async addModuleFile(@UploadedFile() file) {
-    return this.veronaModulesService.upload(file.buffer);
-  }
-
-  // TODO: keys als query params umsetzen und eigenen endpunkt vermeiden
-  @Delete(':keys')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Verona modules deleted successfully.' }) // TODO: Exception hinzufügen
-  @ApiTags('admin verona-modules')
-  async remove(@Param('keys') keys: string): Promise<void> {
-    const keysAsStringArray: string[] = [];
-    keys.split(';').forEach(s => keysAsStringArray.push(s));
-    return this.veronaModulesService.remove(keysAsStringArray);
+  async findFileById(
+    @Param('key') key: string,
+      @Res({ passthrough: true }) res: Response,
+      @Query('download') download: boolean
+  ): Promise<StreamableFile | VeronaModuleFileDto> {
+    return this.veronaModulesService.getVeronaModule(key, res, download);
   }
 }

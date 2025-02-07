@@ -26,7 +26,7 @@ export class BackendService {
 
   getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
     return this.http
-      .get<VeronaModuleFileDto>(`${this.serverUrl}verona-module/${moduleId}`)
+      .get<VeronaModuleFileDto>(`${this.serverUrl}verona-modules/${moduleId}`)
       .pipe(
         catchError(() => of(null))
       );

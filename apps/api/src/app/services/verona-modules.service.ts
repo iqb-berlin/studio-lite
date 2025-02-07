@@ -1,9 +1,12 @@
-import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
+import {
+  Injectable, Logger, NotAcceptableException, StreamableFile
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import type { Response } from 'express';
 import VeronaModule from '../entities/verona-module.entity';
 import { AdminVeronaModulesNotFoundException } from '../exceptions/admin-verona-modules-not-found.exception';
 
@@ -15,6 +18,22 @@ export class VeronaModulesService {
     @InjectRepository(VeronaModule)
     private veronaModulesRepository: Repository<VeronaModule>
   ) {}
+
+  async getVeronaModule(key: string, res: Response, download: boolean): Promise<StreamableFile | VeronaModuleFileDto> {
+    if (download) {
+      return this.downloadModuleById(key, res);
+    }
+    return this.findFileById(key);
+  }
+
+  private async downloadModuleById(key: string, res: Response): Promise<StreamableFile> {
+    const fileData = await this.findFileById(key);
+    res.set({
+      'Content-Type': 'text/html',
+      'Content-Disposition': `attachment; filename="${fileData.fileName}"`
+    });
+    return new StreamableFile(Buffer.from(fileData.file, 'utf8'));
+  }
 
   async findFileById(key: string): Promise<VeronaModuleFileDto> {
     this.logger.log(`Returning verona module with key: ${key}`);
@@ -71,7 +90,7 @@ export class VeronaModulesService {
           existingModule.fileSize = fileAsString.length;
           await this.veronaModulesRepository.save(existingModule);
         } else {
-          const newFile = await this.veronaModulesRepository.create({
+          const newFile = this.veronaModulesRepository.create({
             key: moduleKey,
             metadata: veronaModuleMetadata,
             file: fileData,

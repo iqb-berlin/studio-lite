@@ -1,14 +1,12 @@
 import {
-  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException, Query, Param
+  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException
 } from '@nestjs/common';
 
 import {
-  ApiBearerAuth, ApiHeader, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags
 } from '@nestjs/swagger';
 import {
-  AuthDataDto,
-  VeronaModuleFileDto,
-  VeronaModuleInListDto
+  AuthDataDto
   // eslint-disable-next-line import/no-duplicates, import/order
 } from '@studio-lite-lib/api-dto';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
@@ -21,7 +19,6 @@ import { UserId } from '../decorators/user-id.decorator';
 import { UserName } from '../decorators/user-name.decorator';
 import { ReviewService } from '../services/review.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
-import { VeronaModulesService } from '../services/verona-modules.service';
 // eslint-disable-next-line import/no-duplicates, import/order
 import { CreateUserDto } from '@studio-lite-lib/api-dto';
 // eslint-disable-next-line import/no-duplicates, import/order
@@ -35,8 +32,7 @@ export class AppController {
     private authService: AuthService,
     private userService: UsersService,
     private workspaceService: WorkspaceService,
-    private reviewService: ReviewService,
-    private veronaModulesService: VeronaModulesService
+    private reviewService: ReviewService
   ) {
   }
 
@@ -155,30 +151,5 @@ export class AppController {
     if (req.user.id !== myNewData.id) throw new UnauthorizedException();
     await this.userService.patchMyData(myNewData);
     return true;
-  }
-
-  @Get('verona-modules')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiQuery({
-    name: 'type',
-    type: String,
-    description: 'specify the type of module if needed: schemer, editor, player',
-    required: false
-  })
-  @ApiOkResponse({ description: 'Verona modules retrieved successfully.' })
-  @ApiTags('verona-modules')
-  async findAllByType(@Query('type') type: string): Promise<VeronaModuleInListDto[]> {
-    return this.veronaModulesService.findAll(type);
-  }
-
-  @Get('verona-module/:key')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Verona module not found.' })
-  @ApiTags('verona-modules')
-  async findFileById(@Param('key') key: string): Promise<VeronaModuleFileDto> {
-    return this.veronaModulesService.findFileById(key);
   }
 }

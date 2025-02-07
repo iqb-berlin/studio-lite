@@ -8,10 +8,9 @@ import {
   ConfigDto,
   AppLogoDto,
   MyDataDto,
-  VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto, UserWorkspaceFullDto
+  ResourcePackageDto, CreateUserDto, UserWorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -121,16 +120,6 @@ export class BackendService {
       );
   }
 
-  getResourcePackage(name: string): Observable<Blob> {
-    return this.http
-      .get(`${this.serverUrl}admin/resource-packages/${name}`, {
-        headers: {
-          Accept: 'application/zip'
-        },
-        responseType: 'blob'
-      });
-  }
-
   setUserPassword(oldPassword: string, newPassword: string): Observable<boolean> {
     return this.http
       .patch<boolean>(
@@ -139,22 +128,6 @@ export class BackendService {
     )
       .pipe(
         catchError(() => of(false))
-      );
-  }
-
-  getModuleList(type?: string): Observable<VeronaModuleInListDto[]> {
-    return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}verona-modules${type ? `?type=${type}` : ''}`)
-      .pipe(
-        catchError(() => of(<VeronaModuleInListDto[]>[]))
-      );
-  }
-
-  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
-    return this.http
-      .get<VeronaModuleFileDto>(`${this.serverUrl}verona-module/${moduleId}`)
-      .pipe(
-        catchError(() => of(null))
       );
   }
 
