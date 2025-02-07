@@ -26,7 +26,7 @@ export class GroupAdminUserController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin users retrieved successfully.' })
-  @ApiTags('group-admin users')
+  @ApiTags('group-admin user')
   @ApiQuery({
     name: 'full',
     type: Boolean,
@@ -44,7 +44,7 @@ export class GroupAdminUserController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
   @ApiNotFoundResponse({ description: 'Group admin user not found.' }) // TODO: Exception implementieren?
-  @ApiTags('group-admin users')
+  @ApiTags('group-admin user')
   async patchOnesWorkspaces(@Param('id') id: number,
     @Body() body: UserWorkspaceAccessForGroupDto) {
     return this.workspaceService.setWorkspacesByUser(id, body.groupId, body.workspaces);
@@ -55,7 +55,7 @@ export class GroupAdminUserController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'User not found.' }) // TODO: Exception implementieren?
-  @ApiTags('group-admin users')
+  @ApiTags('group-admin user')
   async findOnesWorkspaces(@Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
     return this.workspaceService.findAll(id);
   }
