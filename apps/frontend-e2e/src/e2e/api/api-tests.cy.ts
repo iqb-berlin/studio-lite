@@ -505,7 +505,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('18. POST /api/admin/workspaces/{groupId}', () => {
+    describe('18. POST /api/group-admin/workspaces/{groupId}', () => {
       it('201 positive test: an admin should create an ws', () => {
         cy.createWsAPI(Cypress.env(group1.id), ws1, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -544,7 +544,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('19. PATCH /api/admin/workspaces/{ids}/{workspace_group_id}', () => {
+    describe('19. PATCH /api/group-admin/workspaces/{ids}/{workspace_group_id}', () => {
       it('200 positive test: should move ws1 from group1 to group2', () => {
         cy.setAdminsOfGroupAPI([Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`id_${user2.username}`)],
           Cypress.env(group2.id),
@@ -580,7 +580,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('20. GET /api/admin/workspaces/{id}', () => {
+    describe('20. GET /api/group-admin/workspaces/{id}', () => {
       it('200 positive test: should retrieve the a ws by id', () => {
         cy.createUserAPI(user3, Cypress.env(`token_${Cypress.env('username')}`))
           .then(res => {
@@ -637,7 +637,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('21. PATCH /api/admin/workspaces/{id}/users', () => {
+    describe('21. PATCH /api/group-admin/workspaces/{id}/users', () => {
       it('401 negative test: should not update with incorrect token', () => {
         cy.updateUsersOfWsAPI(Cypress.env(ws1.id),
           AccessLevel.Developer,
@@ -690,7 +690,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('22. GET /api/admin/workspaces/{id}/users', () => {
+    describe('22. GET /api/group-admin/workspaces/{id}/users', () => {
       it('200 positive test: should get the users of a workspace', () => {
         cy.getUsersOfWsAdminAPI(Cypress.env(ws1.id),
           Cypress.env(`id_${Cypress.env('username')}`),
@@ -787,7 +787,7 @@ describe('Studio API tests', () => {
     //   });
     // });
 
-    describe('24. PATCH /api/admin/workspaces/}', () => {
+    describe('24. PATCH /api/group-admin/workspaces/}', () => {
       it('200 positive test: should update the ws data', () => {
         const wsN: WsData = {
           id: 'id_ws1',
@@ -1088,7 +1088,7 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('1. Check difference between /api/admin/workspaces/{id} and /api/workspaces/{workspace_id}', () => {
+      it('1. Check difference between /api/group-admin/workspaces/{id} and /api/workspaces/{workspace_id}', () => {
         cy.getWsNormalAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -1097,7 +1097,7 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('2. Check difference between /api/admin/workspaces/{id} and /api/workspaces/{workspace_id}', () => {
+      it('2. Check difference between /api/group-admin/workspaces/{id} and /api/workspaces/{workspace_id}', () => {
         cy.getWsAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -2835,7 +2835,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('88. DELETE /api/admin/workspaces/{ids}/{workspace_group_id}', () => {
+    describe('88. DELETE /api/group-admin/workspaces/{ids}/{workspace_group_id}', () => {
       it('200 positive test: should delete a workspace ', () => {
         cy.deleteWsAPI(Cypress.env(ws1.id), Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
