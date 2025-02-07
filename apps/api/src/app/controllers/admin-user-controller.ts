@@ -27,7 +27,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'User retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'User not found.' })
-  @ApiTags('admin users')
+  @ApiTags('admin user')
   async findOne(@Param('id') id: number): Promise<UserFullDto> {
     return this.usersService.findOne(id);
   }
@@ -38,7 +38,7 @@ export class AdminUserController {
   @ApiCreatedResponse({
     type: [WorkspaceGroupInListDto]
   })
-  @ApiTags('admin users')
+  @ApiTags('admin user')
   async findOnesWorkspaceGroups(@Param('id') id: number): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll(id);
   }
@@ -46,7 +46,7 @@ export class AdminUserController {
   @Patch(':id/workspace-groups')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiTags('admin users')
+  @ApiTags('admin user')
   async patchOnesWorkspaceGroups(@Param('id') id: number,
     @Body() workspaceGroups: number[]) {
     return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, workspaceGroups);
@@ -55,7 +55,7 @@ export class AdminUserController {
   @Delete()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiTags('admin users')
+  @ApiTags('admin user')
   @ApiOkResponse({ description: 'Users deleted successfully.' })
   @ApiQuery({
     name: 'id',
@@ -74,7 +74,7 @@ export class AdminUserController {
     description: 'Sends back the id of the new user in database',
     type: Number
   })
-  @ApiTags('admin users')
+  @ApiTags('admin user')
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -82,7 +82,7 @@ export class AdminUserController {
   @Patch()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiTags('admin users')
+  @ApiTags('admin user')
   async patch(@Body() userFullDto: UserFullDto) {
     return this.usersService.patch(userFullDto);
   }
