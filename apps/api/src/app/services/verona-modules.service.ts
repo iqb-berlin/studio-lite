@@ -19,7 +19,14 @@ export class VeronaModulesService {
     private veronaModulesRepository: Repository<VeronaModule>
   ) {}
 
-  async downloadModuleById(key: string, res: Response): Promise<StreamableFile> {
+  async getVeronaModule(key: string, res: Response, download: boolean): Promise<StreamableFile | VeronaModuleFileDto> {
+    if (download) {
+      return this.downloadModuleById(key, res);
+    }
+    return this.findFileById(key);
+  }
+
+  private async downloadModuleById(key: string, res: Response): Promise<StreamableFile> {
     const fileData = await this.findFileById(key);
     res.set({
       'Content-Type': 'text/html',
@@ -83,7 +90,7 @@ export class VeronaModulesService {
           existingModule.fileSize = fileAsString.length;
           await this.veronaModulesRepository.save(existingModule);
         } else {
-          const newFile = await this.veronaModulesRepository.create({
+          const newFile = this.veronaModulesRepository.create({
             key: moduleKey,
             metadata: veronaModuleMetadata,
             file: fileData,

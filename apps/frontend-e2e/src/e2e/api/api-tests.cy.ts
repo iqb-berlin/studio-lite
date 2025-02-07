@@ -888,32 +888,33 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('28. GET /api/admin/verona-modules/{key}', () => {
-      it('200 positive test: should download with id of the module', () => {
-        cy.downloadModuleAPI(getNameAt(modules[0]),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-            // const parser = new DOMParser();
-            // mString(resp.body, 'text/html');
-            // console.log(dom);
-          });
-      });
-
-      it('401 negative test: should not download if we do not have a token', () => {
-        cy.downloadModuleAPI(getNameAt(modules[0]), noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('404 negative test: should not download without passing the id of the module', () => {
-        cy.downloadModuleAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(404);
-          });
-      });
-    });
+    // TODO: moved and changed
+    // describe('28. GET /api/admin/verona-modules/{key}', () => {
+    //   it('200 positive test: should download with id of the module', () => {
+    //     cy.downloadModuleAPI(getNameAt(modules[0]),
+    //       Cypress.env(`token_${Cypress.env('username')}`))
+    //       .then(resp => {
+    //         expect(resp.status).to.equal(200);
+    //         // const parser = new DOMParser();
+    //         // mString(resp.body, 'text/html');
+    //         // console.log(dom);
+    //       });
+    //   });
+    //
+    //   it('401 negative test: should not download if we do not have a token', () => {
+    //     cy.downloadModuleAPI(getNameAt(modules[0]), noId)
+    //       .then(resp => {
+    //         expect(resp.status).to.equal(401);
+    //       });
+    //   });
+    //
+    //   it('404 negative test: should not download without passing the id of the module', () => {
+    //     cy.downloadModuleAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+    //       .then(resp => {
+    //         expect(resp.status).to.equal(404);
+    //       });
+    //   });
+    // });
   });
 
   describe('Admin/ workspace unit API tests', () => {

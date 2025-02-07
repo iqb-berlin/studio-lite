@@ -1,23 +1,18 @@
 import {
   Controller,
   Delete,
-  Get,
-  Param,
   ParseArrayPipe,
   Post,
   Query,
-  Res,
-  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import type { Response } from 'express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -27,19 +22,6 @@ export class AdminVeronaModuleController {
   constructor(
     private veronaModulesService: VeronaModulesService
   ) {}
-
-  @Get(':key')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Verona module not found.' })
-  @ApiTags('admin verona-module')
-  async downloadModuleById(
-    @Param('key') key: string,
-      @Res({ passthrough: true }) res: Response
-  ): Promise<StreamableFile | void> {
-    return this.veronaModulesService.downloadModuleById(key, res);
-  }
 
   @Post()
   @UseGuards(JwtAuthGuard, IsAdminGuard)

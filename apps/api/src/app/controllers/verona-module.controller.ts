@@ -2,13 +2,14 @@ import {
   Controller,
   Get,
   Param,
-  Query,
+  Query, Res, StreamableFile,
   UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { VeronaModuleFileDto, VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import type { Response } from 'express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
@@ -39,7 +40,15 @@ export class VeronaModuleController {
   @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Verona module not found.' })
   @ApiTags('verona-module')
-  async findFileById(@Param('key') key: string): Promise<VeronaModuleFileDto> {
-    return this.veronaModulesService.findFileById(key);
+  @ApiQuery({
+    name: 'download',
+    type: Boolean
+  })
+  async findFileById(
+    @Param('key') key: string,
+      @Res({ passthrough: true }) res: Response,
+      @Query('download') download: boolean
+  ): Promise<StreamableFile | VeronaModuleFileDto> {
+    return this.veronaModulesService.getVeronaModule(key, res, download);
   }
 }

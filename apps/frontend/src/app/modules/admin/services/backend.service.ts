@@ -264,12 +264,15 @@ export class BackendService {
   }
 
   downloadModule(moduleKey: string): Observable<Blob> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('download', true);
     return this.http.get(
-      `${this.serverUrl}admin/verona-modules/${moduleKey}`,
+      `${this.serverUrl}verona-modules/${moduleKey}`,
       {
         headers: {
           Accept: 'text/html'
         },
+        params: queryParams,
         responseType: 'blob'
       }
     );
