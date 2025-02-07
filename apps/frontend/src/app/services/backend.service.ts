@@ -114,7 +114,7 @@ export class BackendService {
 
   getResourcePackages(): Observable<ResourcePackageDto[]> {
     return this.http
-      .get<ResourcePackageDto[]>(`${this.serverUrl}admin/resource-packages`, {})
+      .get<ResourcePackageDto[]>(`${this.serverUrl}resource-packages`, {})
       .pipe(
         catchError(() => of([]))
       );

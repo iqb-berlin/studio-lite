@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { ResourcePackageController } from './resource-package.controller';
+import { AdminResourcePackageController } from './admin-resource-package.controller';
 import { AuthService } from '../services/auth.service';
 import { ResourcePackageService } from '../services/resource-package.service';
 
 describe('ResourcePackageController', () => {
-  let controller: ResourcePackageController;
+  let controller: AdminResourcePackageController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ResourcePackageController],
+      controllers: [AdminResourcePackageController],
       providers: [
         {
           provide: AuthService,
@@ -22,8 +22,8 @@ describe('ResourcePackageController', () => {
       ]
     }).compile();
 
-    controller = module.get<ResourcePackageController>(
-      ResourcePackageController
+    controller = module.get<AdminResourcePackageController>(
+      AdminResourcePackageController
     );
   });
 

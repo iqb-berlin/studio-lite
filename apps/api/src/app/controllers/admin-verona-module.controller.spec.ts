@@ -4,7 +4,7 @@ import { AdminVeronaModuleController } from './admin-verona-module.controller';
 import { AuthService } from '../services/auth.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 
-describe('VeronaModuleController', () => {
+describe('AdminVeronaModuleController', () => {
   let controller: AdminVeronaModuleController;
 
   beforeEach(async () => {

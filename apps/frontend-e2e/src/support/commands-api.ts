@@ -1441,7 +1441,7 @@ Cypress.Commands.add('getPackageAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/resource-packages',
+    url: '/api/resource-packages',
     headers: {
       'app-version': Cypress.env('version'),
       authorization

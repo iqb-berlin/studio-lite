@@ -49,7 +49,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('109. GET /api/admin/resource-packages', () => {
+  describe('109. GET /api/resource-packages', () => {
     it('200 positive test: should get a resource package the admin', () => {
       cy.getPackageAPI(Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {

@@ -11,7 +11,7 @@ import { AdminWorkspaceController } from './controllers/admin-workspace.controll
 import { UserController } from './controllers/user.controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
-import { ResourcePackageController } from './controllers/resource-package.controller';
+import { AdminResourcePackageController } from './controllers/admin-resource-package.controller';
 import { AdminVeronaModuleController } from './controllers/admin-verona-module.controller';
 import { ReviewController } from './controllers/review.controller';
 import { MetadataController } from './controllers/metadata.controller';
@@ -62,6 +62,7 @@ import { WorkspaceUnitCommentController } from './controllers/workspace-unit-com
 import { ReviewUnitController } from './controllers/review-unit.controller';
 import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
+import { ResourcePackageController } from './controllers/resource-package.controller';
 
 @Module({
   imports: [
@@ -164,6 +165,7 @@ import { VeronaModuleController } from './controllers/verona-module.controller';
     UserController,
     AdminWorkspaceGroupController,
     SettingController,
+    AdminResourcePackageController,
     ResourcePackageController,
     AdminVeronaModuleController,
     VeronaModuleController,
