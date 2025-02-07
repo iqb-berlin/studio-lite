@@ -62,6 +62,7 @@ import { WorkspaceUnitCommentController } from './controllers/workspace-unit-com
 import { ReviewUnitController } from './controllers/review-unit.controller';
 import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
+import { ResourcePackageController } from './controllers/resource-package.controller';
 
 @Module({
   imports: [
@@ -165,6 +166,7 @@ import { VeronaModuleController } from './controllers/verona-module.controller';
     AdminWorkspaceGroupController,
     SettingController,
     AdminResourcePackageController,
+    ResourcePackageController,
     AdminVeronaModuleController,
     VeronaModuleController,
     WorkspaceController,

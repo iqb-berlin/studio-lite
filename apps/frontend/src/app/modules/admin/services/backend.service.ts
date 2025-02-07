@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
@@ -217,18 +217,6 @@ export class BackendService {
       .pipe(
         catchError(() => of(false)),
         map(() => true)
-      );
-  }
-
-  createResourcePackage(zippedResourcePackage: FormData): Observable<HttpEvent<unknown>> {
-    return this.http
-      .post(`${this.serverUrl}admin/resource-packages`, zippedResourcePackage, {
-        reportProgress: true,
-        observe: 'events'
-      })
-      .pipe(
-        catchError(err => of(err)),
-        map(progress => progress)
       );
   }
 

@@ -1,13 +1,11 @@
 import {
   Controller,
   Delete,
-  Get, Header,
   Param,
   ParseArrayPipe,
   ParseIntPipe,
   Post,
   Query,
-  StreamableFile,
   UploadedFile,
   UseGuards
 } from '@nestjs/common';
@@ -16,7 +14,6 @@ import {
 } from '@nestjs/swagger';
 import { Express } from 'express';
 import 'multer';
-import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { ResourcePackageService } from '../services/resource-package.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -29,13 +26,6 @@ export class AdminResourcePackageController {
   constructor(
     private resourcePackageService: ResourcePackageService
   ) {}
-
-  @Get()
-  @ApiOkResponse({ description: 'Resource Packages retrieved successfully.' }) // TODO Exception
-  @ApiTags('admin resource-package')
-  async findResourcePackages(): Promise<ResourcePackageDto[]> {
-    return this.resourcePackageService.findResourcePackages();
-  }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
@@ -62,18 +52,6 @@ export class AdminResourcePackageController {
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) id: number[]
   ) : Promise<void> {
     return this.resourcePackageService.removeResourcePackages(id);
-  }
-
-  @Get(':name')
-  @Header('Content-Disposition', 'filename="resource-package.zip"')
-  @Header('Cache-Control', 'none')
-  @Header('Content-Type', 'application/zip')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiTags('admin resource-package')
-  async getZippedResourcePackage(@Param('name') name: string): Promise<StreamableFile> {
-    const file = this.resourcePackageService.getZippedResourcePackage(name);
-    return new StreamableFile(file);
   }
 
   @Post()
