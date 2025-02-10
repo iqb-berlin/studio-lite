@@ -157,20 +157,21 @@ export class BackendService {
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
+      let queryParams = new HttpParams();
+      queryParams = queryParams.append('format', contentOptions.exportFormat);
+      queryParams = queryParams.append('missingsProfile', contentOptions.missingsProfile);
+      queryParams = queryParams.append('generalInstructions', contentOptions.hasGeneralInstructions);
+      queryParams = queryParams.append('onlyManual', contentOptions.hasOnlyManualCoding);
+      queryParams = queryParams.append('closed', contentOptions.hasClosedVars);
+      queryParams = queryParams.append('derived', contentOptions.hasDerivedVars);
+      queryParams = queryParams.append('showScore', contentOptions.showScore);
+      queryParams = queryParams.append('codeLabelToUpper', contentOptions.codeLabelToUpper);
+      queryParams = queryParams.append('hideItemVarRelation', contentOptions.hideItemVarRelation);
+      queryParams = queryParams.append('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes);
+      unitList.forEach(id => { queryParams = queryParams.append('id', id); });
       return this.http
-        .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
-          params: new HttpParams()
-            .set('format', contentOptions.exportFormat)
-            .set('missingsProfile', contentOptions.missingsProfile)
-            .set('generalInstructions', contentOptions.hasGeneralInstructions)
-            .set('onlyManual', contentOptions.hasOnlyManualCoding)
-            .set('closed', contentOptions.hasClosedVars)
-            .set('derived', contentOptions.hasDerivedVars)
-            .set('showScore', contentOptions.showScore)
-            .set('codeLabelToUpper', contentOptions.codeLabelToUpper)
-            .set('hideItemVarRelation', contentOptions.hideItemVarRelation)
-            .set('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes),
-
+        .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book`, {
+          params: queryParams,
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },

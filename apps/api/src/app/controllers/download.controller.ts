@@ -1,7 +1,9 @@
 import {
-  Controller, Get, Header, Param, ParseBoolPipe, Query, StreamableFile, UseFilters, UseGuards
+  Controller, Get, Header, Param, ParseArrayPipe, ParseBoolPipe, Query, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiParam, ApiQuery, ApiTags
+} from '@nestjs/swagger';
 import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../services/workspace.service';
@@ -24,16 +26,21 @@ export class DownloadController {
   ) {
   }
 
-  @Get('docx/workspaces/:workspace_group_id/coding-book/:unitList')
+  @Get('docx/workspaces/:workspace_group_id/coding-book')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
   @ApiTags('download')
-
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: true
+  })
   async downloadCodingBook(
   @WorkspaceGroupId() workspaceGroupId: number,
-    @Param('unitList') unitList: string,
+    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('missingsProfile')missingsProfile: string,
     @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
@@ -63,7 +70,7 @@ export class DownloadController {
         this.unitService,
         this.settingsService,
         options,
-        unitList);
+        ids);
     return new StreamableFile(file as Buffer);
   }
 

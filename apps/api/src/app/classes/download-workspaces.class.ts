@@ -163,13 +163,10 @@ export class DownloadWorkspacesClass {
     unitService: UnitService,
     settingsService: SettingService,
     contentSetting: CodeBookContentSetting,
-    unitList: string
+    unitList: number[]
   ): Promise<Buffer | []> {
     const units = await unitService.findAllWithMetadata(workspaceGroupId);
-    const selectedUnits = units.filter(unit => unitList
-      .split(',')
-      .map((u: string) => parseInt(u, 10))
-      .includes(unit.id)
+    const selectedUnits = units.filter(unit => unitList.includes(unit.id)
     );
     const codebook: CodebookUnitDto[] = [];
     const profiles = await settingsService.findMissingsProfiles();
