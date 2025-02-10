@@ -7,7 +7,6 @@ import {
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { UnitService } from '../services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
@@ -20,19 +19,6 @@ export class DownloadController {
     private workspaceService: WorkspaceService,
     private unitService: UnitService
   ) {
-  }
-
-  @Get('xlsx/workspace-groups/:workspace_group_id')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @Header('Content-Disposition', 'attachment; filename="iqb-studio-workspace-report.xlsx"')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  @ApiTags('download')
-  async downloadXlsxWorkspacesByGroup(@WorkspaceGroupId() workspaceGroupId: number) {
-    const file = await DownloadWorkspacesClass.getWorkspaceReport(
-      this.workspaceService, this.unitService, workspaceGroupId
-    );
-    return new StreamableFile(file as Buffer);
   }
 
   @Get('xlsx/workspaces')
