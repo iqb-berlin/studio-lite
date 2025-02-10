@@ -19,7 +19,7 @@ import {
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
-  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto
+  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto, NameDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
@@ -202,13 +202,13 @@ export class WorkspaceController {
     return this.workspaceService.patchSettings(workspaceId, workspaceSetting);
   }
 
-  @Patch('rename/:name')
+  @Patch('name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
-  async patchName(@WorkspaceId() workspaceId: number, @Param('name') newName: string) {
-    return this.workspaceService.patchName(workspaceId, newName);
+  async patchName(@WorkspaceId() workspaceId: number, @Body() body: NameDto) {
+    return this.workspaceService.patchName(workspaceId, body.name);
   }
 
   @Patch('drop-box')
