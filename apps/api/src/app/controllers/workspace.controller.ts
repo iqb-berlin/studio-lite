@@ -132,37 +132,24 @@ export class WorkspaceController {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
   }
 
-  @Patch('new-group')
+  @Patch('group-name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Group data changed' })
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
-  async addUnitGroup(@WorkspaceId() workspaceId: number,
-    @Body() body: GroupNameDto) {
+  async deleteUnitGroup(
+  @WorkspaceId() workspaceId: number,
+    @Body() body: GroupNameDto | RenameGroupNameDto
+  ) {
+    if (body.operation === 'remove') {
+      return this.workspaceService.removeGroup(workspaceId, body.groupName);
+    }
+    if (body.operation === 'rename' && 'newGroupName' in body) {
+      return this.workspaceService
+        .patchGroupName(workspaceId, body.groupName, body.newGroupName);
+    }
     return this.workspaceService.createGroup(workspaceId, body.groupName);
-  }
-
-  @Patch('rename-group')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group data changed' })
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace')
-  async renameUnitGroup(@WorkspaceId() workspaceId: number,
-    @Body() body: RenameGroupNameDto) {
-    return this.workspaceService
-      .patchGroupName(workspaceId, body.groupName, body.newGroupName);
-  }
-
-  @Patch('remove-group')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group data changed' })
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace')
-  async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Body() body: GroupNameDto) {
-    return this.workspaceService.removeGroup(workspaceId, body.groupName);
   }
 
   @Get('coding-report')
