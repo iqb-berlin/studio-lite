@@ -466,18 +466,6 @@ export class UsersService {
     });
   }
 
-  async setWorkspaceGroupAdminsByWorkspaceGroup(workspaceGroupId: number, users: number[]) {
-    return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
-      await Promise.all(users.map(async userId => {
-        const newWorkspaceGroupAdmin = this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
-          userId: userId,
-          workspaceGroupId: workspaceGroupId
-        });
-        await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
-      }));
-    });
-  }
-
   private static getPasswordHash(stringToHash: string): string {
     return bcrypt.hashSync(stringToHash, 11);
   }
