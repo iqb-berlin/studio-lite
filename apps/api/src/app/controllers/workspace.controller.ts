@@ -135,21 +135,14 @@ export class WorkspaceController {
   @Patch('group-name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group data changed' })
+  @ApiOkResponse({ description: 'Group name changed' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
   @WorkspaceId() workspaceId: number,
     @Body() body: GroupNameDto | RenameGroupNameDto
   ) {
-    if (body.operation === 'remove') {
-      return this.workspaceService.removeGroup(workspaceId, body.groupName);
-    }
-    if (body.operation === 'rename' && 'newGroupName' in body) {
-      return this.workspaceService
-        .patchGroupName(workspaceId, body.groupName, body.newGroupName);
-    }
-    return this.workspaceService.createGroup(workspaceId, body.groupName);
+    return this.workspaceService.patchGroupName(workspaceId, body);
   }
 
   @Get('coding-report')

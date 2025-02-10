@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto, WorkspaceInListDto
+  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -225,7 +225,7 @@ export class WorkspaceService {
     return newWorkspace.id;
   }
 
-  async createGroup(id: number, newGroup: string): Promise<void> {
+  private async createGroup(id: number, newGroup: string): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
@@ -351,7 +351,17 @@ export class WorkspaceService {
     }));
   }
 
-  async patchGroupName(id: number, oldName: string, newName: string): Promise<void> {
+  async patchGroupName(workspaceId: number, dto: GroupNameDto | RenameGroupNameDto): Promise<void> {
+    if (dto.operation === 'remove') {
+      return this.removeGroup(workspaceId, dto.groupName);
+    }
+    if (dto.operation === 'rename' && 'newGroupName' in dto) {
+      return this.renameGroupName(workspaceId, dto.groupName, dto.newGroupName);
+    }
+    return this.createGroup(workspaceId, dto.groupName);
+  }
+
+  private async renameGroupName(id: number, oldName: string, newName: string): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
@@ -375,7 +385,7 @@ export class WorkspaceService {
     });
   }
 
-  async removeGroup(id: number, groupName: string): Promise<void> {
+  private async removeGroup(id: number, groupName: string): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
