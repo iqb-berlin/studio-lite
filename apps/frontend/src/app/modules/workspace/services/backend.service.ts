@@ -77,7 +77,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     units.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/`, { params: queryParams })
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units`, { params: queryParams })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -87,7 +87,7 @@ export class BackendService {
   submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/submit`, { targetId: dropBoxId, ids: units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/drop-box-history`, { targetId: dropBoxId, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -96,7 +96,7 @@ export class BackendService {
   returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/return-submitted`, { ids: units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/drop-box-history`, { ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -106,7 +106,7 @@ export class BackendService {
             units: number[],
             targetWorkspace: number): Observable<boolean | RequestReportDto> {
     return this.http.patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/move`, { targetId: targetWorkspace, ids: units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/workspace-id`, { targetId: targetWorkspace, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -118,7 +118,7 @@ export class BackendService {
             addComments?: boolean
   ): Observable<boolean | RequestReportDto> {
     return this.http.post<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/copy`, { targetId: targetWorkspace, ids: units, addComments })
+      `${this.serverUrl}workspaces/${workspaceId}/units`, { targetId: targetWorkspace, ids: units, addComments })
       .pipe(
         catchError(() => of(false))
       );
