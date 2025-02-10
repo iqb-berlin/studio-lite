@@ -87,7 +87,7 @@ export class BackendService {
   submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/submit`, { targetId: dropBoxId, ids: units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/drop-box-history`, { targetId: dropBoxId, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -96,7 +96,7 @@ export class BackendService {
   returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/return-submitted`, { ids: units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/drop-box-history`, { ids: units })
       .pipe(
         catchError(() => of(false))
       );

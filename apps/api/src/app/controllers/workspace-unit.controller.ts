@@ -122,6 +122,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Unit moved' })
   @ApiTags('workspace unit')
   async moveUnits(@Body() body: MoveToDto,
     @User() user: UserEntity,
@@ -129,15 +130,19 @@ export class WorkspaceUnitController {
     return this.unitService.patchWorkspace(body.ids, body.targetId, user, workspaceId, 'moveTo');
   }
 
-  @Patch('submit')
+  @Patch('drop-box-history')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'Unit moved' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
-    @Body() body: MoveToDto) {
-    return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
+    @Body() body: MoveToDto | IdArrayDto) {
+    if ('targetId' in body) {
+      return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
+    }
+    return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
   }
 
   @Patch('group-name')
@@ -152,16 +157,6 @@ export class WorkspaceUnitController {
   ) {
     return this.unitService
       .patchUnitGroup(workspaceId, body.name, body.ids);
-  }
-
-  @Patch('return-submitted')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace unit')
-  async patchReturnDropBoxHistory(@User() user: UserEntity,
-    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Body() body: IdArrayDto) {
-    return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
   }
 
   @Patch(':id/definition')
