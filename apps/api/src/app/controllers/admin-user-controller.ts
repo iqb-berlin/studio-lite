@@ -22,7 +22,7 @@ export class AdminUserController {
   ) {}
 
   @Get(':id/workspace-groups')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [WorkspaceGroupInListDto]
