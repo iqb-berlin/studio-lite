@@ -19,7 +19,7 @@ import {
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
-  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto
+  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto, NameDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
@@ -132,37 +132,17 @@ export class WorkspaceController {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
   }
 
-  @Patch('new-group')
+  @Patch('group-name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiOkResponse({ description: 'Group data changed' })
-  @ApiTags('workspace')
-  async addUnitGroup(@WorkspaceId() workspaceId: number,
-    @Body() body: GroupNameDto) {
-    return this.workspaceService.createGroup(workspaceId, body.groupName);
-  }
-
-  @Patch('rename-group')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group data changed' })
+  @ApiOkResponse({ description: 'Group name changed' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
-  async renameUnitGroup(@WorkspaceId() workspaceId: number,
-    @Body() body: RenameGroupNameDto) {
-    return this.workspaceService
-      .patchGroupName(workspaceId, body.groupName, body.newGroupName);
-  }
-
-  @Patch('remove-group')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group data changed' })
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace')
-  async deleteUnitGroup(@WorkspaceId() workspaceId: number, @Body() body: GroupNameDto) {
-    return this.workspaceService.removeGroup(workspaceId, body.groupName);
+  async deleteUnitGroup(
+  @WorkspaceId() workspaceId: number,
+    @Body() body: GroupNameDto | RenameGroupNameDto
+  ) {
+    return this.workspaceService.patchGroupName(workspaceId, body);
   }
 
   @Get('coding-report')
@@ -202,13 +182,13 @@ export class WorkspaceController {
     return this.workspaceService.patchSettings(workspaceId, workspaceSetting);
   }
 
-  @Patch('rename/:name')
+  @Patch('name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
-  async patchName(@WorkspaceId() workspaceId: number, @Param('name') newName: string) {
-    return this.workspaceService.patchName(workspaceId, newName);
+  async patchName(@WorkspaceId() workspaceId: number, @Body() body: NameDto) {
+    return this.workspaceService.patchName(workspaceId, body.name);
   }
 
   @Patch('drop-box')

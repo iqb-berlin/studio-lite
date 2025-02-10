@@ -78,7 +78,7 @@ export class BackendService {
 
   renameWorkspace(workspaceId: number, newName: string): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspaces/${workspaceId}/rename/${newName}`, {})
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/name`, { name: newName })
       .pipe(
         map(() => true),
         catchError(() => of(false))
