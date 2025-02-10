@@ -70,7 +70,7 @@ export class GroupAdminWorkspaceController {
     return this.workspaceService.remove(ids);
   }
 
-  @Patch('move')
+  @Patch('group-id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Admin workspace moved successfully.' })

@@ -107,7 +107,7 @@ export class BackendService {
 
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
     return this.http
-      .patch(`${this.serverUrl}group-admin/workspaces/move`, { targetId: workspaceGroupId, ids: workspaces })
+      .patch(`${this.serverUrl}group-admin/workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
