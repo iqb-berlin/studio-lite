@@ -164,17 +164,6 @@ export class WorkspaceUnitController {
     return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
   }
 
-  @Post('copy')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiTags('workspace unit')
-  async copyUnits(@Body() body: CopyUnitDto,
-    @User() user: UserEntity
-  ) {
-    return this.unitService.copy(body.ids, body.targetId, user, body.addComments);
-  }
-
   @Patch(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
@@ -201,15 +190,17 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    description: 'Sends back the id of the new unit in database',
-    type: Number
-  })
+  @ApiCreatedResponse({ description: 'Unit created' })
   @ApiTags('workspace unit')
-  async create(@WorkspaceId() workspaceId: number,
-    @User() user: UserEntity,
-    @Body() createUnitDto: CreateUnitDto) {
-    return this.unitService.create(workspaceId, createUnitDto, user, false);
+  async create(
+  @WorkspaceId() workspaceId: number,
+    @Body() body: CreateUnitDto | CopyUnitDto,
+    @User() user: UserEntity
+  ) {
+    if ('targetId' in body) {
+      return this.unitService.copy(body.ids, body.targetId, user, body.addComments);
+    }
+    return this.unitService.create(workspaceId, body, user, false);
   }
 
   @Delete()
