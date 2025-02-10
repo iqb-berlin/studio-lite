@@ -159,13 +159,13 @@ export class DownloadWorkspacesClass {
   }
 
   static async getWorkspaceCodingBook(
-    workspaceGroupId: number,
+    workspaceId: number,
     unitService: UnitService,
     settingsService: SettingService,
     contentSetting: CodeBookContentSetting,
     unitList: number[]
   ): Promise<Buffer | []> {
-    const units = await unitService.findAllWithMetadata(workspaceGroupId);
+    const units = await unitService.findAllWithMetadata(workspaceId);
     const selectedUnits = units.filter(unit => unitList.includes(unit.id)
     );
     const codebook: CodebookUnitDto[] = [];

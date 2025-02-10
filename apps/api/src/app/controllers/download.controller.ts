@@ -15,6 +15,7 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { SettingService } from '../services/setting.service';
+import { WorkspaceId } from '../decorators/workspace.decorator';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
@@ -26,7 +27,7 @@ export class DownloadController {
   ) {
   }
 
-  @Get('docx/workspaces/:workspace_group_id/coding-book')
+  @Get('docx/workspaces/:workspace_id/coding-book')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
@@ -39,7 +40,7 @@ export class DownloadController {
     required: true
   })
   async downloadCodingBook(
-  @WorkspaceGroupId() workspaceGroupId: number,
+  @WorkspaceId() workspaceId: number,
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('missingsProfile')missingsProfile: string,
@@ -66,7 +67,7 @@ export class DownloadController {
 
     const file = await DownloadWorkspacesClass
       .getWorkspaceCodingBook(
-        workspaceGroupId,
+        workspaceId,
         this.unitService,
         this.settingsService,
         options,
