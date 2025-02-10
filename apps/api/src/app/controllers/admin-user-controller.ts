@@ -2,13 +2,12 @@ import {
   Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse,
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse,
   ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUserDto,
-  UserFullDto,
-  WorkspaceGroupInListDto
+  UserFullDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -21,16 +20,6 @@ export class AdminUserController {
     private usersService: UsersService,
     private workspaceGroupService: WorkspaceGroupService
   ) {}
-
-  @Get(':id')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'User retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'User not found.' })
-  @ApiTags('admin user')
-  async findOne(@Param('id') id: number): Promise<UserFullDto> {
-    return this.usersService.findOne(id);
-  }
 
   @Get(':id/workspace-groups')
   @UseGuards(JwtAuthGuard)
