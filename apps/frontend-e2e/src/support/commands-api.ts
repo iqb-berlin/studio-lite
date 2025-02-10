@@ -125,12 +125,13 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
 });
 
 // 7.
+// TODO Endpoint changed
 Cypress.Commands.add('getUsersFullAPI',
   (token: string) => {
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: '/api/admin/users/full',
+      url: '/api/group-admin/users/full',
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -160,7 +161,7 @@ Cypress.Commands.add('getUserNoIdAPI',
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: '/api/admin/users',
+      url: '/api/group-admin/users',
       headers: {
         'app-version': Cypress.env('version'),
         authorization

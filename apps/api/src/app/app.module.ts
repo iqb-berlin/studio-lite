@@ -8,7 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
-import { UserController } from './controllers/user.controller';
+import { AdminUserController } from './controllers/admin-user-controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
 import { AdminResourcePackageController } from './controllers/admin-resource-package.controller';
@@ -63,6 +63,7 @@ import { ReviewUnitController } from './controllers/review-unit.controller';
 import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
+import { GroupAdminUserController } from './controllers/group-admin-user-controller';
 
 @Module({
   imports: [
@@ -162,7 +163,8 @@ import { ResourcePackageController } from './controllers/resource-package.contro
   controllers: [
     AppController,
     GroupAdminWorkspaceController,
-    UserController,
+    AdminUserController,
+    GroupAdminUserController,
     AdminWorkspaceGroupController,
     SettingController,
     AdminResourcePackageController,

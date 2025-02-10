@@ -13,8 +13,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
@@ -33,7 +32,7 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
   // eslint-disable-next-line max-len
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent,
-    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, MatIcon, MatIconButton, RolesHeaderComponent]
+    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, RolesHeaderComponent]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
@@ -118,8 +117,7 @@ export class UsersComponent implements OnInit {
         this.appService.dataLoading = true;
         this.backendService.setWorkspacesByUser(
           this.selectedUser,
-          this.userWorkspaces.getChecks(),
-          this.wsgAdminService.selectedWorkspaceGroupId
+          this.userWorkspaces.getChecks(this.wsgAdminService.selectedWorkspaceGroupId)
         ).subscribe(
           respOk => {
             if (respOk) {

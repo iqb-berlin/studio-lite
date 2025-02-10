@@ -9,7 +9,8 @@ import {
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   WorkspaceGroupFullDto,
-  WorkspaceUserInListDto
+  WorkspaceUserInListDto,
+  UserWorkspaceAccessForGroupDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -23,15 +24,17 @@ export class BackendService {
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
+      .get<UserInListDto[]>(`${this.serverUrl}group-admin/users`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
   getUsersFull(): Observable<UserFullDto[]> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('full', true);
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}admin/users/full`)
+      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, { params: queryParams })
       .pipe(
         catchError(() => of([]))
       );
@@ -39,7 +42,7 @@ export class BackendService {
 
   getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}group-admin/users/${userId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );
@@ -47,10 +50,9 @@ export class BackendService {
 
   setWorkspacesByUser(
     userId: number,
-    accessTo: UserWorkspaceAccessDto[],
-    workspaceGroupId: number): Observable<boolean> {
+    accessTo: UserWorkspaceAccessForGroupDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
+      .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

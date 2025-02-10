@@ -1,4 +1,4 @@
-import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -373,11 +373,10 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  // TODO: id als Parameter
-  async patch(userData: UserFullDto): Promise<void> {
-    this.logger.log(`Updating user with id: ${userData.id}`);
+  async patch(userId: number, userData: UserFullDto): Promise<void> {
+    this.logger.log(`Updating user with id: ${userId}`);
     const userToUpdate = await this.usersRepository.findOne({
-      where: { id: userData.id },
+      where: { id: userId },
       select: {
         name: true,
         isAdmin: true,
@@ -467,26 +466,7 @@ export class UsersService {
     });
   }
 
-  async setWorkspaceGroupAdminsByWorkspaceGroup(workspaceGroupId: number, users: number[]) {
-    return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
-      await Promise.all(users.map(async userId => {
-        const newWorkspaceGroupAdmin = this.workspaceGroupAdminRepository.create(<WorkspaceGroupAdmin>{
-          userId: userId,
-          workspaceGroupId: workspaceGroupId
-        });
-        await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
-      }));
-    });
-  }
-
   private static getPasswordHash(stringToHash: string): string {
     return bcrypt.hashSync(stringToHash, 11);
-  }
-
-  removeIds(ids: number[]) {
-    if (ids && ids.length) {
-      ids.forEach(id => this.remove(id));
-    }
-    throw new MethodNotAllowedException();
   }
 }
