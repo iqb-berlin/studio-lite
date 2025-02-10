@@ -77,7 +77,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     units.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/`, { params: queryParams })
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units`, { params: queryParams })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -106,7 +106,7 @@ export class BackendService {
             units: number[],
             targetWorkspace: number): Observable<boolean | RequestReportDto> {
     return this.http.patch<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/move`, { targetId: targetWorkspace, ids: units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/workspace-id`, { targetId: targetWorkspace, ids: units })
       .pipe(
         catchError(() => of(false))
       );

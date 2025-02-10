@@ -118,7 +118,7 @@ export class WorkspaceUnitController {
     return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
   }
 
-  @Patch('move')
+  @Patch('workspace-id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
