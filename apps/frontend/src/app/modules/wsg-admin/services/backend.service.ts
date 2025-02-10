@@ -154,7 +154,7 @@ export class BackendService {
 
   getXlsWorkspaces(workspaceGroupId: number): Observable<Blob> {
     return this.http.get(
-      `${this.serverUrl}download/xlsx/workspaces/${workspaceGroupId}`,
+      `${this.serverUrl}download/xlsx/workspace-groups/${workspaceGroupId}`,
       {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

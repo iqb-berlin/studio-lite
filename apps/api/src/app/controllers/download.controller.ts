@@ -22,7 +22,7 @@ export class DownloadController {
   ) {
   }
 
-  @Get('xlsx/workspaces/:workspace_group_id')
+  @Get('xlsx/workspace-groups/:workspace_group_id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-workspace-report.xlsx"')
