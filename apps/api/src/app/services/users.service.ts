@@ -373,11 +373,10 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  // TODO: id als Parameter
-  async patch(userData: UserFullDto): Promise<void> {
-    this.logger.log(`Updating user with id: ${userData.id}`);
+  async patch(userId: number, userData: UserFullDto): Promise<void> {
+    this.logger.log(`Updating user with id: ${userId}`);
     const userToUpdate = await this.usersRepository.findOne({
-      where: { id: userData.id },
+      where: { id: userId },
       select: {
         name: true,
         isAdmin: true,

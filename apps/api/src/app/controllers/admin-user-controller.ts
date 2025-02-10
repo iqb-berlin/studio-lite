@@ -2,13 +2,13 @@ import {
   Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse,
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam,
   ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CreateUserDto, IdArrayDto,
   UserFullDto, WorkspaceGroupInListDto
-} from "@studio-lite-lib/api-dto";
+} from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -68,11 +68,13 @@ export class AdminUserController {
     return this.usersService.create(createUserDto);
   }
 
-  @Patch()
+  @Patch(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'User updated successfully.' })
+  @ApiParam({ name: 'id', type: Number })
   @ApiBearerAuth()
   @ApiTags('admin user')
-  async patch(@Body() userFullDto: UserFullDto) {
-    return this.usersService.patch(userFullDto);
+  async patch(@Param('id') userId: number, @Body() userFullDto: UserFullDto) {
+    return this.usersService.patch(userId, userFullDto);
   }
 }

@@ -79,9 +79,9 @@ export class BackendService {
       );
   }
 
-  changeUserData(newData: UserFullDto): Observable<boolean> {
+  changeUserData(id: number, newData: UserFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users`, newData)
+      .patch(`${this.serverUrl}admin/users/${id}`, newData)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
