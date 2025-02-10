@@ -91,14 +91,4 @@ export class GroupAdminWorkspaceController {
   async create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
     return this.workspaceService.create(createWorkspaceDto);
   }
-
-  @Patch()
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace updated successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
-  @ApiTags('group-admin workspace')
-  async patch(@Body() workspaceFullDto: WorkspaceFullDto) {
-    return this.workspaceService.patch(workspaceFullDto);
-  }
 }
