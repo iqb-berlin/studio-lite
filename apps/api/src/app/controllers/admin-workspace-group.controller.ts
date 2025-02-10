@@ -5,7 +5,7 @@ import {
   Get,
   ParseArrayPipe,
   Patch,
-  Post, Query,
+  Post, Query, Res, StreamableFile,
   UseGuards
 } from '@nestjs/common';
 import {
@@ -16,6 +16,7 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -24,6 +25,7 @@ import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { UsersService } from '../services/users.service';
 import { UnitService } from '../services/unit.service';
+import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
 @Controller('admin/workspace-groups')
 export class AdminWorkspaceGroupController {
@@ -37,9 +39,27 @@ export class AdminWorkspaceGroupController {
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace-groups retrieved successfully.' })
+  @ApiOkResponse({ description: 'Workspace-groups retrieved successfully.' })
+  @ApiQuery({
+    name: 'download',
+    type: Boolean,
+    required: false
+  })
   @ApiTags('admin workspace-group')
-  async findAll(): Promise<WorkspaceGroupInListDto[]> {
+  async findAll(
+    @Query('download') download: boolean,
+      @Res({ passthrough: true }) res: Response
+  ): Promise<WorkspaceGroupInListDto[] | StreamableFile> {
+    if (download) {
+      const file = await DownloadWorkspacesClass.getWorkspaceReport(
+        this.workspaceService, this.unitService, 0
+      );
+      res.set({
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
+      });
+      return new StreamableFile(file as Buffer);
+    }
     return this.workspaceGroupService.findAll();
   }
 

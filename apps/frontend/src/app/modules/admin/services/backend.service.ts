@@ -273,12 +273,14 @@ export class BackendService {
   }
 
   getXlsWorkspaces(): Observable<Blob> {
+    const queryParams = new HttpParams().set('download', 'true');
     return this.http.get(
-      `${this.serverUrl}download/xlsx/workspaces`,
+      `${this.serverUrl}admin/workspace-groups`,
       {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
+        params: queryParams,
         responseType: 'blob'
       }
     );

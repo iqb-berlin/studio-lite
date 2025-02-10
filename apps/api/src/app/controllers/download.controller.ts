@@ -5,33 +5,17 @@ import {
   ApiBearerAuth, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
-import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { UnitService } from '../services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
-import { IsAdminGuard } from '../guards/is-admin.guard';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
 export class DownloadController {
   constructor(
-    private workspaceService: WorkspaceService,
     private unitService: UnitService
   ) {
-  }
-
-  @Get('xlsx/workspaces')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @Header('Content-Disposition', 'attachment; filename="iqb-studio-workspace-report.xlsx"')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  @ApiTags('download')
-  async downloadXlsxWorkspaces() {
-    const file = await DownloadWorkspacesClass.getWorkspaceReport(
-      this.workspaceService, this.unitService, 0
-    );
-    return new StreamableFile(file as Buffer);
   }
 
   @Get('xlsx/unit-metadata-items/:workspace_id/:selection')
