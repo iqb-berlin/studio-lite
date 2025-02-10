@@ -1,10 +1,9 @@
 import {
-  Controller, Get, Header, Param, ParseArrayPipe, ParseBoolPipe, Query, StreamableFile, UseFilters, UseGuards
+  Controller, Get, Header, Param, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth, ApiParam, ApiTags
 } from '@nestjs/swagger';
-import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -13,66 +12,14 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { UnitService } from '../services/unit.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
-import { WorkspaceGuard } from '../guards/workspace.guard';
-import { SettingService } from '../services/setting.service';
-import { WorkspaceId } from '../decorators/workspace.decorator';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
 export class DownloadController {
   constructor(
     private workspaceService: WorkspaceService,
-    private unitService: UnitService,
-    private settingsService: SettingService
+    private unitService: UnitService
   ) {
-  }
-
-  @Get('docx/workspaces/:workspace_id/coding-book')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
-  @ApiBearerAuth()
-  @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-  @ApiTags('download')
-  @ApiQuery({
-    name: 'id',
-    type: Number,
-    isArray: true,
-    required: true
-  })
-  async downloadCodingBook(
-  @WorkspaceId() workspaceId: number,
-    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
-    @Query('format')exportFormat: 'json' | 'docx',
-    @Query('missingsProfile')missingsProfile: string,
-    @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
-    @Query('hasOnlyVarsWithCodes', new ParseBoolPipe()) hasOnlyVarsWithCodes: boolean,
-    @Query('generalInstructions', new ParseBoolPipe()) hasGeneralInstructions: boolean,
-    @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
-    @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
-    @Query('showScore', new ParseBoolPipe()) showScore: boolean,
-    @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
-    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
-    const options:CodeBookContentSetting = {
-      exportFormat,
-      missingsProfile: missingsProfile,
-      hasOnlyManualCoding: hasOnlyManualCoding,
-      hasGeneralInstructions: hasGeneralInstructions,
-      hasDerivedVars: hasDerivedVars,
-      hasClosedVars: hasClosedVars,
-      showScore: showScore,
-      codeLabelToUpper: codeLabelToUpper,
-      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes,
-      hideItemVarRelation: hideItemVarRelation
-    };
-
-    const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(
-        workspaceId,
-        this.unitService,
-        this.settingsService,
-        options,
-        ids);
-    return new StreamableFile(file as Buffer);
   }
 
   @Get('xlsx/workspaces/:workspace_group_id')

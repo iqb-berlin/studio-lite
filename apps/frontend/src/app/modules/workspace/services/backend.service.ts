@@ -170,7 +170,7 @@ export class BackendService {
       queryParams = queryParams.append('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes);
       unitList.forEach(id => { queryParams = queryParams.append('id', id); });
       return this.http
-        .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book`, {
+        .get(`${this.serverUrl}workspaces/${workspaceId}/coding-book`, {
           params: queryParams,
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
