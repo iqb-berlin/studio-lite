@@ -318,7 +318,6 @@ export class WorkspaceService {
     return [];
   }
 
-  // TODO: id als Parameter
   async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: workspaceData.id }
