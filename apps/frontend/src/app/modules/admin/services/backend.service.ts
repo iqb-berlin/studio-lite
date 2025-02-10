@@ -109,7 +109,7 @@ export class BackendService {
 
   setWorkspaceGroupsByAdmin(userId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, accessTo)
+      .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, { ids: accessTo })
       .pipe(
         catchError(() => of(false)),
         map(() => true)

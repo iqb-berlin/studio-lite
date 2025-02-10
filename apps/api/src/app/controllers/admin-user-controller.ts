@@ -6,9 +6,9 @@ import {
   ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CreateUserDto,
+  CreateUserDto, IdArrayDto,
   UserFullDto, WorkspaceGroupInListDto
-} from '@studio-lite-lib/api-dto';
+} from "@studio-lite-lib/api-dto";
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -37,8 +37,8 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   async patchOnesWorkspaceGroups(@Param('id') id: number,
-    @Body() workspaceGroups: number[]) {
-    return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, workspaceGroups);
+    @Body() body: IdArrayDto): Promise<void> {
+    return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, body.ids);
   }
 
   @Delete()
