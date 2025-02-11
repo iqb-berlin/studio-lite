@@ -39,13 +39,6 @@ export class ResourcePackagesComponent implements OnInit {
     this.resourcePackages = this.readBackendService.getResourcePackages();
   }
 
-  delete(id: number) {
-    this.resourcePackages = this.writeBackendService.deleteResourcePackage(id)
-      .pipe(
-        switchMap(() => this.readBackendService.getResourcePackages())
-      );
-  }
-
   deleteSelected(): void {
     this.resourcePackages = this.writeBackendService.deleteResourcePackages(this.selectedResourcePackages.value)
       .pipe(
