@@ -1,8 +1,8 @@
 import {
   Body,
   Controller,
-  Get, Header,
-  Param, ParseArrayPipe, ParseBoolPipe,
+  Get,
+  Param,
   Patch,
   Post,
   Query, Res,
@@ -15,11 +15,10 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CodingReportDto,
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
-  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto, NameDto, CodeBookContentSetting
+  UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto, NameDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
@@ -38,7 +37,6 @@ import UserEntity from '../entities/user.entity';
 import { User } from '../decorators/user.decorator';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
-import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
 @Controller('workspaces/:workspace_id')
 export class WorkspaceController {
@@ -48,17 +46,14 @@ export class WorkspaceController {
     private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
-    private usersService: UsersService,
-    private settingsService: SettingService
+    private usersService: UsersService
   ) {}
 
   @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: WorkspaceFullDto
-  })
+  @ApiOkResponse()
   @ApiQuery({
     name: 'download',
     type: Boolean,
@@ -95,62 +90,12 @@ export class WorkspaceController {
     return this.workspaceService.findOne(workspaceId);
   }
 
-  @Get('coding-book')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
-  @ApiBearerAuth()
-  @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-  @ApiTags('workspace')
-  @ApiQuery({
-    name: 'id',
-    type: Number,
-    isArray: true,
-    required: true
-  })
-  async downloadCodingBook(
-  @WorkspaceId() workspaceId: number,
-    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
-    @Query('format')exportFormat: 'json' | 'docx',
-    @Query('missingsProfile')missingsProfile: string,
-    @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
-    @Query('hasOnlyVarsWithCodes', new ParseBoolPipe()) hasOnlyVarsWithCodes: boolean,
-    @Query('generalInstructions', new ParseBoolPipe()) hasGeneralInstructions: boolean,
-    @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
-    @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
-    @Query('showScore', new ParseBoolPipe()) showScore: boolean,
-    @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
-    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
-    const options:CodeBookContentSetting = {
-      exportFormat,
-      missingsProfile: missingsProfile,
-      hasOnlyManualCoding: hasOnlyManualCoding,
-      hasGeneralInstructions: hasGeneralInstructions,
-      hasDerivedVars: hasDerivedVars,
-      hasClosedVars: hasClosedVars,
-      showScore: showScore,
-      codeLabelToUpper: codeLabelToUpper,
-      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes,
-      hideItemVarRelation: hideItemVarRelation
-    };
-
-    const file = await DownloadWorkspacesClass
-      .getWorkspaceCodingBook(
-        workspaceId,
-        this.unitService,
-        this.settingsService,
-        options,
-        ids);
-    return new StreamableFile(file as Buffer);
-  }
-
   @Get('users/:user_id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
-  @ApiCreatedResponse({
-    type: UserWorkspaceFullDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async findByUser(@WorkspaceId() workspaceId: number,
     @Param('user_id') userId: number
@@ -162,9 +107,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: WorkspaceFullDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
     return this.usersService.findAllWorkspaceUsers(workspaceId);
@@ -174,9 +117,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [String]
-  })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async findGroups(@WorkspaceId() workspaceId: number): Promise<string[]> {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
@@ -185,7 +126,7 @@ export class WorkspaceController {
   @Patch('group-name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group name changed' })
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
@@ -193,18 +134,6 @@ export class WorkspaceController {
     @Body() body: GroupNameDto | RenameGroupNameDto
   ) {
     return this.workspaceService.patchGroupName(workspaceId, body);
-  }
-
-  @Get('coding-report')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [String]
-  })
-  @ApiTags('workspace')
-  async getCodingReport(@WorkspaceId() workspaceId: number): Promise<CodingReportDto[]> {
-    return this.workspaceService.getCodingReport(workspaceId);
   }
 
   @Post()
@@ -226,6 +155,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
     @Body() workspaceSetting: WorkspaceSettingsDto) {
@@ -235,6 +165,7 @@ export class WorkspaceController {
   @Patch('name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchName(@WorkspaceId() workspaceId: number, @Body() body: NameDto) {
@@ -244,6 +175,7 @@ export class WorkspaceController {
   @Patch('drop-box')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxId') dropBoxId: number) {

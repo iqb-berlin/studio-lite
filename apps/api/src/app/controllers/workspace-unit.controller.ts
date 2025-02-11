@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, Header,
   Param,
   ParseArrayPipe,
   ParseBoolPipe,
@@ -18,6 +18,8 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
+  CodeBookContentSetting,
+  CodingReportDto,
   CopyUnitDto,
   CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -35,20 +37,22 @@ import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { ManageAccessGuard } from '../guards/manage-access.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { WorkspaceService } from '../services/workspace.service';
+import { SettingService } from '../services/setting.service';
 
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
   constructor(
-    private unitService: UnitService
+    private unitService: UnitService,
+    private workspaceService: WorkspaceService,
+    private settingsService: SettingService
   ) {}
 
   @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [UnitInListDto]
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findAll(
     @Req() request,
@@ -66,6 +70,65 @@ export class WorkspaceUnitController {
       withLastSeenCommentTimeStamp,
       targetWorkspaceId,
       filterTargetWorkspaceId);
+  }
+
+  @Get('scheme')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
+  @ApiTags('workspace unit')
+  async getCodingReport(@WorkspaceId() workspaceId: number): Promise<CodingReportDto[]> {
+    return this.workspaceService.getCodingReport(workspaceId);
+  }
+
+  @Get('coding-book')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
+  @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+  @ApiTags('workspace unit')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: true
+  })
+  async downloadCodingBook(
+  @WorkspaceId() workspaceId: number,
+    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
+    @Query('format')exportFormat: 'json' | 'docx',
+    @Query('missingsProfile')missingsProfile: string,
+    @Query('onlyManual', new ParseBoolPipe()) hasOnlyManualCoding: boolean,
+    @Query('hasOnlyVarsWithCodes', new ParseBoolPipe()) hasOnlyVarsWithCodes: boolean,
+    @Query('generalInstructions', new ParseBoolPipe()) hasGeneralInstructions: boolean,
+    @Query('derived', new ParseBoolPipe()) hasDerivedVars: boolean,
+    @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
+    @Query('showScore', new ParseBoolPipe()) showScore: boolean,
+    @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
+    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
+    const options:CodeBookContentSetting = {
+      exportFormat,
+      missingsProfile: missingsProfile,
+      hasOnlyManualCoding: hasOnlyManualCoding,
+      hasGeneralInstructions: hasGeneralInstructions,
+      hasDerivedVars: hasDerivedVars,
+      hasClosedVars: hasClosedVars,
+      showScore: showScore,
+      codeLabelToUpper: codeLabelToUpper,
+      hasOnlyVarsWithCodes: hasOnlyVarsWithCodes,
+      hideItemVarRelation: hideItemVarRelation
+    };
+    const file = await DownloadWorkspacesClass
+      .getWorkspaceCodingBook(
+        workspaceId,
+        this.unitService,
+        this.settingsService,
+        options,
+        ids);
+    return new StreamableFile(file as Buffer);
   }
 
   @Get('metadata')
@@ -115,9 +178,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: UnitMetadataDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesMetadata(
     @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
@@ -129,9 +190,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: UnitDefinitionDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesDefinition(
     @Param('id', ParseIntPipe) unitId: number
@@ -143,9 +202,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: UnitSchemeDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesScheme(
     @Param('id', ParseIntPipe) unitId: number
@@ -208,6 +265,7 @@ export class WorkspaceUnitController {
   @Patch(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
@@ -219,6 +277,7 @@ export class WorkspaceUnitController {
   @Patch(':id/scheme')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchScheme(@Param('id', ParseIntPipe) unitId: number,
@@ -248,6 +307,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit')
+  @ApiOkResponse()
   @ApiQuery({
     name: 'id',
     type: Number,
