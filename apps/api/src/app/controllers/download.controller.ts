@@ -9,7 +9,6 @@ import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { UnitService } from '../services/unit.service';
-import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 
 @Controller('download')
 @UseFilters(HttpExceptionFilter)
@@ -20,7 +19,7 @@ export class DownloadController {
   }
 
   @Get('xlsx/unit-metadata/:workspace_id')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiQuery({
