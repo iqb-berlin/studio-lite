@@ -198,15 +198,6 @@ export class BackendService {
       );
   }
 
-  deleteResourcePackage(id: number): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/resource-packages/${id}`)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
   deleteResourcePackages(ids: number[]): Observable<boolean> {
     let queryParams = new HttpParams();
     ids.forEach(id => { queryParams = queryParams.append('id', id); });
