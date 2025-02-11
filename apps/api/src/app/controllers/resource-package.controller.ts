@@ -14,7 +14,7 @@ export class ResourcePackageController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ description: 'Resource Packages retrieved successfully.' }) // TODO Exception
+  @ApiOkResponse({ description: 'Resource Packages retrieved successfully.' })
   @ApiTags('resource-package')
   async findResourcePackages(): Promise<ResourcePackageDto[]> {
     return this.resourcePackageService.findResourcePackages();

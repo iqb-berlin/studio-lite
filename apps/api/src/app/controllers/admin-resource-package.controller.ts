@@ -35,7 +35,7 @@ export class AdminResourcePackageController {
     isArray: true,
     required: true
   })
-  @ApiOkResponse({ description: 'Admin resource-packages deleted successfully.' })
+  @ApiOkResponse({ description: 'Resource-packages deleted successfully.' })
   async removeIds(
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) id: number[]
   ) : Promise<void> {
