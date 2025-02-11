@@ -2,7 +2,7 @@ import {
   Controller, Get, Param, ParseIntPipe, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
   UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto
@@ -21,9 +21,7 @@ export class ReviewUnitController {
   @Get(':id/metadata')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: UnitMetadataDto
-  })
+  @ApiOkResponse({ description: 'Unit metadata retrieved successfully.' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
@@ -37,9 +35,7 @@ export class ReviewUnitController {
   @Get(':id/definition')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: UnitDefinitionDto
-  })
+  @ApiOkResponse({ description: 'Unit definition retrieved successfully.' })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
   async getUnitDefinition(
@@ -51,9 +47,7 @@ export class ReviewUnitController {
   @Get(':id/scheme')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: UnitSchemeDto
-  })
+  @ApiOkResponse({ description: 'Unit scheme retrieved successfully.' })
   @ApiTags('review unit')
   async findOnesScheme(
     @Param('id', ParseIntPipe) unitId: number
