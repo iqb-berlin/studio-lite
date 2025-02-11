@@ -2,7 +2,7 @@ import {
   Controller, Get, Param, ParseIntPipe, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
   ReviewFullDto
@@ -19,9 +19,7 @@ export class ReviewController {
   @Get(':review_id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: ReviewFullDto
-  })
+  @ApiOkResponse({ description: 'Review retrieved successfully.' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiTags('review')
   async findOne(
