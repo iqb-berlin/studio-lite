@@ -16,7 +16,6 @@ import { AdminVeronaModuleController } from './controllers/admin-verona-module.c
 import { ReviewController } from './controllers/review.controller';
 import { MetadataController } from './controllers/metadata.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
-import { DownloadController } from './controllers/download.controller';
 import { WorkspaceUnitController } from './controllers/workspace-unit.controller';
 import { WorkspaceController } from './controllers/workspace.controller';
 import { WorkspaceReviewController } from './controllers/workspace-review.controller';
@@ -179,8 +178,7 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     ReviewUnitController,
     ReviewUnitCommentController,
     MetadataController,
-    WorkspaceGroupController,
-    DownloadController
+    WorkspaceGroupController
   ],
   providers: [
     AppVersionProvider,

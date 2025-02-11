@@ -95,8 +95,7 @@ export class MetadataService {
     columns.forEach(column => { queryParams = queryParams.append('column', column); });
     units.forEach(unit => { queryParams = queryParams.append('id', unit); });
     return this.http.get(
-      // eslint-disable-next-line max-len
-      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}`, {
+      `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/metadata`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
