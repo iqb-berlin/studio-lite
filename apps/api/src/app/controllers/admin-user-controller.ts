@@ -24,9 +24,7 @@ export class AdminUserController {
   @Get(':id/workspace-groups')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: [WorkspaceGroupInListDto]
-  })
+  @ApiOkResponse({ description: 'Workspace groups retrieved successfully.' })
   @ApiTags('admin user')
   async findOnesWorkspaceGroups(@Param('id') id: number): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll(id);
@@ -36,6 +34,7 @@ export class AdminUserController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin user')
+  @ApiOkResponse({ description: 'Workspace group updated successfully.' })
   async patchOnesWorkspaceGroups(@Param('id') id: number,
     @Body() body: IdArrayDto): Promise<void> {
     return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, body.ids);
