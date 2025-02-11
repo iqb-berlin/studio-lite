@@ -52,9 +52,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [UnitInListDto]
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findAll(
     @Req() request,
@@ -180,9 +178,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: UnitMetadataDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesMetadata(
     @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
@@ -194,9 +190,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: UnitDefinitionDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesDefinition(
     @Param('id', ParseIntPipe) unitId: number
@@ -208,9 +202,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: UnitSchemeDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesScheme(
     @Param('id', ParseIntPipe) unitId: number
@@ -273,6 +265,7 @@ export class WorkspaceUnitController {
   @Patch(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
@@ -284,6 +277,7 @@ export class WorkspaceUnitController {
   @Patch(':id/scheme')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   async patchScheme(@Param('id', ParseIntPipe) unitId: number,
@@ -313,6 +307,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit')
+  @ApiOkResponse()
   @ApiQuery({
     name: 'id',
     type: Number,
