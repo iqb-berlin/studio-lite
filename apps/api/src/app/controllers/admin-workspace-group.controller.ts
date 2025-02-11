@@ -66,7 +66,7 @@ export class AdminWorkspaceGroupController {
   @Get('units')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin Units retrieved successfully.' })
+  @ApiOkResponse({ description: 'Units retrieved successfully.' })
   @ApiTags('admin workspace-group')
   async findAllUnits(): Promise<UnitByDefinitionIdDto[]> {
     return this.unitService.findAll();
@@ -75,7 +75,7 @@ export class AdminWorkspaceGroupController {
   @Get(':workspace_group_id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace-group retrieved successfully.' })
+  @ApiOkResponse({ description: 'Workspace-group retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace-group not found.' })
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('admin workspace-group')
@@ -87,7 +87,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
-  @ApiOkResponse({ description: 'Admin workspaces by workspace-group retrieved successfully.' })
+  @ApiOkResponse({ description: 'Workspaces of workspace-group retrieved successfully.' })
   @ApiTags('admin workspace-group')
   async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAllByGroup(id);
@@ -96,7 +96,7 @@ export class AdminWorkspaceGroupController {
   @Delete()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace-group deleted successfully.' })
+  @ApiOkResponse({ description: 'Workspace-group deleted successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace group not found.' }) // TODO: not implemented
   @ApiTags('admin workspace-group')
   @ApiQuery({
@@ -112,6 +112,7 @@ export class AdminWorkspaceGroupController {
   @Patch()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
   @ApiTags('admin workspace-group')
   async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
     return this.workspaceGroupService.patch(workspaceGroupFullDto);
@@ -143,6 +144,7 @@ export class AdminWorkspaceGroupController {
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'List of admins for workspace-group updated successfully.' })
   @ApiTags('admin workspace-group')
   async patchOnesAdmins(@WorkspaceGroupId() id: number,
     @Body() users: number[]) {
