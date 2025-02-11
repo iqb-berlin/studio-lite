@@ -1,9 +1,10 @@
 import {
-  Controller, Get, Header, Param, StreamableFile, UseFilters, UseGuards
+  Controller, Get, Param, Query, Res, StreamableFile, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiParam, ApiTags
+  ApiBearerAuth, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
@@ -18,29 +19,42 @@ export class DownloadController {
   ) {
   }
 
-  @Get('xlsx/unit-metadata-items/:workspace_id/:selection')
+  @Get('xlsx/unit-metadata/:workspace_id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @Header('Content-Disposition', 'attachment; filename="iqb-studio-unit-metadata-items-report.xlsx"')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @ApiQuery({
+    name: 'column',
+    type: String,
+    isArray: true,
+    required: true
+  })
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: true
+  })
+  @ApiQuery({
+    name: 'type',
+    type: String
+  })
   @ApiTags('download')
-  async downloadXlsxItemsMetadata(@Param('workspace_id') workspaceId: number, @Param('selection') selection: string) {
+  async downloadXlsxUnitsMetadata(
+  @Param('workspace_id') workspaceId: number,
+    @Query('column') columns: string[],
+    @Query('id') units: number[],
+    @Query('type') type: string,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
-      'items', this.unitService, workspaceId, selection);
-    return new StreamableFile(file as Buffer);
-  }
-
-  @Get('xlsx/unit-metadata/:workspace_id/:selection')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @Header('Content-Disposition', 'attachment; filename="iqb-studio-unit-metadata-report.xlsx"')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  @ApiTags('download')
-  async downloadXlsxUnitsMetadata(@Param('workspace_id') workspaceId: number, @Param('selection') selection: string) {
-    const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
-      'units', this.unitService, workspaceId, selection);
+      type, this.unitService, workspaceId, [columns].flat(), [units].flat());
+    const filename = type === 'unit' ?
+      'iqb-studio-unit-metadata-report.xlsx' : 'iqb-studio-unit-metadata-items-report.xlsx';
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${filename}"`
+    });
     return new StreamableFile(file as Buffer);
   }
 }

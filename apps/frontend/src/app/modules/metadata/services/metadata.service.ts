@@ -3,7 +3,7 @@ import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { TopConcept, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
@@ -89,31 +89,18 @@ export class MetadataService {
     return this.idLabelDictionary;
   }
 
-  downloadItemsMetadataReport(columns:string[], units:number[]): Observable<Blob> {
-    const joinedString = columns.join(',')
-      .replace(/key/g, 'Aufgabe')
-      .replace(/description/g, 'Beschreibung')
-      .replace(/variableId/g, 'Variable')
-      .replace(/weighting/g, 'Wichtung')
-      .replace(/id/g, 'Item-Id');
+  downloadMetadataReport(type: string, columns:string[], units:number[]): Observable<Blob> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('type', type);
+    columns.forEach(column => { queryParams = queryParams.append('column', column); });
+    units.forEach(unit => { queryParams = queryParams.append('id', unit); });
     return this.http.get(
       // eslint-disable-next-line max-len
-      `${this.serverUrl}download/xlsx/unit-metadata-items/${this.workspaceService.selectedWorkspaceId}/${units.join(',')}@${encodeURIComponent(joinedString)}`, {
+      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
-        responseType: 'blob'
-      });
-  }
-
-  downloadUnitsMetadataReport(columns:string[], units:number[]): Observable<Blob> {
-    const joinedKeyString = columns.join(',').replace(/key/g, 'Aufgabe');
-    return this.http.get(
-      // eslint-disable-next-line max-len
-      `${this.serverUrl}download/xlsx/unit-metadata/${this.workspaceService.selectedWorkspaceId}/${units.join(',')}@${encodeURIComponent(joinedKeyString)}`, {
-        headers: {
-          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        },
+        params: queryParams,
         responseType: 'blob'
       });
   }
