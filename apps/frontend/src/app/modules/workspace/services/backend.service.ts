@@ -395,6 +395,6 @@ export class BackendService {
   }
 
   getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
-    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/coding-report`);
+    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`);
   }
 }

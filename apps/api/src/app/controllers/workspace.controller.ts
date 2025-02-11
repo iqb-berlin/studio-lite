@@ -15,7 +15,6 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
-  CodingReportDto,
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
@@ -193,18 +192,6 @@ export class WorkspaceController {
     @Body() body: GroupNameDto | RenameGroupNameDto
   ) {
     return this.workspaceService.patchGroupName(workspaceId, body);
-  }
-
-  @Get('coding-report')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [String]
-  })
-  @ApiTags('workspace')
-  async getCodingReport(@WorkspaceId() workspaceId: number): Promise<CodingReportDto[]> {
-    return this.workspaceService.getCodingReport(workspaceId);
   }
 
   @Post()

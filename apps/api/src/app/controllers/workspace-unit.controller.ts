@@ -18,6 +18,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
+  CodingReportDto,
   CopyUnitDto,
   CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -35,11 +36,13 @@ import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { ManageAccessGuard } from '../guards/manage-access.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { WorkspaceService } from '../services/workspace.service';
 
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
   constructor(
-    private unitService: UnitService
+    private unitService: UnitService,
+    private workspaceService: WorkspaceService
   ) {}
 
   @Get()
@@ -66,6 +69,16 @@ export class WorkspaceUnitController {
       withLastSeenCommentTimeStamp,
       targetWorkspaceId,
       filterTargetWorkspaceId);
+  }
+
+  @Get('scheme')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
+  @ApiTags('workspace unit')
+  async getCodingReport(@WorkspaceId() workspaceId: number): Promise<CodingReportDto[]> {
+    return this.workspaceService.getCodingReport(workspaceId);
   }
 
   @Get('metadata')
