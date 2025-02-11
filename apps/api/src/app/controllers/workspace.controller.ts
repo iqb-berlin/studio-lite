@@ -53,9 +53,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: WorkspaceFullDto
-  })
+  @ApiOkResponse()
   @ApiQuery({
     name: 'download',
     type: Boolean,
@@ -97,9 +95,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
-  @ApiCreatedResponse({
-    type: UserWorkspaceFullDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async findByUser(@WorkspaceId() workspaceId: number,
     @Param('user_id') userId: number
@@ -111,9 +107,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: WorkspaceFullDto
-  })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
     return this.usersService.findAllWorkspaceUsers(workspaceId);
@@ -123,9 +117,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [String]
-  })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async findGroups(@WorkspaceId() workspaceId: number): Promise<string[]> {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
@@ -134,7 +126,7 @@ export class WorkspaceController {
   @Patch('group-name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Group name changed' })
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
@@ -163,6 +155,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
     @Body() workspaceSetting: WorkspaceSettingsDto) {
@@ -172,6 +165,7 @@ export class WorkspaceController {
   @Patch('name')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchName(@WorkspaceId() workspaceId: number, @Body() body: NameDto) {
@@ -181,6 +175,7 @@ export class WorkspaceController {
   @Patch('drop-box')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
+  @ApiOkResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxId') dropBoxId: number) {
