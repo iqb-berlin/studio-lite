@@ -1,5 +1,18 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, Req, UseGuards
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseArrayPipe,
+  ParseBoolPipe,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res, StreamableFile,
+  UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
@@ -8,6 +21,7 @@ import {
   CopyUnitDto,
   CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
+import type { Response } from 'express';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
@@ -20,6 +34,7 @@ import UserEntity from '../entities/user.entity';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { ManageAccessGuard } from '../guards/manage-access.guard';
+import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
@@ -57,11 +72,42 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [UnitMetadataDto]
+  @ApiOkResponse()
+  @ApiQuery({
+    name: 'column',
+    type: String,
+    isArray: true,
+    required: false
+  })
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    required: false
+  })
+  @ApiQuery({
+    name: 'type',
+    type: String
   })
   @ApiTags('workspace unit')
-  async findAllWithMetadata(@WorkspaceId() workspaceId: number): Promise<UnitMetadataDto[]> {
+  async findAllWithMetadata(
+    @WorkspaceId() workspaceId: number,
+      @Query('column') columns: string[],
+      @Query('id') units: number[],
+      @Query('type') type: string,
+      @Res({ passthrough: true }) res: Response
+  ): Promise<UnitMetadataDto[] | StreamableFile> {
+    if (type === 'unit' || type === 'item') {
+      const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
+        type, this.unitService, workspaceId, [columns].flat(), [units].flat());
+      const filename = type === 'unit' ?
+        'iqb-studio-unit-metadata-report.xlsx' : 'iqb-studio-unit-metadata-items-report.xlsx';
+      res.set({
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${filename}"`
+      });
+      return new StreamableFile(file as Buffer);
+    }
     return this.unitService.findAllWithMetadata(workspaceId);
   }
 

@@ -240,7 +240,8 @@ export class TableViewComponent implements OnInit {
     const datePipe = new DatePipe('de-DE');
     if (this.viewMode === 'units') {
       this.metadataService
-        .downloadUnitsMetadataReport(
+        .downloadMetadataReport(
+          'unit',
           this.getTableUnitsColumnsDefinitions(),
           this.data.units.map(unit => unit.id)
         )
@@ -257,7 +258,8 @@ export class TableViewComponent implements OnInit {
     }
     if (this.viewMode === 'items') {
       this.metadataService
-        .downloadItemsMetadataReport(
+        .downloadMetadataReport(
+          'item',
           this.getTableItemsColumnsDefinitions(),
           this.data.units.map(unit => unit.id)
         )

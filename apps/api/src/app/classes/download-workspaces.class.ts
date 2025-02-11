@@ -122,31 +122,51 @@ export class DownloadWorkspacesClass {
     return totalValues.flat();
   }
 
+  private static mapColumnNames(columns: string[]): string[] {
+    return columns.map(column => {
+      if (column === 'key') {
+        return 'Aufgabe';
+      }
+      if (column === 'description') {
+        return 'Beschreibung';
+      }
+      if (column === 'variableId') {
+        return 'Variable';
+      }
+      if (column === 'weighting') {
+        return 'Wichtung';
+      }
+      if (column === 'id') {
+        return 'Item-Id';
+      }
+      return column;
+    });
+  }
+
   static async getWorkspaceMetadataReport(
     reportType: string,
     unitService: UnitService,
     workspaceId: number,
-    selection: string
+    columns: string[],
+    units: number[]
   ): Promise<Buffer> {
-    const columnNames = selection.split('@')[1];
-    const selectedUnits = selection.split('@')[0].split(',');
+    const mappedColumnNames = DownloadWorkspacesClass.mapColumnNames(columns);
     const unitsFromWorkspace = await unitService.findAllWithMetadata(workspaceId);
     const unitsFiltered = unitsFromWorkspace.filter(
-      unit => selectedUnits.find(su => Number(su) === unit.id));
+      unit => units.find(su => Number(su) === unit.id));
     const rows =
-      reportType === 'units' ?
+      reportType === 'unit' ?
         this.setUnitsDataRows(unitsFiltered) :
         this.setUnitsItemsDataRows(unitsFiltered);
     const SHEET_NAME =
-      reportType === 'units' ? 'Aufgaben Metadaten ' : ' Items Metadaten ';
+      reportType === 'unit' ? 'Aufgaben Metadaten ' : ' Items Metadaten ';
     const wb = new Excel.Workbook();
     const ws = wb.addWorksheet(SHEET_NAME);
     wb.created = new Date();
     wb.title = 'Webanwendung IQB Studio';
     wb.subject =
-      reportType === 'units' ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
-    ws.columns = decodeURIComponent(columnNames)
-      .split(',')
+      reportType === 'unit' ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
+    ws.columns = mappedColumnNames
       .map((column: string) => ({
         header: column,
         key: column,
@@ -159,17 +179,14 @@ export class DownloadWorkspacesClass {
   }
 
   static async getWorkspaceCodingBook(
-    workspaceGroupId: number,
+    workspaceId: number,
     unitService: UnitService,
     settingsService: SettingService,
     contentSetting: CodeBookContentSetting,
-    unitList: string
+    unitList: number[]
   ): Promise<Buffer | []> {
-    const units = await unitService.findAllWithMetadata(workspaceGroupId);
-    const selectedUnits = units.filter(unit => unitList
-      .split(',')
-      .map((u: string) => parseInt(u, 10))
-      .includes(unit.id)
+    const units = await unitService.findAllWithMetadata(workspaceId);
+    const selectedUnits = units.filter(unit => unitList.includes(unit.id)
     );
     const codebook: CodebookUnitDto[] = [];
     const profiles = await settingsService.findMissingsProfiles();
