@@ -1,13 +1,14 @@
 #!/bin/bash
 
-declare APP_DIR="${PWD}"
+declare SOURCE_VERSION
+declare TARGET_VERSION="${1}"
+
 declare APP_NAME='studio-lite'
+declare APP_DIR="${PWD}"
+declare MAKE_BASE_DIR_NAME='STUDIO_BASE_DIR'
 declare REPO_URL="https://raw.githubusercontent.com/iqb-berlin/${APP_NAME}"
 declare REPO_API="https://api.github.com/repos/iqb-berlin/${APP_NAME}"
 
-declare SOURCE_VERSION
-declare TARGET_VERSION="${1}"
-declare MAKE_BASE_DIR_NAME='STUDIO_BASE_DIR'
 declare RELEASE_REGEX='^((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))$'
 declare PRERELEASE_REGEX='^(0|([1-9][0-9]*))\.(0|([1-9][0-9]*))\.(0|([1-9][0-9]*))(-((alpha|beta|rc)((\.)?([1-9][0-9]*))?))$'
 declare ALL_RELEASE_REGEX='^(0|([1-9][0-9]*))\.(0|([1-9][0-9]*))\.(0|([1-9][0-9]*))(-((alpha|beta|rc)((\.)?([1-9][0-9]*))?))?$'
@@ -85,8 +86,8 @@ create_app_dir_backup() {
   printf "2. Application directory backup creation\n"
   # Save installation directory
   mkdir -p "${APP_DIR}/backup/release/${SOURCE_VERSION}"
-  tar -cf - --exclude='./backup' . | tar -xf - -C "${APP_DIR}/backup/release/${SOURCE_VERSION}"
-  printf -- "- Current release files have been saved at: '%s'\n" "${APP_DIR}/backup/release/${SOURCE_VERSION}"
+  tar -cf - --exclude='./backup' --exclude='acme.json' . | tar -xf - -C "${APP_DIR}/backup/release/${SOURCE_VERSION}"
+  printf -- "- Current release files have been saved at: '%s'\n" "backup/release/${SOURCE_VERSION}"
   printf "Application directory backup created.\n\n"
 }
 
@@ -289,7 +290,7 @@ data_services_up() {
 }
 
 data_services_down() {
-  if [ ${ARE_DATA_SERVICES_UP} = false ]; then
+  if ! ${ARE_DATA_SERVICES_UP}; then
     docker compose \
       --progress quiet \
       --env-file "${APP_DIR}/.env.${APP_NAME}" \
@@ -300,14 +301,17 @@ data_services_down() {
 }
 
 dump_db() {
+  declare db_name="all" # for a single db, adapt 'pg_dumpall' options and "${POSTGRES_DB}" of docker environment file!
+  declare db_dump_file="${BACKUP_DIR}/${db_name}.sql"
+
   if docker compose \
     --env-file "${APP_DIR}/.env.${APP_NAME}" \
     --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
     --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
     exec -it "${DB_SERVICE_NAME}" \
-    pg_dumpall --username="${POSTGRES_USER}" >"${APP_DIR}/${BACKUP_DIR}/all.sql"; then
+    pg_dumpall --username="${POSTGRES_USER}" >"{APP_DIR}/${db_dump_file}"; then
 
-    printf -- "  - Current db dump has been saved at: '%s'\n" "${BACKUP_DIR}/all.sql"
+    printf -- "  - Current db dump has been saved at: '%s'\n" "${db_dump_file}"
 
   else
     declare continue
@@ -436,7 +440,7 @@ download_file() {
   declare local_file="${1}"
   declare remote_file="${REPO_URL}/${TARGET_VERSION}/${2}"
 
-  if curl --silent --fail --output "${local_file}" "${remote_file}"; then
+  if curl --silent --fail --output "${APP_DIR}/${local_file}" "${remote_file}"; then
     printf -- "- File '%s' successfully downloaded.\n" "${1}"
   else
     printf -- "- File '%s' download failed.\n\n" "${1}"
@@ -446,27 +450,27 @@ download_file() {
 }
 
 update_files() {
-  printf "5. File download\n"
+  printf "6. File download\n"
 
-  download_file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" docker-compose.yaml
-  download_file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" "docker-compose.${APP_NAME}.prod.yaml"
-  download_file "${APP_DIR}/scripts/make/${APP_NAME}.mk" scripts/make/prod.mk
+  download_file "docker-compose.${APP_NAME}.yaml" docker-compose.yaml
+  download_file "docker-compose.${APP_NAME}.prod.yaml" "docker-compose.${APP_NAME}.prod.yaml"
+  download_file "scripts/make/${APP_NAME}.mk" scripts/make/prod.mk
 
   printf "File download done.\n\n"
 }
 
 get_modified_file() {
-  declare source_file="${APP_DIR}/${1}"
+  declare source_file="${1}"
   declare target_file="${REPO_URL}/${TARGET_VERSION}/${2}"
   declare file_type="${3}"
   declare current_env_file=.env.${APP_NAME}
-  declare current_config_file="${APP_DIR}/config/frontend/default.conf.template"
+  declare current_config_file="config/frontend/default.conf.template"
 
-  if [ ! -f "${source_file}" ] ||
-    ! (curl --stderr /dev/null "${target_file}" | diff -q - "${source_file}" &>/dev/null); then
+  if [ ! -f "${APP_DIR}/${source_file}" ] ||
+    ! (curl --stderr /dev/null "${target_file}" | diff -q - "${APP_DIR}/${source_file}" &>/dev/null); then
 
     # no source file exists anymore
-    if [ ! -f "${source_file}" ]; then
+    if [ ! -f "${APP_DIR}/${source_file}" ]; then
       if [ "${file_type}" == "env-file" ]; then
         printf -- "- Environment template file '%s' does not exist anymore.\n\n" "${source_file}"
         printf "  A version %s environment template file will be downloaded now ...\n" "${TARGET_VERSION}"
@@ -483,7 +487,7 @@ get_modified_file() {
       fi
 
     # source file and target file differ
-    elif ! curl --stderr /dev/null "${target_file}" | diff -q - "${source_file}" &>/dev/null; then
+    elif ! curl --stderr /dev/null "${target_file}" | diff -q - "${APP_DIR}/${source_file}" &>/dev/null; then
       if [ "${file_type}" == "env-file" ]; then
         printf -- "- The current environment template file '%s' is outdated.\n\n" "${source_file}"
         printf "  A version %s environment template file will be downloaded now ...\n" "${TARGET_VERSION}"
@@ -493,8 +497,8 @@ get_modified_file() {
       fi
 
       if [ "${file_type}" == "conf-file" ]; then
-        mv "${source_file}" "${source_file}.old" 2>/dev/null
-        cp "${current_config_file}" "${current_config_file}.old"
+        mv "${APP_DIR}/${source_file}" "${APP_DIR}/${source_file}.old" 2>/dev/null
+        cp "${APP_DIR}/${current_config_file}" "${APP_DIR}/${current_config_file}.old"
         printf -- "- The current configuration template file '%s' is outdated.\n\n" "${source_file}"
         printf "  A version %s configuration template file will be downloaded now ...\n" "${TARGET_VERSION}"
         printf "  Please compare your current configuration file with the new template file and update it, "
@@ -504,7 +508,7 @@ get_modified_file() {
 
     fi
 
-    if curl --silent --fail --output "${source_file}" "${target_file}"; then
+    if curl --silent --fail --output "${APP_DIR}/${source_file}" "${target_file}"; then
       printf "  File '%s' was downloaded successfully.\n" "${source_file}"
 
       if [ "${file_type}" == "env-file" ]; then
@@ -535,7 +539,7 @@ get_modified_file() {
 }
 
 check_environment_file_modifications() {
-  printf "6. Environment template file modification check\n"
+  printf "7. Environment template file modification check\n"
 
   get_modified_file ".env.${APP_NAME}.template" ".env.${APP_NAME}.template" "env-file"
 
@@ -543,7 +547,7 @@ check_environment_file_modifications() {
 }
 
 check_config_files_modifications() {
-  printf "7. Configuration template files modification check\n"
+  printf "8. Configuration template files modification check\n"
 
   get_modified_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template "conf-file"
 
@@ -571,22 +575,19 @@ customize_settings() {
 }
 
 finalize_update() {
-  printf "8. Summary\n"
-  if [ "${HAS_ENV_FILE_UPDATE}" == "true" ] ||
-    [ "${HAS_CONFIG_FILE_UPDATE}" == "true" ] ||
-    [ "${HAS_MIGRATION_FILES}" == "true" ]; then
-
-    if [ "${HAS_ENV_FILE_UPDATE}" == "true" ] && [ "${HAS_CONFIG_FILE_UPDATE}" == "true" ]; then
+  printf "9. Summary\n"
+  if ${HAS_ENV_FILE_UPDATE} || ${HAS_CONFIG_FILE_UPDATE} || ${HAS_MIGRATION_FILES}; then
+    if ${HAS_ENV_FILE_UPDATE} && ${HAS_CONFIG_FILE_UPDATE}; then
       printf -- '- Version, environment, and configuration update applied!\n\n'
       printf "  PLEASE CHECK YOUR ENVIRONMENT AND CONFIGURATION FILES FOR MODIFICATIONS ! ! !\n\n"
-    elif [ "${HAS_ENV_FILE_UPDATE}" == "true" ]; then
+    elif ${HAS_ENV_FILE_UPDATE}; then
       printf -- '- Version and environment update applied!\n\n'
       printf "  PLEASE CHECK YOUR ENVIRONMENT FILE FOR MODIFICATIONS ! ! !\n\n"
-    elif [ "${HAS_CONFIG_FILE_UPDATE}" == "true" ]; then
+    elif ${HAS_CONFIG_FILE_UPDATE}; then
       printf -- '- Version and configuration update applied!\n\n'
       printf "  PLEASE CHECK YOUR CONFIGURATION FILES FOR MODIFICATIONS ! ! !\n\n"
     fi
-    if [ "${HAS_MIGRATION_FILES}" == "true" ]; then
+    if ${HAS_MIGRATION_FILES}; then
       printf -- '- Migration script(s) existing and execution is still pending!\n\n'
       printf "  PLEASE EXECUTE PENDING MIGRATION SCRIPTS ! ! !\n\n"
     fi
