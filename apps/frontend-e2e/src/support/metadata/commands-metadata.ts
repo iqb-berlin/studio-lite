@@ -6,7 +6,7 @@ Cypress.Commands.add('getRegistryAPI',
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: '/api/metadata-profile/registry',
+      url: '/api/metadata-profiles/registry',
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -20,7 +20,7 @@ Cypress.Commands.add('getMetadataAPI', (profile:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/metadata-profile?url=${profile}`,
+    url: `/api/metadata-profiles?url=${profile}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -62,7 +62,7 @@ Cypress.Commands.add('getVocabularyMetadataAPI', (profile: string, token:string)
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/metadata-profile/vocabularies',
+    url: '/api/metadata-profiles/vocabularies',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -84,7 +84,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
     // stableModulesOnly: `${settings.stableModulesOnly}`,
     cy.request({
       method: 'PATCH',
-      url: `/api/workspace/${wsId}/settings`,
+      url: `/api/workspaces/${wsId}/settings`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -112,7 +112,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
 //     const nu = parseInt(`${unitId}`, 10);
 //     cy.request({
 //       method: 'PATCH',
-//       url: `/api/workspace/${wsId}/${unitId}/metadata`,
+//       url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
 //       headers: {
 //         'app-version': Cypress.env('version'),
 //         authorization

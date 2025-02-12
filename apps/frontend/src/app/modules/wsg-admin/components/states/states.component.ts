@@ -9,8 +9,6 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatError } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-
-import { BackendService } from '../../services/backend.service';
 import { DeleteStateComponent } from '../delete-state/delete-state.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
@@ -34,8 +32,7 @@ export class StatesComponent implements OnInit {
   constructor(
     private wsgAdminService: WsgAdminService,
     private deleteStateDialog: MatDialog,
-    private translateService:TranslateService,
-    private backendService:BackendService
+    private translateService:TranslateService
   ) {}
 
   stateSelectionChange(value:string, type:string, id:string) {
@@ -92,7 +89,6 @@ export class StatesComponent implements OnInit {
       if (result) {
         this.states = this.states?.filter((s: State) => s.id !== state.id);
         this.changedStates = this.states as State[];
-        this.backendService.deleteStateInWorkspaceGroupUnits(this.wsgAdminService.selectedWorkspaceGroupId, state.id);
         this.hasChanged.emit(this.changedStates);
         this.stateDeleted.emit(this.changedStates);
       }

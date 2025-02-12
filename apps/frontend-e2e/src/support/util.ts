@@ -65,7 +65,7 @@ export function createWs(ws:string, group:string):void {
     .click();
   cy.get('input[placeholder="Bitte Namen eingeben"]')
     .type(ws);
-  cy.buttonToContinue('Anlegen', 201, '/api/admin/workspaces/*', 'POST', 'createWs');
+  cy.buttonToContinue('Anlegen', 201, '/api/group-admin/workspaces/*', 'POST', 'createWs');
 }
 
 export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {
@@ -216,7 +216,7 @@ export function deleteUnit(unit: UnitData):void {
     .click()
     .type(unit.shortname);
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  cy.buttonToContinue('Löschen', 200, '/api/workspace/*/*', 'DELETE', 'deleteUnit');
+  cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units/*', 'DELETE', 'deleteUnit');
 }
 
 export function deleteUnit2(kurzname: string):void {
@@ -235,7 +235,7 @@ export function addUnit(kurzname: string):void {
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
-  cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
+  cy.dialogButtonToContinue('Speichern', 201, '/api/workspaces/*/units', 'POST', 'addUnit');
 }
 
 export function addUnitPred(unit:UnitData):void {
@@ -275,7 +275,7 @@ export function addUnitPred(unit:UnitData):void {
       });
     }
   });
-  cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'addUnit');
+  cy.dialogButtonToContinue('Speichern', 201, '/api/workspaces/*/units', 'POST', 'addUnit');
 }
 
 export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData):void {
@@ -320,7 +320,7 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
       });
     }
   });
-  cy.dialogButtonToContinue('Speichern', 201, '/api/workspace/*/units', 'POST', 'createUnitFromExisting');
+  cy.dialogButtonToContinue('Speichern', 201, '/api/workspaces/*/units', 'POST', 'createUnitFromExisting');
 }
 
 export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):void {
@@ -334,7 +334,7 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
     .click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  // cy.buttonToContinue('Verschieben', 200, '/api/workspace/*/moveUnits', 'PATCH', 'createUnitFromExisting');
+  // cy.buttonToContinue('Verschieben', 200, '/api/workspaces/*/units/move', 'PATCH', 'createUnitFromExisting');
   cy.clickButton('Verschieben');
 }
 export function importExercise(): void {

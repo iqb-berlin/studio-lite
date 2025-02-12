@@ -42,7 +42,7 @@ export class BackendService {
 
   getUnitList(workspaceId: number, params?: HttpParams): Observable <UnitInListDto[]> {
     return this.http
-      .get<UnitInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/units`, { params: params })
+      .get<UnitInListDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units`, { params: params })
       .pipe(
         catchError(() => [])
       );
@@ -50,7 +50,7 @@ export class BackendService {
 
   getUsersList(workspaceId: number): Observable <UsersInWorkspaceDto | boolean> {
     return this.http
-      .get<UsersInWorkspaceDto>(`${this.serverUrl}workspace/${workspaceId}/users`)
+      .get<UsersInWorkspaceDto>(`${this.serverUrl}workspaces/${workspaceId}/users`)
       .pipe(
         catchError(() => of(false))
       );
@@ -58,7 +58,7 @@ export class BackendService {
 
   getUnitListWithMetadata(workspaceId: number): Observable <UnitMetadataDto[]> {
     return this.http
-      .get<UnitMetadataDto[]>(`${this.serverUrl}workspace/${workspaceId}/units/metadata`)
+      .get<UnitMetadataDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/metadata`)
       .pipe(
         catchError(() => [])
       );
@@ -66,17 +66,18 @@ export class BackendService {
 
   addUnit(workspaceId: number, newUnit: CreateUnitDto): Observable<number | null> {
     return this.http
-      .post<number>(`${this.serverUrl}workspace/${workspaceId}/units`, newUnit)
+      .post<number>(`${this.serverUrl}workspaces/${workspaceId}/units`, newUnit)
       .pipe(
         catchError(() => of(null)),
         map(returnId => Number(returnId))
       );
   }
 
-  // TOD0: queryParams Object
   deleteUnits(workspaceId: number, units: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    units.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}workspace/${workspaceId}/${units.join(';')}`)
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units`, { params: queryParams })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -86,7 +87,7 @@ export class BackendService {
   submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/submit_units`, { dropBoxId, units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/drop-box-history`, { targetId: dropBoxId, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -95,7 +96,7 @@ export class BackendService {
   returnSubmittedUnits(workspaceId: number, units: number[]): Observable<boolean | RequestReportDto> {
     return this.http
       .patch<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/return_submitted_units`, { units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/drop-box-history`, { ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -105,7 +106,7 @@ export class BackendService {
             units: number[],
             targetWorkspace: number): Observable<boolean | RequestReportDto> {
     return this.http.patch<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/units/move`, { targetWorkspace, units })
+      `${this.serverUrl}workspaces/${workspaceId}/units/workspace-id`, { targetId: targetWorkspace, ids: units })
       .pipe(
         catchError(() => of(false))
       );
@@ -117,7 +118,7 @@ export class BackendService {
             addComments?: boolean
   ): Observable<boolean | RequestReportDto> {
     return this.http.post<RequestReportDto>(
-      `${this.serverUrl}workspace/${workspaceId}/units/copy`, { targetWorkspace, units, addComments })
+      `${this.serverUrl}workspaces/${workspaceId}/units`, { targetId: targetWorkspace, ids: units, addComments })
       .pipe(
         catchError(() => of(false))
       );
@@ -127,8 +128,9 @@ export class BackendService {
     workspaceId: number, settings: UnitDownloadSettingsDto
   ): Observable<Blob | number | null> {
     let queryParams = new HttpParams();
+    queryParams = queryParams.append('download', true);
     queryParams = queryParams.append('settings', JSON.stringify(settings));
-    return this.http.get(`${this.serverUrl}workspace/${workspaceId}/download`, {
+    return this.http.get(`${this.serverUrl}workspaces/${workspaceId}`, {
       headers: {
         Accept: 'application/zip'
       },
@@ -155,20 +157,21 @@ export class BackendService {
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
                 unitList:number[]): Observable<Blob | null> {
     if (workspaceId > 0) {
+      let queryParams = new HttpParams();
+      queryParams = queryParams.append('format', contentOptions.exportFormat);
+      queryParams = queryParams.append('missingsProfile', contentOptions.missingsProfile);
+      queryParams = queryParams.append('generalInstructions', contentOptions.hasGeneralInstructions);
+      queryParams = queryParams.append('onlyManual', contentOptions.hasOnlyManualCoding);
+      queryParams = queryParams.append('closed', contentOptions.hasClosedVars);
+      queryParams = queryParams.append('derived', contentOptions.hasDerivedVars);
+      queryParams = queryParams.append('showScore', contentOptions.showScore);
+      queryParams = queryParams.append('codeLabelToUpper', contentOptions.codeLabelToUpper);
+      queryParams = queryParams.append('hideItemVarRelation', contentOptions.hideItemVarRelation);
+      queryParams = queryParams.append('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes);
+      unitList.forEach(id => { queryParams = queryParams.append('id', id); });
       return this.http
-        .get(`${this.serverUrl}download/docx/workspaces/${workspaceId}/coding-book/${unitList}`, {
-          params: new HttpParams()
-            .set('format', contentOptions.exportFormat)
-            .set('missingsProfile', contentOptions.missingsProfile)
-            .set('generalInstructions', contentOptions.hasGeneralInstructions)
-            .set('onlyManual', contentOptions.hasOnlyManualCoding)
-            .set('closed', contentOptions.hasClosedVars)
-            .set('derived', contentOptions.hasDerivedVars)
-            .set('showScore', contentOptions.showScore)
-            .set('codeLabelToUpper', contentOptions.codeLabelToUpper)
-            .set('hideItemVarRelation', contentOptions.hideItemVarRelation)
-            .set('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes),
-
+        .get(`${this.serverUrl}workspaces/${workspaceId}/units/coding-book`, {
+          params: queryParams,
           headers: {
             Accept: 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           },
@@ -184,7 +187,7 @@ export class BackendService {
   getUnitProperties(workspaceId: number, unitId: number): Observable<UnitMetadataDto | null> {
     if (workspaceId > 0 && unitId > 0) {
       return this.http
-        .get<UnitMetadataDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/metadata`)
+        .get<UnitMetadataDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/metadata`)
         .pipe(
           catchError(() => of(null))
         );
@@ -195,7 +198,7 @@ export class BackendService {
   getUnitDefinition(workspaceId: number, unitId: number): Observable<UnitDefinitionDto | null> {
     if (workspaceId > 0 && unitId > 0) {
       return this.http
-        .get<UnitDefinitionDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`)
+        .get<UnitDefinitionDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/definition`)
         .pipe(
           catchError(() => of(null))
         );
@@ -206,7 +209,7 @@ export class BackendService {
   getUnitScheme(workspaceId: number, unitId: number): Observable<UnitSchemeDto | null> {
     if (workspaceId > 0 && unitId > 0) {
       return this.http
-        .get<UnitSchemeDto>(`${this.serverUrl}workspace/${workspaceId}/${unitId}/scheme`)
+        .get<UnitSchemeDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/scheme`)
         .pipe(
           catchError(() => of(null))
         );
@@ -216,7 +219,7 @@ export class BackendService {
 
   setUnitMetadata(workspaceId: number, unitData: UnitMetadataDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitData.id}/metadata`, unitData)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitData.id}/metadata`, unitData)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -229,7 +232,7 @@ export class BackendService {
       for (let i = 0; i < files.length; i++) {
         formData.append('files', files[i]);
       }
-      return this.http.post<RequestReportDto>(`${this.serverUrl}workspace/${workspaceId}/upload`, formData, {
+      return this.http.post<RequestReportDto>(`${this.serverUrl}workspaces/${workspaceId}`, formData, {
         reportProgress: true,
         observe: 'events'
       }).pipe(
@@ -255,7 +258,7 @@ export class BackendService {
 
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/definition`, unitData)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/definition`, unitData)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -264,7 +267,7 @@ export class BackendService {
 
   setUnitScheme(workspaceId: number, unitId: number, unitData: UnitSchemeDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/${unitId}/scheme`, unitData)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/scheme`, unitData)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -273,7 +276,7 @@ export class BackendService {
 
   getReviewList(workspaceId: number): Observable <ReviewInListDto[]> {
     return this.http
-      .get<ReviewInListDto[]>(`${this.serverUrl}workspace/${workspaceId}/reviews`)
+      .get<ReviewInListDto[]>(`${this.serverUrl}workspaces/${workspaceId}/reviews`)
       .pipe(
         catchError(() => [])
       );
@@ -281,7 +284,7 @@ export class BackendService {
 
   getReview(workspaceId: number, reviewId: number): Observable <ReviewFullDto | null> {
     return this.http
-      .get<ReviewFullDto>(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviewId}`)
+      .get<ReviewFullDto>(`${this.serverUrl}workspaces/${workspaceId}/reviews/${reviewId}`)
       .pipe(
         map(r => {
           if (r.settings) {
@@ -300,7 +303,7 @@ export class BackendService {
 
   setReview(workspaceId: number, reviewId: number, reviewData: ReviewFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviewId}`, reviewData)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/reviews/${reviewId}`, reviewData)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -309,16 +312,16 @@ export class BackendService {
 
   addReview(workspaceId: number, newReview: CreateReviewDto): Observable<number | null> {
     return this.http
-      .post<number>(`${this.serverUrl}workspace/${workspaceId}/reviews`, newReview)
+      .post<number>(`${this.serverUrl}workspaces/${workspaceId}/reviews`, newReview)
       .pipe(
         catchError(() => of(null)),
         map(returnId => Number(returnId))
       );
   }
 
-  deleteReviews(workspaceId: number, reviews: number[]): Observable<boolean> {
+  deleteReview(workspaceId: number, review: number): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}workspace/${workspaceId}/reviews/${reviews.join(';')}`)
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/reviews/${review}`)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -331,7 +334,7 @@ export class BackendService {
 
   getUnitGroups(workspaceId: number): Observable <string[]> {
     return this.http
-      .get<string[]>(`${this.serverUrl}workspace/${workspaceId}/groups`)
+      .get<string[]>(`${this.serverUrl}workspaces/${workspaceId}/groups`)
       .pipe(
         catchError(() => [])
       );
@@ -339,9 +342,9 @@ export class BackendService {
 
   addUnitGroup(workspaceId: number, newGroup: string): Observable <boolean> {
     return this.http
-      .post(
-        `${this.serverUrl}workspace/${workspaceId}/group`,
-        { body: newGroup }
+      .patch(
+        `${this.serverUrl}workspaces/${workspaceId}/group-name`,
+        { groupName: newGroup }
       )
       .pipe(
         catchError(() => of(false)),
@@ -351,16 +354,9 @@ export class BackendService {
 
   deleteUnitGroup(workspaceId: number, group: string): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}workspace/${workspaceId}/group/${BackendService.utf8AsHexString(group)}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
-  }
-
-  deleteUnitState(workspaceId: number, unitId:number): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}workspace/${workspaceId}/${unitId}/state`)
+      .patch(
+        `${this.serverUrl}workspaces/${workspaceId}/group-name`,
+        { groupName: group, operation: 'remove' })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -370,8 +366,8 @@ export class BackendService {
   renameUnitGroup(workspaceId: number, oldGroupName: string, newGroupName: string): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}workspace/${workspaceId}/group/${BackendService.utf8AsHexString(oldGroupName)}`,
-        { body: newGroupName })
+        `${this.serverUrl}workspaces/${workspaceId}/group-name`,
+        { groupName: oldGroupName, newGroupName: newGroupName, operation: 'rename' })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -381,8 +377,8 @@ export class BackendService {
   setGroupUnits(workspaceId: number, groupName: string, units: number[]): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}workspace/${workspaceId}/group/${BackendService.utf8AsHexString(groupName)}/units`,
-        { units })
+        `${this.serverUrl}workspaces/${workspaceId}/units/group-name`,
+        { name: groupName, ids: units })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -399,6 +395,6 @@ export class BackendService {
   }
 
   getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
-    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspace/${workspaceId}/coding-report`);
+    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`);
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
@@ -29,7 +29,8 @@ export class BackendService {
 
   setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspace-groups/`, { id: workspaceGroupId, settings: settings })
+      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`,
+        { id: workspaceGroupId, settings: settings })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -46,7 +47,7 @@ export class BackendService {
 
   getWorkspaceById(workspaceId: number):Observable<boolean | WorkspaceFullDto> {
     return this.http
-      .get<WorkspaceFullDto>(`${this.serverUrl}workspace/${workspaceId}`)
+      .get<WorkspaceFullDto>(`${this.serverUrl}workspaces/${workspaceId}`)
       .pipe(
         catchError(() => of(false))
       );
@@ -54,25 +55,19 @@ export class BackendService {
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
+      .get<UserInListDto[]>(`${this.serverUrl}group-admin/users`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
   getUsersFull(): Observable<UserFullDto[]> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('full', true);
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}admin/users/full`)
+      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, { params: queryParams })
       .pipe(
         catchError(() => of([]))
-      );
-  }
-
-  getUserFull(id: number): Observable<UserFullDto | null> {
-    return this.http
-      .get<UserFullDto>(`${this.serverUrl}admin/users/${id}`)
-      .pipe(
-        catchError(() => of(null))
       );
   }
 
@@ -85,9 +80,9 @@ export class BackendService {
       );
   }
 
-  changeUserData(newData: UserFullDto): Observable<boolean> {
+  changeUserData(id: number, newData: UserFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users`, newData)
+      .patch(`${this.serverUrl}admin/users/${id}`, newData)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -95,8 +90,10 @@ export class BackendService {
   }
 
   deleteUsers(users: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    users.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/users/${users.join(';')}`)
+      .delete(`${this.serverUrl}admin/users`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -113,7 +110,7 @@ export class BackendService {
 
   setWorkspaceGroupsByAdmin(userId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, accessTo)
+      .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, { ids: accessTo })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -138,8 +135,10 @@ export class BackendService {
   }
 
   deleteVeronaModules(files: string[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    files.forEach(file => { queryParams = queryParams.append('key', file); });
     return this.http
-      .delete(`${this.serverUrl}admin/verona-modules/${files.join(';')}`)
+      .delete(`${this.serverUrl}admin/verona-modules`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -163,8 +162,10 @@ export class BackendService {
   }
 
   deleteWorkspaceGroups(ids: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspace-groups/${ids.join(';')}`)
+      .delete(`${this.serverUrl}admin/workspace-groups`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -173,7 +174,7 @@ export class BackendService {
 
   changeWorkspaceGroup(workspaceGroupData: WorkspaceGroupFullDto): Observable<boolean> {
     return this.http
-      .patch<boolean>(`${this.serverUrl}admin/workspace-groups`, workspaceGroupData)
+      .patch<boolean>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`, workspaceGroupData)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -198,33 +199,14 @@ export class BackendService {
       );
   }
 
-  deleteResourcePackage(id: number): Observable<boolean> {
+  deleteResourcePackages(ids: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/resource-packages/${id}`)
+      .delete(`${this.serverUrl}admin/resource-packages`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
-      );
-  }
-
-  deleteResourcePackages(params: HttpParams): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/resource-packages`, { params: params })
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
-  createResourcePackage(zippedResourcePackage: FormData): Observable<HttpEvent<unknown>> {
-    return this.http
-      .post(`${this.serverUrl}admin/resource-packages`, zippedResourcePackage, {
-        reportProgress: true,
-        observe: 'events'
-      })
-      .pipe(
-        catchError(err => of(err)),
-        map(progress => progress)
       );
   }
 
@@ -260,12 +242,15 @@ export class BackendService {
   }
 
   downloadModule(moduleKey: string): Observable<Blob> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('download', true);
     return this.http.get(
-      `${this.serverUrl}admin/verona-modules/download/${moduleKey}`,
+      `${this.serverUrl}verona-modules/${moduleKey}`,
       {
         headers: {
           Accept: 'text/html'
         },
+        params: queryParams,
         responseType: 'blob'
       }
     );
@@ -280,12 +265,14 @@ export class BackendService {
   }
 
   getXlsWorkspaces(): Observable<Blob> {
+    const queryParams = new HttpParams().set('download', 'true');
     return this.http.get(
-      `${this.serverUrl}download/xlsx/workspaces`,
+      `${this.serverUrl}admin/workspace-groups`,
       {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
+        params: queryParams,
         responseType: 'blob'
       }
     );

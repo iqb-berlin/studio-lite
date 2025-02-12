@@ -10,19 +10,22 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { MatDialog } from '@angular/material/dialog';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
-// eslint-disable-next-line max-len
-import { MetadataReadonlyItemsComponent } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
+import {
+  MetadataReadonlyItemsComponent
+} from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
 import { AliasId } from '../../models/alias-id.interface';
+import { NewItemComponent } from '../new-item/new-item.component';
 
 @Component({
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss'],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon, MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon,
+    MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
 })
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
@@ -37,6 +40,8 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() language!: string;
 
   @Output() metadataChange: EventEmitter<UnitMetadataValues> = new EventEmitter();
+
+  constructor(private addItemDialog: MatDialog) {}
 
   ngOnInit(): void {
     this.variablesLoader
@@ -67,7 +72,45 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   add(): void {
-    this.items.push({});
+    if (!this.items.length) {
+      this.addItem({});
+    } else {
+      this.openDialog();
+    }
+  }
+
+  private openDialog(): void {
+    const dialogRef = this.addItemDialog.open(NewItemComponent, {
+      autoFocus: false,
+      data: {
+        items: structuredClone(this.items)
+      },
+      width: '400px'
+    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((result?: number) => this.onCloseDialog(result));
+  }
+
+  private onCloseDialog(result?: number): void {
+    if (result === undefined) return;
+    if (result === -1) {
+      this.addItem({});
+    } else {
+      const item = structuredClone(this.items[result]);
+      this.addItem({
+        ...item,
+        id: undefined,
+        variableId: undefined,
+        variableReadOnlyId: undefined,
+        weighting: undefined,
+        description: undefined
+      });
+    }
+  }
+
+  private addItem(item: ItemsMetadataValues): void {
+    this.items.push(item);
     this.metadata.items = this.items;
     this.emitMetadata();
   }

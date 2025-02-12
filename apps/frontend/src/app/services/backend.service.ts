@@ -8,10 +8,9 @@ import {
   ConfigDto,
   AppLogoDto,
   MyDataDto,
-  VeronaModuleInListDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto, VeronaModuleFileDto, CreateUserDto, UserWorkspaceFullDto
+  ResourcePackageDto, CreateUserDto, UserWorkspaceFullDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -115,20 +114,10 @@ export class BackendService {
 
   getResourcePackages(): Observable<ResourcePackageDto[]> {
     return this.http
-      .get<ResourcePackageDto[]>(`${this.serverUrl}admin/resource-packages`, {})
+      .get<ResourcePackageDto[]>(`${this.serverUrl}resource-packages`, {})
       .pipe(
         catchError(() => of([]))
       );
-  }
-
-  getResourcePackage(name: string): Observable<Blob> {
-    return this.http
-      .get(`${this.serverUrl}admin/resource-packages/${name}`, {
-        headers: {
-          Accept: 'application/zip'
-        },
-        responseType: 'blob'
-      });
   }
 
   setUserPassword(oldPassword: string, newPassword: string): Observable<boolean> {
@@ -142,26 +131,10 @@ export class BackendService {
       );
   }
 
-  getModuleList(type?: string): Observable<VeronaModuleInListDto[]> {
-    return this.http
-      .get<VeronaModuleInListDto[]>(`${this.serverUrl}verona-modules${type ? `?type=${type}` : ''}`)
-      .pipe(
-        catchError(() => of(<VeronaModuleInListDto[]>[]))
-      );
-  }
-
-  getModuleHtml(moduleId: string): Observable<VeronaModuleFileDto | null> {
-    return this.http
-      .get<VeronaModuleFileDto>(`${this.serverUrl}verona-module/${moduleId}`)
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
-
   getWorkspaceData(workspaceId: number): Observable<WorkspaceFullDto | null> {
     return this.http
       .get<WorkspaceFullDto>(
-      `${this.serverUrl}workspace/${workspaceId}`
+      `${this.serverUrl}workspaces/${workspaceId}`
     )
       .pipe(
         catchError(() => of(null))
@@ -171,7 +144,7 @@ export class BackendService {
   getUserWorkspaceData(workspaceId: number, userId: number): Observable<UserWorkspaceFullDto | null> {
     return this.http
       .get<UserWorkspaceFullDto>(
-      `${this.serverUrl}workspace/${workspaceId}/users/${userId}`
+      `${this.serverUrl}workspaces/${workspaceId}/users/${userId}`
     )
       .pipe(
         catchError(() => of(null))
@@ -180,7 +153,7 @@ export class BackendService {
 
   setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/settings`, settings)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/settings`, settings)
       .pipe(
         map(() => true),
         catchError(() => of(false))

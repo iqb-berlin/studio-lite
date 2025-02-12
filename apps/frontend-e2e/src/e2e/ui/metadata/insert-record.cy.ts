@@ -33,7 +33,7 @@ describe('Metadata Management', () => {
     cy.visit('/');
   });
 
-  it('prepare context', () => {
+  it('prepares context', () => {
     createGroup(group);
     cy.visit('/');
     createWs(ws1, group);
@@ -44,7 +44,7 @@ describe('Metadata Management', () => {
     grantRemovePrivilege(Cypress.env('username'), ws2, AccessLevel.Admin);
   });
 
-  it('choose profiles from the group ', () => {
+  it('chooses profiles from the group ', () => {
     cy.visit('/');
     selectProfileForGroup(group, IqbProfile.DE);
     cy.visit('/');
@@ -52,14 +52,14 @@ describe('Metadata Management', () => {
   });
   // Execute only one of the two test: the previous oder this, not both together
 
-  it('choose profile for an area from a group', () => {
+  it('chooses profile for an area from a group', () => {
     cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group);
     cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.MA, ws2, group);
   });
 
-  it('choose a profile for an area from workspace', () => {
+  it('chooses a profile for an area from workspace', () => {
     cy.visit('/');
     cy.contains(ws1).click();
     selectProfileForArea(IqbProfile.DE);
@@ -68,13 +68,13 @@ describe('Metadata Management', () => {
     selectProfileForArea(IqbProfile.MA);
   });
 
-  it('create a new Unit in an area', () => {
+  it('creates a new Unit in an area', () => {
     cy.visit('/');
     cy.visitWs(ws2);
     addUnit('M1_001');
   });
 
-  it('create more than one Unit in an area', () => {
+  it('creates more than one Unit in an area', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     addUnit('D1_001');
@@ -83,7 +83,7 @@ describe('Metadata Management', () => {
     addUnit('D1_002');
   });
 
-  it('add metadata', () => {
+  it('adds metadata', () => {
     cy.visitWs(ws2);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
@@ -91,7 +91,7 @@ describe('Metadata Management', () => {
     cy.contains('Speichern').click();
   });
 
-  it('add metadata with more than one element', () => {
+  it('adds metadata with more than one element', () => {
     cy.visitWs(ws1);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
@@ -100,7 +100,7 @@ describe('Metadata Management', () => {
     cy.contains('Speichern').click();
   });
 
-  it('delete the data', () => {
+  it('deletes the data', () => {
     cy.visitWs(ws1);
     deleteUnit2('D1_001');
     deleteUnit2('D1_002');

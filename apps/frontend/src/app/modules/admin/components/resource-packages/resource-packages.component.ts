@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
-import { HttpParams } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -40,17 +39,8 @@ export class ResourcePackagesComponent implements OnInit {
     this.resourcePackages = this.readBackendService.getResourcePackages();
   }
 
-  delete(id: number) {
-    this.resourcePackages = this.writeBackendService.deleteResourcePackage(id)
-      .pipe(
-        switchMap(() => this.readBackendService.getResourcePackages())
-      );
-  }
-
   deleteSelected(): void {
-    let queryParams = new HttpParams();
-    this.selectedResourcePackages.value.forEach(id => { queryParams = queryParams.append('id', id); });
-    this.resourcePackages = this.writeBackendService.deleteResourcePackages(queryParams)
+    this.resourcePackages = this.writeBackendService.deleteResourcePackages(this.selectedResourcePackages.value)
       .pipe(
         switchMap(() => this.readBackendService.getResourcePackages())
       );

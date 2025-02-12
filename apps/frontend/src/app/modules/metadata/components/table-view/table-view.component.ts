@@ -17,7 +17,6 @@ import {
 import { ItemsMetadataValues, MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
@@ -61,7 +60,6 @@ interface ColumnValues {
     MatFormField,
     MatInput,
     MatLabel,
-    MatSlideToggle,
     MatSort
   ]
 })
@@ -242,7 +240,8 @@ export class TableViewComponent implements OnInit {
     const datePipe = new DatePipe('de-DE');
     if (this.viewMode === 'units') {
       this.metadataService
-        .downloadUnitsMetadataReport(
+        .downloadMetadataReport(
+          'unit',
           this.getTableUnitsColumnsDefinitions(),
           this.data.units.map(unit => unit.id)
         )
@@ -259,7 +258,8 @@ export class TableViewComponent implements OnInit {
     }
     if (this.viewMode === 'items') {
       this.metadataService
-        .downloadItemsMetadataReport(
+        .downloadMetadataReport(
+          'item',
           this.getTableItemsColumnsDefinitions(),
           this.data.units.map(unit => unit.id)
         )

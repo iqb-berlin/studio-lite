@@ -1,4 +1,8 @@
-import { UsersWorkspaceInListDto, UserWorkspaceAccessDto } from '@studio-lite-lib/api-dto';
+import {
+  UsersWorkspaceInListDto,
+  UserWorkspaceAccessDto,
+  UserWorkspaceAccessForGroupDto
+} from '@studio-lite-lib/api-dto';
 import { WorkspaceChecked } from './workspace-checked.class';
 
 export class WorkspaceToCheckCollection {
@@ -36,11 +40,11 @@ export class WorkspaceToCheckCollection {
     this.hasChanged = false;
   }
 
-  getChecks(): UserWorkspaceAccessDto[] {
-    const checkedWorkspacesIds: UserWorkspaceAccessDto[] = [];
+  getChecks(groupId: number): UserWorkspaceAccessForGroupDto {
+    const checkedWorkspacesIds: UserWorkspaceAccessForGroupDto = { groupId, workspaces: [] };
     this.entries.forEach(workspace => {
       if (workspace.isChecked) {
-        checkedWorkspacesIds.push(
+        checkedWorkspacesIds.workspaces.push(
           {
             id: workspace.id,
             accessLevel: workspace.accessLevel

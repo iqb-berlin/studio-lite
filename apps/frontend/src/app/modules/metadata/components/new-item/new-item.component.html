@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>{{'metadata.create-item' | translate}}</h2>
+<mat-dialog-content>
+  {{'metadata.create-item-description' | translate}}
+  <mat-form-field class="select-item">
+    <mat-label>{{'metadata.item-content' | translate}}</mat-label>
+    <mat-select [(value)]="selectedIndex">
+      @for (option of options; track option;  let  i = $index) {
+        <mat-option [value]="i">
+          {{option}}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          type="submit"
+          [mat-dialog-close]="selectedIndex - 1">
+    {{'confirm' | translate}}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="undefined">
+    {{'cancel' | translate}}
+  </button>
+</mat-dialog-actions>
+

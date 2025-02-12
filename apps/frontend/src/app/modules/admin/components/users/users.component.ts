@@ -104,6 +104,7 @@ export class UsersComponent implements OnInit {
 
   editUser(value: { selection: UserFullDto[], user: UntypedFormGroup }): void {
     this.appService.dataLoading = true;
+    const id = value.selection[0].id;
     const newPassword: string = value.user.get('password')?.value;
     const newName: string = value.user.get('name')?.value;
     const newFirstName: string = value.user.get('firstName')?.value;
@@ -111,7 +112,7 @@ export class UsersComponent implements OnInit {
     const newEmail: string = value.user.get('email')?.value;
     const newDescription: string = value.user.get('description')?.value;
     const newIsAdmin: boolean = value.user.get('isAdmin')?.value;
-    const changedData: UserFullDto = { id: value.selection[0].id };
+    const changedData: UserFullDto = { id: id };
     if (newName !== value.selection[0].name) changedData.name = newName;
     if (newDescription !== value.selection[0].description) changedData.description = newDescription;
     if (newFirstName !== value.selection[0].firstName) changedData.firstName = newFirstName;
@@ -119,7 +120,7 @@ export class UsersComponent implements OnInit {
     if (newEmail !== value.selection[0].email) changedData.email = newEmail;
     if (newPassword) changedData.password = newPassword;
     if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
-    this.backendService.changeUserData(changedData).subscribe(
+    this.backendService.changeUserData(id, changedData).subscribe(
       respOk => {
         this.updateUserList();
         if (respOk) {

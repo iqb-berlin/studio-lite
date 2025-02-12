@@ -49,9 +49,9 @@ export class DeleteReviewButtonComponent {
         if (result !== false) {
           this.changedChange.emit(false);
           this.appService.dataLoading = true;
-          this.backendService.deleteReviews(
+          this.backendService.deleteReview(
             this.workspaceId,
-            [this.selectedReviewId]
+            this.selectedReviewId
           ).subscribe(ok => {
             this.selectedReviewId = 0;
             this.appService.dataLoading = false;

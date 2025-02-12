@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
@@ -9,7 +9,8 @@ import {
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   WorkspaceGroupFullDto,
-  WorkspaceUserInListDto
+  WorkspaceUserInListDto,
+  UserWorkspaceAccessForGroupDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -23,15 +24,17 @@ export class BackendService {
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/users`)
+      .get<UserInListDto[]>(`${this.serverUrl}group-admin/users`)
       .pipe(
         catchError(() => of([]))
       );
   }
 
   getUsersFull(): Observable<UserFullDto[]> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('full', true);
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}admin/users/full`)
+      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, { params: queryParams })
       .pipe(
         catchError(() => of([]))
       );
@@ -39,7 +42,7 @@ export class BackendService {
 
   getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}group-admin/users/${userId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );
@@ -47,10 +50,9 @@ export class BackendService {
 
   setWorkspacesByUser(
     userId: number,
-    accessTo: UserWorkspaceAccessDto[],
-    workspaceGroupId: number): Observable<boolean> {
+    accessTo: UserWorkspaceAccessForGroupDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspaces/${workspaceGroupId}`, accessTo)
+      .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -67,7 +69,7 @@ export class BackendService {
 
   addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspaces/${createWorkspaceDto.groupId}`, createWorkspaceDto)
+      .post<boolean>(`${this.serverUrl}group-admin/workspaces`, createWorkspaceDto)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -76,7 +78,7 @@ export class BackendService {
 
   renameWorkspace(workspaceId: number, newName: string): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/rename/${newName}`, {})
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/name`, { name: newName })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -85,25 +87,18 @@ export class BackendService {
 
   selectWorkspaceDropBox(workspaceId: number, dropBoxId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace/${workspaceId}/drop-box`, { dropBoxId })
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/drop-box`, { dropBoxId })
       .pipe(
         map(() => true),
         catchError(() => of(false))
       );
   }
 
-  deleteWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
+  deleteWorkspaces(workspaces: number[]): Observable<boolean> {
+    let queryParams = new HttpParams();
+    workspaces.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`)
-      .pipe(
-        catchError(() => of(false)),
-        map(() => true)
-      );
-  }
-
-  deleteStateInWorkspaceGroupUnits(workspaceGroupId:number, stateId:number):Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}workspace-groups/${workspaceGroupId}/${stateId}`)
+      .delete(`${this.serverUrl}group-admin/workspaces`, { params: queryParams })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -112,7 +107,7 @@ export class BackendService {
 
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspaces/${workspaces.join(';')}/${workspaceGroupId}`, {})
+      .patch(`${this.serverUrl}group-admin/workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -122,7 +117,7 @@ export class BackendService {
   // *******************************************************************
   getUsersByWorkspace(workspaceId: number): Observable<WorkspaceUserInListDto[]> {
     return this.http
-      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}admin/workspaces/${workspaceId}/users`)
+      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`)
       .pipe(
         catchError(() => of([]))
       );
@@ -130,7 +125,7 @@ export class BackendService {
 
   setUsersByWorkspace(workspaceId: number, accessTo: UserWorkspaceAccessDto[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspaces/${workspaceId}/users`, accessTo)
+      .patch(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`, accessTo)
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -158,12 +153,14 @@ export class BackendService {
   }
 
   getXlsWorkspaces(workspaceGroupId: number): Observable<Blob> {
+    const queryParams = new HttpParams().set('download', 'true');
     return this.http.get(
-      `${this.serverUrl}download/xlsx/workspaces/${workspaceGroupId}`,
+      `${this.serverUrl}workspace-groups/${workspaceGroupId}`,
       {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
+        params: queryParams,
         responseType: 'blob'
       }
     );
