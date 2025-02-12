@@ -4,6 +4,8 @@ import { WorkspaceUnitController } from './workspace-unit.controller';
 import { AuthService } from '../services/auth.service';
 import { UnitService } from '../services/unit.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
+import { SettingService } from '../services/setting.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
@@ -23,6 +25,14 @@ describe('WorkspaceUnitController', () => {
         {
           provide: UnitService,
           useValue: createMock<UnitService>()
+        },
+        {
+          provide: SettingService,
+          useValue: createMock<SettingService>()
+        },
+        {
+          provide: WorkspaceService,
+          useValue: createMock<WorkspaceService>()
         },
         {
           provide: WorkspaceUserService,

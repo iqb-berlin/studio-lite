@@ -29,7 +29,7 @@ export class GroupAdminWorkspaceController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace retrieved successfully.' })
+  @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin Workspace not found.' })
   @ApiTags('group-admin workspace')
   async findOne(@Param('id') id: number): Promise<WorkspaceFullDto> {
@@ -39,7 +39,7 @@ export class GroupAdminWorkspaceController {
   @Get(':id/users')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace users retrieved successfully.' })
+  @ApiOkResponse({ description: 'Workspace users retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
   @ApiTags('group-admin workspace')
   async findOnesUsers(@Param('id') id: number): Promise<WorkspaceUserInListDto[]> {
@@ -49,6 +49,7 @@ export class GroupAdminWorkspaceController {
   @Patch(':id/users')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Workspace users updated successfully.' })
   @ApiTags('group-admin workspace')
   async patchOnesUsers(@Param('id') id: number,
     @Body() users: UserWorkspaceAccessDto[]) {
@@ -58,7 +59,7 @@ export class GroupAdminWorkspaceController {
   @Delete()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace deleted successfully.' })
+  @ApiOkResponse({ description: 'Workspaces deleted successfully.' })
   @ApiTags('group-admin workspace')
   @ApiQuery({
     name: 'id',
@@ -73,7 +74,7 @@ export class GroupAdminWorkspaceController {
   @Patch('group-id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin workspace moved successfully.' })
+  @ApiOkResponse({ description: 'Workspace moved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
   @ApiTags('group-admin workspace')
   async patchGroups(@User() user: UserEntity, @Body() body: MoveToDto): Promise<void> {
@@ -84,7 +85,7 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
-    description: 'Sends back the id of the new admin workspace in database',
+    description: 'Sends back the id of the new Workspace in database',
     type: Number
   })
   @ApiTags('group-admin workspace')

@@ -24,9 +24,7 @@ export class WorkspaceReviewController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiCreatedResponse({
-    type: [ReviewInListDto]
-  })
+  @ApiOkResponse({ description: 'Reviews retrieved successfully.' })
   @ApiTags('workspace review')
   async findAll(@WorkspaceId() workspaceId: number): Promise<ReviewInListDto[]> {
     return this.reviewService.findAll(workspaceId);
@@ -35,9 +33,7 @@ export class WorkspaceReviewController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({
-    type: ReviewFullDto
-  })
+  @ApiOkResponse({ description: 'Review retrieved successfully.' })
   @ApiTags('workspace review')
   async findOne(
     @Param('id', ParseIntPipe) reviewId: number

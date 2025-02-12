@@ -58,9 +58,11 @@ export class WorkspaceGroupController {
 
   @Patch()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
   @ApiBearerAuth()
   @ApiTags('workspace-group')
   async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
+    // TODO: use id for patching resource
     return this.workspaceGroupService.patch(workspaceGroupFullDto);
   }
 }

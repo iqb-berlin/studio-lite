@@ -33,7 +33,6 @@ export class SettingController {
     return this.settingService.findConfig();
   }
 
-  // TODO:  Könnte ein PUT sein?
   @Patch('config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Config settings updated successfully.' }) // TODO Exception?
@@ -50,7 +49,6 @@ export class SettingController {
     return this.settingService.findAppLogo();
   }
 
-  // TODO:  Könnte ein PUT sein?
   @Patch('app-logo')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'App logo updated successfully.' }) // TODO Exception?
@@ -67,9 +65,9 @@ export class SettingController {
     return this.settingService.findUnitExportConfig();
   }
 
-  // TODO:  Könnte ein PUT sein?
   @Patch('unit-export-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Unit export config updated successfully.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
@@ -78,6 +76,7 @@ export class SettingController {
 
   @Get('missings-profiles')
   @ApiOkResponse({ description: 'Missings profiles config retrieved successfully.' }) // TODO Exception
+  @ApiBearerAuth()
   @ApiTags('admin settings')
   async findMissingsProfiles(): Promise<MissingsProfilesDto[]> {
     return this.settingService.findMissingsProfiles();
@@ -86,6 +85,7 @@ export class SettingController {
   @Patch('missings-profiles')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Missings profiles config updated successfully.' })
   @ApiTags('admin settings')
   async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
     return this.settingService.patchMissingsProfiles(newMissingsProfiles);

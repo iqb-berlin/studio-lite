@@ -454,6 +454,7 @@ export class UsersService {
     });
   }
 
+  // TODO: mit Dtos
   async setWorkspaceGroupAdmins(workspaceGroupId: number, users: number[]) {
     return this.workspaceGroupAdminRepository.delete({ workspaceGroupId: workspaceGroupId }).then(async () => {
       await Promise.all(users.map(async userId => {
