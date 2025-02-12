@@ -75,12 +75,11 @@ export class WorkspaceGroupService {
     return newWorkspaceGroup.id;
   }
 
-  // TODO: Pfad mit Id (s. patch bei WorkspaceService und UsersService)
-  async patch(workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
+  async patch(id: number, workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
     this.logger.log(`Updating workspace group with id: ${workspaceGroupData.id}`);
-    if (workspaceGroupData.id) {
+    if (id) {
       const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
-        where: { id: workspaceGroupData.id }
+        where: { id: id }
       });
       if (workspaceGroupData.name) workspaceGroupToUpdate.name = workspaceGroupData.name;
       if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;

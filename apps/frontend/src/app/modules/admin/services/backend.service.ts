@@ -29,7 +29,8 @@ export class BackendService {
 
   setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspace-groups/`, { id: workspaceGroupId, settings: settings })
+      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`,
+        { id: workspaceGroupId, settings: settings })
       .pipe(
         catchError(() => of(false)),
         map(() => true)
@@ -173,7 +174,7 @@ export class BackendService {
 
   changeWorkspaceGroup(workspaceGroupData: WorkspaceGroupFullDto): Observable<boolean> {
     return this.http
-      .patch<boolean>(`${this.serverUrl}admin/workspace-groups`, workspaceGroupData)
+      .patch<boolean>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`, workspaceGroupData)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

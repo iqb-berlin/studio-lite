@@ -109,13 +109,14 @@ export class AdminWorkspaceGroupController {
     return this.workspaceGroupService.remove(ids);
   }
 
-  @Patch()
+  @Patch(':workspace_group_id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
   @ApiTags('admin workspace-group')
-  async patch(@Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
-    return this.workspaceGroupService.patch(workspaceGroupFullDto);
+  async patch(@WorkspaceGroupId() id: number, @Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
+    return this.workspaceGroupService.patch(id, workspaceGroupFullDto);
   }
 
   @Post()
