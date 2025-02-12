@@ -12,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -23,7 +24,6 @@ import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
-import { ShowCodingResultsComponent } from './show-coding-results.component';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -583,48 +583,8 @@ export class UnitPreviewComponent
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
         .map(vc => (vc.alias ? vc.alias : vc.id));
-      console.log(responses, 'responses');
       if (responses) {
-        let newResponses: Response[] = [];
-        const baseResponses: Response[] = [];
-        const subformResponses = responses.reduce((acc, item:Response) => {
-          if (item.subform !== undefined) {
-            if (!acc[item.subform]) {
-              acc[item.subform] = [];
-            }
-            acc[item.subform].push(item);
-          } else {
-            baseResponses.push(item);
-          }
-          return acc;
-        }, {} as Record<string, Response[]>);
-        console.log(baseResponses, 'baseResponses');
-        // eslint-disable-next-line no-restricted-syntax
-        for (const key in subformResponses) {
-          if (key === undefined) {
-            console.log('undefined');
-          }
-          if (key !== 'undefined') {
-            newResponses = [
-              ...newResponses,
-              ...this.workspaceService.codingSchemer.code([...subformResponses[key], ...baseResponses])
-            ];
-          } else {
-            newResponses = [
-              ...newResponses,
-              ...this.workspaceService.codingSchemer.code(subformResponses['no-subform'])
-            ];
-          }
-        }
-        console.log(subformResponses, 'subformResponses');
-        console.log(newResponses, 'newResponses');
-        const uniqueResponses = newResponses
-          .filter((item, index, self) => index === self
-            .findIndex(t => (
-              t.id === item.id && t.subform === item.subform
-            ))
-          );
-        this.showCodingResults([...uniqueResponses], varsWithCodes);
+        this.showCodingResults(responses, varsWithCodes);
       }
     }
   }
