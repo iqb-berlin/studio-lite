@@ -326,4 +326,4 @@ studio-lite-import-backend-vol:
 			-c "cd /usr/src/studio-lite-api/packages && tar xvzf /tmp/backend_vol.tar.gz --strip-components 4"
 
 studio-lite-update:
-	bash $(STUDIO_BASE_DIR)/scripts/update.sh
+	bash $(STUDIO_BASE_DIR)/scripts/update.sh -s $(TAG)
