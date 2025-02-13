@@ -35,6 +35,7 @@ type Missing = {
 interface BookVariable {
   id: string;
   label: string;
+  sourceType: string;
   generalInstruction: string;
   codes: CodeInfo[];
 }
@@ -281,7 +282,7 @@ export class DownloadWorkspacesClass {
     contentSetting: CodeBookContentSetting
   ): BookVariable | null {
     const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(variableCoding.codes, contentSetting);
-    const isDerived: boolean = variableCoding.sourceType !== 'BASE';
+    const isDerived: boolean = (variableCoding.sourceType !== 'BASE' && variableCoding.sourceType !== 'BASE_NO_VALUE');
     if (!isDerived || contentSetting.hasDerivedVars) {
       return DownloadWorkspacesClass.getManualOrClosedCodedBookVariable(contentSetting, codes, variableCoding);
     }
@@ -331,6 +332,7 @@ export class DownloadWorkspacesClass {
     return {
       id: variableCoding.alias || variableCoding.id,
       label: variableCoding.label,
+      sourceType: variableCoding.sourceType,
       generalInstruction: contentSetting.hasGeneralInstructions ?
         variableCoding.manualInstruction :
         '',
@@ -348,7 +350,8 @@ export class DownloadWorkspacesClass {
     return {
       key: unit.key,
       name: unit.name,
-      variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
+      variables: DownloadWorkspacesClass
+        .getSortedBookVariables(bookVariables.filter(v => v.sourceType !== 'BASE_NO_VALUE')),
       missings: missings,
       items: unit.metadata.items
     };
