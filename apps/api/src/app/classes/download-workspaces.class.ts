@@ -191,7 +191,6 @@ export class DownloadWorkspacesClass {
     const codebook: CodebookUnitDto[] = [];
     const profiles = await settingsService.findMissingsProfiles();
     const missings = profiles.length ? this.getProfileMissings(profiles, contentSetting.missingsProfile) : [];
-
     selectedUnits.forEach((unit: UnitMetadataDto) => {
       DownloadWorkspacesClass.setCodeBookDataForUnit(unit, contentSetting, codebook, missings);
     });
@@ -346,18 +345,17 @@ export class DownloadWorkspacesClass {
     codebook: CodebookUnitDto[],
     missings: Missing[]
   ): void {
-    const parsedScheme = new CodingScheme(unit.scheme);
-    if (parsedScheme?.variableCodings) {
-      const bookVariables = DownloadWorkspacesClass
-        .getBookVariables(parsedScheme.variableCodings, contentSetting);
-      codebook.push({
-        key: unit.key,
-        name: unit.name,
-        variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
-        missings: missings,
-        items: unit.metadata.items
-      });
-    }
+    const parsedScheme = unit.scheme ? new CodingScheme(unit.scheme) : null;
+    const variableCodings = parsedScheme?.variableCodings || [];
+    const bookVariables = DownloadWorkspacesClass
+      .getBookVariables(variableCodings, contentSetting);
+    codebook.push({
+      key: unit.key,
+      name: unit.name,
+      variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
+      missings: missings,
+      items: unit.metadata.items
+    });
   }
 
   private static getBookVariables(
