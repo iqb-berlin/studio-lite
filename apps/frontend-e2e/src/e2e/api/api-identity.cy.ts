@@ -97,8 +97,7 @@ describe('Identity tests users API tests', () => {
           });
       });
     });
-    it('200 negative test identity: should not create' +
-      ' a user if we do not type correctly the parameter identity.', () => {
+    it('200 negative test identity: should not create a user if we do not type correctly the parameter identity.', () => {
       // It does not create the user, if we don't type identity parameter correctly but other parameters.
       // create the token but not the id
       cy.request({
@@ -127,7 +126,6 @@ describe('Identity tests users API tests', () => {
       });
     });
     it('500 negative test: should not create a user if we do not type correctly the parameter name.', () => {
-      // sometimes it returns 201
       cy.request({
         method: 'POST',
         url: '/api/keycloak-login',
@@ -159,17 +157,11 @@ describe('Identity tests users API tests', () => {
         });
     });
     it('Delete all users', () => {
-      const ids = [
-        Cypress.env(`id_${cloakUser1.username}`),
-        Cypress.env(`id_${cloakUser2.username}`),
-        Cypress.env(`id_${fakeCloakUser3.username}`)];
-
-      cy.deleteUsersAPI(
-        ids,
-        Cypress.env(`token_${Cypress.env('username')}`)
-      ).then(resp => {
-        expect(resp.status).to.equal(200);
-      });
+      const ids = `id=${Cypress.env(`id_${cloakUser1.username}`)}&id=${Cypress.env(`id_${cloakUser2.username}`)}&id=${Cypress.env(`id_${fakeCloakUser3.username}`)}`;
+      cy.deleteUsersAPI(ids, Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+        });
     });
   });
 });
