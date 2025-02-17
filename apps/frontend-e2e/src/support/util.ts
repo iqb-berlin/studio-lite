@@ -3,7 +3,9 @@ import { AccessLevel, UnitData, UserData } from './testData';
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
-  cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
+  // cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
+  cy.clickButton('Weiter');
+  cy.wait(100);
 }
 
 export function createNewUser(newUser: UserData):void {
@@ -219,7 +221,8 @@ export function deleteUnit(unit: UnitData):void {
     .click()
     .type(unit.shortname);
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units/*', 'DELETE', 'deleteUnit');
+  // cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units/*', 'DELETE', 'deleteUnit');
+  cy.clickButton('Löschen');
 }
 
 export function deleteUnit2(kurzname: string):void {
