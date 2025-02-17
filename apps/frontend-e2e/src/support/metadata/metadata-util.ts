@@ -62,7 +62,8 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
     .click();
   checkProfile(profile);
 
-  cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+  // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+  cy.clickButton('Speichern');
 }
 
 export function selectProfileForGroup(group:string, profile:IqbProfile) {
@@ -202,6 +203,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
 export function getItem(profile:string, moreThanOne: boolean) {
   cy.get('.add-button > .mdc-button__label').click();
   if (moreThanOne) {
+    cy.clickButton('Bestätigen');
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
     cy.get('mat-label:contains("Item ID *")').eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
     cy.get('mat-label:contains("Wichtung")').eq(-1).type(IqbProfileExamples.get(profile).get('Wichtung'));

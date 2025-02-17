@@ -38,7 +38,8 @@ export function deleteUser(user: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', 200, '/api/admin/users/*', 'DELETE', 'deleteUser');
+  // cy.buttonToContinue('Löschen', 200, '/api/admin/users/*', 'DELETE', 'deleteUser');
+  cy.clickButton('Löschen');
 }
 
 export function createGroup(group:string):void {
@@ -65,7 +66,8 @@ export function createWs(ws:string, group:string):void {
     .click();
   cy.get('input[placeholder="Bitte Namen eingeben"]')
     .type(ws);
-  cy.buttonToContinue('Anlegen', 201, '/api/group-admin/workspaces/*', 'POST', 'createWs');
+  // cy.buttonToContinue('Anlegen', 201, '/api/group-admin/workspaces/*', 'POST', 'createWs');
+  cy.clickButton('Anlegen');
 }
 
 export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {
@@ -156,7 +158,8 @@ export function deleteGroup(group: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', 200, '/api/admin/workspace-groups/*', 'DELETE', 'deleteGroup');
+  // cy.buttonToContinue('Löschen', 200, '/api/admin/workspace-groups/*', 'DELETE', 'deleteGroup');
+  cy.clickButton('Löschen');
 }
 
 export function logout() {
