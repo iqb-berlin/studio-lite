@@ -124,7 +124,8 @@ declare namespace Cypress {
     deleteGroupAPI(id: string, token: string): Chainable<Response>; // 80
 
     deleteModuleAPI(module: string, token: string): Chainable<Response>; // 89
-    deleteUserAPI(id: string, token: string): Chainable<Response>; // 90
+    deleteUserAPI(id:string, token: string): Chainable<Response>; // 90
+    deleteUsersAPI(ids:string, token: string): Chainable<Response>; // 90
 
     getSettingConfigAPI(token:string): Chainable<Response>; // 100
     updateSettingConfigAPI(token:string, hour: number): Chainable<Response>; // 101
