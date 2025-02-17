@@ -39,10 +39,11 @@ describe('Identity tests users API tests', () => {
       });
   });
   after(() => {
-    cy.deleteFirstUserAPI().then(resp => {
-      Cypress.env('token_admin', '');
-      expect(resp.status).to.equal(200);
-    });
+    cy.deleteUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
+      .then(resp => {
+        Cypress.env('token_admin', '');
+        expect(resp.status).to.equal(200);
+      });
   });
   describe('5. POST /api/keycloak-login', () => {
     it('201 positive test: all users are not admin users', () => {
@@ -156,15 +157,8 @@ describe('Identity tests users API tests', () => {
         });
     });
     it('Delete all users', () => {
-      cy.deleteUserAPI(Cypress.env(`id_${cloakUser1.username}`), Cypress.env(`token_${Cypress.env('username')}`))
-        .then(resp => {
-          expect(resp.status).to.equal(200);
-        });
-      cy.deleteUserAPI(Cypress.env(`id_${cloakUser2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
-        .then(resp => {
-          expect(resp.status).to.equal(200);
-        });
-      cy.deleteUserAPI(Cypress.env(`id_${fakeCloakUser3.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+      const ids = `id=${Cypress.env(`id_${cloakUser1.username}`)}&id=${Cypress.env(`id_${cloakUser2.username}`)}&id=${Cypress.env(`id_${fakeCloakUser3.username}`)}`;
+      cy.deleteUsersAPI(ids, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
