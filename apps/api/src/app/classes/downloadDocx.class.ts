@@ -41,7 +41,7 @@ export class DownloadDocx {
       let missings: Paragraph[] = [];
       codingBookUnits.forEach(variableCoding => {
         missings = DownloadDocx.getMissings(variableCoding);
-        if (variableCoding.variables.length) {
+        if (variableCoding.variables.length || !contentSetting.hasOnlyVarsWithCodes) {
           units.push(...(DownloadDocx
             .createDocXForUnit(
               variableCoding.items,
