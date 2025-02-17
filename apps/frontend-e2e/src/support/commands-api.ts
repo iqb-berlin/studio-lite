@@ -1473,7 +1473,7 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/resource-packages/${packageId}`,
+    url: `/api/admin/resource-packages?id=${packageId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
