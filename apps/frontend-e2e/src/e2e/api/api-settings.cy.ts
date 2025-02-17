@@ -44,10 +44,11 @@ describe('Admin settings API tests', () => {
       .then(resp => {
         expect(resp.status).to.equal(200);
       });
-    cy.deleteFirstUserAPI().then(resp => {
-      Cypress.env('token_admin', '');
-      expect(resp.status).to.equal(200);
-    });
+    cy.deleteUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
+      .then(resp => {
+        Cypress.env('token_admin', '');
+        expect(resp.status).to.equal(200);
+      });
   });
 
   describe('100. GET /api/admin/settings/config', () => {
