@@ -1295,7 +1295,23 @@ Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${id}`,
+    url: '/api/admin/users/',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    qs: {
+      id: `${id}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('deleteUsersAPI', (ids: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users?${ids}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
