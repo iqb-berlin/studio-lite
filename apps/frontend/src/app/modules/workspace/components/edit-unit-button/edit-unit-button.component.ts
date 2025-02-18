@@ -157,9 +157,8 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
                   });
                 } else {
                   this.backendService.copyUnits(
-                    this.workspaceService.selectedWorkspaceId,
-                    dialogComponent.selectedUnits,
                     dialogComponent.targetWorkspace,
+                    dialogComponent.selectedUnits,
                     dialogComponent.copyComments
                   ).subscribe(uploadStatus => {
                     this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
