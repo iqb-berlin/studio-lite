@@ -53,6 +53,11 @@ class Unit {
     definitionId: number;
 
   @Column({
+    name: 'metadata_id'
+  })
+    metadataId: number;
+
+  @Column({
     type: 'jsonb',
     array: false,
     default: () => "'[]'",

@@ -1,27 +1,17 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-class UnitComment {
+class UnitItem {
   @PrimaryGeneratedColumn()
     id: number;
 
   @Column()
-    body: string;
+    alias: string;
 
   @Column({
-    name: 'user_name'
+    name: 'metadata_id'
   })
-    userName: string;
-
-  @Column({
-    name: 'user_id'
-  })
-    userId: number;
-
-  @Column({
-    name: 'parent_id'
-  })
-    parentId: number | null;
+    metadataId: number;
 
   @Column({
     name: 'unit_id'
@@ -29,9 +19,15 @@ class UnitComment {
     unitId: number;
 
   @Column({
-    name: 'item_id'
+    name: 'variable_id'
   })
-    itemId: number;
+    variableId: string;
+
+  @Column()
+    weighting: number;
+
+  @Column()
+    description: string;
 
   @Column({
     type: 'timestamp with time zone',
@@ -46,4 +42,4 @@ class UnitComment {
     changedAt: Date;
 }
 
-export default UnitComment;
+export default UnitItem;
