@@ -297,8 +297,8 @@ export class WorkspaceUnitController {
     @Body() body: CreateUnitDto | CopyUnitDto,
     @User() user: UserEntity
   ) {
-    if ('targetId' in body) {
-      return this.unitService.copy(body.ids, body.targetId, user, body.addComments);
+    if ('addComments' in body) {
+      return this.unitService.copy(body.ids, workspaceId, user, body.addComments);
     }
     return this.unitService.create(workspaceId, body, user, false);
   }
