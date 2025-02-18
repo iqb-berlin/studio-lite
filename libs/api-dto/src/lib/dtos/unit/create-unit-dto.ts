@@ -34,5 +34,8 @@ export class CreateUnitDto {
     metadata?: UnitMetadataValues;
 
   @ApiProperty()
+    metadataId?: number;
+
+  @ApiProperty()
     variables?: VariableInfo[];
 }

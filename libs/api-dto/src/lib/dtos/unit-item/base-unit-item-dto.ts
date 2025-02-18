@@ -1,26 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UnitCommentDto {
-  @ApiProperty()
-    id!: number;
+export class BaseUnitItemDto {
+  @ApiProperty({ example: 'item01' })
+    alias?: string;
 
   @ApiProperty()
-    body!: string;
+    variableId?: string;
 
   @ApiProperty()
-    userName!: string;
+    weighting?: number;
 
   @ApiProperty()
-    userId!: number;
+    description?: string;
 
   @ApiProperty()
-    parentId?: number | null;
+    unitId!: number;
 
   @ApiProperty()
-    unitId?: number;
-
-  @ApiProperty()
-    itemId?: number;
+    metadataId?: number;
 
   @ApiProperty()
     createdAt?: Date;
