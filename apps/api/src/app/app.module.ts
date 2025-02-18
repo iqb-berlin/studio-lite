@@ -63,6 +63,10 @@ import { ReviewUnitCommentController } from './controllers/review-unit-comment.c
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { GroupAdminUserController } from './controllers/group-admin-user-controller';
+import { UnitItemController } from './controllers/unit-item.controller';
+import Metadata from './entities/metadata.entity';
+import { UnitItemService } from './services/unit-item.service';
+import UnitItem from './entities/unit-item.entity';
 
 @Module({
   imports: [
@@ -100,6 +104,8 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     ResourcePackage,
     Review,
     ReviewUnit,
+    UnitItem,
+    Metadata,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -129,7 +135,9 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
           UnitUser,
           WorkspaceGroupAdmin,
           Review,
-          ReviewUnit
+          ReviewUnit,
+          UnitItem,
+          Metadata
         ],
         synchronize: false
       }),
@@ -155,7 +163,9 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
       UnitUser,
       WorkspaceGroupAdmin,
       Review,
-      ReviewUnit
+      ReviewUnit,
+      UnitItem,
+      Metadata
     ]),
     MulterModule
   ],
@@ -178,7 +188,8 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     ReviewUnitController,
     ReviewUnitCommentController,
     MetadataController,
-    WorkspaceGroupController
+    WorkspaceGroupController,
+    UnitItemController
   ],
   providers: [
     AppVersionProvider,
@@ -199,7 +210,8 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     UnitUserService,
     VeronaModulesService,
     SettingService,
-    ReviewService
+    ReviewService,
+    UnitItemService
   ],
   exports: [AppVersionProvider]
 })
