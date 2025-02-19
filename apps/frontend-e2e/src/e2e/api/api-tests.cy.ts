@@ -236,7 +236,7 @@ describe('Studio API tests', () => {
 
     describe('7. GET /api/admin/group-users/full', () => {
       it('200 positive test: admin user can retrieve all users data', () => {
-        cy.getUsersFullAPI(Cypress.env(`token_${Cypress.env('username')}`))
+        cy.getUsersFullAPI(false, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
             expect(resp.body.length).to.equal(2);
@@ -244,7 +244,7 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: normal user can not use this api call', () => {
-        cy.getUsersFullAPI(Cypress.env(`token_${user2.username}`))
+        cy.getUsersFullAPI(false, Cypress.env(`token_${user2.username}`))
           .then(resp2 => {
             expect(resp2.status).to.equal(401);
           });
