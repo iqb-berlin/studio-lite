@@ -127,6 +127,7 @@ describe('Identity tests users API tests', () => {
       });
     });
     it('500 negative test: should not create a user if we do not type correctly the parameter name.', () => {
+      // sometimes it returns 201
       cy.request({
         method: 'POST',
         url: '/api/keycloak-login',

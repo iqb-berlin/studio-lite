@@ -45,7 +45,7 @@ declare namespace Cypress {
     keycloakAPI(user: UserData): Chainable<Response>; // 5
 
     createUserAPI(userData: UserData, token: string): Chainable<Response>; // 6
-    getUsersFullAPI(token: string): Chainable<Response>; // 7
+    getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 7
     getUserAPI(id: string, token: string): Chainable<Response>; // 8
     getUserNoIdAPI(token: string): Chainable<Response>; // 9
     updateUserAPI(user: UserData, credentials: boolean, token: string): Chainable<Response>; // 10
