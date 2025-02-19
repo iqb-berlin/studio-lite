@@ -29,11 +29,6 @@ class UnitComment {
     unitId: number;
 
   @Column({
-    name: 'item_id'
-  })
-    itemId: number;
-
-  @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })

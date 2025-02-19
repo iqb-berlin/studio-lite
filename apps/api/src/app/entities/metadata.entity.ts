@@ -14,6 +14,19 @@ class Metadata {
   })
     data: MetadataValuesEntry[] = [];
 
+  @Column({
+    name: 'unit_id'
+  })
+    unitId: number;
+
+  @Column({
+    name: 'item_id'
+  })
+    itemId: number;
+
+  @Column()
+    reference: string;
+
   @Column()
     profile: string;
 

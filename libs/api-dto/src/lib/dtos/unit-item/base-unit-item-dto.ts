@@ -2,7 +2,16 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class BaseUnitItemDto {
   @ApiProperty({ example: 'item01' })
-    alias?: string;
+    key?: string;
+
+  @ApiProperty()
+    order?: number;
+
+  @ApiProperty()
+    position?: string;
+
+  @ApiProperty()
+    locked?: boolean;
 
   @ApiProperty()
     variableId?: string;
@@ -15,9 +24,6 @@ export class BaseUnitItemDto {
 
   @ApiProperty()
     unitId!: number;
-
-  @ApiProperty()
-    metadataId?: number;
 
   @ApiProperty()
     createdAt?: Date;

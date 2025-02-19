@@ -69,3 +69,5 @@ export { WorkspaceUserInListDto } from './lib/dtos/user/workspace-user-in-list-d
 export { BaseUnitItemDto } from './lib/dtos/unit-item/base-unit-item-dto';
 export { UnitItemDto } from './lib/dtos/unit-item/unit-item-dto';
 export { MetadataDto } from './lib/dtos/metadata/metadata-dto';
+export { UnitProfileMetadataDto } from './lib/dtos/metadata/unit-metadata-dto';
+export { UnitItemMetadataDto } from './lib/dtos/metadata/unit-item-metadata-dto';

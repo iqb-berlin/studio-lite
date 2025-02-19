@@ -31,9 +31,6 @@ export class UnitMetadataDto {
     metadata?: UnitMetadataValues;
 
   @ApiProperty()
-    metadataId?: number;
-
-  @ApiProperty()
     player?: string;
 
   @ApiProperty()

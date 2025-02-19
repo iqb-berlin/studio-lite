@@ -6,12 +6,16 @@ class UnitItem {
     id: number;
 
   @Column()
-    alias: string;
+    key: string;
 
-  @Column({
-    name: 'metadata_id'
-  })
-    metadataId: number;
+  @Column()
+    order: number;
+
+  @Column()
+    locked: boolean;
+
+  @Column()
+    position: string;
 
   @Column({
     name: 'unit_id'

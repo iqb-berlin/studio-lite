@@ -15,7 +15,4 @@ export class CreateUnitCommentDto {
 
   @ApiProperty()
     unitId?: number;
-
-  @ApiProperty()
-    itemId?: number;
 }
