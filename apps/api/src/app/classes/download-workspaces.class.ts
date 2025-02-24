@@ -226,7 +226,7 @@ export class DownloadWorkspacesClass {
   }
 
   private static isClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO');
+    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE');
   }
 
   private static isManual(variableCodingData: VariableCodingData): boolean {
@@ -234,11 +234,13 @@ export class DownloadWorkspacesClass {
   }
 
   private static isManualWithoutClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.manualInstruction && codeData.type !== 'RESIDUAL_AUTO');
+    return variableCodingData.codes.some(codeData => codeData.manualInstruction &&
+      (codeData.type !== 'RESIDUAL_AUTO' && codeData.type !== 'INTENDED_INCOMPLETE'));
   }
 
   private static isClosedWithoutManual(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO' && !codeData.manualInstruction);
+    return variableCodingData.codes
+      .some(codeData => (codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE') && !codeData.manualInstruction);
   }
 
   private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
