@@ -430,6 +430,7 @@
     "status": "Status",
     "code": "Code",
     "score": "Bewertung",
+    "subform": "Unterformular",
     "raw-responses": "Rohdaten anzeigen",
     "has-only-vars-with-codes": "Nur Variablen mit Codes",
     "vars-with-codes-only": "Nur Variablen mit Codes",

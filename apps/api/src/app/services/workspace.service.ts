@@ -282,7 +282,7 @@ export class WorkspaceService {
                     if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) manualCodingOnly = false;
                     hasRules = ruleSet.rules.length > 0;
                   });
-                  closedCoding = code.type === 'RESIDUAL_AUTO';
+                  closedCoding = code.type === 'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE';
                 });
               }
               if (closedCoding) {

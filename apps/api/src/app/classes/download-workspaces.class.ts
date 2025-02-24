@@ -35,6 +35,7 @@ type Missing = {
 interface BookVariable {
   id: string;
   label: string;
+  sourceType: string;
   generalInstruction: string;
   codes: CodeInfo[];
 }
@@ -225,7 +226,7 @@ export class DownloadWorkspacesClass {
   }
 
   private static isClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO');
+    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE');
   }
 
   private static isManual(variableCodingData: VariableCodingData): boolean {
@@ -233,11 +234,13 @@ export class DownloadWorkspacesClass {
   }
 
   private static isManualWithoutClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.manualInstruction && codeData.type !== 'RESIDUAL_AUTO');
+    return variableCodingData.codes.some(codeData => codeData.manualInstruction &&
+      (codeData.type !== 'RESIDUAL_AUTO' && codeData.type !== 'INTENDED_INCOMPLETE'));
   }
 
   private static isClosedWithoutManual(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO' && !codeData.manualInstruction);
+    return variableCodingData.codes
+      .some(codeData => (codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE') && !codeData.manualInstruction);
   }
 
   private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
@@ -281,7 +284,7 @@ export class DownloadWorkspacesClass {
     contentSetting: CodeBookContentSetting
   ): BookVariable | null {
     const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(variableCoding.codes, contentSetting);
-    const isDerived: boolean = variableCoding.sourceType !== 'BASE';
+    const isDerived: boolean = (variableCoding.sourceType !== 'BASE' && variableCoding.sourceType !== 'BASE_NO_VALUE');
     if (!isDerived || contentSetting.hasDerivedVars) {
       return DownloadWorkspacesClass.getManualOrClosedCodedBookVariable(contentSetting, codes, variableCoding);
     }
@@ -331,6 +334,7 @@ export class DownloadWorkspacesClass {
     return {
       id: variableCoding.alias || variableCoding.id,
       label: variableCoding.label,
+      sourceType: variableCoding.sourceType,
       generalInstruction: contentSetting.hasGeneralInstructions ?
         variableCoding.manualInstruction :
         '',
@@ -348,7 +352,8 @@ export class DownloadWorkspacesClass {
     return {
       key: unit.key,
       name: unit.name,
-      variables: DownloadWorkspacesClass.getSortedBookVariables(bookVariables),
+      variables: DownloadWorkspacesClass
+        .getSortedBookVariables(bookVariables.filter(v => v.sourceType !== 'BASE_NO_VALUE')),
       missings: missings,
       items: unit.metadata.items
     };
