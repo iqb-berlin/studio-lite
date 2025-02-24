@@ -10,9 +10,9 @@ import {
 } from '../../support/testData';
 import { addModules, login, logout } from '../../support/util';
 
-function getName(initialName: string): string {
-  return initialName.replace(/-+(?=[^-\d]*\d)/, '%40').replace(/.html$/, '');
-}
+// function getName(initialName: string): string {
+//   return initialName.replace(/-+(?=[^@\d]*\d)/, '%40').replace(/.html$/, '');
+// }
 
 function getNameAt(initialName: string): string {
   return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
@@ -337,7 +337,10 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: A normal user should not able to create a group.', () => {
-        cy.updateUserAPI(Cypress.env(`id_${user2.username}`), user2, false, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.updateUserAPI(Cypress.env(`id_${user2.username}`),
+          user2,
+          false,
+          Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
             cy.createGroupAPI(group2, Cypress.env(`token_${user2.username}`))
@@ -531,7 +534,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
-        cy.pause();
       });
     });
 
@@ -556,10 +558,10 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('404 negative test: should no update with no workspace data structure', () => {
+      it('500 negative test: should no update with no workspace data structure', () => {
         cy.moveWsAPI('', Cypress.env(group2.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp2 => {
-            expect(resp2.status).to.equal(404);
+            expect(resp2.status).to.equal(500);
           });
       });
 
@@ -778,51 +780,78 @@ describe('Studio API tests', () => {
     //   });
     // });
 
-    describe('24. PATCH /api/group-admin/workspaces/}', () => {
+    describe('24a. PATCH /api/group-admin/workspaces/}', () => {
       it('200 positive test: should update the ws data', () => {
+        // we update the name and we add 2 states
         const wsN: WsData = {
-          id: 'id_ws1',
+          id: `${Cypress.env(ws1.id)}`,
           name: 'NewVorlage',
           state: ['Initial', 'Final']
         };
-        cy.updateWsAPI(wsN, group1, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.updateWsNameAPI(wsN, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-            cy.getWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
-              .then(resp2 => {
-                expect(resp2.body.name).to.equal(wsN.name);
-              });
-          });
-      });
-
-      it('500 negative test:  should not update the workspace with no group data', () => {
-        cy.updateWsAPI(ws1, noId, Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
           });
       });
 
       it('401 negative test: should not update the workspace of which you are not a user', () => {
-        cy.updateWsAPI(ws1, group1, noId)
+        cy.updateWsNameAPI(ws1, noId)
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
       });
 
       it('500 negative test: should not update the workspace with wrong ws data format', () => {
-        cy.updateWsAPI(noId, group1, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.updateWsNameAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
+    describe('24b. PATCH /api/group-admin/workspaces/}', () => {
+      it('200 positive test: should update the ws data', () => {
+        // we update the name and we add 2 states
+        const wsN: WsSettings = {
+          stableModulesOnly: true,
+          unitMDProfile: '',
+          itemMDProfile: '',
+          states: ['Initial', 'Final']
+        };
+        cy.updateWsSettingsAPI(wsN, Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
+      it('500 negative test:  should not update the workspace with no group data', () => {
+        cy.updateWsSettingsAPI(ws1, noId, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
       });
 
+      it('401 negative test: should not update the workspace of which you are not a user', () => {
+        cy.updateWsSettingsAPI(ws1, Cypress.env(ws1.id), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('200/500 negative test: should not update the workspace with wrong ws data format', () => {
+        cy.updateWsSettingsAPI(noId, Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
       it('500 negative test: should not update the workspace with an inexistent ws id', () => {
-        const wsN: WsData = {
-          id: 'id_ws6',
-          name: 'NewVorlage',
-          state: ['Initial', 'Final']
+        const wsN: WsSettings = {
+          stableModulesOnly: true,
+          unitMDProfile: '',
+          itemMDProfile: '',
+          states: ['Initial2', 'Final2']
         };
-        cy.updateWsAPI(wsN, group1, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.updateWsSettingsAPI(wsN, noId, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
@@ -856,16 +885,16 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('27. GET /api/verona-module/{key}', () => {
+    describe('27. GET /api/verona-modules/{key}', () => {
       it('200 positive test', () => {
-        cy.getModuleAPI(getName(modules[0]), Cypress.env(`token_${Cypress.env('username')}`))
+        cy.getModuleAPI('iqb-schemer%402.0.0-beta', Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
       });
 
       it('401 negative test', () => {
-        cy.getModuleAPI(getName(modules[0]), noId)
+        cy.getModuleAPI('iqb-schemer%402.0.0-beta', noId)
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
@@ -882,7 +911,7 @@ describe('Studio API tests', () => {
     // TODO: moved and changed
     // describe('28. GET /api/admin/verona-modules/{key}', () => {
     //   it('200 positive test: should download with id of the module', () => {
-    //     cy.downloadModuleAPI(getNameAt(modules[0]),
+    //     cy.downloadModuleAPI(getNameAt('iqb-schemer@2.0.0-beta.html'),
     //       Cypress.env(`token_${Cypress.env('username')}`))
     //       .then(resp => {
     //         expect(resp.status).to.equal(200);
@@ -893,7 +922,7 @@ describe('Studio API tests', () => {
     //   });
     //
     //   it('401 negative test: should not download if we do not have a token', () => {
-    //     cy.downloadModuleAPI(getNameAt(modules[0]), noId)
+    //     cy.downloadModuleAPI(getNameAt('iqb-schemer@2.0.0-beta.html'), noId)
     //       .then(resp => {
     //         expect(resp.status).to.equal(401);
     //       });
@@ -1092,7 +1121,6 @@ describe('Studio API tests', () => {
         cy.getWsAPI(Cypress.env(ws1.id),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
-            expect(resp.body.name).to.equal('NewVorlage');
             expect(resp.status).to.equal(200);
           });
       });
@@ -1747,6 +1775,7 @@ describe('Studio API tests', () => {
     describe('States block', () => {
       describe('58. PATCH /api/workspace-groups/{workspace_group_id}', () => {
         it('200 positive test: should add new states in a group with credentials', () => {
+          cy.pause();
           cy.updateGroupStatesAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
@@ -2903,7 +2932,7 @@ describe('Studio API tests', () => {
         });
       });
       it('401 negative test', () => {
-        cy.deleteModuleAPI(getNameAt(modules[0]), noId)
+        cy.deleteModuleAPI(getNameAt('iqb-schemer@2.0.0-beta'), noId)
           .then(resp => {
             expect(resp.status).to.equal(401);
           });

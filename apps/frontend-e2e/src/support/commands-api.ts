@@ -288,10 +288,14 @@ Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) =>
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/group-admin/workspaces/${ws}/${newGroup}`,
+    url: '/api/group-admin/workspaces/group-id',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      ids: [`${ws}`],
+      targetId: `${newGroup}`
     },
     failOnStatusCode: false
   });
@@ -403,21 +407,45 @@ Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, userId:string, token
 //   });
 // });
 
-// 24 Not used because we use request to simulate the command
-Cypress.Commands.add('updateWsAPI', (ws:WsData, group:GroupData, token:string) => {
+// 24a Not used because we use request to simulate the command
+Cypress.Commands.add('updateWsNameAPI', (ws, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/group-admin/workspaces/',
+    url: `/api/workspaces/${ws.id}/name`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
-      id: `${Cypress.env(ws.id)}`,
-      name: `${ws.name}`,
-      groupId: `${Cypress.env(group.id)}`,
-      groupName: `${group.name}`
+      name: `${ws.name}`
+    },
+    failOnStatusCode: false
+  });
+});
+// 24b
+Cypress.Commands.add('updateWsSettingsAPI', (ws: WsSettings, wsId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/settings`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      defaultEditor: {},
+      defaultPlayer: {},
+      defaultSchemer: {},
+      unitGroups: [
+        ''
+      ],
+      stableModulesOnly: true,
+      unitMDProfile: '',
+      itemMDProfile: '',
+      states: [
+        `${ws.states}`
+      ]
     },
     failOnStatusCode: false
   });
@@ -461,7 +489,7 @@ Cypress.Commands.add('getModuleAPI', (module:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/verona-module/${module}`,
+    url: `/api/verona-modules/${module}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
