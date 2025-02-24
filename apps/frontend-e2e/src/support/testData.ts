@@ -45,8 +45,6 @@ export interface WsSettings {
   unitMDProfile?: string;
   itemMDProfile?: string;
   states?: string[];
-  groupName?: string;
-  id?: number;
 }
 
 export interface DownloadSettings {
