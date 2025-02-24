@@ -425,7 +425,7 @@ export class UsersService {
   }
 
   async setUsersByWorkspace(workspaceId: number, users: UserWorkspaceAccessDto[]) {
-    this.logger.log(`Adding ${users.length} users for workspaceId: ${workspaceId}`);
+    this.logger.log(`Adding users for workspaceId: ${workspaceId}`);
     return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
       await Promise.all(users.map(async user => {
         const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{

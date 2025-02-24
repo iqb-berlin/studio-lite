@@ -114,11 +114,10 @@ export class BackendService {
 
   copyUnits(workspaceId: number,
             units: number[],
-            targetWorkspace: number,
             addComments?: boolean
   ): Observable<boolean | RequestReportDto> {
     return this.http.post<RequestReportDto>(
-      `${this.serverUrl}workspaces/${workspaceId}/units`, { targetId: targetWorkspace, ids: units, addComments })
+      `${this.serverUrl}workspaces/${workspaceId}/units`, { ids: units, addComments })
       .pipe(
         catchError(() => of(false))
       );

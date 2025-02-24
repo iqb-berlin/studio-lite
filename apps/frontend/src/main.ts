@@ -90,7 +90,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '10.0.0'
+      useValue: '10.1.0'
     },
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi())
