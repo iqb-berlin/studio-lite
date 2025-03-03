@@ -7,7 +7,7 @@ import {
   UnitDefinitionDto,
   UnitByDefinitionIdDto,
   UnitInListDto,
-  UnitMetadataDto,
+  UnitPropertiesDto,
   UnitSchemeDto, MetadataValues, UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqb/responses';
@@ -180,7 +180,7 @@ export class UnitService {
     return newUnit.id;
   }
 
-  async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitMetadataDto> {
+  async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
@@ -201,7 +201,7 @@ export class UnitService {
     return unit;
   }
 
-  async findAllWithMetadata(workspaceId: number): Promise<UnitMetadataDto[]> {
+  async findAllWithMetadata(workspaceId: number): Promise<UnitPropertiesDto[]> {
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
     });
@@ -262,7 +262,7 @@ export class UnitService {
     };
   }
 
-  async patchMetadata(unitId: number, newData: UnitMetadataDto, user: User): Promise<void> {
+  async patchMetadata(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const displayName = await this.getDisplayNameForUser(user.id);
     const dataKeys = Object.keys(newData);

@@ -21,7 +21,7 @@ import {
   CodeBookContentSetting,
   CodingReportDto,
   CopyUnitDto,
-  CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitPropertiesDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
 import { UnitService } from '../services/unit.service';
@@ -159,7 +159,7 @@ export class WorkspaceUnitController {
       @Query('id') units: number[],
       @Query('type') type: string,
       @Res({ passthrough: true }) res: Response
-  ): Promise<UnitMetadataDto[] | StreamableFile> {
+  ): Promise<UnitPropertiesDto[] | StreamableFile> {
     if (type === 'unit' || type === 'item') {
       const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
         type, this.unitService, workspaceId, [columns].flat(), [units].flat());
@@ -182,7 +182,7 @@ export class WorkspaceUnitController {
   @ApiTags('workspace unit')
   async findOnesMetadata(
     @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
-  ): Promise<UnitMetadataDto> {
+  ): Promise<UnitPropertiesDto> {
     return this.unitService.findOnesMetadata(unitId, workspaceId);
   }
 
@@ -217,8 +217,8 @@ export class WorkspaceUnitController {
   @ApiTags('workspace unit')
   async patchMetadata(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
-    @Body() unitMetadataDto: UnitMetadataDto) {
-    return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
+    @Body() unitProperties: UnitPropertiesDto) {
+    return this.unitService.patchMetadata(unitId, unitProperties, user);
   }
 
   @Patch('workspace-id')

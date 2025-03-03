@@ -5,7 +5,7 @@ import {
   ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags
 } from '@nestjs/swagger';
 import {
-  UnitDefinitionDto, UnitMetadataDto, UnitSchemeDto
+  UnitDefinitionDto, UnitPropertiesDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewService } from '../services/review.service';
@@ -28,7 +28,7 @@ export class ReviewUnitController {
   async getUnitMetadata(
     @Param('review_id', ParseIntPipe) reviewId: number,
       @Param('id', ParseIntPipe) unitId: number
-  ): Promise<UnitMetadataDto> {
+  ): Promise<UnitPropertiesDto> {
     return this.reviewService.findUnitMetadata(unitId, reviewId);
   }
 

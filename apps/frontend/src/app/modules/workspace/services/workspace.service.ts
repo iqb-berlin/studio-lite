@@ -5,7 +5,7 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import {
-  UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto
+  UnitInListDto, UnitPropertiesDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { CodingScheme } from '@iqb/responses';
 import { HttpParams } from '@angular/common/http';
@@ -178,7 +178,7 @@ export class WorkspaceService {
             }
             this.setUnitMetadataStore(new UnitMetadataStore(unitData));
           } else {
-            this.setUnitMetadataStore(new UnitMetadataStore(<UnitMetadataDto>{ id: selectedUnitId }));
+            this.setUnitMetadataStore(new UnitMetadataStore(<UnitPropertiesDto>{ id: selectedUnitId }));
           }
           return this.unitMetadataStore;
         })

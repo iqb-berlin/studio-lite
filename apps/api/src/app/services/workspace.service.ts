@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
-  UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
+  UnitPropertiesDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
   CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
@@ -247,7 +247,7 @@ export class WorkspaceService {
     const unitDataRows:CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithMetadata(id);
     if (unitListWithMetadata) {
-      unitListWithMetadata?.forEach((unit: UnitMetadataDto) => {
+      unitListWithMetadata?.forEach((unit: UnitPropertiesDto) => {
         if (unit.scheme && unit.scheme !== 'undefined' && unit.schemer.split('@')[1] >= '1.5') {
           const parsedUnitScheme = JSON.parse(unit.scheme as string);
           let codingType:string;

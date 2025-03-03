@@ -1,14 +1,14 @@
-import { UnitMetadataValues, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
 
 export class UnitMetadataStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
-  private originalData: UnitMetadataDto;
-  private changedData: UnitMetadataDto;
+  private originalData: UnitPropertiesDto;
+  private changedData: UnitPropertiesDto;
 
-  constructor(originalData: UnitMetadataDto) {
+  constructor(originalData: UnitPropertiesDto) {
     this.originalData = originalData;
-    this.changedData = <UnitMetadataDto>{ id: originalData.id };
+    this.changedData = <UnitPropertiesDto>{ id: originalData.id };
   }
 
   setPlayer(newPlayer: string): void {
@@ -104,11 +104,11 @@ export class UnitMetadataStore {
       dataKeys.indexOf('name') >= 0 || dataKeys.indexOf('groupName') >= 0 || dataKeys.indexOf('state') >= 0);
   }
 
-  getChangedData(): UnitMetadataDto {
+  getChangedData(): UnitPropertiesDto {
     return this.changedData;
   }
 
-  getData(): UnitMetadataDto {
+  getData(): UnitPropertiesDto {
     return { ...this.originalData, ...this.changedData };
   }
 
@@ -118,7 +118,7 @@ export class UnitMetadataStore {
   }
 
   restore(): void {
-    this.changedData = <UnitMetadataDto>{ id: this.originalData.id };
+    this.changedData = <UnitPropertiesDto>{ id: this.originalData.id };
     this.dataChange.emit();
   }
 }

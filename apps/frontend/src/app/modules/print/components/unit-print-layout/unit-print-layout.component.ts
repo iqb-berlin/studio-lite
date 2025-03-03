@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
@@ -35,7 +35,7 @@ export class UnitPrintLayoutComponent implements OnInit {
 
   @Output() heightChange: EventEmitter<number> = new EventEmitter<number>();
   message = '';
-  unitProperties!: UnitMetadataDto;
+  unitProperties!: UnitPropertiesDto;
   playerId: string = '';
 
   constructor(
@@ -59,7 +59,7 @@ export class UnitPrintLayoutComponent implements OnInit {
     });
   }
 
-  private async setUnitProperties(unitProperties: UnitMetadataDto) {
+  private async setUnitProperties(unitProperties: UnitPropertiesDto) {
     this.unitProperties = unitProperties;
     if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
     this.playerId = unitProperties.player ?

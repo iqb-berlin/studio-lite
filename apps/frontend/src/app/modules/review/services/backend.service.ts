@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@angular/core';
 import {
   ReviewFullDto, ReviewSettingsDto,
   UnitDefinitionDto,
-  UnitMetadataDto, UnitSchemeDto
+  UnitPropertiesDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { Comment } from '../../comments/models/comment.interface';
 
@@ -18,9 +18,9 @@ export class BackendService {
     private http: HttpClient
   ) {}
 
-  getUnitMetadata(reviewId: number, unitId: number): Observable<UnitMetadataDto | null> {
+  getUnitMetadata(reviewId: number, unitId: number): Observable<UnitPropertiesDto | null> {
     return this.http
-      .get<UnitMetadataDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/metadata`)
+      .get<UnitPropertiesDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/metadata`)
       .pipe(
         catchError(() => of(null))
       );

@@ -1,6 +1,6 @@
 import * as Excel from 'exceljs';
 import {
-  UnitMetadataDto,
+  UnitPropertiesDto,
   CodebookUnitDto,
   CodeBookContentSetting,
   MissingsProfilesDto
@@ -192,7 +192,7 @@ export class DownloadWorkspacesClass {
     const profiles = await settingsService.findMissingsProfiles();
     const missings = profiles.length ? this.getProfileMissings(profiles, contentSetting.missingsProfile) : [];
     const codebook: CodebookUnitDto[] = selectedUnits
-      .map((unit: UnitMetadataDto) => DownloadWorkspacesClass
+      .map((unit: UnitPropertiesDto) => DownloadWorkspacesClass
         .getCodeBookDataForUnit(unit, contentSetting, missings));
     if (contentSetting.exportFormat === 'docx') {
       return new Promise(resolve => {
@@ -343,7 +343,7 @@ export class DownloadWorkspacesClass {
   }
 
   private static getCodeBookDataForUnit(
-    unit: UnitMetadataDto, contentSetting: CodeBookContentSetting, missings: Missing[]
+    unit: UnitPropertiesDto, contentSetting: CodeBookContentSetting, missings: Missing[]
   ): CodebookUnitDto {
     const parsedScheme = unit.scheme ? new CodingScheme(unit.scheme) : null;
     const variableCodings = parsedScheme?.variableCodings || [];

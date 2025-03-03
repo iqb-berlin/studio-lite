@@ -5,7 +5,7 @@ import {
   CreateReviewDto,
   ReviewFullDto,
   ReviewInListDto,
-  ReviewDto, UnitMetadataDto
+  ReviewDto, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import { v4 as uuIdv4 } from 'uuid';
 import Review from '../entities/review.entity';
@@ -78,7 +78,7 @@ export class ReviewService {
     };
   }
 
-  async findUnitMetadata(unitId: number, reviewId: number): Promise<UnitMetadataDto> {
+  async findUnitMetadata(unitId: number, reviewId: number): Promise<UnitPropertiesDto> {
     const review = await this.reviewRepository
       .findOne({ where: { id: reviewId }, select: ['workspaceId'] });
     return this.unitService.findOnesMetadata(unitId, review.workspaceId);
