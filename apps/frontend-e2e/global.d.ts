@@ -66,7 +66,7 @@ declare namespace Cypress {
     // TODO: Endpoint is removed
     // getWsGroupwiseAPI(token: string): Chainable<Response>; // 23
     updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24
-    updateWsSettingsAPI(ws: WsSettings, wsId:string, token: string): Chainable<Response>; // 24
+    // updateWsSettingsAPI(ws: WsSettings, wsId:stri ng, token: string): Chainable<Response>; // 24
 
     getModulesAPI(token: string): Chainable<Response>; // 26
     getModuleAPI(module: string, token: string): Chainable<Response>; // 27
@@ -74,7 +74,7 @@ declare namespace Cypress {
 
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
     getUnitsByWsGAPI(token: string): Chainable<Response>; // 31
-    updateWsSettings(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 32
+    updateWsSettingsAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 32
     getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 33
     getUsersByWsIdAPI(wsId: string, token: string): Chainable<Response>; // 34
     getUnitMetadataAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 40
@@ -88,7 +88,7 @@ declare namespace Cypress {
     downloadWsAPI(wsId:string, token:string): Chainable<Response>; // b1
     downloadWsAllAPI(token:string): Chainable<Response>; // b2
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // b3
-    getCodingReportAPI(wsId: string, token:string): Chainable<Response>; // b4
+
     createGroupWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // b5
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6
     updateGroupStatesAPI(groupId: string, token:string): Chainable<Response>; // b7
