@@ -424,7 +424,7 @@ Cypress.Commands.add('updateWsNameAPI', (ws, token:string) => {
   });
 });
 // 24b
-Cypress.Commands.add('updateWsSettingsAPI', (ws: WsSettings, wsId:string, token:string) => {
+Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -434,15 +434,13 @@ Cypress.Commands.add('updateWsSettingsAPI', (ws: WsSettings, wsId:string, token:
       authorization
     },
     body: {
-      defaultEditor: {},
-      defaultPlayer: {},
-      defaultSchemer: {},
-      unitGroups: [
-        ''
-      ],
-      stableModulesOnly: true,
-      unitMDProfile: '',
-      itemMDProfile: '',
+      defaultEditor: `${ws.defaultEditor}`,
+      defaultPlayer: `${ws.defaultPlayer}`,
+      defaultSchemer: `${ws.defaultSchemer}`,
+      unitGroups: `${ws.unitGroups}`,
+      stableModulesOnly: `${ws.stableModulesOnly}`,
+      unitMDProfile: `${ws.unitMDProfile}`,
+      itemMDProfile: `${ws.itemMDProfile}`,
       states: [
         `${ws.states}`
       ]
@@ -547,7 +545,7 @@ Cypress.Commands.add('getUnitsByWsGAPI', (token:string) => {
 });
 
 // 32
-Cypress.Commands.add('updateWsSettings', (wsId:string, settings:WsSettings, token:string) => {
+Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, settings:WsSettings, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -671,14 +669,14 @@ Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitI
   const unitIdNumber = parseInt(`${unitId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsOriginId}/units/move`,
+    url: `/api/workspaces/${wsOriginId}/units/workspace-id`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
-      targetWorkspace: nu,
-      units: [unitIdNumber]
+      targetId: nu,
+      ids: [unitIdNumber]
     },
     failOnStatusCode: false
   });
@@ -689,10 +687,13 @@ Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) =
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/rename/${wsName}`,
+    url: `/api/workspaces/${wsId}/name`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      name: `${wsName}`
     },
     failOnStatusCode: false
   });
@@ -718,7 +719,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   });
 });
 
-// 53
+// 53 skipped
 Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -732,7 +733,7 @@ Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
   });
 });
 
-// 54
+// 54 skipped
 Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -759,37 +760,23 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
     failOnStatusCode: false
   });
 });
-// 56
-Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspaces/${wsId}/coding-report`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
 
-// 57
-// TODO: Endpoint has changed
-Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'POST',
-    url: `/api/workspaces/${wsId}/group`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      body: `${groupName}`
-    },
-    failOnStatusCode: false
-  });
-});
+// 57 //now is 32
+// Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'POST',
+//     url: `/api/workspaces/${wsId}/name`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     body: {
+//       name: `${groupName}`
+//     },
+//     failOnStatusCode: false
+//   });
+// });
 
 // 58
 Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => {
