@@ -1,4 +1,6 @@
+// import { HttpParams } from '@angular/common/http';
 import { UserData } from '../../support/testData';
+import { buildQueryParameters } from '../../support/utilAPI';
 
 describe('Identity tests users API tests', () => {
   const cloakUser1:UserData = {
@@ -159,11 +161,11 @@ describe('Identity tests users API tests', () => {
         });
     });
     it('Delete all users', () => {
-      const ids = `id=${Cypress.env(
-        `id_${cloakUser1.username}`
-      )}&id=${Cypress.env(`id_${cloakUser2.username}`)}&id=${Cypress.env(
-        `id_${fakeCloakUser3.username}`
-      )}`;
+      const ids = [
+        Cypress.env(`id_${cloakUser1.username}`),
+        Cypress.env(`id_${cloakUser2.username}`),
+        Cypress.env(`id_${fakeCloakUser3.username}`)];
+
       cy.deleteUsersAPI(
         ids,
         Cypress.env(`token_${Cypress.env('username')}`)
