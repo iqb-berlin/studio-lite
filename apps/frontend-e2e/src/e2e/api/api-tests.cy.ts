@@ -744,42 +744,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    // Todo: Endpoint is removed
-    // describe('23. /api/admin/workspaces/groupwise', () => {
-    //   it('200 positive test: should retrieve groupwise ordered admin workspaces successfully.', () => {
-    //     cy.getWsGroupwiseAPI(Cypress.env(`token_${Cypress.env('username')}`))
-    //       .then(resp => {
-    //         expect(resp.body.length).to.equal(2);
-    //         expect(resp.status).to.equal(200);
-    //       });
-    //   });
-    //
-    //   it('401 negative test: you should not get the workspace of which you are not a user.', () => {
-    //     cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
-    //       .then(resp => {
-    //         expect(resp.status).to.equal(401);
-    //       });
-    //   });
-    //
-    //   it('200 positive test: you should the workspaces you are admin.', () => {
-    //     cy.updateUserAPI(user2, true, Cypress.env(`token_${Cypress.env('username')}`))
-    //       .then(() => {
-    //         cy.getWsGroupwiseAPI(Cypress.env(`token_${user2.username}`))
-    //           .then(resp2 => {
-    //             expect(resp2.status).to.equal(200);
-    //           });
-    //       });
-    //     cy.updateUserAPI(user2, false, Cypress.env(`token_${Cypress.env('username')}`));
-    //   });
-    //
-    //   it('401 negative test: you should not get the workspace of which you are not a user.', () => {
-    //     cy.getWsGroupwiseAPI(noId)
-    //       .then(resp => {
-    //         expect(resp.status).to.equal(401);
-    //       });
-    //   });
-    // });
-
     describe('24a. PATCH /api/group-admin/workspaces/}', () => {
       it('200 positive test: should update the ws data', () => {
         // we update the name and we add 2 states
@@ -1603,7 +1567,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    // describe.skip('52. PATCH /api/workspaces/{workspace_id}/units/{ids}/copyto/{target}', () => {
     describe('52. POST /api/workspaces/{workspace_id}/units', () => {
       let copyUnit: CopyUnit;
       before(() => {
@@ -2606,19 +2569,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    // describe.skip('82. /api/workspaces/{workspace_id}/download/{settings}', () => {
-    //   it('200 positive test: should be able to add a group for a unit', () => {
-    //     // no write answer
-    //     // eslint-disable-next-line max-len
-    //     const setting = `{"unitList":[${Cypress.env(unit1.shortname)}],
-    //     "addPlayers":false,"addTestTakersReview":0,"addTestTakersMonitor":0,
-    //     "addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}`;
-    //     cy.FdownloadWsAPI(Cypress.env(ws1.id), setting, Cypress.env(`token_${Cypress.env('username')}`))
-    //       .then(resp => {
-    //         expect(resp.status).to.equal(500);
-    //       });
-    //   });
-    // });
     describe.skip('83. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
       it('401 negative test: should not delete the unit from other user', () => {
         cy.deleteUnitAPI(Cypress.env(unit1.shortname),

@@ -11,6 +11,8 @@ import {
   DefinitionUnit, CopyUnit
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
+import { buildQueryParameters } from './utilAPI';
+// import { HttpParams } from '@angular/common/http';
 
 // General
 Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
@@ -391,21 +393,6 @@ Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, userId:string, token
   });
 });
 
-// 23
-// TODO: Endpoint is removed
-// Cypress.Commands.add('getWsGroupwiseAPI', (token: string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'GET',
-//     url: '/api/admin/workspaces/groupwise',
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
 // 24a Not used because we use request to simulate the command
 Cypress.Commands.add('updateWsNameAPI', (ws, token:string) => {
   const authorization = `bearer ${token}`;
@@ -766,7 +753,7 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   });
 });
 
-// 57 //now is 32
+// 57 //now is 32 and 24b
 // Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
 //   const authorization = `bearer ${token}`;
 //   cy.request({
@@ -1141,21 +1128,6 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
   });
 });
 
-// 82
-// TODO: Endpoint changed
-Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspaces/${wsId}/download/${settings}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 83
 Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
@@ -1277,22 +1249,7 @@ Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
   });
 });
 
-// // 11
-// Cypress.Commands.add('deleteUserAPI',
-//   (id:string, token:string) => {
-//     const authorization = `bearer ${token}`;
-//     cy.request({
-//       method: 'DELETE',
-//       url: `/api/admin/users?id=${id}`,
-//       headers: {
-//         'app-version': Cypress.env('version'),
-//         authorization
-//       },
-//       failOnStatusCode: false
-//     });
-//   });
-
-// 91
+// 91 we keep the command deleteUserAPI and deleteUsersAPI to see the actual way to work with query Parameter
 Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1309,11 +1266,12 @@ Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   });
 });
 
-Cypress.Commands.add('deleteUsersAPI', (ids: string, token: string) => {
+Cypress.Commands.add('deleteUsersAPI', (ids: string[], token: string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', ids);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users?${ids}`,
+    url: `/api/admin/users${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1531,21 +1489,6 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
     }).then(resp => {
       expect(resp.status).to.equal(204);
     });
-  });
-});
-
-// 23
-Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/admin/workspace-groups/${groupId}/admins`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: userIds,
-    failOnStatusCode: false
   });
 });
 
