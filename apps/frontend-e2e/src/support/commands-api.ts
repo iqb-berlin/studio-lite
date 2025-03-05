@@ -4,7 +4,6 @@ import {
   WsData,
   AccessLevel,
   UnitData,
-  WsSettings,
   AccessUser,
   CommentData,
   ReviewData,
@@ -424,30 +423,36 @@ Cypress.Commands.add('updateWsNameAPI', (ws, token:string) => {
   });
 });
 // 24b
-Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspaces/${wsId}/settings`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      defaultEditor: `${ws.defaultEditor}`,
-      defaultPlayer: `${ws.defaultPlayer}`,
-      defaultSchemer: `${ws.defaultSchemer}`,
-      unitGroups: `${ws.unitGroups}`,
-      stableModulesOnly: `${ws.stableModulesOnly}`,
-      unitMDProfile: `${ws.unitMDProfile}`,
-      itemMDProfile: `${ws.itemMDProfile}`,
-      states: [
-        `${ws.states}`
-      ]
-    },
-    failOnStatusCode: false
-  });
-});
+// Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   const group1 = ws.unitGroups[0] || undefined;
+//   const group2 = ws.unitGroups[1] || undefined;
+//   const state1 = ws.states[0] || undefined;
+//   const state2 = ws.states[1] || undefined;
+//   cy.request({
+//     method: 'PATCH',
+//     url: `/api/workspaces/${wsId}/settings`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     body: {
+//       defaultEditor: `${ws.defaultEditor}`,
+//       defaultPlayer: `${ws.defaultPlayer}`,
+//       defaultSchemer: `${ws.defaultSchemer}`,
+//       unitGroups: [
+//         group1, group2
+//       ],
+//       stableModulesOnly: `${ws.stableModulesOnly}`,
+//       unitMDProfile: `${ws.unitMDProfile}`,
+//       itemMDProfile: `${ws.itemMDProfile}`,
+//       states: [
+//         state1, state2
+//       ]
+//     },
+//     failOnStatusCode: false
+//   });
+// });
 // 25
 // Cypress.Commands.add('addModuleAPI', (module:string) => {
 //   const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -545,19 +550,19 @@ Cypress.Commands.add('getUnitsByWsGAPI', (token:string) => {
 });
 
 // 32
-Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, settings:WsSettings, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspaces/${wsId}/settings`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: `${settings}`,
-    failOnStatusCode: false
-  });
-});
+// Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, settings:WsSettings, token:string) => {
+//   const authorization = `bearer ${token}`;
+//   cy.request({
+//     method: 'PATCH',
+//     url: `/api/workspaces/${wsId}/settings`,
+//     headers: {
+//       'app-version': Cypress.env('version'),
+//       authorization
+//     },
+//     body: `${settings}`,
+//     failOnStatusCode: false
+//   });
+// });
 
 // 33
 Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
@@ -1249,7 +1254,7 @@ Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/workspace-groups/${id}`,
+    url: `/api/admin/workspace-groups?id=${id}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1484,10 +1489,13 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${Cypress.env(`id_${Cypress.env('username')}`)}`,
+    url: '/api/admin/users/',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    qs: {
+      id: `${Cypress.env(`id_${Cypress.env('username')}`)}`
     },
     failOnStatusCode: false
   });
