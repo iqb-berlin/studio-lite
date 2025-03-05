@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-
 declare namespace Cypress {
   import {
     UnitData, GroupData, WsData, AccessLevel
@@ -66,7 +65,7 @@ declare namespace Cypress {
     // TODO: Endpoint is removed
     // getWsGroupwiseAPI(token: string): Chainable<Response>; // 23
     updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24
-    // updateWsSettingsAPI(ws: WsSettings, wsId:stri ng, token: string): Chainable<Response>; // 24
+    // updateWsSettingsAPI(ws: WsSettings, wsId:string, token: string): Chainable<Response>; // 24
 
     getModulesAPI(token: string): Chainable<Response>; // 26
     getModuleAPI(module: string, token: string): Chainable<Response>; // 27
@@ -114,7 +113,6 @@ declare namespace Cypress {
     getReviewMetadataAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 56
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 57
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 68
-    FdownloadWsAPI(wsId: string, settings: string, token: string): Chainable<Response>; // 69
     deleteUnitAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 70
     getMyData(token:string): Chainable<Response>; // 71
     updateMyData(token:string, data:MyData): Chainable<Response>; // 72
@@ -126,7 +124,7 @@ declare namespace Cypress {
 
     deleteModuleAPI(module: string, token: string): Chainable<Response>; // 89
     deleteUserAPI(id:string, token: string): Chainable<Response>; // 90
-    deleteUsersAPI(ids:string, token: string): Chainable<Response>; // 90
+    deleteUsersAPI(qs: string[], token: string): Chainable<Response>; // 90
 
     getSettingConfigAPI(token:string): Chainable<Response>; // 100
     updateSettingConfigAPI(token:string, hour: number): Chainable<Response>; // 101
