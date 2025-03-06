@@ -140,36 +140,6 @@ Cypress.Commands.add('getUsersFullAPI',
     });
   });
 
-// 8
-Cypress.Commands.add('getUserAPI',
-  (id:string, token:string) => {
-    const authorization = `bearer ${token}`;
-    cy.request({
-      method: 'GET',
-      url: `/api/admin/users/${id}/workspace-groups`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
-      },
-      failOnStatusCode: false
-    });
-  });
-
-// 9
-Cypress.Commands.add('getUserNoIdAPI',
-  (token:string) => {
-    const authorization = `bearer ${token}`;
-    cy.request({
-      method: 'GET',
-      url: '/api/group-admin/users',
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
-      },
-      failOnStatusCode: false
-    });
-  });
-
 // 10
 Cypress.Commands.add('updateUserAPI',
   (id: string, user:UserData, credentials: boolean, token:string) => {
@@ -184,8 +154,7 @@ Cypress.Commands.add('updateUserAPI',
       },
       body: {
         id: nu,
-        name: `${user.username}`,
-        isAdmin: `${credentials}`
+        isAdmin: credentials
       },
       failOnStatusCode: false
     });
@@ -208,6 +177,21 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
     failOnStatusCode: false
   });
 });
+
+// 8
+Cypress.Commands.add('getUserAPI',
+  (id:string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/users/${id}/workspace-groups`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
 
 // 13
 Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
