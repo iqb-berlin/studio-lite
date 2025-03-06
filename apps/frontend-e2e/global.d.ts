@@ -28,7 +28,7 @@ declare namespace Cypress {
 
     // commands-api.ts
     runAndIgnore(testFn: () => void): void;
-    getWsByGroupAPI(groupKey: string, num_ws: number): void;
+
     getUsersAPI(): Chainable<Response>;
     setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>;
     // commands-unit-api.ts
@@ -45,8 +45,7 @@ declare namespace Cypress {
 
     createUserAPI(userData: UserData, token: string): Chainable<Response>; // 6
     getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 7
-    getUserAPI(id: string, token: string): Chainable<Response>; // 8
-    getUserNoIdAPI(token: string): Chainable<Response>; // 9
+
     updateUserAPI(id:string, user: UserData, credentials: boolean, token: string): Chainable<Response>; // 10
     deleteUserNoIdAPI(id: string, token: string): Chainable<Response>; // 11
 
@@ -55,6 +54,8 @@ declare namespace Cypress {
     getGroupAPI(token: string): Chainable<Response>; // 14
     // updateGroupAPI(token:string):Chainable<Response>; // 15
     setAdminsOfGroupAPI(userIds: string[], groupId: string, token: string): Chainable<Response>; // 16
+    getUserAPI(id: string, token: string): Chainable<Response>; // 8
+
     getAdminOfGroupAPI(groupId: string, token: string): Chainable<Response>; // 17
     createWsAPI(groupId: string, ws: WsData, token: string): Chainable<Response>; // 18
     moveWsAPI(ws: string, newGroup: string, token: string): Chainable<Response>; // 19
@@ -62,14 +63,12 @@ declare namespace Cypress {
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 21
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 21
     getUsersOfWsAdminAPI(wsId: string, userId: string, token: string): Chainable<Response>; // 22
-    // TODO: Endpoint is removed
-    // getWsGroupwiseAPI(token: string): Chainable<Response>; // 23
-    updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24
+    getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 23
+    updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24a
     // updateWsSettingsAPI(ws: WsSettings, wsId:string, token: string): Chainable<Response>; // 24
 
     getModulesAPI(token: string): Chainable<Response>; // 26
     getModuleAPI(module: string, token: string): Chainable<Response>; // 27
-    downloadModuleAPI(module: string, token: string): Chainable<Response>; // 28
 
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
     getUnitsByWsGAPI(token: string): Chainable<Response>; // 31
