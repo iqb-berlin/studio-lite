@@ -18,9 +18,9 @@ export class BackendService {
     private http: HttpClient
   ) {}
 
-  getUnitMetadata(reviewId: number, unitId: number): Observable<UnitPropertiesDto | null> {
+  getUnitProperties(reviewId: number, unitId: number): Observable<UnitPropertiesDto | null> {
     return this.http
-      .get<UnitPropertiesDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/metadata`)
+      .get<UnitPropertiesDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/properties`)
       .pipe(
         catchError(() => of(null))
       );

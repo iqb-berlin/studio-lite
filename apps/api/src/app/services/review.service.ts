@@ -78,7 +78,7 @@ export class ReviewService {
     };
   }
 
-  async findUnitMetadata(unitId: number, reviewId: number): Promise<UnitPropertiesDto> {
+  async findUnitProperties(unitId: number, reviewId: number): Promise<UnitPropertiesDto> {
     const review = await this.reviewRepository
       .findOne({ where: { id: reviewId }, select: ['workspaceId'] });
     return this.unitService.findOnesProperties(unitId, review.workspaceId);

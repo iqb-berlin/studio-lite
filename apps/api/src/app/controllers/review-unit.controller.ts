@@ -18,18 +18,18 @@ export class ReviewUnitController {
     private unitService: UnitService
   ) {}
 
-  @Get(':id/metadata')
+  @Get(':id/properties')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit metadata retrieved successfully.' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
-  async getUnitMetadata(
+  async findUnitProperties(
     @Param('review_id', ParseIntPipe) reviewId: number,
       @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitPropertiesDto> {
-    return this.reviewService.findUnitMetadata(unitId, reviewId);
+    return this.reviewService.findUnitProperties(unitId, reviewId);
   }
 
   @Get(':id/definition')
