@@ -180,7 +180,7 @@ export class UnitService {
     return newUnit.id;
   }
 
-  async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
+  async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
@@ -201,7 +201,7 @@ export class UnitService {
     return unit;
   }
 
-  async findAllWithMetadata(workspaceId: number): Promise<UnitPropertiesDto[]> {
+  async findAllWithProperties(workspaceId: number): Promise<UnitPropertiesDto[]> {
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
     });
@@ -262,7 +262,7 @@ export class UnitService {
     };
   }
 
-  async patchMetadata(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
+  async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const displayName = await this.getDisplayNameForUser(user.id);
     const dataKeys = Object.keys(newData);

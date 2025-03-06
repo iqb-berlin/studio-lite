@@ -171,7 +171,7 @@ export class WorkspaceUnitController {
       });
       return new StreamableFile(file as Buffer);
     }
-    return this.unitService.findAllWithMetadata(workspaceId);
+    return this.unitService.findAllWithProperties(workspaceId);
   }
 
   @Get(':id/metadata')
@@ -180,10 +180,10 @@ export class WorkspaceUnitController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
   @ApiTags('workspace unit')
-  async findOnesMetadata(
+  async findOnesProperties(
     @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
   ): Promise<UnitPropertiesDto> {
-    return this.unitService.findOnesMetadata(unitId, workspaceId);
+    return this.unitService.findOnesProperties(unitId, workspaceId);
   }
 
   @Get(':id/definition')
@@ -215,10 +215,10 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchMetadata(@Param('id', ParseIntPipe) unitId: number,
+  async patchUnitProperties(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitProperties: UnitPropertiesDto) {
-    return this.unitService.patchMetadata(unitId, unitProperties, user);
+    return this.unitService.patchUnitProperties(unitId, unitProperties, user);
   }
 
   @Patch('workspace-id')

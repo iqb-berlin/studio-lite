@@ -152,7 +152,7 @@ export class DownloadWorkspacesClass {
     units: number[]
   ): Promise<Buffer> {
     const mappedColumnNames = DownloadWorkspacesClass.mapColumnNames(columns);
-    const unitsFromWorkspace = await unitService.findAllWithMetadata(workspaceId);
+    const unitsFromWorkspace = await unitService.findAllWithProperties(workspaceId);
     const unitsFiltered = unitsFromWorkspace.filter(
       unit => units.find(su => Number(su) === unit.id));
     const rows =
@@ -186,7 +186,7 @@ export class DownloadWorkspacesClass {
     contentSetting: CodeBookContentSetting,
     unitList: number[]
   ): Promise<Buffer | []> {
-    const units = await unitService.findAllWithMetadata(workspaceId);
+    const units = await unitService.findAllWithProperties(workspaceId);
     const selectedUnits = units.filter(unit => unitList.includes(unit.id)
     );
     const profiles = await settingsService.findMissingsProfiles();
@@ -396,7 +396,7 @@ export class DownloadWorkspacesClass {
       if (workspaceGroupId === 0 || group.id === workspaceGroupId) {
         group.workspaces.forEach(w => {
           wsDataWithMetadataPromises.push(
-            unitService.findAllWithMetadata(w.id).then(unitData => {
+            unitService.findAllWithProperties(w.id).then(unitData => {
               const returnData = <WorkspaceData>{
                 id: w.id,
                 name: w.name,

@@ -245,7 +245,7 @@ export class WorkspaceService {
 
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
     const unitDataRows:CodingReportDto[] = [];
-    const unitListWithMetadata = await this.unitService.findAllWithMetadata(id);
+    const unitListWithMetadata = await this.unitService.findAllWithProperties(id);
     if (unitListWithMetadata) {
       unitListWithMetadata?.forEach((unit: UnitPropertiesDto) => {
         if (unit.scheme && unit.scheme !== 'undefined' && unit.schemer.split('@')[1] >= '1.5') {
@@ -565,7 +565,7 @@ export class WorkspaceService {
     unitImportData: UnitImportData,
     user: UserEntity
   ) {
-    await this.unitService.patchMetadata(newUnitId, {
+    await this.unitService.patchUnitProperties(newUnitId, {
       id: newUnitId,
       editor: unitImportData.editor,
       player: unitImportData.player,

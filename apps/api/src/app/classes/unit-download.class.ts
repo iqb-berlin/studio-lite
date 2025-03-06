@@ -84,7 +84,7 @@ export class UnitDownloadClass {
     usedPlayers: string[],
     zip: AdmZip
   ): Promise<void> {
-    const unitMetadata = await unitService.findOnesMetadata(unitId, workspaceId);
+    const unitMetadata = await unitService.findOnesProperties(unitId, workspaceId);
     const unitXml = UnitDownloadClass.createUnitXML(unitExportConfig, unitMetadata);
     UnitDownloadClass.addMetadata(unitMetadata, zip);
     const definitionData = await unitService.findOnesDefinition(unitId);
