@@ -131,7 +131,7 @@ export class WorkspaceUnitController {
     return new StreamableFile(file as Buffer);
   }
 
-  @Get('metadata')
+  @Get('properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -174,7 +174,7 @@ export class WorkspaceUnitController {
     return this.unitService.findAllWithProperties(workspaceId);
   }
 
-  @Get(':id/metadata')
+  @Get(':id/properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -210,7 +210,7 @@ export class WorkspaceUnitController {
     return this.unitService.findOnesScheme(unitId);
   }
 
-  @Patch(':id/metadata')
+  @Patch(':id/properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
