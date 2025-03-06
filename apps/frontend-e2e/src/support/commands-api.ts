@@ -181,6 +181,21 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
   });
 });
 
+// 8
+Cypress.Commands.add('getUserAPI',
+  (id:string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/users/${id}/workspace-groups`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
 // 13
 Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
