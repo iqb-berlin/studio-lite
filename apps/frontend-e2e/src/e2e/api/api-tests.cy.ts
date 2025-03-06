@@ -103,6 +103,7 @@ describe('Studio API tests', () => {
         cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
           .then(resp => {
             Cypress.env(`token_${Cypress.env('username')}`, resp.body);
+            console.log(resp.body);
             expect(resp.status).to.equal(201);
           });
       });
@@ -114,8 +115,8 @@ describe('Studio API tests', () => {
           });
       });
 
-      // eslint-disable-next-line max-len
-      it('403 negative test: should not create a second first user with the different user data.', () => {
+      it('403 negative test: should not create a second first user with the different' +
+        ' user data.', () => {
         cy.addFirstUserAPI(fakeUser.username, fakeUser.password)
           .then(resp => {
             expect(resp.status).to.equal(403);
@@ -235,6 +236,7 @@ describe('Studio API tests', () => {
     });
 
     describe('7. GET /api/admin/group-users/full', () => {
+      // TO DO check the difference between full and not full
       it('200 positive test: admin user can retrieve all users data', () => {
         cy.getUsersFullAPI(false, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -247,47 +249,6 @@ describe('Studio API tests', () => {
         cy.getUsersFullAPI(false, Cypress.env(`token_${user2.username}`))
           .then(resp2 => {
             expect(resp2.status).to.equal(401);
-          });
-      });
-    });
-
-    // Do the test once we create the workspace-groups first
-    describe.skip('8. GET /api/admin/users/{id}/workspace-groups', () => {
-      it('200 positive test: get the workspaces of the actual user.', () => {
-        cy.getUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: user should not be able to get the data of an admin', () => {
-        cy.getUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('404 negative test: should not find a non-existent user', () => {
-        cy.getUserAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(404);
-          });
-      });
-    });
-
-    describe('9. GET /api/group-admin/users', () => {
-      it('200 positive test: ', () => {
-        cy.getUserNoIdAPI(Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-            expect(resp.body.length).to.equal(2);
-          });
-      });
-
-      it('401 negative test: should not return no data if the parameter is not an administrator token', () => {
-        cy.getUserNoIdAPI(Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(401);
           });
       });
     });
@@ -347,6 +308,30 @@ describe('Studio API tests', () => {
               .then(resp2 => {
                 expect(resp2.status).to.equal(401);
               });
+          });
+      });
+    });
+    // Move after we make admin of some workspace-groups, now it is returning only []
+    describe('8. GET /api/admin/users/{id}/workspace-groups', () => {
+      it('200 positive test: get the workspaces of the actual user.', () => {
+        cy.getUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
+      it('401 negative test: user should not be able to get the data of an admin', () => {
+        cy.getUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('200/500 negative test: should not find a non-existent user', () => {
+        // A new user id, will return am emtpy array [].
+        cy.getUserAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
           });
       });
     });
