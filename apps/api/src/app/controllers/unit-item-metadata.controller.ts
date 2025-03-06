@@ -9,19 +9,19 @@ import {
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
-import { UnitItemDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitItemMetadataDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
-import { UnitItemService } from '../services/unit-item.service';
-import { UnitId } from '../decorators/unit-id.decorator';
+import { UnitItemMetadataService } from '../services/unit-item-metadata.service';
+import { ItemUuid } from '../decorators/item-uuid.decorator';
 
-@Controller('workspaces/:workspace_id/units/:unit_id/items')
-export class UnitItemController {
+@Controller('workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata')
+export class UnitItemMetadataController {
   constructor(
-    private unitItemsService: UnitItemService
+    private unitItemMetadataService: UnitItemMetadataService
   ) {}
 
   @Get()
@@ -29,10 +29,11 @@ export class UnitItemController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'item_uuid', type: String })
   @ApiOkResponse()
-  @ApiTags('unit item')
-  async findAll(@UnitId() unitId: number): Promise<UnitItemDto[]> {
-    return this.unitItemsService.getAllByUnitIdWithMetadata(unitId);
+  @ApiTags('item metadata')
+  async findAll(@ItemUuid() itemUuid: string): Promise<UnitItemMetadataDto[]> {
+    return this.unitItemMetadataService.getAllByItemId(itemUuid);
   }
 
   @Post()
@@ -40,20 +41,22 @@ export class UnitItemController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'item_uuid', type: String })
   @ApiCreatedResponse({ description: 'Unit item created' })
-  @ApiTags('unit item')
+  @ApiTags('item metadata')
   async create(
-    @UnitId() unitId: number, @Body() body: UnitItemWithMetadataDto
-  ): Promise<string> {
-    return this.unitItemsService.addItem(unitId, body);
+    @ItemUuid() itemUuid: string, @Body() body: UnitItemMetadataDto
+  ): Promise<number> {
+    return this.unitItemMetadataService.addItemMetadata(itemUuid, body);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
-  @ApiTags('unit item')
+  @ApiTags('item metadata')
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'item_uuid', type: String })
   @ApiOkResponse()
   @ApiQuery({
     name: 'id',
@@ -62,6 +65,6 @@ export class UnitItemController {
     required: true
   })
   async remove(@Param('id') id: number): Promise<void> {
-    return this.unitItemsService.removeItem(id);
+    return this.unitItemMetadataService.removeItemMetadata(id);
   }
 }

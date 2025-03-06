@@ -3,10 +3,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class UnitItem {
   @PrimaryGeneratedColumn()
-    id: number;
+    uuid: string;
 
   @Column()
-    key: string;
+    id: string;
 
   @Column()
     order: number;

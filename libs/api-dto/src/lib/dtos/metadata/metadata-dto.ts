@@ -6,10 +6,10 @@ export class MetadataDto {
     id!: number;
 
   @ApiProperty()
-    data?: MetadataValuesEntry[];
+    entries?: MetadataValuesEntry[];
 
   @ApiProperty()
-    profile?: string;
+    profileId?: string;
 
   @ApiProperty()
     createdAt?: Date;

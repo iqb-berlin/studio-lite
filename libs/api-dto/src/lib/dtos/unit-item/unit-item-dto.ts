@@ -1,7 +1,36 @@
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { BaseUnitItemDto } from '@studio-lite-lib/api-dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class UnitItemDto extends IntersectionType(BaseUnitItemDto) {
+export class UnitItemDto {
   @ApiProperty()
-    id!: number;
+    uuid!: string;
+
+  @ApiProperty()
+    id?: string;
+
+  @ApiProperty()
+    order?: number;
+
+  @ApiProperty()
+    position?: string;
+
+  @ApiProperty()
+    locked?: boolean;
+
+  @ApiProperty()
+    variableId?: string;
+
+  @ApiProperty()
+    weighting?: number;
+
+  @ApiProperty()
+    description?: string;
+
+  @ApiProperty()
+    unitId!: number;
+
+  @ApiProperty()
+    createdAt?: Date;
+
+  @ApiProperty()
+    changedAt?: Date;
 }

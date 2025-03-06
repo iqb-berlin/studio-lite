@@ -64,9 +64,12 @@ import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { GroupAdminUserController } from './controllers/group-admin-user-controller';
 import { UnitItemController } from './controllers/unit-item.controller';
-import Metadata from './entities/metadata.entity';
 import { UnitItemService } from './services/unit-item.service';
 import UnitItem from './entities/unit-item.entity';
+import UnitItemMetadata from './entities/unit-item-metadata.entity';
+import UnitMetadata from './entities/unit-metadata.entity';
+import { UnitItemMetadataService } from './services/unit-item-metadata.service';
+import { UnitItemMetadataController } from './controllers/unit-item-metadata.controller';
 
 @Module({
   imports: [
@@ -105,7 +108,8 @@ import UnitItem from './entities/unit-item.entity';
     Review,
     ReviewUnit,
     UnitItem,
-    Metadata,
+    UnitItemMetadata,
+    UnitMetadata,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -137,7 +141,8 @@ import UnitItem from './entities/unit-item.entity';
           Review,
           ReviewUnit,
           UnitItem,
-          Metadata
+          UnitItemMetadata,
+          UnitMetadata
         ],
         synchronize: false
       }),
@@ -165,7 +170,8 @@ import UnitItem from './entities/unit-item.entity';
       Review,
       ReviewUnit,
       UnitItem,
-      Metadata
+      UnitItemMetadata,
+      UnitMetadata
     ]),
     MulterModule
   ],
@@ -189,7 +195,8 @@ import UnitItem from './entities/unit-item.entity';
     ReviewUnitCommentController,
     MetadataController,
     WorkspaceGroupController,
-    UnitItemController
+    UnitItemController,
+    UnitItemMetadataController
   ],
   providers: [
     AppVersionProvider,
@@ -211,7 +218,8 @@ import UnitItem from './entities/unit-item.entity';
     VeronaModulesService,
     SettingService,
     ReviewService,
-    UnitItemService
+    UnitItemService,
+    UnitItemMetadataService
   ],
   exports: [AppVersionProvider]
 })

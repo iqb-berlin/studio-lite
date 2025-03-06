@@ -3,5 +3,5 @@ import { MetadataDto } from '@studio-lite-lib/api-dto';
 
 export class UnitItemMetadataDto extends IntersectionType(MetadataDto) {
   @ApiProperty()
-    unitItemId!: number;
+    unitItemUuid!: string;
 }

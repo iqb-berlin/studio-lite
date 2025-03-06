@@ -1,7 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, PrimaryGeneratedColumn } from 'typeorm';
 import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
 
-@Entity()
 class Metadata {
   @PrimaryGeneratedColumn()
     id: number;
@@ -12,23 +11,12 @@ class Metadata {
     default: () => "'[]'",
     nullable: false
   })
-    data: MetadataValuesEntry[] = [];
+    entries: MetadataValuesEntry[] = [];
 
   @Column({
-    name: 'unit_id'
+    name: 'profile_id'
   })
-    unitId: number;
-
-  @Column({
-    name: 'item_id'
-  })
-    itemId: number;
-
-  @Column()
-    reference: string;
-
-  @Column()
-    profile: string;
+    profileId: string;
 
   @Column({
     type: 'timestamp with time zone',
