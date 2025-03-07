@@ -26,6 +26,7 @@ CREATE TABLE "public"."metadata"
   "id"   SERIAL
       PRIMARY KEY,
   "entries" JSONB NOT NULL,
+  "is_current" BOOLEAN DEFAULT true,
   "profile_id" VARCHAR(256) NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now(),
   "changed_at" TIMESTAMP WITH TIME ZONE DEFAULT now()

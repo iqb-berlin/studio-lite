@@ -19,6 +19,11 @@ class Metadata {
     profileId: string;
 
   @Column({
+    name: 'is_current'
+  })
+    isCurrent: boolean;
+
+  @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })

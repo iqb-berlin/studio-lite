@@ -12,6 +12,9 @@ export class MetadataDto {
     profileId?: string;
 
   @ApiProperty()
+    isCurrent?: boolean;
+
+  @ApiProperty()
     createdAt?: Date;
 
   @ApiProperty()
