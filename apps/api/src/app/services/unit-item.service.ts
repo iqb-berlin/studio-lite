@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
-  UnitItemDto, UnitItemMetadataDto,
+  UnitItemDto,
   UnitItemWithMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -34,16 +34,16 @@ export class UnitItemService {
     );
   }
 
-  static compareProfiles(savedMetadata: UnitItemMetadataDto[], newMetadata: UnitItemMetadataDto[]) {
-    const newIds = newMetadata
-      .map(item => item.id)
-      .filter(id => id !== undefined);
-    const unchanged = newMetadata
-      .filter(metadata => metadata.id !== undefined && newIds.includes(metadata.id));
-    const removed = savedMetadata
-      .filter(metadata => metadata.id !== undefined && !newIds.includes(metadata.id));
-    const added = newMetadata
-      .filter(metadata => metadata.id === undefined);
+  static compare<T>(savedItems: T[], newItems: T[], key: string): { unchanged: T[]; removed: T[]; added: T[]; } {
+    const newIds = newItems
+      .map(item => item[key])
+      .filter(uuid => uuid !== undefined);
+    const unchanged = newItems
+      .filter(item => item[key] !== undefined && newIds.includes(item[key]));
+    const removed = savedItems
+      .filter(item => item[key] !== undefined && !newIds.includes(item[key]));
+    const added = newItems
+      .filter(item => item[key] === undefined);
     return { unchanged, removed, added };
   }
 
@@ -52,7 +52,7 @@ export class UnitItemService {
     if (updateItem) {
       await this.unitItemRepository.update(uuid, item);
       const profilesToUpdate = await this.unitItemMetadataService.getAllByItemId(item.uuid);
-      const { unchanged, removed, added } = UnitItemService.compareProfiles(profilesToUpdate, item.profiles);
+      const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, item.profiles, 'id');
       unchanged
         .map(metadata => this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata));
       removed
@@ -74,7 +74,7 @@ export class UnitItemService {
     return newItem.uuid;
   }
 
-  async removeItem(id: number): Promise<void> {
-    await this.unitItemRepository.delete(id);
+  async removeItem(uuid: string): Promise<void> {
+    await this.unitItemRepository.delete(uuid);
   }
 }

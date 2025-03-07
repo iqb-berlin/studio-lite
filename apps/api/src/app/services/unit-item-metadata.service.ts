@@ -13,12 +13,10 @@ export class UnitItemMetadataService {
   ) {}
 
   async getAll(): Promise<UnitItemMetadataDto[]> {
-    this.logger.log('findAll');
     return this.unitItemMetadataRepository.find();
   }
 
   async getAllByItemId(unitItemUuid: string): Promise<UnitItemMetadataDto[]> {
-    this.logger.log('findAll');
     return this.unitItemMetadataRepository.findBy({ unitItemUuid: unitItemUuid });
   }
 

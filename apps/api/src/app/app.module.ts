@@ -70,6 +70,7 @@ import UnitItemMetadata from './entities/unit-item-metadata.entity';
 import UnitMetadata from './entities/unit-metadata.entity';
 import { UnitItemMetadataService } from './services/unit-item-metadata.service';
 import { UnitItemMetadataController } from './controllers/unit-item-metadata.controller';
+import { UnitMetadataService } from './services/unit-metadata.service';
 
 @Module({
   imports: [
@@ -219,7 +220,8 @@ import { UnitItemMetadataController } from './controllers/unit-item-metadata.con
     SettingService,
     ReviewService,
     UnitItemService,
-    UnitItemMetadataService
+    UnitItemMetadataService,
+    UnitMetadataService
   ],
   exports: [AppVersionProvider]
 })

@@ -48,7 +48,7 @@ export class UnitItemController {
     return this.unitItemsService.addItem(unitId, body);
   }
 
-  @Delete(':id')
+  @Delete(':uuid')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiTags('unit item')
@@ -56,12 +56,12 @@ export class UnitItemController {
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiOkResponse()
   @ApiQuery({
-    name: 'id',
-    type: Number,
-    isArray: true,
+    name: 'uuid',
+    type: String,
+    isArray: false,
     required: true
   })
-  async remove(@Param('id') id: number): Promise<void> {
-    return this.unitItemsService.removeItem(id);
+  async remove(@Param('uuid') uuid: string): Promise<void> {
+    return this.unitItemsService.removeItem(uuid);
   }
 }

@@ -8,7 +8,10 @@ import {
   UnitByDefinitionIdDto,
   UnitInListDto,
   UnitPropertiesDto,
-  UnitSchemeDto, MetadataValues, UnitMetadataValues
+  UnitSchemeDto,
+  MetadataValues,
+  UnitMetadataValues,
+  UnitMetadataDto, UnitItemWithMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -19,6 +22,8 @@ import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
 import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
+import { UnitMetadataService } from './unit-metadata.service';
+import { UnitItemService } from './unit-item.service';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -37,7 +42,9 @@ export class UnitService {
     @InjectRepository(UnitDropBoxHistory)
     private unitDropBoxHistoryRepository: Repository<UnitDropBoxHistory>,
     private unitUserService: UnitUserService,
-    private unitCommentService: UnitCommentService
+    private unitCommentService: UnitCommentService,
+    private unitMetadataService: UnitMetadataService,
+    private unitItemService: UnitItemService
   ) {}
 
   async findAll(): Promise<UnitByDefinitionIdDto[]> {
@@ -262,6 +269,36 @@ export class UnitService {
     };
   }
 
+  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
+    const profilesToUpdate = await this.unitMetadataService.getAllByUnitId(unitId);
+    const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
+    unchanged
+      .map(metadata => this.unitMetadataService.updateMetadata(metadata.id, metadata));
+    removed
+      .map(metadata => this.unitMetadataService.removeMetadata(metadata.id));
+    added
+      .map(metadata => this.unitMetadataService.addMetadata(unitId, metadata));
+  }
+
+  async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {
+    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId);
+    const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
+    unchanged
+      .map(item => this.unitItemService.updateItem(item.uuid, item));
+    removed
+      .map(item => this.unitItemService.removeItem(item.uuid));
+    added
+      .map(item => this.unitItemService.addItem(unitId, item));
+  }
+
+  async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
+    const profiles = metadata.profiles || [];
+    await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[]);
+
+    const items = metadata.items || [];
+    await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[]);
+  }
+
   async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const displayName = await this.getDisplayNameForUser(user.id);
@@ -275,7 +312,10 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unit.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unit.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unit.schemeType = newData.schemeType;
-    if (dataKeys.indexOf('metadata') >= 0) unit.metadata = newData.metadata;
+    if (dataKeys.indexOf('metadata') >= 0) {
+      unit.metadata = newData.metadata;
+      await this.patchMetadata(unitId, newData.metadata);
+    }
     if (dataKeys.indexOf('state') >= 0) unit.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
       unit.groupName = newData.groupName;

@@ -153,7 +153,7 @@ export class WorkspaceUnitController {
     type: String
   })
   @ApiTags('workspace unit')
-  async findAllWithMetadata(
+  async findAllWithProperties(
     @WorkspaceId() workspaceId: number,
       @Query('column') columns: string[],
       @Query('id') units: number[],

@@ -68,7 +68,7 @@ describe('UnitItemService', () => {
       } as UnitItemMetadataDto
     ];
 
-    expect(UnitItemService.compareProfiles(savedProfiles, newProfles))
+    expect(UnitItemService.compare(savedProfiles, newProfles, 'id'))
       .toEqual(
         {
           unchanged: [
