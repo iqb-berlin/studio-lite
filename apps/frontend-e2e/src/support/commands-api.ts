@@ -477,7 +477,7 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
 });
 
 // 31
-Cypress.Commands.add('getUnitsByWsGAPI', (token:string) => {
+Cypress.Commands.add('getUnitsAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -513,22 +513,8 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
     failOnStatusCode: false
   });
 });
-// 32
-// Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, settings:WsSettings, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'PATCH',
-//     url: `/api/workspaces/${wsId}/settings`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     body: `${settings}`,
-//     failOnStatusCode: false
-//   });
-// });
 
-// 33
+// 33 ///api/group-admin/workspaces/${wsId}
 Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
