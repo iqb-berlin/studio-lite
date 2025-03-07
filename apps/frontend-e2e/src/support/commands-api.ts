@@ -514,7 +514,7 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
   });
 });
 
-// 33 ///api/group-admin/workspaces/${wsId}
+// 33
 Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -529,7 +529,7 @@ Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
 });
 
 // 34
-Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
+Cypress.Commands.add('getUsersByWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -594,20 +594,6 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   cy.request({
     method: 'GET',
     url: `/api/workspaces/${wsId}/units`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 43 similar to 22 but with no admin
-Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspaces/${wsId}/users`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
