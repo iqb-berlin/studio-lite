@@ -62,9 +62,8 @@ declare namespace Cypress {
     getWsAPI(wsId: string, token: string): Chainable<Response>; // 20
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 21
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 21
-    getUsersOfWsAdminAPI(wsId: string, userId: string, token: string): Chainable<Response>; // 22
+    getUsersOfWsAdminAPI(wsId: string, token: string): Chainable<Response>; // 22
     getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 23
-    updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24a
     // updateWsSettingsAPI(ws: WsSettings, wsId:string, token: string): Chainable<Response>; // 24
 
     getModulesAPI(token: string): Chainable<Response>; // 26
@@ -79,8 +78,6 @@ declare namespace Cypress {
     updateUnitMetadataAPI(wsId: string, unitId: string, profile: string, entry: DefinitionUnit, token: string):
     Chainable<Response>; // 41
     getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 42
-
-    renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // a1
     copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 52
     downloadWsAPI(wsId:string, token:string): Chainable<Response>; // b1
     downloadWsAllAPI(token:string): Chainable<Response>; // b2
@@ -103,6 +100,7 @@ declare namespace Cypress {
     Chainable<Response>; // 48
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 49
     moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 50
+    renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // 51
     addReviewAPI(wsId:string, reviewName: string, token:string): Chainable<Response>; // 51
     getReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response>; // 52
     updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 53

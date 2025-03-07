@@ -364,7 +364,7 @@ Cypress.Commands.add(
   }
 );
 // 22
-Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, userId:string, token:string) => {
+Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -391,23 +391,6 @@ Cypress.Commands.add('getWsByGroupAPI',
       failOnStatusCode: false
     });
   });
-
-// 24a
-Cypress.Commands.add('updateWsNameAPI', (ws, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspaces/${ws.id}/name`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      name: `${ws.name}`
-    },
-    failOnStatusCode: false
-  });
-});
 
 // 25
 // Cypress.Commands.add('addModuleAPI', (module:string) => {
