@@ -239,7 +239,7 @@ export class UnitPreviewComponent
       .subscribe(() => {
         this.message = '';
         this.workspaceService
-          .loadUnitMetadata()
+          .loadUnitProperties()
           .then(() => this.sendUnitData());
       });
     this.addSubscriptionForUnitDefinitionChanges();

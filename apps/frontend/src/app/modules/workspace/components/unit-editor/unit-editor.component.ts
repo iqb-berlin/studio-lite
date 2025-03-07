@@ -109,7 +109,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
       .subscribe(() => {
         this.message = '';
-        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToEditor());
+        this.workspaceService.loadUnitProperties().then(() => this.sendUnitDataToEditor());
       });
   }
 

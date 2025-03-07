@@ -56,7 +56,7 @@ export class BackendService {
       );
   }
 
-  getUnitListWithMetadata(workspaceId: number): Observable <UnitPropertiesDto[]> {
+  getUnitListWithProperties(workspaceId: number): Observable <UnitPropertiesDto[]> {
     return this.http
       .get<UnitPropertiesDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/properties`)
       .pipe(
@@ -216,7 +216,7 @@ export class BackendService {
     return of(null);
   }
 
-  setUnitMetadata(workspaceId: number, unitData: UnitPropertiesDto): Observable<boolean> {
+  setUnitProperties(workspaceId: number, unitData: UnitPropertiesDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitData.id}/properties`, unitData)
       .pipe(
