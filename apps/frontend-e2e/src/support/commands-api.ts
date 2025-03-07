@@ -515,7 +515,7 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
   });
 });
 
-// 33 ///api/group-admin/workspaces/${wsId}
+// 33
 Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
