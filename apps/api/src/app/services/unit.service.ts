@@ -11,7 +11,7 @@ import {
   UnitSchemeDto,
   MetadataValues,
   UnitMetadataValues,
-  UnitMetadataDto, UnitItemWithMetadataDto
+  UnitMetadataDto, UnitItemWithMetadataDto, UnitFullMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -642,5 +642,12 @@ export class UnitService {
       }
     }
     return unit;
+  }
+
+  async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
+    return {
+      profiles: await this.unitMetadataService.getAllByUnitId(unitId),
+      items: await this.unitItemService.getAllByUnitIdWithMetadata(unitId)
+    };
   }
 }
