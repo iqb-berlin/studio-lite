@@ -1701,7 +1701,6 @@ describe('Studio API tests', () => {
             });
         });
         it('200 positive test: should submit a unit with ws origin, ws destination, unit id and credentials', () => {
-          cy.pause();
           cy.submitUnitsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
             Cypress.env(unit3.shortname),
@@ -1709,7 +1708,6 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
       });
 
@@ -1742,7 +1740,6 @@ describe('Studio API tests', () => {
             });
         });
         it('200 positive test: should return a submit unit with ws origin, unit id and credentials', () => {
-          cy.pause();
           cy.submitUnitsAPI(Cypress.env(ws2.id),
             '',
             Cypress.env(unit3.shortname),
@@ -1750,7 +1747,6 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
       });
     });
@@ -2132,6 +2128,7 @@ describe('Studio API tests', () => {
       describe.skip('72. PATCH /api/workspaces/{workspace_id}/reviews/{id}', () => {
         let review1: ReviewData;
         before(() => {
+          cy.pause();
           const authorization = `bearer ${Cypress.env(`token_${user2.username}`)}`;
           const nu = parseInt(Cypress.env(unit2.shortname), 10);
           cy.request({
@@ -2156,6 +2153,7 @@ describe('Studio API tests', () => {
             name: 'Teil1',
             units: [Cypress.env(unit2.shortname)]
           };
+          cy.pause();
         });
 
         it('200 positive test: should update a review with credentials', () => {
@@ -2215,6 +2213,7 @@ describe('Studio API tests', () => {
 
       describe.skip('74. GET /api/reviews/{review_id}', () => {
         it('200 positive test: should all reviews with credentials', () => {
+          cy.pause();
           cy.getReviewWindowAPI(Cypress.env('id_review1'), Cypress.env(`token_${user2.username}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
@@ -2337,9 +2336,9 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe.skip('83. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
+    describe('83. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
       it('401 negative test: should not delete the unit from other user', () => {
-        cy.deleteUnitAPI(Cypress.env(unit1.shortname),
+        cy.deleteUnitsAPI([Cypress.env(unit1.shortname)],
           Cypress.env(ws1.id),
           Cypress.env(`token_${user3.username}`))
           .then(resp => {
@@ -2348,7 +2347,7 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: should not delete the unit without token ', () => {
-        cy.deleteUnitAPI(Cypress.env(unit1.shortname),
+        cy.deleteUnitsAPI([Cypress.env(unit1.shortname)],
           Cypress.env(ws1.id),
           noId)
           .then(resp => {
@@ -2357,7 +2356,7 @@ describe('Studio API tests', () => {
       });
 
       it('500 negative test: should not delete the unit with non existent workspace', () => {
-        cy.deleteUnitAPI(Cypress.env(unit2.shortname),
+        cy.deleteUnitsAPI([Cypress.env(unit2.shortname)],
           noId,
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -2366,7 +2365,7 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: should not delete the unit with wrong workspace', () => {
-        cy.deleteUnitAPI(Cypress.env(unit2.shortname),
+        cy.deleteUnitsAPI([Cypress.env(unit2.shortname)],
           Cypress.env(ws1.id),
           Cypress.env(`token_${user3.username}`))
           .then(resp => {
@@ -2375,7 +2374,12 @@ describe('Studio API tests', () => {
       });
 
       it('200 positive test: a normal user should delete their own unit', () => {
-        cy.deleteUnitAPI(Cypress.env(unit2.shortname),
+        // Delete 2 units at time
+        const ids = [
+          Cypress.env(unit2.shortname),
+          Cypress.env(unit1.shortname)];
+
+        cy.deleteUnitsAPI(ids,
           Cypress.env(ws2.id),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {

@@ -932,7 +932,6 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
       body: {
         id: nu,
         name: `${review.name}`,
-        link: `${review.link}`,
         units: [`${review.units[0]}`]
       },
       failOnStatusCode: false
@@ -1011,11 +1010,12 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
 });
 
 // 83
-Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
+Cypress.Commands.add('deleteUnitsAPI', (ids:string[], wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', ids);
   cy.request({
     method: 'DELETE',
-    url: `/api/workspaces/${wsId}/units/${unitId}`,
+    url: `/api/workspaces/${wsId}/units${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
