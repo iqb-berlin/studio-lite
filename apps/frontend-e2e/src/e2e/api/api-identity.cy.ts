@@ -1,4 +1,6 @@
+// import { HttpParams } from '@angular/common/http';
 import { UserData } from '../../support/testData';
+import { buildQueryParameters } from '../../support/utilAPI';
 
 describe('Identity tests users API tests', () => {
   const cloakUser1:UserData = {
