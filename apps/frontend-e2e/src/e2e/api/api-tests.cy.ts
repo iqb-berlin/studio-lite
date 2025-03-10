@@ -111,7 +111,7 @@ describe('Studio API tests', () => {
         cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
           .then(resp => {
             Cypress.env(`token_${Cypress.env('username')}`, resp.body);
-            console.log(resp.body);
+            // console.log(resp.body);
             expect(resp.status).to.equal(201);
           });
       });
@@ -902,7 +902,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('24b. PATCH /api/workspaces/{workspace_id}/settings}', () => {
+      describe('32. PATCH /api/workspaces/{workspace_id}/settings}', () => {
         it('200 positive test: should update the ws data', () => {
           cy.updateWsSettingsAPI(Cypress.env(ws1.id), setEditor, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -1521,65 +1521,25 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe.skip('57. POST /api/workspaces/{workspace_id}/group', () => {
-      let setEditor2: WsSettings;
-      before(() => {
-        setEditor2 = {
-          defaultEditor: 'iqb-editor-aspect@2.5.0-beta5',
-          defaultPlayer: 'iqb-player-aspect@2.5.0-beta5',
-          defaultSchemer: 'iqb-schemer@2.0.0-beta',
-          stableModulesOnly: false,
-          unitGroups: ['Bista', 'NewGroup']
-        };
-      });
-
-      it('200 positive test: should create a new group for the ws', () => {
-        cy.updateWsSettingsAPI(Cypress.env(ws1.id),
-          setEditor2,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not create a new group without credentials', () => {
-        cy.updateWsSettingsAPI(Cypress.env(ws1.id),
-          'Group6',
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('500 negative test: should not create a group without a valid ws id', () => {
-        cy.updateWsSettingsAPI(noId,
-          'Group6',
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-    });
-
     // STATES
     describe('States block', () => {
       describe('58. PATCH /api/workspace-groups/{workspace_group_id}', () => {
         it('200 positive test: should add new states in a group with credentials', () => {
-          cy.updateGroupStatesAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          cy.updateGroupPropertiesAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
         });
 
         it('401 negative test: should not add new states in a group without credentials', () => {
-          cy.updateGroupStatesAPI(Cypress.env(group2.id), noId)
+          cy.updateGroupPropertiesAPI(Cypress.env(group2.id), noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
         });
 
         it('500 negative test: should not add any new states with a invalid group id', () => {
-          cy.updateGroupStatesAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          cy.updateGroupPropertiesAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
@@ -1638,35 +1598,6 @@ describe('Studio API tests', () => {
             });
         });
       });
-
-      // describe('60. DELETE /api/workspaces/{workspace_id}/units/{id}/state', () => {
-      //   it.skip('200 positive test: should delete a state', () => {
-      //     cy.deleteStateAPI(Cypress.env(ws1.id),
-      //       '1',
-      //       Cypress.env(`token_${Cypress.env('username')}`))
-      //       .then(resp => {
-      //         expect(resp.status).to.equal(200);
-      //       });
-      //   });
-      //
-      //   it('401 negative test: should not delete a state without credentials', () => {
-      //     cy.deleteStateAPI(Cypress.env(ws1.id),
-      //       '2',
-      //       noId)
-      //       .then(resp => {
-      //         expect(resp.status).to.equal(401);
-      //       });
-      //   });
-      //
-      //   it('500 negative test: should not delete a state passing a non valid ws id ', () => {
-      //     cy.deleteStateAPI(noId,
-      //       '2',
-      //       Cypress.env(`token_${Cypress.env('username')}`))
-      //       .then(resp => {
-      //         expect(resp.status).to.equal(500);
-      //       });
-      //   });
-      // });
 
       describe('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
         // I can not find the use in studio.
@@ -1732,7 +1663,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe.skip('63. PATCH /api/workspaces/{workspace_id}/submit', () => {
+      describe('63. PATCH /api/workspaces/{workspace_id}/units/drop-box-history', () => {
         it('401 negative test: should not submit units without credentials ', () => {
           cy.submitUnitsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
@@ -1770,6 +1701,7 @@ describe('Studio API tests', () => {
             });
         });
         it('200 positive test: should submit a unit with ws origin, ws destination, unit id and credentials', () => {
+          cy.pause();
           cy.submitUnitsAPI(Cypress.env(ws1.id),
             Cypress.env(ws2.id),
             Cypress.env(unit3.shortname),
@@ -1777,12 +1709,14 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
+          cy.pause();
         });
       });
 
-      describe.skip('64. PATCH /api/workspaces/{workspace_id}/return-submitted', () => {
+      describe('63b. PATCH /api/workspaces/{workspace_id}/units/submitUnitsAPI', () => {
         it('401 negative test: should not return a submit unit without credentials', () => {
-          cy.returnUnitsAPI(Cypress.env(ws2.id),
+          cy.submitUnitsAPI(Cypress.env(ws2.id),
+            '',
             Cypress.env(unit3.shortname),
             noId)
             .then(resp => {
@@ -1790,7 +1724,8 @@ describe('Studio API tests', () => {
             });
         });
         it('500 negative test: should not return a submit unit without origin ws', () => {
-          cy.returnUnitsAPI(noId,
+          cy.submitUnitsAPI(noId,
+            '',
             Cypress.env(unit3.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -1798,7 +1733,8 @@ describe('Studio API tests', () => {
             });
         });
         it('500 negative test: should not return a submit unit without valid unit id', () => {
-          cy.returnUnitsAPI(Cypress.env(ws2.id),
+          cy.submitUnitsAPI(Cypress.env(ws2.id),
+            '',
             noId,
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -1806,12 +1742,15 @@ describe('Studio API tests', () => {
             });
         });
         it('200 positive test: should return a submit unit with ws origin, unit id and credentials', () => {
-          cy.returnUnitsAPI(Cypress.env(ws2.id),
+          cy.pause();
+          cy.submitUnitsAPI(Cypress.env(ws2.id),
+            '',
             Cypress.env(unit3.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
+          cy.pause();
         });
       });
     });

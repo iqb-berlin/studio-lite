@@ -81,17 +81,16 @@ declare namespace Cypress {
     copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 52
     downloadWsAPI(wsId:string, token:string): Chainable<Response>; // b1
     downloadWsAllAPI(token:string): Chainable<Response>; // b2
-    getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // b3
+    getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 55
 
     createGroupWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // b5
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6
-    updateGroupStatesAPI(groupId: string, token:string): Chainable<Response>; // b7
+    updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // b8
-    deleteStateAPI(wsId: string, state: string, token:string): Chainable<Response>; // b9
+
     getMetadataWsAPI(wsId: string, token:string): Chainable<Response>; // b10
-    dropboxWsAPI(wsId: string, wsDe: string, token:string): Chainable<Response>; // b11
-    submitUnitsAPI(wsId: string, wsDe: string, unit:string, token:string): Chainable<Response>; // b12
-    returnUnitsAPI(wsDe: string, unit:string, token:string): Chainable<Response>; // b13
+    dropboxWsAPI(wsId: string, wsDe: string, token:string): Chainable<Response>; // 62
+    submitUnitsAPI(wsId: string, wsDe: string, unit:string, token:string): Chainable<Response>; // 63, 63b
 
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 45
     getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 46

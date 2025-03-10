@@ -473,7 +473,7 @@ Cypress.Commands.add('getUnitsAPI', (token:string) => {
   });
 });
 
-// 24b
+// 32
 Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -685,25 +685,8 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   });
 });
 
-// 57 //now is 32 and 24b
-// Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'POST',
-//     url: `/api/workspaces/${wsId}/name`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     body: {
-//       name: `${groupName}`
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
 // 58
-Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => {
+Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -760,21 +743,6 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
   });
 });
 
-// 60
-// TODO: Endpoint is removed
-// Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'DELETE',
-//     url: `/api/workspace/${wsId}/${state}/state`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
 // 61
 Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -814,32 +782,14 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/submit`,
+    url: `/api/workspaces/${wsId}/units/drop-box-history`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
-      dropBoxId: nu,
-      units: [unitNumber]
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 64
-Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  const unitNumber = parseInt(`${unit}`, 10);
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspaces/${wsDe}/return-submitted`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      units: [unitNumber]
+      ids: [unitNumber],
+      ...(wsDe !== '' ? { targetId: nu } : {})
     },
     failOnStatusCode: false
   });
