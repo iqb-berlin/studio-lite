@@ -934,8 +934,9 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
       },
       body: {
         id: nu,
-        name: `${review.name}`,
-        units: [`${review.units[0]}`]
+        link: review.link,
+        name: review.name,
+        units: [review.units[0]]
       },
       failOnStatusCode: false
     });
@@ -947,7 +948,7 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/reviews/`,
+    url: `/api/workspaces/${wsId}/reviews`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -961,7 +962,7 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/reviews/${reviewId}`,
+    url: `api/reviews/${reviewId}/`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1069,7 +1070,7 @@ Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/users/${userId}/workspaces`,
+    url: `/api/group-admin/users/${userId}/workspaces`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1107,11 +1108,12 @@ Cypress.Commands.add('deleteWsAPI', (ws:string, group: string, token:string) => 
 });
 
 // 89
-Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
+Cypress.Commands.add('deleteGroupsAPI', (qs: string[], token:string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', qs);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/workspace-groups?id=${id}`,
+    url: `/api/admin/workspace-groups${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
