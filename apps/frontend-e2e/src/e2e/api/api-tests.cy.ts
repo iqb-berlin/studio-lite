@@ -2352,7 +2352,6 @@ describe('Studio API tests', () => {
 
       it('200 positive test: a normal user should delete their own unit', () => {
         // Delete 2 units at time
-        cy.pause();
         const ids = [
           Cypress.env(unit2.shortname),
           Cypress.env(unit1.shortname)];
@@ -2363,7 +2362,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
-        cy.pause();
       });
     });
   });
