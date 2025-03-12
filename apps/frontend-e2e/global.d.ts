@@ -31,8 +31,6 @@ declare namespace Cypress {
 
     getUsersAPI(): Chainable<Response>;
     setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>;
-    // commands-unit-api.ts
-    deleteUnitAPI(idUnit: string, idGroup: string): Chainable<Response>;
     // commands-verona-api.ts
     addModuleAPI(module: string);
     getModuleAPI(module: string);
@@ -62,7 +60,7 @@ declare namespace Cypress {
     getWsAPI(wsId: string, token: string): Chainable<Response>; // 20
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 21
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 21
-    getUsersOfWsAdminAPI(wsId: string, userId: string, token: string): Chainable<Response>; // 22
+    getUsersOfWsAdminAPI(wsId: string, token: string): Chainable<Response>; // 22
     getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 23
     updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24a
     // updateWsSettingsAPI(ws: WsSettings, wsId:string, token: string): Chainable<Response>; // 24
@@ -88,7 +86,7 @@ declare namespace Cypress {
 
     createGroupWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // b5
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6
-    updateGroupStatesAPI(groupId: string, token:string): Chainable<Response>; // b7
+    updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // b7
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // b8
     deleteStateAPI(wsId: string, state: string, token:string): Chainable<Response>; // b9
     getMetadataWsAPI(wsId: string, token:string): Chainable<Response>; // b10
@@ -111,7 +109,7 @@ declare namespace Cypress {
     getReviewMetadataAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 56
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 57
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 68
-    deleteUnitAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 70
+    deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 70
     getMyData(token:string): Chainable<Response>; // 71
     updateMyData(token:string, data:MyData): Chainable<Response>; // 72
 
