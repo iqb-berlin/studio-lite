@@ -126,9 +126,6 @@ export function addModules(filenames:string[]):void {
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
-  cy.loadModule('../frontend-e2e/src/fixtures/iqb-schemer-2.0.0.html', 'iqb-schemer@2.0');
-  cy.loadModule('../frontend-e2e/src/fixtures/iqb-player-aspect-2.5.0-beta.html', 'iqb-player-aspect@2.5.0');
-  cy.loadModule('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.5.0-beta.html', 'iqb-editor-aspect@2.5.0');
   filenames.forEach(filename => {
     cy.loadModule(filename, filename);
   });
