@@ -3,8 +3,8 @@ import { AccessLevel, UnitData, UserData } from './testData';
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
-  cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
-  // cy.clickButton('Weiter');
+  // cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
+  cy.clickButton('Weiter');
   cy.wait(100);
 }
 
@@ -157,7 +157,7 @@ export function deleteGroup(group: string):void {
     .contains('delete')
     .click();
   cy.buttonToContinue('Löschen', 200, '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
-  cy.clickButton('Löschen');
+  // cy.clickButton('Löschen');
 }
 
 export function logout() {

@@ -206,7 +206,6 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: should not update user password with wrong token', () => {
-        // Should return 401
         cy.updatePasswordAPI(noId, Cypress.env('password'), '4567')
           .then(resp => {
             expect(resp.status).to.equal(401);
@@ -438,7 +437,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    // Moved after we make admin of some workspace-groups, otherwise we get []
     describe('8. GET /api/admin/users/{id}/workspace-groups', () => {
       it('200 positive test: get the workspaces of the actual user.', () => {
         cy.getUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
