@@ -1318,7 +1318,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(500);
           });
-        cy.pause();
       });
     });
 
@@ -1530,6 +1529,30 @@ describe('Studio API tests', () => {
 
         it('401 negative test: should not add new states in a group without credentials', () => {
           cy.updateGroupPropertiesAPI(Cypress.env(group2.id), noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+
+        it('500 negative test: should not add any new states with a invalid group id', () => {
+          cy.updateGroupPropertiesAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(500);
+            });
+        });
+      });
+
+      describe('58a. GET /api/workspace-groups/{workspace_group_id}', () => {
+        // It is used when we enter in a ws
+        it('200 positive test: should get the properties of a group with credentials', () => {
+          cy.getGroupPropertiesAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+        });
+
+        it('401 negative test: should not get the properties of a  group without credentials', () => {
+          cy.getGroupPropertiesAPI(Cypress.env(group2.id), noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
@@ -2341,43 +2364,6 @@ describe('Studio API tests', () => {
       it('200 positive test: should a user get the workspace by ws id', () => {
         cy.getWsForUserAPI(Cypress.env(ws1.id),
           Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-    });
-
-    describe.skip('82a. GET /api/workspaces/{workspace_id}/users/{user_id}', () => {
-      it('401 negative test: should not retrieve the ws data for the user without token ', () => {
-        cy.getWsForUserAPI(Cypress.env(ws1.id),
-          Cypress.env(`id_${Cypress.env('username')}`),
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('200/404 negative test: should not retrieve with non existent workspace', () => {
-        cy.getWsForUserAPI(noId,
-          Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('500 negative test: should not retrieve without a valid workspace', () => {
-        cy.getWsForUserAPI(noId,
-          noId,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-      it('200 positive test: should a user get the workspace by ws id', () => {
-        cy.getWsForUserAPI(noId,
-          Cypress.env(ws1.id),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);

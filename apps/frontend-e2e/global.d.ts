@@ -86,7 +86,8 @@ declare namespace Cypress {
 
     createGroupWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // b5
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6
-    updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // b7
+    getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 57
+    updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // b8
     deleteStateAPI(wsId: string, state: string, token:string): Chainable<Response>; // b9
     getMetadataWsAPI(wsId: string, token:string): Chainable<Response>; // b10

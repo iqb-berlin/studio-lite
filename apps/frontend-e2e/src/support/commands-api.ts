@@ -688,6 +688,20 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   });
 });
 
+// 58a
+Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 58
 Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
