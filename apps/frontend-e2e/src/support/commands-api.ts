@@ -1013,6 +1013,20 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
   });
 });
 
+// 82
+Cypress.Commands.add('getWsForUserAPI', (wsId:string, userId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/users/${userId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 83
 Cypress.Commands.add('deleteUnitsAPI', (ids:string[], wsId:string, token: string) => {
   const authorization = `bearer ${token}`;

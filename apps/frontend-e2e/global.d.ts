@@ -109,6 +109,7 @@ declare namespace Cypress {
     getReviewMetadataAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 56
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 57
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 68
+    getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 70
     getMyData(token:string): Chainable<Response>; // 71
     updateMyData(token:string, data:MyData): Chainable<Response>; // 72
