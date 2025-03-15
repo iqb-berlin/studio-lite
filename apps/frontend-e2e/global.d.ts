@@ -73,6 +73,7 @@ declare namespace Cypress {
     downloadWsAPI(wsId:string, token:string): Chainable<Response>; // 53
     downloadWsAllAPI(token:string): Chainable<Response>; // 54
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 55
+    getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 57
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
     getMetadataWsAPI(wsId: string, token:string): Chainable<Response>; // 61
@@ -92,6 +93,7 @@ declare namespace Cypress {
     getReviewMetadataAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 75
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 76
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 81
+    getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 83
     getMyData(token:string): Chainable<Response>; // 84
     updateMyData(token:string, data:MyData): Chainable<Response>; // 85

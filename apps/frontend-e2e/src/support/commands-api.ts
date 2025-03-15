@@ -688,6 +688,20 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   });
 });
 
+// 58a
+Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 58
 Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1005,6 +1019,20 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
   cy.request({
     method: 'DELETE',
     url: `/api/workspaces/${wsId}/reviews/${reviewId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 82
+Cypress.Commands.add('getWsForUserAPI', (wsId:string, userId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/users/${userId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
