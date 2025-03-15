@@ -1094,7 +1094,7 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
 });
 
 // 88
-Cypress.Commands.add('deleteWsAPI', (qs:string[], group: string, token:string) => {
+Cypress.Commands.add('deleteWsAPI', (qs:string[], token:string) => {
   const authorization = `bearer ${token}`;
   const qp = buildQueryParameters('id', qs);
   cy.request({
@@ -1115,20 +1115,6 @@ Cypress.Commands.add('deleteGroupsAPI', (qs: string[], token:string) => {
   cy.request({
     method: 'DELETE',
     url: `/api/admin/workspace-groups${qp}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 90
-Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'DELETE',
-    url: `/api/admin/verona-modules/${module}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
