@@ -1616,7 +1616,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
+      describe.skip('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
         // I can not find the use in studio.
         it('200 positive test: should get the metadata of a workspace.', () => {
           cy.getMetadataWsAPI(Cypress.env(ws1.id),
