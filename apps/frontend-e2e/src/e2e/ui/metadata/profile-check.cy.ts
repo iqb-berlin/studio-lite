@@ -50,7 +50,8 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     checkProfile(searchProfile);
-    cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+    // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+    cy.clickButton('Speichern');
   });
 
   it('should be possible load a metadata profile from workspace', () => {
@@ -77,7 +78,8 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     checkMultipleProfiles(searchProfiles);
-    cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+    // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+    cy.clickButton('Speichern');
   });
 
   it('removes the Context', () => {

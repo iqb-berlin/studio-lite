@@ -1,17 +1,21 @@
+// @ts-check
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../../global.d.ts" />
 import {
   UserData,
   GroupData,
   WsData,
   AccessLevel,
   UnitData,
-  WsSettings,
   AccessUser,
   CommentData,
   ReviewData,
   MyData,
-  DefinitionUnit, CopyUnit
+  DefinitionUnit, CopyUnit, WsSettings
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
+import { buildQueryParameters } from './utilAPI';
+// import { HttpParams } from '@angular/common/http';
 
 // General
 Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
@@ -125,43 +129,12 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
 });
 
 // 7.
-// TODO Endpoint changed
 Cypress.Commands.add('getUsersFullAPI',
-  (token: string) => {
+  (full: boolean, token: string) => {
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: '/api/group-admin/users/full',
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
-      },
-      failOnStatusCode: false
-    });
-  });
-
-// 8
-Cypress.Commands.add('getUserAPI',
-  (id:string, token:string) => {
-    const authorization = `bearer ${token}`;
-    cy.request({
-      method: 'GET',
-      url: `/api/admin/users/${id}`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
-      },
-      failOnStatusCode: false
-    });
-  });
-
-// 9
-Cypress.Commands.add('getUserNoIdAPI',
-  (token:string) => {
-    const authorization = `bearer ${token}`;
-    cy.request({
-      method: 'GET',
-      url: '/api/group-admin/users',
+      url: `/api/group-admin/users?full=${full}`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -172,12 +145,12 @@ Cypress.Commands.add('getUserNoIdAPI',
 
 // 10
 Cypress.Commands.add('updateUserAPI',
-  (user:UserData, credentials: boolean, token:string) => {
+  (id: string, user:UserData, credentials: boolean, token:string) => {
     const authorization = `bearer ${token}`;
     const nu = parseInt(`${Cypress.env(`id_${user.username}`)}`, 10);
     cy.request({
       method: 'PATCH',
-      url: '/api/admin/users',
+      url: `/api/admin/users/${id}`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -185,21 +158,6 @@ Cypress.Commands.add('updateUserAPI',
       body: {
         id: nu,
         isAdmin: credentials
-      },
-      failOnStatusCode: false
-    });
-  });
-
-// 11
-Cypress.Commands.add('deleteUserNoIdAPI',
-  (id:string, token:string) => {
-    const authorization = `bearer ${token}`;
-    cy.request({
-      method: 'DELETE',
-      url: `/api/admin/users?id=${id}`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        authorization
       },
       failOnStatusCode: false
     });
@@ -251,24 +209,6 @@ Cypress.Commands.add('getGroupAPI', (token:string) => {
   });
 });
 
-// 15 Not used because we use request to simulate the command
-// Cypress.Commands.add('updateGroupAPI', (token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'PATCH',
-//     url: '/api/admin/workspace-groups/',
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     body: {
-//       id: `${Cypress.env('id_group1')}`,
-//       name: 'VERA2024'
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
 // 16
 Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -283,6 +223,21 @@ Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string,
     failOnStatusCode: false
   });
 });
+
+// 8
+Cypress.Commands.add('getUserAPI',
+  (id:string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/users/${id}/workspace-groups`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
 
 // 17
 Cypress.Commands.add('getAdminOfGroupAPI', (groupId: string, token:string) => {
@@ -303,7 +258,7 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) =
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: `/api/group-admin/workspaces/${groupId}`,
+    url: '/api/group-admin/workspaces',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -321,10 +276,14 @@ Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) =>
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/group-admin/workspaces/${ws}/${newGroup}`,
+    url: '/api/group-admin/workspaces/group-id',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      ids: [`${ws}`],
+      targetId: `${newGroup}`
     },
     failOnStatusCode: false
   });
@@ -358,8 +317,8 @@ Cypress.Commands.add('updateUsersOfWsAPI', (wsId:string, level:AccessLevel,
     },
     body: [
       {
-        accessLevel: `${level}`,
-        id: `${userId}`
+        accessLevel: level,
+        id: userId
       }
     ],
     failOnStatusCode: false
@@ -408,7 +367,7 @@ Cypress.Commands.add(
   }
 );
 // 22
-Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, userId:string, token:string) => {
+Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -422,39 +381,20 @@ Cypress.Commands.add('getUsersOfWsAdminAPI', (wsId: string, userId:string, token
 });
 
 // 23
-// TODO: Endpoint is removed
-// Cypress.Commands.add('getWsGroupwiseAPI', (token: string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'GET',
-//     url: '/api/admin/workspaces/groupwise',
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
-// 24 Not used because we use request to simulate the command
-Cypress.Commands.add('updateWsAPI', (ws:WsData, group:GroupData, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: '/api/group-admin/workspaces/',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      id: `${Cypress.env(ws.id)}`,
-      name: `${ws.name}`,
-      groupId: `${Cypress.env(group.id)}`,
-      groupName: `${group.name}`
-    },
-    failOnStatusCode: false
+Cypress.Commands.add('getWsByGroupAPI',
+  (id:string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/admin/workspace-groups/${id}/workspaces`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
   });
-});
+
 // 25
 // Cypress.Commands.add('addModuleAPI', (module:string) => {
 //   const authorization = `bearer ${Cypress.env('token_admin')}`;
@@ -494,7 +434,7 @@ Cypress.Commands.add('getModuleAPI', (module:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/verona-module/${module}`,
+    url: `/api/verona-modules/${module}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -502,21 +442,6 @@ Cypress.Commands.add('getModuleAPI', (module:string, token:string) => {
     failOnStatusCode: false
   });
 });
-
-// 28
-// TODO: Moved and changed
-// Cypress.Commands.add('downloadModuleAPI', (module:string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'GET',
-//     url: `/api/admin/verona-modules/${module}`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
 
 // 30
 Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string) => {
@@ -538,7 +463,7 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
 });
 
 // 31
-Cypress.Commands.add('getUnitsByWsGAPI', (token:string) => {
+Cypress.Commands.add('getUnitsAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -552,7 +477,7 @@ Cypress.Commands.add('getUnitsByWsGAPI', (token:string) => {
 });
 
 // 32
-Cypress.Commands.add('updateWsSettings', (wsId:string, settings:WsSettings, token:string) => {
+Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -561,7 +486,16 @@ Cypress.Commands.add('updateWsSettings', (wsId:string, settings:WsSettings, toke
       'app-version': Cypress.env('version'),
       authorization
     },
-    body: `${settings}`,
+    body: {
+      defaultEditor: ws.defaultEditor,
+      defaultPlayer: ws.defaultPlayer,
+      defaultSchemer: ws.defaultSchemer,
+      unitGroups: ws.unitGroups,
+      stableModulesOnly: ws.stableModulesOnly,
+      unitMDProfile: ws.unitMDProfile,
+      itemMDProfile: ws.itemMDProfile,
+      states: ws.states
+    },
     failOnStatusCode: false
   });
 });
@@ -581,7 +515,7 @@ Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
 });
 
 // 34
-Cypress.Commands.add('getUsersByWsIdAPI', (wsId:string, token:string) => {
+Cypress.Commands.add('getUsersByWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
@@ -654,20 +588,6 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   });
 });
 
-// 43 similar to 22 but with no admin
-Cypress.Commands.add('getUsersOfWsAPI', (wsId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspaces/${wsId}/users`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 50
 Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
   // TO DO replace the unitId by an ids array
@@ -676,14 +596,14 @@ Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitI
   const unitIdNumber = parseInt(`${unitId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsOriginId}/units/move`,
+    url: `/api/workspaces/${wsOriginId}/units/workspace-id`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
-      targetWorkspace: nu,
-      units: [unitIdNumber]
+      targetId: nu,
+      ids: [unitIdNumber]
     },
     failOnStatusCode: false
   });
@@ -694,10 +614,13 @@ Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) =
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/rename/${wsName}`,
+    url: `/api/workspaces/${wsId}/name`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    body: {
+      name: `${wsName}`
     },
     failOnStatusCode: false
   });
@@ -723,7 +646,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   });
 });
 
-// 53
+// 53 skipped
 Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -737,7 +660,7 @@ Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
   });
 });
 
-// 54
+// 54 skipped
 Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -764,40 +687,23 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
     failOnStatusCode: false
   });
 });
-// 56
-Cypress.Commands.add('getCodingReportAPI', (wsId: string, token:string) => {
+
+// 58a
+Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/coding-report`,
+    url: `/api/workspace-groups/${groupId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 57
-// TODO: Endpoint has changed
-Cypress.Commands.add('createGroupWsAPI', (wsId: string, groupName:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'POST',
-    url: `/api/workspaces/${wsId}/group`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      body: `${groupName}`
     },
     failOnStatusCode: false
   });
 });
 
 // 58
-Cypress.Commands.add('updateGroupStatesAPI', (groupId: string, token:string) => {
+Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -854,21 +760,6 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
   });
 });
 
-// 60
-// TODO: Endpoint is removed
-// Cypress.Commands.add('deleteStateAPI', (wsId: string, state: string, token:string) => {
-//   const authorization = `bearer ${token}`;
-//   cy.request({
-//     method: 'DELETE',
-//     url: `/api/workspace/${wsId}/${state}/state`,
-//     headers: {
-//       'app-version': Cypress.env('version'),
-//       authorization
-//     },
-//     failOnStatusCode: false
-//   });
-// });
-
 // 61
 Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -908,32 +799,14 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
   const unitNumber = parseInt(`${unit}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/submit`,
+    url: `/api/workspaces/${wsId}/units/drop-box-history`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
     },
     body: {
-      dropBoxId: nu,
-      units: [unitNumber]
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 64
-Cypress.Commands.add('returnUnitsAPI', (wsDe: string, unit:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  const unitNumber = parseInt(`${unit}`, 10);
-  cy.request({
-    method: 'PATCH',
-    url: `/api/workspaces/${wsDe}/return-submitted`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: {
-      units: [unitNumber]
+      ids: [unitNumber],
+      ...(wsDe !== '' ? { targetId: nu } : {})
     },
     failOnStatusCode: false
   });
@@ -1075,9 +948,9 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
       },
       body: {
         id: nu,
-        name: `${review.name}`,
-        link: `${review.link}`,
-        units: [`${review.units[0]}`]
+        link: review.link,
+        name: review.name,
+        units: [review.units[0]]
       },
       failOnStatusCode: false
     });
@@ -1089,7 +962,7 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/reviews/`,
+    url: `/api/workspaces/${wsId}/reviews`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1103,7 +976,7 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/reviews/${reviewId}`,
+    url: `api/reviews/${reviewId}/`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1155,12 +1028,11 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
 });
 
 // 82
-// TODO: Endpoint changed
-Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:string) => {
+Cypress.Commands.add('getWsForUserAPI', (wsId:string, userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/download/${settings}`,
+    url: `/api/workspaces/${wsId}/users/${userId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1170,11 +1042,12 @@ Cypress.Commands.add('FdownloadWsAPI', (wsId:string, settings: string, token:str
 });
 
 // 83
-Cypress.Commands.add('deleteUnitAPI', (unitId:string, wsId:string, token: string) => {
+Cypress.Commands.add('deleteUnitsAPI', (ids:string[], wsId:string, token: string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', ids);
   cy.request({
     method: 'DELETE',
-    url: `/api/workspaces/${wsId}/units/${unitId}`,
+    url: `/api/workspaces/${wsId}/units${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1225,7 +1098,7 @@ Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/users/${userId}/workspaces`,
+    url: `/api/group-admin/users/${userId}/workspaces`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1249,11 +1122,12 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
 });
 
 // 88
-Cypress.Commands.add('deleteWsAPI', (ws:string, group: string, token:string) => {
+Cypress.Commands.add('deleteWsAPI', (qs:string[], token:string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', qs);
   cy.request({
     method: 'DELETE',
-    url: `/api/group-admin/workspaces/${ws}/${group}`,
+    url: `/api/group-admin/workspaces${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1263,11 +1137,12 @@ Cypress.Commands.add('deleteWsAPI', (ws:string, group: string, token:string) => 
 });
 
 // 89
-Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
+Cypress.Commands.add('deleteGroupsAPI', (qs: string[], token:string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', qs);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/workspace-groups/${id}`,
+    url: `/api/admin/workspace-groups${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1277,11 +1152,12 @@ Cypress.Commands.add('deleteGroupAPI', (id: string, token:string) => {
 });
 
 // 90
-Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
+Cypress.Commands.add('deleteModulesAPI', (modules:string[], token:string) => {
   const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('key', modules);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/verona-modules/${module}`,
+    url: `/api/admin/verona-modules${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1290,12 +1166,29 @@ Cypress.Commands.add('deleteModuleAPI', (module:string, token:string) => {
   });
 });
 
-// 91
+// 91 we keep the command deleteUserAPI and deleteUsersAPI to see the actual way to work with query Parameter
 Cypress.Commands.add('deleteUserAPI', (id: string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${id}`,
+    url: '/api/admin/users/',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    qs: {
+      id: `${id}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('deleteUsersAPI', (ids: string[], token: string) => {
+  const authorization = `bearer ${token}`;
+  const qp = buildQueryParameters('id', ids);
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1457,7 +1350,7 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/resource-packages/${packageId}`,
+    url: `/api/admin/resource-packages?id=${packageId}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1471,10 +1364,13 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${Cypress.env(`id_${Cypress.env('username')}`)}`,
+    url: '/api/admin/users/',
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    qs: {
+      id: `${Cypress.env(`id_${Cypress.env('username')}`)}`
     },
     failOnStatusCode: false
   });
@@ -1510,21 +1406,6 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
     }).then(resp => {
       expect(resp.status).to.equal(204);
     });
-  });
-});
-
-// 23
-Cypress.Commands.add('setGroupFromAdminsAPI', (userIds: string[], groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'PATCH',
-    url: `/api/admin/workspace-groups/${groupId}/admins`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    body: userIds,
-    failOnStatusCode: false
   });
 });
 

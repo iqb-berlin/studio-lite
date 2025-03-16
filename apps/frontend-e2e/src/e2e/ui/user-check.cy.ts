@@ -53,7 +53,7 @@ describe('UI User Management', () => {
     changePassword(newUser.password, 'newpass');
   });
 
-  it('should be able to logout', () => {
+  it('should be able to log out', () => {
     logout();
   });
 

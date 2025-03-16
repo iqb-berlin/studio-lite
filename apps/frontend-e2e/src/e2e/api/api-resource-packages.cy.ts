@@ -87,8 +87,8 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it.skip('200 positive test: should delete the package the admin ', () => {
-      cy.wait(2000);
+    it('200 positive test: should delete the package the admin ', () => {
+      cy.wait(4000);
       cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(200);
@@ -102,10 +102,11 @@ describe('Admin settings API tests', () => {
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
-      cy.deleteFirstUserAPI().then(resp => {
-        Cypress.env('token_admin', '');
-        expect(resp.status).to.equal(200);
-      });
+      cy.deleteUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          Cypress.env('token_admin', '');
+          expect(resp.status).to.equal(200);
+        });
     });
     it('Log out', () => {
       cy.visit('/');
