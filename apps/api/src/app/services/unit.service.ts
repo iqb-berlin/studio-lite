@@ -555,7 +555,9 @@ export class UnitService {
     const schemeObject = JSON.parse(scheme);
     if (schemeObject.variableCodings) {
       schemeObject.variableCodings.forEach(item => {
-        item.alias = variableAliasId.find(v => v.id === item.id)?.alias;
+        if (item.sourceType === 'BASE' || item.sourceType === 'BASE_NO_VALUE') {
+          item.alias = variableAliasId.find(v => v.id === item.id)?.alias;
+        }
       });
       return JSON.stringify(schemeObject);
     }
