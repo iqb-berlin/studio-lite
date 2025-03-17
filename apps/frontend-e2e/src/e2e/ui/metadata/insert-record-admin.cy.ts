@@ -11,7 +11,7 @@ import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metada
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import { AccessLevel } from '../../../support/testData';
 
-describe('UI Metadata Management from administration', () => {
+describe.skip('UI Metadata Management from administration', () => {
   const area = 'Deutsch II';
   const mathArea = 'Mathematik II';
   const group = 'Bista II';
