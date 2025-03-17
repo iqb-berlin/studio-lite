@@ -68,6 +68,21 @@ CREATE TABLE "public"."unit_comment_unit_item"
 );
 -- rollback DROP TABLE "public"."unit_comment_unit_item";
 
+-- changeset jojohoch:6
+CREATE TABLE "public"."unit_metadata_to_delete"
+(
+  "id"   SERIAL
+    PRIMARY KEY,
+  "unit_id" INTEGER NOT NULL
+    REFERENCES "public"."unit"
+      ON DELETE CASCADE,
+  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  "changed_at" TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+-- rollback DROP TABLE "public"."unit_metadata_to_delete";
 
-
+-- changeset jojohoch:7
+alter table "public"."unit_metadata_to_delete" add constraint unit_id_unique
+  unique (unit_id);
+-- rollback alter table "public"."unit_metadata_to_delete" drop constraint unit_id_unique;
 

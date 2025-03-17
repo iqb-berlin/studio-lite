@@ -71,6 +71,8 @@ import UnitMetadata from './entities/unit-metadata.entity';
 import { UnitItemMetadataService } from './services/unit-item-metadata.service';
 import { UnitItemMetadataController } from './controllers/unit-item-metadata.controller';
 import { UnitMetadataService } from './services/unit-metadata.service';
+import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
+import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
 
 @Module({
   imports: [
@@ -111,6 +113,7 @@ import { UnitMetadataService } from './services/unit-metadata.service';
     UnitItem,
     UnitItemMetadata,
     UnitMetadata,
+    UnitMetadataToDelete,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -143,7 +146,8 @@ import { UnitMetadataService } from './services/unit-metadata.service';
           ReviewUnit,
           UnitItem,
           UnitItemMetadata,
-          UnitMetadata
+          UnitMetadata,
+          UnitMetadataToDelete
         ],
         synchronize: false
       }),
@@ -172,7 +176,8 @@ import { UnitMetadataService } from './services/unit-metadata.service';
       ReviewUnit,
       UnitItem,
       UnitItemMetadata,
-      UnitMetadata
+      UnitMetadata,
+      UnitMetadataToDelete
     ]),
     MulterModule
   ],
@@ -221,7 +226,8 @@ import { UnitMetadataService } from './services/unit-metadata.service';
     ReviewService,
     UnitItemService,
     UnitItemMetadataService,
-    UnitMetadataService
+    UnitMetadataService,
+    UnitMetadataToDeleteService
   ],
   exports: [AppVersionProvider]
 })
