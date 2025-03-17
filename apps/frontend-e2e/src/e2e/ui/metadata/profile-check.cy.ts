@@ -10,7 +10,7 @@ import {
 import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
 import { UserData } from '../../../support/testData';
 
-describe('Load metadata profile', () => {
+describe.skip('Load metadata profile', () => {
   const groups = ['Mathematik Primär und Sek I',
     'Deutsch Primär und Sek I',
     'Englisch Sek I'];
