@@ -12,12 +12,11 @@ import { MatFormField } from '@angular/material/form-field';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 
 @Component({
-  selector: 'studio-lite-edit-workspace-group',
-  templateUrl: './edit-workspace-group.component.html',
-  styleUrls: ['./edit-workspace-group.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    selector: 'studio-lite-edit-workspace-group',
+    templateUrl: './edit-workspace-group.component.html',
+    styleUrls: ['./edit-workspace-group.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class EditWorkspaceGroupComponent {
   editWorkspaceGroupForm: UntypedFormGroup;

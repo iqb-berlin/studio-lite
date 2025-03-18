@@ -7,11 +7,10 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 
 @Component({
-  selector: 'studio-lite-login-alternative-warning',
-  templateUrl: './login-alternative-warning.html',
-  styleUrls: ['./login-alternative-warning.scss'],
-  standalone: true,
-  imports: [MatDialogContent, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    selector: 'studio-lite-login-alternative-warning',
+    templateUrl: './login-alternative-warning.html',
+    styleUrls: ['./login-alternative-warning.scss'],
+    imports: [MatDialogContent, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class LoginAlternativeWarningComponent {

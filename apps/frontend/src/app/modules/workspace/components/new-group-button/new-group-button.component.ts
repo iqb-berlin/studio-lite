@@ -12,11 +12,10 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 
 @Component({
-  selector: 'studio-lite-new-group-button',
-  templateUrl: './new-group-button.component.html',
-  styleUrls: ['./new-group-button.component.scss'],
-  standalone: true,
-  imports: [MatIconButton, MatTooltip, MatIcon, TranslateModule]
+    selector: 'studio-lite-new-group-button',
+    templateUrl: './new-group-button.component.html',
+    styleUrls: ['./new-group-button.component.scss'],
+    imports: [MatIconButton, MatTooltip, MatIcon, TranslateModule]
 })
 export class NewGroupButtonComponent {
   constructor(

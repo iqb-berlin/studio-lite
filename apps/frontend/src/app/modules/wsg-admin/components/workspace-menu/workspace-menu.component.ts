@@ -19,11 +19,10 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.component';
 
 @Component({
-  selector: 'studio-lite-workspace-menu',
-  templateUrl: './workspace-menu.component.html',
-  styleUrls: ['./workspace-menu.component.scss'],
-  standalone: true,
-  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-workspace-menu',
+    templateUrl: './workspace-menu.component.html',
+    styleUrls: ['./workspace-menu.component.scss'],
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceMenuComponent {
   @Input() selectedWorkspaceId!: number;

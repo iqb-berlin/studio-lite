@@ -5,11 +5,10 @@ import { MatAnchor } from '@angular/material/button';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-start-review-button',
-  templateUrl: './start-review-button.component.html',
-  styleUrls: ['./start-review-button.component.scss'],
-  standalone: true,
-  imports: [MatAnchor, MatTooltip, WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-start-review-button',
+    templateUrl: './start-review-button.component.html',
+    styleUrls: ['./start-review-button.component.scss'],
+    imports: [MatAnchor, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class StartReviewButtonComponent {
   @Input() selectedReviewId!: number;

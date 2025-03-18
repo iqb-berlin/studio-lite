@@ -41,14 +41,13 @@ import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
 
 @Component({
-  templateUrl: './unit-properties.component.html',
-  styleUrls: ['unit-properties.component.scss'],
-  standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
-    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatMenuItem, MatTooltip,
-    MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
-    CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
-    TranslateModule, MatIcon, CanReturnUnitPipe]
+    templateUrl: './unit-properties.component.html',
+    styleUrls: ['unit-properties.component.scss'],
+    imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
+        MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatMenuItem, MatTooltip,
+        MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
+        CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
+        TranslateModule, MatIcon, CanReturnUnitPipe]
 })
 
 export class UnitPropertiesComponent extends RequestMessageDirective implements OnInit, OnDestroy {

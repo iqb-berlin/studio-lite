@@ -7,11 +7,10 @@ import { AddCommentButtonComponent } from '../add-comment-button/add-comment-but
 import { UnitNavComponent } from '../unit-nav/unit-nav.component';
 
 @Component({
-  selector: 'studio-lite-review',
-  templateUrl: './review.component.html',
-  styleUrls: ['./review.component.scss'],
-  standalone: true,
-  imports: [UnitNavComponent, AddCommentButtonComponent, RouterOutlet]
+    selector: 'studio-lite-review',
+    templateUrl: './review.component.html',
+    styleUrls: ['./review.component.scss'],
+    imports: [UnitNavComponent, AddCommentButtonComponent, RouterOutlet]
 })
 export class ReviewComponent {
   constructor(

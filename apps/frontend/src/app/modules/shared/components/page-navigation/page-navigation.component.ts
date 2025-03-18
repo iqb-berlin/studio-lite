@@ -7,11 +7,10 @@ import { PageData } from '../../../workspace/models/page-data.interface';
 import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-page-navigation',
-  templateUrl: './page-navigation.component.html',
-  styleUrls: ['./page-navigation.component.scss'],
-  standalone: true,
-  imports: [WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-page-navigation',
+    templateUrl: './page-navigation.component.html',
+    styleUrls: ['./page-navigation.component.scss'],
+    imports: [WrappedIconComponent, TranslateModule]
 })
 export class PageNavigationComponent {
   @Input() pageList!: PageData[];

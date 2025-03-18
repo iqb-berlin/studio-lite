@@ -24,11 +24,10 @@ import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 
 @Component({
-  templateUrl: './unit-preview.component.html',
-  styleUrls: ['./unit-preview.component.scss'],
-  host: { class: 'unit-preview' },
-  standalone: true,
-  imports: [PreviewBarComponent]
+    templateUrl: './unit-preview.component.html',
+    styleUrls: ['./unit-preview.component.scss'],
+    host: { class: 'unit-preview' },
+    imports: [PreviewBarComponent]
 })
 
 export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {

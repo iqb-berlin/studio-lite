@@ -15,26 +15,25 @@ import {
 } from '@angular/material/table';
 
 @Component({
-  templateUrl: './show-responses.component.html',
-  standalone: true,
-  imports: [
-    TranslateModule,
-    MatDialogModule,
-    MatDialogTitle,
-    MatButton,
-    JsonPipe,
-    MatTable,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatColumnDef,
-    MatHeaderRow,
-    MatHeaderRowDef,
-    MatRowDef,
-    MatRow,
-    MatCell,
-    MatHeaderCell
-  ],
-  styleUrls: ['show-responses.component.scss']
+    templateUrl: './show-responses.component.html',
+    imports: [
+        TranslateModule,
+        MatDialogModule,
+        MatDialogTitle,
+        MatButton,
+        JsonPipe,
+        MatTable,
+        MatHeaderCellDef,
+        MatCellDef,
+        MatColumnDef,
+        MatHeaderRow,
+        MatHeaderRowDef,
+        MatRowDef,
+        MatRow,
+        MatCell,
+        MatHeaderCell
+    ],
+    styleUrls: ['show-responses.component.scss']
 })
 
 export class ShowResponsesComponent {

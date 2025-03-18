@@ -15,12 +15,11 @@ import { ReviewService } from '../../services/review.service';
 const NAME_LOCAL_STORAGE_KEY = 'iqb-studio-user-name-for-review-comments';
 
 @Component({
-  selector: 'studio-lite-comment-dialog',
-  templateUrl: './comment-dialog.component.html',
-  styleUrls: ['./comment-dialog.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    selector: 'studio-lite-comment-dialog',
+    templateUrl: './comment-dialog.component.html',
+    styleUrls: ['./comment-dialog.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class CommentDialogComponent implements OnInit {
   userName = '';

@@ -6,11 +6,10 @@ import { BackendService } from '../../../workspace/services/backend.service';
 import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 
 @Component({
-  selector: 'studio-lite-unit-print-coding',
-  templateUrl: './unit-print-coding.component.html',
-  styleUrls: ['./unit-print-coding.component.scss'],
-  standalone: true,
-  imports: [UnitPrintCodeComponent, TranslateModule]
+    selector: 'studio-lite-unit-print-coding',
+    templateUrl: './unit-print-coding.component.html',
+    styleUrls: ['./unit-print-coding.component.scss'],
+    imports: [UnitPrintCodeComponent, TranslateModule]
 })
 export class UnitPrintCodingComponent implements OnInit {
   @Input() unitId!: number;

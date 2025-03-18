@@ -8,17 +8,17 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 @Component({
-  templateUrl: './show-metadata.component.html',
-  styleUrls: ['show-metadata.component.scss'],
-  standalone: true,
-  imports: [
-    MatDialogTitle,
-    MatDialogContent,
-    SelectUnitListComponent,
-    MatDialogActions,
-    MatButton,
-    MatDialogClose,
-    TranslateModule]
+    templateUrl: './show-metadata.component.html',
+    styleUrls: ['show-metadata.component.scss'],
+    imports: [
+        MatDialogTitle,
+        MatDialogContent,
+        SelectUnitListComponent,
+        MatDialogActions,
+        MatButton,
+        MatDialogClose,
+        TranslateModule
+    ]
 })
 
 export class ShowMetadataComponent {

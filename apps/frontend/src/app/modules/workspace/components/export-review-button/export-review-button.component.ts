@@ -13,11 +13,10 @@ import { BackendService } from '../../services/backend.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-export-review-button',
-  templateUrl: './export-review-button.component.html',
-  styleUrls: ['./export-review-button.component.scss'],
-  standalone: true,
-  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-export-review-button',
+    templateUrl: './export-review-button.component.html',
+    styleUrls: ['./export-review-button.component.scss'],
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class ExportReviewButtonComponent {
   @Input() bookletConfigSettings!: BookletConfigDto | undefined;

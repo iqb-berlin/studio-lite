@@ -17,12 +17,11 @@ import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-verona-modules',
-  templateUrl: './verona-modules.component.html',
-  styleUrls: ['./verona-modules.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
+    selector: 'studio-lite-verona-modules',
+    templateUrl: './verona-modules.component.html',
+    styleUrls: ['./verona-modules.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
 })
 export class VeronaModulesComponent implements OnInit {
   @ViewChildren(VeronaModulesTableComponent) moduleTables!: QueryList<VeronaModulesTableComponent>;

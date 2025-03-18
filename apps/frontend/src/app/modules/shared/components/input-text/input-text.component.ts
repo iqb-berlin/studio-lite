@@ -18,12 +18,11 @@ export interface InputTextData {
 }
 
 @Component({
-  selector: 'studio-lite-input-text',
-  templateUrl: './input-text.component.html',
-  styleUrls: ['./input-text.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    selector: 'studio-lite-input-text',
+    templateUrl: './input-text.component.html',
+    styleUrls: ['./input-text.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class InputTextComponent {
   textInputForm: UntypedFormGroup;

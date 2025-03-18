@@ -12,8 +12,8 @@ export enum MessageType {
 }
 
 @Component({
-  selector: 'iqb-message-dialog',
-  template: `
+    selector: 'iqb-message-dialog',
+    template: `
     <h1 mat-dialog-title>
       @if (messageData.type === 0) {
         <mat-icon>error</mat-icon>
@@ -33,9 +33,8 @@ export enum MessageType {
       <button mat-raised-button [mat-dialog-close]="false">{{ messageData.closeButtonLabel }}</button>
     </mat-dialog-actions>
     `,
-  styles: ['mat-dialog-content { padding-bottom: 30px;}'],
-  standalone: true,
-  imports: [MatDialogTitle, MatIcon, MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
+    styles: ['mat-dialog-content { padding-bottom: 30px;}'],
+    imports: [MatDialogTitle, MatIcon, MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class MessageDialogComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public messageData: MessageDialogData) { }

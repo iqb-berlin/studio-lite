@@ -19,11 +19,10 @@ import { SplitterComponent } from '../../../splitter/components/splitter/splitte
 import { RoutingHelperService } from '../../services/routing-helper.service';
 
 @Component({
-  selector: 'studio-lite-workspace',
-  templateUrl: './workspace.component.html',
-  styleUrls: ['./workspace.component.scss'],
-  standalone: true,
-  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent]
+    selector: 'studio-lite-workspace',
+    templateUrl: './workspace.component.html',
+    styleUrls: ['./workspace.component.scss'],
+    imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';

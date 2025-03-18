@@ -25,14 +25,13 @@ import { WorkspaceChecked } from '../../models/workspace-checked.class';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 
 @Component({
-  selector: 'studio-lite-users',
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
-    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent,
-    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, RolesHeaderComponent]
+    selector: 'studio-lite-users',
+    templateUrl: './users.component.html',
+    styleUrls: ['./users.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
+        MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent,
+        MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, RolesHeaderComponent]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);

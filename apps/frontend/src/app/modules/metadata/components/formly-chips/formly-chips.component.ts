@@ -14,11 +14,10 @@ import { MetadataService } from '../../services/metadata.service';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
 
 @Component({
-  selector: 'studio-lite-formly-chips',
-  templateUrl: './formly-chips.component.html',
-  styleUrls: ['./formly-chips.component.scss'],
-  standalone: true,
-  imports: [MatChipGrid, MatChipRow, MatChipRemove, MatIcon, FormsModule, MatChipInput, ReactiveFormsModule]
+    selector: 'studio-lite-formly-chips',
+    templateUrl: './formly-chips.component.html',
+    styleUrls: ['./formly-chips.component.scss'],
+    imports: [MatChipGrid, MatChipRow, MatChipRemove, MatIcon, FormsModule, MatChipInput, ReactiveFormsModule]
 })
 export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements OnDestroy {
   private ngUnsubscribe = new Subject<void>();

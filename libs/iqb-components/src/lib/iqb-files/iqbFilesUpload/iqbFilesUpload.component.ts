@@ -11,12 +11,11 @@ import { BytesPipe } from '../../pipes/bytes.pipe';
 import { UploadStatus } from '../iqb-files-classes';
 
 @Component({
-  selector: 'iqb-files-upload',
-  templateUrl: './iqbFilesUpload.component.html',
-  exportAs: 'iqbFilesUpload',
-  styleUrls: ['../iqb-files.scss'],
-  standalone: true,
-  imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
+    selector: 'iqb-files-upload',
+    templateUrl: './iqbFilesUpload.component.html',
+    exportAs: 'iqbFilesUpload',
+    styleUrls: ['../iqb-files.scss'],
+    imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
 })
 
 export class IqbFilesUploadComponent implements OnInit {

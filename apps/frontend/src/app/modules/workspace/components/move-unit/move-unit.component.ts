@@ -19,12 +19,11 @@ import { AppService } from '../../../../services/app.service';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 
 @Component({
-  selector: 'studio-lite-move-unit',
-  templateUrl: './move-unit.component.html',
-  styleUrls: ['./move-unit.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatCheckbox]
+    selector: 'studio-lite-move-unit',
+    templateUrl: './move-unit.component.html',
+    styleUrls: ['./move-unit.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatCheckbox]
 })
 
 export class MoveUnitComponent implements OnInit {

@@ -17,12 +17,11 @@ import { BackendService } from '../../../metadata/services/backend.service';
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
 @Component({
-  selector: 'studio-lite-profiles',
-  templateUrl: './profiles.component.html',
-  styleUrls: ['./profiles.component.scss'],
-  standalone: true,
-  imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel,
-    MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
+    selector: 'studio-lite-profiles',
+    templateUrl: './profiles.component.html',
+    styleUrls: ['./profiles.component.scss'],
+    imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel,
+        MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
 })
 export class ProfilesComponent implements OnInit {
   isLoading: boolean = false;

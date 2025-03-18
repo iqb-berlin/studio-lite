@@ -2,11 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'studio-lite-comment-badge',
-  templateUrl: './comment-badge.component.html',
-  styleUrls: ['./comment-badge.component.scss'],
-  standalone: true,
-  imports: [MatTooltip]
+    selector: 'studio-lite-comment-badge',
+    templateUrl: './comment-badge.component.html',
+    styleUrls: ['./comment-badge.component.scss'],
+    imports: [MatTooltip]
 })
 export class CommentBadgeComponent implements OnInit {
   @Input() userName!: string;

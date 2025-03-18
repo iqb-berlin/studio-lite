@@ -4,11 +4,10 @@ import { MatIcon } from '@angular/material/icon';
 import { MatMenuItem } from '@angular/material/menu';
 
 @Component({
-  selector: 'studio-lite-account-action',
-  templateUrl: './account-action.component.html',
-  styleUrls: ['./account-action.component.scss'],
-  standalone: true,
-  imports: [MatMenuItem, MatIcon, TranslateModule]
+    selector: 'studio-lite-account-action',
+    templateUrl: './account-action.component.html',
+    styleUrls: ['./account-action.component.scss'],
+    imports: [MatMenuItem, MatIcon, TranslateModule]
 })
 export class AccountActionComponent {
   @Input() type!: 'changePassword' | 'logout' | 'editMyData';

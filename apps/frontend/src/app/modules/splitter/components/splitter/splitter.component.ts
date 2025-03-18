@@ -6,11 +6,10 @@ import { SplitterPaneComponent } from '../splitter-pane/splitter-pane.component'
 import { SplitterGutterComponent } from '../splitter-gutter/splitter-gutter.component';
 
 @Component({
-  selector: 'studio-lite-splitter',
-  templateUrl: './splitter.component.html',
-  styleUrls: ['./splitter.component.scss'],
-  standalone: true,
-  imports: [SplitterGutterComponent]
+    selector: 'studio-lite-splitter',
+    templateUrl: './splitter.component.html',
+    styleUrls: ['./splitter.component.scss'],
+    imports: [SplitterGutterComponent]
 })
 export class SplitterComponent implements AfterViewInit {
   @ContentChildren(SplitterPaneComponent) panes!: QueryList<SplitterPaneComponent>;

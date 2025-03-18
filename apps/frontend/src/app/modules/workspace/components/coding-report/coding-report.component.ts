@@ -18,24 +18,23 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
-  selector: 'studio-lite-coding-report',
-  templateUrl: './coding-report.component.html',
-  styleUrls: ['coding-report.component.scss'],
-  standalone: true,
-  imports: [
-    TranslateModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTabsModule,
-    MatSortModule,
-    MatProgressSpinnerModule,
-    MatRadioButton,
-    MatSlideToggle,
-    MatFormField,
-    MatInput,
-    MatLabel
-  ]
+    selector: 'studio-lite-coding-report',
+    templateUrl: './coding-report.component.html',
+    styleUrls: ['coding-report.component.scss'],
+    imports: [
+        TranslateModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatTableModule,
+        MatTabsModule,
+        MatSortModule,
+        MatProgressSpinnerModule,
+        MatRadioButton,
+        MatSlideToggle,
+        MatFormField,
+        MatInput,
+        MatLabel
+    ]
 })
 
 export class CodingReportComponent implements OnInit {

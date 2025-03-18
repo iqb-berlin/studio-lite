@@ -22,12 +22,11 @@ import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.p
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 
 @Component({
-  selector: 'studio-lite-verona-modules-table',
-  templateUrl: './verona-modules-table.component.html',
-  styleUrls: ['./verona-modules-table.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
+    selector: 'studio-lite-verona-modules-table',
+    templateUrl: './verona-modules-table.component.html',
+    styleUrls: ['./verona-modules-table.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: 'editor' | 'player' | 'schemer';

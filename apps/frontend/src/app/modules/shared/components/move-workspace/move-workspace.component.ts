@@ -22,11 +22,10 @@ export interface MoveComponentData {
   selectedRows: WorkspaceInListDto[]
 }
 @Component({
-  templateUrl: './move-workspace.component.html',
-  styleUrls: ['./move-workspace.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
+    templateUrl: './move-workspace.component.html',
+    styleUrls: ['./move-workspace.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatDialogTitle, MatDialogContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class MoveWorkspaceComponent {

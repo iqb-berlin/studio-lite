@@ -10,12 +10,11 @@ import { PrintOptionsComponent } from '../../../shared/components/print-options/
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 @Component({
-  selector: 'studio-lite-print-units-dialog',
-  templateUrl: './print-units-dialog.component.html',
-  styleUrls: ['./print-units-dialog.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    selector: 'studio-lite-print-units-dialog',
+    templateUrl: './print-units-dialog.component.html',
+    styleUrls: ['./print-units-dialog.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class PrintUnitsDialogComponent {
   unitPrintSettings: {

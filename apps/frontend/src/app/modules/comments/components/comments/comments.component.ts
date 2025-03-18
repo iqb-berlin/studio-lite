@@ -19,12 +19,11 @@ import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-
 import { CommentComponent } from '../comment/comment.component';
 
 @Component({
-  selector: 'studio-lite-comments',
-  templateUrl: './comments.component.html',
-  styleUrls: ['./comments.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
+    selector: 'studio-lite-comments',
+    templateUrl: './comments.component.html',
+    styleUrls: ['./comments.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
 })
 export class CommentsComponent implements OnInit {
   @Input() userId!: number;

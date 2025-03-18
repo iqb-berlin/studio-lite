@@ -19,12 +19,11 @@ import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mo
 import { StatusIndicationComponent } from '../status-indication/status-indication.component';
 
 @Component({
-  selector: 'studio-lite-preview-bar',
-  templateUrl: './preview-bar.component.html',
-  styleUrls: ['./preview-bar.component.scss'],
-  standalone: true,
-  imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent,
-    MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
+    selector: 'studio-lite-preview-bar',
+    templateUrl: './preview-bar.component.html',
+    styleUrls: ['./preview-bar.component.scss'],
+    imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent,
+        MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];

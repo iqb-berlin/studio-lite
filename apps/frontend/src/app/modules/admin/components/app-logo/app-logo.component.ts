@@ -15,12 +15,11 @@ import { BackendService as ReadBackendService } from '../../../../services/backe
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 
 @Component({
-  selector: 'studio-lite-app-logo',
-  templateUrl: './app-logo.component.html',
-  styleUrls: ['./app-logo.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, MatFormField, MatLabel, MatInput, TranslateModule]
+    selector: 'studio-lite-app-logo',
+    templateUrl: './app-logo.component.html',
+    styleUrls: ['./app-logo.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, MatFormField, MatLabel, MatInput, TranslateModule]
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {

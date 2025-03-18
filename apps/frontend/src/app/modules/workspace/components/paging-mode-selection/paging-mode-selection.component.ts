@@ -6,11 +6,10 @@ import { PagingMode } from '../../models/types';
 import { PreviewService } from '../../services/preview.service';
 
 @Component({
-  selector: 'studio-lite-paging-mode-selection',
-  templateUrl: './paging-mode-selection.component.html',
-  styleUrls: ['./paging-mode-selection.component.scss'],
-  standalone: true,
-  imports: [FormsModule, TranslateModule]
+    selector: 'studio-lite-paging-mode-selection',
+    templateUrl: './paging-mode-selection.component.html',
+    styleUrls: ['./paging-mode-selection.component.scss'],
+    imports: [FormsModule, TranslateModule]
 })
 export class PagingModeSelectionComponent {
   pagingModes: PagingMode[] = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];

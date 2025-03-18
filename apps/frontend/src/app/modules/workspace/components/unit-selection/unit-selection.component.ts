@@ -20,12 +20,11 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
 
 @Component({
-  selector: 'studio-lite-unit-selection',
-  templateUrl: './unit-selection.component.html',
-  styleUrls: ['./unit-selection.component.scss'],
-  standalone: true,
-  imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, UnitGroupComponent,
-    KeyValuePipe, TranslateModule]
+    selector: 'studio-lite-unit-selection',
+    templateUrl: './unit-selection.component.html',
+    styleUrls: ['./unit-selection.component.scss'],
+    imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, UnitGroupComponent,
+        KeyValuePipe, TranslateModule]
 })
 export class UnitSelectionComponent extends SelectUnitDirective implements OnInit, OnDestroy {
   numberOfGroups!: number;

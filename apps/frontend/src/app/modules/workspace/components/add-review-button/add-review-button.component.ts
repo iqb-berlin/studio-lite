@@ -12,11 +12,10 @@ import { CheckForChangesDirective } from '../../directives/check-for-changes.dir
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-add-review-button',
-  templateUrl: './add-review-button.component.html',
-  styleUrls: ['./add-review-button.component.scss'],
-  standalone: true,
-  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-add-review-button',
+    templateUrl: './add-review-button.component.html',
+    styleUrls: ['./add-review-button.component.scss'],
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class AddReviewButtonComponent extends CheckForChangesDirective {
   @Input() selectedReviewId!: number;

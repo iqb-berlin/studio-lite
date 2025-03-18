@@ -29,12 +29,11 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
 
 @Component({
-  selector: 'studio-lite-users',
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
+    selector: 'studio-lite-users',
+    templateUrl: './users.component.html',
+    styleUrls: ['./users.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();

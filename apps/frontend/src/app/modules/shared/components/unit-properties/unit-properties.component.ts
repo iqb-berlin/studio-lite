@@ -7,11 +7,10 @@ import { BackendService } from '../../../workspace/services/backend.service';
 import { State } from '../../../admin/models/state.type';
 
 @Component({
-  selector: 'studio-lite-unit-properties',
-  templateUrl: './unit-properties.component.html',
-  styleUrls: ['./unit-properties.component.scss'],
-  standalone: true,
-  imports: [DatePipe, TranslateModule]
+    selector: 'studio-lite-unit-properties',
+    templateUrl: './unit-properties.component.html',
+    styleUrls: ['./unit-properties.component.scss'],
+    imports: [DatePipe, TranslateModule]
 })
 export class UnitPropertiesComponent implements OnChanges {
   @Input() workspaceGroupId!: number;

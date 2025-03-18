@@ -32,36 +32,35 @@ interface ColumnValues {
 }
 
 @Component({
-  selector: 'studio-lite-table-view',
-  templateUrl: './table-view.component.html',
-  styleUrls: ['./table-view.component.scss'],
-  standalone: true,
-  imports: [
-    MatSortModule,
-    MatDialogContent,
-    MatTabGroup,
-    MatTab,
-    MatTable,
-    MatColumnDef,
-    MatHeaderCellDef,
-    MatHeaderCell,
-    MatCellDef,
-    MatCell,
-    MatHeaderRowDef,
-    MatHeaderRow,
-    MatRowDef,
-    MatRow,
-    MatDialogActions,
-    MatButton,
-    MatDialogClose,
-    TranslateModule,
-    IncludePipe,
-    MatDialogTitle,
-    MatFormField,
-    MatInput,
-    MatLabel,
-    MatSort
-  ]
+    selector: 'studio-lite-table-view',
+    templateUrl: './table-view.component.html',
+    styleUrls: ['./table-view.component.scss'],
+    imports: [
+        MatSortModule,
+        MatDialogContent,
+        MatTabGroup,
+        MatTab,
+        MatTable,
+        MatColumnDef,
+        MatHeaderCellDef,
+        MatHeaderCell,
+        MatCellDef,
+        MatCell,
+        MatHeaderRowDef,
+        MatHeaderRow,
+        MatRowDef,
+        MatRow,
+        MatDialogActions,
+        MatButton,
+        MatDialogClose,
+        TranslateModule,
+        IncludePipe,
+        MatDialogTitle,
+        MatFormField,
+        MatInput,
+        MatLabel,
+        MatSort
+    ]
 })
 export class TableViewComponent implements OnInit {
   constructor(

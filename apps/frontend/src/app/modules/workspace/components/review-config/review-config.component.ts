@@ -13,12 +13,11 @@ import { ReviewConfigEditComponent } from '../review-config-edit/review-config-e
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
 
 @Component({
-  selector: 'studio-lite-review-config',
-  templateUrl: './review-config.component.html',
-  styleUrls: ['./review-config.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatInput, FormsModule, ReviewConfigEditComponent, BookletConfigEditComponent, TranslateModule]
+    selector: 'studio-lite-review-config',
+    templateUrl: './review-config.component.html',
+    styleUrls: ['./review-config.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatInput, FormsModule, ReviewConfigEditComponent, BookletConfigEditComponent, TranslateModule]
 })
 export class ReviewConfigComponent {
   @Input() selectedReviewId!: number;

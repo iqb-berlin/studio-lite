@@ -12,12 +12,11 @@ import { WrappedIconComponent } from '../../modules/shared/components/wrapped-ic
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
 @Component({
-  selector: 'studio-lite-user-workspaces-area',
-  templateUrl: './user-workspaces-area.component.html',
-  styleUrls: ['./user-workspaces-area.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [AreaTitleComponent, MatButton, RouterLink, MatTooltip, WrappedIconComponent, UserMenuComponent, WarningComponent, UserWorkspacesGroupsComponent, TranslateModule]
+    selector: 'studio-lite-user-workspaces-area',
+    templateUrl: './user-workspaces-area.component.html',
+    styleUrls: ['./user-workspaces-area.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [AreaTitleComponent, MatButton, RouterLink, MatTooltip, WrappedIconComponent, UserMenuComponent, WarningComponent, UserWorkspacesGroupsComponent, TranslateModule]
 })
 export class UserWorkspacesAreaComponent {
   @Input() workspaceGroups!: WorkspaceGroupDto[];

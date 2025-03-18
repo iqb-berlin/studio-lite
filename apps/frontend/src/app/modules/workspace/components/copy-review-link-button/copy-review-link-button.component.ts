@@ -7,11 +7,10 @@ import { MatButton } from '@angular/material/button';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-copy-review-link-button',
-  templateUrl: './copy-review-link-button.component.html',
-  styleUrls: ['./copy-review-link-button.component.scss'],
-  standalone: true,
-  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-copy-review-link-button',
+    templateUrl: './copy-review-link-button.component.html',
+    styleUrls: ['./copy-review-link-button.component.scss'],
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class CopyReviewLinkButtonComponent {
   @Input() link!: string;

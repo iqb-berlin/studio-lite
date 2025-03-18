@@ -13,12 +13,11 @@ import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
 @Component({
-  selector: 'studio-lite-user-reviews-area',
-  templateUrl: './user-reviews-area.component.html',
-  styleUrls: ['./user-reviews-area.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [AreaTitleComponent, MatButton, LogoutDirective, MatTooltip, MatIcon, UserIssuesComponent, TranslateModule, UserIssuesPipe]
+    selector: 'studio-lite-user-reviews-area',
+    templateUrl: './user-reviews-area.component.html',
+    styleUrls: ['./user-reviews-area.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [AreaTitleComponent, MatButton, LogoutDirective, MatTooltip, MatIcon, UserIssuesComponent, TranslateModule, UserIssuesPipe]
 })
 export class UserReviewsAreaComponent {
   @Input() reviews!: ReviewDto[];

@@ -9,11 +9,10 @@ import { BackendService } from '../../services/backend.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-update-units-button',
-  templateUrl: './update-units-button.component.html',
-  styleUrls: ['./update-units-button.component.scss'],
-  standalone: true,
-  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+    selector: 'studio-lite-update-units-button',
+    templateUrl: './update-units-button.component.html',
+    styleUrls: ['./update-units-button.component.scss'],
+    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class UpdateUnitsButtonComponent extends SelectUnitDirective {
   constructor(

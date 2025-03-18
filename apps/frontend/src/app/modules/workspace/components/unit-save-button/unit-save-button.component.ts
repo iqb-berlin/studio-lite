@@ -14,11 +14,10 @@ import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-  selector: 'studio-lite-unit-save-button',
-  templateUrl: './unit-save-button.component.html',
-  styleUrls: ['./unit-save-button.component.scss'],
-  standalone: true,
-  imports: [MatButton, MatTooltip, WrappedIconComponent, MatIcon, TranslateModule]
+    selector: 'studio-lite-unit-save-button',
+    templateUrl: './unit-save-button.component.html',
+    styleUrls: ['./unit-save-button.component.scss'],
+    imports: [MatButton, MatTooltip, WrappedIconComponent, MatIcon, TranslateModule]
 })
 export class UnitSaveButtonComponent {
   constructor(

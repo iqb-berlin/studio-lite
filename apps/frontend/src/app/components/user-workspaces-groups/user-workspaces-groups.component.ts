@@ -10,12 +10,11 @@ import { UserIssuesComponent } from '../user-issues/user-issues.component';
 import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
 
 @Component({
-  selector: 'studio-lite-user-workspaces-groups',
-  templateUrl: './user-workspaces-groups.component.html',
-  styleUrls: ['./user-workspaces-groups.component.scss'],
-  standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe]
+    selector: 'studio-lite-user-workspaces-groups',
+    templateUrl: './user-workspaces-groups.component.html',
+    styleUrls: ['./user-workspaces-groups.component.scss'],
+    // eslint-disable-next-line max-len
+    imports: [MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe]
 })
 
 export class UserWorkspacesGroupsComponent {

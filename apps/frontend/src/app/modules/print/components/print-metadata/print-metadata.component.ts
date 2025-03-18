@@ -9,11 +9,10 @@ import { MetadataProfileEntriesComponent }
   from '../../../shared/components/metadata-profile-entries/metadata-profile-entries.component';
 
 @Component({
-  selector: 'studio-lite-print-metadata',
-  templateUrl: './print-metadata.component.html',
-  styleUrls: ['./print-metadata.component.scss'],
-  standalone: true,
-  imports: [MetadataProfileEntriesComponent, MetadataReadonlyItemsComponent, TranslateModule]
+    selector: 'studio-lite-print-metadata',
+    templateUrl: './print-metadata.component.html',
+    styleUrls: ['./print-metadata.component.scss'],
+    imports: [MetadataProfileEntriesComponent, MetadataReadonlyItemsComponent, TranslateModule]
 })
 export class PrintMetadataComponent implements OnChanges {
   @Input() metadata!: UnitMetadataValues | null;

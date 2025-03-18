@@ -3,11 +3,10 @@ import { CodeData } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'studio-lite-unit-print-code',
-  templateUrl: './unit-print-code.component.html',
-  styleUrls: ['./unit-print-code.component.scss'],
-  standalone: true,
-  imports: [TranslateModule]
+    selector: 'studio-lite-unit-print-code',
+    templateUrl: './unit-print-code.component.html',
+    styleUrls: ['./unit-print-code.component.scss'],
+    imports: [TranslateModule]
 })
 export class UnitPrintCodeComponent {
   @Input() codeData!: CodeData;

@@ -5,7 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 @Directive({
-  selector: '[studioLiteCheckForChanges]'
+    selector: '[studioLiteCheckForChanges]',
+    standalone: false
 })
 export abstract class CheckForChangesDirective {
   protected abstract confirmDiscardChangesDialog: MatDialog;
