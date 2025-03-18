@@ -1,10 +1,7 @@
 import {
   Component, EventEmitter, Input, OnInit, Output, HostBinding
 } from '@angular/core';
-import {
-  HttpClient, HttpEventType, HttpHeaders, HttpParams,
-  HttpErrorResponse, HttpEvent
-} from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpErrorResponse, HttpEvent } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';

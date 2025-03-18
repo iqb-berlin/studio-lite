@@ -1,10 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor, HttpHeaders
-} from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpHeaders } from '@angular/common/http';
 import { finalize, Observable, tap } from 'rxjs';
 import { AppService } from '../services/app.service';
 import { AppHttpError } from '../models/app-http-error.class';

@@ -21,7 +21,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AdminRoutingModule } from './admin-routing.module';
@@ -50,66 +50,60 @@ import {
   EditWorkspaceGroupSettingsComponent
 } from './components/edit-workspace-group-settings/edit-workspace-group-settings.component';
 
-@NgModule({
-  imports: [
-    CommonModule,
-    AdminRoutingModule,
-    IqbComponentsModule,
-    MatTableModule,
-    MatTabsModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatSortModule,
-    ReactiveFormsModule,
-    MatProgressSpinnerModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatCardModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatToolbarModule,
-    MatSnackBarModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatBadgeModule,
-    MatChipsModule,
-    FormsModule,
-    TranslateModule,
-    HttpClientModule,
-    MatExpansionModule,
-    WorkspaceGroupsComponent,
-    UsersComponent,
-    AdminComponent,
-    EditWorkspaceGroupComponent,
-    EditUserComponent,
-    VeronaModulesComponent,
-    VeronaModulesTableComponent,
-    SettingsComponent,
-    EditWorkspaceGroupComponent,
-    AppConfigComponent,
-    AppLogoComponent,
-    UnitExportConfigComponent,
-    ResourcePackagesComponent,
-    ResourcePackagesTableComponent,
-    TableDataSourcePipe,
-    SafeUrlPipe,
-    ToTimePipe,
-    UsersMenuComponent,
-    WorkspaceGroupsMenuComponent,
-    EditWorkspaceGroupSettingsComponent
-  ],
-  exports: [AdminComponent],
-  providers: [
-    BackendService,
-    [
-      {
-        provide: HTTP_INTERCEPTORS,
-        useClass: AuthInterceptor,
-        multi: true
-      }
-    ]
-  ]
-})
+@NgModule({ exports: [AdminComponent], imports: [CommonModule,
+        AdminRoutingModule,
+        IqbComponentsModule,
+        MatTableModule,
+        MatTabsModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatSortModule,
+        ReactiveFormsModule,
+        MatProgressSpinnerModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatCardModule,
+        MatTooltipModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatToolbarModule,
+        MatSnackBarModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        MatBadgeModule,
+        MatChipsModule,
+        FormsModule,
+        TranslateModule,
+        MatExpansionModule,
+        WorkspaceGroupsComponent,
+        UsersComponent,
+        AdminComponent,
+        EditWorkspaceGroupComponent,
+        EditUserComponent,
+        VeronaModulesComponent,
+        VeronaModulesTableComponent,
+        SettingsComponent,
+        EditWorkspaceGroupComponent,
+        AppConfigComponent,
+        AppLogoComponent,
+        UnitExportConfigComponent,
+        ResourcePackagesComponent,
+        ResourcePackagesTableComponent,
+        TableDataSourcePipe,
+        SafeUrlPipe,
+        ToTimePipe,
+        UsersMenuComponent,
+        WorkspaceGroupsMenuComponent,
+        EditWorkspaceGroupSettingsComponent], providers: [
+        BackendService,
+        [
+            {
+                provide: HTTP_INTERCEPTORS,
+                useClass: AuthInterceptor,
+                multi: true
+            }
+        ],
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AdminModule {}

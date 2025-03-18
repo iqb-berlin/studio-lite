@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { TranslateModule } from '@ngx-translate/core';
@@ -19,35 +19,29 @@ import { IqbFilesUploadComponent } from './iqb-files/iqbFilesUpload/iqbFilesUplo
 import { IqbFilesUploadQueueComponent } from './iqb-files/iqbFilesUploadQueue/iqbFilesUploadQueue.component';
 import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive';
 
-@NgModule({
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    MatIconModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatExpansionModule,
-    FormsModule,
-    MatInputModule,
-    HttpClientModule,
-    MatProgressBarModule,
-    MatCardModule,
-    TranslateModule,
-    ConfirmDialogComponent,
-    MessageDialogComponent,
-    BytesPipe,
-    IqbFilesUploadComponent,
-    IqbFilesUploadQueueComponent,
-    IqbFilesUploadInputForDirective
-  ],
-  exports: [
-    ConfirmDialogComponent,
-    MessageDialogComponent,
-    BytesPipe,
-    IqbFilesUploadQueueComponent,
-    IqbFilesUploadInputForDirective
-  ]
-})
+@NgModule({ exports: [
+        ConfirmDialogComponent,
+        MessageDialogComponent,
+        BytesPipe,
+        IqbFilesUploadQueueComponent,
+        IqbFilesUploadInputForDirective
+    ], imports: [CommonModule,
+        MatDialogModule,
+        MatIconModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatExpansionModule,
+        FormsModule,
+        MatInputModule,
+        MatProgressBarModule,
+        MatCardModule,
+        TranslateModule,
+        ConfirmDialogComponent,
+        MessageDialogComponent,
+        BytesPipe,
+        IqbFilesUploadComponent,
+        IqbFilesUploadQueueComponent,
+        IqbFilesUploadInputForDirective], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class IqbComponentsModule {
   // if config is needed: static forRoot(config: IqbComponentsConfig): ModuleWithProviders {
   static forRoot(): ModuleWithProviders<IqbComponentsModule> {
