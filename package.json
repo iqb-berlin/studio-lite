@@ -114,7 +114,7 @@
     "@angular-eslint/eslint-plugin": "17.3.0",
     "@angular-eslint/eslint-plugin-template": "17.3.0",
     "@angular-eslint/template-parser": "17.3.0",
-    "@angular/cli": "~17.2.0",
+    "@angular/cli": "~17.3.0",
     "@angular/compiler-cli": "17.3.9",
     "@angular/language-service": "17.3.9",
     "@compodoc/compodoc": "^1.1.25",
