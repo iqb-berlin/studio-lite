@@ -48,11 +48,12 @@ export class UnitItemService {
   }
 
   async updateItem(uuid: string, item: UnitItemWithMetadataDto): Promise<void> {
-    const updateItem = this.getOneByUuid(uuid);
+    const updateItem = await this.getOneByUuid(uuid);
     if (updateItem) {
-      await this.unitItemRepository.update(uuid, item);
+      const { profiles, ...unitItem } = item;
+      await this.unitItemRepository.update(uuid, unitItem);
       const profilesToUpdate = await this.unitItemMetadataService.getAllByItemId(item.uuid);
-      const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, item.profiles, 'id');
+      const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
       unchanged
         .map(metadata => this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata));
       removed
