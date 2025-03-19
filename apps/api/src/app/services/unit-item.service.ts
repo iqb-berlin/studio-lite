@@ -63,6 +63,16 @@ export class UnitItemService {
     }
   }
 
+  async patchItemMetadataCurrentProfile(unitId: number, itemProfile: string) {
+    const itemsToUpdate: UnitItemWithMetadataDto[] = await this.getAllByUnitIdWithMetadata(unitId);
+    const profiles = itemsToUpdate.flatMap(metadata => metadata.profiles);
+    profiles.map(metadata => {
+      metadata.isCurrent = metadata.profileId === itemProfile;
+      this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
+      return metadata;
+    });
+  }
+
   async addItem(unitId: number, item: UnitItemWithMetadataDto): Promise<string> {
     item.unitId = unitId;
     const { uuid, ...itemWithoutUuid } = item;

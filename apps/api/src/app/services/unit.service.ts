@@ -11,7 +11,9 @@ import {
   UnitSchemeDto,
   MetadataValues,
   UnitMetadataValues,
-  UnitMetadataDto, UnitItemWithMetadataDto, UnitFullMetadataDto
+  UnitMetadataDto,
+  UnitItemWithMetadataDto,
+  UnitFullMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -167,6 +169,12 @@ export class UnitService {
         await this.unitsRepository.save(newUnit);
 
         const metadata = await this.getMetadataOfUnit(unit);
+        const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
+        newUnit.metadata = UnitService.setCurrentProfiles(
+          workspace.settings?.unitMDProfile,
+          workspace.settings?.itemMDProfile,
+          metadata as UnitMetadataValues
+        );
         await this.addMetadata(newUnit.id, metadata as UnitFullMetadataDto);
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
@@ -381,8 +389,8 @@ export class UnitService {
   async patchWorkspace(unitIds: number[],
                        newWorkspaceId: number,
                        user: User,
-                       workspaceId: number = 0,
-                       action: string = null
+                       workspaceId: number,
+                       action: string
   ): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
@@ -406,6 +414,10 @@ export class UnitService {
       }
       unit.workspaceId = newWorkspaceId;
       unit.groupName = '';
+      const newWorkspace = await this.workspaceRepository.findOne({
+        where: { id: newWorkspaceId },
+        select: ['groupId', 'settings']
+      });
       if ((action === 'submit' || action === 'return') && workspaceId) {
         await this.unitDropBoxHistoryRepository.upsert({
           unitId: unit.id,
@@ -420,14 +432,15 @@ export class UnitService {
           where: { id: workspaceId },
           select: ['groupId']
         });
-        const newWorkspace = await this.workspaceRepository.findOne({
-          where: { id: newWorkspaceId },
-          select: ['groupId']
-        });
         if (workspace.groupId !== newWorkspace.groupId) {
           unit.state = '0';
         }
       }
+
+      await this.patchMetadataCurrentProfile(
+        unit.id, newWorkspace.settings?.unitMDProfile, newWorkspace.settings?.itemMDProfile
+      );
+
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
@@ -443,6 +456,20 @@ export class UnitService {
       if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages];
     });
     return report;
+  }
+
+  async patchMetadataCurrentProfile(unitId: number, unitProfile: string = '', itemProfile: string = ''): Promise<void> {
+    await this.patchUnitMetadataCurrentProfile(unitId, unitProfile);
+    await this.unitItemService.patchItemMetadataCurrentProfile(unitId, itemProfile);
+  }
+
+  private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
+    const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
+    profilesToUpdate.map(metadata => {
+      metadata.isCurrent = metadata.profileId === unitProfile;
+      this.unitMetadataService.updateMetadata(metadata.id, metadata);
+      return metadata;
+    });
   }
 
   async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
