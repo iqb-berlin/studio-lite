@@ -9,11 +9,10 @@ import {
   UnitInListDto,
   UnitPropertiesDto,
   UnitSchemeDto,
-  MetadataValues,
   UnitMetadataValues,
   UnitMetadataDto,
   UnitItemWithMetadataDto,
-  UnitFullMetadataDto
+  UnitFullMetadataDto, UnitItemMetadataDto, MetadataDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -173,7 +172,7 @@ export class UnitService {
         newUnit.metadata = UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
-          metadata as UnitMetadataValues
+          metadata as UnitFullMetadataDto
         );
         await this.addMetadata(newUnit.id, metadata as UnitFullMetadataDto);
 
@@ -247,18 +246,18 @@ export class UnitService {
     return unit;
   }
 
-  private static setCurrentProfiles(
-    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
-  ): UnitMetadataValues {
+  static setCurrentProfiles(
+    unitProfile: string, itemProfile: string, metadata: UnitFullMetadataDto
+  ): UnitFullMetadataDto {
     if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map((profile: MetadataValues) => UnitService
-        .setCurrentProfile(unitProfile, profile));
+      metadata.profiles = metadata.profiles.map((profile => UnitService
+        .setCurrentProfile(unitProfile, profile) as UnitMetadataDto));
     }
     if (metadata.items) {
       metadata.items.forEach(item => {
         if (item.profiles) {
           item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile));
+            .setCurrentProfile(itemProfile, profile) as UnitItemMetadataDto);
         }
       });
     }
@@ -277,7 +276,7 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  private static setCurrentProfile(profileId: string, profile: MetadataValues): MetadataValues {
+  private static setCurrentProfile(profileId: string, profile: MetadataDto): MetadataDto {
     return {
       ...profile,
       isCurrent: profile.profileId === profileId
@@ -327,6 +326,14 @@ export class UnitService {
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
   }
 
+  async patchUnit(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
+    await this.patchUnitProperties(unitId, newData, user);
+    const dataKeys = Object.keys(newData);
+    if (dataKeys.indexOf('metadata') >= 0) {
+      await this.patchMetadata(unitId, newData.metadata);
+    }
+  }
+
   async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const displayName = await this.getDisplayNameForUser(user.id);
@@ -340,9 +347,6 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unit.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unit.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unit.schemeType = newData.schemeType;
-    if (dataKeys.indexOf('metadata') >= 0) {
-      await this.patchMetadata(unitId, newData.metadata);
-    }
     if (dataKeys.indexOf('state') >= 0) unit.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
       unit.groupName = newData.groupName;

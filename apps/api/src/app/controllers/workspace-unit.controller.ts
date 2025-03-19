@@ -238,7 +238,7 @@ export class WorkspaceUnitController {
   async patchUnitProperties(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitProperties: UnitPropertiesDto) {
-    return this.unitService.patchUnitProperties(unitId, unitProperties, user);
+    return this.unitService.patchUnit(unitId, unitProperties, user);
   }
 
   @Patch('workspace-id')
