@@ -9,7 +9,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatRadioButton } from '@angular/material/radio';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -29,7 +28,6 @@ import { BackendService } from '../../services/backend.service';
         MatTabsModule,
         MatSortModule,
         MatProgressSpinnerModule,
-        MatRadioButton,
         MatSlideToggle,
         MatFormField,
         MatInput,

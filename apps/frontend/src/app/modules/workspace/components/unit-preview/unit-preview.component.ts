@@ -9,7 +9,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+import { ShowCodingResultsComponent } from '@jurei733/ngx-coding-components';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
@@ -20,17 +20,18 @@ import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
-import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
+import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 
 @Component({
-    templateUrl: './unit-preview.component.html',
-    styleUrls: ['./unit-preview.component.scss'],
-    host: { class: 'unit-preview' },
-    imports: [PreviewBarComponent]
+  templateUrl: './unit-preview.component.html',
+  styleUrls: ['./unit-preview.component.scss'],
+  host: { class: 'unit-preview' },
+  imports: [PreviewBarComponent]
 })
-
-export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
+export class UnitPreviewComponent
+  extends SubscribeUnitDefinitionChangesDirective
+  implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -103,7 +104,11 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       .subscribe((m: MessageEvent) => {
         const msgData = m.data;
         const msgType = msgData.type;
-        if ((msgType !== undefined) && (msgType !== null) && (m.source === this.iFrameElement?.contentWindow)) {
+        if (
+          msgType !== undefined &&
+          msgType !== null &&
+          m.source === this.iFrameElement?.contentWindow
+        ) {
           switch (msgType) {
             case 'vopReadyNotification':
             case 'player':
@@ -114,7 +119,8 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
                   majorVersion = msgData.metadata.specVersion.match(/\d+/);
                 } else {
                   majorVersion = msgData.apiVersion ?
-                    msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
+                    msgData.apiVersion.match(/\d+/) :
+                    msgData.specVersion.match(/\d+/);
                 }
                 if (majorVersion.length > 0) {
                   this.playerApiVersion = Number(majorVersion[0]);
@@ -124,8 +130,11 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
               } else {
                 this.playerApiVersion = 1;
               }
-              this.sessionId = ((window.crypto
-                .getRandomValues(new Uint32Array(1))[0] % 20000000) + 10000000).toString();
+              this.sessionId = (
+                (window.crypto.getRandomValues(new Uint32Array(1))[0] %
+                  20000000) +
+                10000000
+              ).toString();
               this.postMessageTarget = m.source as Window;
               this.sendUnitData();
               break;
@@ -139,15 +148,25 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
             case 'vopStateChangedNotification':
               if (msgData.playerState) {
                 const pages = msgData.playerState.validPages;
-                this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
+                this.setPageList(
+                  Object.keys(pages),
+                  msgData.playerState.currentPage
+                );
               }
               if (msgData.unitState) {
-                this.setPresentationStatus(msgData.unitState.presentationProgress);
+                this.setPresentationStatus(
+                  msgData.unitState.presentationProgress
+                );
                 this.setResponsesStatus(msgData.unitState.responseProgress);
                 if (msgData.unitState.dataParts) {
-                  const dataParts: Record<string, string> = msgData.unitState.dataParts;
-                  this.dataParts = { ...(this.dataParts ? this.dataParts : {}), ...dataParts };
-                  this.unitStateDataType = msgData.unitState.unitStateDataType || null;
+                  const dataParts: Record<string, string> =
+                    msgData.unitState.dataParts;
+                  this.dataParts = {
+                    ...(this.dataParts ? this.dataParts : {}),
+                    ...dataParts
+                  };
+                  this.unitStateDataType =
+                    msgData.unitState.unitStateDataType || null;
                 }
               }
               break;
@@ -160,38 +179,48 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
             case 'vo.FromPlayer.PageNavigationRequest':
               this.snackBar.open(
-                this.translateService
-                  .instant('workspace.player-send-page-navigation-request', { target: msgData.newPage }),
+                this.translateService.instant(
+                  'workspace.player-send-page-navigation-request',
+                  { target: msgData.newPage }
+                ),
                 '',
-                { duration: 3000 });
+                { duration: 3000 }
+              );
               this.gotoPage({ action: msgData.newPage });
               break;
 
             case 'vopPageNavigationCommand':
               this.snackBar.open(
-                this.translateService
-                  .instant('workspace.player-send-page-navigation-request', { target: msgData.target }),
+                this.translateService.instant(
+                  'workspace.player-send-page-navigation-request',
+                  { target: msgData.target }
+                ),
                 '',
-                { duration: 3000 });
+                { duration: 3000 }
+              );
               this.gotoPage({ action: msgData.target });
               break;
 
             case 'vo.FromPlayer.UnitNavigationRequest':
               this.snackBar.open(
-                this.translateService
-                  .instant('workspace.player-send-unit-navigation-request',
-                    { target: msgData.navigationTarget }),
+                this.translateService.instant(
+                  'workspace.player-send-unit-navigation-request',
+                  { target: msgData.navigationTarget }
+                ),
                 '',
-                { duration: 3000 });
+                { duration: 3000 }
+              );
               break;
 
             case 'vopUnitNavigationRequestedNotification':
               this.snackBar.open(
-                this.translateService
-                  .instant('workspace.player-send-unit-navigation-request',
-                    { target: msgData.target }),
+                this.translateService.instant(
+                  'workspace.player-send-unit-navigation-request',
+                  { target: msgData.target }
+                ),
                 '',
-                { duration: 3000 });
+                { duration: 3000 }
+              );
               break;
 
             case 'vopWindowFocusChangedNotification':
@@ -213,7 +242,9 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.message = '';
-        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitData());
+        this.workspaceService
+          .loadUnitMetadata()
+          .then(() => this.sendUnitData());
       });
     this.addSubscriptionForUnitDefinitionChanges();
   }
@@ -228,28 +259,43 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       const unitMetadata = unitMetadataStore.getData();
       if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
       const playerId = unitMetadata.player ?
-        VeronaModuleFactory.getBestMatch(unitMetadata.player, Object.keys(this.moduleService.players)) : '';
+        VeronaModuleFactory.getBestMatch(
+          unitMetadata.player,
+          Object.keys(this.moduleService.players)
+        ) :
+        '';
       if (playerId) {
-        if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
-          let unitDefinitionStore = this.workspaceService.getUnitDefinitionStore();
+        if (playerId === this.lastPlayerId && this.postMessageTarget) {
+          let unitDefinitionStore =
+            this.workspaceService.getUnitDefinitionStore();
           if (unitDefinitionStore) {
             this.postUnitDef(unitDefinitionStore);
           } else {
-            this.backendService.getUnitDefinition(this.workspaceService.selectedWorkspaceId, this.unitId)
-              .subscribe(
-                ued => {
-                  if (ued) {
-                    unitDefinitionStore = new UnitDefinitionStore(this.unitId, ued);
-                    this.workspaceService.setUnitDefinitionStore(unitDefinitionStore);
-                    this.postUnitDef(unitDefinitionStore);
-                  } else {
-                    this.snackBar.open(
-                      this.translateService.instant('workspace.unit-definition-not-loaded'),
-                      this.translateService.instant('workspace.error'),
-                      { duration: 3000 });
-                  }
+            this.backendService
+              .getUnitDefinition(
+                this.workspaceService.selectedWorkspaceId,
+                this.unitId
+              )
+              .subscribe(ued => {
+                if (ued) {
+                  unitDefinitionStore = new UnitDefinitionStore(
+                    this.unitId,
+                    ued
+                  );
+                  this.workspaceService.setUnitDefinitionStore(
+                    unitDefinitionStore
+                  );
+                  this.postUnitDef(unitDefinitionStore);
+                } else {
+                  this.snackBar.open(
+                    this.translateService.instant(
+                      'workspace.unit-definition-not-loaded'
+                    ),
+                    this.translateService.instant('workspace.error'),
+                    { duration: 3000 }
+                  );
                 }
-              );
+              });
           }
         } else {
           this.message = '';
@@ -270,38 +316,47 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       if (this.playerApiVersion === 1) {
-        this.postMessageTarget.postMessage({
-          type: 'vo.ToPlayer.DataTransfer',
-          sessionId: this.sessionId,
-          unitDefinition: unitDef.definition ? unitDef.definition : ''
-        }, '*');
+        this.postMessageTarget.postMessage(
+          {
+            type: 'vo.ToPlayer.DataTransfer',
+            sessionId: this.sessionId,
+            unitDefinition: unitDef.definition ? unitDef.definition : ''
+          },
+          '*'
+        );
       } else {
-        this.postMessageTarget.postMessage({
-          type: 'vopStartCommand',
-          sessionId: this.sessionId,
-          unitState: {
-            dataParts: {},
-            presentationProgress: 'none',
-            responseProgress: 'none'
+        this.postMessageTarget.postMessage(
+          {
+            type: 'vopStartCommand',
+            sessionId: this.sessionId,
+            unitState: {
+              dataParts: {},
+              presentationProgress: 'none',
+              responseProgress: 'none'
+            },
+            playerConfig: {
+              stateReportPolicy: 'eager',
+              pagingMode: this.previewService.pagingMode.value,
+              directDownloadUrl: this.backendService.getDirectDownloadLink()
+            },
+            unitDefinition: unitDef.definition ? unitDef.definition : ''
           },
-          playerConfig: {
-            stateReportPolicy: 'eager',
-            pagingMode: this.previewService.pagingMode.value,
-            directDownloadUrl: this.backendService.getDirectDownloadLink()
-          },
-          unitDefinition: unitDef.definition ? unitDef.definition : ''
-        }, '*');
+          '*'
+        );
       }
     }
   }
 
   postNavigationDenied(): void {
     if (this.postMessageTarget) {
-      this.postMessageTarget.postMessage({
-        type: 'vopNavigationDeniedNotification',
-        sessionId: this.sessionId,
-        reason: ['presentationIncomplete', 'responsesIncomplete']
-      }, '*');
+      this.postMessageTarget.postMessage(
+        {
+          type: 'vopNavigationDeniedNotification',
+          sessionId: this.sessionId,
+          reason: ['presentationIncomplete', 'responsesIncomplete']
+        },
+        '*'
+      );
     }
   }
 
@@ -310,15 +365,18 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (playerId) {
-        this.moduleService.getModuleHtml(this.moduleService.players[playerId])
+        this.moduleService
+          .getModuleHtml(this.moduleService.players[playerId])
           .then(playerData => {
             this.playerName = playerId;
             if (playerData) {
               this.setupPlayerIFrame(playerData);
               this.lastPlayerId = playerId;
             } else {
-              this.message = this.translateService
-                .instant('workspace.player-not-loaded', { id: playerId });
+              this.message = this.translateService.instant(
+                'workspace.player-not-loaded',
+                { id: playerId }
+              );
               this.lastPlayerId = '';
             }
           });
@@ -336,7 +394,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
   // ++++++++++++ page nav ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   setPageList(validPages?: string[], currentPage?: string): void {
-    if ((validPages instanceof Array)) {
+    if (validPages instanceof Array) {
       const newPageList: PageData[] = [];
       if (validPages.length > 1) {
         for (let i = 0; i < validPages.length; i++) {
@@ -367,7 +425,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         }
       }
       this.pageList = newPageList;
-    } else if ((this.pageList.length > 1) && (currentPage !== undefined)) {
+    } else if (this.pageList.length > 1 && currentPage !== undefined) {
       let currentPageIndex = 0;
       for (let i = 0; i < this.pageList.length; i++) {
         if (this.pageList[i].type === '#goto') {
@@ -384,12 +442,13 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         this.pageList[this.pageList.length - 1].disabled = false;
       } else {
         this.pageList[0].disabled = false;
-        this.pageList[this.pageList.length - 1].disabled = currentPageIndex === this.pageList.length - 2;
+        this.pageList[this.pageList.length - 1].disabled =
+          currentPageIndex === this.pageList.length - 2;
       }
     }
   }
 
-  gotoPage(target: { action: string, index?: number }): void {
+  gotoPage(target: { action: string; index?: number }): void {
     const action = target.action;
     const index = target.index || 0;
     let nextPageId = '';
@@ -397,18 +456,18 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     if (action === '#next') {
       let currentPageIndex = 0;
       for (let i = 0; i < this.pageList.length; i++) {
-        if ((this.pageList[i].index > 0) && (this.pageList[i].disabled)) {
+        if (this.pageList[i].index > 0 && this.pageList[i].disabled) {
           currentPageIndex = i;
           break;
         }
       }
-      if ((currentPageIndex > 0) && (currentPageIndex < this.pageList.length - 2)) {
+      if (currentPageIndex > 0 && currentPageIndex < this.pageList.length - 2) {
         nextPageId = this.pageList[currentPageIndex + 1].id;
       }
     } else if (action === '#previous') {
       let currentPageIndex = 0;
       for (let i = 0; i < this.pageList.length; i++) {
-        if ((this.pageList[i].index > 0) && (this.pageList[i].disabled)) {
+        if (this.pageList[i].index > 0 && this.pageList[i].disabled) {
           currentPageIndex = i;
           break;
         }
@@ -417,7 +476,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         nextPageId = this.pageList[currentPageIndex - 1].id;
       }
     } else if (action === '#goto') {
-      if ((index > 0) && (index < this.pageList.length - 1)) {
+      if (index > 0 && index < this.pageList.length - 1) {
         nextPageId = this.pageList[index].id;
       }
     } else if (index === 0) {
@@ -427,17 +486,23 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
 
     if (nextPageId.length > 0 && this.postMessageTarget) {
       if (this.playerApiVersion === 1) {
-        this.postMessageTarget.postMessage({
-          type: 'vo.ToPlayer.NavigateToPage',
-          sessionId: this.sessionId,
-          newPage: nextPageId
-        }, '*');
+        this.postMessageTarget.postMessage(
+          {
+            type: 'vo.ToPlayer.NavigateToPage',
+            sessionId: this.sessionId,
+            newPage: nextPageId
+          },
+          '*'
+        );
       } else {
-        this.postMessageTarget.postMessage({
-          type: 'vopPageNavigationCommand',
-          sessionId: this.sessionId,
-          target: nextPageId
-        }, '*');
+        this.postMessageTarget.postMessage(
+          {
+            type: 'vopPageNavigationCommand',
+            sessionId: this.sessionId,
+            target: nextPageId
+          },
+          '*'
+        );
       }
     }
   }
@@ -473,7 +538,8 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     if (data && !this.workspaceService.isChanged()) {
       this.checkCoding(data);
     } else {
-      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+      this.backendService
+        .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
         .subscribe(schemeData => {
           this.checkCoding(schemeData);
         });
@@ -489,37 +555,48 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
         if (responses) {
           this.dialog
             .open(ShowResponsesComponent, {
-              data: { responses: responses, table: !this.isIqbStandardResponse() },
+              data: {
+                responses: responses,
+                table: !this.isIqbStandardResponse()
+              },
               height: '80%',
               width: '60%'
             })
             .afterClosed()
-            .pipe(
-              takeUntil(this.ngUnsubscribe)
-            ).subscribe(() => {});
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(() => {});
         } else {
           this.snackBar.open(
             this.translateService.instant('workspace.coding-check-error'),
             this.translateService.instant('workspace.error'),
-            { duration: 3000 });
+            { duration: 3000 }
+          );
         }
         return;
       }
-      this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
+      this.workspaceService.codingSchemer = new CodingScheme(
+        codingScheme.variableCodings
+      );
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
         .map(vc => (vc.alias ? vc.alias : vc.id));
-      const newResponses = this.workspaceService.codingSchemer?.code(responses!);
+      const newResponses = this.workspaceService.codingSchemer?.code(
+        responses!
+      );
       this.showCodingResults(newResponses, varsWithCodes);
     }
   }
 
-  private showCodingResults(responses: Response[], varsWithCodes:string[]): void {
+  private showCodingResults(
+    responses: Response[],
+    varsWithCodes: string[]
+  ): void {
     if (this.workspaceService.isChanged()) {
       this.snackBar.open(
         this.translateService.instant('workspace.save-unit-before-check'),
         this.translateService.instant('workspace.error'),
-        { duration: 3000 });
+        { duration: 3000 }
+      );
     } else {
       this.dialog
         .open(ShowCodingResultsComponent, {
@@ -528,10 +605,8 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
           width: '60%'
         })
         .afterClosed()
-        .pipe(
-          takeUntil(this.ngUnsubscribe)
-        ).subscribe(() => {
-        });
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {});
     }
   }
 
