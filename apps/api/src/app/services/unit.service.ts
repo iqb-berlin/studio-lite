@@ -50,6 +50,15 @@ export class UnitService {
     private unitMetadataToDeleteService: UnitMetadataToDeleteService
   ) {}
 
+  async getUnitIdsByWorkspaceId(workspaceId: number): Promise<number[]> {
+    const units = await this.unitsRepository
+      .find({
+        where: { workspaceId: workspaceId },
+        select: ['id']
+      });
+    return units.map(unit => unit.id);
+  }
+
   async findAll(): Promise<UnitByDefinitionIdDto[]> {
     this.logger.log('Retrieving units for workspaceId');
     const units = await this.unitsRepository.find({

@@ -425,12 +425,12 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
+    await this.checkForProfileUpdate(workspaceToUpdate, settings);
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
   async remove(id: number | number[]): Promise<void> {
-    // TODO: sollte Fehler liefern wenn eine nicht gültige id verwendet wird
     this.logger.log(`Deleting workspace with id: ${id}`);
     await this.workspacesRepository.delete(id);
   }
@@ -616,5 +616,14 @@ export class WorkspaceService {
 
   private async importComments(unitId: number, comments: string) {
     await this.unitCommentService.createComments(JSON.parse(comments), unitId);
+  }
+
+  private async checkForProfileUpdate(workspace: Workspace, newSettings: WorkspaceSettingsDto) {
+    if ((workspace.settings?.itemMDProfile && workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
+    (workspace.settings?.unitMDProfile && workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile)) {
+      const unitIds = await this.unitService.getUnitIdsByWorkspaceId(workspace.id);
+      unitIds.map(async unitId => this.unitService
+        .patchMetadataCurrentProfile(unitId, newSettings.unitMDProfile, newSettings.itemMDProfile));
+    }
   }
 }
