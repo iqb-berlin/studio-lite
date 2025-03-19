@@ -9,7 +9,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { ShowCodingResultsComponent } from '@jurei733/ngx-coding-components';
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
