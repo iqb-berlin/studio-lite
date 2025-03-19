@@ -65,7 +65,8 @@ export class UnitItemService {
 
   async addItem(unitId: number, item: UnitItemWithMetadataDto): Promise<string> {
     item.unitId = unitId;
-    const newItem = this.unitItemRepository.create(item);
+    const { uuid, ...itemWithoutUuid } = item;
+    const newItem = this.unitItemRepository.create(itemWithoutUuid);
     await this.unitItemRepository.save(newItem);
     if (item.profiles) {
       item.profiles

@@ -157,7 +157,6 @@ export class UnitService {
         newUnit.description = unitSourceData.description;
         newUnit.transcript = unitSourceData.transcript;
         newUnit.reference = unitSourceData.reference;
-        newUnit.metadata = unitSourceData.metadata;
         newUnit.player = unitSourceData.player;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
@@ -166,6 +165,10 @@ export class UnitService {
         newUnit.lastChangedMetadataUser = displayName;
         newUnit.lastChangedSchemeUser = displayName;
         await this.unitsRepository.save(newUnit);
+
+        const metadata = await this.getMetadataOfUnit(unit);
+        await this.addMetadata(newUnit.id, metadata as UnitFullMetadataDto);
+
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
           await this.patchDefinition(newUnit.id, unitSourceDefinition, user);
@@ -293,6 +296,17 @@ export class UnitService {
       .map(item => this.unitItemService.removeItem(item.uuid));
     added
       .map(item => this.unitItemService.addItem(unitId, item));
+  }
+
+  async addMetadata(unitId: number, metadata: UnitFullMetadataDto): Promise<void> {
+    const profiles = metadata.profiles || [];
+    profiles
+      .map(profile => this.unitMetadataService.addMetadata(unitId, profile as UnitMetadataDto));
+    const items = metadata.items || [];
+    items
+      .map(item => this.unitItemService.addItem(unitId, item as UnitItemWithMetadataDto));
+
+    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
   }
 
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
@@ -647,6 +661,14 @@ export class UnitService {
       }
     }
     return unit;
+  }
+
+  private async getMetadataOfUnit(unit: CreateUnitDto): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+    const unitMetadataToDelete = this.unitMetadataToDeleteService.getOneByUnit(unit.createFrom);
+    if (unitMetadataToDelete) {
+      return this.findOnesMetadata(unit.createFrom);
+    }
+    return unit.metadata;
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {

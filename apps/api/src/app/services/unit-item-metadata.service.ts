@@ -22,7 +22,8 @@ export class UnitItemMetadataService {
 
   async addItemMetadata(unitItemUuid: string, metadata: UnitItemMetadataDto): Promise<number> {
     metadata.unitItemUuid = unitItemUuid;
-    const newItemMetadata = this.unitItemMetadataRepository.create(metadata);
+    const { id, ...metadataWithoutId } = metadata;
+    const newItemMetadata = this.unitItemMetadataRepository.create(metadataWithoutId);
     await this.unitItemMetadataRepository.save(newItemMetadata);
     return newItemMetadata.id;
   }
