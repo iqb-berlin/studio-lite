@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { provideHttpClient } from '@angular/common/http';
 import { UnitPrintLayoutComponent } from './unit-print-layout.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -67,13 +67,12 @@ describe('UnitPrintLayoutComponent', () => {
         MockUnitPrintCodingComponent,
         MockIncludePipe
       ],
-      imports: [
-        HttpClientModule
-      ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitPrintLayoutComponent);

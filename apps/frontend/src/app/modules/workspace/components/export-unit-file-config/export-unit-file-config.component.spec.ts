@@ -6,8 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { ExportUnitFileConfigComponent } from './export-unit-file-config.component';
 
@@ -25,13 +25,14 @@ describe('ExportUnitFileConfigComponent', () => {
         MatFormFieldModule,
         MatCheckboxModule,
         MatDialogModule,
-        HttpClientModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ExportUnitFileConfigComponent);

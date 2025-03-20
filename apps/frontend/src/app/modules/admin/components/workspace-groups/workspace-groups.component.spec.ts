@@ -4,7 +4,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { HttpClientModule } from '@angular/common/http';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -14,6 +13,7 @@ import {
 import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -51,11 +51,11 @@ describe('WorkspaceGroupsComponent', () => {
         MatTooltipModule,
         MatIconModule,
         MatTableModule,
-        HttpClientModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

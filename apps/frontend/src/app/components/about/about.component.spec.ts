@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { AboutComponent } from './about.component';
 
 describe('AboutComponent', () => {
@@ -12,12 +12,12 @@ describe('AboutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         MatIconModule,
         MatCardModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideRouter([]),
         {
           provide: 'APP_VERSION',
           useValue: '0.0.0'

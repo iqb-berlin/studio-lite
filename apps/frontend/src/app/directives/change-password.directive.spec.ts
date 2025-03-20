@@ -1,8 +1,8 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { BackendService } from '../services/backend.service';
 import { ChangePasswordDirective } from './change-password.directive';
@@ -13,13 +13,15 @@ describe('ChangePasswordDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MatDialogModule,
-        HttpClientModule
+        MatDialogModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
+      ]
     }).compileComponents();
   });
 

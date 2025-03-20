@@ -1,7 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -9,6 +8,7 @@ import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { ReviewsComponent } from './reviews.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -72,11 +72,11 @@ describe('ReviewsComponent', () => {
         MatSortModule,
         MatDialogModule,
         MatSnackBarModule,
-        HttpClientModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

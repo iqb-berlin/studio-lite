@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
 import { UnitPrintCodingComponent } from './unit-print-coding.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -11,13 +11,15 @@ describe('UnitPrintCodingComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        HttpClientModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitPrintCodingComponent);

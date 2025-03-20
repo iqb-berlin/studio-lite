@@ -2,13 +2,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSelectModule } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { provideHttpClient } from '@angular/common/http';
 import { MoveUnitComponent } from './move-unit.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -40,7 +40,6 @@ describe('MoveUnitComponent', () => {
       ],
       imports: [
         MatSelectModule,
-        HttpClientModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatDialogModule,
@@ -49,6 +48,7 @@ describe('MoveUnitComponent', () => {
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: MAT_DIALOG_DATA,
           useValue: {}

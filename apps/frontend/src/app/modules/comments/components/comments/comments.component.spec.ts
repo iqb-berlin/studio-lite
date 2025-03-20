@@ -1,12 +1,12 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { CommentsComponent } from './comments.component';
 import { BackendService } from '../../services/backend.service';
@@ -56,10 +56,10 @@ describe('UnitCommentsComponent', () => {
       ],
       imports: [
         TranslateModule.forRoot(),
-        MatDialogModule,
-        HttpClientModule
+        MatDialogModule
       ],
       providers: [
+        provideHttpClient(),
         BackendService,
         {
           provide: 'SERVER_URL',

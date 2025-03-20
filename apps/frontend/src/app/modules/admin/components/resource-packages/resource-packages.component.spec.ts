@@ -1,6 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {
   CUSTOM_ELEMENTS_SCHEMA, Directive, Input, Pipe, PipeTransform
@@ -11,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { ResourcePackagesComponent } from './resource-packages.component';
 
@@ -40,17 +40,19 @@ describe('ResourcePackageComponent', () => {
       ],
       imports: [
         TranslateModule.forRoot(),
-        HttpClientModule,
         MatTooltipModule,
         MatSnackBarModule,
         MatIconModule,
         NoopAnimationsModule
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ResourcePackagesComponent);

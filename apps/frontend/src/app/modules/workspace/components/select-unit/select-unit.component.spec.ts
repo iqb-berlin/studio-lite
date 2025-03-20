@@ -3,8 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitComponent } from './select-unit.component';
@@ -34,11 +34,11 @@ describe('SelectUnitComponent', () => {
       imports: [
         ReactiveFormsModule,
         MatDialogModule,
-        HttpClientModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: MAT_DIALOG_DATA,
           useValue: {

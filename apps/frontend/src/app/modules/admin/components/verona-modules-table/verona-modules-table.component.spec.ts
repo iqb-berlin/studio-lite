@@ -3,7 +3,7 @@ import { MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
 
@@ -17,13 +17,15 @@ describe('VeronaModulesTableComponent', () => {
         TranslateModule.forRoot(),
         MatTableModule,
         MatCheckboxModule,
-        MatSortModule,
-        HttpClientModule
+        MatSortModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(VeronaModulesTableComponent);

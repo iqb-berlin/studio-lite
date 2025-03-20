@@ -4,10 +4,10 @@ import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { SettingsComponent } from './settings.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -35,12 +35,12 @@ describe('SettingsComponent', () => {
         TranslateModule.forRoot(),
         MatFormFieldModule,
         MatInputModule,
-        HttpClientModule,
         MatNativeDateModule,
         MatDatepickerModule,
         NoopAnimationsModule
       ],
       providers: [
+        provideHttpClient(),
         MatDatepickerModule,
         {
           provide: 'SERVER_URL',

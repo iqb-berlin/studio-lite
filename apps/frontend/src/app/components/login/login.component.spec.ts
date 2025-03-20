@@ -1,8 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +10,8 @@ import { Component, Input } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../modules/auth/service/auth.service';
@@ -25,7 +25,7 @@ describe('LoginComponent', () => {
     @Input() warnMessage!: string;
   }
 
-  @Component({ selector: 'studio-lite-area-title', template: '', standalone: false  })
+  @Component({ selector: 'studio-lite-area-title', template: '', standalone: false })
   class MockAreaTitleComponent {
     @Input() title!: string;
   }
@@ -46,8 +46,6 @@ describe('LoginComponent', () => {
       ],
       imports: [
         ReactiveFormsModule,
-        RouterTestingModule,
-        HttpClientModule,
         MatSnackBarModule,
         MatFormFieldModule,
         MatInputModule,
@@ -57,18 +55,22 @@ describe('LoginComponent', () => {
         MatTooltipModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      },
-      {
-        provide: MAT_DIALOG_DATA,
-        useValue: {}
-      },
-      {
-        provide: AuthService,
-        useClass: MockAuthService
-      }]
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {}
+        },
+        {
+          provide: AuthService,
+          useClass: MockAuthService
+        }
+      ]
     }).compileComponents();
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;

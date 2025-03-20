@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { ExportTestTakerConfigComponent } from './export-test-taker-config.component';
 import { environment } from '../../../../../environments/environment';
@@ -25,7 +24,6 @@ describe('ExportTestTakerConfigComponent', () => {
         MatFormFieldModule,
         MatCheckboxModule,
         MatDialogModule,
-        HttpClientModule,
         TranslateModule.forRoot()
       ],
       providers: [{

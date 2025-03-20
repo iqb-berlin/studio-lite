@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { UnitPreviewComponent } from './unit-preview.component';
 import { PageData } from '../../models/page-data.interface';
@@ -31,14 +31,15 @@ describe('UnitPreviewComponent', () => {
         MockPreviewBarComponent],
       imports: [
         CommonModule,
-        HttpClientModule,
         MatSnackBarModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitPreviewComponent);

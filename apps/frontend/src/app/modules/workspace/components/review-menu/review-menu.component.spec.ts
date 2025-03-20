@@ -2,8 +2,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
 import { ReviewMenuComponent } from './review-menu.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -64,10 +64,10 @@ describe('ReviewMenuComponent', () => {
         MockExportReviewButtonComponent
       ],
       imports: [
-        HttpClientModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

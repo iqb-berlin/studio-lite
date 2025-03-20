@@ -1,10 +1,11 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { Component, Input } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { UnitInfoComponent } from './unit-info.component';
 
@@ -51,10 +52,11 @@ describe('UnitInfoComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         MatIconModule,
-        MatTooltipModule,
-        HttpClientModule
+        MatTooltipModule
       ],
       providers: [
+        provideHttpClient(),
+        provideRouter([]),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

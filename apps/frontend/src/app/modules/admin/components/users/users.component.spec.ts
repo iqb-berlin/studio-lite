@@ -4,7 +4,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { HttpClientModule } from '@angular/common/http';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
@@ -13,6 +12,7 @@ import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
 
@@ -49,11 +49,11 @@ describe('UsersComponent', () => {
         MatTooltipModule,
         MatIconModule,
         MatTableModule,
-        HttpClientModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
