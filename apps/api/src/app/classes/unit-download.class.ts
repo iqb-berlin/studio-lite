@@ -154,6 +154,7 @@ export class UnitDownloadClass {
         const variableElement = variablesElement.ele({
           Variable: {
             '@id': transformedVariable.id,
+            '@alias': transformedVariable.alias,
             '@type': transformedVariable.type,
             '@format': transformedVariable.format,
             '@nullable': transformedVariable.nullable,
