@@ -14,7 +14,7 @@ describe('VeronaModulesComponent', () => {
   let component: VeronaModulesComponent;
   let fixture: ComponentFixture<VeronaModulesComponent>;
 
-  @Component({ selector: 'iqb-files-upload-queue', template: '' })
+  @Component({ selector: 'iqb-files-upload-queue', template: '', standalone: false })
   class MockIqbFilesUploadQueueComponent {
     @Input() uploadQueue!: unknown;
     @Input() httpUrl: unknown;
@@ -27,13 +27,13 @@ describe('VeronaModulesComponent', () => {
     @Input() folder: unknown;
   }
 
-  @Component({ selector: 'studio-lite-verona-modules-table', template: '' })
+  @Component({ selector: 'studio-lite-verona-modules-table', template: '', standalone: false })
   class MockVeronaModulesTableComponent {
     @Input() uploadQueue!: unknown;
     @Input() modules: unknown;
   }
 
-  @Directive({ selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]' })
+  @Directive({ selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]', standalone: false })
   class MockIqbFilesUploadInputForDirective {
     @Input() iqbFilesUploadInputFor!: unknown;
   }

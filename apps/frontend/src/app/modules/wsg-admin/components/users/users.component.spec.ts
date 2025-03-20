@@ -17,7 +17,7 @@ describe('UsersComponent', () => {
   let component: UsersComponent;
   let fixture: ComponentFixture<UsersComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }

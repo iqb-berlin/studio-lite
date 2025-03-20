@@ -14,7 +14,7 @@ describe('UnitsComponent', () => {
   let component: UnitsComponent;
   let fixture: ComponentFixture<UnitsComponent>;
 
-  @Component({ selector: 'studio-lite-page-navigation', template: '' })
+  @Component({ selector: 'studio-lite-page-navigation', template: '', standalone: false })
   class MockPageNavigationComponent {
     @Input() pageList!: PageData[];
     @Output() gotoPage = new EventEmitter<{ action: string, index?: number }>();

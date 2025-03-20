@@ -57,7 +57,8 @@ describe('CommentEditorComponent', () => {
   }
 
   @Pipe({
-    name: 'isCommentCommittable'
+    name: 'isCommentCommittable',
+    standalone: false
   })
   class MockIsCommentCommittablePipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this

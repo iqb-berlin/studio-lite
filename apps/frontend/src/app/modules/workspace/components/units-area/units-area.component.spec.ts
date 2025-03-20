@@ -15,11 +15,11 @@ import { UnitsAreaComponent } from './units-area.component';
 describe('UnitsAreaComponent', () => {
   let component: UnitsAreaComponent;
   let fixture: ComponentFixture<UnitsAreaComponent>;
-  @Component({ selector: 'studio-lite-unit-save-button', template: '' })
+  @Component({ selector: 'studio-lite-unit-save-button', template: '', standalone: false })
   class MockUnitSaveButtonComponent {}
-  @Component({ selector: 'studio-lite-update-units-button', template: '' })
+  @Component({ selector: 'studio-lite-update-units-button', template: '', standalone: false })
   class MockUpdateUnitsButtonComponent {}
-  @Component({ selector: 'studio-lite-unit-selection', template: '' })
+  @Component({ selector: 'studio-lite-unit-selection', template: '', standalone: false })
   class MockUnitSelectionComponent {
     @Input() selectedUnitId!: number;
     @Input() navLinks!: string[];
@@ -27,19 +27,19 @@ describe('UnitsAreaComponent', () => {
     @Input() selectedRouterLink!: number;
     @Input() unitGroupList!: number;
   }
-  @Component({ selector: 'studio-lite-add-unit-button', template: '' })
+  @Component({ selector: 'studio-lite-add-unit-button', template: '', standalone: false })
   class MockAddUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;
     @Input() selectedUnitId!: number;
   }
-  @Component({ selector: 'studio-lite-delete-unit-button', template: '' })
+  @Component({ selector: 'studio-lite-delete-unit-button', template: '', standalone: false })
   class MockDeleteUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;
     @Input() selectedUnitId!: number;
   }
-  @Component({ selector: 'studio-lite-edit-unit-button', template: '' })
+  @Component({ selector: 'studio-lite-edit-unit-button', template: '', standalone: false })
   class MockEditUnitButtonComponent {
     @Input() navLinks!: string[];
     @Input() selectedRouterLink!: number;

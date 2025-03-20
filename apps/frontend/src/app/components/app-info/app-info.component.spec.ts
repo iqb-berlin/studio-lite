@@ -8,7 +8,7 @@ describe('AppInfoComponent', () => {
   let component: AppInfoComponent;
   let fixture: ComponentFixture<AppInfoComponent>;
 
-  @Component({ selector: 'studio-lite-area-title', template: '' })
+  @Component({ selector: 'studio-lite-area-title', template: '', standalone: false })
   class MockAreaTitleComponent {
     @Input() title!: string;
   }

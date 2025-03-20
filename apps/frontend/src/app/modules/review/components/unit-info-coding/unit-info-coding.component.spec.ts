@@ -10,7 +10,7 @@ describe('UnitInfoCodingComponent', () => {
   let component: UnitInfoCodingComponent;
   let fixture: ComponentFixture<UnitInfoCodingComponent>;
 
-  @Component({ selector: 'studio-lite-unit-info-loader', template: '' })
+  @Component({ selector: 'studio-lite-unit-info-loader', template: '', standalone: false })
   class MockUnitInfoLoader {}
 
   beforeEach(async () => {

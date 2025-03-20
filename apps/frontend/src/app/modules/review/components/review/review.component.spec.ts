@@ -13,10 +13,10 @@ describe('ReviewComponent', () => {
   let component: ReviewComponent;
   let fixture: ComponentFixture<ReviewComponent>;
 
-  @Component({ selector: 'studio-lite-unit-nav', template: '' })
+  @Component({ selector: 'studio-lite-unit-nav', template: '', standalone: false })
   class MockUnitNav {}
 
-  @Component({ selector: 'studio-lite-add-comment-button', template: '' })
+  @Component({ selector: 'studio-lite-add-comment-button', template: '', standalone: false })
   class MockAddCommentButton {
     @Input() showOthersComments!: boolean;
     @Input() unitDbId!: number;

@@ -16,12 +16,12 @@ describe('MoveUnitComponent', () => {
   let component: MoveUnitComponent;
   let fixture: ComponentFixture<MoveUnitComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     value: string = '';
   }
 
-  @Component({ selector: 'studio-lite-select-unit-list', template: '' })
+  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: false })
   class MockSelectUnitListComponent {
     @Input() disabled!: number[];
     @Input() filter!: number[];

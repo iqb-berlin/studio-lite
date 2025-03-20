@@ -4,8 +4,8 @@ import { FormlyModule } from '@ngx-formly/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
 import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
+import { provideHttpClient } from '@angular/common/http';
 import { ItemComponent } from './item.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -13,7 +13,7 @@ describe('ItemComponent', () => {
   let component: ItemComponent;
   let fixture: ComponentFixture<ItemComponent>;
 
-  @Component({ selector: 'studio-lite-profile-form', template: '' })
+  @Component({ selector: 'studio-lite-profile-form', template: '', standalone: false })
   class MockProfileFormComponent {
     @Input() language!: string;
     @Input() profileUrl!: string | undefined;
@@ -29,12 +29,12 @@ describe('ItemComponent', () => {
       ],
       imports: [
         MatExpansionModule,
-        HttpClientModule,
         FormlyModule.forRoot(),
         BrowserAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

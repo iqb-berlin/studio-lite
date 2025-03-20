@@ -16,7 +16,7 @@ describe('SelectUnitListComponent', () => {
   let component: SelectUnitListComponent;
   let fixture: ComponentFixture<SelectUnitListComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     value: string = '';
   }

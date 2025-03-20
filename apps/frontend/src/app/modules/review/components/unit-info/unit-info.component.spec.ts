@@ -12,7 +12,7 @@ describe('UnitInfoComponent', () => {
   let component: UnitInfoComponent;
   let fixture: ComponentFixture<UnitInfoComponent>;
 
-  @Component({ selector: 'studio-lite-unit-properties', template: '' })
+  @Component({ selector: 'studio-lite-unit-properties', template: '', standalone: false })
   class MockUnitMetaDataComponent {
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
@@ -31,12 +31,12 @@ describe('UnitInfoComponent', () => {
     @Input() lastChangedSchemeUser!: string | undefined | null;
   }
 
-  @Component({ selector: 'studio-lite-unit-info-comments', template: '' })
+  @Component({ selector: 'studio-lite-unit-info-comments', template: '', standalone: false })
   class MockUnitInfoComments {
     @Input() unitId!: number;
   }
 
-  @Component({ selector: 'studio-lite-unit-info-coding', template: '' })
+  @Component({ selector: 'studio-lite-unit-info-coding', template: '', standalone: false })
   class MockUnitInfoCoding {
     @Input() unitId!: number;
   }

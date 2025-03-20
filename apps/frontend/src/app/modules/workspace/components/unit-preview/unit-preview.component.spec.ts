@@ -13,7 +13,7 @@ describe('UnitPreviewComponent', () => {
   let component: UnitPreviewComponent;
   let fixture: ComponentFixture<UnitPreviewComponent>;
 
-  @Component({ selector: 'studio-lite-preview-bar', template: '' })
+  @Component({ selector: 'studio-lite-preview-bar', template: '', standalone: false })
   class MockPreviewBarComponent {
     @Input() pageList!: PageData[];
     @Input() unitId!: number;

@@ -12,7 +12,7 @@ describe('UnitPrintLayoutComponent', () => {
   let component: UnitPrintLayoutComponent;
   let fixture: ComponentFixture<UnitPrintLayoutComponent>;
 
-  @Pipe({ name: 'include' })
+  @Pipe({ name: 'include', standalone: false })
   class MockIncludePipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
     transform(): boolean {
@@ -20,7 +20,7 @@ describe('UnitPrintLayoutComponent', () => {
     }
   }
 
-  @Component({ selector: 'studio-lite-unit-properties', template: '' })
+  @Component({ selector: 'studio-lite-unit-properties', template: '', standalone: false })
   class MockUnitMetaDataComponent {
     @Input() workspaceGroupId!: number;
     @Input() state!: string | undefined | null;
@@ -41,18 +41,18 @@ describe('UnitPrintLayoutComponent', () => {
     @Input() lastChangedSchemeUser!: string | undefined | null;
   }
 
-  @Component({ selector: 'studio-lite-print-metadata', template: '' })
+  @Component({ selector: 'studio-lite-print-metadata', template: '', standalone: false })
   class MockUnitPrintMetaDateComponent {
     @Input() metadata!: UnitMetadataValues | null;
   }
 
-  @Component({ selector: 'studio-lite-unit-print-comments', template: '' })
+  @Component({ selector: 'studio-lite-unit-print-comments', template: '', standalone: false })
   class MockUnitPrintCommentsComponent {
     @Input() unitId!: number;
     @Input() workspaceId!: number;
   }
 
-  @Component({ selector: 'studio-lite-unit-print-coding', template: '' })
+  @Component({ selector: 'studio-lite-unit-print-coding', template: '', standalone: false })
   class MockUnitPrintCodingComponent {
     @Input() unitId!: number;
     @Input() workspaceId!: number;

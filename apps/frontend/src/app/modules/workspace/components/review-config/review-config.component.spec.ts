@@ -14,13 +14,13 @@ describe('ReviewConfigComponent', () => {
   let component: ReviewConfigComponent;
   let fixture: ComponentFixture<ReviewConfigComponent>;
 
-  @Component({ selector: 'studio-lite-booklet-config-edit', template: '' })
+  @Component({ selector: 'studio-lite-booklet-config-edit', template: '', standalone: false })
   class MockBookletConfigEditComponent {
     @Input() disabled!: boolean;
     @Input() config!: BookletConfigDto | undefined;
   }
 
-  @Component({ selector: 'studio-lite-review-config-edit', template: '' })
+  @Component({ selector: 'studio-lite-review-config-edit', template: '', standalone: false })
   class MockReviewConfigEditComponent {
     @Input() disabled!: boolean;
     @Input() config!: ReviewConfigDto | undefined;

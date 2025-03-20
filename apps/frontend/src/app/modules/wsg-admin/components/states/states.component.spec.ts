@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatListModule } from '@angular/material/list';
@@ -10,6 +9,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component, Input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { StatesComponent } from './states.component';
 
@@ -17,7 +17,7 @@ describe('StatesComponent', () => {
   let component: StatesComponent;
   let fixture: ComponentFixture<StatesComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }
@@ -30,7 +30,6 @@ describe('StatesComponent', () => {
         MatDialogModule,
         MatTableModule,
         MatCheckboxModule,
-        HttpClientModule,
         MatSnackBarModule,
         MatListModule,
         MatIconModule,
@@ -39,6 +38,7 @@ describe('StatesComponent', () => {
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

@@ -13,7 +13,7 @@ describe('ExportCodingBookComponent', () => {
   let component: ExportCodingBookComponent;
   let fixture: ComponentFixture<ExportCodingBookComponent>;
 
-  @Component({ selector: 'studio-lite-select-unit-list', template: '' })
+  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: false })
   class MockSelectUnitListComponent {
     @Input() disabled!: number[];
     @Input() filter!: number[];
@@ -31,12 +31,12 @@ describe('ExportCodingBookComponent', () => {
       ],
       imports: [
         MatDialogModule,
-        provideHttpClient(),
         MatExpansionModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

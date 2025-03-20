@@ -15,13 +15,15 @@ describe('WorkspaceComponent', () => {
 
   @Component({
     selector: 'studio-lite-splitter',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteSplitterComponent {}
 
   @Component({
     selector: 'studio-lite-splitter-pane',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteSplitterPaneComponent {
     @Input() initialSize: number | 'auto' = 'auto';
@@ -31,7 +33,8 @@ describe('WorkspaceComponent', () => {
 
   @Component({
     selector: 'studio-lite-units-area',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteUnitsAreaComponent {
     @Input() selectedRouterLink!: number;
@@ -40,7 +43,8 @@ describe('WorkspaceComponent', () => {
 
   @Component({
     selector: 'studio-lite-unit-data-area',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteUnitDataAreaComponent {
     @Input() navTabs!: { name: string; duplicable: boolean }[];

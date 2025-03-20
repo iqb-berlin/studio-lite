@@ -9,18 +9,18 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../../../../../environments/environment';
 import { UnitSelectionComponent } from './unit-selection.component';
 
-@Component({ selector: 'studio-lite-unit-table', template: '' })
+@Component({ selector: 'studio-lite-unit-table', template: '', standalone: false })
 class MockUnitTableComponent {
   @Input() hasSortHeader!: boolean;
   @Input() unitList!: UnitInListDto[];
 }
 
-@Component({ selector: 'studio-lite-search-filter', template: '' })
+@Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
 class MockSearchFilterComponent {
   value: string = '';
 }
 
-@Component({ selector: 'studio-lite-unit-groups', template: '' })
+@Component({ selector: 'studio-lite-unit-groups', template: '', standalone: false })
 class MockUnitGroupsComponent {
   @Input() expandedGroups !: number;
   @Input() numberOfGroups !: number;

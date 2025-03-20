@@ -20,7 +20,8 @@ describe('AppConfigComponent', () => {
   let fixture: ComponentFixture<AppConfigComponent>;
 
   @Pipe({
-    name: 'toTime'
+    name: 'toTime',
+    standalone: false
   })
   class MockToTimePipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this

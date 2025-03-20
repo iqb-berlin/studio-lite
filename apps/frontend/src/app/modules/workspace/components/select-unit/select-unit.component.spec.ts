@@ -14,7 +14,7 @@ describe('SelectUnitComponent', () => {
   let component: SelectUnitComponent;
   let fixture: ComponentFixture<SelectUnitComponent>;
 
-  @Component({ selector: 'studio-lite-select-unit-list', template: '' })
+  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: false })
   class MockSelectUnitListComponent {
     @Input() filter!: number[];
     @Input() initialSelection!: number[];

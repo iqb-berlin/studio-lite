@@ -18,7 +18,7 @@ describe('SettingsComponent', () => {
   let component: WorkspaceSettingsComponent;
   let fixture: ComponentFixture<WorkspaceSettingsComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }

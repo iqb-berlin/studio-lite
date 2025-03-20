@@ -18,7 +18,8 @@ describe('UnitCommentsComponent', () => {
   let fixture: ComponentFixture<CommentsComponent>;
 
   @Pipe({
-    name: 'rootComments'
+    name: 'rootComments',
+    standalone: false
   })
   class MockRootCommentsPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
@@ -27,7 +28,7 @@ describe('UnitCommentsComponent', () => {
     }
   }
 
-  @Component({ selector: 'studio-lite-comment-editor', template: '' })
+  @Component({ selector: 'studio-lite-comment-editor', template: '', standalone: false })
   class MockCommentEditorComponent {
     @Input() submitLabel!: string;
     @Input() initialHTML!: string;
@@ -35,7 +36,7 @@ describe('UnitCommentsComponent', () => {
     @Input() label!: string;
   }
 
-  @Component({ selector: 'studio-lite-comment', template: '' })
+  @Component({ selector: 'studio-lite-comment', template: '', standalone: false })
   class MockCommentComponent {
     @Input() comment!: Comment;
     @Input() activeComment!: ActiveComment | null;

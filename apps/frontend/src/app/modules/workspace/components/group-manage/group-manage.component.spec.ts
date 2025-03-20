@@ -17,7 +17,7 @@ describe('GroupManageComponent', () => {
   let component: GroupManageComponent;
   let fixture: ComponentFixture<GroupManageComponent>;
 
-  @Component({ selector: 'studio-lite-select-unit-list', template: '' })
+  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: false })
   class MockSelectUnitListComponent {
     @Input() disabled!: number[];
     @Input() filter!: number[];
@@ -28,17 +28,17 @@ describe('GroupManageComponent', () => {
     @Input() selectedUnitId!: number;
   }
 
-  @Component({ selector: 'studio-lite-save-changes', template: '' })
+  @Component({ selector: 'studio-lite-save-changes', template: '', standalone: false })
   class MockSaveChangesComponent {
     @Input() changed!: boolean;
   }
 
-  @Component({ selector: 'studio-lite-group-menu', template: '' })
+  @Component({ selector: 'studio-lite-group-menu', template: '', standalone: false })
   class MockGroupMenuComponent {
     @Input() selectedGroup!: string;
   }
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }

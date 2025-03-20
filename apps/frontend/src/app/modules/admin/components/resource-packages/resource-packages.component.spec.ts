@@ -18,7 +18,7 @@ describe('ResourcePackageComponent', () => {
   let component: ResourcePackagesComponent;
   let fixture: ComponentFixture<ResourcePackagesComponent>;
 
-  @Pipe({ name: 'tableDataSource' })
+  @Pipe({ name: 'tableDataSource', standalone: false })
   class MockTableDataSourcePipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
     transform(): MatTableDataSource<ResourcePackageDto> {
@@ -26,7 +26,7 @@ describe('ResourcePackageComponent', () => {
     }
   }
 
-  @Directive({ selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]' })
+  @Directive({ selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]', standalone: false })
   class MockIqbFilesUploadInputForDirective {
     @Input() iqbFilesUploadInputFor!: unknown;
     // eslint-disable-next-line class-methods-use-this

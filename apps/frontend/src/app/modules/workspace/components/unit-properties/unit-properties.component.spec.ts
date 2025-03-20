@@ -19,12 +19,12 @@ describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;
   let fixture: ComponentFixture<UnitPropertiesComponent>;
 
-  @Component({ selector: 'studio-lite-new-group-button', template: '' })
+  @Component({ selector: 'studio-lite-new-group-button', template: '', standalone: false })
   class MockNewGroupButtonComponent {
     @Input() disabled!: boolean;
   }
 
-  @Component({ selector: 'studio-lite-select-module', template: '' })
+  @Component({ selector: 'studio-lite-select-module', template: '', standalone: false })
   class MockSelectModuleComponent {
     @Input() modules!: { [key: string]: VeronaModuleClass };
     @Input() hidden!: boolean;

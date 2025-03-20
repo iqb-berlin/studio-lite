@@ -19,7 +19,7 @@ describe('WorkspacesComponent', () => {
   let component: WorkspacesComponent;
   let fixture: ComponentFixture<WorkspacesComponent>;
 
-  @Component({ selector: 'studio-lite-workspace-menu', template: '' })
+  @Component({ selector: 'studio-lite-workspace-menu', template: '', standalone: false })
   class MockWorkspaceMenuComponent {
     @Input() selectedWorkspaceId!: number;
     @Input() isWorkspaceGroupAdmin!: boolean;
@@ -27,7 +27,7 @@ describe('WorkspacesComponent', () => {
     @Input() checkedRows!: WorkspaceInListDto[];
   }
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }

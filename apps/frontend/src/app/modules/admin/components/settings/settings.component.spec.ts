@@ -15,13 +15,13 @@ describe('SettingsComponent', () => {
   let component: SettingsComponent;
   let fixture: ComponentFixture<SettingsComponent>;
 
-  @Component({ selector: 'studio-lite-app-config', template: '' })
+  @Component({ selector: 'studio-lite-app-config', template: '', standalone: false })
   class MockAppConfigComponent {}
 
-  @Component({ selector: 'studio-lite-app-logo', template: '' })
+  @Component({ selector: 'studio-lite-app-logo', template: '', standalone: false })
   class MockAppLogoComponent {}
 
-  @Component({ selector: 'studio-lite-unit-export-config', template: '' })
+  @Component({ selector: 'studio-lite-unit-export-config', template: '', standalone: false })
   class MockUnitExportComponent {}
 
   beforeEach(async () => {

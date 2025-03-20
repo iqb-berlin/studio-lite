@@ -11,12 +11,13 @@ import { Comment } from '../../models/comment.interface';
 import { CommentComponent } from './comment.component';
 import { ActiveComment } from '../../models/active-comment.interface';
 
-describe('CommentBadgeComponent', () => {
+describe('CommentComponent', () => {
   let component: CommentComponent;
   let fixture: ComponentFixture<CommentComponent>;
 
   @Pipe({
-    name: 'fullTimestamp'
+    name: 'fullTimestamp',
+    standalone: false
   })
   class MockMomentFullTimestampPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
@@ -25,7 +26,8 @@ describe('CommentBadgeComponent', () => {
     }
   }
   @Pipe({
-    name: 'isEditing'
+    name: 'isEditing',
+    standalone: false
   })
   class MockIsEditingPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-unused-vars
@@ -35,7 +37,8 @@ describe('CommentBadgeComponent', () => {
   }
 
   @Pipe({
-    name: 'isReplying'
+    name: 'isReplying',
+    standalone: false
   })
   class MockIsReplyingPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-unused-vars
@@ -45,7 +48,8 @@ describe('CommentBadgeComponent', () => {
   }
 
   @Pipe({
-    name: 'safeResourceHTML'
+    name: 'safeResourceHTML',
+    standalone: false
   })
   class MockSafeResourceHTMLPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
@@ -54,7 +58,7 @@ describe('CommentBadgeComponent', () => {
     }
   }
 
-  @Component({ selector: 'studio-lite-comment-badge', template: '' })
+  @Component({ selector: 'studio-lite-comment-badge', template: '', standalone: false })
   class MockCommentBadgeComponent {
     @Input() userName!: string;
     @Input() ownComment!: boolean;

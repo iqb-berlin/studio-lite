@@ -21,12 +21,12 @@ describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;
   let fixture: ComponentFixture<WorkspaceGroupsComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }
 
-  @Component({ selector: 'studio-lite-workspace-groups-menu', template: '' })
+  @Component({ selector: 'studio-lite-workspace-groups-menu', template: '', standalone: false })
   class MockWorkspaceGroupsMenuComponent {
     @Input() selectedWorkspaceGroupId!: number;
     @Input() selectedRows!: WorkspaceGroupInListDto[];
