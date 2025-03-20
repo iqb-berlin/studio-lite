@@ -1,7 +1,9 @@
 import {
   Component, EventEmitter, Input, OnInit, Output, HostBinding
 } from '@angular/core';
-import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpErrorResponse, HttpEvent } from '@angular/common/http';
+import {
+  HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpErrorResponse, HttpEvent
+} from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -11,11 +13,11 @@ import { BytesPipe } from '../../pipes/bytes.pipe';
 import { UploadStatus } from '../iqb-files-classes';
 
 @Component({
-    selector: 'iqb-files-upload',
-    templateUrl: './iqbFilesUpload.component.html',
-    exportAs: 'iqbFilesUpload',
-    styleUrls: ['../iqb-files.scss'],
-    imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
+  selector: 'iqb-files-upload',
+  templateUrl: './iqbFilesUpload.component.html',
+  exportAs: 'iqbFilesUpload',
+  styleUrls: ['../iqb-files.scss'],
+  imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
 })
 
 export class IqbFilesUploadComponent implements OnInit {

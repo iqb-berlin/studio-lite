@@ -10,10 +10,10 @@ import { UploadStatus } from '../iqb-files-classes';
  * A material design file upload queue component.
  */
 @Component({
-    selector: 'iqb-files-upload-queue',
-    templateUrl: 'iqbFilesUploadQueue.component.html',
-    exportAs: 'iqbFilesUploadQueue',
-    imports: [IqbFilesUploadComponent, MatButton]
+  selector: 'iqb-files-upload-queue',
+  templateUrl: 'iqbFilesUploadQueue.component.html',
+  exportAs: 'iqbFilesUploadQueue',
+  imports: [IqbFilesUploadComponent, MatButton]
 })
 export class IqbFilesUploadQueueComponent implements OnDestroy {
   @ViewChildren(IqbFilesUploadComponent) fileUploads: QueryList<IqbFilesUploadComponent> | undefined;
