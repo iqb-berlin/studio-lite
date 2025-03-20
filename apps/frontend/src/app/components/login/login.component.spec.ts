@@ -20,12 +20,12 @@ describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
 
-  @Component({ selector: 'studio-lite-warning', template: '' })
+  @Component({ selector: 'studio-lite-warning', template: '', standalone: false })
   class MockWarningComponent {
     @Input() warnMessage!: string;
   }
 
-  @Component({ selector: 'studio-lite-area-title', template: '' })
+  @Component({ selector: 'studio-lite-area-title', template: '', standalone: false  })
   class MockAreaTitleComponent {
     @Input() title!: string;
   }
