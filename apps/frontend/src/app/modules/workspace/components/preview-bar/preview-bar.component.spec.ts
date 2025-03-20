@@ -18,14 +18,14 @@ describe('PreviewBarComponent', () => {
   let component: PreviewBarComponent;
   let fixture: ComponentFixture<PreviewBarComponent>;
 
-  @Component({ selector: 'studio-lite-status-indication', template: '' })
+  @Component({ selector: 'studio-lite-status-indication', template: '', standalone: false })
   class MockStatusIndicationComponent {
     @Input() presentationProgress!: Progress;
     @Input() responseProgress!: Progress;
     @Input() hasFocus!: boolean;
   }
 
-  @Component({ selector: 'studio-lite-page-navigation', template: '' })
+  @Component({ selector: 'studio-lite-page-navigation', template: '', standalone: false })
   class MockPageNavigationComponent {
     @Input() pageList!: PageData[];
   }
