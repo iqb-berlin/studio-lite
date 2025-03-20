@@ -13,11 +13,11 @@ import { NamedRouterLinkPipe } from '../../pipes/named-router-link.pipe';
 import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
-    selector: 'studio-lite-unit-data-area',
-    templateUrl: './unit-data-area.component.html',
-    styleUrls: ['./unit-data-area.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
+  selector: 'studio-lite-unit-data-area',
+  templateUrl: './unit-data-area.component.html',
+  styleUrls: ['./unit-data-area.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
 })
 export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;

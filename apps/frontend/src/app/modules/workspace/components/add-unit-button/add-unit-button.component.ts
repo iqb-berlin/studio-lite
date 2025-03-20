@@ -24,10 +24,10 @@ import { NewUnitData } from '../../models/new-unit.interface';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-add-unit-button',
-    templateUrl: './add-unit-button.component.html',
-    styleUrls: ['./add-unit-button.component.scss'],
-    imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, TranslateModule]
+  selector: 'studio-lite-add-unit-button',
+  templateUrl: './add-unit-button.component.html',
+  styleUrls: ['./add-unit-button.component.scss'],
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, TranslateModule]
 })
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   private uploadSubscription: Subscription | null = null;

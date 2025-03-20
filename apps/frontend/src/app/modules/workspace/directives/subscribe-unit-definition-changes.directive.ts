@@ -3,8 +3,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../services/workspace.service';
 
 @Directive({
-    selector: '[studioLiteSubscribeUnitDefinitionChanges]',
-    standalone: false
+  selector: '[studioLiteSubscribeUnitDefinitionChanges]',
+  standalone: false
 })
 export abstract class SubscribeUnitDefinitionChangesDirective {
   abstract workspaceService: WorkspaceService;

@@ -14,10 +14,10 @@ import { StatesComponent } from '../states/states.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-settings',
-    templateUrl: './settings.component.html',
-    styleUrls: ['./settings.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, ProfilesComponent, StatesComponent, TranslateModule]
+  selector: 'studio-lite-settings',
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, ProfilesComponent, StatesComponent, TranslateModule]
 })
 export class WorkspaceSettingsComponent implements OnInit {
   settings!: WorkspaceGroupSettingsDto;

@@ -13,11 +13,11 @@ import { ResourcePackagesTableComponent } from '../resource-packages-table/resou
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-resource-packages',
-    templateUrl: './resource-packages.component.html',
-    styleUrls: ['./resource-packages.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [IqbFilesUploadInputForDirective, MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadQueueComponent, ResourcePackagesTableComponent, AsyncPipe, TranslateModule, TableDataSourcePipe]
+  selector: 'studio-lite-resource-packages',
+  templateUrl: './resource-packages.component.html',
+  styleUrls: ['./resource-packages.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [IqbFilesUploadInputForDirective, MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadQueueComponent, ResourcePackagesTableComponent, AsyncPipe, TranslateModule, TableDataSourcePipe]
 })
 export class ResourcePackagesComponent implements OnInit {
   resourcePackages!: Observable<ResourcePackageDto[]>;

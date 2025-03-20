@@ -7,10 +7,10 @@ import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
-    selector: 'studio-lite-review-config-edit',
-    templateUrl: './review-config-edit.component.html',
-    styleUrls: ['./review-config-edit.component.scss'],
-    imports: [MatCheckbox, FormsModule, TranslateModule]
+  selector: 'studio-lite-review-config-edit',
+  templateUrl: './review-config-edit.component.html',
+  styleUrls: ['./review-config-edit.component.scss'],
+  imports: [MatCheckbox, FormsModule, TranslateModule]
 })
 
 export class ReviewConfigEditComponent {

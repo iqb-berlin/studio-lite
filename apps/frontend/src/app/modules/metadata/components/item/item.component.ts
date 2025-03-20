@@ -19,11 +19,11 @@ interface ItemModel {
 }
 
 @Component({
-    selector: 'studio-lite-item',
-    templateUrl: './item.component.html',
-    styleUrls: ['./item.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule]
+  selector: 'studio-lite-item',
+  templateUrl: './item.component.html',
+  styleUrls: ['./item.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule]
 })
 export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }

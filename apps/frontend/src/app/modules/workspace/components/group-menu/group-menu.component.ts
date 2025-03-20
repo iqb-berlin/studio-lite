@@ -10,10 +10,10 @@ import { InputTextComponent } from '../../../shared/components/input-text/input-
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-group-menu',
-    templateUrl: './group-menu.component.html',
-    styleUrls: ['./group-menu.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-group-menu',
+  templateUrl: './group-menu.component.html',
+  styleUrls: ['./group-menu.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class GroupMenuComponent {
   @Input() selectedGroup!: string;

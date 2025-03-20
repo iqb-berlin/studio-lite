@@ -26,11 +26,11 @@ import { GroupMenuComponent } from '../group-menu/group-menu.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
 @Component({
-    selector: 'studio-lite-group-manage',
-    templateUrl: './group-manage.component.html',
-    styleUrls: ['./group-manage.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-group-manage',
+  templateUrl: './group-manage.component.html',
+  styleUrls: ['./group-manage.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GroupManageComponent implements OnInit {

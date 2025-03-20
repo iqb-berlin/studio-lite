@@ -21,11 +21,11 @@ import { IncludePipe } from '../../../shared/pipes/include.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
 @Component({
-    selector: 'studio-lite-select-unit-list',
-    templateUrl: './select-unit-list.component.html',
-    styleUrls: ['select-unit-list.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule]
+  selector: 'studio-lite-select-unit-list',
+  templateUrl: './select-unit-list.component.html',
+  styleUrls: ['select-unit-list.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule]
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();

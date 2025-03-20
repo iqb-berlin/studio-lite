@@ -11,11 +11,11 @@ import { IsActivePrintOption } from '../../pipes/isActivePrintOption.pipe';
 import { PrintOptions } from '../../../print/models/print-options.interface';
 
 @Component({
-    selector: 'studio-lite-print-options',
-    templateUrl: './print-options.component.html',
-    styleUrls: ['./print-options.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
+  selector: 'studio-lite-print-options',
+  templateUrl: './print-options.component.html',
+  styleUrls: ['./print-options.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
 })
 export class PrintOptionsComponent implements OnInit {
   printOptions: PrintOptions[] = [

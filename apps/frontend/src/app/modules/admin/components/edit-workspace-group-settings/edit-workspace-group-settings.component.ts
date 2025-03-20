@@ -13,10 +13,10 @@ import { ProfilesComponent } from '../../../shared/components/profiles/profiles.
 import { Profile } from '../../../shared/models/profile.type';
 
 @Component({
-    selector: 'studio-lite-edit-workspace-group',
-    templateUrl: './edit-workspace-group-settings.component.html',
-    styleUrls: ['./edit-workspace-group-settings.component.scss'],
-    imports: [MatDialogTitle, ProfilesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-edit-workspace-group',
+  templateUrl: './edit-workspace-group-settings.component.html',
+  styleUrls: ['./edit-workspace-group-settings.component.scss'],
+  imports: [MatDialogTitle, ProfilesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class EditWorkspaceGroupSettingsComponent implements OnInit {

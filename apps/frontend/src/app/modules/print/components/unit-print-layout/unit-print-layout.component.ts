@@ -20,11 +20,11 @@ import { PrintMetadataComponent } from '../print-metadata/print-metadata.compone
 import { UnitPropertiesComponent } from '../../../shared/components/unit-properties/unit-properties.component';
 
 @Component({
-    selector: 'studio-lite-unit-print-layout',
-    templateUrl: './unit-print-layout.component.html',
-    styleUrls: ['./unit-print-layout.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [UnitPropertiesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
+  selector: 'studio-lite-unit-print-layout',
+  templateUrl: './unit-print-layout.component.html',
+  styleUrls: ['./unit-print-layout.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [UnitPropertiesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
 })
 export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;

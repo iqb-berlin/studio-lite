@@ -5,10 +5,10 @@ import { MatFabAnchor } from '@angular/material/button';
 import { ReviewService } from '../../services/review.service';
 
 @Component({
-    selector: 'studio-lite-finish',
-    templateUrl: './finish.component.html',
-    styleUrls: ['./finish.component.scss'],
-    imports: [MatFabAnchor, MatTooltip, TranslateModule]
+  selector: 'studio-lite-finish',
+  templateUrl: './finish.component.html',
+  styleUrls: ['./finish.component.scss'],
+  imports: [MatFabAnchor, MatTooltip, TranslateModule]
 })
 export class FinishComponent implements OnInit {
   constructor(

@@ -14,11 +14,11 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
 
 @Component({
-    selector: 'studio-lite-states',
-    templateUrl: './states.component.html',
-    styleUrls: ['./states.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatProgressSpinner, MatButton, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
+  selector: 'studio-lite-states',
+  templateUrl: './states.component.html',
+  styleUrls: ['./states.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatProgressSpinner, MatButton, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
 })
 export class StatesComponent implements OnInit {
   states: State[] = [];

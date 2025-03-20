@@ -20,11 +20,11 @@ import { NewUnitData } from '../../models/new-unit.interface';
 import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
-    selector: 'studio-lite-new-unit',
-    templateUrl: './new-unit.component.html',
-    styleUrls: ['./new-unit.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-new-unit',
+  templateUrl: './new-unit.component.html',
+  styleUrls: ['./new-unit.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class NewUnitComponent {
   newUnitForm: UntypedFormGroup;

@@ -14,10 +14,10 @@ const bookletConfigDefault = {
 };
 
 @Component({
-    selector: 'studio-lite-booklet-config-show',
-    templateUrl: './booklet-config-show.component.html',
-    styleUrls: ['./booklet-config-show.component.scss'],
-    imports: [TranslateModule]
+  selector: 'studio-lite-booklet-config-show',
+  templateUrl: './booklet-config-show.component.html',
+  styleUrls: ['./booklet-config-show.component.scss'],
+  imports: [TranslateModule]
 })
 export class BookletConfigShowComponent {
   bookletConfig: BookletConfigDto = bookletConfigDefault;

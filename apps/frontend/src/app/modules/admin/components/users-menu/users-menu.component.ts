@@ -17,10 +17,10 @@ import { EditUserComponent } from '../edit-user/edit-user.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-users-menu',
-    templateUrl: './users-menu.component.html',
-    styleUrls: ['./users-menu.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-users-menu',
+  templateUrl: './users-menu.component.html',
+  styleUrls: ['./users-menu.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class UsersMenuComponent {
   @Input() selectedUser!: number;

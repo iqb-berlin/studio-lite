@@ -17,10 +17,10 @@ import { PageNavigationComponent } from '../../../shared/components/page-navigat
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 
 @Component({
-    selector: 'studio-lite-units',
-    templateUrl: './units.component.html',
-    styleUrls: ['./units.component.scss'],
-    imports: [UnitInfoComponent, PageNavigationComponent]
+  selector: 'studio-lite-units',
+  templateUrl: './units.component.html',
+  styleUrls: ['./units.component.scss'],
+  imports: [UnitInfoComponent, PageNavigationComponent]
 })
 export class UnitsComponent implements OnInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

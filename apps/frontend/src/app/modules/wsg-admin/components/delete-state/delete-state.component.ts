@@ -14,10 +14,10 @@ export interface DeleteStateData {
 }
 
 @Component({
-    selector: 'studio-lite-delete-state',
-    templateUrl: './delete-state.component.html',
-    styleUrls: ['./delete-state.component.scss'],
-    imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-delete-state',
+  templateUrl: './delete-state.component.html',
+  styleUrls: ['./delete-state.component.scss'],
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class DeleteStateComponent {
   typedData: DeleteStateData;

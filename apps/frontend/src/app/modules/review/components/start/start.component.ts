@@ -8,11 +8,11 @@ import { AppService } from '../../../../services/app.service';
 import { BookletConfigShowComponent } from '../booklet-config-show/booklet-config-show.component';
 
 @Component({
-    selector: 'studio-lite-start',
-    templateUrl: './start.component.html',
-    styleUrls: ['./start.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, BookletConfigShowComponent, MatFabAnchor, MatTooltip, TranslateModule]
+  selector: 'studio-lite-start',
+  templateUrl: './start.component.html',
+  styleUrls: ['./start.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, BookletConfigShowComponent, MatFabAnchor, MatTooltip, TranslateModule]
 })
 
 export class StartComponent implements OnInit {

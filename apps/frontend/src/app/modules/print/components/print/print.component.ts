@@ -7,10 +7,10 @@ import { PrintOption } from '../../models/print-options.interface';
 import { UnitPrintLayoutComponent } from '../unit-print-layout/unit-print-layout.component';
 
 @Component({
-    selector: 'studio-lite-print',
-    templateUrl: './print.component.html',
-    styleUrls: ['./print.component.scss'],
-    imports: [UnitPrintLayoutComponent]
+  selector: 'studio-lite-print',
+  templateUrl: './print.component.html',
+  styleUrls: ['./print.component.scss'],
+  imports: [UnitPrintLayoutComponent]
 })
 export class PrintComponent implements OnInit {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;

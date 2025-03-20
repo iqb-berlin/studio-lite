@@ -20,11 +20,11 @@ import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
 
 @Component({
-    selector: 'studio-lite-items',
-    templateUrl: './items.component.html',
-    styleUrls: ['./items.component.scss'],
-    imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon,
-        MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
+  selector: 'studio-lite-items',
+  templateUrl: './items.component.html',
+  styleUrls: ['./items.component.scss'],
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon,
+    MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
 })
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {

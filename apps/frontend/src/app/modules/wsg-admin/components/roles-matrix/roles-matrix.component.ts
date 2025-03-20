@@ -24,12 +24,12 @@ interface RoleAccess {
 }
 
 @Component({
-    selector: 'studio-lite-roles-matrix',
-    imports: [CommonModule, MatIcon, TranslateModule, MatTooltip, MatButton, MatDialogActions, MatDialogClose,
-        MatDialogTitle, MatDialogContent, MatTable, MatTableModule, MatHeaderCellDef, MatCellDef, MatHeaderRowDef,
-        MatRowDef],
-    templateUrl: './roles-matrix.component.html',
-    styleUrl: './roles-matrix.component.scss'
+  selector: 'studio-lite-roles-matrix',
+  imports: [CommonModule, MatIcon, TranslateModule, MatTooltip, MatButton, MatDialogActions, MatDialogClose,
+    MatDialogTitle, MatDialogContent, MatTable, MatTableModule, MatHeaderCellDef, MatCellDef, MatHeaderRowDef,
+    MatRowDef],
+  templateUrl: './roles-matrix.component.html',
+  styleUrl: './roles-matrix.component.scss'
 })
 
 export class RolesMatrixComponent {

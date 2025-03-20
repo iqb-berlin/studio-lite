@@ -20,7 +20,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient
+} from '@angular/common/http';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';

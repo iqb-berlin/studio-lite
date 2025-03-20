@@ -8,10 +8,10 @@ import { ReviewService } from '../../services/review.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-add-comment-button',
-    templateUrl: './add-comment-button.component.html',
-    styleUrls: ['./add-comment-button.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-add-comment-button',
+  templateUrl: './add-comment-button.component.html',
+  styleUrls: ['./add-comment-button.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class AddCommentButtonComponent {
   @Input() showOthersComments!: boolean;

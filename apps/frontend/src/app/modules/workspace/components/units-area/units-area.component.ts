@@ -14,11 +14,11 @@ import { UpdateUnitsButtonComponent } from '../update-units-button/update-units-
 import { UnitSaveButtonComponent } from '../unit-save-button/unit-save-button.component';
 
 @Component({
-    selector: 'studio-lite-units-area',
-    templateUrl: './units-area.component.html',
-    styleUrls: ['./units-area.component.scss'],
-    imports: [UnitSaveButtonComponent, UpdateUnitsButtonComponent, UnitSelectionComponent, AddUnitButtonComponent,
-        DeleteUnitButtonComponent, EditUnitButtonComponent, AsyncPipe, TranslateModule]
+  selector: 'studio-lite-units-area',
+  templateUrl: './units-area.component.html',
+  styleUrls: ['./units-area.component.scss'],
+  imports: [UnitSaveButtonComponent, UpdateUnitsButtonComponent, UnitSelectionComponent, AddUnitButtonComponent,
+    DeleteUnitButtonComponent, EditUnitButtonComponent, AsyncPipe, TranslateModule]
 })
 export class UnitsAreaComponent implements OnInit, OnDestroy {
   @Input() selectedRouterLink!: number;

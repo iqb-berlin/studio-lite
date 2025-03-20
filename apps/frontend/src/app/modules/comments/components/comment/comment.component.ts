@@ -19,11 +19,11 @@ import { CommentBadgeComponent } from '../comment-badge/comment-badge.component'
 import { FullTimestampPipe } from '../../pipes/full-timestamp.pipe';
 
 @Component({
-    selector: 'studio-lite-comment',
-    templateUrl: './comment.component.html',
-    styleUrls: ['./comment.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe]
+  selector: 'studio-lite-comment',
+  templateUrl: './comment.component.html',
+  styleUrls: ['./comment.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

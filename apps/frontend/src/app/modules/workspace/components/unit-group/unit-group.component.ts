@@ -8,10 +8,10 @@ import { MatIconButton } from '@angular/material/button';
 import { MatBadge } from '@angular/material/badge';
 
 @Component({
-    selector: 'studio-lite-unit-group',
-    templateUrl: './unit-group.component.html',
-    styleUrls: ['./unit-group.component.scss'],
-    imports: [MatBadge, MatIconButton, MatIcon, TranslateModule]
+  selector: 'studio-lite-unit-group',
+  templateUrl: './unit-group.component.html',
+  styleUrls: ['./unit-group.component.scss'],
+  imports: [MatBadge, MatIconButton, MatIcon, TranslateModule]
 })
 export class UnitGroupComponent implements OnInit {
   @Input() title!: string;

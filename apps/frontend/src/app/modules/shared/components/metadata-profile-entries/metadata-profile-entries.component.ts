@@ -5,13 +5,13 @@ import { IsArrayPipe } from '../../pipes/isArray.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
 
 @Component({
-    selector: 'studio-lite-metadata-profile-entries',
-    templateUrl: './metadata-profile-entries.component.html',
-    styleUrls: ['./metadata-profile-entries.component.scss'],
-    imports: [
-        IsArrayPipe,
-        CastPipe
-    ]
+  selector: 'studio-lite-metadata-profile-entries',
+  templateUrl: './metadata-profile-entries.component.html',
+  styleUrls: ['./metadata-profile-entries.component.scss'],
+  imports: [
+    IsArrayPipe,
+    CastPipe
+  ]
 })
 export class MetadataProfileEntriesComponent {
   @Input() profiles!: MetadataValues[];

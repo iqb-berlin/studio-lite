@@ -12,10 +12,10 @@ import { BackendService } from '../../services/backend.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-delete-review-button',
-    templateUrl: './delete-review-button.component.html',
-    styleUrls: ['./delete-review-button.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-delete-review-button',
+  templateUrl: './delete-review-button.component.html',
+  styleUrls: ['./delete-review-button.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class DeleteReviewButtonComponent {
   @Input() selectedReviewId!: number;

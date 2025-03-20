@@ -16,11 +16,11 @@ import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscr
 import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({
-    selector: 'studio-lite-unit-schemer',
-    templateUrl: './unit-schemer.component.html',
-    styleUrls: ['./unit-schemer.component.scss'],
-    host: { class: 'unit-schemer' },
-    imports: []
+  selector: 'studio-lite-unit-schemer',
+  templateUrl: './unit-schemer.component.html',
+  styleUrls: ['./unit-schemer.component.scss'],
+  host: { class: 'unit-schemer' },
+  imports: []
 })
 export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

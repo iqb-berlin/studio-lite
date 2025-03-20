@@ -7,16 +7,16 @@ import { AppConfigComponent } from '../app-config/app-config.component';
 import { MissingsProfilesConfigComponent } from '../missings-profiles-config/missings-profiles-config.component';
 
 @Component({
-    selector: 'studio-lite-settings',
-    templateUrl: './settings.component.html',
-    styleUrls: ['./settings.component.scss'],
-    imports: [
-        MatLabel,
-        AppConfigComponent,
-        AppLogoComponent,
-        UnitExportConfigComponent,
-        TranslateModule,
-        MissingsProfilesConfigComponent
-    ]
+  selector: 'studio-lite-settings',
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss'],
+  imports: [
+    MatLabel,
+    AppConfigComponent,
+    AppLogoComponent,
+    UnitExportConfigComponent,
+    TranslateModule,
+    MissingsProfilesConfigComponent
+  ]
 })
 export class SettingsComponent {}

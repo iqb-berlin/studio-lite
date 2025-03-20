@@ -10,10 +10,10 @@ import {
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
 
 @Component({
-    selector: 'studio-lite-print-review-button',
-    templateUrl: './print-review-button.component.html',
-    styleUrls: ['./print-review-button.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-print-review-button',
+  templateUrl: './print-review-button.component.html',
+  styleUrls: ['./print-review-button.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class PrintReviewButtonComponent {
   @Input() workspaceId!: number;

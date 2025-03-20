@@ -11,10 +11,10 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
-    selector: 'studio-lite-booklet-config-edit',
-    templateUrl: './booklet-config-edit.component.html',
-    styleUrls: ['./booklet-config-edit.component.scss'],
-    imports: [MatSlideToggle, MatFormField, MatLabel, MatSelect, FormsModule, MatOption, TranslateModule]
+  selector: 'studio-lite-booklet-config-edit',
+  templateUrl: './booklet-config-edit.component.html',
+  styleUrls: ['./booklet-config-edit.component.scss'],
+  imports: [MatSlideToggle, MatFormField, MatLabel, MatSelect, FormsModule, MatOption, TranslateModule]
 })
 export class BookletConfigEditComponent {
   pagingModeOptions = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];

@@ -6,9 +6,9 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { CommentsComponent } from '../../../comments/components/comments/comments.component';
 
 @Component({
-    templateUrl: './unit-comments.component.html',
-    styleUrls: ['./unit-comments.component.scss'],
-    imports: [CommentsComponent]
+  templateUrl: './unit-comments.component.html',
+  styleUrls: ['./unit-comments.component.scss'],
+  imports: [CommentsComponent]
 })
 export class UnitCommentsComponent implements OnDestroy {
   userName: string = '';

@@ -8,10 +8,10 @@ import {
 import { AppService } from '../../services/app.service';
 
 @Component({
-    selector: 'studio-lite-about',
-    templateUrl: './about.component.html',
-    styleUrls: ['about.component.scss'],
-    imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule]
+  selector: 'studio-lite-about',
+  templateUrl: './about.component.html',
+  styleUrls: ['about.component.scss'],
+  imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule]
 })
 
 export class AboutComponent implements OnInit {

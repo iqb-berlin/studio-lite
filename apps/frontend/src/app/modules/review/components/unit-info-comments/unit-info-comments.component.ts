@@ -10,10 +10,10 @@ import { Comment } from '../../../comments/models/comment.interface';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
 
 @Component({
-    selector: 'studio-lite-unit-info-comments',
-    templateUrl: './unit-info-comments.component.html',
-    styleUrls: ['./unit-info-comments.component.scss'],
-    imports: [UnitInfoLoaderComponent, MatIcon, DatePipe, TranslateModule]
+  selector: 'studio-lite-unit-info-comments',
+  templateUrl: './unit-info-comments.component.html',
+  styleUrls: ['./unit-info-comments.component.scss'],
+  imports: [UnitInfoLoaderComponent, MatIcon, DatePipe, TranslateModule]
 })
 export class UnitInfoCommentsComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;

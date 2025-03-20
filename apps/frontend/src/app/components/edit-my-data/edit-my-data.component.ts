@@ -13,11 +13,11 @@ import { MatFormField } from '@angular/material/form-field';
 import { MyData } from '../../models/my-data.interface';
 
 @Component({
-    selector: 'studio-lite-edit-my-data',
-    templateUrl: './edit-my-data.component.html',
-    styleUrls: ['./edit-my-data.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-edit-my-data',
+  templateUrl: './edit-my-data.component.html',
+  styleUrls: ['./edit-my-data.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class EditMyDataComponent {

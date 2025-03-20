@@ -27,11 +27,11 @@ import { ReviewMenuComponent } from '../review-menu/review-menu.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
 @Component({
-    selector: 'studio-lite-reviews',
-    templateUrl: './reviews.component.html',
-    styleUrls: ['./reviews.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-reviews',
+  templateUrl: './reviews.component.html',
+  styleUrls: ['./reviews.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {

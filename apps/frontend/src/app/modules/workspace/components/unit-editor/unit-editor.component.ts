@@ -14,11 +14,11 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({
-    selector: 'studio-lite-unit-editor',
-    templateUrl: './unit-editor.component.html',
-    styleUrls: ['./unit-editor.component.scss'],
-    host: { class: 'unit-editor' },
-    imports: []
+  selector: 'studio-lite-unit-editor',
+  templateUrl: './unit-editor.component.html',
+  styleUrls: ['./unit-editor.component.scss'],
+  host: { class: 'unit-editor' },
+  imports: []
 })
 
 export class UnitEditorComponent implements AfterViewInit, OnDestroy {

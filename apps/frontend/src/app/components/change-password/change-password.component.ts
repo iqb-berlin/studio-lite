@@ -11,11 +11,11 @@ import {
 } from '@angular/material/dialog';
 
 @Component({
-    selector: 'studio-lite-change-password',
-    templateUrl: './change-password.component.html',
-    styleUrls: ['./change-password.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [FormsModule, ReactiveFormsModule, MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-change-password',
+  templateUrl: './change-password.component.html',
+  styleUrls: ['./change-password.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [FormsModule, ReactiveFormsModule, MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ChangePasswordComponent {
   changePasswordForm: UntypedFormGroup;

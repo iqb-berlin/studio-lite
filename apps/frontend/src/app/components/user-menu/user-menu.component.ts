@@ -10,11 +10,11 @@ import { AccountActionComponent } from '../account-action/account-action.compone
 import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-user-menu',
-    templateUrl: './user-menu.component.html',
-    styleUrls: ['./user-menu.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent, ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule]
+  selector: 'studio-lite-user-menu',
+  templateUrl: './user-menu.component.html',
+  styleUrls: ['./user-menu.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent, ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule]
 })
 export class UserMenuComponent {
 }

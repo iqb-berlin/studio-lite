@@ -15,10 +15,10 @@ interface FormlyDurationProps extends FormlyFieldProps {
 }
 
 @Component({
-    selector: 'studio-lite-formly-duration',
-    templateUrl: './formly-duration.component.html',
-    styleUrls: ['./formly-duration.component.scss'],
-    imports: [MatFormField, MatLabel, FormsModule, MatInput]
+  selector: 'studio-lite-formly-duration',
+  templateUrl: './formly-duration.component.html',
+  styleUrls: ['./formly-duration.component.scss'],
+  imports: [MatFormField, MatLabel, FormsModule, MatInput]
 })
 export class FormlyDurationComponent
   extends FieldType<FieldTypeConfig<FormlyDurationProps>> implements OnInit, OnDestroy {

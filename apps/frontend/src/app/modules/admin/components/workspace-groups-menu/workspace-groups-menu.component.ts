@@ -17,10 +17,10 @@ import { WorkspaceService } from '../../../workspace/services/workspace.service'
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-workspace-groups-menu',
-    templateUrl: './workspace-groups-menu.component.html',
-    styleUrls: ['./workspace-groups-menu.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-workspace-groups-menu',
+  templateUrl: './workspace-groups-menu.component.html',
+  styleUrls: ['./workspace-groups-menu.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceGroupsMenuComponent {
   @Input() selectedWorkspaceGroupId!: number;

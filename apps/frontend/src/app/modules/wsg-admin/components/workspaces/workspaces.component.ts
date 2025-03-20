@@ -36,13 +36,13 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 
 @Component({
-    selector: 'studio-lite-workspaces',
-    templateUrl: './workspaces.component.html',
-    styleUrls: ['./workspaces.component.scss'],
-    imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
-        MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-        MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
-        IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe]
+  selector: 'studio-lite-workspaces',
+  templateUrl: './workspaces.component.html',
+  styleUrls: ['./workspaces.component.scss'],
+  imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
+    MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
+    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe]
 })
 export class WorkspacesComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);

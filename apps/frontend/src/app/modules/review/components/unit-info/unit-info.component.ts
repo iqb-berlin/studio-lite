@@ -18,11 +18,11 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 const PanelWidthOffset = 40;
 
 @Component({
-    selector: 'studio-lite-unit-info',
-    templateUrl: './unit-info.component.html',
-    styleUrls: ['./unit-info.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
+  selector: 'studio-lite-unit-info',
+  templateUrl: './unit-info.component.html',
+  styleUrls: ['./unit-info.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;

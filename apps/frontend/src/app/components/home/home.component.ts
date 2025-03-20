@@ -13,10 +13,10 @@ import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-worksp
 import { LoginComponent } from '../login/login.component';
 
 @Component({
-    selector: 'studio-lite-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    imports: [LoginComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent]
+  selector: 'studio-lite-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
+  imports: [LoginComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent]
 })
 export class HomeComponent implements OnInit {
   constructor(

@@ -20,11 +20,11 @@ import { BackendService as ReadBackendService } from '../../../../services/backe
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 
 @Component({
-    selector: 'studio-lite-app-config',
-    templateUrl: './app-config.component.html',
-    styleUrls: ['./app-config.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
+  selector: 'studio-lite-app-config',
+  templateUrl: './app-config.component.html',
+  styleUrls: ['./app-config.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {

@@ -8,9 +8,9 @@ import { AuthService } from './service/auth.service';
   imports: [KeycloakAngularModule],
   providers: [
     provideAppInitializer(() => {
-        const initializerFn = (initializer)(inject(KeycloakService));
-        return initializerFn();
-      }),
+      const initializerFn = (initializer)(inject(KeycloakService));
+      return initializerFn();
+    }),
     AuthService
   ]
 })

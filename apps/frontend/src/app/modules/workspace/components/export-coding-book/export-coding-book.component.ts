@@ -19,18 +19,18 @@ import { AppService } from '../../../../services/app.service';
 const datePipe = new DatePipe('de-DE');
 
 @Component({
-    templateUrl: './export-coding-book.component.html',
-    imports: [
-        TranslateModule,
-        MatDialogModule,
-        MatCheckboxModule,
-        FormsModule,
-        MatRadioModule,
-        MatSelectModule,
-        MatButton,
-        SelectUnitListComponent
-    ],
-    styleUrls: ['export-coding-book.component.scss']
+  templateUrl: './export-coding-book.component.html',
+  imports: [
+    TranslateModule,
+    MatDialogModule,
+    MatCheckboxModule,
+    FormsModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatButton,
+    SelectUnitListComponent
+  ],
+  styleUrls: ['export-coding-book.component.scss']
 })
 
 export class ExportCodingBookComponent implements OnInit {

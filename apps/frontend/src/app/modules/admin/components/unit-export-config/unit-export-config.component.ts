@@ -11,10 +11,10 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
-    selector: 'studio-lite-unit-export-config',
-    templateUrl: './unit-export-config.component.html',
-    styleUrls: ['./unit-export-config.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
+  selector: 'studio-lite-unit-export-config',
+  templateUrl: './unit-export-config.component.html',
+  styleUrls: ['./unit-export-config.component.scss'],
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
 })
 
 export class UnitExportConfigComponent implements OnInit, OnDestroy {

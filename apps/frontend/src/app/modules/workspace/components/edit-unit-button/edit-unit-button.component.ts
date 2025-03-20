@@ -41,11 +41,11 @@ import { RequestMessageDirective } from '../../directives/request-message.direct
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 
 @Component({
-    selector: 'studio-lite-edit-unit-button',
-    templateUrl: './edit-unit-button.component.html',
-    styleUrls: ['./edit-unit-button.component.scss'],
-    imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider,
-        TranslateModule]
+  selector: 'studio-lite-edit-unit-button',
+  templateUrl: './edit-unit-button.component.html',
+  styleUrls: ['./edit-unit-button.component.scss'],
+  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider,
+    TranslateModule]
 })
 export class EditUnitButtonComponent extends RequestMessageDirective implements OnInit {
   constructor(

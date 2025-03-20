@@ -42,11 +42,11 @@ import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace
 import { Profile } from '../../../shared/models/profile.type';
 
 @Component({
-    selector: 'studio-lite-workspace-groups',
-    templateUrl: './workspace-groups.component.html',
-    styleUrls: ['./workspace-groups.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
+  selector: 'studio-lite-workspace-groups',
+  templateUrl: './workspace-groups.component.html',
+  styleUrls: ['./workspace-groups.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, MatTooltip, WrappedIconComponent, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();

@@ -13,10 +13,10 @@ interface CodingSchemeDto {
 }
 
 @Component({
-    selector: 'studio-lite-unit-info-coding',
-    templateUrl: './unit-info-coding.component.html',
-    styleUrls: ['./unit-info-coding.component.scss'],
-    imports: [UnitInfoLoaderComponent, TranslateModule]
+  selector: 'studio-lite-unit-info-coding',
+  templateUrl: './unit-info-coding.component.html',
+  styleUrls: ['./unit-info-coding.component.scss'],
+  imports: [UnitInfoLoaderComponent, TranslateModule]
 })
 export class UnitInfoCodingComponent {
   @ViewChild(UnitInfoLoaderComponent) loader?: UnitInfoLoaderComponent;

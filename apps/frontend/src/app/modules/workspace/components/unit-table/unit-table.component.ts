@@ -16,12 +16,12 @@ import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
 import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
 
 @Component({
-    selector: 'studio-lite-unit-table',
-    templateUrl: './unit-table.component.html',
-    styleUrls: ['./unit-table.component.scss'],
-    imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
-        MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-        TranslateModule, HasNewCommentsPipe, StatePipe, UnitDropBoxTooltipPipe]
+  selector: 'studio-lite-unit-table',
+  templateUrl: './unit-table.component.html',
+  styleUrls: ['./unit-table.component.scss'],
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
+    MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    TranslateModule, HasNewCommentsPipe, StatePipe, UnitDropBoxTooltipPipe]
 })
 export class UnitTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatSort) sortTable!: MatSort;

@@ -49,10 +49,10 @@ type ModelValueEntry = [string, ModelValue];
 type ModelValue = string | number | boolean | Record<string, string> | VocabularyEntry[];
 
 @Component({
-    selector: 'studio-lite-profile-form',
-    templateUrl: './profile-form.component.html',
-    styleUrls: ['./profile-form.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, FormlyModule]
+  selector: 'studio-lite-profile-form',
+  templateUrl: './profile-form.component.html',
+  styleUrls: ['./profile-form.component.scss'],
+  imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
   constructor(

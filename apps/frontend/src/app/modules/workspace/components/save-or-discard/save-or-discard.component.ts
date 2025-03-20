@@ -9,10 +9,10 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { ConfirmDialogData } from '../../models/confirm-dialog.interface';
 
 @Component({
-    selector: 'studio-lite-save-or-discard',
-    templateUrl: './save-or-discard.component.html',
-    styleUrls: ['./save-or-discard.component.scss'],
-    imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  selector: 'studio-lite-save-or-discard',
+  templateUrl: './save-or-discard.component.html',
+  styleUrls: ['./save-or-discard.component.scss'],
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SaveOrDiscardComponent {
   constructor(public workspaceService: WorkspaceService,

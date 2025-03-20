@@ -7,10 +7,10 @@ import { Comment } from '../../../comments/models/comment.interface';
 import { BackendService } from '../../../comments/services/backend.service';
 
 @Component({
-    selector: 'studio-lite-unit-print-comments',
-    templateUrl: './unit-print-comments.component.html',
-    styleUrls: ['./unit-print-comments.component.scss'],
-    imports: [MatIcon, AsyncPipe, DatePipe, TranslateModule]
+  selector: 'studio-lite-unit-print-comments',
+  templateUrl: './unit-print-comments.component.html',
+  styleUrls: ['./unit-print-comments.component.scss'],
+  imports: [MatIcon, AsyncPipe, DatePipe, TranslateModule]
 })
 export class UnitPrintCommentsComponent implements OnInit {
   @Input() unitId!: number;

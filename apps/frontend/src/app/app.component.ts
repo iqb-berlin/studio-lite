@@ -20,11 +20,11 @@ import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
 })
 
 export class AppComponent implements OnInit {

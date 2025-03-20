@@ -21,11 +21,11 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
 
 @Component({
-    selector: 'studio-lite-comment-editor',
-    templateUrl: './comment-editor.component.html',
-    styleUrls: ['./comment-editor.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, NgxTiptapModule, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
+  selector: 'studio-lite-comment-editor',
+  templateUrl: './comment-editor.component.html',
+  styleUrls: ['./comment-editor.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, NgxTiptapModule, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
 })
 export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;

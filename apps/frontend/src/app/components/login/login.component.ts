@@ -25,11 +25,11 @@ import { WrappedIconComponent } from '../../modules/shared/components/wrapped-ic
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
 @Component({
-    selector: 'studio-lite-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    // eslint-disable-next-line max-len
-    imports: [AreaTitleComponent, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
+  selector: 'studio-lite-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  // eslint-disable-next-line max-len
+  imports: [AreaTitleComponent, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: UntypedFormGroup;

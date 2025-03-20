@@ -8,10 +8,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { RolesMatrixComponent } from '../roles-matrix/roles-matrix.component';
 
 @Component({
-    selector: 'studio-lite-roles-header',
-    imports: [CommonModule, MatIcon, TranslateModule, MatTooltip, MatIconButton],
-    templateUrl: './roles-header.component.html',
-    styleUrl: './roles-header.component.scss'
+  selector: 'studio-lite-roles-header',
+  imports: [CommonModule, MatIcon, TranslateModule, MatTooltip, MatIconButton],
+  templateUrl: './roles-header.component.html',
+  styleUrl: './roles-header.component.scss'
 })
 export class RolesHeaderComponent {
   constructor(private roleMatrixDialog: MatDialog) {}

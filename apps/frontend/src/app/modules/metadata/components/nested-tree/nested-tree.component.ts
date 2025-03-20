@@ -29,12 +29,12 @@ import { IsNodeSelectedPipe } from '../../pipes/is-node-selected.pipe';
 import { VocabNodeChangeService } from '../../services/vocab-node-change.service';
 
 @Component({
-    selector: 'studio-lite-nested-tree',
-    templateUrl: './nested-tree.component.html',
-    styleUrls: ['./nested-tree.component.scss'],
-    providers: [VocabNodeChangeService],
-    // eslint-disable-next-line max-len
-    imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule, AreAllDescendantsSelectedPipe, AreSomeDescendantsSelectedPipe, IsTreeControlExpandedPipe, IsNodeSelectedPipe]
+  selector: 'studio-lite-nested-tree',
+  templateUrl: './nested-tree.component.html',
+  styleUrls: ['./nested-tree.component.scss'],
+  providers: [VocabNodeChangeService],
+  // eslint-disable-next-line max-len
+  imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule, AreAllDescendantsSelectedPipe, AreSomeDescendantsSelectedPipe, IsTreeControlExpandedPipe, IsNodeSelectedPipe]
 })
 
 export class NestedTreeComponent implements OnInit {

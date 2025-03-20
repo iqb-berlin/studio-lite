@@ -11,10 +11,10 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
 
 @Component({
-    selector: 'studio-lite-export-unit-file-config',
-    templateUrl: './export-unit-file-config.component.html',
-    styleUrls: ['./export-unit-file-config.component.scss'],
-    imports: [MatCheckbox, FormsModule, TranslateModule, MatCard]
+  selector: 'studio-lite-export-unit-file-config',
+  templateUrl: './export-unit-file-config.component.html',
+  styleUrls: ['./export-unit-file-config.component.scss'],
+  imports: [MatCheckbox, FormsModule, TranslateModule, MatCard]
 })
 export class ExportUnitFileConfigComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];

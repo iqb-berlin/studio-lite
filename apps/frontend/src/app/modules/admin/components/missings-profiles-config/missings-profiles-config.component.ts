@@ -11,10 +11,10 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
-    selector: 'studio-lite-missings-profiles-config',
-    templateUrl: './missings-profiles-config.component.html',
-    styleUrls: ['./missings-profiles-config.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
+  selector: 'studio-lite-missings-profiles-config',
+  templateUrl: './missings-profiles-config.component.html',
+  styleUrls: ['./missings-profiles-config.component.scss'],
+  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
 })
 
 export class MissingsProfilesConfigComponent implements OnInit, OnDestroy {

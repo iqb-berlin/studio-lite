@@ -14,10 +14,10 @@ import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
-    selector: 'studio-lite-delete-unit-button',
-    templateUrl: './delete-unit-button.component.html',
-    styleUrls: ['./delete-unit-button.component.scss'],
-    imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
+  selector: 'studio-lite-delete-unit-button',
+  templateUrl: './delete-unit-button.component.html',
+  styleUrls: ['./delete-unit-button.component.scss'],
+  imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class DeleteUnitButtonComponent extends SelectUnitDirective {
   @Input() selectedUnitId!: number;
