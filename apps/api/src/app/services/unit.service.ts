@@ -26,6 +26,7 @@ import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
+import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -214,7 +215,7 @@ export class UnitService {
       where: { id: workspaceId }
     });
     const unit = await this.unitsRepository.findOne({
-      where: { id: unitId },
+      where: { id: unitId, workspaceId: workspaceId },
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
         'player', 'description', 'transcript', 'reference',
@@ -222,6 +223,7 @@ export class UnitService {
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
+    if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
     return this.getModifiedMetadataForUnit(unit, workspace);
   }
 
