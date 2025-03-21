@@ -1194,13 +1194,13 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('500 negative test: should not get the properties of an unit without unit id ', () => {
+      it('404 negative test: should not get the properties of an unit without unit id ', () => {
         cy.getUnitPropertiesAPI(
           Cypress.env(ws1.id),
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
-            expect(resp.status).to.equal(500);
+            expect(resp.status).to.equal(404);
           });
       });
       it('401 negative test: should not get the properties of an unit without credentials. ', () => {

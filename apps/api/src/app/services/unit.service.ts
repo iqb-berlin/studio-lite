@@ -211,9 +211,6 @@ export class UnitService {
 
   async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
-    const workspace = await this.workspaceRepository.findOne({
-      where: { id: workspaceId }
-    });
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
       select: [
@@ -224,6 +221,9 @@ export class UnitService {
       ]
     });
     if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId }
+    });
     return this.getModifiedMetadataForUnit(unit, workspace);
   }
 

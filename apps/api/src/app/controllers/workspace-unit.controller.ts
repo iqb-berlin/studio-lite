@@ -15,7 +15,7 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CodeBookContentSetting,
@@ -187,6 +187,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiNotFoundResponse()
   @ApiTags('workspace unit')
   async findOnesProperties(
     @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
