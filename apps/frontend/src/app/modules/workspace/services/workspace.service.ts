@@ -5,7 +5,7 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import {
-  UnitInListDto, UnitMetadataDto, WorkspaceSettingsDto
+  UnitInListDto, UnitPropertiesDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { CodingScheme } from '@iqb/responses';
 import { HttpParams } from '@angular/common/http';
@@ -147,7 +147,7 @@ export class WorkspaceService {
     }
   }
 
-  async loadUnitMetadata(): Promise<UnitMetadataStore | undefined> {
+  async loadUnitProperties(): Promise<UnitMetadataStore | undefined> {
     if (this.unitMetadataStore) return this.unitMetadataStore;
     const selectedUnitId = this.selectedUnit$.getValue();
     return lastValueFrom(this.backendService.getUnitProperties(this.selectedWorkspaceId, selectedUnitId)
@@ -176,9 +176,10 @@ export class WorkspaceService {
               this.lastChangedScheme = new Date(unitData.lastChangedScheme);
               this.lastChangedSchemeUser = unitData.lastChangedSchemeUser;
             }
+            console.log('unitDatametadata', unitData.metadata);
             this.setUnitMetadataStore(new UnitMetadataStore(unitData));
           } else {
-            this.setUnitMetadataStore(new UnitMetadataStore(<UnitMetadataDto>{ id: selectedUnitId }));
+            this.setUnitMetadataStore(new UnitMetadataStore(<UnitPropertiesDto>{ id: selectedUnitId }));
           }
           return this.unitMetadataStore;
         })
@@ -190,7 +191,7 @@ export class WorkspaceService {
     let saveOk = true;
     this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
-      saveOk = await lastValueFrom(this.backendService.setUnitMetadata(
+      saveOk = await lastValueFrom(this.backendService.setUnitProperties(
         this.selectedWorkspaceId, this.unitMetadataStore.getChangedData()
       ));
       if (saveOk) {

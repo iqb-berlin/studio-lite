@@ -4,7 +4,7 @@ import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { TopConcept, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { TopConcept, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 import {
@@ -95,7 +95,7 @@ export class MetadataService {
     columns.forEach(column => { queryParams = queryParams.append('column', column); });
     units.forEach(unit => { queryParams = queryParams.append('id', unit); });
     return this.http.get(
-      `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/metadata`, {
+      `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`, {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         },
@@ -104,9 +104,9 @@ export class MetadataService {
       });
   }
 
-  createMetadataReport(): Observable<boolean | UnitMetadataDto[]> {
+  createMetadataReport(): Observable<boolean | UnitPropertiesDto[]> {
     return this.http
-      .get<UnitMetadataDto[]>(`${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/metadata`)
+      .get<UnitPropertiesDto[]>(`${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`)
       .pipe(
         catchError(() => of(false)),
         map(report => report)

@@ -1172,9 +1172,9 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('40. GET /api/workspaces/{workspace_id}/units/{id}/metadata ', () => {
-      it('200 positive test: should get the characteristics of an unit. ', () => {
-        cy.getUnitMetadataAPI(
+    describe('40. GET /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
+      it('200 positive test: should get the properties of an unit. ', () => {
+        cy.getUnitPropertiesAPI(
           Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
           Cypress.env(`token_${Cypress.env('username')}`))
@@ -1184,8 +1184,8 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('500 negative test: should not get the characteristics of an unit without ws id ', () => {
-        cy.getUnitMetadataAPI(
+      it('500 negative test: should not get the properties of an unit without ws id ', () => {
+        cy.getUnitPropertiesAPI(
           noId,
           Cypress.env(unit1.shortname),
           Cypress.env(`token_${Cypress.env('username')}`))
@@ -1194,8 +1194,8 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('500 negative test: should not get the characteristics of an unit without unit id ', () => {
-        cy.getUnitMetadataAPI(
+      it('500 negative test: should not get the properties of an unit without unit id ', () => {
+        cy.getUnitPropertiesAPI(
           Cypress.env(ws1.id),
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
@@ -1203,8 +1203,8 @@ describe('Studio API tests', () => {
             expect(resp.status).to.equal(500);
           });
       });
-      it('401 negative test: should not get the characteristics of an unit without credentials. ', () => {
-        cy.getUnitMetadataAPI(
+      it('401 negative test: should not get the properties of an unit without credentials. ', () => {
+        cy.getUnitPropertiesAPI(
           Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
           noId)
@@ -1214,7 +1214,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('41. PATCH /api/workspaces/{workspace_id}/units/{id}/metadata', () => {
+    describe('41. PATCH /api/workspaces/{workspace_id}/units/{id}/properties', () => {
       // TO DO It does not work, all values we changes get undefined.
       let entry1: DefinitionUnit;
       before(() => {
@@ -1226,7 +1226,7 @@ describe('Studio API tests', () => {
       });
 
       it('200 positive test: should be possible update unit definition', () => {
-        cy.updateUnitMetadataAPI(Cypress.env(ws1.id),
+        cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
           Cypress.env('profile1'),
           entry1,
@@ -1237,7 +1237,7 @@ describe('Studio API tests', () => {
       });
 
       it('500 negative test: should return error 500 not passing the ws', () => {
-        cy.updateUnitMetadataAPI(noId,
+        cy.updateUnitPropertiesAPI(noId,
           Cypress.env(unit1.shortname),
           Cypress.env('profile1'),
           entry1,
@@ -1248,7 +1248,7 @@ describe('Studio API tests', () => {
       });
 
       it('500 negative test: should return error 500 not passing the the unit id', () => {
-        cy.updateUnitMetadataAPI(Cypress.env(ws1.id),
+        cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           noId,
           Cypress.env('profile1'),
           entry1,
@@ -1260,7 +1260,7 @@ describe('Studio API tests', () => {
 
       it('200/500 negative test: should return an error with incorrect data', () => {
         // Should not allow to pass incorrect structure
-        cy.updateUnitMetadataAPI(Cypress.env(ws1.id),
+        cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
           Cypress.env('profile1'),
           noId,
@@ -1271,7 +1271,7 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: should return error with no credentials', () => {
-        cy.updateUnitMetadataAPI(Cypress.env(ws1.id),
+        cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
           Cypress.env('profile1'),
           entry1,
@@ -1282,7 +1282,7 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: should return error with user with no credentials on the ws', () => {
-        cy.updateUnitMetadataAPI(Cypress.env(ws1.id),
+        cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
           Cypress.env('profile1'),
           entry1,
@@ -1563,7 +1563,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe.skip('59. PATCH /api/workspaces/{workspace_id}/units/{id}/metadata ', () => {
+      describe.skip('59. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
         it('200 positive test: should assign the state 1 to the unit', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
@@ -2230,7 +2230,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe.skip('75. GET /api/reviews/{review_id}/units/{id}/metadata', () => {
+      describe.skip('75. GET /api/reviews/{review_id}/units/{id}/properties', () => {
         it('200 positive test: should the metadata with credentials', () => {
           cy.getReviewMetadataAPI(Cypress.env('id_review1'),
             Cypress.env(unit2.shortname),

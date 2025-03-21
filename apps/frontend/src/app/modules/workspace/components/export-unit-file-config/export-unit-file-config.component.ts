@@ -32,7 +32,7 @@ export class ExportUnitFileConfigComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.backendService.getUnitListWithMetadata(
+    this.backendService.getUnitListWithProperties(
       this.workspaceService.selectedWorkspaceId
     ).subscribe(unitsWithMetadata => {
       unitsWithMetadata.forEach(umd => {

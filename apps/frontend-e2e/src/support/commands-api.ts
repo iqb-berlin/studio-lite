@@ -529,11 +529,11 @@ Cypress.Commands.add('getUsersByWsAPI', (wsId:string, token:string) => {
 });
 
 // 40
-Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:string) => {
+Cypress.Commands.add('getUnitPropertiesAPI', (wsId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/properties`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -544,7 +544,7 @@ Cypress.Commands.add('getUnitMetadataAPI', (wsId:string, unitId:string, token:st
 
 // 41
 Cypress.Commands.add(
-  'updateUnitMetadataAPI',
+  'updateUnitPropertiesAPI',
   (wsId: string, unitId: string, profile:string, entry: DefinitionUnit, token: string) => {
     // console.log(entry);
     // eslint-disable-next-line max-len
@@ -560,7 +560,7 @@ Cypress.Commands.add(
     const nu = parseInt(`${unitId}`, 10);
     cy.request({
       method: 'PATCH',
-      url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
+      url: `/api/workspaces/${wsId}/units/${unitId}/properties`,
       headers: {
         'app-version': Cypress.env('version'),
         authorization
@@ -747,7 +747,7 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
   const nu = parseInt(`${unitId}`, 10);
   cy.request({
     method: 'PATCH',
-    url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/properties`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -990,7 +990,7 @@ Cypress.Commands.add('getReviewMetadataAPI', (reviewId:string, unitId:string, to
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/reviews/${reviewId}/units/${unitId}/metadata`,
+    url: `/api/reviews/${reviewId}/units/${unitId}/properties`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

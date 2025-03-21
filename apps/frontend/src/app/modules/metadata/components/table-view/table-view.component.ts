@@ -14,7 +14,7 @@ import {
   MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
   MatHeaderRow, MatRowDef, MatRow, MatTableDataSource
 } from '@angular/material/table';
-import { ItemsMetadataValues, MetadataValuesEntry, UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -68,7 +68,7 @@ export class TableViewComponent implements OnInit {
     private workspaceService: WorkspaceService,
     private translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA)
-    public data: { units: UnitMetadataDto[]; warning: string }
+    public data: { units: UnitPropertiesDto[]; warning: string }
   ) {}
 
   @ViewChild('tabGroup') tabGroup!: MatTabGroup;
@@ -116,7 +116,7 @@ export class TableViewComponent implements OnInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  private setUnitsItemsDataRows(units: UnitMetadataDto[]): void {
+  private setUnitsItemsDataRows(units: UnitPropertiesDto[]): void {
     const allUnits: ColumnValues[][] = [];
     units.forEach(unit => {
       const totalValues: ColumnValues[] = [];
@@ -156,7 +156,7 @@ export class TableViewComponent implements OnInit {
   private setItemColumnValues(
     values: ColumnValues,
     item: ItemsMetadataValues,
-    unit: UnitMetadataDto,
+    unit: UnitPropertiesDto,
     addKey: boolean
   ): ColumnValues {
     this.displayedColumns.forEach(column => {
@@ -190,7 +190,7 @@ export class TableViewComponent implements OnInit {
     return values;
   }
 
-  private setUnitsDataRows(units: UnitMetadataDto[]): void {
+  private setUnitsDataRows(units: UnitPropertiesDto[]): void {
     const totalValues: ColumnValues[] = [];
     units.forEach(unit => {
       const activeProfile =

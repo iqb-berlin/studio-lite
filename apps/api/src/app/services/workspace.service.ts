@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
-  UnitMetadataDto, UnitMetadataValues, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto
+  UnitPropertiesDto, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
+  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto, UnitFullMetadataDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -245,9 +245,9 @@ export class WorkspaceService {
 
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
     const unitDataRows:CodingReportDto[] = [];
-    const unitListWithMetadata = await this.unitService.findAllWithMetadata(id);
+    const unitListWithMetadata = await this.unitService.findAllWithProperties(id);
     if (unitListWithMetadata) {
-      unitListWithMetadata?.forEach((unit: UnitMetadataDto) => {
+      unitListWithMetadata?.forEach((unit: UnitPropertiesDto) => {
         if (unit.scheme && unit.scheme !== 'undefined' && unit.schemer.split('@')[1] >= '1.5') {
           const parsedUnitScheme = JSON.parse(unit.scheme as string);
           let codingType:string;
@@ -425,17 +425,17 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
+    await this.checkForProfileUpdate(workspaceToUpdate, settings);
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
   async remove(id: number | number[]): Promise<void> {
-    // TODO: sollte Fehler liefern wenn eine nicht gültige id verwendet wird
     this.logger.log(`Deleting workspace with id: ${id}`);
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadFiles(id: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
+  async uploadFiles(workspaceId: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
@@ -445,7 +445,7 @@ export class WorkspaceService {
     const { unitData, notXmlFiles, usedFiles } = WorkspaceService.readImportData(files, functionReturn);
 
     await Promise.all(unitData.map(async u => {
-      await this.uploadFile(usedFiles, u, id, user, functionReturn, notXmlFiles);
+      await this.uploadFile(usedFiles, u, workspaceId, user, functionReturn, notXmlFiles);
     }));
 
     files.forEach(f => {
@@ -487,14 +487,14 @@ export class WorkspaceService {
   private async uploadFile(
     usedFiles: string[],
     unitImportData: UnitImportData,
-    id: number,
+    workspaceId: number,
     user: UserEntity,
     functionReturn: RequestReportDto,
     notXmlFiles: { [fName: string]: FileIo }
   ) {
     usedFiles.push(unitImportData.fileName);
     const newUnitId = await this.unitService.create(
-      id,
+      workspaceId,
       { key: unitImportData.key, name: unitImportData.name },
       user,
       true
@@ -510,7 +510,7 @@ export class WorkspaceService {
         unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
         usedFiles.push(unitImportData.metadataFileName);
       }
-      await this.patchMetadata(newUnitId, unitImportData, user);
+      await this.patchUnitProperties(workspaceId, newUnitId, unitImportData, user);
 
       if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {
         const comments = notXmlFiles[unitImportData.commentsFileName].buffer.toString();
@@ -560,17 +560,17 @@ export class WorkspaceService {
     return files;
   }
 
-  private async patchMetadata(
+  private async patchUnitProperties(
+    workspaceId: number,
     newUnitId: number,
     unitImportData: UnitImportData,
     user: UserEntity
   ) {
-    await this.unitService.patchMetadata(newUnitId, {
+    await this.unitService.patchUnitProperties(newUnitId, {
       id: newUnitId,
       editor: unitImportData.editor,
       player: unitImportData.player,
       schemer: unitImportData.schemer,
-      metadata: unitImportData.metadata as UnitMetadataValues,
       description: unitImportData.description,
       transcript: unitImportData.transcript,
       reference: unitImportData.reference,
@@ -581,6 +581,15 @@ export class WorkspaceService {
       lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
       lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
     }, user);
+    if (unitImportData.metadata) {
+      const workspace = await this.workspacesRepository.findOne({ where: { id: workspaceId } });
+      const metadata = UnitService.setCurrentProfiles(
+        workspace.settings?.unitMDProfile,
+        workspace.settings?.itemMDProfile,
+        unitImportData.metadata as UnitFullMetadataDto
+      );
+      await this.unitService.addMetadata(newUnitId, metadata);
+    }
   }
 
   private async importDefinition(
@@ -607,5 +616,14 @@ export class WorkspaceService {
 
   private async importComments(unitId: number, comments: string) {
     await this.unitCommentService.createComments(JSON.parse(comments), unitId);
+  }
+
+  private async checkForProfileUpdate(workspace: Workspace, newSettings: WorkspaceSettingsDto) {
+    if ((workspace.settings?.itemMDProfile && workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
+    (workspace.settings?.unitMDProfile && workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile)) {
+      const unitIds = await this.unitService.getUnitIdsByWorkspaceId(workspace.id);
+      unitIds.map(async unitId => this.unitService
+        .patchMetadataCurrentProfile(unitId, newSettings.unitMDProfile, newSettings.itemMDProfile));
+    }
   }
 }

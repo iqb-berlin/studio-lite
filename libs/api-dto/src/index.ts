@@ -18,7 +18,7 @@ export { ResourcePackageDto } from './lib/dtos/resource-package/resource-package
 export { ConfigDto } from './lib/dtos/setting/config-dto';
 export { VeronaModuleFileDto } from './lib/dtos/verona-module/verona-module-file-dto';
 export { UnitDefinitionDto } from './lib/dtos/unit/unit-definition-dto';
-export { UnitMetadataDto } from './lib/dtos/unit/unit-metadata-dto';
+export { UnitPropertiesDto } from './lib/dtos/unit/unit-properties-dto';
 export { WorkspaceSettingsDto } from './lib/dtos/workspace/workspace-settings-dto';
 export { CreateUnitDto } from './lib/dtos/unit/create-unit-dto';
 export { UnitInListDto } from './lib/dtos/unit/unit-in-list-dto';
@@ -66,3 +66,9 @@ export { UserWorkspaceAccessDto } from './lib/dtos/workspace/user-workspace-acce
 export { UserWorkspaceAccessForGroupDto } from './lib/dtos/workspace/user-workspace-access-for-group-dto';
 export { UsersWorkspaceInListDto } from './lib/dtos/workspace/users-workspace-in-list-dto';
 export { WorkspaceUserInListDto } from './lib/dtos/user/workspace-user-in-list-dto';
+export { UnitItemDto } from './lib/dtos/unit-item/unit-item-dto';
+export { MetadataDto } from './lib/dtos/metadata/metadata-dto';
+export { UnitMetadataDto } from './lib/dtos/metadata/unit-metadata-dto';
+export { UnitItemMetadataDto } from './lib/dtos/metadata/unit-item-metadata-dto';
+export { UnitItemWithMetadataDto } from './lib/dtos/unit-item/unit-item-with-metadata-dto';
+export { UnitFullMetadataDto } from './lib/dtos/unit/unit-full-metadata-dto';

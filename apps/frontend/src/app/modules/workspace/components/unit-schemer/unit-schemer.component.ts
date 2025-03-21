@@ -83,7 +83,7 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.iFrameElement = this.hostingIframe.nativeElement;
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
       this.message = '';
-      this.workspaceService.loadUnitMetadata().then(() => this.sendUnitData());
+      this.workspaceService.loadUnitProperties().then(() => this.sendUnitData());
     });
     this.addSubscriptionForUnitDefinitionChanges();
   }

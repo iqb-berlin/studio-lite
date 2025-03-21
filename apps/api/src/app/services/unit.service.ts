@@ -7,8 +7,12 @@ import {
   UnitDefinitionDto,
   UnitByDefinitionIdDto,
   UnitInListDto,
+  UnitPropertiesDto,
+  UnitSchemeDto,
+  UnitMetadataValues,
   UnitMetadataDto,
-  UnitSchemeDto, MetadataValues, UnitMetadataValues
+  UnitItemWithMetadataDto,
+  UnitFullMetadataDto, UnitItemMetadataDto, MetadataDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -19,6 +23,9 @@ import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
 import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
+import { UnitMetadataService } from './unit-metadata.service';
+import { UnitItemService } from './unit-item.service';
+import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -37,8 +44,20 @@ export class UnitService {
     @InjectRepository(UnitDropBoxHistory)
     private unitDropBoxHistoryRepository: Repository<UnitDropBoxHistory>,
     private unitUserService: UnitUserService,
-    private unitCommentService: UnitCommentService
+    private unitCommentService: UnitCommentService,
+    private unitMetadataService: UnitMetadataService,
+    private unitItemService: UnitItemService,
+    private unitMetadataToDeleteService: UnitMetadataToDeleteService
   ) {}
+
+  async getUnitIdsByWorkspaceId(workspaceId: number): Promise<number[]> {
+    const units = await this.unitsRepository
+      .find({
+        where: { workspaceId: workspaceId },
+        select: ['id']
+      });
+    return units.map(unit => unit.id);
+  }
 
   async findAll(): Promise<UnitByDefinitionIdDto[]> {
     this.logger.log('Retrieving units for workspaceId');
@@ -148,7 +167,6 @@ export class UnitService {
         newUnit.description = unitSourceData.description;
         newUnit.transcript = unitSourceData.transcript;
         newUnit.reference = unitSourceData.reference;
-        newUnit.metadata = unitSourceData.metadata;
         newUnit.player = unitSourceData.player;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
@@ -157,6 +175,16 @@ export class UnitService {
         newUnit.lastChangedMetadataUser = displayName;
         newUnit.lastChangedSchemeUser = displayName;
         await this.unitsRepository.save(newUnit);
+
+        const metadata = await this.getMetadataOfUnit(unit);
+        const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
+        newUnit.metadata = UnitService.setCurrentProfiles(
+          workspace.settings?.unitMDProfile,
+          workspace.settings?.itemMDProfile,
+          metadata as UnitFullMetadataDto
+        );
+        await this.addMetadata(newUnit.id, metadata as UnitFullMetadataDto);
+
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
           await this.patchDefinition(newUnit.id, unitSourceDefinition, user);
@@ -180,7 +208,7 @@ export class UnitService {
     return newUnit.id;
   }
 
-  async findOnesMetadata(unitId: number, workspaceId: number): Promise<UnitMetadataDto> {
+  async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
@@ -194,14 +222,10 @@ export class UnitService {
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
-    unit.metadata = UnitService.setCurrentProfiles(
-      workspace.settings?.unitMDProfile,
-      workspace.settings?.itemMDProfile,
-      unit.metadata);
-    return unit;
+    return this.getModifiedMetadataForUnit(unit, workspace);
   }
 
-  async findAllWithMetadata(workspaceId: number): Promise<UnitMetadataDto[]> {
+  async findAllWithProperties(workspaceId: number): Promise<UnitPropertiesDto[]> {
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
     });
@@ -215,28 +239,34 @@ export class UnitService {
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
-    return Promise.all(units
-      .map(async unit => ({
-        ...unit,
-        metadata: UnitService.setCurrentProfiles(
-          workspace.settings?.unitMDProfile,
-          workspace.settings?.itemMDProfile,
-          unit.metadata)
-      })));
+    return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace)));
   }
 
-  private static setCurrentProfiles(
-    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
-  ): UnitMetadataValues {
+  private async getModifiedMetadataForUnit(unit: Unit, workspace: Workspace): Promise<Unit> {
+    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
+    if (unitMetadataToDelete) {
+      unit.metadata = await this.findOnesMetadata(unit.id);
+    } else {
+      unit.metadata = UnitService.setCurrentProfiles(
+        workspace.settings?.unitMDProfile,
+        workspace.settings?.itemMDProfile,
+        unit.metadata);
+    }
+    return unit;
+  }
+
+  static setCurrentProfiles(
+    unitProfile: string, itemProfile: string, metadata: UnitFullMetadataDto
+  ): UnitFullMetadataDto {
     if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map((profile: MetadataValues) => UnitService
-        .setCurrentProfile(unitProfile, profile));
+      metadata.profiles = metadata.profiles.map((profile => UnitService
+        .setCurrentProfile(unitProfile, profile) as UnitMetadataDto));
     }
     if (metadata.items) {
       metadata.items.forEach(item => {
         if (item.profiles) {
           item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile));
+            .setCurrentProfile(itemProfile, profile) as UnitItemMetadataDto);
         }
       });
     }
@@ -255,14 +285,65 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  private static setCurrentProfile(profileId: string, profile: MetadataValues): MetadataValues {
+  private static setCurrentProfile(profileId: string, profile: MetadataDto): MetadataDto {
     return {
       ...profile,
       isCurrent: profile.profileId === profileId
     };
   }
 
-  async patchMetadata(unitId: number, newData: UnitMetadataDto, user: User): Promise<void> {
+  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
+    const profilesToUpdate = await this.unitMetadataService.getAllByUnitId(unitId);
+    const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
+    unchanged
+      .map(metadata => this.unitMetadataService.updateMetadata(metadata.id, metadata));
+    removed
+      .map(metadata => this.unitMetadataService.removeMetadata(metadata.id));
+    added
+      .map(metadata => this.unitMetadataService.addMetadata(unitId, metadata));
+  }
+
+  async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {
+    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId);
+    const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
+    unchanged
+      .map(item => this.unitItemService.updateItem(item.uuid, item));
+    removed
+      .map(item => this.unitItemService.removeItem(item.uuid));
+    added
+      .map(item => this.unitItemService.addItem(unitId, item));
+  }
+
+  async addMetadata(unitId: number, metadata: UnitFullMetadataDto): Promise<void> {
+    const profiles = metadata.profiles || [];
+    profiles
+      .map(profile => this.unitMetadataService.addMetadata(unitId, profile as UnitMetadataDto));
+    const items = metadata.items || [];
+    items
+      .map(item => this.unitItemService.addItem(unitId, item as UnitItemWithMetadataDto));
+
+    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
+  }
+
+  async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
+    const profiles = metadata.profiles || [];
+    await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[]);
+
+    const items = metadata.items || [];
+    await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[]);
+
+    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
+  }
+
+  async patchUnit(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
+    await this.patchUnitProperties(unitId, newData, user);
+    const dataKeys = Object.keys(newData);
+    if (dataKeys.indexOf('metadata') >= 0) {
+      await this.patchMetadata(unitId, newData.metadata);
+    }
+  }
+
+  async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const displayName = await this.getDisplayNameForUser(user.id);
     const dataKeys = Object.keys(newData);
@@ -275,7 +356,6 @@ export class UnitService {
     if (dataKeys.indexOf('player') >= 0) unit.player = newData.player;
     if (dataKeys.indexOf('schemer') >= 0) unit.schemer = newData.schemer;
     if (dataKeys.indexOf('schemeType') >= 0) unit.schemeType = newData.schemeType;
-    if (dataKeys.indexOf('metadata') >= 0) unit.metadata = newData.metadata;
     if (dataKeys.indexOf('state') >= 0) unit.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
       unit.groupName = newData.groupName;
@@ -322,8 +402,8 @@ export class UnitService {
   async patchWorkspace(unitIds: number[],
                        newWorkspaceId: number,
                        user: User,
-                       workspaceId: number = 0,
-                       action: string = null
+                       workspaceId: number,
+                       action: string
   ): Promise<RequestReportDto> {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
@@ -347,6 +427,10 @@ export class UnitService {
       }
       unit.workspaceId = newWorkspaceId;
       unit.groupName = '';
+      const newWorkspace = await this.workspaceRepository.findOne({
+        where: { id: newWorkspaceId },
+        select: ['groupId', 'settings']
+      });
       if ((action === 'submit' || action === 'return') && workspaceId) {
         await this.unitDropBoxHistoryRepository.upsert({
           unitId: unit.id,
@@ -361,14 +445,15 @@ export class UnitService {
           where: { id: workspaceId },
           select: ['groupId']
         });
-        const newWorkspace = await this.workspaceRepository.findOne({
-          where: { id: newWorkspaceId },
-          select: ['groupId']
-        });
         if (workspace.groupId !== newWorkspace.groupId) {
           unit.state = '0';
         }
       }
+
+      await this.patchMetadataCurrentProfile(
+        unit.id, newWorkspace.settings?.unitMDProfile, newWorkspace.settings?.itemMDProfile
+      );
+
       const unitToUpdate = await this.repairDefinition(unit, user);
       await this.unitsRepository.save(unitToUpdate);
       return <RequestReportDto>{
@@ -384,6 +469,20 @@ export class UnitService {
       if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages];
     });
     return report;
+  }
+
+  async patchMetadataCurrentProfile(unitId: number, unitProfile: string = '', itemProfile: string = ''): Promise<void> {
+    await this.patchUnitMetadataCurrentProfile(unitId, unitProfile);
+    await this.unitItemService.patchItemMetadataCurrentProfile(unitId, itemProfile);
+  }
+
+  private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
+    const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
+    profilesToUpdate.map(metadata => {
+      metadata.isCurrent = metadata.profileId === unitProfile;
+      this.unitMetadataService.updateMetadata(metadata.id, metadata);
+      return metadata;
+    });
   }
 
   async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
@@ -602,5 +701,20 @@ export class UnitService {
       }
     }
     return unit;
+  }
+
+  private async getMetadataOfUnit(unit: CreateUnitDto): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+    const unitMetadataToDelete = this.unitMetadataToDeleteService.getOneByUnit(unit.createFrom);
+    if (unitMetadataToDelete) {
+      return this.findOnesMetadata(unit.createFrom);
+    }
+    return unit.metadata;
+  }
+
+  async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
+    return {
+      profiles: await this.unitMetadataService.getAllByUnitId(unitId),
+      items: await this.unitItemService.getAllByUnitIdWithMetadata(unitId)
+    };
   }
 }
