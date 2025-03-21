@@ -63,8 +63,8 @@ declare namespace Cypress {
     updateWsSettingsAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 32
     getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 33
     getUsersByWsAPI(wsId: string, token: string): Chainable<Response>; // 34
-    getUnitMetadataAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 40
-    updateUnitMetadataAPI(wsId: string, unitId: string, profile: string, entry: DefinitionUnit, token: string):
+    getUnitPropertiesAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 40
+    updateUnitPropertiesAPI(wsId: string, unitId: string, profile: string, entry: DefinitionUnit, token: string):
     Chainable<Response>; // 41
     getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 42
     moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 50
