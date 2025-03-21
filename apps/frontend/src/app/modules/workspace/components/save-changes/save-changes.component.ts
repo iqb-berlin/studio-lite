@@ -10,7 +10,6 @@ import { MatButton } from '@angular/material/button';
   selector: 'studio-lite-save-changes',
   templateUrl: './save-changes.component.html',
   styleUrls: ['./save-changes.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, MatIcon, TranslateModule]
 })
 export class SaveChangesComponent {

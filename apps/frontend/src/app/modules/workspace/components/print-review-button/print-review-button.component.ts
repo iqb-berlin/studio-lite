@@ -13,7 +13,6 @@ import {
   selector: 'studio-lite-print-review-button',
   templateUrl: './print-review-button.component.html',
   styleUrls: ['./print-review-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class PrintReviewButtonComponent {

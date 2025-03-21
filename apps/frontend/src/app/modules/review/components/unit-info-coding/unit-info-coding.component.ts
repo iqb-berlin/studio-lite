@@ -16,7 +16,6 @@ interface CodingSchemeDto {
   selector: 'studio-lite-unit-info-coding',
   templateUrl: './unit-info-coding.component.html',
   styleUrls: ['./unit-info-coding.component.scss'],
-  standalone: true,
   imports: [UnitInfoLoaderComponent, TranslateModule]
 })
 export class UnitInfoCodingComponent {

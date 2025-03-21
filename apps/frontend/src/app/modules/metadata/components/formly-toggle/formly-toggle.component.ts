@@ -16,7 +16,6 @@ interface FormlyToggleProps extends FormlyFieldProps {
   templateUrl: './formly-toggle.component.html',
   styleUrls: ['./formly-toggle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatSlideToggle, FormsModule, ReactiveFormsModule, FormlyModule]
 })
 

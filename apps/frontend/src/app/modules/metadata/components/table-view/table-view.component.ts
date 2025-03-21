@@ -35,7 +35,6 @@ interface ColumnValues {
   selector: 'studio-lite-table-view',
   templateUrl: './table-view.component.html',
   styleUrls: ['./table-view.component.scss'],
-  standalone: true,
   imports: [
     MatSortModule,
     MatDialogContent,

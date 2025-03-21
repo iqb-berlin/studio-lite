@@ -28,7 +28,6 @@ import { MatButton } from '@angular/material/button';
       }
     </mat-dialog-actions>
     `,
-  standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ConfirmDialogComponent implements OnInit {

@@ -22,7 +22,6 @@ import { CommentComponent } from '../comment/comment.component';
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
 })

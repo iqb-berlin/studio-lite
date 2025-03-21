@@ -17,7 +17,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, ProfilesComponent, StatesComponent, TranslateModule]
 })
 export class WorkspaceSettingsComponent implements OnInit {

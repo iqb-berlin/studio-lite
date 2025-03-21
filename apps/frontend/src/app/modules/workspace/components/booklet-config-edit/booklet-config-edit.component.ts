@@ -14,7 +14,6 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   selector: 'studio-lite-booklet-config-edit',
   templateUrl: './booklet-config-edit.component.html',
   styleUrls: ['./booklet-config-edit.component.scss'],
-  standalone: true,
   imports: [MatSlideToggle, MatFormField, MatLabel, MatSelect, FormsModule, MatOption, TranslateModule]
 })
 export class BookletConfigEditComponent {

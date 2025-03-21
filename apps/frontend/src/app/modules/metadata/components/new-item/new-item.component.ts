@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'studio-lite-new-item',
-  standalone: true,
   imports: [CommonModule, MatButton, MatDialogActions, TranslateModule, MatLabel, MatFormField,
     MatSelect, MatOption, MatDialogClose, MatDialogContent, MatDialogTitle, FormsModule],
   templateUrl: './new-item.component.html',

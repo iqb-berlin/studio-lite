@@ -22,7 +22,6 @@ import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.compo
   selector: 'studio-lite-workspace-menu',
   templateUrl: './workspace-menu.component.html',
   styleUrls: ['./workspace-menu.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceMenuComponent {

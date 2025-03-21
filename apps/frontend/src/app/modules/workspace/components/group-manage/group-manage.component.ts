@@ -29,7 +29,6 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   selector: 'studio-lite-group-manage',
   templateUrl: './group-manage.component.html',
   styleUrls: ['./group-manage.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

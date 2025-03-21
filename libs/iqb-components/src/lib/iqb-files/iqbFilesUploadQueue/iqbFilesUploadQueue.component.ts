@@ -13,7 +13,6 @@ import { UploadStatus } from '../iqb-files-classes';
   selector: 'iqb-files-upload-queue',
   templateUrl: 'iqbFilesUploadQueue.component.html',
   exportAs: 'iqbFilesUploadQueue',
-  standalone: true,
   imports: [IqbFilesUploadComponent, MatButton]
 })
 export class IqbFilesUploadQueueComponent implements OnDestroy {

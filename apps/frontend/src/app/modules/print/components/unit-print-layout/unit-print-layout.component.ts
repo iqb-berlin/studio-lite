@@ -23,7 +23,6 @@ import { UnitPropertiesComponent } from '../../../shared/components/unit-propert
   selector: 'studio-lite-unit-print-layout',
   templateUrl: './unit-print-layout.component.html',
   styleUrls: ['./unit-print-layout.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [UnitPropertiesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
 })

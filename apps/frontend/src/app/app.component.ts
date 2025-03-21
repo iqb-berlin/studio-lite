@@ -23,7 +23,6 @@ import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
 })

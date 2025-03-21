@@ -8,7 +8,6 @@ import { MatIconButton } from '@angular/material/button';
 
 import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
 import { Comment } from '../../models/comment.interface';
-import { FromNowPipe } from '../../pipes/from-now.pipe';
 import { IsReplyingPipe } from '../../pipes/is-replying.pipe';
 import { IsEditingPipe } from '../../pipes/is-editing.pipe';
 import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
@@ -23,9 +22,8 @@ import { FullTimestampPipe } from '../../pipes/full-timestamp.pipe';
   selector: 'studio-lite-comment',
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FromNowPipe, FullTimestampPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

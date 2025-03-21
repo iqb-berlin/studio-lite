@@ -7,7 +7,6 @@ import { Progress } from '../../models/types';
   selector: 'studio-lite-status-indication',
   templateUrl: './status-indication.component.html',
   styleUrls: ['./status-indication.component.scss'],
-  standalone: true,
   imports: [MatTooltip, TranslateModule]
 })
 export class StatusIndicationComponent {

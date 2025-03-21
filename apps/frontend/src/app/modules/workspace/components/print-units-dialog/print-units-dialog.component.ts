@@ -13,7 +13,6 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
   selector: 'studio-lite-print-units-dialog',
   templateUrl: './print-units-dialog.component.html',
   styleUrls: ['./print-units-dialog.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

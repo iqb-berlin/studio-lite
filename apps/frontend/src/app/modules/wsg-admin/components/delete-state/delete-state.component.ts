@@ -17,7 +17,6 @@ export interface DeleteStateData {
   selector: 'studio-lite-delete-state',
   templateUrl: './delete-state.component.html',
   styleUrls: ['./delete-state.component.scss'],
-  standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class DeleteStateComponent {

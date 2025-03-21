@@ -9,7 +9,6 @@ import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.compo
   selector: 'studio-lite-unit-print-coding',
   templateUrl: './unit-print-coding.component.html',
   styleUrls: ['./unit-print-coding.component.scss'],
-  standalone: true,
   imports: [UnitPrintCodeComponent, TranslateModule]
 })
 export class UnitPrintCodingComponent implements OnInit {

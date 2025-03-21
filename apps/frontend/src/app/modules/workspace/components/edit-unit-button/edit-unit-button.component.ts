@@ -44,7 +44,6 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
   selector: 'studio-lite-edit-unit-button',
   templateUrl: './edit-unit-button.component.html',
   styleUrls: ['./edit-unit-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider,
     TranslateModule]
 })

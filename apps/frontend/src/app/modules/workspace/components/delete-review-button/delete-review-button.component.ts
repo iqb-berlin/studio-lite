@@ -15,7 +15,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-delete-review-button',
   templateUrl: './delete-review-button.component.html',
   styleUrls: ['./delete-review-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class DeleteReviewButtonComponent {

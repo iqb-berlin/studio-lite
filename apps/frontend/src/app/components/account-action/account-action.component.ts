@@ -7,7 +7,6 @@ import { MatMenuItem } from '@angular/material/menu';
   selector: 'studio-lite-account-action',
   templateUrl: './account-action.component.html',
   styleUrls: ['./account-action.component.scss'],
-  standalone: true,
   imports: [MatMenuItem, MatIcon, TranslateModule]
 })
 export class AccountActionComponent {

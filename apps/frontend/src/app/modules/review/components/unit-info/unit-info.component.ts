@@ -21,7 +21,6 @@ const PanelWidthOffset = 40;
   selector: 'studio-lite-unit-info',
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
 })

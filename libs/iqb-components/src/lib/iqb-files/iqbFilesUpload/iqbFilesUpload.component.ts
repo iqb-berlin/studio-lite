@@ -2,8 +2,7 @@ import {
   Component, EventEmitter, Input, OnInit, Output, HostBinding
 } from '@angular/core';
 import {
-  HttpClient, HttpEventType, HttpHeaders, HttpParams,
-  HttpErrorResponse, HttpEvent
+  HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpErrorResponse, HttpEvent
 } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
@@ -18,7 +17,6 @@ import { UploadStatus } from '../iqb-files-classes';
   templateUrl: './iqbFilesUpload.component.html',
   exportAs: 'iqbFilesUpload',
   styleUrls: ['../iqb-files.scss'],
-  standalone: true,
   imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
 })
 

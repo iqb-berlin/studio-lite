@@ -9,7 +9,6 @@ import { SplitterGutterComponent } from '../splitter-gutter/splitter-gutter.comp
   selector: 'studio-lite-splitter',
   templateUrl: './splitter.component.html',
   styleUrls: ['./splitter.component.scss'],
-  standalone: true,
   imports: [SplitterGutterComponent]
 })
 export class SplitterComponent implements AfterViewInit {

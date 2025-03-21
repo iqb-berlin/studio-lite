@@ -18,7 +18,6 @@ import { EditUserComponentData } from '../../models/edit-user-component-data.typ
   selector: 'studio-lite-edit-user',
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatIcon, MatLabel, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

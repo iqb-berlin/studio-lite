@@ -6,7 +6,6 @@ import { TranslateModule } from '@ngx-translate/core';
   selector: 'studio-lite-unit-print-code',
   templateUrl: './unit-print-code.component.html',
   styleUrls: ['./unit-print-code.component.scss'],
-  standalone: true,
   imports: [TranslateModule]
 })
 export class UnitPrintCodeComponent {

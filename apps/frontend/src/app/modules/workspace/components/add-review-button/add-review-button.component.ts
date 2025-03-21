@@ -15,7 +15,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-add-review-button',
   templateUrl: './add-review-button.component.html',
   styleUrls: ['./add-review-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class AddReviewButtonComponent extends CheckForChangesDirective {

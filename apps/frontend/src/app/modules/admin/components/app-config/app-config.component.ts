@@ -23,7 +23,6 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
   selector: 'studio-lite-app-config',
   templateUrl: './app-config.component.html',
   styleUrls: ['./app-config.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
 })

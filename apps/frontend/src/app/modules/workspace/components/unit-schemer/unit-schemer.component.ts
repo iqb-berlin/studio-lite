@@ -20,7 +20,6 @@ import { RolePipe } from '../../pipes/role.pipe';
   templateUrl: './unit-schemer.component.html',
   styleUrls: ['./unit-schemer.component.scss'],
   host: { class: 'unit-schemer' },
-  standalone: true,
   imports: []
 })
 export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {

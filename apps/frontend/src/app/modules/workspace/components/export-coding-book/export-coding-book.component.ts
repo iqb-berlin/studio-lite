@@ -6,14 +6,13 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver-es';
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButton } from '@angular/material/button';
 import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
-import { SelectUnitComponent } from '../select-unit/select-unit.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
 
@@ -21,7 +20,6 @@ const datePipe = new DatePipe('de-DE');
 
 @Component({
   templateUrl: './export-coding-book.component.html',
-  standalone: true,
   imports: [
     TranslateModule,
     MatDialogModule,
@@ -30,9 +28,7 @@ const datePipe = new DatePipe('de-DE');
     MatRadioModule,
     MatSelectModule,
     MatButton,
-    SelectUnitComponent,
-    SelectUnitListComponent,
-    JsonPipe
+    SelectUnitListComponent
   ],
   styleUrls: ['export-coding-book.component.scss']
 })

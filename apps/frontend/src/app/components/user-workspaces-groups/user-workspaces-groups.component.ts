@@ -13,7 +13,6 @@ import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
   selector: 'studio-lite-user-workspaces-groups',
   templateUrl: './user-workspaces-groups.component.html',
   styleUrls: ['./user-workspaces-groups.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe]
 })

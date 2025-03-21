@@ -14,7 +14,6 @@ import { PrintOptions } from '../../../print/models/print-options.interface';
   selector: 'studio-lite-print-options',
   templateUrl: './print-options.component.html',
   styleUrls: ['./print-options.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule, IsActivePrintOption]
 })

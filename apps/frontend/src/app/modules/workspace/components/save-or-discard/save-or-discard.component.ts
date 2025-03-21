@@ -12,7 +12,6 @@ import { ConfirmDialogData } from '../../models/confirm-dialog.interface';
   selector: 'studio-lite-save-or-discard',
   templateUrl: './save-or-discard.component.html',
   styleUrls: ['./save-or-discard.component.scss'],
-  standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SaveOrDiscardComponent {

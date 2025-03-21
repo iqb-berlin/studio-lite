@@ -32,7 +32,6 @@ export interface SelectUnitData {
   selector: 'studio-lite-select-unit',
   templateUrl: './select-unit.component.html',
   styleUrls: ['./select-unit.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

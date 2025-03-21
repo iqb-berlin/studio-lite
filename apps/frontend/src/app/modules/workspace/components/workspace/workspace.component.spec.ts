@@ -1,11 +1,11 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { RouterTestingModule } from '@angular/router/testing';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { WorkspaceComponent } from './workspace.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -15,13 +15,15 @@ describe('WorkspaceComponent', () => {
 
   @Component({
     selector: 'studio-lite-splitter',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteSplitterComponent {}
 
   @Component({
     selector: 'studio-lite-splitter-pane',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteSplitterPaneComponent {
     @Input() initialSize: number | 'auto' = 'auto';
@@ -31,7 +33,8 @@ describe('WorkspaceComponent', () => {
 
   @Component({
     selector: 'studio-lite-units-area',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteUnitsAreaComponent {
     @Input() selectedRouterLink!: number;
@@ -40,7 +43,8 @@ describe('WorkspaceComponent', () => {
 
   @Component({
     selector: 'studio-lite-unit-data-area',
-    template: ''
+    template: '',
+    standalone: false
   })
   class MockStudioLiteUnitDataAreaComponent {
     @Input() navTabs!: { name: string; duplicable: boolean }[];
@@ -59,16 +63,17 @@ describe('WorkspaceComponent', () => {
         MockStudioLiteUnitDataAreaComponent
       ],
       imports: [
-        HttpClientModule,
-        RouterTestingModule,
         MatSnackBarModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(WorkspaceComponent);

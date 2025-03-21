@@ -14,7 +14,6 @@ import { BackendService } from '../../services/backend.service';
   selector: 'studio-lite-unit-export-config',
   templateUrl: './unit-export-config.component.html',
   styleUrls: ['./unit-export-config.component.scss'],
-  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
 })
 

@@ -1,10 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { SafeUrl } from '@angular/platform-browser';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { HomeComponent } from './home.component';
 import { LoginComponent } from '../login/login.component';
@@ -42,11 +42,11 @@ describe('HomeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         HomeComponent,
-        RouterTestingModule,
-        HttpClientModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
+        provideRouter([]),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

@@ -11,7 +11,6 @@ import { MatBadge } from '@angular/material/badge';
   selector: 'studio-lite-unit-group',
   templateUrl: './unit-group.component.html',
   styleUrls: ['./unit-group.component.scss'],
-  standalone: true,
   imports: [MatBadge, MatIconButton, MatIcon, TranslateModule]
 })
 export class UnitGroupComponent implements OnInit {

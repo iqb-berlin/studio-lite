@@ -16,7 +16,6 @@ import {
 
 @Component({
   templateUrl: './show-responses.component.html',
-  standalone: true,
   imports: [
     TranslateModule,
     MatDialogModule,

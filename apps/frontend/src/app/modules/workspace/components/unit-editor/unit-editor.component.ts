@@ -18,7 +18,6 @@ import { RolePipe } from '../../pipes/role.pipe';
   templateUrl: './unit-editor.component.html',
   styleUrls: ['./unit-editor.component.scss'],
   host: { class: 'unit-editor' },
-  standalone: true,
   imports: []
 })
 

@@ -25,8 +25,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MatMenuItem } from '@angular/material/menu';
-import { MatTooltip } from '@angular/material/tooltip';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -43,9 +41,8 @@ import { AliasId } from '../../../metadata/models/alias-id.interface';
 @Component({
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
-  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
-    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatMenuItem, MatTooltip,
+    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
     MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
     CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
     TranslateModule, MatIcon, CanReturnUnitPipe]

@@ -34,7 +34,6 @@ export enum MessageType {
     </mat-dialog-actions>
     `,
   styles: ['mat-dialog-content { padding-bottom: 30px;}'],
-  standalone: true,
   imports: [MatDialogTitle, MatIcon, MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class MessageDialogComponent implements OnInit {

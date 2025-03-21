@@ -22,7 +22,6 @@ import { RoutingHelperService } from '../../services/routing-helper.service';
   selector: 'studio-lite-workspace',
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss'],
-  standalone: true,
   imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {

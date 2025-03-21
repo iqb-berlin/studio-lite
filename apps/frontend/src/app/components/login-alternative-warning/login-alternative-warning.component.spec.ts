@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { LoginAlternativeWarningComponent } from './login-alternative-warning.component';
 
@@ -13,6 +13,7 @@ describe('LoginAlternativeWarningComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
@@ -22,7 +23,6 @@ describe('LoginAlternativeWarningComponent', () => {
         }
       ],
       imports: [
-        HttpClientModule,
         TranslateModule.forRoot(),
         MatDialogModule,
         MatIconModule

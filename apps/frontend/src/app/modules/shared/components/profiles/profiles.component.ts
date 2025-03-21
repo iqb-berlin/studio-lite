@@ -9,7 +9,6 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import { FormsModule } from '@angular/forms';
 import { MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { NgIf, NgFor } from '@angular/common';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
 import { BackendService } from '../../../metadata/services/backend.service';
@@ -20,8 +19,7 @@ export type CoreProfile = Omit<MDProfile, 'groups'>;
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
-  standalone: true,
-  imports: [NgIf, MatProgressSpinner, MatDialogTitle, FormsModule, NgFor, MatExpansionPanel,
+  imports: [MatProgressSpinner, MatDialogTitle, FormsModule, MatExpansionPanel,
     MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
 })
 export class ProfilesComponent implements OnInit {

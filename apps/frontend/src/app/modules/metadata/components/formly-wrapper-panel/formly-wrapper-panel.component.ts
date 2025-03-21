@@ -19,7 +19,6 @@ interface FormlyExpandedProps extends FormlyFieldProps {
           <ng-container #fieldComponent></ng-container>
       </mat-expansion-panel>
   `,
-  standalone: true,
   imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class FormlyWrapperPanel extends FieldWrapper<FieldType<FieldTypeConfig<FormlyExpandedProps>>> {}

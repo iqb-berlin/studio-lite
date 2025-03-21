@@ -12,7 +12,6 @@ import { MatIcon } from '@angular/material/icon';
   selector: 'studio-lite-request-message',
   templateUrl: './request-message.component.html',
   styleUrls: ['./request-message.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatIcon, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

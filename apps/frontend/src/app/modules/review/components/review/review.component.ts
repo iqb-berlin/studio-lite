@@ -10,7 +10,6 @@ import { UnitNavComponent } from '../unit-nav/unit-nav.component';
   selector: 'studio-lite-review',
   templateUrl: './review.component.html',
   styleUrls: ['./review.component.scss'],
-  standalone: true,
   imports: [UnitNavComponent, AddCommentButtonComponent, RouterOutlet]
 })
 export class ReviewComponent {

@@ -8,7 +8,6 @@ import { UserIssue } from '../../models/user-issue.interface';
   selector: 'studio-lite-user-issues',
   templateUrl: './user-issues.component.html',
   styleUrls: ['./user-issues.component.scss'],
-  standalone: true,
   imports: [RouterLink, MatTooltip]
 })
 export class UserIssuesComponent {

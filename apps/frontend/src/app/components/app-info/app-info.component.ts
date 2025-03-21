@@ -10,7 +10,6 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   selector: 'studio-lite-app-info',
   templateUrl: './app-info.component.html',
   styleUrls: ['./app-info.component.scss'],
-  standalone: true,
   imports: [AreaTitleComponent, MatAnchor, RouterLink, TranslateModule]
 })
 export class AppInfoComponent {

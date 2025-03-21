@@ -52,7 +52,6 @@ type ModelValue = string | number | boolean | Record<string, string> | Vocabular
   selector: 'studio-lite-profile-form',
   templateUrl: './profile-form.component.html',
   styleUrls: ['./profile-form.component.scss'],
-  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
 export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {

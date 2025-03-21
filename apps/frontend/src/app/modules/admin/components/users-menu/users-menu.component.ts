@@ -20,7 +20,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-users-menu',
   templateUrl: './users-menu.component.html',
   styleUrls: ['./users-menu.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class UsersMenuComponent {

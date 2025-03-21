@@ -3,8 +3,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material/dialog';
+import { provideRouter } from '@angular/router';
 import { PrintReviewButtonComponent } from './print-review-button.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -19,13 +19,14 @@ describe('PrintReviewButtonComponent', () => {
         MatIconModule,
         MatTooltipModule,
         MatButtonModule,
-        RouterTestingModule,
         MatDialogModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideRouter([]),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PrintReviewButtonComponent);

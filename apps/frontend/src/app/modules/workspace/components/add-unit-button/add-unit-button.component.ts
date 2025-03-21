@@ -27,7 +27,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-add-unit-button',
   templateUrl: './add-unit-button.component.html',
   styleUrls: ['./add-unit-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, TranslateModule]
 })
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {

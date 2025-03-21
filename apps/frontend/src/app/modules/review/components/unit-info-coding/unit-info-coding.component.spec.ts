@@ -1,8 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { UnitInfoCodingComponent } from './unit-info-coding.component';
 
@@ -10,7 +11,7 @@ describe('UnitInfoCodingComponent', () => {
   let component: UnitInfoCodingComponent;
   let fixture: ComponentFixture<UnitInfoCodingComponent>;
 
-  @Component({ selector: 'studio-lite-unit-info-loader', template: '' })
+  @Component({ selector: 'studio-lite-unit-info-loader', template: '', standalone: false })
   class MockUnitInfoLoader {}
 
   beforeEach(async () => {
@@ -19,13 +20,15 @@ describe('UnitInfoCodingComponent', () => {
         MockUnitInfoLoader
       ],
       imports: [
-        TranslateModule.forRoot(),
-        HttpClientModule
+        TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitInfoCodingComponent);

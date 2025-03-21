@@ -10,7 +10,7 @@ describe('PrintOptionsDialogComponent', () => {
   let component: PrintOptionsDialogComponent;
   let fixture: ComponentFixture<PrintOptionsDialogComponent>;
 
-  @Component({ selector: 'studio-lite-print-options', template: '' })
+  @Component({ selector: 'studio-lite-print-options', template: '', standalone: false })
   class MockPrintOptionsComponent {
     @Input() printOptions!: PrintOptions[];
   }

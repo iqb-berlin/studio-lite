@@ -13,7 +13,6 @@ import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.co
   selector: 'studio-lite-unit-info-comments',
   templateUrl: './unit-info-comments.component.html',
   styleUrls: ['./unit-info-comments.component.scss'],
-  standalone: true,
   imports: [UnitInfoLoaderComponent, MatIcon, DatePipe, TranslateModule]
 })
 export class UnitInfoCommentsComponent {

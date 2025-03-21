@@ -3,10 +3,10 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
+import { provideHttpClient } from '@angular/common/http';
 import { VeronaModuleClass } from '../../models/verona-module.class';
 import { environment } from '../../../../../environments/environment';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
@@ -15,7 +15,7 @@ describe('EditWorkspaceSettingsComponent', () => {
   let component: EditWorkspaceSettingsComponent;
   let fixture: ComponentFixture<EditWorkspaceSettingsComponent>;
 
-  @Component({ selector: 'studio-lite-select-module', template: '' })
+  @Component({ selector: 'studio-lite-select-module', template: '', standalone: false })
   class MockSelectModuleComponent {
     @Input() modules!: { [key: string]: VeronaModuleClass };
     @Input() hidden!: boolean;
@@ -32,12 +32,12 @@ describe('EditWorkspaceSettingsComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatCheckboxModule,
-        HttpClientModule,
         MatDialogModule,
         MatSelectModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

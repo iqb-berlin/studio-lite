@@ -17,7 +17,6 @@ import { State } from '../../../admin/models/state.type';
   selector: 'studio-lite-states',
   templateUrl: './states.component.html',
   styleUrls: ['./states.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatProgressSpinner, MatButton, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule]
 })

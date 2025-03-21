@@ -10,7 +10,6 @@ import { BackendService } from '../../../comments/services/backend.service';
   selector: 'studio-lite-unit-print-comments',
   templateUrl: './unit-print-comments.component.html',
   styleUrls: ['./unit-print-comments.component.scss'],
-  standalone: true,
   imports: [MatIcon, AsyncPipe, DatePipe, TranslateModule]
 })
 export class UnitPrintCommentsComponent implements OnInit {

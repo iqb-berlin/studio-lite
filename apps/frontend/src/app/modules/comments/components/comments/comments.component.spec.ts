@@ -1,12 +1,12 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { CommentsComponent } from './comments.component';
 import { BackendService } from '../../services/backend.service';
@@ -18,7 +18,8 @@ describe('UnitCommentsComponent', () => {
   let fixture: ComponentFixture<CommentsComponent>;
 
   @Pipe({
-    name: 'rootComments'
+    name: 'rootComments',
+    standalone: false
   })
   class MockRootCommentsPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
@@ -27,7 +28,7 @@ describe('UnitCommentsComponent', () => {
     }
   }
 
-  @Component({ selector: 'studio-lite-comment-editor', template: '' })
+  @Component({ selector: 'studio-lite-comment-editor', template: '', standalone: false })
   class MockCommentEditorComponent {
     @Input() submitLabel!: string;
     @Input() initialHTML!: string;
@@ -35,7 +36,7 @@ describe('UnitCommentsComponent', () => {
     @Input() label!: string;
   }
 
-  @Component({ selector: 'studio-lite-comment', template: '' })
+  @Component({ selector: 'studio-lite-comment', template: '', standalone: false })
   class MockCommentComponent {
     @Input() comment!: Comment;
     @Input() activeComment!: ActiveComment | null;
@@ -55,10 +56,10 @@ describe('UnitCommentsComponent', () => {
       ],
       imports: [
         TranslateModule.forRoot(),
-        MatDialogModule,
-        HttpClientModule
+        MatDialogModule
       ],
       providers: [
+        provideHttpClient(),
         BackendService,
         {
           provide: 'SERVER_URL',

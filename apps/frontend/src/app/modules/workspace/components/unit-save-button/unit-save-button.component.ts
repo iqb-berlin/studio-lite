@@ -17,7 +17,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-unit-save-button',
   templateUrl: './unit-save-button.component.html',
   styleUrls: ['./unit-save-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, MatIcon, TranslateModule]
 })
 export class UnitSaveButtonComponent {

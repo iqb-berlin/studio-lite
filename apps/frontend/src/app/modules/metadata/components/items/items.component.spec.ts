@@ -12,7 +12,7 @@ describe('ItemsComponent', () => {
   let component: ItemsComponent;
   let fixture: ComponentFixture<ItemsComponent>;
 
-  @Component({ selector: 'studio-lite-wrapped-icon', template: '' })
+  @Component({ selector: 'studio-lite-wrapped-icon', template: '', standalone: false })
   class MockWrappedIconComponent {
   }
 

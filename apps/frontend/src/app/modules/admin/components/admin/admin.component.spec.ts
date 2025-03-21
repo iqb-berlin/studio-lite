@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { RouterTestingModule } from '@angular/router/testing';
 import { MatTabsModule } from '@angular/material/tabs';
+import { provideRouter } from '@angular/router';
 import { AdminComponent } from './admin.component';
 
 describe('AppComponent', () => {
@@ -12,8 +12,10 @@ describe('AppComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatTabsModule,
-        RouterTestingModule,
         TranslateModule.forRoot()
+      ],
+      providers: [
+        provideRouter([])
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(AdminComponent);

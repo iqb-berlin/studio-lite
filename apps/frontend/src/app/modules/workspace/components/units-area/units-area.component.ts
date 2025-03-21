@@ -17,7 +17,6 @@ import { UnitSaveButtonComponent } from '../unit-save-button/unit-save-button.co
   selector: 'studio-lite-units-area',
   templateUrl: './units-area.component.html',
   styleUrls: ['./units-area.component.scss'],
-  standalone: true,
   imports: [UnitSaveButtonComponent, UpdateUnitsButtonComponent, UnitSelectionComponent, AddUnitButtonComponent,
     DeleteUnitButtonComponent, EditUnitButtonComponent, AsyncPipe, TranslateModule]
 })

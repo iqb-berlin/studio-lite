@@ -15,7 +15,6 @@ import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-gro
   selector: 'studio-lite-edit-workspace-group',
   templateUrl: './edit-workspace-group.component.html',
   styleUrls: ['./edit-workspace-group.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

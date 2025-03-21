@@ -8,7 +8,6 @@ import { CommentsComponent } from '../../../comments/components/comments/comment
 @Component({
   templateUrl: './unit-comments.component.html',
   styleUrls: ['./unit-comments.component.scss'],
-  standalone: true,
   imports: [CommentsComponent]
 })
 export class UnitCommentsComponent implements OnDestroy {

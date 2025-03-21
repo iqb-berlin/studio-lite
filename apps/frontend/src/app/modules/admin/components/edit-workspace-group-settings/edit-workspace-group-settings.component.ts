@@ -16,7 +16,6 @@ import { Profile } from '../../../shared/models/profile.type';
   selector: 'studio-lite-edit-workspace-group',
   templateUrl: './edit-workspace-group-settings.component.html',
   styleUrls: ['./edit-workspace-group-settings.component.scss'],
-  standalone: true,
   imports: [MatDialogTitle, ProfilesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

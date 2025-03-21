@@ -15,7 +15,6 @@ import { BackendService as AppBackendService } from '../../../../services/backen
   selector: 'studio-lite-new-group-button',
   templateUrl: './new-group-button.component.html',
   styleUrls: ['./new-group-button.component.scss'],
-  standalone: true,
   imports: [MatIconButton, MatTooltip, MatIcon, TranslateModule]
 })
 export class NewGroupButtonComponent {

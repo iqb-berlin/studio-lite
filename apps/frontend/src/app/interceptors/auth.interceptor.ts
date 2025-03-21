@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor, HttpHeaders
+  HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpHeaders
 } from '@angular/common/http';
 import { finalize, Observable, tap } from 'rxjs';
 import { AppService } from '../services/app.service';
