@@ -9,7 +9,8 @@
         [lineSize]="gutterLineSize"
         [hotspotSize]="gutterHotspotSize"
         (startDragging)="onGutterStartDragging($event)"
-        (dragging)="onGutterDragging($event)">
+        (dragging)="onGutterDragging($event)"
+        (stopDragging)="onGutterStopDragging()">
       </studio-lite-splitter-gutter>
     }
   }

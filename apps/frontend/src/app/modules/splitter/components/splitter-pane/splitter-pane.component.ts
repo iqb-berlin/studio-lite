@@ -1,4 +1,5 @@
 import { Component, ElementRef, Input } from '@angular/core';
+import { SplitterService } from '../../services/splitter.service';
 
 @Component({
   selector: 'studio-lite-splitter-pane',
@@ -14,21 +15,29 @@ export class SplitterPaneComponent {
   @Input() minSize: number = 0;
   @Input() maxSize!: number;
 
-  constructor(public elementRef: ElementRef) { }
+  constructor(public elementRef: ElementRef, private splitterService: SplitterService) {
+  }
 
   init(index: number, isLast: boolean): void {
     this.index = index;
     this.isLast = isLast;
     this.elementRef.nativeElement.style.order = index;
-    if (this.initialSize !== 'auto') {
+    this.initSize();
+  }
+
+  private initSize(): void {
+    const storedSize = this.splitterService.panelSizes[this.index];
+    if (storedSize && !this.isLast) {
+      this.setSize(storedSize);
+    } else if (this.initialSize !== 'auto') {
       this.setSize(this.initialSize);
     }
-    if (this.initialSize !== 'auto' || this.isLast) {
+    if (this.initialSize !== 'auto' || (storedSize && !this.isLast) || this.isLast) {
       this.setStyle(this.size);
     }
   }
 
-  setSize(size: number): void {
+  private setSize(size: number): void {
     let paneSize = size < this.minSize ? this.minSize : size;
     paneSize = this.maxSize && paneSize > this.maxSize ? this.maxSize : paneSize;
     this.size = paneSize;

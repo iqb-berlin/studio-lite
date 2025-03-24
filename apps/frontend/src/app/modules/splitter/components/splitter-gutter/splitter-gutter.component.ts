@@ -16,6 +16,7 @@ export class SplitterGutterComponent {
   @Input() isFixed!: boolean;
   @Output() dragging = new EventEmitter<{ index: number, position: number }>();
   @Output() startDragging = new EventEmitter<number>();
+  @Output() stopDragging = new EventEmitter<number>();
 
   onPointerDown(event: PointerEvent) {
     if (!this.isFixed) {
@@ -35,5 +36,6 @@ export class SplitterGutterComponent {
   @HostListener('window:pointerup')
   onGlobalPointerUp(): void {
     this.pointerPressed = false;
+    this.stopDragging.emit(this.index);
   }
 }
