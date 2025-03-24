@@ -10,7 +10,7 @@ services:
     environment:
       <<: *env-postgres
     volumes:
-      - "db_vol:/var/lib/postgresql/data"
+      - "${DB_VOL}:/var/lib/postgresql/data"
     networks:
       - application-network
 
@@ -58,6 +58,12 @@ services:
 
 volumes:
   db_vol:
+  db_external_vol:
+    driver: local
+    driver_opts:
+      device: ${DB_EXTERNAL_VOL_PATH}
+      o: bind
+      type: none
   backend_vol:
 
 networks:
