@@ -11,7 +11,7 @@ import {
 } from '../../support/util';
 import { UserData } from '../../support/testData';
 
-describe.skip('UI User Management', () => {
+describe('UI User Management', () => {
   const newUser: UserData = {
     username: 'normaluser',
     password: '5678'

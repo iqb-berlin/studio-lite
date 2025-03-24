@@ -11,7 +11,7 @@ import {
 } from '../../support/util';
 import { AccessLevel, UserData } from '../../support/testData';
 
-describe.skip('UI Administration Management', () => {
+describe('UI Administration Management', () => {
   // eslint-disable-next-line max-len
   const modules:string[] = ['iqb-schemer-2.0.0-beta.html', 'iqb-editor-aspect-2.5.0-beta5.html', 'iqb-player-aspect-2.5.0-beta5.html'];
   const group1:string = 'Mathematik Primär Bereichsgruppe';
