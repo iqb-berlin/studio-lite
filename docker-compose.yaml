@@ -6,11 +6,27 @@ x-env-postgres: &env-postgres
   POSTGRES_DB: ${POSTGRES_DB}
 
 services:
-  db:
+  frontend:
+    depends_on:
+      db:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
+    networks:
+      - application-network
+
+  backend:
+    depends_on:
+      db:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
     environment:
+      API_HOST: backend
+      JWT_SECRET: ${JWT_SECRET}
       <<: *env-postgres
-    volumes:
-      - "${DB_VOL}:/var/lib/postgresql/data"
     networks:
       - application-network
 
@@ -32,31 +48,16 @@ services:
     networks:
       - application-network
 
-  backend:
-    depends_on:
-      db:
-        condition: service_healthy
-      liquibase:
-        condition: service_completed_successfully
+  db:
     environment:
-      API_HOST: backend
-      JWT_SECRET: ${JWT_SECRET}
       <<: *env-postgres
-    networks:
-      - application-network
-
-  frontend:
-    depends_on:
-      db:
-        condition: service_healthy
-      liquibase:
-        condition: service_completed_successfully
-      backend:
-        condition: service_started
+    volumes:
+      - "${DB_VOL}:/var/lib/postgresql/data"
     networks:
       - application-network
 
 volumes:
+  backend_vol:
   db_vol:
   db_external_vol:
     driver: local
@@ -64,7 +65,6 @@ volumes:
       device: ${DB_EXTERNAL_VOL_PATH}
       o: bind
       type: none
-  backend_vol:
 
 networks:
   application-network:

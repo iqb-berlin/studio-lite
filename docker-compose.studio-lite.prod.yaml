@@ -1,10 +1,21 @@
 services:
-  db:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
+  frontend:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certResolver=${TLS_CERTIFICATE_RESOLVER}"
+      - "traefik.http.routers.frontend.tls.domains[0].main=${SERVER_NAME}"
+      - "traefik.http.routers.frontend.tls.domains[0].sans=www.${SERVER_NAME}"
+      - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.frontend.middlewares=security-headers"
+      - "traefik.http.routers.frontend.service=frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+      - "traefik.docker.network=app-net"
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
+    volumes:
+      - "./config/frontend/default.conf.template:/etc/nginx/templates/default.conf.template:ro"
     restart: always
-
-  liquibase:
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
 
   backend:
     labels:
@@ -24,20 +35,9 @@ services:
       - "backend_vol:/usr/src/studio-lite-api/packages"
     restart: always
 
-  frontend:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.routers.frontend.tls.certResolver=${TLS_CERTIFICATE_RESOLVER}"
-      - "traefik.http.routers.frontend.tls.domains[0].main=${SERVER_NAME}"
-      - "traefik.http.routers.frontend.tls.domains[0].sans=www.${SERVER_NAME}"
-      - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
-      - "traefik.http.routers.frontend.middlewares=security-headers"
-      - "traefik.http.routers.frontend.service=frontend"
-      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-      - "traefik.docker.network=app-net"
-    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
-    volumes:
-      - "./config/frontend/default.conf.template:/etc/nginx/templates/default.conf.template:ro"
+  liquibase:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-liquibase:${TAG}
+
+  db:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-db:${TAG}
     restart: always
