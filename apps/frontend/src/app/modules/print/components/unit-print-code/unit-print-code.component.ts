@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CodeData } from '@iqb/responses';
+import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({

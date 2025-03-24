@@ -1,5 +1,5 @@
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { VariableCodingData } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { Comment } from '../../comments/models/comment.interface';
 
 export class UnitData {

@@ -7,8 +7,8 @@ import { map } from 'rxjs/operators';
 import {
   UnitInListDto, UnitPropertiesDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
-import { CodingScheme } from '@iqb/responses';
 import { HttpParams } from '@angular/common/http';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { BackendService } from './backend.service';
 import {
   UnitMetadataStore
@@ -41,7 +41,7 @@ export class WorkspaceService {
   lastChangedSchemeUser?: string;
   isValidFormKey = new BehaviorSubject<boolean>(true);
   states: State[] = [];
-  codingSchemer!: CodingScheme;
+  codingScheme!: CodingScheme;
   dropBoxId: number | null = null;
   hasDroppedUnits: boolean = false;
 
@@ -176,7 +176,6 @@ export class WorkspaceService {
               this.lastChangedScheme = new Date(unitData.lastChangedScheme);
               this.lastChangedSchemeUser = unitData.lastChangedSchemeUser;
             }
-            console.log('unitDatametadata', unitData.metadata);
             this.setUnitMetadataStore(new UnitMetadataStore(unitData));
           } else {
             this.setUnitMetadataStore(new UnitMetadataStore(<UnitPropertiesDto>{ id: selectedUnitId }));

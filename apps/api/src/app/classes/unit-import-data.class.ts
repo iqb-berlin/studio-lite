@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { VariableInfo } from '@iqb/responses';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileIo } from '../interfaces/file-io.interface';
 
 export class UnitImportData {

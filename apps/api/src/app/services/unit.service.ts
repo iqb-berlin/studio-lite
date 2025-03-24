@@ -14,7 +14,7 @@ import {
   UnitItemWithMetadataDto,
   UnitFullMetadataDto, UnitItemMetadataDto, MetadataDto
 } from '@studio-lite-lib/api-dto';
-import { VariableCodingData } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
