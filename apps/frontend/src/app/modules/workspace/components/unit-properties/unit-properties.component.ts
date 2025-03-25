@@ -20,7 +20,8 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import {
   MatCard, MatCardHeader, MatCardTitle, MatCardContent
 } from '@angular/material/card';
-import { CodingScheme, VariableInfo } from '@iqb/responses';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';

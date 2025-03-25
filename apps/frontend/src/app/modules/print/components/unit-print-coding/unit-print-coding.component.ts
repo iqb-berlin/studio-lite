@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { VariableCodingData } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { BackendService } from '../../../workspace/services/backend.service';

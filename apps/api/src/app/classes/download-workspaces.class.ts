@@ -5,9 +5,8 @@ import {
   CodeBookContentSetting,
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
-import {
-  CodeData, VariableCodingData, ToTextFactory, CodingScheme, CodeAsText
-} from '@iqb/responses';
+import { ToTextFactory, CodeAsText } from '@iqb/responses';
+import { CodingScheme, VariableCodingData, CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { DownloadDocx } from './downloadDocx.class';

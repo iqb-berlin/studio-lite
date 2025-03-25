@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { VariableInfo } from '@iqb/responses';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class UnitPropertiesDto {

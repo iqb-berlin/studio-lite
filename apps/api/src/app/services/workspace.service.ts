@@ -8,8 +8,9 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
-  CodeData, CodingScheme, CodingSchemeProblem, RuleSet, VariableCodingData
-} from '@iqb/responses';
+  VariableCodingData, RuleSet, CodeData
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -252,8 +253,8 @@ export class WorkspaceService {
           const parsedUnitScheme = JSON.parse(unit.scheme as string);
           let codingType:string;
           if (parsedUnitScheme) {
-            const schemer = new CodingScheme(parsedUnitScheme.variableCodings);
-            const validation = schemer.validate(unit.variables);
+            const validation = CodingSchemeFactory
+              .validate(unit.variables, parsedUnitScheme.variableCodings);
             let validationResultText: string;
             parsedUnitScheme.variableCodings?.forEach((codingVariable: VariableCodingData) => {
               const validationResult = validation

@@ -7,10 +7,12 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
-import { CodingScheme, Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeFactory } from '@iqb/responses';
+import { Response } from '@iqbspecs/response/response.interface';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -570,14 +572,12 @@ export class UnitPreviewComponent
         }
         return;
       }
-      this.workspaceService.codingSchemer = new CodingScheme(
-        codingScheme.variableCodings
-      );
+      this.workspaceService.codingScheme = codingScheme;
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes.length > 0)
         .map(vc => (vc.alias ? vc.alias : vc.id));
-      const newResponses = this.workspaceService.codingSchemer?.code(
-        responses!
+      const newResponses = CodingSchemeFactory.code(
+        responses!, this.workspaceService.codingScheme.variableCodings
       );
       this.showCodingResults(newResponses, varsWithCodes);
     }

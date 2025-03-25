@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogTitle } from '@angular/mater
 import { TranslateModule } from '@ngx-translate/core';
 import { JsonPipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
-import { Response } from '@iqb/responses';
+import { Response } from '@iqbspecs/response/response.interface';
 import {
   MatCell,
   MatCellDef,
