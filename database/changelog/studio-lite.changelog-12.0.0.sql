@@ -10,6 +10,7 @@ CREATE TABLE "public"."unit_item"
   "locked"   boolean DEFAULT false,
   "position"  Text,
   "variable_id"  VARCHAR(100),
+  "variable_read_only_id" VARCHAR(100),
   "weighting"  INTEGER,
   "description" TEXT,
   "unit_id"    INTEGER NOT NULL

@@ -27,6 +27,11 @@ class UnitItem {
   })
     variableId: string;
 
+  @Column({
+    name: 'variable_read_only_id'
+  })
+    variableReadOnlyId: string;
+
   @Column()
     weighting: number;
 
