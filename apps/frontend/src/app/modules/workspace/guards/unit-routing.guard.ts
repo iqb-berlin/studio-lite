@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, map, tap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
@@ -21,14 +21,19 @@ export class UnitRoutingCanDeactivateGuard {
     if (this.workspaceService.isChanged() && this.workspaceService.userAccessLevel > 1) {
       let content = '';
       let isWarning = true;
-      this.workspaceService.isValidFormKey.subscribe(isValid => {
-        isWarning = !isValid;
-        if (isValid) {
-          content = this.translateService.instant('workspace.save-unit-data-changes');
-        } else {
-          content = this.translateService.instant('workspace.save-unit-data-changes-warning');
-        }
-      });
+
+      this.workspaceService.isValidFormKey.pipe(
+        map(isValid => ({
+          isWarning: !isValid,
+          content: isValid ?
+            this.translateService.instant('workspace.save-unit-data-changes') :
+            this.translateService.instant('workspace.save-unit-data-changes-warning')
+        })),
+        tap(({ isWarning: warning, content: message }) => {
+          isWarning = warning;
+          content = message;
+        })
+      ).subscribe();
       const dialogRef = this.confirmDialog.open(SaveOrDiscardComponent, {
         width: '500px',
         data: <ConfirmDialogData> {
@@ -43,21 +48,29 @@ export class UnitRoutingCanDeactivateGuard {
       });
       return dialogRef.afterClosed().pipe(
         switchMap(result => {
-          if (result === false) {
-            return of(false);
+          console.log('Dialogergebnis:', result);
+
+          switch (result) {
+            case false:
+              return of(false);
+
+            case 'NO':
+              return of(true);
+
+            case 'YES':
+              return from(this.workspaceService.saveUnitData()).pipe(
+                map(saveResult => {
+                  const message = saveResult ?
+                    'Änderungen an Aufgabedaten gespeichert' :
+                    'Problem: Konnte Aufgabendaten nicht speichern';
+                  this.snackBar.open(message, '', { duration: 1000 });
+                  return saveResult;
+                })
+              );
+
+            default:
+              return of(false);
           }
-          if (result === 'NO') {
-            return of(true);
-          } // 'YES':
-          return this.workspaceService.saveUnitData()
-            .then(saveResult => {
-              if (saveResult) {
-                this.snackBar.open('Änderungen an Aufgabedaten gespeichert', '', { duration: 1000 });
-                return true;
-              }
-              this.snackBar.open('Problem: Konnte Aufgabendaten nicht speichern', '', { duration: 1000 });
-              return false;
-            });
         })
       );
     }
