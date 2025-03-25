@@ -260,7 +260,7 @@ export function addUnitPred(unit:UnitData):void {
         .clear()
         .type(unit.group);
     } else {
-      cy.get('svg')
+      cy.get('mat-dialog-content').find('svg')
         .click();
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${unit.group}")`).length > 0) {
@@ -305,7 +305,7 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
         .clear()
         .type(newUnit.group);
     } else {
-      cy.get('svg')
+      cy.get('mat-dialog-content').find('svg')
         .click();
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${unit1.group}")`).length > 0) {

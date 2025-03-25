@@ -83,12 +83,10 @@ export function selectProfileForArea(profile:IqbProfile) {
     .click();
   cy.get('span:contains("Einstellungen")')
     .click();
-  cy.get('svg').eq(1).click();
+  cy.contains('div', 'Aufgaben Profil').find('svg').click();
   cy.get('mat-option>span').contains(profile).click();
-  // cy.wait(400);
-  cy.get('svg').eq(2).click();
+  cy.contains('div', 'Item Profil').find('svg').click();
   cy.get('mat-option>span').contains(profile).click();
-
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
 
@@ -176,7 +174,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
       .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type:string, fieldName:string) => {
       cy.log(IqbProfileExamples.get(profile).get(fieldName));
-      if (IqbProfileExamples.get(profile).get(fieldName) !== ('undefined' && '')) {
+      if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
           case 'number': {
             getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile, moreThanOne);
