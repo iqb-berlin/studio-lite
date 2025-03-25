@@ -18,7 +18,7 @@ export class SplitterGutterComponent {
   @Output() startDragging = new EventEmitter<number>();
   @Output() stopDragging = new EventEmitter<number>();
 
-  onPointerDown(event: PointerEvent) {
+  onPointerDown(event: MouseEvent) {
     if (!this.isFixed) {
       this.pointerPressed = true;
       this.startDragging.emit(this.index);
@@ -26,14 +26,14 @@ export class SplitterGutterComponent {
     }
   }
 
-  @HostListener('window:pointermove', ['$event'])
-  onGlobalPointerMove(event: PointerEvent) {
+  @HostListener('window:mousemove', ['$event'])
+  onGlobalPointerMove(event: MouseEvent) {
     if (this.pointerPressed) {
       this.dragging.emit({ index: this.index, position: event.clientX });
     }
   }
 
-  @HostListener('window:pointerup')
+  @HostListener('window:mouseup')
   onGlobalPointerUp(): void {
     this.pointerPressed = false;
     this.stopDragging.emit(this.index);
