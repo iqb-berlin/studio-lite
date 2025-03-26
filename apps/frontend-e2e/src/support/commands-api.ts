@@ -1121,6 +1121,23 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   });
 });
 
+// 87a
+Cypress.Commands.add('updateGroupsByUserAPI', (userId:string, groupIds: string[], token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/users/${userId}/workspace-groups`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      ids: groupIds
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 88
 Cypress.Commands.add('deleteWsAPI', (qs:string[], token:string) => {
   const authorization = `bearer ${token}`;
