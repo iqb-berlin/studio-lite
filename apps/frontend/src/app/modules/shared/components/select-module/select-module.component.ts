@@ -17,7 +17,6 @@ import { VeronaModuleClass } from '../../models/verona-module.class';
   selector: 'studio-lite-select-module',
   templateUrl: './select-module.component.html',
   styleUrls: ['./select-module.component.scss'],
-  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, TranslateModule]
 })
 export class SelectModuleComponent implements OnDestroy {

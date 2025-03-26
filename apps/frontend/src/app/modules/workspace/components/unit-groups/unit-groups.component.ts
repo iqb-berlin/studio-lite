@@ -10,7 +10,6 @@ import { MatIconButton } from '@angular/material/button';
   selector: 'studio-lite-unit-groups',
   templateUrl: './unit-groups.component.html',
   styleUrls: ['./unit-groups.component.scss'],
-  standalone: true,
   imports: [MatIconButton, MatIcon, TranslateModule]
 })
 export class UnitGroupsComponent {

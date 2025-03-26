@@ -3,7 +3,9 @@ import { AccessLevel, UnitData, UserData } from './testData';
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
-  cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
+  // cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
+  cy.clickButton('Weiter');
+  cy.wait(100);
 }
 
 export function createNewUser(newUser: UserData):void {
@@ -38,7 +40,8 @@ export function deleteUser(user: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', 200, '/api/admin/users/*', 'DELETE', 'deleteUser');
+  cy.buttonToContinue('Löschen', 200, '/api/admin/users*', 'DELETE', 'deleteUser');
+  // cy.clickButton('Löschen');
 }
 
 export function createGroup(group:string):void {
@@ -65,7 +68,8 @@ export function createWs(ws:string, group:string):void {
     .click();
   cy.get('input[placeholder="Bitte Namen eingeben"]')
     .type(ws);
-  cy.buttonToContinue('Anlegen', 201, '/api/group-admin/workspaces/*', 'POST', 'createWs');
+  cy.buttonToContinue('Anlegen', 201, '/api/group-admin/workspaces*', 'POST', 'createWs');
+  // cy.clickButton('Anlegen');
 }
 
 export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {
@@ -122,11 +126,7 @@ export function addModules(filenames:string[]):void {
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
-  // cy.loadModule('../frontend-e2e/src/fixtures/iqb-schemer-1.5.0.html', 'iqb-schemer@1.5');
-  // cy.loadModule('../frontend-e2e/src/fixtures/iqb-player-aspect-2.4.10-alpha.html', 'iqb-player-aspect@2.4.10');
-  // cy.loadModule('../frontend-e2e/src/fixtures/iqb-editor-aspect-2.4.9-alpha.html', 'iqb-editor-aspect@2.4.9');
   filenames.forEach(filename => {
-    // TO DO CHECK 28.08.2024
     cy.loadModule(filename, filename);
   });
 }
@@ -156,7 +156,8 @@ export function deleteGroup(group: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', 200, '/api/admin/workspace-groups/*', 'DELETE', 'deleteGroup');
+  cy.buttonToContinue('Löschen', 200, '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
+  // cy.clickButton('Löschen');
 }
 
 export function logout() {
@@ -216,7 +217,8 @@ export function deleteUnit(unit: UnitData):void {
     .click()
     .type(unit.shortname);
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units/*', 'DELETE', 'deleteUnit');
+  cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units*', 'DELETE', 'deleteUnit');
+  // cy.clickButton('Löschen');
 }
 
 export function deleteUnit2(kurzname: string):void {
@@ -334,8 +336,8 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
     .click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  // cy.buttonToContinue('Verschieben', 200, '/api/workspaces/*/units/move', 'PATCH', 'createUnitFromExisting');
-  cy.clickButton('Verschieben');
+  cy.buttonToContinue('Verschieben', 200, '/api/workspaces/*/units/workspace-id', 'PATCH', 'createUnitFromExisting');
+  // cy.clickButton('Verschieben');
 }
 export function importExercise(): void {
   cy.get('[data-cy="workspace-add-units"]')

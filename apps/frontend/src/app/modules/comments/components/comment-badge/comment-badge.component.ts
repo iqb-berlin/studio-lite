@@ -5,7 +5,6 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'studio-lite-comment-badge',
   templateUrl: './comment-badge.component.html',
   styleUrls: ['./comment-badge.component.scss'],
-  standalone: true,
   imports: [MatTooltip]
 })
 export class CommentBadgeComponent implements OnInit {

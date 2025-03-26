@@ -13,7 +13,6 @@ import { AppService } from '../../../../services/app.service';
   selector: 'studio-lite-wsg-admin',
   templateUrl: './wsg-admin.component.html',
   styleUrls: ['./wsg-admin.component.scss'],
-  standalone: true,
   imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatTabNavPanel, RouterOutlet, TranslateModule]
 })
 export class WsgAdminComponent implements OnInit {

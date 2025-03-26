@@ -16,7 +16,6 @@ import { MyData } from '../../models/my-data.interface';
   selector: 'studio-lite-edit-my-data',
   templateUrl: './edit-my-data.component.html',
   styleUrls: ['./edit-my-data.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

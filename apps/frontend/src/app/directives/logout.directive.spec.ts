@@ -1,6 +1,5 @@
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { inject, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { LogoutDirective } from './logout.directive';
 import { AppService } from '../services/app.service';
@@ -12,8 +11,7 @@ describe('LogoutDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MatDialogModule,
-        HttpClientModule
+        MatDialogModule
       ],
       providers: [{
         provide: 'SERVER_URL',

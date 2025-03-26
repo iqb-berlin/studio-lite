@@ -20,7 +20,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-verona-modules',
   templateUrl: './verona-modules.component.html',
   styleUrls: ['./verona-modules.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
 })

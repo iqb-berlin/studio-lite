@@ -12,7 +12,6 @@ import { MetadataProfileEntriesComponent }
   selector: 'studio-lite-print-metadata',
   templateUrl: './print-metadata.component.html',
   styleUrls: ['./print-metadata.component.scss'],
-  standalone: true,
   imports: [MetadataProfileEntriesComponent, MetadataReadonlyItemsComponent, TranslateModule]
 })
 export class PrintMetadataComponent implements OnChanges {

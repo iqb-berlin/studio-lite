@@ -10,7 +10,6 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 @Component({
   templateUrl: './show-metadata.component.html',
   styleUrls: ['show-metadata.component.scss'],
-  standalone: true,
   imports: [
     MatDialogTitle,
     MatDialogContent,
@@ -18,7 +17,8 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
     MatDialogActions,
     MatButton,
     MatDialogClose,
-    TranslateModule]
+    TranslateModule
+  ]
 })
 
 export class ShowMetadataComponent {

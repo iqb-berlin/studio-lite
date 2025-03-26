@@ -3,7 +3,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { WorkspaceGroupsMenuComponent } from './workspace-groups-menu.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -13,12 +13,14 @@ describe('WorkspaceGroupsMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }],
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
+      ],
       imports: [
-        HttpClientModule,
         MatDialogModule,
         MatIconModule,
         MatTooltipModule,

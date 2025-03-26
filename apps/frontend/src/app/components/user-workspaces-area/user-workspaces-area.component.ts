@@ -15,7 +15,6 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   selector: 'studio-lite-user-workspaces-area',
   templateUrl: './user-workspaces-area.component.html',
   styleUrls: ['./user-workspaces-area.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [AreaTitleComponent, MatButton, RouterLink, MatTooltip, WrappedIconComponent, UserMenuComponent, WarningComponent, UserWorkspacesGroupsComponent, TranslateModule]
 })

@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
 import { UpdateUnitsButtonComponent } from './update-units-button.component';
 
@@ -19,14 +19,15 @@ describe('UpdateUnitsButtonComponent', () => {
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
-        RouterTestingModule,
-        HttpClientModule,
         MatIconModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UpdateUnitsButtonComponent);

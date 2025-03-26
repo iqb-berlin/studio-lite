@@ -8,7 +8,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-start-review-button',
   templateUrl: './start-review-button.component.html',
   styleUrls: ['./start-review-button.component.scss'],
-  standalone: true,
   imports: [MatAnchor, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class StartReviewButtonComponent {

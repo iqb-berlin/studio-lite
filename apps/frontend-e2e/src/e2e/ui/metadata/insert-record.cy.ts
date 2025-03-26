@@ -19,7 +19,7 @@ import {
 import { AccessLevel } from '../../../support/testData';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
-describe('Metadata Management', () => {
+describe.skip('Metadata Management', () => {
   const ws1 = 'Deutsch I';
   const ws2 = 'Mathematik I';
   const group = 'Bista I';

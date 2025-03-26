@@ -11,17 +11,17 @@ describe('UserReviewsAreaComponent', () => {
   let component: UserReviewsAreaComponent;
   let fixture: ComponentFixture<UserReviewsAreaComponent>;
 
-  @Component({ selector: 'studio-lite-area-title', template: '' })
+  @Component({ selector: 'studio-lite-area-title', template: '', standalone: false })
   class MockAreaTitleComponent {
     @Input() title!: string;
   }
 
-  @Component({ selector: 'studio-lite-user-issues', template: '' })
+  @Component({ selector: 'studio-lite-user-issues', template: '', standalone: false })
   class MockUserIssuesComponent {
     @Input() issues!: UserIssue[];
   }
 
-  @Pipe({ name: 'userIssues' })
+  @Pipe({ name: 'userIssues', standalone: false })
   class MockUserIssuesPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
     transform() {

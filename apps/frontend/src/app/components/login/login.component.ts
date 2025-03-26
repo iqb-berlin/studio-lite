@@ -28,7 +28,6 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   selector: 'studio-lite-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [AreaTitleComponent, MatIconButton, MatTooltip, WrappedIconComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
 })

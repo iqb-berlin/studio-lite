@@ -5,8 +5,6 @@ import { Subject, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
-
-import { CodingScheme } from '@iqb/responses';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -20,7 +18,6 @@ import { RolePipe } from '../../pipes/role.pipe';
   templateUrl: './unit-schemer.component.html',
   styleUrls: ['./unit-schemer.component.scss'],
   host: { class: 'unit-schemer' },
-  standalone: true,
   imports: []
 })
 export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirective implements AfterViewInit, OnDestroy {
@@ -59,8 +56,7 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
           case 'vosSchemeChangedNotification':
             if (msgData.sessionId === this.sessionId) {
               if (msgData.codingScheme) {
-                const codingScheme = JSON.parse(msgData.codingScheme);
-                this.workspaceService.codingSchemer = new CodingScheme(codingScheme.variableCodings);
+                this.workspaceService.codingScheme = JSON.parse(msgData.codingScheme);
                 this.workspaceService.getUnitSchemeStore()?.setData(msgData.codingScheme, msgData.codingSchemeType);
                 // } else { TODO: find solution for vosGetSchemeRequest
                 //   this.postMessageTarget.postMessage({
@@ -84,7 +80,7 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.iFrameElement = this.hostingIframe.nativeElement;
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
       this.message = '';
-      this.workspaceService.loadUnitMetadata().then(() => this.sendUnitData());
+      this.workspaceService.loadUnitProperties().then(() => this.sendUnitData());
     });
     this.addSubscriptionForUnitDefinitionChanges();
   }

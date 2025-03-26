@@ -3,7 +3,7 @@ import {
   UnitDefinitionDto,
   UnitDownloadSettingsDto,
   UnitExportConfigDto,
-  UnitMetadataDto,
+  UnitPropertiesDto,
   UnitSchemeDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
@@ -27,7 +27,7 @@ export class UnitDownloadClass {
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
     const zip = new AdmZip();
-    const unitsMetadata: UnitMetadataDto[] = [];
+    const unitsMetadata: UnitPropertiesDto[] = [];
     const usedPlayers: string[] = [];
     const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(settingService);
 
@@ -80,11 +80,11 @@ export class UnitDownloadClass {
     workspaceId: number,
     unitDownloadSettings: UnitDownloadSettingsDto,
     unitExportConfig: UnitExportConfigDto,
-    unitsMetadata: UnitMetadataDto[],
+    unitsMetadata: UnitPropertiesDto[],
     usedPlayers: string[],
     zip: AdmZip
   ): Promise<void> {
-    const unitMetadata = await unitService.findOnesMetadata(unitId, workspaceId);
+    const unitMetadata = await unitService.findOnesProperties(unitId, workspaceId);
     const unitXml = UnitDownloadClass.createUnitXML(unitExportConfig, unitMetadata);
     UnitDownloadClass.addMetadata(unitMetadata, zip);
     const definitionData = await unitService.findOnesDefinition(unitId);
@@ -101,7 +101,7 @@ export class UnitDownloadClass {
     if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
   }
 
-  private static createUnitXML(unitExportConfig: UnitExportConfigDto, unitMetadata: UnitMetadataDto): XMLBuilder {
+  private static createUnitXML(unitExportConfig: UnitExportConfigDto, unitMetadata: UnitPropertiesDto): XMLBuilder {
     return XmlBuilder.create({ version: '1.0' }, {
       Unit: {
         '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -117,14 +117,14 @@ export class UnitDownloadClass {
     });
   }
 
-  private static addMetadata(unitMetadata: UnitMetadataDto, zip: AdmZip): void {
+  private static addMetadata(unitMetadata: UnitPropertiesDto, zip: AdmZip): void {
     if (Object.keys(unitMetadata.metadata).length !== 0) {
       zip.addFile(`${unitMetadata.key}.vomd`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
     }
   }
 
   private static addUnitDefinition(
-    definitionData: UnitDefinitionDto, unitXml: XMLBuilder, unitMetadata: UnitMetadataDto, zip: AdmZip
+    definitionData: UnitDefinitionDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
   ): void {
     if (definitionData && definitionData.definition && definitionData.definition.length > 0) {
       unitXml.root().ele({
@@ -154,6 +154,7 @@ export class UnitDownloadClass {
         const variableElement = variablesElement.ele({
           Variable: {
             '@id': transformedVariable.id,
+            '@alias': transformedVariable.alias,
             '@type': transformedVariable.type,
             '@format': transformedVariable.format,
             '@nullable': transformedVariable.nullable,
@@ -182,7 +183,7 @@ export class UnitDownloadClass {
   }
 
   private static addComments(
-    comments: UnitCommentDto[], unitXml: XMLBuilder, unitMetadata: UnitMetadataDto, zip: AdmZip
+    comments: UnitCommentDto[], unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
   ): void {
     if (comments && comments.length) {
       unitXml.root().ele({
@@ -195,7 +196,7 @@ export class UnitDownloadClass {
   }
 
   private static addScheme(
-    schemeData: UnitSchemeDto, unitXml: XMLBuilder, unitMetadata: UnitMetadataDto, zip: AdmZip
+    schemeData: UnitSchemeDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
   ): void {
     if (schemeData && schemeData.scheme) {
       unitXml.root().ele({
@@ -251,7 +252,7 @@ export class UnitDownloadClass {
   private static addBooklet(
     unitExportConfig: UnitExportConfigDto,
     unitDownloadSettings: UnitDownloadSettingsDto,
-    unitsMetadata: UnitMetadataDto[],
+    unitsMetadata: UnitPropertiesDto[],
     zip: AdmZip
   ): void {
     const bookletXml = UnitDownloadClass.createBookletXml(unitExportConfig);

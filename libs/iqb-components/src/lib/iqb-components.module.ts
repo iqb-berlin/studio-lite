@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { TranslateModule } from '@ngx-translate/core';
@@ -20,8 +20,14 @@ import { IqbFilesUploadQueueComponent } from './iqb-files/iqbFilesUploadQueue/iq
 import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInputFor/iqbFilesUploadInputFor.directive';
 
 @NgModule({
-  imports: [
-    CommonModule,
+  exports: [
+    ConfirmDialogComponent,
+    MessageDialogComponent,
+    BytesPipe,
+    IqbFilesUploadQueueComponent,
+    IqbFilesUploadInputForDirective
+  ],
+  imports: [CommonModule,
     MatDialogModule,
     MatIconModule,
     MatButtonModule,
@@ -29,7 +35,6 @@ import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInput
     MatExpansionModule,
     FormsModule,
     MatInputModule,
-    HttpClientModule,
     MatProgressBarModule,
     MatCardModule,
     TranslateModule,
@@ -38,15 +43,8 @@ import { IqbFilesUploadInputForDirective } from './iqb-files/iqbFilesUploadInput
     BytesPipe,
     IqbFilesUploadComponent,
     IqbFilesUploadQueueComponent,
-    IqbFilesUploadInputForDirective
-  ],
-  exports: [
-    ConfirmDialogComponent,
-    MessageDialogComponent,
-    BytesPipe,
-    IqbFilesUploadQueueComponent,
-    IqbFilesUploadInputForDirective
-  ]
+    IqbFilesUploadInputForDirective],
+  providers: [provideHttpClient(withInterceptorsFromDi())]
 })
 export class IqbComponentsModule {
   // if config is needed: static forRoot(config: IqbComponentsConfig): ModuleWithProviders {

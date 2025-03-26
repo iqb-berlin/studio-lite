@@ -1,13 +1,12 @@
 import * as Excel from 'exceljs';
 import {
-  UnitMetadataDto,
+  UnitPropertiesDto,
   CodebookUnitDto,
   CodeBookContentSetting,
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
-import {
-  CodeData, VariableCodingData, ToTextFactory, CodingScheme, CodeAsText
-} from '@iqb/responses';
+import { ToTextFactory, CodeAsText } from '@iqb/responses';
+import { CodingScheme, VariableCodingData, CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { DownloadDocx } from './downloadDocx.class';
@@ -152,7 +151,7 @@ export class DownloadWorkspacesClass {
     units: number[]
   ): Promise<Buffer> {
     const mappedColumnNames = DownloadWorkspacesClass.mapColumnNames(columns);
-    const unitsFromWorkspace = await unitService.findAllWithMetadata(workspaceId);
+    const unitsFromWorkspace = await unitService.findAllWithProperties(workspaceId);
     const unitsFiltered = unitsFromWorkspace.filter(
       unit => units.find(su => Number(su) === unit.id));
     const rows =
@@ -186,13 +185,13 @@ export class DownloadWorkspacesClass {
     contentSetting: CodeBookContentSetting,
     unitList: number[]
   ): Promise<Buffer | []> {
-    const units = await unitService.findAllWithMetadata(workspaceId);
+    const units = await unitService.findAllWithProperties(workspaceId);
     const selectedUnits = units.filter(unit => unitList.includes(unit.id)
     );
     const profiles = await settingsService.findMissingsProfiles();
     const missings = profiles.length ? this.getProfileMissings(profiles, contentSetting.missingsProfile) : [];
     const codebook: CodebookUnitDto[] = selectedUnits
-      .map((unit: UnitMetadataDto) => DownloadWorkspacesClass
+      .map((unit: UnitPropertiesDto) => DownloadWorkspacesClass
         .getCodeBookDataForUnit(unit, contentSetting, missings));
     if (contentSetting.exportFormat === 'docx') {
       return new Promise(resolve => {
@@ -343,7 +342,7 @@ export class DownloadWorkspacesClass {
   }
 
   private static getCodeBookDataForUnit(
-    unit: UnitMetadataDto, contentSetting: CodeBookContentSetting, missings: Missing[]
+    unit: UnitPropertiesDto, contentSetting: CodeBookContentSetting, missings: Missing[]
   ): CodebookUnitDto {
     const parsedScheme = unit.scheme ? new CodingScheme(unit.scheme) : null;
     const variableCodings = parsedScheme?.variableCodings || [];
@@ -396,7 +395,7 @@ export class DownloadWorkspacesClass {
       if (workspaceGroupId === 0 || group.id === workspaceGroupId) {
         group.workspaces.forEach(w => {
           wsDataWithMetadataPromises.push(
-            unitService.findAllWithMetadata(w.id).then(unitData => {
+            unitService.findAllWithProperties(w.id).then(unitData => {
               const returnData = <WorkspaceData>{
                 id: w.id,
                 name: w.name,

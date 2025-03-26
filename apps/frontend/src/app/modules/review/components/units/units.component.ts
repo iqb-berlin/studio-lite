@@ -20,7 +20,6 @@ import { UnitInfoComponent } from '../unit-info/unit-info.component';
   selector: 'studio-lite-units',
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.scss'],
-  standalone: true,
   imports: [UnitInfoComponent, PageNavigationComponent]
 })
 export class UnitsComponent implements OnInit, OnDestroy {
@@ -230,7 +229,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
 
   sendUnitDataToPlayer(): void {
     this.setPageList([], '');
-    this.backendService.getUnitMetadata(this.reviewService.reviewId, this.unitData.databaseId).subscribe(umd => {
+    this.backendService.getUnitProperties(this.reviewService.reviewId, this.unitData.databaseId).subscribe(umd => {
       if (umd) {
         this.unitData.dbMetadata = umd;
         this.unitData.playerId = umd.player ? umd.player : '';

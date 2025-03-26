@@ -21,7 +21,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { MatChipsModule } from '@angular/material/chips';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AdminRoutingModule } from './admin-routing.module';
@@ -51,8 +51,8 @@ import {
 } from './components/edit-workspace-group-settings/edit-workspace-group-settings.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
+  exports: [AdminComponent],
+  imports: [CommonModule,
     AdminRoutingModule,
     IqbComponentsModule,
     MatTableModule,
@@ -77,7 +77,6 @@ import {
     MatChipsModule,
     FormsModule,
     TranslateModule,
-    HttpClientModule,
     MatExpansionModule,
     WorkspaceGroupsComponent,
     UsersComponent,
@@ -98,9 +97,7 @@ import {
     ToTimePipe,
     UsersMenuComponent,
     WorkspaceGroupsMenuComponent,
-    EditWorkspaceGroupSettingsComponent
-  ],
-  exports: [AdminComponent],
+    EditWorkspaceGroupSettingsComponent],
   providers: [
     BackendService,
     [
@@ -109,7 +106,8 @@ import {
         useClass: AuthInterceptor,
         multi: true
       }
-    ]
+    ],
+    provideHttpClient(withInterceptorsFromDi())
   ]
 })
 export class AdminModule {}

@@ -18,7 +18,6 @@ const NAME_LOCAL_STORAGE_KEY = 'iqb-studio-user-name-for-review-comments';
   selector: 'studio-lite-comment-dialog',
   templateUrl: './comment-dialog.component.html',
   styleUrls: ['./comment-dialog.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

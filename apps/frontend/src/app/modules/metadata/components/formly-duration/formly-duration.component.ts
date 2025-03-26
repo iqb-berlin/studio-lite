@@ -18,7 +18,6 @@ interface FormlyDurationProps extends FormlyFieldProps {
   selector: 'studio-lite-formly-duration',
   templateUrl: './formly-duration.component.html',
   styleUrls: ['./formly-duration.component.scss'],
-  standalone: true,
   imports: [MatFormField, MatLabel, FormsModule, MatInput]
 })
 export class FormlyDurationComponent

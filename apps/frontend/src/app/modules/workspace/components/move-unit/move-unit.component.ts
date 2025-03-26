@@ -22,7 +22,6 @@ import { MoveUnitData } from '../../models/move-unit-data.interface';
   selector: 'studio-lite-move-unit',
   templateUrl: './move-unit.component.html',
   styleUrls: ['./move-unit.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatCheckbox]
 })

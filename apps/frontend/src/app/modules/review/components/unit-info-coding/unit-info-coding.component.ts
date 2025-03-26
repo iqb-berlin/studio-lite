@@ -1,9 +1,8 @@
 import {
   Component, Input, ViewChild
 } from '@angular/core';
-import { VariableCodingData } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
@@ -16,7 +15,6 @@ interface CodingSchemeDto {
   selector: 'studio-lite-unit-info-coding',
   templateUrl: './unit-info-coding.component.html',
   styleUrls: ['./unit-info-coding.component.scss'],
-  standalone: true,
   imports: [UnitInfoLoaderComponent, TranslateModule]
 })
 export class UnitInfoCodingComponent {

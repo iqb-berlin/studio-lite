@@ -5,10 +5,10 @@ import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HttpClientModule } from '@angular/common/http';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Component } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { SelectUnitListComponent } from './select-unit-list.component';
 
@@ -16,7 +16,7 @@ describe('SelectUnitListComponent', () => {
   let component: SelectUnitListComponent;
   let fixture: ComponentFixture<SelectUnitListComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '' })
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
   class MockSearchFilterComponent {
     value: string = '';
   }
@@ -27,7 +27,6 @@ describe('SelectUnitListComponent', () => {
         MockSearchFilterComponent
       ],
       imports: [
-        HttpClientModule,
         MatTooltipModule,
         MatTableModule,
         MatIconModule,
@@ -37,10 +36,12 @@ describe('SelectUnitListComponent', () => {
         MatFormFieldModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SelectUnitListComponent);

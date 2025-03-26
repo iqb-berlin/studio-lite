@@ -13,7 +13,6 @@ import { WrappedIconComponent } from '../../modules/shared/components/wrapped-ic
   selector: 'studio-lite-user-menu',
   templateUrl: './user-menu.component.html',
   styleUrls: ['./user-menu.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent, ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule]
 })

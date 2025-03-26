@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { MoveWorkspaceComponent } from './move-workspace.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -19,10 +19,10 @@ describe('MoveWorkspaceComponent', () => {
         MatDialogModule,
         ReactiveFormsModule,
         MatSelectModule,
-        HttpClientModule,
         NoopAnimationsModule
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: MAT_DIALOG_DATA,
           useValue: {}

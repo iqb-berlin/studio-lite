@@ -19,7 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTabsModule } from '@angular/material/tabs';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
@@ -85,8 +85,14 @@ import { ShowMetadataComponent } from './components/show-metadata/show-metadata.
 import { PrintUnitsDialogComponent } from './components/print-units-dialog/print-units-dialog.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
+  exports: [
+    WorkspaceComponent,
+    UnitCommentsComponent,
+    UnitGroupComponent,
+    UnitTableComponent,
+    SelectUnitListComponent
+  ],
+  imports: [CommonModule,
     MetadataModule,
     MatIconModule,
     MatTooltipModule,
@@ -103,7 +109,6 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
-    HttpClientModule,
     MatProgressSpinnerModule,
     MatInputModule,
     MatCardModule,
@@ -166,18 +171,11 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     UnitGroupsComponent,
     UnitPropertiesComponent,
     ShowMetadataComponent,
-    PrintUnitsDialogComponent
-  ],
-  exports: [
-    WorkspaceComponent,
-    UnitCommentsComponent,
-    UnitGroupComponent,
-    UnitTableComponent,
-    SelectUnitListComponent
-  ],
+    PrintUnitsDialogComponent],
   providers: [
     UnitRoutingCanDeactivateGuard,
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+    provideHttpClient(withInterceptorsFromDi())
   ]
 })
 export class WorkspaceModule {}

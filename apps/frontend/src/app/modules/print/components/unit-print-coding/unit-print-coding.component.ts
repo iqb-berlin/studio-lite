@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { VariableCodingData } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { BackendService } from '../../../workspace/services/backend.service';
@@ -9,7 +9,6 @@ import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.compo
   selector: 'studio-lite-unit-print-coding',
   templateUrl: './unit-print-coding.component.html',
   styleUrls: ['./unit-print-coding.component.scss'],
-  standalone: true,
   imports: [UnitPrintCodeComponent, TranslateModule]
 })
 export class UnitPrintCodingComponent implements OnInit {

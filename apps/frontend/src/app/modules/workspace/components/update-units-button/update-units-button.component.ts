@@ -12,7 +12,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-update-units-button',
   templateUrl: './update-units-button.component.html',
   styleUrls: ['./update-units-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class UpdateUnitsButtonComponent extends SelectUnitDirective {

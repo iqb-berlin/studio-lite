@@ -25,7 +25,6 @@ import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
   selector: 'studio-lite-verona-modules-table',
   templateUrl: './verona-modules-table.component.html',
   styleUrls: ['./verona-modules-table.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })

@@ -23,7 +23,6 @@ import { NewItemComponent } from '../new-item/new-item.component';
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss'],
-  standalone: true,
   imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon,
     MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
 })

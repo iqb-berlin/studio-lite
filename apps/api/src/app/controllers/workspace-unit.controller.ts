@@ -15,13 +15,21 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   CodeBookContentSetting,
   CodingReportDto,
   CopyUnitDto,
-  CreateUnitDto, IdArrayDto, MoveToDto, NewNameDto, UnitDefinitionDto, UnitInListDto, UnitMetadataDto, UnitSchemeDto
+  CreateUnitDto,
+  IdArrayDto,
+  MoveToDto,
+  NewNameDto,
+  UnitDefinitionDto,
+  UnitFullMetadataDto,
+  UnitInListDto,
+  UnitPropertiesDto,
+  UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
 import { UnitService } from '../services/unit.service';
@@ -131,7 +139,7 @@ export class WorkspaceUnitController {
     return new StreamableFile(file as Buffer);
   }
 
-  @Get('metadata')
+  @Get('properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -153,13 +161,13 @@ export class WorkspaceUnitController {
     type: String
   })
   @ApiTags('workspace unit')
-  async findAllWithMetadata(
+  async findAllWithProperties(
     @WorkspaceId() workspaceId: number,
       @Query('column') columns: string[],
       @Query('id') units: number[],
       @Query('type') type: string,
       @Res({ passthrough: true }) res: Response
-  ): Promise<UnitMetadataDto[] | StreamableFile> {
+  ): Promise<UnitPropertiesDto[] | StreamableFile> {
     if (type === 'unit' || type === 'item') {
       const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
         type, this.unitService, workspaceId, [columns].flat(), [units].flat());
@@ -171,7 +179,20 @@ export class WorkspaceUnitController {
       });
       return new StreamableFile(file as Buffer);
     }
-    return this.unitService.findAllWithMetadata(workspaceId);
+    return this.unitService.findAllWithProperties(workspaceId);
+  }
+
+  @Get(':id/properties')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
+  @ApiNotFoundResponse()
+  @ApiTags('workspace unit')
+  async findOnesProperties(
+    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
+  ): Promise<UnitPropertiesDto> {
+    return this.unitService.findOnesProperties(unitId, workspaceId);
   }
 
   @Get(':id/metadata')
@@ -181,9 +202,9 @@ export class WorkspaceUnitController {
   @ApiOkResponse()
   @ApiTags('workspace unit')
   async findOnesMetadata(
-    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
-  ): Promise<UnitMetadataDto> {
-    return this.unitService.findOnesMetadata(unitId, workspaceId);
+    @Param('id', ParseIntPipe) unitId: number
+  ): Promise<UnitFullMetadataDto> {
+    return this.unitService.findOnesMetadata(unitId);
   }
 
   @Get(':id/definition')
@@ -210,15 +231,15 @@ export class WorkspaceUnitController {
     return this.unitService.findOnesScheme(unitId);
   }
 
-  @Patch(':id/metadata')
+  @Patch(':id/properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchMetadata(@Param('id', ParseIntPipe) unitId: number,
+  async patchUnitProperties(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
-    @Body() unitMetadataDto: UnitMetadataDto) {
-    return this.unitService.patchMetadata(unitId, unitMetadataDto, user);
+    @Body() unitProperties: UnitPropertiesDto) {
+    return this.unitService.patchUnit(unitId, unitProperties, user);
   }
 
   @Patch('workspace-id')

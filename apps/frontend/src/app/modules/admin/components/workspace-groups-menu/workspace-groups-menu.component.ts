@@ -20,7 +20,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-workspace-groups-menu',
   templateUrl: './workspace-groups-menu.component.html',
   styleUrls: ['./workspace-groups-menu.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceGroupsMenuComponent {

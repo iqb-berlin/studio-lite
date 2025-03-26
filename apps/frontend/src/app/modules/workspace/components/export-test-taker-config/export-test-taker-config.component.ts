@@ -11,7 +11,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
   selector: 'studio-lite-export-test-taker-config',
   templateUrl: './export-test-taker-config.component.html',
   styleUrls: ['./export-test-taker-config.component.scss'],
-  standalone: true,
   imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, TranslateModule]
 })
 export class ExportTestTakerConfigComponent {

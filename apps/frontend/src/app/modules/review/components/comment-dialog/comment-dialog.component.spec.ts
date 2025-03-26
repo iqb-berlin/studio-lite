@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { CommentDialogComponent } from './comment-dialog.component';
 
@@ -19,10 +19,10 @@ describe('CommentDialogComponent', () => {
         NoopAnimationsModule,
         FormsModule,
         MatInputModule,
-        MatDialogModule,
-        HttpClientModule
+        MatDialogModule
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: MatDialogRef,
           useValue: {}

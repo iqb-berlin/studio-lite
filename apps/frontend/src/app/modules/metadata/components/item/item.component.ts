@@ -22,7 +22,6 @@ interface ItemModel {
   selector: 'studio-lite-item',
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule]
 })

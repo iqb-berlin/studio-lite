@@ -4,8 +4,8 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { provideHttpClient } from '@angular/common/http';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -20,7 +20,6 @@ describe('EditWorkspaceGroupComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        HttpClientModule,
         MatInputModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
@@ -28,18 +27,20 @@ describe('EditWorkspaceGroupComponent', () => {
         MatSnackBarModule,
         TranslateModule.forRoot()
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      },
-      {
-        provide: MAT_DIALOG_DATA,
-        useValue: {}
-      },
-      {
-        provide: FormBuilder,
-        useValue: {}
-      }
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {}
+        },
+        {
+          provide: FormBuilder,
+          useValue: {}
+        }
       ]
     })
       .compileComponents();

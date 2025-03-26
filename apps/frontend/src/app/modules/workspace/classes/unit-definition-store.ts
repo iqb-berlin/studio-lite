@@ -1,6 +1,6 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
-import { VariableInfo } from '@iqb/responses';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
 export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();

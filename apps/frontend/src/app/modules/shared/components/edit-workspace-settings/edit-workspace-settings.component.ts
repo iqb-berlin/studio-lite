@@ -35,7 +35,6 @@ type SelectedRow = {
   selector: 'studio-lite-edit-workspace-settings',
   templateUrl: './edit-workspace-settings.component.html',
   styleUrls: ['./edit-workspace-settings.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

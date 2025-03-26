@@ -12,7 +12,7 @@ describe('PrintOptionsComponent', () => {
   let component: PrintOptionsComponent;
   let fixture: ComponentFixture<PrintOptionsComponent>;
 
-  @Pipe({ name: 'isActivePrintOption' })
+  @Pipe({ name: 'isActivePrintOption', standalone: false })
   class MockIsActivePrintOptionPipe implements PipeTransform {
     // eslint-disable-next-line class-methods-use-this
     transform() {

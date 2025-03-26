@@ -9,7 +9,6 @@ import { PreviewService } from '../../services/preview.service';
   selector: 'studio-lite-paging-mode-selection',
   templateUrl: './paging-mode-selection.component.html',
   styleUrls: ['./paging-mode-selection.component.scss'],
-  standalone: true,
   imports: [FormsModule, TranslateModule]
 })
 export class PagingModeSelectionComponent {

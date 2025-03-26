@@ -9,7 +9,6 @@ import { RolesMatrixComponent } from '../roles-matrix/roles-matrix.component';
 
 @Component({
   selector: 'studio-lite-roles-header',
-  standalone: true,
   imports: [CommonModule, MatIcon, TranslateModule, MatTooltip, MatIconButton],
   templateUrl: './roles-header.component.html',
   styleUrl: './roles-header.component.scss'

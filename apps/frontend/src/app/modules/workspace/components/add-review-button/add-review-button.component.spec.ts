@@ -3,9 +3,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
-import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
+import { provideHttpClient } from '@angular/common/http';
 import { AddReviewButtonComponent } from './add-review-button.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -20,14 +20,15 @@ describe('AddReviewButtonComponent', () => {
         MatIconModule,
         MatTooltipModule,
         MatButtonModule,
-        HttpClientModule,
         MatSnackBarModule,
         MatDialogModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AddReviewButtonComponent);

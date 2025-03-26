@@ -22,7 +22,6 @@ import { StatusIndicationComponent } from '../status-indication/status-indicatio
   selector: 'studio-lite-preview-bar',
   templateUrl: './preview-bar.component.html',
   styleUrls: ['./preview-bar.component.scss'],
-  standalone: true,
   imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent,
     MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
 })

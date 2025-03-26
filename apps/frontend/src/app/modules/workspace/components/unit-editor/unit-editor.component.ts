@@ -18,7 +18,6 @@ import { RolePipe } from '../../pipes/role.pipe';
   templateUrl: './unit-editor.component.html',
   styleUrls: ['./unit-editor.component.scss'],
   host: { class: 'unit-editor' },
-  standalone: true,
   imports: []
 })
 
@@ -110,7 +109,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
       .subscribe(() => {
         this.message = '';
-        this.workspaceService.loadUnitMetadata().then(() => this.sendUnitDataToEditor());
+        this.workspaceService.loadUnitProperties().then(() => this.sendUnitDataToEditor());
       });
   }
 

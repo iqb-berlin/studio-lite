@@ -10,7 +10,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-copy-review-link-button',
   templateUrl: './copy-review-link-button.component.html',
   styleUrls: ['./copy-review-link-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class CopyReviewLinkButtonComponent {

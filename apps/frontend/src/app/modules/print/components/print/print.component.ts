@@ -10,7 +10,6 @@ import { UnitPrintLayoutComponent } from '../unit-print-layout/unit-print-layout
   selector: 'studio-lite-print',
   templateUrl: './print.component.html',
   styleUrls: ['./print.component.scss'],
-  standalone: true,
   imports: [UnitPrintLayoutComponent]
 })
 export class PrintComponent implements OnInit {

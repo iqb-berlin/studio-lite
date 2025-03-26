@@ -5,7 +5,6 @@ import { MatIcon } from '@angular/material/icon';
   selector: 'studio-lite-wrapped-icon',
   templateUrl: './wrapped-icon.component.html',
   styleUrls: ['./wrapped-icon.component.scss'],
-  standalone: true,
   imports: [MatIcon]
 })
 export class WrappedIconComponent {

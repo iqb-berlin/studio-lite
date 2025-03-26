@@ -24,7 +24,6 @@ import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe
   selector: 'studio-lite-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, NgxTiptapModule, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
 })

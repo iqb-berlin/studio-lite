@@ -9,7 +9,6 @@ import { MatButton } from '@angular/material/button';
   selector: 'studio-lite-delete-dialog',
   templateUrl: './delete-dialog.component.html',
   styleUrls: ['./delete-dialog.component.scss'],
-  standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, TranslateModule]
 })
 export class DeleteDialogComponent {

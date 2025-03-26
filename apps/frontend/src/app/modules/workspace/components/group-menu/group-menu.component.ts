@@ -13,7 +13,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-group-menu',
   templateUrl: './group-menu.component.html',
   styleUrls: ['./group-menu.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class GroupMenuComponent {

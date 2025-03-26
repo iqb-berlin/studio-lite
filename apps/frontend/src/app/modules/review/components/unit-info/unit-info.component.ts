@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   Component, ElementRef, Input, OnDestroy, ViewChild
 } from '@angular/core';
-import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -21,7 +21,6 @@ const PanelWidthOffset = 40;
   selector: 'studio-lite-unit-info',
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule]
 })
@@ -33,9 +32,9 @@ export class UnitInfoComponent implements AfterViewInit, OnDestroy {
     this._unitId = value;
   }
 
-  _unitMetadata?: UnitMetadataDto;
+  _unitMetadata?: UnitPropertiesDto;
   @Input('unitMetadata')
-  set unitMetadata(value: UnitMetadataDto | undefined) {
+  set unitMetadata(value: UnitPropertiesDto | undefined) {
     this._unitMetadata = value;
   }
 

@@ -14,7 +14,6 @@ import { BackendService } from '../../services/backend.service';
   selector: 'studio-lite-missings-profiles-config',
   templateUrl: './missings-profiles-config.component.html',
   styleUrls: ['./missings-profiles-config.component.scss'],
-  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatButton, TranslateModule]
 })
 

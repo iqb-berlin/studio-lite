@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
 import { UnitPrintCommentsComponent } from './unit-print-comments.component';
 import { CommentsModule } from '../../../comments/comments.module';
 import { environment } from '../../../../../environments/environment';
@@ -12,14 +12,15 @@ describe('UnitPrintCommentsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        HttpClientModule,
         TranslateModule.forRoot(),
         CommentsModule
       ],
-      providers: [{
-        provide: 'SERVER_URL',
-        useValue: environment.backendUrl
-      }]
+      providers: [
+        provideHttpClient(),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(UnitPrintCommentsComponent);

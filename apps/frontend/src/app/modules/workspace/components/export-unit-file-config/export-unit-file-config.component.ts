@@ -14,7 +14,6 @@ import { ModuleService } from '../../../shared/services/module.service';
   selector: 'studio-lite-export-unit-file-config',
   templateUrl: './export-unit-file-config.component.html',
   styleUrls: ['./export-unit-file-config.component.scss'],
-  standalone: true,
   imports: [MatCheckbox, FormsModule, TranslateModule, MatCard]
 })
 export class ExportUnitFileConfigComponent implements OnInit {
@@ -33,7 +32,7 @@ export class ExportUnitFileConfigComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.backendService.getUnitListWithMetadata(
+    this.backendService.getUnitListWithProperties(
       this.workspaceService.selectedWorkspaceId
     ).subscribe(unitsWithMetadata => {
       unitsWithMetadata.forEach(umd => {

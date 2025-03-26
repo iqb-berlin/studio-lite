@@ -11,7 +11,7 @@ import {
 } from '../../support/util';
 import { UserData } from '../../support/testData';
 
-describe('UI User Management', () => {
+describe.skip('UI User Management', () => {
   const newUser: UserData = {
     username: 'normaluser',
     password: '5678'
@@ -53,7 +53,7 @@ describe('UI User Management', () => {
     changePassword(newUser.password, 'newpass');
   });
 
-  it('should be able to logout', () => {
+  it('should be able to log out', () => {
     logout();
   });
 

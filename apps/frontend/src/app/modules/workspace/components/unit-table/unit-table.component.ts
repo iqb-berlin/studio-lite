@@ -19,7 +19,6 @@ import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
   selector: 'studio-lite-unit-table',
   templateUrl: './unit-table.component.html',
   styleUrls: ['./unit-table.component.scss'],
-  standalone: true,
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     TranslateModule, HasNewCommentsPipe, StatePipe, UnitDropBoxTooltipPipe]

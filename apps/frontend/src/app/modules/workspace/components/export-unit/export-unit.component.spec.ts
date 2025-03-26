@@ -1,12 +1,12 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { ExportUnitComponent } from './export-unit.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -14,7 +14,7 @@ describe('ExportUnitComponent', () => {
   let component: ExportUnitComponent;
   let fixture: ComponentFixture<ExportUnitComponent>;
 
-  @Component({ selector: 'studio-lite-select-unit-list', template: '' })
+  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: false })
   class MockSelectUnitListComponent {
     @Input() disabled!: number[];
     @Input() filter!: number[];
@@ -25,7 +25,7 @@ describe('ExportUnitComponent', () => {
     @Input() selectedUnitId!: number;
   }
 
-  @Component({ selector: 'studio-lite-test-config', template: '' })
+  @Component({ selector: 'studio-lite-test-config', template: '', standalone: false })
   class MockTestConfigComponent {
     @Input() addTestTakersReview!: number;
     @Input() addTestTakersHot!: number;
@@ -34,7 +34,7 @@ describe('ExportUnitComponent', () => {
     @Input() passwordLess!: boolean;
   }
 
-  @Component({ selector: 'studio-lite-booklet-config-edit', template: '' })
+  @Component({ selector: 'studio-lite-booklet-config-edit', template: '', standalone: false })
   class MockBookletConfigComponent {
     @Input() disabled!: boolean;
     @Input() config!: BookletConfigDto | undefined;
@@ -49,12 +49,12 @@ describe('ExportUnitComponent', () => {
       ],
       imports: [
         MatDialogModule,
-        HttpClientModule,
         MatExpansionModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

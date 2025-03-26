@@ -11,7 +11,6 @@ import { AppService } from '../../services/app.service';
   selector: 'studio-lite-about',
   templateUrl: './about.component.html',
   styleUrls: ['about.component.scss'],
-  standalone: true,
   imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule]
 })
 

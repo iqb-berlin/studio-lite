@@ -18,25 +18,25 @@ describe('UserWorkspacesAreaComponent', () => {
   let component: UserWorkspacesAreaComponent;
   let fixture: ComponentFixture<UserWorkspacesAreaComponent>;
 
-  @Component({ selector: 'studio-lite-user-menu', template: '' })
+  @Component({ selector: 'studio-lite-user-menu', template: '', standalone: false })
   class MockUserMenuComponent {}
 
-  @Component({ selector: 'studio-lite-user-workspaces-groups', template: '' })
+  @Component({ selector: 'studio-lite-user-workspaces-groups', template: '', standalone: false })
   class MockUserWorkspacesGroupsComponent {
     @Input() workspaceGroups!: WorkspaceGroupDto[];
   }
 
-  @Component({ selector: 'studio-lite-warning', template: '' })
+  @Component({ selector: 'studio-lite-warning', template: '', standalone: false })
   class MockWarningComponent {
     @Input() warnMessage!: string;
   }
 
-  @Component({ selector: 'studio-lite-area-title', template: '' })
+  @Component({ selector: 'studio-lite-area-title', template: '', standalone: false })
   class MockAreaTitleComponent {
     @Input() title!: string;
   }
 
-  @Component({ selector: 'studio-lite-wrapped-icon', template: '' })
+  @Component({ selector: 'studio-lite-wrapped-icon', template: '', standalone: false })
   class MockWrappedIconComponent {
     @Input() icon!: string;
   }

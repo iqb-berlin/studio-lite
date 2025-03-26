@@ -8,7 +8,6 @@ import { ReviewService } from '../../services/review.service';
   selector: 'studio-lite-finish',
   templateUrl: './finish.component.html',
   styleUrls: ['./finish.component.scss'],
-  standalone: true,
   imports: [MatFabAnchor, MatTooltip, TranslateModule]
 })
 export class FinishComponent implements OnInit {

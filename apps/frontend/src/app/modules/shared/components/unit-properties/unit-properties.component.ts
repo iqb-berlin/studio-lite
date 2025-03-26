@@ -10,7 +10,6 @@ import { State } from '../../../admin/models/state.type';
   selector: 'studio-lite-unit-properties',
   templateUrl: './unit-properties.component.html',
   styleUrls: ['./unit-properties.component.scss'],
-  standalone: true,
   imports: [DatePipe, TranslateModule]
 })
 export class UnitPropertiesComponent implements OnChanges {

@@ -17,7 +17,6 @@ import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
   selector: 'studio-lite-resource-packages-table',
   templateUrl: './resource-packages-table.component.html',
   styleUrls: ['./resource-packages-table.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
 })

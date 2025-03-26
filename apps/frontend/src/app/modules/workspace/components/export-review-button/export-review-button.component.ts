@@ -16,7 +16,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-export-review-button',
   templateUrl: './export-review-button.component.html',
   styleUrls: ['./export-review-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class ExportReviewButtonComponent {

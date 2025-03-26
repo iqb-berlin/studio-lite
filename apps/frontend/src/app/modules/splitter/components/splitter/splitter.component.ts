@@ -4,12 +4,12 @@ import {
 
 import { SplitterPaneComponent } from '../splitter-pane/splitter-pane.component';
 import { SplitterGutterComponent } from '../splitter-gutter/splitter-gutter.component';
+import { SplitterService } from '../../services/splitter.service';
 
 @Component({
   selector: 'studio-lite-splitter',
   templateUrl: './splitter.component.html',
   styleUrls: ['./splitter.component.scss'],
-  standalone: true,
   imports: [SplitterGutterComponent]
 })
 export class SplitterComponent implements AfterViewInit {
@@ -18,6 +18,8 @@ export class SplitterComponent implements AfterViewInit {
   gutterLineSize: number = 2;
   gutterHotspotSize: number = 10;
   availablePanesSize: number = 0;
+
+  constructor(private splitterService: SplitterService) {}
 
   ngAfterViewInit() {
     this.updateContent();
@@ -67,5 +69,12 @@ export class SplitterComponent implements AfterViewInit {
 
   private setPanesStyleForIndex(paneIndex: number): void {
     this.getPanesForIndex(paneIndex).map(pane => pane.setStyle(pane.size));
+  }
+
+  onGutterStopDragging() {
+    this.splitterService.update(
+      this.panes
+        .filter(pane => !pane.isLast)
+        .map(pane => pane.size));
   }
 }

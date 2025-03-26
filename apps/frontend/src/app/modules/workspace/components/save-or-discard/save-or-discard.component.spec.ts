@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
 import { SaveOrDiscardComponent } from './save-or-discard.component';
 import { environment } from '../../../../../environments/environment';
 import { BackendService } from '../../services/backend.service';
@@ -14,8 +13,7 @@ describe('SaveOrDiscardComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatDialogModule,
-        TranslateModule.forRoot(),
-        HttpClientModule
+        TranslateModule.forRoot()
       ],
       providers: [
         {

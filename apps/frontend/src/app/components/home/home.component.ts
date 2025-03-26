@@ -16,7 +16,6 @@ import { LoginComponent } from '../login/login.component';
   selector: 'studio-lite-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  standalone: true,
   imports: [LoginComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent]
 })
 export class HomeComponent implements OnInit {

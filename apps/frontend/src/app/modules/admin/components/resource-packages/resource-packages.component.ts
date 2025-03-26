@@ -16,7 +16,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-resource-packages',
   templateUrl: './resource-packages.component.html',
   styleUrls: ['./resource-packages.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [IqbFilesUploadInputForDirective, MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadQueueComponent, ResourcePackagesTableComponent, AsyncPipe, TranslateModule, TableDataSourcePipe]
 })

@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
-import { RouterTestingModule } from '@angular/router/testing';
 import { MatTabsModule } from '@angular/material/tabs';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { WsgAdminComponent } from './wsg-admin.component';
 
@@ -14,11 +14,11 @@ describe('WsgAdminComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatTabsModule,
-        RouterTestingModule,
-        HttpClientModule,
         TranslateModule.forRoot()
       ],
       providers: [
+        provideHttpClient(),
+        provideRouter([]),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl

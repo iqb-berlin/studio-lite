@@ -14,7 +14,6 @@ import {
   selector: 'studio-lite-change-password',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [FormsModule, ReactiveFormsModule, MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })

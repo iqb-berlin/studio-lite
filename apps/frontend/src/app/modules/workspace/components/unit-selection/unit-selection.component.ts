@@ -23,7 +23,6 @@ import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
   selector: 'studio-lite-unit-selection',
   templateUrl: './unit-selection.component.html',
   styleUrls: ['./unit-selection.component.scss'],
-  standalone: true,
   imports: [UnitGroupsComponent, SearchFilterComponent, UnitTableComponent, UnitGroupComponent,
     KeyValuePipe, TranslateModule]
 })

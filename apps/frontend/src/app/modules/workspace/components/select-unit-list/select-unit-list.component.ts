@@ -24,7 +24,6 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   selector: 'studio-lite-select-unit-list',
   templateUrl: './select-unit-list.component.html',
   styleUrls: ['select-unit-list.component.scss'],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule]
 })

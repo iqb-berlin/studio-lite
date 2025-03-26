@@ -10,7 +10,6 @@ import { MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/mat
   selector: 'studio-lite-login-alternative-warning',
   templateUrl: './login-alternative-warning.html',
   styleUrls: ['./login-alternative-warning.scss'],
-  standalone: true,
   imports: [MatDialogContent, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

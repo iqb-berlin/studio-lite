@@ -33,7 +33,6 @@ import { VocabNodeChangeService } from '../../services/vocab-node-change.service
   templateUrl: './nested-tree.component.html',
   styleUrls: ['./nested-tree.component.scss'],
   providers: [VocabNodeChangeService],
-  standalone: true,
   // eslint-disable-next-line max-len
   imports: [MatDialogContent, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule, AreAllDescendantsSelectedPipe, AreSomeDescendantsSelectedPipe, IsTreeControlExpandedPipe, IsNodeSelectedPipe]
 })

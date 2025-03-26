@@ -63,6 +63,16 @@ import { ReviewUnitCommentController } from './controllers/review-unit-comment.c
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { GroupAdminUserController } from './controllers/group-admin-user-controller';
+import { UnitItemController } from './controllers/unit-item.controller';
+import { UnitItemService } from './services/unit-item.service';
+import UnitItem from './entities/unit-item.entity';
+import UnitItemMetadata from './entities/unit-item-metadata.entity';
+import UnitMetadata from './entities/unit-metadata.entity';
+import { UnitItemMetadataService } from './services/unit-item-metadata.service';
+import { UnitItemMetadataController } from './controllers/unit-item-metadata.controller';
+import { UnitMetadataService } from './services/unit-metadata.service';
+import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
+import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
 
 @Module({
   imports: [
@@ -100,6 +110,10 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     ResourcePackage,
     Review,
     ReviewUnit,
+    UnitItem,
+    UnitItemMetadata,
+    UnitMetadata,
+    UnitMetadataToDelete,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -129,7 +143,11 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
           UnitUser,
           WorkspaceGroupAdmin,
           Review,
-          ReviewUnit
+          ReviewUnit,
+          UnitItem,
+          UnitItemMetadata,
+          UnitMetadata,
+          UnitMetadataToDelete
         ],
         synchronize: false
       }),
@@ -155,7 +173,11 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
       UnitUser,
       WorkspaceGroupAdmin,
       Review,
-      ReviewUnit
+      ReviewUnit,
+      UnitItem,
+      UnitItemMetadata,
+      UnitMetadata,
+      UnitMetadataToDelete
     ]),
     MulterModule
   ],
@@ -178,7 +200,9 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     ReviewUnitController,
     ReviewUnitCommentController,
     MetadataController,
-    WorkspaceGroupController
+    WorkspaceGroupController,
+    UnitItemController,
+    UnitItemMetadataController
   ],
   providers: [
     AppVersionProvider,
@@ -199,7 +223,11 @@ import { GroupAdminUserController } from './controllers/group-admin-user-control
     UnitUserService,
     VeronaModulesService,
     SettingService,
-    ReviewService
+    ReviewService,
+    UnitItemService,
+    UnitItemMetadataService,
+    UnitMetadataService,
+    UnitMetadataToDeleteService
   ],
   exports: [AppVersionProvider]
 })

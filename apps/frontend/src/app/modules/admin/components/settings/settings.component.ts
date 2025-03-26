@@ -10,7 +10,6 @@ import { MissingsProfilesConfigComponent } from '../missings-profiles-config/mis
   selector: 'studio-lite-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
-  standalone: true,
   imports: [
     MatLabel,
     AppConfigComponent,

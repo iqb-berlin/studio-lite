@@ -10,7 +10,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
   selector: 'studio-lite-review-config-edit',
   templateUrl: './review-config-edit.component.html',
   styleUrls: ['./review-config-edit.component.scss'],
-  standalone: true,
   imports: [MatCheckbox, FormsModule, TranslateModule]
 })
 

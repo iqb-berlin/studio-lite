@@ -11,7 +11,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-add-comment-button',
   templateUrl: './add-comment-button.component.html',
   styleUrls: ['./add-comment-button.component.scss'],
-  standalone: true,
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class AddCommentButtonComponent {

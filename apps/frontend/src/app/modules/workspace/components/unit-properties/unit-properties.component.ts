@@ -20,13 +20,12 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import {
   MatCard, MatCardHeader, MatCardTitle, MatCardContent
 } from '@angular/material/card';
-import { CodingScheme, VariableInfo } from '@iqb/responses';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MatMenuItem } from '@angular/material/menu';
-import { MatTooltip } from '@angular/material/tooltip';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -43,9 +42,8 @@ import { AliasId } from '../../../metadata/models/alias-id.interface';
 @Component({
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
-  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
-    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatMenuItem, MatTooltip,
+    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
     MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
     CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
     TranslateModule, MatIcon, CanReturnUnitPipe]
@@ -128,7 +126,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
-    this.workspaceService.loadUnitMetadata().then(() => {
+    this.workspaceService.loadUnitProperties().then(() => {
       this.setupForm();
       this.updateVariables();
       this.loadMetaData();
@@ -266,13 +264,16 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const variables: VariableInfo[] = this.workspaceService
+      const defStoreVariables: VariableInfo[] = this.workspaceService
         .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
-      if (variables) {
+      if (defStoreVariables) {
+        const variables = defStoreVariables.filter(v => v.type !== 'no-value');
         const variableAliasIds = variables.map(variable => ({ id: variable.id, alias: variable.alias || variable.id }));
         const scheme: CodingScheme = JSON.parse(data.scheme);
         const variableCodings = scheme?.variableCodings || [];
-        const variableCodingIds = variableCodings.map(item => ({ id: item.id, alias: item.alias || item.id }));
+        const variableCodingIds = variableCodings
+          .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
+          .map(item => ({ id: item.id, alias: item.alias || item.id }));
         // merge without duplicates
         return [...variableAliasIds, ...variableCodingIds]
           .reduce((acc: AliasId[], current: AliasId) => {

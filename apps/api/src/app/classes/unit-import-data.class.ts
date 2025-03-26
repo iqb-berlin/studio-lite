@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { VariableInfo } from '@iqb/responses';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileIo } from '../interfaces/file-io.interface';
 
 export class UnitImportData {
@@ -129,6 +129,8 @@ export class UnitImportData {
           this.baseVariables.push({
             // eslint-disable-next-line @typescript-eslint/dot-notation
             id: variableRecord.attribs['id'],
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            alias: variableRecord.attribs['alias'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
             type: variableRecord.attribs['type'],
             // eslint-disable-next-line @typescript-eslint/dot-notation

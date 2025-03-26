@@ -4,7 +4,6 @@ import { Component, Input } from '@angular/core';
   selector: 'studio-lite-warning',
   templateUrl: './warning.component.html',
   styleUrls: ['./warning.component.scss'],
-  standalone: true,
   imports: []
 })
 export class WarningComponent {
