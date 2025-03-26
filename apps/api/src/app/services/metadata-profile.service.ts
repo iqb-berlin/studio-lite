@@ -20,21 +20,27 @@ export class MetadataProfileService {
     private http: HttpService) {}
 
   private vocabularyCache = new Map<string, MetadataVocabularyDto>();
+  private profileCache = new Map<string, MetadataProfileDto>(); // Neuer Cache
 
   async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
+    if (this.profileCache.has(url)) {
+      return this.profileCache.get(url) || null;
+    }
+
     const profile = await firstValueFrom(
-      this.http.get<MetadataProfileDto>(url)
-        .pipe(
-          catchError(() => of({ data: null })),
-          map(result => result.data)
-        )
+      this.http.get<MetadataProfileDto>(url).pipe(
+        catchError(() => of({ data: null })), // Fehler abfangen
+        map(result => result.data) // Antwortdaten extrahieren
+      )
     );
+
     if (profile) {
+      this.profileCache.set(url, profile);
       await this.storeProfile(profile, url);
     } else {
-      const storedProfile = await this.metadataProfileRepository
-        .findOneBy({ id: url });
+      const storedProfile = await this.metadataProfileRepository.findOneBy({ id: url });
       if (storedProfile) {
+        this.profileCache.set(url, storedProfile); // Profil aus der DB in Cache legen
         return storedProfile;
       }
     }
