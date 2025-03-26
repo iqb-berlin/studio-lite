@@ -99,6 +99,7 @@ declare namespace Cypress {
     updateMyData(token:string, data:MyData): Chainable<Response>; // 85
     getWsByUserAPI(id: string, token: string): Chainable<Response>; // 86
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 87
+    updateGroupsByUserAPI(id: string, qs: string[], token: string): Chainable<Response>; // 87a
     deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 88
     deleteGroupsAPI(qs: string[], token: string): Chainable<Response>; // 89
     deleteModulesAPI(modules: string[], token: string): Chainable<Response>; // 91a

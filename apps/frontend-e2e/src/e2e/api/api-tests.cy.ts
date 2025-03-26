@@ -2592,7 +2592,55 @@ describe('Studio API tests', () => {
           });
       });
     });
+    describe('87a. PATCH /api/admin/users/{id}/workspace-groups', () => {
+      it('200 positive test: should update the workspace-groups accessible for the user', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [Cypress.env(group2.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        cy.pause();
+      });
 
+      it('401 negative test: should not update the workspace-groups accessible for a user a normal user', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [Cypress.env(group2.id)],
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+        cy.pause();
+      });
+
+      it('401 negative test: should not update the workspace-groups accessible' +
+        ' for a user without a valid token', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [Cypress.env(group1.id)],
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should not update the user s workspace-groups without group ids', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [noId],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('500 negative test: should not get the workspace-groups with a false user Id', () => {
+        cy.updateGroupsByUserAPI(noId,
+          [Cypress.env(group1.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
     describe('88. DELETE /api/group-admin/workspaces/{ids}', () => {
       it('200/500 negative test: should fail by not passing the workspace', () => {
         cy.deleteWsAPI([noId], Cypress.env(`token_${Cypress.env('username')}`))
