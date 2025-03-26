@@ -264,13 +264,16 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const variables: VariableInfo[] = this.workspaceService
+      const defStoreVariables: VariableInfo[] = this.workspaceService
         .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
-      if (variables) {
+      if (defStoreVariables) {
+        const variables = defStoreVariables.filter(v => v.type !== 'no-value');
         const variableAliasIds = variables.map(variable => ({ id: variable.id, alias: variable.alias || variable.id }));
         const scheme: CodingScheme = JSON.parse(data.scheme);
         const variableCodings = scheme?.variableCodings || [];
-        const variableCodingIds = variableCodings.map(item => ({ id: item.id, alias: item.alias || item.id }));
+        const variableCodingIds = variableCodings
+          .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
+          .map(item => ({ id: item.id, alias: item.alias || item.id }));
         // merge without duplicates
         return [...variableAliasIds, ...variableCodingIds]
           .reduce((acc: AliasId[], current: AliasId) => {
