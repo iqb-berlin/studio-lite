@@ -10,7 +10,10 @@ export function addFirstUser() {
 
 export function createNewUser(newUser: UserData):void {
   cy.visit('/');
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
     .should('exist')
@@ -32,7 +35,10 @@ export function createNewUser(newUser: UserData):void {
 }
 
 export function deleteUser(user: string):void {
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('mat-cell')
     .contains(`${user}`)
     .should('exist')
@@ -45,7 +51,10 @@ export function deleteUser(user: string):void {
 }
 
 export function createGroup(group:string):void {
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -122,7 +131,10 @@ export function login(username: string, password = '') {
 }
 
 export function addModules(filenames:string[]):void {
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
@@ -132,7 +144,10 @@ export function addModules(filenames:string[]):void {
 }
 
 export function deleteModule():void {
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
@@ -146,7 +161,10 @@ export function deleteModule():void {
 }
 
 export function deleteGroup(group: string):void {
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -161,7 +179,9 @@ export function deleteGroup(group: string):void {
 }
 
 export function logout() {
-  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('studio-lite-user-menu')
+    .click();
   cy.get('span:contains("Abmelden")')
     .should('exist')
     .click();
@@ -172,7 +192,9 @@ export function logout() {
 }
 
 export function changePassword(newPass:string, oldPass:string):void {
-  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('studio-lite-user-menu')
+    .click();
   cy.get('span:contains("Kennwort ändern")')
     .should('exist')
     .click();
@@ -190,7 +212,9 @@ export function changePassword(newPass:string, oldPass:string):void {
 }
 
 export function updatePersonalData():void {
-  cy.get('[data-cy="goto-user-menu"]').click();
+  // cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('studio-lite-user-menu')
+    .click();
   cy.get('span:contains("Nutzerdaten ändern")')
     .should('exist')
     .click();
