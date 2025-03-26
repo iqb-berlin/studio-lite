@@ -1,23 +1,28 @@
 services:
-  db:
+  frontend:
+    labels:
+      - "traefik.enable=false"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.frontend.service=frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+      - "traefik.docker.network=app-net"
     build:
       context: .
-      dockerfile: database/Postgres.Dockerfile
+      dockerfile: apps/frontend/Dockerfile
+      target: dev
       args:
         REGISTRY_PATH: ${REGISTRY_PATH}
+        PROJECT: frontend
     ports:
-      - "${POSTGRES_PORT}:5432"
-
-  liquibase:
-    build:
-      context: .
-      dockerfile: database/Liquibase.Dockerfile
-      target: base
-      args:
-        REGISTRY_PATH: ${REGISTRY_PATH}
+      - "${HTTP_PORT}:8080"
     volumes:
-      - "./database/changelog:/liquibase/changelog"
-      - "./database/changelogDocs:/liquibase/changelogDocs"
+      - "./apps/frontend/src:/studio-lite/apps/frontend/src"
+    command:
+      - "serve"
+      - "frontend"
+      - "--host=frontend"
+      - "--port=8080"
 
   backend:
     labels:
@@ -45,27 +50,22 @@ services:
       - "api"
       - "--host=backend"
 
-  frontend:
-    labels:
-      - "traefik.enable=false"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
-      - "traefik.http.routers.frontend.service=frontend"
-      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-      - "traefik.docker.network=app-net"
+  liquibase:
     build:
       context: .
-      dockerfile: apps/frontend/Dockerfile
-      target: dev
+      dockerfile: database/Liquibase.Dockerfile
+      target: base
       args:
         REGISTRY_PATH: ${REGISTRY_PATH}
-        PROJECT: frontend
-    ports:
-      - "${HTTP_PORT}:8080"
     volumes:
-      - "./apps/frontend/src:/studio-lite/apps/frontend/src"
-    command:
-      - "serve"
-      - "frontend"
-      - "--host=frontend"
-      - "--port=8080"
+      - "./database/changelog:/liquibase/changelog"
+      - "./database/changelogDocs:/liquibase/changelogDocs"
+
+  db:
+    build:
+      context: .
+      dockerfile: database/Postgres.Dockerfile
+      args:
+        REGISTRY_PATH: ${REGISTRY_PATH}
+    ports:
+      - "${POSTGRES_PORT}:5432"
