@@ -19,6 +19,8 @@ export class MetadataProfileService {
     private metadataVocabularyService: MetadataVocabularyService,
     private http: HttpService) {}
 
+  private vocabularyCache = new Map<string, MetadataVocabularyDto>();
+
   async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
     const profile = await firstValueFrom(
       this.http.get<MetadataProfileDto>(url)
@@ -60,14 +62,19 @@ export class MetadataProfileService {
     const profile = await this.getMetadataProfile(url);
     const vocabularies: MetadataVocabularyDto[] = [];
     const vocabularyIds = profile.groups
-      .map(group => group.entries)
-      .flat()
+      .flatMap(group => group.entries)
       .filter(entry => (entry.type === 'vocabulary'))
       .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url);
-    await Promise.all(vocabularyIds
-      .map(async id => {
-        vocabularies.push(await this.metadataVocabularyService.getMetadataVocabularyById(id));
-      }));
+    await Promise.all(vocabularyIds.map(async id => {
+      const vocabulary = this.vocabularyCache.get(id) ??
+        await (async () => {
+          const fetchedVocabulary = await this.metadataVocabularyService.getMetadataVocabularyById(id);
+          this.vocabularyCache.set(id, fetchedVocabulary);
+          return fetchedVocabulary;
+        })();
+
+      vocabularies.push(vocabulary);
+    }));
     return vocabularies;
   }
 }

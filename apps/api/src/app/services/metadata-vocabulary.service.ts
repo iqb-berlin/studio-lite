@@ -16,7 +16,14 @@ export class MetadataVocabularyService {
     private metadataVocabularyRepository: Repository<MetadataVocabulary>,
     private http: HttpService) {}
 
+  private vocabularyCache = new Map<string, MetadataVocabularyDto>();
+
   async getMetadataVocabularyById(id: string): Promise<MetadataVocabularyDto | null> {
+    const cachedVocabulary = this.vocabularyCache.get(id);
+    if (cachedVocabulary) {
+      return cachedVocabulary;
+    }
+
     const url = `${id}index.jsonld`;
     const vocabulary = await firstValueFrom(
       this.http.get<MetadataVocabularyDto>(url)
@@ -26,15 +33,19 @@ export class MetadataVocabularyService {
         )
     );
     if (vocabulary) {
+      this.vocabularyCache.set(id, vocabulary);
       await this.storeVocabulary(vocabulary, id);
-    } else {
-      const storedVocabulary = await this.metadataVocabularyRepository
-        .findOneBy({ id: id });
-      if (storedVocabulary) {
-        return storedVocabulary;
-      }
+      return vocabulary;
     }
-    return vocabulary;
+
+    const storedVocabulary = await this.metadataVocabularyRepository.findOneBy({ id });
+    if (storedVocabulary) {
+      const storedData: MetadataVocabularyDto = { ...storedVocabulary };
+      this.vocabularyCache.set(id, storedData);
+      return storedData;
+    }
+
+    return null;
   }
 
   private async storeVocabulary(vocabulary: MetadataVocabularyDto, id: string): Promise<void> {
