@@ -303,7 +303,7 @@ customize_settings() {
   # Setup environment variables
   printf "5. Set Environment variables (default postgres password is generated randomly):\n\n"
 
-  sed -i.bak "s|^TAG.*|TAG=${TARGET_VERSION}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
+  sed -i.bak "s|^TAG=.*|TAG=${TARGET_VERSION}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   declare server_name
   if [ -n "${TRAEFIK_DIR}" ]; then
@@ -311,7 +311,7 @@ customize_settings() {
   else
     read -p "SERVER_NAME: " -er -i "${server_name}" server_name
   fi
-  sed -i.bak "s|^SERVER_NAME.*|SERVER_NAME=${server_name}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
+  sed -i.bak "s|^SERVER_NAME=.*|SERVER_NAME=${server_name}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   declare env_var_name
   for env_var_name in "${ENV_VAR_ORDER[@]}"; do
@@ -322,13 +322,13 @@ customize_settings() {
 
   declare jwt_secret
   jwt_secret=$(openssl rand -base64 32 | tr -- '+/' '-_')
-  sed -i.bak "s|JWT_SECRET.*|JWT_SECRET=${jwt_secret}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
+  sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=${jwt_secret}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   # Setup makefiles
-  sed -i.bak "s|${MAKE_BASE_DIR_NAME} :=.*|${MAKE_BASE_DIR_NAME} := \\${APP_DIR}|" "scripts/make/${APP_NAME}.mk" &&
-    rm "scripts/make/${APP_NAME}.mk.bak"
-  sed -i.bak "s|scripts/update.sh|scripts/update_${APP_NAME}.sh|" "scripts/make/${APP_NAME}.mk" &&
-    rm "scripts/make/${APP_NAME}.mk.bak"
+  sed -i.bak "s|^${MAKE_BASE_DIR_NAME} :=.*|${MAKE_BASE_DIR_NAME} := \\${APP_DIR}|" \
+    "scripts/make/${APP_NAME}.mk" && rm "scripts/make/${APP_NAME}.mk.bak"
+  sed -i.bak "s|scripts/update.sh|scripts/update_${APP_NAME}.sh|" \
+    "scripts/make/${APP_NAME}.mk" && rm "scripts/make/${APP_NAME}.mk.bak"
 
   if [ -n "${TRAEFIK_DIR}" ] && [ "${TRAEFIK_DIR}" != "${APP_DIR}" ]; then
     cp "${TRAEFIK_DIR}/Makefile" Makefile
