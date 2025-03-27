@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, ViewChild
+  Component, Input, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
@@ -7,7 +7,7 @@ import {
 import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
-import { UnitMetadataValues, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -26,6 +26,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
+import { MDProfile } from '@iqb/metadata';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -38,6 +39,7 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
+import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -53,7 +55,8 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
-  private unitIdChangedSubscription: Subscription | undefined;
+  @Input() profile!: MDProfile;
+  private readonly unitIdChangedSubscription: Subscription | undefined;
   private unitFormDataChangedSubscription: Subscription | undefined;
   private editorSelectionChangedSubscription: Subscription | undefined;
   private playerSelectionChangedSubscription: Subscription | undefined;
@@ -61,7 +64,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   private statesChangedSubscription: Subscription | undefined;
   private ngUnsubscribe = new Subject<void>();
   metadata!: UnitMetadataValues;
-  workspaceSettings!: WorkspaceSettingsDto;
+  workspaceSettings!: WorkspaceSettings | null;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
   variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>([]);
   unitForm: UntypedFormGroup;
@@ -108,29 +111,45 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   async ngOnInit(): Promise<void> {
     // load studio with selected unit
     if (this.workspaceService.selectedUnit$.getValue()) {
-      this.readDataForUnitId(this.workspaceService.selectedUnit$.getValue());
+      await this.readDataForUnitId(this.workspaceService.selectedUnit$.getValue());
     }
     this.updateVariables();
   }
 
-  private readDataForUnitId(unitId: number): void {
+  private async readDataForUnitId(unitId: number): Promise<void> {
     this.selectedUnitId = unitId;
-    this.readData();
+    await this.readData();
   }
 
   // properties
   private async readData() {
-    if (Object.keys(this.moduleService.editors).length === 0) await this.moduleService.loadList();
-    if (this.unitFormDataChangedSubscription) this.unitFormDataChangedSubscription.unsubscribe();
-    if (this.editorSelectionChangedSubscription) this.editorSelectionChangedSubscription.unsubscribe();
-    if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
-    if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
-    if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
-    this.workspaceService.loadUnitProperties().then(() => {
+    try {
+      // Ensure that editors are loaded before proceeding.
+      if (Object.keys(this.moduleService.editors).length === 0) {
+        await this.moduleService.loadList();
+      }
+
+      this.unsubscribeAll([
+        this.unitFormDataChangedSubscription,
+        this.editorSelectionChangedSubscription,
+        this.playerSelectionChangedSubscription,
+        this.schemerSelectionChangedSubscription,
+        this.statesChangedSubscription
+      ]);
+
+      await this.workspaceService.loadUnitProperties();
+
       this.setupForm();
       this.updateVariables();
       this.loadMetaData();
-    });
+    } catch (error) {
+      console.error('Error fetching data', error);
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private unsubscribeAll(subscriptions: (Subscription | undefined)[]): void {
+    subscriptions.forEach(subscription => subscription?.unsubscribe());
   }
 
   private setupForm() {
@@ -219,7 +238,9 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
-      this.workspaceSettings = this.workspaceService.workspaceSettings;
+      this.workspaceService.workspaceSettings$.subscribe(workspaceSettings => {
+        this.workspaceSettings = workspaceSettings;
+      });
       const unitMetadata = unitMetadataStore.getData();
       this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
     }

@@ -1,3 +1,5 @@
+import { State } from '../../admin/models/state.type';
+
 export interface WorkspaceSettings {
   defaultEditor: string;
   defaultPlayer: string;
@@ -6,4 +8,5 @@ export interface WorkspaceSettings {
   stableModulesOnly?: boolean;
   unitMDProfile?: string;
   itemMDProfile?: string;
+  states?: State[];
 }

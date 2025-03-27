@@ -6,7 +6,6 @@ import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   MetadataProfileDto,
-  MetadataVocabularyDto,
   RegisteredMetadataProfileDto
 } from '@studio-lite-lib/api-dto';
 
@@ -18,17 +17,6 @@ export class BackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
-
-  getMetadataVocabulariesForProfile(url:string):Observable<MetadataVocabularyDto[] | boolean> {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('url', url);
-    return this.http
-      .get(`${this.serverUrl}metadata/vocabularies`, { params: queryParams })
-      .pipe(
-        catchError(() => of(false)),
-        map(vocab => vocab as MetadataVocabularyDto[])
-      );
-  }
 
   getMetadataProfile(url:string): Observable<MetadataProfileDto | boolean> {
     let queryParams = new HttpParams();

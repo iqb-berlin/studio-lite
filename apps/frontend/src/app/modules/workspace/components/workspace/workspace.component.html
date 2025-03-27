@@ -1,13 +1,15 @@
 <studio-lite-splitter class="authoring-body">
 
   <studio-lite-splitter-pane [initialSize]="275">
-    <studio-lite-units-area [navLinks]="navLinks"
+    <studio-lite-units-area
+      [navLinks]="navLinks"
       [selectedRouterLink]="selectedRouterLink">
     </studio-lite-units-area>
   </studio-lite-splitter-pane>
 
   <studio-lite-splitter-pane>
-    <studio-lite-unit-data-area [navTabs]="navTabs"
+    <studio-lite-unit-data-area
+      [navTabs]="navTabs"
       [secondaryRoutingOutlet]="secondaryRoutingOutlet"
       [pinIcon]="'push_pin'"
       [disabledRouterLink]="pinnedNavTab.length ? pinnedNavTab[0].name : ''"
@@ -17,7 +19,8 @@
 
   @if (pinnedNavTab.length) {
     <studio-lite-splitter-pane>
-      <studio-lite-unit-data-area [routingOutlet]="secondaryRoutingOutlet"
+      <studio-lite-unit-data-area
+        [routingOutlet]="secondaryRoutingOutlet"
         [secondaryRoutingOutlet]="secondaryRoutingOutlet"
         [pinIcon]="'close'"
         [navTabs]="pinnedNavTab">

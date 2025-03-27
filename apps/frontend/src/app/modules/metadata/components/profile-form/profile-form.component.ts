@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
+  Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -16,17 +16,15 @@ import { ProfileEntryParametersText, ProfileEntryParametersVocabulary }
 import { TextWithLanguage } from '@iqb/metadata/md-main';
 import { TextsWithLanguageAndId } from '@iqb/metadata/md-values';
 import {
-  MetadataProfileDto,
   MetadataValues,
   MetadataValuesEntry,
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
-import { MetadataService } from '../../services/metadata.service';
 import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
-import { VocabularyEntry } from '../../models/vocabulary.class';
+import { Vocab, VocabularyEntry } from '../../models/vocabulary.class';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
+import { MetadataService } from '../../services/metadata.service';
 
 interface FormlyConfigProps {
   label: string;
@@ -54,31 +52,27 @@ type ModelValue = string | number | boolean | Record<string, string> | Vocabular
   styleUrls: ['./profile-form.component.scss'],
   imports: [FormsModule, ReactiveFormsModule, FormlyModule]
 })
-export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
+export class ProfileFormComponent implements OnDestroy, OnChanges {
   constructor(
-    public metadataService: MetadataService,
+    public workspaceService: WorkspaceService,
     public backendService:BackendService,
-    private snackBar: MatSnackBar,
-    private translateService: TranslateService) {}
+    public metadataService: MetadataService
+  ) {}
 
   @Output() metadataChange: EventEmitter<Partial<UnitMetadataValues>> = new EventEmitter();
   @Input() language!: string;
-  @Input() profileUrl!: string | undefined;
   @Input() metadata!: Partial<UnitMetadataValues>;
   @Input() formlyWrapper!: string;
   @Input() panelExpanded!: boolean;
+  @Input() profile!: MDProfile;
+  @Input() vocabularies !: Vocab[];
 
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
   model: Record<string, ModelValue> = {};
-  profile!: MDProfile;
 
   private profileItemKeys: Record<string, ProfileItemKeyValue> = {};
   private ngUnsubscribe = new Subject<void>();
-
-  ngOnInit() {
-    this.init();
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     const metadata = 'metadata';
@@ -91,65 +85,17 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
       );
     }
 
-    const profileUrl = 'profileUrl';
-    if (changes[profileUrl] &&
-      !changes[profileUrl].firstChange &&
-      changes[profileUrl].previousValue !== changes[profileUrl].currentValue) {
-      this.init();
-    }
-  }
-
-  private init(): void {
-    this.initProfile()
-      .then((profile => this.loadProfile(profile)));
-  }
-
-  private async initProfile(): Promise<MetadataProfileDto | boolean> {
-    return this.getProfile(this.profileUrl as string);
-  }
-
-  private async loadProfile(profile: MetadataProfileDto | boolean) {
-    if (profile) {
-      this.profile = new MDProfile(profile);
-      const isLoaded = await this.metadataService.loadProfileVocabularies(this.profile);
-      if (isLoaded) {
-        this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
-        this.model = this.mapMetadataValuesToFormlyModel(
-          this.findCurrentProfileMetadata(this.metadata.profiles)
-        );
-      } else {
-        this.snackBar.open(
-          this.translateService
-            .instant('workspace.vocabs-not-loaded', { profileUrl: this.profileUrl }),
-          this.translateService.instant('error'),
-          { duration: 5000 }
-        );
-      }
-    } else {
-      this.snackBar.open(
-        this.translateService
-          .instant('workspace.profile-not-loaded', { profileUrl: this.profileUrl }),
-        this.translateService.instant('error'),
-        { duration: 5000 }
-      );
+    const profile = 'profile';
+    if (changes[profile] &&
+      !changes[profile].firstChange &&
+      changes[profile].previousValue !== changes[profile].currentValue) {
+      this.fields = this.mapProfileToFormlyFieldConfig(this.profile);
     }
   }
 
   private findCurrentProfileMetadata(metadata: MetadataValues[] | undefined): MetadataValues | undefined {
     if (!metadata || !metadata.length) return {};
     return metadata.find(data => data.profileId === this.profile.id);
-  }
-
-  private async getProfile(profileUrl: string): Promise<MetadataProfileDto | boolean> {
-    return new Promise(resolve => {
-      this.backendService.getMetadataProfile(profileUrl)
-        .subscribe(profile => {
-          if (profile && profile !== true) {
-            return resolve(profile);
-          }
-          return resolve(false);
-        });
-    });
   }
 
   private static getFormlyType(entry: MDProfileEntry): string {
@@ -308,10 +254,10 @@ export class ProfileFormComponent implements OnInit, OnDestroy, OnChanges {
         }
         if (hasId) {
           return (value as TextsWithLanguageAndId[]).map(v => {
-            const name = this.metadataService.vocabulariesIdDictionary[v.id]?.labels.de;
-            const notation = this.metadataService.vocabulariesIdDictionary[v.id]?.notation[0] || '';
+            const name = this.workspaceService.vocabulariesIdDictionary[v.id]?.labels.de;
+            const notation = this.workspaceService.vocabulariesIdDictionary[v.id]?.notation[0] || '';
             return {
-              name: `${this.metadataService.vocabulariesIdDictionary[v.id]?.hideNumbering ? '' : notation} ${name} `,
+              name: `${this.workspaceService.vocabulariesIdDictionary[v.id]?.hideNumbering ? '' : notation} ${name} `,
               notation: notation ? [notation] : [],
               text: v.text,
               id: v.id

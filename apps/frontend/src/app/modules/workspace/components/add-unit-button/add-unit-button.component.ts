@@ -22,6 +22,7 @@ import {
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { NewUnitData } from '../../models/new-unit.interface';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
   selector: 'studio-lite-add-unit-button',
@@ -31,6 +32,8 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 })
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   private uploadSubscription: Subscription | null = null;
+  private workspaceSettingsSubscription: Subscription | null = null;
+  private workspaceSettings : WorkspaceSettings | null = null;
   @Input() selectedUnitId!: number;
   @Input() disabled!: boolean;
   constructor(
@@ -45,8 +48,16 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     private newUnitDialog: MatDialog,
     private translateService: TranslateService,
     private uploadReportDialog: MatDialog
+
   ) {
     super();
+  }
+
+  ngOnInit(): void {
+    this.workspaceSettingsSubscription = this.workspaceService.workspaceSettings$
+      .subscribe(settings => {
+        this.workspaceSettings = settings;
+      });
   }
 
   addUnitFromExisting(): void {
@@ -58,7 +69,8 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
             .instant('workspace.copy-from')} ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
           key: unitSource.key,
           label: unitSource.name || '',
-          groups: this.workspaceService.workspaceSettings.unitGroups || []
+          groups: this.workspaceSettings && this.workspaceSettings.unitGroups ?
+            this.workspaceSettings.unitGroups : []
         }).then((createUnitDto: CreateUnitDto | boolean) => {
           if (typeof createUnitDto !== 'boolean') {
             this.appService.dataLoading = true;
@@ -97,52 +109,71 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
       subTitle: '',
       key: '',
       label: '',
-      groups: this.workspaceService.workspaceSettings.unitGroups || []
-    }).then((createUnitDto: CreateUnitDto | boolean) => {
-      if (typeof createUnitDto !== 'boolean') {
-        this.appService.dataLoading = true;
-        createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
-        createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
-        createUnitDto.schemer = this.workspaceService.workspaceSettings.defaultSchemer;
-        this.backendService.addUnit(
-          this.workspaceService.selectedWorkspaceId, createUnitDto
-        ).subscribe(
-          respOk => {
-            if (respOk) {
+      groups: this.workspaceSettings && this.workspaceSettings.unitGroups ?
+        this.workspaceSettings.unitGroups : []
+    })
+      .then((createUnitDto: CreateUnitDto | boolean) => {
+        if (typeof createUnitDto !== 'boolean') {
+          this.appService.dataLoading = true;
+          createUnitDto.player = this.workspaceSettings?.defaultPlayer;
+          createUnitDto.editor = this.workspaceSettings?.defaultEditor;
+          createUnitDto.schemer = this.workspaceSettings?.defaultSchemer;
+          this.backendService.addUnit(
+            this.workspaceService.selectedWorkspaceId, createUnitDto
+          )
+            .subscribe(respOk => {
+              const messageKey = respOk ? 'workspace.unit-added' : 'workspace.error';
+              const messageDuration = respOk ? 1000 : 3000;
+
               this.snackBar.open(
                 this.translateService.instant('workspace.unit-added'),
-                '',
-                { duration: 1000 });
-              this.addUnitGroup(createUnitDto.groupName);
-              this.updateUnitList(respOk);
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-added'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 }
+                respOk ? '' : this.translateService.instant(messageKey),
+                { duration: messageDuration }
               );
-            }
-            this.appService.dataLoading = false;
-          }
-        );
-      }
-    });
+
+              if (respOk) {
+                this.addUnitGroup(createUnitDto.groupName);
+                this.updateUnitList(respOk);
+              }
+
+              this.appService.dataLoading = false;
+            });
+        }
+      });
   }
 
-  private addUnitGroup(newGroup: string | undefined) {
-    if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
-      this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
-      this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
-      this.appBackendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-      ).subscribe(isOK => {
-        this.snackBar.open(isOK ?
-          this.translateService.instant('workspace.group-saved') :
-          this.translateService.instant('workspace.group-not-saved'),
-        isOK ? '' : this.translateService.instant('workspace.error'),
-        { duration: 3000 });
-      });
+  private addUnitGroup(newGroup?: string): void {
+    if (!newGroup || !this.workspaceSettings?.unitGroups) {
+      return;
     }
+    const isGroupAlreadyPresent = this.workspaceSettings.unitGroups.includes(newGroup);
+    if (isGroupAlreadyPresent) {
+      return;
+    }
+    this.workspaceSettings.unitGroups.push(newGroup);
+    this.appBackendService
+      .setWorkspaceSettings(this.workspaceService.selectedWorkspaceId, this.workspaceSettings)
+      .subscribe({
+        next: isOK => {
+          const messageKey = isOK ?
+            'workspace.group-saved' :
+            'workspace.group-not-saved';
+          const action = isOK ? '' : this.translateService.instant('workspace.error');
+
+          this.snackBar.open(
+            this.translateService.instant(messageKey),
+            action,
+            { duration: 3000 }
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            this.translateService.instant('workspace.group-not-saved'),
+            this.translateService.instant('workspace.error'),
+            { duration: 3000 }
+          );
+        }
+      });
   }
 
   private async addUnitFromExistingDialog(): Promise<UnitInListDto | boolean> {
@@ -241,15 +272,12 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
   }
 
   resetUpload() {
-    if (this.uploadSubscription !== null) {
-      this.uploadSubscription.unsubscribe();
-      this.uploadSubscription = null;
-    }
+    this.uploadSubscription?.unsubscribe();
+    this.uploadSubscription = null;
   }
 
   ngOnDestroy(): void {
-    if (this.uploadSubscription !== null) {
-      this.uploadSubscription.unsubscribe();
-    }
+    this.uploadSubscription?.unsubscribe();
+    this.workspaceSettingsSubscription?.unsubscribe();
   }
 }
