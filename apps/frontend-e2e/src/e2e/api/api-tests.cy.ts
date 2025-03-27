@@ -107,7 +107,7 @@ describe('Studio API tests', () => {
         cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
           .then(resp => {
             Cypress.env(`token_${Cypress.env('username')}`, resp.body);
-            // console.log(resp.body);
+            console.log(resp.body);
             expect(resp.status).to.equal(201);
           });
       });
@@ -2556,6 +2556,61 @@ describe('Studio API tests', () => {
       });
     });
 
+    describe('86a. UPDATE /api/group-admin/users/{id}/workspaces', () => {
+      it('200 positive test: should update the workspace-groups accessible for the user', () => {
+        cy.pause();
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(group1.id),
+          [Cypress.env(ws2.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('500 negative test: should not update the workspace-groups accessible for a user a normal user', () => {
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(group1.id),
+          [Cypress.env(ws1.id)],
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+        cy.pause();
+      });
+
+      it('401 negative test: should not update the workspace-groups accessible' +
+        ' for a user without a valid token', () => {
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(group1.id),
+          [Cypress.env(ws1.id)],
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should not update the user s workspace-groups without group ids', () => {
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(group1.id),
+          [noId],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('500 negative test: should not get the workspace-groups with a false user Id', () => {
+        cy.updateWsByUserAPI(noId,
+          Cypress.env(group1.id),
+          [Cypress.env(ws1.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
+
     describe('87. GET /api/admin/users/{id}/workspace-groups', () => {
       it('200 positive test: should get the workspace-group by admin user id', () => {
         cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
@@ -2600,7 +2655,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
-        cy.pause();
       });
 
       it('401 negative test: should not update the workspace-groups accessible for a user a normal user', () => {
@@ -2610,7 +2664,6 @@ describe('Studio API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(401);
           });
-        cy.pause();
       });
 
       it('401 negative test: should not update the workspace-groups accessible' +
