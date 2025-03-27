@@ -44,7 +44,7 @@
                         [style.border-bottom-color]="selectedStateColor"
                         [placeholder]="'workspace.unit-state' | translate">
                         <mat-option [value]="0"></mat-option>
-                        @for (state of this.workspaceService.workspaceSettings.states; track state) {
+                        @for (state of this.workspaceSettings?.states; track state) {
                           <mat-option class="state-option"
                                       [value]="state.id.toString()">
                             <div class="fx-row-center-center">
@@ -64,7 +64,7 @@
                       <mat-select formControlName="group"
                                   [placeholder]="'workspace.group' | translate">
                         <mat-option [value]="''"></mat-option>
-                        @for (group of workspaceService.workspaceSettings.unitGroups; track group) {
+                        @for (group of workspaceSettings?.unitGroups; track group) {
                           <mat-option
                             [value]="group">
                             {{ group }}
@@ -102,7 +102,7 @@
                                                class="fx-flex-row-60"
                                                [modules]="this.moduleService.editors"
                                                [hidden]="unitForm.disabled"
-                                               [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
+                                               [stableOnly]="workspaceSettings?.stableModulesOnly || false"
                                                moduleType="editor"></studio-lite-select-module>
                   </div>
                   <div class="fx-row-space-between-start">
@@ -114,7 +114,7 @@
                                                class="fx-flex-row-60"
                                                [modules]="this.moduleService.players"
                                                [hidden]="unitForm.disabled"
-                                               [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
+                                               [stableOnly]="workspaceSettings?.stableModulesOnly || false"
                                                moduleType="player">
                     </studio-lite-select-module>
                   </div>
@@ -127,7 +127,7 @@
                                                class="fx-flex-row-60"
                                                [modules]="this.moduleService.schemers"
                                                [hidden]="unitForm.disabled"
-                                               [stableOnly]="workspaceService.workspaceSettings.stableModulesOnly || false"
+                                               [stableOnly]="workspaceSettings?.stableModulesOnly || false"
                                                moduleType="schemer">
                     </studio-lite-select-module>
                   </div>
@@ -267,7 +267,8 @@
             <mat-card-content>
               @if (workspaceSettings && workspaceSettings.unitMDProfile && metadata) {
                 <studio-lite-profile-form
-                  [profileUrl]="workspaceSettings && workspaceSettings.unitMDProfile"
+                  [vocabularies]="this.workspaceService.vocabularies"
+                  [profile]="this.workspaceService.unitProfile"
                   [metadata]="metadata"
                   [language]="'de'"
                   [formlyWrapper]="'panel'"
@@ -290,7 +291,6 @@
               @if (workspaceSettings && workspaceSettings.itemMDProfile && metadata) {
                 <studio-lite-items
                   class="fx-flex-row-50"
-                  [profileUrl]="workspaceSettings && workspaceSettings.itemMDProfile"
                   [metadata]="metadata"
                   [language]="'de'"
                   [variablesLoader]="variablesLoader"

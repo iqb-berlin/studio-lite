@@ -3,11 +3,12 @@ import {
 } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UserWorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { MetadataProfileDto, UserWorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import {
   filter, Subject, takeUntil, takeWhile
 } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { MDProfile } from '@iqb/metadata';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -17,6 +18,7 @@ import { UnitsAreaComponent } from '../units-area/units-area.component';
 import { SplitterPaneComponent } from '../../../splitter/components/splitter-pane/splitter-pane.component';
 import { SplitterComponent } from '../../../splitter/components/splitter/splitter.component';
 import { RoutingHelperService } from '../../services/routing-helper.service';
+import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
   selector: 'studio-lite-workspace',
@@ -41,6 +43,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   routingOutlet: string = 'primary';
   private ngUnsubscribe = new Subject<void>();
   private userId = 0;
+  private workspaceSettings : WorkspaceSettings | null = null;
 
   constructor(
     public appService: AppService,
@@ -54,16 +57,21 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   ) {
     this.uploadProcessId = Math.floor(Math.random() * 20000000 + 10000000).toString();
-    this.workspaceService.workspaceSettings = {
-      defaultEditor: '',
-      defaultPlayer: '',
-      defaultSchemer: '',
-      unitGroups: [],
-      stableModulesOnly: true
-    };
   }
 
   ngOnInit(): void {
+    this.workspaceService.workspaceSettings$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(settings => {
+        if (settings) {
+          this.workspaceSettings = settings;
+          this.initProfile('unit')
+            .then((profile => this.loadProfile(profile)));
+          this.initProfile('item')
+            .then((profile => this.loadProfile(profile)));
+        }
+      });
+
     this.workspaceService.resetUnitList([]);
     const workspaceKey = 'ws';
     this.workspaceService.selectedWorkspaceId = Number(this.route.snapshot.params[workspaceKey]);
@@ -94,6 +102,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.openSecondaryOutlet(this.router.routerState.snapshot.url);
   }
 
+  private async initProfile(profileType: 'unit' | 'item'): Promise<MetadataProfileDto | boolean> {
+    const profileKey = profileType === 'unit' ? 'unitMDProfile' : 'itemMDProfile';
+    const profileId = this.workspaceSettings?.[profileKey];
+    return profileId ?
+      this.workspaceService.getProfile(profileId, profileType) :
+      false;
+  }
+
+  private async loadProfile(profile: boolean | MetadataProfileDto) {
+    if (profile) {
+      await this.workspaceService.loadProfileVocabularies(new MDProfile(profile));
+    } else {
+      this.snackBar.open(
+        this.translateService
+          .instant('workspace.profile-not-loaded', { profileUrl: profile }),
+        this.translateService.instant('error'),
+        { duration: 5000 }
+      );
+    }
+  }
+
   private fetchUserWorkspaceDataForUser(): void {
     this.appBackendService.getUserWorkspaceData(
       this.workspaceService.selectedWorkspaceId,
@@ -119,7 +148,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.pinnedNavTab = secondaryOutletTab ? [{ name: secondaryOutletTab, duplicable: true }] : [];
   }
 
-  private initWorkspace(workspace: UserWorkspaceFullDto): void {
+  private async initWorkspace(workspace: UserWorkspaceFullDto) {
     this.workspaceService.selectedWorkspaceName = `${workspace.groupName}: ${workspace.name}`;
     this.workspaceService.groupId = workspace.groupId || 0;
     this.workspaceService.dropBoxId = workspace.dropBoxId;

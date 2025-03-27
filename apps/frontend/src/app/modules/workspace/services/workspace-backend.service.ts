@@ -12,7 +12,7 @@ import {
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitPropertiesDto,
-  UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
+  UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto, MetadataProfileDto, MetadataVocabularyDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -37,6 +37,29 @@ export class WorkspaceBackendService {
       .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
       .pipe(
         catchError(() => [])
+      );
+  }
+
+  getMetadataProfile(url:string): Observable<MetadataProfileDto | boolean> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('url', url);
+
+    return this.http
+      .get(`${this.serverUrl}metadata/profiles`, { params: queryParams })
+      .pipe(
+        catchError(() => of(false)),
+        map(profile => profile as MetadataProfileDto)
+      );
+  }
+
+  getMetadataVocabulariesForProfile(url:string):Observable<MetadataVocabularyDto[] | boolean> {
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append('url', url);
+    return this.http
+      .get(`${this.serverUrl}metadata/vocabularies`, { params: queryParams })
+      .pipe(
+        catchError(() => of(false)),
+        map(vocab => vocab as MetadataVocabularyDto[])
       );
   }
 

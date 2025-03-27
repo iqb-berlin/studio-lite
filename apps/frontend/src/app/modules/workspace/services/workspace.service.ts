@@ -5,11 +5,15 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import {
-  UnitInListDto, UnitPropertiesDto, WorkspaceSettingsDto
+  MetadataProfileDto,
+  TopConcept,
+  UnitInListDto, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceBackendService } from './workspace-backend.service';
+import { MDProfile } from '@iqb/metadata';
+import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
@@ -17,11 +21,24 @@ import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { State } from '../../admin/models/state.type';
+import { Vocab, VocabData, VocabIdDictionaryValue } from '../../metadata/models/vocabulary.class';
+import { WorkspaceSettings } from '../../wsg-admin/models/workspace-settings.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
+  private workspaceSettingsSubject = new BehaviorSubject<WorkspaceSettings | null>(null);
+  workspaceSettings$ = this.workspaceSettingsSubject.asObservable();
+
+  set workspaceSettings(settings: WorkspaceSettings | null) {
+    this.workspaceSettingsSubject.next(settings);
+  }
+
+  get workspaceSettings(): WorkspaceSettings | null {
+    return this.workspaceSettingsSubject.value;
+  }
+
   private unitMetadataStore: UnitMetadataStore | undefined;
   private unitDefinitionStore: UnitDefinitionStore | undefined;
   private unitSchemeStore: UnitSchemeStore | undefined;
@@ -29,7 +46,6 @@ export class WorkspaceService {
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
-  workspaceSettings: WorkspaceSettingsDto;
   unitList: { [key: string]: UnitInListDto[] } = {};
   isWorkspaceGroupAdmin = false;
   userAccessLevel = 0;
@@ -44,6 +60,11 @@ export class WorkspaceService {
   codingScheme!: CodingScheme;
   dropBoxId: number | null = null;
   hasDroppedUnits: boolean = false;
+  itemProfile!: MDProfile;
+  unitProfile!: MDProfile;
+  vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
+  vocabularies: Vocab[] = [];
+  idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
@@ -64,6 +85,84 @@ export class WorkspaceService {
       itemMDProfile: '',
       unitMDProfile: ''
     };
+  }
+
+  async getProfile(profileUrl: string, profileType: string): Promise<MetadataProfileDto | boolean> {
+    try {
+      const profile = await lastValueFrom(this.backendService.getMetadataProfile(profileUrl));
+      if (!profile) {
+        return false;
+      }
+      if (profileType === 'item') {
+        this.itemProfile = new MDProfile(profile);
+      } else {
+        this.unitProfile = new MDProfile(profile);
+      }
+      return profile;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return false;
+    }
+  }
+
+  async loadProfileVocabularies(profile: MDProfile): Promise<Vocab[] | boolean> {
+    return new Promise(resolve => {
+      this.backendService.getMetadataVocabulariesForProfile(profile.id)
+        .subscribe(metadataVocabularies => {
+          if (metadataVocabularies && metadataVocabularies !== true &&
+            !metadataVocabularies.some(vocabulary => vocabulary === null)) {
+            const vocabularies: Vocab[] = metadataVocabularies
+              .map(vocabulary => ({
+                data: vocabulary,
+                url: vocabulary.id
+              }));
+            if (this.vocabularies.length) {
+              this.vocabularies = [...this.vocabularies, ...vocabularies];
+            } else {
+              this.vocabularies = vocabularies;
+            }
+
+            const vocabularyEntryParams = profile.groups
+              .flatMap(group => group.entries)
+              .filter(entry => (entry.type === 'vocabulary'))
+              .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary));
+            vocabularyEntryParams.forEach(entryParam => {
+              const matchingVocabulary = this.vocabularies.find(vocabulary => vocabulary.url === entryParam.url);
+              if (matchingVocabulary) {
+                this.vocabulariesIdDictionary = {
+                  ...this.vocabulariesIdDictionary,
+                  ...this.mapVocabularyIds(matchingVocabulary.data, entryParam)
+                };
+              }
+            });
+            resolve(true);
+          }
+          resolve(false);
+        });
+    });
+  }
+
+  private mapVocabularyIds(vocabulary: VocabData, entryParams: ProfileEntryParametersVocabulary) {
+    const hasNarrower = (narrower: TopConcept[]) => {
+      narrower.forEach((vocabularyEntry: TopConcept) => {
+        this.idLabelDictionary[vocabularyEntry.id] = {
+          labels: vocabularyEntry.prefLabel,
+          notation: vocabularyEntry.notation || [],
+          ...entryParams
+        };
+        if (vocabularyEntry.narrower) hasNarrower(vocabularyEntry.narrower);
+      });
+    };
+
+    if (vocabulary.hasTopConcept) {
+      vocabulary.hasTopConcept.forEach((topConcept: TopConcept) => {
+        this.idLabelDictionary[topConcept.id] = {
+          labels: topConcept.prefLabel, notation: topConcept.notation || [], ...entryParams
+        };
+        if (topConcept.narrower) hasNarrower(topConcept.narrower);
+      });
+    }
+    return this.idLabelDictionary;
   }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: { [key: string]: UnitInListDto[] }): ValidatorFn {
@@ -137,14 +236,17 @@ export class WorkspaceService {
   }
 
   setWorkspaceGroupStates(): void {
-    if (this.groupId) {
-      this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
-        if (res.settings) {
-          this.workspaceSettings.states = res.settings.states;
-          this.states = res.settings.states || [];
-        }
-      });
+    if (!this.groupId) {
+      return;
     }
+
+    this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
+      const newStates = res.settings?.states;
+      if (newStates && this.workspaceSettings) {
+        this.workspaceSettings.states = newStates;
+        this.states = newStates;
+      }
+    });
   }
 
   async loadUnitProperties(): Promise<UnitMetadataStore | undefined> {
@@ -218,19 +320,26 @@ export class WorkspaceService {
       }
     }
     if (reloadUnitList) {
-      let queryParams = new HttpParams();
-      queryParams = queryParams
-        .append('targetWorkspaceId', this.selectedWorkspaceId)
-        .append('withLastSeenCommentTimeStamp', true);
-      saveOk = await lastValueFrom(this.backendService.getUnitList(this.selectedWorkspaceId, queryParams)
-        .pipe(
-          map(uResponse => {
-            this.resetUnitList(uResponse);
-            this.appService.dataLoading = false;
-            return true;
-          })
-        ));
+      const queryParams = new HttpParams()
+        .set('targetWorkspaceId', this.selectedWorkspaceId)
+        .set('withLastSeenCommentTimeStamp', true);
+
+      try {
+        const unitListResponse = await lastValueFrom(
+          this.backendService.getUnitList(this.selectedWorkspaceId, queryParams).pipe(
+            map(uResponse => {
+              this.resetUnitList(uResponse);
+              this.appService.dataLoading = false;
+              return true;
+            })
+          )
+        );
+        saveOk = unitListResponse;
+      } catch (error) {
+        console.error('Error loading unit list:', error);
+      }
     }
+
     this.appService.dataLoading = false;
     return saveOk;
   }

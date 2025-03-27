@@ -10,8 +10,8 @@ import {
   MatChipGrid, MatChipRow, MatChipRemove, MatChipInput
 } from '@angular/material/chips';
 import { NotationNode } from '../../models/vocabulary.class';
-import { MetadataService } from '../../services/metadata.service';
 import { NestedTreeComponent } from '../nested-tree/nested-tree.component';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 @Component({
   selector: 'studio-lite-formly-chips',
@@ -25,7 +25,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
 
   constructor(
     private vocabsDialog: MatDialog,
-    private metadataService: MetadataService
+    private workspaceService: WorkspaceService
   ) {
     super();
   }
@@ -59,7 +59,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
       data: {
         value: this.formControl.value,
         props: this.props,
-        vocabularies: this.metadataService.vocabularies
+        vocabularies: this.workspaceService.vocabularies
       },
       width: '1000px'
     });
@@ -71,7 +71,7 @@ export class FormlyChipsComponent extends FieldType<FieldTypeConfig> implements 
           const selectedVocabularyEntries = results.nodes
             .map((result: NotationNode) => ({
               name: `${results.hideNumbering ? '' :
-                result.notation}  ${this.metadataService.vocabulariesIdDictionary[result.id].labels.de}`.trim(),
+                result.notation}  ${this.workspaceService.vocabulariesIdDictionary[result.id].labels.de}`.trim(),
               id: result.id,
               notation: result.notation,
               text: [{ lang: 'de', value: `${results.hideNumbering ? '' : result.notation} ${result.label}`.trim() }]

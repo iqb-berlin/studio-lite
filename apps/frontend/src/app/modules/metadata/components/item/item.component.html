@@ -3,15 +3,18 @@
     <mat-panel-title>{{model.id || 'metadata.without-id' | translate}}
     </mat-panel-title>
   </mat-expansion-panel-header>
-    <form [formGroup]="form">
-     <formly-form [model]="model"
-                  [fields]="fields"
-                  [form]="form"
-                  (modelChange)="onModelChange()">
+    <form
+      [formGroup]="form">
+     <formly-form
+       [model]="model"
+       [fields]="fields"
+       [form]="form"
+       (modelChange)="onModelChange()">
      </formly-form>
     </form>
     <studio-lite-profile-form
-     [profileUrl]="profileUrl"
+      [vocabularies]="this.workspaceService.vocabularies"
+      [profile]="profile"
      [metadata]="metadata[itemIndex]"
      [language]="language"
      [formlyWrapper]="''"

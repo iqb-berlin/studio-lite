@@ -4,11 +4,13 @@ import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceBackendService } from '../services/workspace-backend.service';
 import { RoutingHelperService } from '../services/routing-helper.service';
+import { WorkspaceSettings } from '../../wsg-admin/models/workspace-settings.interface';
 
 @Directive()
 export abstract class SelectUnitDirective {
   @Input() selectedRouterLink!: number;
   @Input() navLinks!: string[];
+  private wsSettings : WorkspaceSettings | null = null;
 
   abstract workspaceService: WorkspaceService;
   abstract router: Router;
@@ -20,10 +22,18 @@ export abstract class SelectUnitDirective {
   routingOutlet: string = 'primary';
 
   updateUnitList(unitToSelect?: number): void {
-    this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId)
-      .subscribe(groups => {
-        this.workspaceService.workspaceSettings.unitGroups = groups;
+    this.workspaceService.workspaceSettings$
+      .subscribe(settings => {
+        if (settings) {
+          this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId)
+            .subscribe(groups => {
+              if (this.wsSettings) {
+                this.wsSettings.unitGroups = groups;
+              }
+            });
+        }
       });
+
     let queryParams = new HttpParams();
     queryParams = queryParams
       .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId)

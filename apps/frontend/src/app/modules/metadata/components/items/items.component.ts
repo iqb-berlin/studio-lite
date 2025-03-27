@@ -34,10 +34,8 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
 
   @Input() variablesLoader!: BehaviorSubject<AliasId[]>;
-  @Input() profileUrl!: string | undefined;
   @Input() metadata: Partial<UnitMetadataValues> = {};
   @Input() language!: string;
-
   @Output() metadataChange: EventEmitter<UnitMetadataValues> = new EventEmitter();
 
   constructor(private addItemDialog: MatDialog) {}

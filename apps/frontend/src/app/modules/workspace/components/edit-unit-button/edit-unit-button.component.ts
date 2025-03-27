@@ -12,7 +12,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatButton } from '@angular/material/button';
-import { lastValueFrom, map } from 'rxjs';
+import { lastValueFrom, map, Subscription } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
@@ -39,6 +39,7 @@ import { ExportCodingBookComponent } from '../export-coding-book/export-coding-b
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
+import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -48,6 +49,7 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
     TranslateModule]
 })
 export class EditUnitButtonComponent extends RequestMessageDirective implements OnInit {
+  private workspaceSettingsSubscription: Subscription | null = null;
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -71,9 +73,17 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
     super();
   }
 
+  private workspaceSettings : WorkspaceSettings | null = null;
+
   userListTitle: string = '';
 
   ngOnInit(): void {
+    // Abonniere workspaceSettings$ und hole unitGroups
+    this.workspaceSettingsSubscription = this.workspaceService.workspaceSettings$
+      .subscribe(settings => {
+        this.workspaceSettings = settings;
+      });
+
     this.userListTitle = this.workspaceService.selectedWorkspaceName ?
       this.translateService
         .instant('workspace.user-list', { workspace: this.workspaceService.selectedWorkspaceName }) :
@@ -92,31 +102,33 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.workspaceService.workspaceSettings.defaultEditor = result.defaultEditor;
-        this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
-        this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
-        this.workspaceService.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
-        this.workspaceService.workspaceSettings.unitMDProfile = result.unitMDProfile;
-        this.workspaceService.workspaceSettings.itemMDProfile = result.itemMDProfile;
-        this.workspaceService.workspaceSettings.states = result.states;
+        if (this.workspaceSettings) {
+          this.workspaceSettings.defaultEditor = result.defaultEditor;
+          this.workspaceSettings.defaultPlayer = result.defaultPlayer;
+          this.workspaceSettings.defaultSchemer = result.defaultSchemer;
+          this.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
+          this.workspaceSettings.unitMDProfile = result.unitMDProfile;
+          this.workspaceSettings.itemMDProfile = result.itemMDProfile;
+          this.workspaceSettings.states = result.states;
 
-        this.appBackendService.setWorkspaceSettings(
-          this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-        ).subscribe(isOK => {
-          if (isOK) {
-            this.snackBar.open(
-              this.translateService.instant('workspace.settings-saved'),
-              '',
-              { duration: 1000 }
-            );
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('workspace.settings-not-saved'),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
+          this.appBackendService.setWorkspaceSettings(
+            this.workspaceService.selectedWorkspaceId, this.workspaceSettings
+          ).subscribe(isOK => {
+            if (isOK) {
+              this.snackBar.open(
+                this.translateService.instant('workspace.settings-saved'),
+                '',
+                { duration: 1000 }
+              );
+            } else {
+              this.snackBar.open(
+                this.translateService.instant('workspace.settings-not-saved'),
+                this.translateService.instant('workspace.error'),
+                { duration: 3000 }
+              );
+            }
+          });
+        }
       }
     });
   }
@@ -427,6 +439,12 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
       }).afterClosed().subscribe(() => {
         this.updateUnitList();
       });
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.workspaceSettingsSubscription !== null) {
+      this.workspaceSettingsSubscription.unsubscribe();
     }
   }
 }
