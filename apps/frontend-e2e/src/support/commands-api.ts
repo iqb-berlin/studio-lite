@@ -545,17 +545,7 @@ Cypress.Commands.add('getUnitPropertiesAPI', (wsId:string, unitId:string, token:
 // 41
 Cypress.Commands.add(
   'updateUnitPropertiesAPI',
-  (wsId: string, unitId: string, profile:string, entry: DefinitionUnit, token: string) => {
-    // console.log(entry);
-    // eslint-disable-next-line max-len
-    // const jsonObj = JSON.parse('[{"id":"a1","label":[{"lang":"de","value":"Für SPF geeignet"}],"value":"false","valueAsText":{"lang":"de","value":"ja"}},{"id":"iqb_phones","label":[{"lang":"de","value":"Kopfhörer"}],"value":[],"valueAsText":[]},{"id":"w8","label":[{"lang":"de","value":"Leitidee"}],"value":[],"valueAsText":[]},{"id":"iqb_author","label":[{"lang":"de","value":"Entwickler:in"}],"value":[{"lang":"de","value":"Ana Maier"}],"valueAsText":[{"lang":"de","value":"Ana Maier"}]}]');
-    // metadata: {
-    //   profiles: [{
-    //     entries: `${jsonObj}`,
-    //     profileId: `${profile}`,
-    //     isCurrent: true
-    //   }]
-    // }
+  (wsId: string, unitId: string, entry: DefinitionUnit, token: string) => {
     const authorization = `bearer ${token}`;
     const nu = parseInt(`${unitId}`, 10);
     cy.request({
@@ -567,7 +557,7 @@ Cypress.Commands.add(
       },
       body: {
         id: nu,
-        groupName: `${entry.groupName}`
+        groupName: entry.groupName
       },
       failOnStatusCode: false
     });
@@ -688,6 +678,19 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   });
 });
 
+// 55a
+Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 // 58a
 Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1119,7 +1122,12 @@ Cypress.Commands.add('updateWsByUserAPI', (userId:string, groupId: string, wsIds
     },
     body: {
       groupId: parseInt(groupId, 10),
-      workspaces: wsIds
+      workspaces: [
+        {
+          accessLevel: 2,
+          id: wsIds[0]
+        }
+      ]
     },
     failOnStatusCode: false
   });
