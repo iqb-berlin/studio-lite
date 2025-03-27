@@ -101,6 +101,9 @@ export interface CopyUnit {
   key: string;
   name: string;
 }
+export interface DynamicSetting {
+  [key: string]: string;
+}
 export interface DefinitionUnit {
   id: number;
   key?: string;

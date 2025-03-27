@@ -64,7 +64,7 @@ declare namespace Cypress {
     getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 33
     getUsersByWsAPI(wsId: string, token: string): Chainable<Response>; // 34
     getUnitPropertiesAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 40
-    updateUnitPropertiesAPI(wsId: string, unitId: string, profile: string, entry: DefinitionUnit, token: string):
+    updateUnitPropertiesAPI(wsId: string, unitId: string, entry: DefinitionUnit, token: string):
     Chainable<Response>; // 41
     getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 42
     moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 50
@@ -73,6 +73,7 @@ declare namespace Cypress {
     downloadWsAPI(wsId:string, token:string): Chainable<Response>; // 53
     downloadWsAllAPI(token:string): Chainable<Response>; // 54
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 55
+    getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55a
     getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 57
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
