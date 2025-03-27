@@ -100,13 +100,16 @@ export class TableViewComponent implements OnInit {
   }
 
   tabChanged(tabChangeEvent: MatTabChangeEvent): void {
-    if (tabChangeEvent.index === 1) {
-      this.viewMode = 'items';
-      this.columnsToDisplay = this.getTableItemsColumnsDefinitions();
+    const isItemView = tabChangeEvent.index === 1;
+
+    this.viewMode = isItemView ? 'items' : 'units';
+    this.columnsToDisplay = isItemView ?
+      this.getTableItemsColumnsDefinitions() :
+      this.getTableUnitsColumnsDefinitions();
+
+    if (isItemView) {
       this.setUnitsItemsDataRows(this.data.units);
     } else {
-      this.viewMode = 'units';
-      this.columnsToDisplay = this.getTableUnitsColumnsDefinitions();
       this.setUnitsDataRows(this.data.units);
     }
   }
@@ -159,14 +162,16 @@ export class TableViewComponent implements OnInit {
     unit: UnitPropertiesDto,
     addKey: boolean
   ): ColumnValues {
-    this.displayedColumns.forEach(column => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const column of this.displayedColumns) {
       if (column === 'key' && addKey) {
-        values.key =
-          `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–';
-      } else {
-        values[column] = item[column] ? item[column]?.toString() : '';
+        values.key = `<a href="#/a/${this.workspaceId}/${unit.id}">${unit.key}</a>` || '–';
+        // eslint-disable-next-line no-continue
+        continue;
       }
-    });
+      const itemValue = item[column];
+      values[column] = itemValue ? itemValue.toString() : '';
+    }
     return values;
   }
 
@@ -174,18 +179,16 @@ export class TableViewComponent implements OnInit {
     values: ColumnValues,
     entry: MetadataValuesEntry
   ): ColumnValues {
+    const label = entry.label[0]?.value;
+    if (!label) {
+      return values;
+    }
     if (Array.isArray(entry.valueAsText)) {
-      if (entry.valueAsText.length > 1) {
-        const textValues: string[] = [];
-        entry.valueAsText.forEach(textValue => {
-          textValues.push(`${textValue.value || ''}`);
-        });
-        values[entry.label[0].value] = textValues.join('<br>');
-      } else {
-        values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
-      }
+      const textValues = entry.valueAsText
+        .map(textValue => textValue.value || '');
+      values[label] = textValues.length > 1 ? textValues.join('<br>') : textValues[0] || '';
     } else {
-      values[entry.label[0].value] = entry.valueAsText?.value || '';
+      values[label] = entry.valueAsText?.value || '';
     }
     return values;
   }
@@ -218,21 +221,21 @@ export class TableViewComponent implements OnInit {
   }
 
   private getTableItemsColumnsDefinitions(): string[] {
-    if (!this.metadataService.itemProfileColumns) return [];
-    const columnsDefinitions: string[] =
-      this.metadataService.itemProfileColumns.entries?.map(
-        entry => entry.label
-      ) || [];
+    const itemProfileColumns = this.metadataService.itemProfileColumns;
+    if (!itemProfileColumns?.entries) {
+      return [...this.displayedColumns];
+    }
+    const columnsDefinitions = itemProfileColumns.entries.map(entry => entry.label);
     return [...this.displayedColumns, ...columnsDefinitions];
   }
 
   private getTableUnitsColumnsDefinitions(): string[] {
-    const columnsDefinitions: string[][] = [];
-    if (!this.metadataService.unitProfileColumns) return [];
-    this.metadataService.unitProfileColumns.forEach(group => {
-      columnsDefinitions.push(group.entries.map(entry => entry.label));
-    });
-    return ['key', ...columnsDefinitions.flat()];
+    if (!this.metadataService.unitProfileColumns) {
+      return [];
+    }
+    const columnLabels = this.metadataService.unitProfileColumns
+      .flatMap(group => group.entries.map(entry => entry.label));
+    return ['key', ...columnLabels];
   }
 
   downloadMetadata(): void {
