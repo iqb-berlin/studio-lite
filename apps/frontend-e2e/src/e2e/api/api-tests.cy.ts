@@ -107,7 +107,7 @@ describe('Studio API tests', () => {
         cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
           .then(resp => {
             Cypress.env(`token_${Cypress.env('username')}`, resp.body);
-            // console.log(resp.body);
+            console.log(resp.body);
             expect(resp.status).to.equal(201);
           });
       });
@@ -1215,7 +1215,6 @@ describe('Studio API tests', () => {
     });
 
     describe('41. PATCH /api/workspaces/{workspace_id}/units/{id}/properties', () => {
-      // TO DO It does not work, all values we changes get undefined.
       let entry1: DefinitionUnit;
       before(() => {
         entry1 = {
@@ -1518,7 +1517,6 @@ describe('Studio API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(200);
         });
-        cy.pause();
       });
 
       it('500 negative test: should not retrieve scheme without a valid unit id ', () => {
@@ -1549,6 +1547,189 @@ describe('Studio API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(401);
         });
+        cy.pause();
+      });
+    });
+
+    describe('55b. PATH /api/workspaces/{workspace_id}/units/{id}/definition', () => {
+      before(() => {
+        // 41, but with different parameters in body
+        const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
+        const nu = parseInt(`${Cypress.env(unit4.shortname)}`, 10);
+        cy.request({
+          method: 'PATCH',
+          url: `/api/workspaces/${Cypress.env(ws1.id)}/units/${Cypress.env(unit4.shortname)}/properties`,
+          headers: {
+            'app-version': Cypress.env('version'),
+            authorization
+          },
+          body: {
+            id: nu,
+            editor: setEditor.defaultEditor,
+            player: setEditor.defaultPlayer,
+            schemer: setEditor.defaultSchemer
+          }
+        }).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+
+      it('500 negative test: should not add any button in the editor without a valid unit id ', () => {
+        cy.updateUnitDefinitionAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not add any button in the editor without a valid ws id ', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not add any button in the editor without credentials', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('401 negative test: should not add any button in the editor without a user with non credentials', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should be able to add a button in the editor and save', () => {
+        cy.pause();
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+        cy.pause();
+      });
+    });
+
+    describe('55c. GET /api/workspaces/{workspace_id}/units/{id}/definition', () => {
+      it('500 negative test: should not retrieve an unit definition without a valid unit id ', () => {
+        cy.getUnitDefinitionAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not retrieve an unit definition without a valid ws id ', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not retrieve an unit definition without credentials', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('401 positive test: should retrieve an unit definition', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should retrieve an unit definition', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+    });
+
+    describe('55d. PATH /api/workspaces/{workspace_id}/units/{id}/scheme', () => {
+      it('500 negative test: should not coding without a valid unit id ', () => {
+        cy.updateUnitSchemeAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not add coding without a valid ws id ', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not add coding without credentials', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('401 negative test: should not add coding without a user with non credentials', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it.skip('200 positive test: should be able to add coding and save', () => {
+        cy.pause();
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+        cy.pause();
       });
     });
 
@@ -1556,6 +1737,7 @@ describe('Studio API tests', () => {
     describe('States block', () => {
       describe('58. PATCH /api/workspace-groups/{workspace_group_id}', () => {
         it('200 positive test: should add new states in a group with credentials', () => {
+          cy.pause();
           cy.updateGroupPropertiesAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
