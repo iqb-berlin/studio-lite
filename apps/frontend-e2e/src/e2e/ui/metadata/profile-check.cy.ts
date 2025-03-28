@@ -10,7 +10,7 @@ import {
 import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
 import { UserData } from '../../../support/testData';
 
-describe.skip('Load metadata profile', () => {
+describe('Load metadata profile', () => {
   const groups = ['Mathematik Primär und Sek I',
     'Deutsch Primär und Sek I',
     'Englisch Sek I'];
@@ -39,7 +39,10 @@ describe.skip('Load metadata profile', () => {
 
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
-    cy.get('[data-cy="goto-admin"]').click();
+    // cy.get('[data-cy="goto-admin"]').click();
+    cy.get('div')
+      .contains('studio-lite-wrapped-icon', 'settings')
+      .click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();
@@ -67,7 +70,10 @@ describe.skip('Load metadata profile', () => {
 
   it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Mathematik'];
-    cy.get('[data-cy="goto-admin"]').click();
+    // cy.get('[data-cy="goto-admin"]').click();
+    cy.get('div')
+      .contains('studio-lite-wrapped-icon', 'settings')
+      .click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();
