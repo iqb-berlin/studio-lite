@@ -8,7 +8,7 @@ import {
   CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
-  RequestReportDto, ReviewFullDto, ReviewInListDto, ReviewSettingsDto,
+  RequestReportDto, ReviewFullDto, ReviewInListDto,
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitPropertiesDto,
@@ -285,17 +285,7 @@ export class BackendService {
     return this.http
       .get<ReviewFullDto>(`${this.serverUrl}workspaces/${workspaceId}/reviews/${reviewId}`)
       .pipe(
-        map(r => {
-          if (r.settings) {
-            if (!r.settings.bookletConfig) {
-              r.settings = <ReviewSettingsDto>{
-                bookletConfig: r.settings,
-                reviewConfig: {}
-              };
-            }
-          }
-          return r;
-        }),
+        map(r => r),
         catchError(() => of(null))
       );
   }
