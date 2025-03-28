@@ -169,6 +169,7 @@ export class UnitService {
         newUnit.transcript = unitSourceData.transcript;
         newUnit.reference = unitSourceData.reference;
         newUnit.player = unitSourceData.player;
+        newUnit.metadata = unitSourceData.metadata;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
         newUnit.schemeType = unitSourceData.schemeType;
@@ -179,7 +180,8 @@ export class UnitService {
 
         const metadata = await this.getMetadataOfUnit(unit);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-        newUnit.metadata = UnitService.setCurrentProfiles(
+
+        UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
           metadata as UnitFullMetadataDto
@@ -706,7 +708,7 @@ export class UnitService {
   }
 
   private async getMetadataOfUnit(unit: CreateUnitDto): Promise<UnitMetadataValues | UnitFullMetadataDto> {
-    const unitMetadataToDelete = this.unitMetadataToDeleteService.getOneByUnit(unit.createFrom);
+    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.createFrom);
     if (unitMetadataToDelete) {
       return this.findOnesMetadata(unit.createFrom);
     }
