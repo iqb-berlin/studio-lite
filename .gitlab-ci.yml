@@ -29,7 +29,7 @@ variables:
   DOCKER_HUB_PROXY: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/"
   BASE_IMAGE: node:lts-bookworm-slim
   CICD_BASE_IMAGE: "${BASE_IMAGE}-git"
-  CYPRESS_IMAGE: cypress/browsers:node-20.15.1-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
+  CYPRESS_IMAGE: cypress/browsers:node-22.14.0-chrome-134.0.6998.165-1-ff-136.0.3-edge-134.0.3124.85-1
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
   E2E_BASE_IMAGE: "${CYPRESS_IMAGE}-docker"
   DOCKER_HOST: tcp://docker:2375
