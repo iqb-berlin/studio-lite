@@ -129,27 +129,13 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         await this.moduleService.loadList();
       }
 
-      this.unsubscribeAll([
-        this.unitFormDataChangedSubscription,
-        this.editorSelectionChangedSubscription,
-        this.playerSelectionChangedSubscription,
-        this.schemerSelectionChangedSubscription,
-        this.statesChangedSubscription
-      ]);
-
       await this.workspaceService.loadUnitProperties();
-
       this.setupForm();
       this.updateVariables();
       this.loadMetaData();
     } catch (error) {
       console.error('Error fetching data', error);
     }
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private unsubscribeAll(subscriptions: (Subscription | undefined)[]): void {
-    subscriptions.forEach(subscription => subscription?.unsubscribe());
   }
 
   private setupForm() {
