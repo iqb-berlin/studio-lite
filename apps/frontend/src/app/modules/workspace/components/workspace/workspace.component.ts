@@ -161,7 +161,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.userAccessLevel = workspace.userAccessLevel;
     this.workspaceService.isWorkspaceGroupAdmin =
       this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);
-    this.moduleService.loadList();
+    await this.moduleService.loadList();
   }
 
   ngOnDestroy(): void {
