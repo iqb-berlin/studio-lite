@@ -83,10 +83,19 @@ export class WorkspaceUnitController {
   @Get('scheme')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiOkResponse()
   @ApiTags('workspace unit')
-  async getCodingReport(@WorkspaceId() workspaceId: number): Promise<CodingReportDto[]> {
+  @ApiParam({
+    name: 'workspace_id',
+    type: Number,
+    description: 'ID of the workspace for which the coding report is to be retrieved.'
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieves the coding report.',
+    type: [CodingReportDto]
+  })
+  async getCodingReport(
+    @WorkspaceId(ParseIntPipe) workspaceId: number
+  ): Promise<CodingReportDto[]> {
     return this.workspaceService.getCodingReport(workspaceId);
   }
 
