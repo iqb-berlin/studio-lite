@@ -11,6 +11,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
+import { MDProfile } from '@iqb/metadata';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 import {
@@ -32,7 +33,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   variables!: AliasId[];
   isTextOnlyView = false;
   private ngUnsubscribe = new Subject<void>();
-
+  @Input() profile !: MDProfile;
   @Input() variablesLoader!: BehaviorSubject<AliasId[]>;
   @Input() metadata: Partial<UnitMetadataValues> = {};
   @Input() language!: string;

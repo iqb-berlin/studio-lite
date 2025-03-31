@@ -291,7 +291,8 @@
               @if (workspaceSettings && workspaceSettings.itemMDProfile && metadata) {
                 <studio-lite-items
                   class="fx-flex-row-50"
-                  [metadata]="metadata"
+                  [profile]="this.workspaceService.itemProfile"
+                  [metadata]="metadata$ | async"
                   [language]="'de'"
                   [variablesLoader]="variablesLoader"
                   (metadataChange)="onMetadataChange($event)">

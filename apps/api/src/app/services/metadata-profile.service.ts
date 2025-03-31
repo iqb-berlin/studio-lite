@@ -58,16 +58,16 @@ export class MetadataProfileService {
 
   async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {
     const profile = await this.getMetadataProfile(url);
-    const vocabularies: MetadataVocabularyDto[] = [];
+    if (!profile) {
+      return [];
+    }
     const vocabularyIds = profile.groups
-      .map(group => group.entries)
-      .flat()
-      .filter(entry => (entry.type === 'vocabulary'))
+      .flatMap(group => group.entries)
+      .filter(entry => entry.type === 'vocabulary')
       .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url);
-    await Promise.all(vocabularyIds
-      .map(async id => {
-        vocabularies.push(await this.metadataVocabularyService.getMetadataVocabularyById(id));
-      }));
+    const vocabularies = await Promise.all(
+      vocabularyIds.map(id => this.metadataVocabularyService.getMetadataVocabularyById(id))
+    );
     return vocabularies;
   }
 }
