@@ -178,9 +178,8 @@ export class UnitService {
         newUnit.lastChangedSchemeUser = displayName;
         await this.unitsRepository.save(newUnit);
 
-        const metadata = await this.getMetadataOfUnit(unit);
+        const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-
         UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
@@ -707,10 +706,10 @@ export class UnitService {
     return unit;
   }
 
-  private async getMetadataOfUnit(unit: CreateUnitDto): Promise<UnitMetadataValues | UnitFullMetadataDto> {
-    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.createFrom);
+  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(createFrom);
     if (unitMetadataToDelete) {
-      return this.findOnesMetadata(unit.createFrom);
+      return this.findOnesMetadata(createFrom);
     }
     return unit.metadata;
   }
