@@ -1,11 +1,11 @@
 import {
-  Component, Input, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import {
-  BehaviorSubject, Subject, Subscription, takeUntil
+  BehaviorSubject, firstValueFrom, Observable, Subject, Subscription, takeUntil
 } from 'rxjs';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -26,7 +26,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MDProfile } from '@iqb/metadata';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -44,18 +43,40 @@ import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.
 @Component({
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
-  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
-    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
-    MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
-    CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
-    TranslateModule, MatIcon, CanReturnUnitPipe]
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+    NewGroupButtonComponent,
+    CdkTextareaAutosize,
+    SelectModuleComponent,
+    MatButton,
+    ProfileFormComponent,
+    ItemsComponent,
+    DatePipe,
+    TranslateModule,
+    MatIcon,
+    CanReturnUnitPipe
+  ]
 })
-
-export class UnitPropertiesComponent extends RequestMessageDirective implements OnInit, OnDestroy {
+export class UnitPropertiesComponent
+  extends RequestMessageDirective
+  implements OnInit, OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
-  @Input() profile!: MDProfile;
   private readonly unitIdChangedSubscription: Subscription | undefined;
   private unitFormDataChangedSubscription: Subscription | undefined;
   private editorSelectionChangedSubscription: Subscription | undefined;
@@ -99,21 +120,22 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       transcript: this.fb.control(''),
       reference: this.fb.control('')
     });
-    this.metadataLoader
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => { this.metadata = metadata; });
+
     this.addSubscriptionForUnitDefinitionChanges();
-    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
-      .subscribe(id => this.readDataForUnitId(id));
+    this.unitIdChangedSubscription =
+      this.workspaceService.selectedUnit$.subscribe(id => this.readDataForUnitId(id)
+      );
     this.updateVariables();
   }
 
   async ngOnInit(): Promise<void> {
     // load studio with selected unit
     if (this.workspaceService.selectedUnit$.getValue()) {
-      await this.readDataForUnitId(this.workspaceService.selectedUnit$.getValue());
+      await this.readDataForUnitId(
+        this.workspaceService.selectedUnit$.getValue()
+      );
     }
-    this.updateVariables();
+    await this.updateVariables();
   }
 
   private async readDataForUnitId(unitId: number): Promise<void> {
@@ -131,8 +153,8 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
 
       await this.workspaceService.loadUnitProperties();
       this.setupForm();
-      this.updateVariables();
-      this.loadMetaData();
+      await this.updateVariables();
+      await this.loadMetaData();
     } catch (error) {
       console.error('Error fetching data', error);
     }
@@ -161,9 +183,12 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       }, { emitEvent: false });
       if (this.editorSelector) {
         this.editorSelector.value = unitMetadata.editor || '';
-        this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
-        });
+        this.editorSelectionChangedSubscription =
+          this.editorSelector.selectionChanged.subscribe(selectedValue => {
+            this.workspaceService
+              .getUnitMetadataStore()
+              ?.setEditor(selectedValue);
+          });
       }
       if (this.playerSelector) {
         this.playerSelector.value = unitMetadata.player || '';
@@ -220,28 +245,47 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
 
   // metadata
 
-  private loadMetaData() {
+  private async loadMetaData(): Promise<void> {
+    this.metadata = await firstValueFrom(
+      this.metadataLoader.pipe(takeUntil(this.ngUnsubscribe))
+    );
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
-      this.workspaceService.workspaceSettings$.subscribe(workspaceSettings => {
-        this.workspaceSettings = workspaceSettings;
-      });
+      this.workspaceSettings = await firstValueFrom(
+        this.workspaceService.workspaceSettings$
+      );
       const unitMetadata = unitMetadataStore.getData();
-      this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
+      const metadata = JSON.parse(JSON.stringify(unitMetadata.metadata)) || {};
+      this.metadataLoader.next({ ...metadata });
+    } else {
+      this.metadataLoader.next({});
     }
   }
 
-  private updateVariables(): void {
+  get metadata$(): Observable<UnitMetadataValues> {
+    return this.metadataLoader.asObservable();
+  }
+
+  private async updateVariables(): Promise<void> {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (!this.workspaceService.getUnitSchemeStore()) {
-      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
-        .subscribe(ues => {
-          if (ues) {
-            this.workspaceService.setUnitSchemeStore(new UnitSchemeStore(unitId, ues));
-            this.variablesLoader.next(this.getItems());
-          }
-        });
+      try {
+        const unitScheme = await firstValueFrom(
+          this.backendService.getUnitScheme(
+            this.workspaceService.selectedWorkspaceId,
+            unitId
+          )
+        );
+        if (unitScheme) {
+          this.workspaceService.setUnitSchemeStore(
+            new UnitSchemeStore(unitId, unitScheme)
+          );
+          this.variablesLoader.next(this.getItems());
+        }
+      } catch (error) {
+        console.error('Error fetching UnitScheme:', error);
+      }
     } else {
       this.variablesLoader.next(this.getItems());
     }
