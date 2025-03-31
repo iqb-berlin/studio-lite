@@ -1,8 +1,3 @@
-<h2>{{key}}</h2>
-@if (name) {
-  <h3>{{name}}</h3>
-}
-
 <table class="metadata">
   @if (stateLabel) {
     <tr>
@@ -30,13 +25,6 @@
       <td class="cell left-cell">{{'print.transcript' | translate}}</td>
       <td class="cell"></td>
       <td class="cell right-cell">{{transcript}}</td>
-    </tr>
-  }
-  @if (reference) {
-    <tr>
-      <td class="cell left-cell">{{'print.reference' | translate}}</td>
-      <td class="cell"></td>
-      <td class="cell right-cell">{{reference}}</td>
     </tr>
   }
   @if (lastChangedDefinition) {

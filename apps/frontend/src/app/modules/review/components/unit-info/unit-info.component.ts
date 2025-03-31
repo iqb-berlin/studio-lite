@@ -6,7 +6,6 @@ import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';
@@ -26,16 +25,16 @@ const PanelWidthOffset = 40;
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;
-  _unitId = 0;
+  id = 0;
   @Input('unitId')
   set unitId(value: number) {
-    this._unitId = value;
+    this.id = value;
   }
 
-  _unitMetadata?: UnitPropertiesDto;
-  @Input('unitMetadata')
-  set unitMetadata(value: UnitPropertiesDto | undefined) {
-    this._unitMetadata = value;
+  properties?: UnitPropertiesDto;
+  @Input('unitProperties')
+  set unitProperties(value: UnitPropertiesDto | undefined) {
+    this.properties = value;
   }
 
   set elementWidth(value: number) {
