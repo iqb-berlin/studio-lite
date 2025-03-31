@@ -87,11 +87,11 @@ export class WorkspaceService {
     };
   }
 
-  async getProfile(profileUrl: string, profileType: string): Promise<MetadataProfileDto | boolean> {
+  async getProfile(profileUrl: string, profileType: string): Promise<MetadataProfileDto | null> {
     try {
       const profile = await lastValueFrom(this.backendService.getMetadataProfile(profileUrl));
       if (!profile) {
-        return false;
+        return null;
       }
       if (profileType === 'item') {
         this.itemProfile = new MDProfile(profile);
@@ -101,7 +101,7 @@ export class WorkspaceService {
       return profile;
     } catch (error) {
       console.error('Error fetching profile:', error);
-      return false;
+      return null;
     }
   }
 

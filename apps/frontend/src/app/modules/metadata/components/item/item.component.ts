@@ -124,9 +124,10 @@ export class ItemComponent implements OnInit, OnChanges {
   }
 
   private initModel(): void {
-    if (this.metadata[this.itemIndex].id) this.model.id = this.metadata[this.itemIndex].id;
-    if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
-    if (this.metadata[this.itemIndex].weighting) this.model.weighting = this.metadata[this.itemIndex].weighting;
+    const currentMetadata = this.metadata[this.itemIndex];
+    this.model.id = currentMetadata.id || this.model.id;
+    this.model.description = currentMetadata.description || this.model.description;
+    this.model.weighting = currentMetadata.weighting || this.model.weighting;
     this.updateModelVariableId();
   }
 

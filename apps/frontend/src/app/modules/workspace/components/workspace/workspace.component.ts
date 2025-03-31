@@ -65,10 +65,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       .subscribe(settings => {
         if (settings) {
           this.workspaceSettings = settings;
-          this.initProfile('unit')
-            .then((profile => this.loadProfile(profile)));
-          this.initProfile('item')
-            .then((profile => this.loadProfile(profile)));
+          ['unit', 'item'].forEach(type => {
+            this.initProfile(type).then(profile => this.loadProfile(profile));
+          });
         }
       });
 
@@ -102,24 +101,26 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.openSecondaryOutlet(this.router.routerState.snapshot.url);
   }
 
-  private async initProfile(profileType: 'unit' | 'item'): Promise<MetadataProfileDto | boolean> {
+  private async initProfile(profileType: string): Promise<MetadataProfileDto | null> {
     const profileKey = profileType === 'unit' ? 'unitMDProfile' : 'itemMDProfile';
     const profileId = this.workspaceSettings?.[profileKey];
-    return profileId ?
-      this.workspaceService.getProfile(profileId, profileType) :
-      false;
+    if (!profileId) {
+      return null;
+    }
+    return this.workspaceService.getProfile(profileId, profileType);
   }
 
-  private async loadProfile(profile: boolean | MetadataProfileDto) {
+  private async loadProfile(profile: MetadataProfileDto | null): Promise<void> {
     if (profile) {
-      await this.workspaceService.loadProfileVocabularies(new MDProfile(profile));
-    } else {
-      this.snackBar.open(
-        this.translateService
-          .instant('workspace.profile-not-loaded', { profileUrl: profile }),
-        this.translateService.instant('error'),
-        { duration: 5000 }
-      );
+      try {
+        await this.workspaceService.loadProfileVocabularies(new MDProfile(profile));
+      } catch (error) {
+        this.snackBar.open(
+          this.translateService.instant('workspace.profile-not-loaded', { profileUrl: 'profile' }),
+          this.translateService.instant('error'),
+          { duration: 5000 }
+        );
+      }
     }
   }
 

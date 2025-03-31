@@ -40,7 +40,7 @@ export class WorkspaceBackendService {
       );
   }
 
-  getMetadataProfile(url:string): Observable<MetadataProfileDto | boolean> {
+  getMetadataProfile(url:string): Observable<MetadataProfileDto | null> {
     let queryParams = new HttpParams();
     queryParams = queryParams.append('url', url);
 
