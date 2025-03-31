@@ -5,7 +5,7 @@ import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import {
-  BehaviorSubject, firstValueFrom, Observable, Subject, Subscription, takeUntil
+  BehaviorSubject, firstValueFrom, Subject, Subscription, takeUntil
 } from 'rxjs';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -261,10 +261,6 @@ export class UnitPropertiesComponent
     } else {
       this.metadataLoader.next({});
     }
-  }
-
-  get metadata$(): Observable<UnitMetadataValues> {
-    return this.metadataLoader.asObservable();
   }
 
   private async updateVariables(): Promise<void> {
