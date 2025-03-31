@@ -535,6 +535,7 @@
     "delete-review-continue": "Die aktuell ausgewählte Aufgabenfolge wird gelöscht.",
     "review-not-deleted": "Konnte Aufgabenfolge nicht löschen",
     "error": "Fehler",
+    "review-show-metadata": "Zeige Metadaten",
     "review-show-codes": "Zeige Kodierung",
     "review-show-comments": "Zeige bereits vergebene Kommentare",
     "review-allow-comments": "Kommentare möglich",

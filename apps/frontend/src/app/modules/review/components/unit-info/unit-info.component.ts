@@ -6,7 +6,6 @@ import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { ReviewService } from '../../services/review.service';

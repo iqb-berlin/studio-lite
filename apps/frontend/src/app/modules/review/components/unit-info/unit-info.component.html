@@ -18,19 +18,25 @@
   </div>
   <div #infoPanelSplitter class="infoPanelSplitter fx-flex-row-fix-6"></div>
   <div #infoPanel class="infoPanel fx-flex-fill">
-    <studio-lite-unit-properties
-      [key]= "properties ? properties.key : null"
-      [name]= "properties?.name"
-      [transcript]="properties?.transcript"
-      [description]="properties?.description"
-      [reference]="properties?.reference"
-      [lastChangedDefinition] = "properties ? properties.lastChangedDefinition : null"
-      [lastChangedMetadata] = "properties ? properties.lastChangedMetadata : null"
-      [lastChangedScheme] = "properties ? properties.lastChangedScheme : null"
-      [lastChangedDefinitionUser]="properties?.lastChangedDefinitionUser"
-      [lastChangedMetadataUser]="properties?.lastChangedMetadataUser"
-      [lastChangedSchemeUser]="properties?.lastChangedSchemeUser">
-    </studio-lite-unit-properties>
+    @if (properties) {
+      @if (properties.key) {
+        <h2>{{properties.key}}</h2>
+      }
+      @if (properties.name) {
+        <h3>{{properties.name}}</h3>
+      }
+    }
+    @if (reviewService.reviewConfig.showMetadata && properties) {
+      <studio-lite-unit-properties
+        [description]="properties?.description"
+        [lastChangedDefinition] = "properties ? properties.lastChangedDefinition : null"
+        [lastChangedMetadata] = "properties ? properties.lastChangedMetadata : null"
+        [lastChangedScheme] = "properties ? properties.lastChangedScheme : null"
+        [lastChangedDefinitionUser]="properties?.lastChangedDefinitionUser"
+        [lastChangedMetadataUser]="properties?.lastChangedMetadataUser"
+        [lastChangedSchemeUser]="properties?.lastChangedSchemeUser">
+      </studio-lite-unit-properties>
+    }
     @if (reviewService.reviewConfig.showCoding && properties) {
       <studio-lite-unit-info-coding
         [unitId]="id">

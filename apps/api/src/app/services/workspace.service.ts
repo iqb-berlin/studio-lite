@@ -574,7 +574,6 @@ export class WorkspaceService {
       schemer: unitImportData.schemer,
       description: unitImportData.description,
       transcript: unitImportData.transcript,
-      reference: unitImportData.reference,
       lastChangedMetadata: unitImportData.lastChangedMetadata,
       lastChangedDefinition: unitImportData.lastChangedDefinition,
       lastChangedScheme: unitImportData.lastChangedScheme,
