@@ -26,16 +26,16 @@ const PanelWidthOffset = 40;
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;
-  _unitId = 0;
+  id = 0;
   @Input('unitId')
   set unitId(value: number) {
-    this._unitId = value;
+    this.id = value;
   }
 
-  _unitMetadata?: UnitPropertiesDto;
-  @Input('unitMetadata')
-  set unitMetadata(value: UnitPropertiesDto | undefined) {
-    this._unitMetadata = value;
+  properties?: UnitPropertiesDto;
+  @Input('unitProperties')
+  set unitProperties(value: UnitPropertiesDto | undefined) {
+    this.properties = value;
   }
 
   set elementWidth(value: number) {
