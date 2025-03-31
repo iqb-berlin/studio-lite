@@ -915,7 +915,7 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   // eslint-disable-next-line max-len
-  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p style=\\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\\">\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
+  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
   cy.request({
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
@@ -926,6 +926,48 @@ Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token
     body: {
       scheme: scheme1,
       schemeType: 'iqb@3.0'
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55e
+Cypress.Commands.add('getWsMetadataAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/properties`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55f
+Cypress.Commands.add('getWsSchemeAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55g
+Cypress.Commands.add('getWsCodingBookAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/coding-book`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
     },
     failOnStatusCode: false
   });
@@ -1004,7 +1046,7 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
 });
 
 // 61
-Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
+Cypress.Commands.add('getMetadataUnitAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',

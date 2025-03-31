@@ -77,10 +77,13 @@ declare namespace Cypress {
     updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55b
     getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55c
     updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55d
+    getWsMetadataAPI(wsId: string, token:string): Chainable<Response>; // 55e
+    getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 55f
+    getWsCodingBookAPI(wsId: string, token:string): Chainable<Response>; // 55g
     getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 57
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
-    getMetadataWsAPI(wsId: string, token:string): Chainable<Response>; // 61
+    getMetadataUnitAPI(wsId: string, token:string): Chainable<Response>; // 61
     dropboxWsAPI(wsId: string, wsDe: string, token:string): Chainable<Response>; // 62
     submitUnitsAPI(wsId: string, wsDe: string, unit:string, token:string): Chainable<Response>; // 63, 63b
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 65
