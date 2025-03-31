@@ -694,6 +694,8 @@ Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:st
 // 55b
 Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
+  // eslint-disable-next-line max-len
+  // const definition = '{"type":"aspect-unit-definition","stateVariables":[],"enableSectionNumbering":false,"sectionNumberingPosition":"left","showUnitNavNext":false,"version":"4.9.0","pages":[{"sections":[{"elements":[{"isRelevantForPresentationComplete":true,"id":"text_1743412177740_1","alias":"text_1","position":{"xPosition":0,"yPosition":0,"gridColumn":1,"gridColumnRange":1,"gridRow":1,"gridRowRange":1,"marginLeft":{"value":0,"unit":"px"},"marginRight":{"value":0,"unit":"px"},"marginTop":{"value":0,"unit":"px"},"marginBottom":{"value":10,"unit":"px"},"zIndex":0},"dimensions":{"width":180,"height":98,"isWidthFixed":false,"isHeightFixed":false,"minWidth":null,"maxWidth":null,"minHeight":null,"maxHeight":null},"type":"text","text":"<p style=\"padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0\" indentsize=\"20\">Wie viele Monde hat Jupiter?</p>","markingMode":"selection","markingPanels":[],"highlightableOrange":false,"highlightableTurquoise":false,"highlightableYellow":false,"hasSelectionPopup":false,"columnCount":1,"styling":{"backgroundColor":"transparent","fontColor":"#000000","font":"NunitoSans","fontSize":20,"bold":false,"italic":false,"underline":false,"lineHeight":135}},{"isRelevantForPresentationComplete":true,"id":"text-area_1743412202936_1","alias":"text-area_1","position":{"xPosition":0,"yPosition":0,"gridColumn":1,"gridColumnRange":1,"gridRow":2,"gridRowRange":1,"marginLeft":{"value":0,"unit":"px"},"marginRight":{"value":0,"unit":"px"},"marginTop":{"value":0,"unit":"px"},"marginBottom":{"value":0,"unit":"px"},"zIndex":0},"dimensions":{"width":230,"height":132,"isWidthFixed":false,"isHeightFixed":false,"minWidth":null,"maxWidth":null,"minHeight":null,"maxHeight":null},"label":"","value":"Jupiter hat ... Monde.","required":false,"requiredWarnMessage":"Eingabe erforderlich","readOnly":false,"inputAssistancePreset":null,"inputAssistanceCustomKeys":"","inputAssistancePosition":"floating","inputAssistanceFloatingStartPosition":"startBottom","restrictedToInputAssistanceChars":false,"hasArrowKeys":false,"hasBackspaceKey":false,"showSoftwareKeyboard":true,"addInputAssistanceToKeyboard":true,"hideNativeKeyboard":true,"type":"text-area","appearance":"outline","resizeEnabled":false,"hasDynamicRowCount":true,"hasAutoHeight":false,"rowCount":3,"expectedCharactersCount":135,"hasReturnKey":false,"hasKeyboardIcon":false,"styling":{"backgroundColor":"transparent","fontColor":"#000000","font":"NunitoSans","fontSize":20,"bold":false,"italic":false,"underline":false,"lineHeight":135}}],"height":400,"backgroundColor":"#ffffff","dynamicPositioning":true,"autoColumnSize":true,"autoRowSize":true,"gridColumnSizes":[{"value":1,"unit":"fr"}],"gridRowSizes":[{"value":1,"unit":"fr"}],"visibilityDelay":0,"animatedVisibility":false,"enableReHide":false,"logicalConnectiveOfRules":"disjunction","visibilityRules":[],"ignoreNumbering":false}],"hasMaxWidth":true,"maxWidth":750,"margin":30,"backgroundColor":"#ffffff","alwaysVisible":false,"alwaysVisiblePagePosition":"left","alwaysVisibleAspectRatio":50}]}';
   cy.request({
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
@@ -752,7 +754,8 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       maxHeight: null
                     },
                     type: 'text',
-                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" indentsize="20">Wie viele Monde hat Jupiter?</p>',
+                    // eslint-disable-next-line max-len
+                    text: '<p>Wie viele Monde hat Jupiter?</p>',
                     highlightableOrange: false,
                     highlightableTurquoise: false,
                     highlightableYellow: false,
@@ -911,6 +914,8 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 // 55d
 Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
+  // eslint-disable-next-line max-len
+  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p style=\\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\\">\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
   cy.request({
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
@@ -919,58 +924,7 @@ Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token
       authorization
     },
     body: {
-      scheme: {
-        variableCodings: [
-          {
-            id: 'text-area_1',
-            alias: 'text-area_1',
-            label: '',
-            sourceType: 'BASE',
-            sourceParameters: {
-              solverExpression: '',
-              processing: []
-            },
-            deriveSources: [],
-            processing: [],
-            fragmenting: '',
-            manualInstruction: '',
-            codeModel: 'NONE',
-            codes: [
-              {
-                id: 1,
-                type: 'FULL_CREDIT',
-                label: '',
-                score: 1,
-                ruleSetOperatorAnd: false,
-                ruleSets: [
-                  {
-                    ruleOperatorAnd: true,
-                    rules: [
-                      {
-                        method: 'MATCH',
-                        parameters: [
-                          'Jupiter hat 92 Monde.'
-                        ]
-                      }
-                    ]
-                  }
-                ],
-                manualInstruction: ''
-              },
-              {
-                id: 0,
-                type: 'RESIDUAL_AUTO',
-                label: '',
-                score: 0,
-                ruleSetOperatorAnd: false,
-                ruleSets: [],
-                manualInstruction: '<p style=\\\\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\\\\">\\\\n Alle anderen Antworten (automatisch)\\\\n </p>'
-              }
-            ]
-          }
-        ],
-        version: '3.0'
-      },
+      scheme: scheme1,
       schemeType: 'iqb@3.0'
     },
     failOnStatusCode: false

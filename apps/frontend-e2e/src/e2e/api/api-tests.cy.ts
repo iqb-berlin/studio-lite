@@ -15,9 +15,9 @@ function getNameAt(initialName: string): string {
 }
 describe('Studio API tests', () => {
   const noId: string = '9988';
-  const modules:string[] = ['iqb-schemer-2.0.0-beta.html',
-    'iqb-editor-aspect-2.5.0-beta5.html',
-    'iqb-player-aspect-2.5.0-beta5.html'];
+  const modules:string[] = ['iqb-schemer-2.5.3.html',
+    'iqb-editor-aspect-2.9.1.html',
+    'iqb-player-aspect-2.9.1.html'];
   const fakeUser: UserData = {
     username: 'falseuser',
     password: 'paso',
@@ -91,9 +91,9 @@ describe('Studio API tests', () => {
   // };
 
   const setEditor: WsSettings = {
-    defaultEditor: 'iqb-editor-aspect@2.5.0-beta5',
-    defaultPlayer: 'iqb-player-aspect@2.5.0-beta5',
-    defaultSchemer: 'iqb-schemer@2.0.0-beta',
+    defaultEditor: 'iqb-editor-aspect@2.9',
+    defaultPlayer: 'iqb-player-aspect@2.9',
+    defaultSchemer: 'iqb-schemer@2.5',
     unitGroups: ['Bista1', 'Bista2'],
     stableModulesOnly: false,
     unitMDProfile: '',
@@ -802,7 +802,7 @@ describe('Studio API tests', () => {
 
       describe('27. GET /api/verona-modules/{key}', () => {
         it('200 positive test', () => {
-          cy.getModuleAPI('iqb-schemer%402.0.0-beta', Cypress.env(`token_${Cypress.env('username')}`))
+          cy.getModuleAPI('iqb-schemer%402.5', Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
               // const parser = new DOMParser();
@@ -1547,7 +1547,6 @@ describe('Studio API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(401);
         });
-        cy.pause();
       });
     });
 
@@ -1615,7 +1614,6 @@ describe('Studio API tests', () => {
       });
 
       it('200 positive test: should be able to add a button in the editor and save', () => {
-        cy.pause();
         cy.updateUnitDefinitionAPI(
           Cypress.env(unit4.shortname),
           Cypress.env(ws1.id),
@@ -1623,7 +1621,6 @@ describe('Studio API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(200);
         });
-        cy.pause();
       });
     });
 
@@ -1720,8 +1717,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      it.skip('200 positive test: should be able to add coding and save', () => {
-        cy.pause();
+      it('200 positive test: should be able to add coding and save', () => {
         cy.updateUnitSchemeAPI(
           Cypress.env(unit4.shortname),
           Cypress.env(ws1.id),
@@ -1729,7 +1725,6 @@ describe('Studio API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(200);
         });
-        cy.pause();
       });
     });
 
