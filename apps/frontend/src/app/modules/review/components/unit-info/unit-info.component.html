@@ -18,27 +18,33 @@
   </div>
   <div #infoPanelSplitter class="infoPanelSplitter fx-flex-row-fix-6"></div>
   <div #infoPanel class="infoPanel fx-flex-fill">
-    <studio-lite-unit-properties
-      [key]= "_unitMetadata ? _unitMetadata.key : null"
-      [name]= "_unitMetadata?.name"
-      [transcript]="_unitMetadata?.transcript"
-      [description]="_unitMetadata?.description"
-      [reference]="_unitMetadata?.reference"
-      [lastChangedDefinition] = "_unitMetadata ? _unitMetadata.lastChangedDefinition : null"
-      [lastChangedMetadata] = "_unitMetadata ? _unitMetadata.lastChangedMetadata : null"
-      [lastChangedScheme] = "_unitMetadata ? _unitMetadata.lastChangedScheme : null"
-      [lastChangedDefinitionUser]="_unitMetadata?.lastChangedDefinitionUser"
-      [lastChangedMetadataUser]="_unitMetadata?.lastChangedMetadataUser"
-      [lastChangedSchemeUser]="_unitMetadata?.lastChangedSchemeUser">
-    </studio-lite-unit-properties>
-    @if (reviewService.reviewConfig.showCoding && _unitMetadata) {
+    @if (properties) {
+      @if (properties.key) {
+        <h2>{{properties.key}}</h2>
+      }
+      @if (properties.name) {
+        <h3>{{properties.name}}</h3>
+      }
+    }
+    @if (reviewService.reviewConfig.showMetadata && properties) {
+      <studio-lite-unit-properties
+        [description]="properties?.description"
+        [lastChangedDefinition] = "properties ? properties.lastChangedDefinition : null"
+        [lastChangedMetadata] = "properties ? properties.lastChangedMetadata : null"
+        [lastChangedScheme] = "properties ? properties.lastChangedScheme : null"
+        [lastChangedDefinitionUser]="properties?.lastChangedDefinitionUser"
+        [lastChangedMetadataUser]="properties?.lastChangedMetadataUser"
+        [lastChangedSchemeUser]="properties?.lastChangedSchemeUser">
+      </studio-lite-unit-properties>
+    }
+    @if (reviewService.reviewConfig.showCoding && properties) {
       <studio-lite-unit-info-coding
-        [unitId]="_unitId">
+        [unitId]="id">
       </studio-lite-unit-info-coding>
     }
-    @if (reviewService.reviewConfig.showOthersComments && _unitMetadata) {
+    @if (reviewService.reviewConfig.showOthersComments && properties) {
       <studio-lite-unit-info-comments
-        [unitId]="_unitId" [allComments]="reviewService.allComments">
+        [unitId]="id" [allComments]="reviewService.allComments">
       </studio-lite-unit-info-comments>
     }
   </div>
