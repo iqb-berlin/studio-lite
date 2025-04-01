@@ -11,7 +11,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import { BackendService } from './backend.service';
 import {
@@ -65,6 +65,8 @@ export class WorkspaceService {
   vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
   vocabularies: Vocab[] = [];
   idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
+  unitProfileColumns:MDProfileGroup[] = [];
+  itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();

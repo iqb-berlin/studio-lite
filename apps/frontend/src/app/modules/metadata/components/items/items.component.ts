@@ -11,7 +11,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 import {
@@ -19,6 +19,7 @@ import {
 } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
 import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
+import { VocabIdDictionaryValue } from '../../models/vocabulary.class';
 
 @Component({
   selector: 'studio-lite-items',
@@ -37,6 +38,9 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() variablesLoader!: BehaviorSubject<AliasId[]>;
   @Input() metadata: Partial<UnitMetadataValues> = {};
   @Input() language!: string;
+  @Input() vocabulariesIdDictionary !: Record<string, VocabIdDictionaryValue>;
+  @Input() unitProfileColumns:MDProfileGroup[] = [];
+  @Input() itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
   @Output() metadataChange: EventEmitter<UnitMetadataValues> = new EventEmitter();
 
   constructor(private addItemDialog: MatDialog) {}

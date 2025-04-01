@@ -269,6 +269,9 @@
                 <studio-lite-profile-form
                   [vocabularies]="this.workspaceService.vocabularies"
                   [profile]="this.workspaceService.unitProfile"
+                  [vocabulariesIdDictionary] = this.workspaceService.vocabulariesIdDictionary
+                  [itemProfileColumns] = this.workspaceService.itemProfileColumns
+                  [unitProfileColumns] = this.workspaceService.unitProfileColumns
                   [metadata]="metadata"
                   [language]="'de'"
                   [formlyWrapper]="'panel'"
@@ -292,6 +295,9 @@
                 <studio-lite-items
                   class="fx-flex-row-50"
                   [profile]="this.workspaceService.itemProfile"
+                  [vocabulariesIdDictionary] = this.workspaceService.vocabulariesIdDictionary
+                  [itemProfileColumns] = this.workspaceService.itemProfileColumns
+                  [unitProfileColumns] = this.workspaceService.unitProfileColumns
                   [metadata]="metadata"
                   [language]="'de'"
                   [variablesLoader]="variablesLoader"

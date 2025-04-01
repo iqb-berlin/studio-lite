@@ -221,7 +221,7 @@ export class TableViewComponent implements OnInit {
   }
 
   private getTableItemsColumnsDefinitions(): string[] {
-    const itemProfileColumns = this.metadataService.itemProfileColumns;
+    const itemProfileColumns = this.workspaceService.itemProfileColumns;
     if (!itemProfileColumns?.entries) {
       return [...this.displayedColumns];
     }
@@ -230,10 +230,10 @@ export class TableViewComponent implements OnInit {
   }
 
   private getTableUnitsColumnsDefinitions(): string[] {
-    if (!this.metadataService.unitProfileColumns) {
+    if (!this.workspaceService.unitProfileColumns) {
       return [];
     }
-    const columnLabels = this.metadataService.unitProfileColumns
+    const columnLabels = this.workspaceService.unitProfileColumns
       .flatMap(group => group.entries.map(entry => entry.label));
     return ['key', ...columnLabels];
   }

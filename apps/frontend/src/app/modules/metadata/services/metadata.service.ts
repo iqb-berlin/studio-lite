@@ -3,7 +3,6 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { MDProfileGroup } from '@iqb/metadata';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 
 @Injectable({
@@ -15,9 +14,6 @@ export class MetadataService {
               private workspaceService: WorkspaceService,
               private http: HttpClient) {
   }
-
-  unitProfileColumns:MDProfileGroup[] = [];
-  itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   downloadMetadataReport(type: string, columns: string[], units: number[]): Observable<Blob> {
     const queryParams = new HttpParams()
