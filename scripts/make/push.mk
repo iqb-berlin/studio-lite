@@ -1,10 +1,10 @@
 STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 TAG := dev
 
-## prevents collisions of make target names with possible file names
+# prevents collisions of make target names with possible file names
 .PHONY: push-dockerhub push-iqb-registry
 
-## Build and tag all docker images
+# Build and tag all docker images
 .build:
 	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
@@ -59,7 +59,7 @@ TAG := dev
 				--tag scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-frontend:$(TAG)\
 			.
 
-## Push all docker images to 'hub.docker.com'
+# Push all docker images to 'hub.docker.com'
 push-dockerhub: .build
 	docker login
 	docker push iqbberlin/studio-lite-db:$(TAG)
@@ -68,7 +68,7 @@ push-dockerhub: .build
 	docker push iqbberlin/studio-lite-frontend:$(TAG)
 	docker logout
 
-## Push all docker images to 'scm.cms.hu-berlin.de:4567/iqb/studio-lite'
+# Push all docker images to 'scm.cms.hu-berlin.de:4567/iqb/studio-lite'
 push-iqb-registry: .build
 	docker login scm.cms.hu-berlin.de:4567
 	docker push scm.cms.hu-berlin.de:4567/iqb/studio-lite/iqbberlin/studio-lite-db:$(TAG)

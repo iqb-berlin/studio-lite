@@ -2,26 +2,26 @@ STUDIO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include $(STUDIO_BASE_DIR)/.env.studio-lite
 
-## exports all variables (especially those of the included .env.studio-lite file!)
+# exports all variables (especially those of the included .env.studio-lite file!)
 .EXPORT_ALL_VARIABLES:
 
-## prevents collisions of make target names with possible file names
+# prevents collisions of make target names with possible file names
 .PHONY: prod-registry-login prod-registry-logout prod-test-build prod-test-up prod-test-down prod-test-logs\
 	prod-test-e2e prod-test-e2e-api prod-test-e2e-ui-chrome prod-test-e2e-ui-chrome-mobile prod-test-e2e-ui-firefox\
 	prod-test-e2e-ui-firefox-mobile prod-test-e2e-ui-edge prod-test-e2e-ui-edge-mobile
 
-## disables printing the recipe of a make target before executing it
+# disables printing the recipe of a make target before executing it
 .SILENT: prod-registry-login prod-registry-logout
 
-## Log in to selected registry (see .env.studio-lite file)
+# Log in to selected registry (see .env.studio-lite file)
 prod-registry-login:
 	if test $(REGISTRY_PATH); then printf "Login %s\n" $(REGISTRY_PATH); docker login $(REGISTRY_PATH); fi
 
-## Log out of selected registry (see .env.studio-lite file)
+# Log out of selected registry (see .env.studio-lite file)
 prod-registry-logout:
 	if test $(REGISTRY_PATH); then docker logout $(REGISTRY_PATH); fi
 
-## Build production and e2e test images
+# Build production and e2e test images
 prod-test-build: prod-registry-login
 	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
@@ -72,7 +72,7 @@ prod-test-build: prod-registry-login
 				--tag $(REGISTRY_PATH)iqbberlin/studio-lite-frontend-e2e:e2e\
 			.
 
-## Start production containers
+# Start production containers
 prod-test-up:
 	sed -i.sed 's/TAG=.*$$/TAG=e2e/' $(STUDIO_BASE_DIR)/.env.studio-lite && \
 		rm $(STUDIO_BASE_DIR)/.env.studio-lite.sed
@@ -90,7 +90,7 @@ prod-test-up:
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 		up --no-build --pull never -d
 
-## Stop and remove production containers
+# Stop and remove production containers
 prod-test-down:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
@@ -98,8 +98,8 @@ prod-test-down:
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 		down
 
-## Show service logs
-# Param (optional): SERVICE - Show log of the specified service only, e.g. `make prod-test-logs SERVICE=db`
+# Show service logs
+## Param (optional): SERVICE - Show log of the specified service only, e.g. `make prod-test-logs SERVICE=db`
 prod-test-logs:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
@@ -107,7 +107,7 @@ prod-test-logs:
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 		logs -f $(SERVICE)
 
-## Run all e2e tests in production environment (only in combination with 'make prod-test-up')
+# Run all e2e tests in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -115,8 +115,8 @@ prod-test-e2e:
 		up --no-build --pull never test-e2e
 	docker rm studio-lite-test-e2e-1
 
-## Run all e2e tests in production environment with electron (only in combination with 'make prod-test-up')
-# Use this for arm64 platforms (cypress/browsers only supports 'electron' for arm54 at the moment) ! ! !
+# Run all e2e tests in production environment with electron (only in combination with 'make prod-test-up')
+## Use this for arm64 platforms (cypress/browsers only supports 'electron' for arm54 at the moment) ! ! !
 prod-test-e2e-electron:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -124,7 +124,7 @@ prod-test-e2e-electron:
 		up --no-build --pull never test-e2e-electron
 	docker rm studio-lite-test-e2e-electron-1
 
-## Run all e2e api tests in production environment (only in combination with 'make prod-test-up')
+# Run all e2e api tests in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-api:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -132,7 +132,7 @@ prod-test-e2e-api:
 		up --no-build --pull never test-e2e-api
 	docker rm studio-lite-test-e2e-api-1
 
-## Run all e2e ui tests with chrome browser in production environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests with chrome browser in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-chrome:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -140,7 +140,7 @@ prod-test-e2e-ui-chrome:
 		up --no-build --pull never test-e2e-ui-chrome
 	docker rm studio-lite-test-e2e-ui-chrome-1
 
-## Run all e2e ui tests with chrome browser for mobiles in production environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests with chrome browser for mobiles in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-chrome-mobile:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -148,7 +148,7 @@ prod-test-e2e-ui-chrome-mobile:
 		up --no-build --pull never test-e2e-ui-chrome-mobile
 	docker rm studio-lite-test-e2e-ui-chrome-mobile-1
 
-## Run all e2e ui tests with firefox browser in production environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests with firefox browser in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-firefox:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -156,7 +156,7 @@ prod-test-e2e-ui-firefox:
 		up --no-build --pull never test-e2e-ui-firefox
 	docker rm studio-lite-test-e2e-ui-firefox-1
 
-## Run all e2e ui tests with firefox browser for mobiles in production environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests with firefox browser for mobiles in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-firefox-mobile:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -164,7 +164,7 @@ prod-test-e2e-ui-firefox-mobile:
 		up --no-build --pull never test-e2e-ui-firefox-mobile
 	docker rm studio-lite-test-e2e-ui-firefox-mobile-1
 
-## Run all e2e ui tests with edge browser in production environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests with edge browser in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-edge:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
@@ -172,7 +172,7 @@ prod-test-e2e-ui-edge:
 		up --no-build --pull never test-e2e-ui-edge
 	docker rm studio-lite-test-e2e-ui-edge-1
 
-## Run all e2e ui tests with edge browser for mobiles in production environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests with edge browser for mobiles in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-edge-mobile:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
