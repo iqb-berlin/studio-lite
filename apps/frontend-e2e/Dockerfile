@@ -7,7 +7,7 @@ ARG BASE_IMAGE_NAME=studio-lite-base
 FROM $BASE_IMAGE_NAME AS base
 
 
-FROM ${REGISTRY_PATH}cypress/browsers:node-20.15.1-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
+FROM ${REGISTRY_PATH}cypress/browsers:node-22.14.0-chrome-134.0.6998.165-1-ff-136.0.3-edge-134.0.3124.85-1
 
 WORKDIR /usr/src/studio-lite
 
