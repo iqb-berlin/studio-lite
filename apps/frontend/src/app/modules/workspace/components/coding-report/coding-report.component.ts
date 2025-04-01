@@ -73,6 +73,7 @@ export class CodingReportComponent implements OnInit {
           this.updateDataSource();
         },
         error: err => {
+          // eslint-disable-next-line no-console
           console.error('Error loading the coding report:', err);
         },
         complete: () => {
@@ -101,9 +102,9 @@ export class CodingReportComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement;
 
     if (inputElement) {
-      const filterValue = inputElement.value.trim().toLowerCase();
-      this.dataSource.filter = filterValue;
+      this.dataSource.filter = inputElement.value.trim().toLowerCase();
     } else {
+      // eslint-disable-next-line no-console
       console.warn('Invalid filter input element.');
     }
   }

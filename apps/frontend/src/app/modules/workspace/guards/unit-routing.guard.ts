@@ -48,8 +48,6 @@ export class UnitRoutingCanDeactivateGuard {
       });
       return dialogRef.afterClosed().pipe(
         switchMap(result => {
-          console.log('Dialogergebnis:', result);
-
           switch (result) {
             case false:
               return of(false);

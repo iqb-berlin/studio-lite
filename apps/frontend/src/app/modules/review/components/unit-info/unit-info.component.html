@@ -28,13 +28,13 @@
     }
     @if (reviewService.reviewConfig.showMetadata && properties) {
       <studio-lite-unit-properties
-        [description]="properties?.description"
+        [description]="properties ? properties.description : null"
         [lastChangedDefinition] = "properties ? properties.lastChangedDefinition : null"
         [lastChangedMetadata] = "properties ? properties.lastChangedMetadata : null"
         [lastChangedScheme] = "properties ? properties.lastChangedScheme : null"
-        [lastChangedDefinitionUser]="properties?.lastChangedDefinitionUser"
-        [lastChangedMetadataUser]="properties?.lastChangedMetadataUser"
-        [lastChangedSchemeUser]="properties?.lastChangedSchemeUser">
+        [lastChangedDefinitionUser]="properties ? properties.lastChangedDefinitionUser : null"
+        [lastChangedMetadataUser]="properties ? properties.lastChangedMetadataUser : null"
+        [lastChangedSchemeUser]="properties ? properties.lastChangedSchemeUser : null">
       </studio-lite-unit-properties>
     }
     @if (reviewService.reviewConfig.showCoding && properties) {
