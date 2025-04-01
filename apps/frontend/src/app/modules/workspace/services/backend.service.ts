@@ -374,16 +374,11 @@ export class BackendService {
       );
   }
 
-  static utf8AsHexString(s: string): string {
-    const uInt8Array = new TextEncoder().encode(s);
-    let result = '';
-    uInt8Array.forEach(v => {
-      result += v.toString(16).padStart(2, '0');
-    });
-    return result;
-  }
-
-  getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
-    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`);
+  getCodingReport(workspaceId: number): Observable<CodingReportDto[] | []> {
+    return this.http
+      .get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`)
+      .pipe(
+        catchError(() => of([]))
+      );
   }
 }
