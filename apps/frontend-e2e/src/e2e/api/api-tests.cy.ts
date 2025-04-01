@@ -1121,9 +1121,9 @@ describe('Studio API tests', () => {
         let newSettings: WsSettings;
         before(() => {
           newSettings = {
-            defaultEditor: 'iqb-editor-aspect@2.5.0-beta5',
-            defaultPlayer: 'iqb-player-aspect@2.5.0-beta5',
-            defaultSchemer: 'iqb-schemer@2.0.0-beta',
+            defaultEditor: 'iqb-editor-aspect@2.9',
+            defaultPlayer: 'iqb-player-aspect@2.9',
+            defaultSchemer: 'iqb-schemer@2.5',
             stableModulesOnly: false,
             unitMDProfile: Cypress.env('profile1'),
             itemMDProfile: Cypress.env('profile2')
@@ -1809,7 +1809,7 @@ describe('Studio API tests', () => {
 
     describe('55g PATH /api/workspaces/{workspace_id}/units/coding-book', () => {
       it('500 negative test: should not generate ws coding book without a valid ws id ', () => {
-        cy.getWsCodingBookAPI(
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1818,7 +1818,7 @@ describe('Studio API tests', () => {
       });
 
       it('401 positive test: should not generate ws coding book without credentials', () => {
-        cy.getWsCodingBookAPI(
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
           Cypress.env(ws1.id),
           noId)
           .then(resp => {
@@ -1827,21 +1827,21 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: should not generate ws coding book with a user with non credentials', () => {
-        cy.getWsCodingBookAPI(
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
           Cypress.env(ws1.id),
           Cypress.env(`token_${user3.username}`)
         ).then(resp => {
           expect(resp.status).to.equal(401);
         });
-        cy.pause();
       });
 
-      it.skip('200 positive test: should generate ws coding book with right credentials, unit, and ws', () => {
-        cy.getWsCodingBookAPI(
+      it('200 positive test: should generate ws coding book with right credentials, unit, and ws', () => {
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
           Cypress.env(ws1.id),
           Cypress.env(`token_${Cypress.env('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
+          // console.log(resp.body);
         });
       });
     });
@@ -1890,10 +1890,28 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
+          cy.pause();
         });
       });
 
-      describe.skip('59. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
+      describe('59. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
+        // before(() => {
+        //   const setNewSettings: WsSettings = {
+        //     defaultEditor: 'iqb-editor-aspect@2.9',
+        //     defaultPlayer: 'iqb-player-aspect@2.9',
+        //     defaultSchemer: 'iqb-schemer@2.5',
+        //     unitGroups: ['Group3', 'Group4'],
+        //     stableModulesOnly: false,
+        //     unitMDProfile: '',
+        //     itemMDProfile: '',
+        //     states: ['Initial', 'Finale']
+        //   };
+        //   cy.updateWsSettingsAPI(Cypress.env(ws1.id), setNewSettings, Cypress.env(`token_${Cypress.env('username')}`))
+        //     .then(resp => {
+        //       expect(resp.status).to.equal(200);
+        //     });
+        //   cy.pause();
+        // });
         it('200 positive test: should assign the state 1 to the unit', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
@@ -1902,6 +1920,7 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
+          cy.pause();
         });
 
         it('401 negative test: should not assign the state 0 without credentials', () => {

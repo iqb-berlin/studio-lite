@@ -14,7 +14,7 @@ import {
   DefinitionUnit, CopyUnit, WsSettings
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
-import { buildQueryParameters } from './utilAPI';
+import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
 // import { HttpParams } from '@angular/common/http';
 
 // General
@@ -960,11 +960,16 @@ Cypress.Commands.add('getWsSchemeAPI', (wsId: string, token:string) => {
 });
 
 // 55g
-Cypress.Commands.add('getWsCodingBookAPI', (wsId: string, token:string) => {
+Cypress.Commands.add('getWsCodingBookAPI', (ids: string[], wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
+  const parameters = ['format', 'missingsProfile', 'generalInstructions',
+    'onlyManual', 'closed', 'derived', 'showScore', 'codeLabelToUpper', 'hideItemVarRelation', 'hasOnlyVarsWithCodes'];
+  const values = ['docx', true, true, true,
+    true, true, true, true, true, true, true];
+  const qp = buildQueryParametersComplex(parameters, values, ids);
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/units/coding-book`,
+    url: `/api/workspaces/${wsId}/units/coding-book${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

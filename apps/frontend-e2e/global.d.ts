@@ -79,7 +79,7 @@ declare namespace Cypress {
     updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55d
     getWsMetadataAPI(wsId: string, token:string): Chainable<Response>; // 55e
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 55f
-    getWsCodingBookAPI(wsId: string, token:string): Chainable<Response>; // 55g
+    getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 55g
     getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 57
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
