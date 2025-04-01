@@ -43,7 +43,7 @@ Cypress.Commands.add('dialogButtonToContinue',
 
 Cypress.Commands.add('loadModule', (filename:string) => {
   const path:string = `../frontend-e2e/src/fixtures/${filename}`;
-  const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
+  const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/...html$/, '');
   cy.get('input[type=file]')
     .selectFile(path, {
       action: 'select',
