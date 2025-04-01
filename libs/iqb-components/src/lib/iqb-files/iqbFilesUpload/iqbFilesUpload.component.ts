@@ -58,7 +58,7 @@ export class IqbFilesUploadComponent implements OnInit {
 
   /* Http request input bindings */
   @Input()
-    httpUrl: string | undefined = 'http://localhost:8080';
+    httpUrl: string | undefined = 'http://127.0.0.1:8080';
 
   @Input()
     httpRequestHeaders: HttpHeaders | {
