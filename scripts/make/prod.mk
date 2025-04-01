@@ -199,8 +199,8 @@ studio-lite-dump-db: studio-lite-down .EXPORT_ALL_VARIABLES
 			pg_dump\
 					--verbose\
 					--username=$(POSTGRES_USER)\
-					--format=t\
-				$(POSTGRES_DB) > $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB).tar
+					--format=c\
+				$(POSTGRES_DB) > $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB)_dump
 	docker compose\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
@@ -220,7 +220,7 @@ studio-lite-restore-db: studio-lite-down .EXPORT_ALL_VARIABLES
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-		cp $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB).tar db:/tmp/
+		cp $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB)_dump db:/tmp/
 	sleep 10	## wait until file upload is completed
 	docker compose\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
@@ -234,7 +234,7 @@ studio-lite-restore-db: studio-lite-down .EXPORT_ALL_VARIABLES
 					--dbname=$(POSTGRES_DB)\
 					--clean\
 					--if-exists\
-				/tmp/$(POSTGRES_DB).tar
+				/tmp/$(POSTGRES_DB)_dump
 	docker compose\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
@@ -260,8 +260,8 @@ studio-lite-dump-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 					--exclude-table=public.databasechangelog\
 					--exclude-table=public.databasechangeloglock\
 					--username=$(POSTGRES_USER)\
-					--format=t\
-			$(POSTGRES_DB) > $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB)_data.tar
+					--format=c\
+			$(POSTGRES_DB) > $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB)_data_dump
 	docker compose\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
@@ -280,7 +280,7 @@ studio-lite-restore-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.prod.yaml\
-		cp $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB)_data.tar db:/tmp/
+		cp $(STUDIO_BASE_DIR)/backup/temp/$(POSTGRES_DB)_data_dump db:/tmp/
 	sleep 10	## wait until file upload is completed
 	docker compose\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
@@ -294,7 +294,7 @@ studio-lite-restore-db-data-only: studio-lite-down .EXPORT_ALL_VARIABLES
 					--disable-triggers\
 					--username=$(POSTGRES_USER)\
 					--dbname=$(POSTGRES_DB)\
-				/tmp/$(POSTGRES_DB)_data.tar
+				/tmp/$(POSTGRES_DB)_data_dump
 	docker compose\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\
