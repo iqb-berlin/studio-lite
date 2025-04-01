@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitPropertiesDto, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto, UnitFullMetadataDto
+  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto, UnitFullMetadataDto, ItemsMetadataValues
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -254,8 +254,10 @@ export class WorkspaceService {
       if (WorkspaceService.isValidScheme(unit.scheme, unit.schemer)) {
         const parsedUnitScheme = WorkspaceService.parseScheme(unit.scheme);
         if (parsedUnitScheme) {
-          const validationResults = CodingSchemeFactory.validate(unit.variables, parsedUnitScheme.variableCodings);
-          WorkspaceService.processVariableCodings(parsedUnitScheme, validationResults, unit, id, unitDataRows);
+          const validationResults = CodingSchemeFactory
+            .validate(unit.variables, parsedUnitScheme.variableCodings);
+          WorkspaceService
+            .processVariableCodings(parsedUnitScheme, validationResults, unit, id, unitDataRows);
         }
       } else {
         WorkspaceService.addInvalidSchemeRow(unit, id, unitDataRows);
@@ -269,7 +271,7 @@ export class WorkspaceService {
     return scheme && scheme !== 'undefined' && schemer.split('@')[1] >= '1.5';
   }
 
-  private static parseScheme(scheme: string): any | null {
+  private static parseScheme(scheme: string): CodingScheme | null {
     try {
       return JSON.parse(scheme);
     } catch {
@@ -336,7 +338,7 @@ export class WorkspaceService {
     return 'keine Regeln';
   }
 
-  static findMatchingItem(unit: UnitPropertiesDto, codingVariable: VariableCodingData): any {
+  static findMatchingItem(unit: UnitPropertiesDto, codingVariable: VariableCodingData): ItemsMetadataValues {
     const codingVariableId = codingVariable.alias || codingVariable.id;
     return unit.metadata.items?.find(item => item.variableId === codingVariableId);
   }

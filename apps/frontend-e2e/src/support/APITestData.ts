@@ -24,5 +24,7 @@ const dataAdmin:APIProps = {
 };
 
 const data1 = new APIData(dataAdmin);
+// eslint-disable-next-line no-console
 console.log(data1.get('id_ws'));
+// eslint-disable-next-line no-console
 console.log(data1.get('password'));
