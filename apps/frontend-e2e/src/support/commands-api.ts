@@ -1051,11 +1051,11 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
 });
 
 // 61
-Cypress.Commands.add('getMetadataUnitAPI', (wsId: string, token:string) => {
+Cypress.Commands.add('getUnitMetadataAPI', (wsId: string, unitId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/units/metadata`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization

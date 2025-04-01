@@ -1288,7 +1288,7 @@ describe('Studio API tests', () => {
 
     describe('42. GET /api/workspaces/{workspace_id}/units', () => {
       it('200 positive test: should get the units from a workspace', () => {
-        // Sweagger has other parameter
+        // Sweagger has other parameter and we get error 521, sweagger needs the version
         // TO ASK parameters
         cy.getUnitsByWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp1 => {
@@ -1894,24 +1894,8 @@ describe('Studio API tests', () => {
         });
       });
 
+      // 41
       describe('59. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
-        // before(() => {
-        //   const setNewSettings: WsSettings = {
-        //     defaultEditor: 'iqb-editor-aspect@2.9',
-        //     defaultPlayer: 'iqb-player-aspect@2.9',
-        //     defaultSchemer: 'iqb-schemer@2.5',
-        //     unitGroups: ['Group3', 'Group4'],
-        //     stableModulesOnly: false,
-        //     unitMDProfile: '',
-        //     itemMDProfile: '',
-        //     states: ['Initial', 'Finale']
-        //   };
-        //   cy.updateWsSettingsAPI(Cypress.env(ws1.id), setNewSettings, Cypress.env(`token_${Cypress.env('username')}`))
-        //     .then(resp => {
-        //       expect(resp.status).to.equal(200);
-        //     });
-        //   cy.pause();
-        // });
         it('200 positive test: should assign the state 1 to the unit', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
@@ -1962,29 +1946,35 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
+          cy.pause();
         });
       });
 
-      describe.skip('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
+      describe('61. GET /api/workspaces/{workspace_id}/units/{id}/metadata', () => {
         // I can not find the use in studio.
+        // To delete, in sweagger, results are always two empty arrays: profiles and items
         it('200 positive test: should get the metadata of a workspace.', () => {
-          cy.getMetadataUnitAPI(Cypress.env(ws1.id),
+          cy.getUnitMetadataAPI(Cypress.env(ws2.id),
+            Cypress.env(unit1.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
-              expect(resp.body.length).to.equal(3);
+              // console.log(resp.body);
             });
         });
 
         it('401 negative test: should not return the metadata of a ws without credentials', () => {
-          cy.getMetadataUnitAPI(Cypress.env(ws1.id), noId)
+          cy.getUnitMetadataAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
         });
 
         it('500 negative test: should not return the metadata without specify an existent ws Id', () => {
-          cy.getMetadataUnitAPI(noId,
+          cy.getUnitMetadataAPI(noId,
+            Cypress.env(unit1.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(500);
