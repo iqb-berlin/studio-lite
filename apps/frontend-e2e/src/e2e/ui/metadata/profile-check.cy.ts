@@ -35,6 +35,7 @@ describe('Load metadata profile', () => {
       createGroup(area);
       cy.visit('/');
     });
+    cy.wait(100);
   });
 
   it('should be possible load a metadata profile from administration settings', () => {
