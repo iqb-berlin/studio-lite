@@ -70,8 +70,6 @@ declare namespace Cypress {
     moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 50
     renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // 51
     copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 52
-    downloadWsAPI(wsId:string, token:string): Chainable<Response>; // 53
-    downloadWsAllAPI(token:string): Chainable<Response>; // 54
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 55
     getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55a
     updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55b
@@ -97,7 +95,6 @@ declare namespace Cypress {
     updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 72
     getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 73
     getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 74
-    getReviewMetadataAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 75
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 76
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 81
     getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82

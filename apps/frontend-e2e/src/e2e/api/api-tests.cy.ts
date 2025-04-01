@@ -1431,49 +1431,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe.skip('53. GET /api/download/xlsx/workspaces/{workspace_group_id}', () => {
-      it('200 positive test: should able download a workspace with credentials', () => {
-        cy.downloadWsAPI(Cypress.env(ws1.id),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not download a workspace with no credentials', () => {
-        cy.downloadWsAPI(Cypress.env(ws1.id),
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('200/500 negative test: should not download any ws without valid id', () => {
-        // Should it not check that it returns a valid file.
-        cy.downloadWsAPI(noId,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-    });
-
-    describe.skip('54. GET /api/download/xlsx/workspaces', () => {
-      it('200 positive test: should able download a workspace with credentials', () => {
-        cy.downloadWsAllAPI(Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not download a workspace with no credentials', () => {
-        cy.downloadWsAllAPI(noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-    });
-
     describe('55. GET /api/workspaces/{workspace_id}/groups', () => {
       before(() => {
         cy.createUnitAPI(Cypress.env(ws1.id), unit3, Cypress.env(`token_${Cypress.env('username')}`))
@@ -2563,36 +2520,6 @@ describe('Studio API tests', () => {
 
         it('401 negative test: should not retrieve reviews without credentials', () => {
           cy.getReviewWindowAPI(Cypress.env('id_review1'), noId)
-            .then(resp => {
-              expect(resp.status).to.equal(401);
-            });
-        });
-      });
-
-      describe.skip('75. GET /api/reviews/{review_id}/units/{id}/properties', () => {
-        it('200 positive test: should the metadata with credentials', () => {
-          cy.getReviewMetadataAPI(Cypress.env('id_review1'),
-            Cypress.env(unit2.shortname),
-            Cypress.env(`token_${user2.username}`))
-            .then(resp => {
-              expect(resp.status).to.equal(200);
-              expect(resp.body.editor).equal(setEditor.defaultEditor);
-            });
-        });
-
-        it('500 negative test: should not get reviews without ws id', () => {
-          cy.getReviewMetadataAPI(noId,
-            Cypress.env(unit2.shortname),
-            Cypress.env(`token_${user2.username}`))
-            .then(resp => {
-              expect(resp.status).to.equal(500);
-            });
-        });
-
-        it('401 negative test: should not retrieve reviews without credentials', () => {
-          cy.getReviewMetadataAPI(Cypress.env('id_review1'),
-            Cypress.env(unit2.shortname),
-            noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });

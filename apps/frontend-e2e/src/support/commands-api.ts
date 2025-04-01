@@ -636,34 +636,6 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   });
 });
 
-// 53 skipped
-Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/download/xlsx/workspaces/${wsId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 54 skipped
-Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: '/api/download/xlsx/workspaces',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 55
 Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1267,20 +1239,6 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   cy.request({
     method: 'GET',
     url: `api/reviews/${reviewId}/`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 75
-Cypress.Commands.add('getReviewMetadataAPI', (reviewId:string, unitId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/reviews/${reviewId}/units/${unitId}/properties`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
