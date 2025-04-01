@@ -22,9 +22,8 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { DurationService } from '../../services/duration.service';
 import { BackendService } from '../../services/backend.service';
-import { Vocab, VocabularyEntry } from '../../models/vocabulary.class';
+import { Vocab, VocabIdDictionaryValue, VocabularyEntry } from '../../models/vocabulary.class';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { MetadataService } from '../../services/metadata.service';
 
 interface FormlyConfigProps {
   label: string;
@@ -55,8 +54,7 @@ type ModelValue = string | number | boolean | Record<string, string> | Vocabular
 export class ProfileFormComponent implements OnDestroy, OnChanges {
   constructor(
     public workspaceService: WorkspaceService,
-    public backendService:BackendService,
-    public metadataService: MetadataService
+    public backendService:BackendService
   ) {}
 
   @Output() metadataChange: EventEmitter<Partial<UnitMetadataValues>> = new EventEmitter();
@@ -66,6 +64,9 @@ export class ProfileFormComponent implements OnDestroy, OnChanges {
   @Input() panelExpanded!: boolean;
   @Input() profile!: MDProfile;
   @Input() vocabularies !: Vocab[];
+  @Input() vocabulariesIdDictionary !: Record<string, VocabIdDictionaryValue>;
+  @Input() unitProfileColumns:MDProfileGroup[] = [];
+  @Input() itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
@@ -281,9 +282,9 @@ export class ProfileFormComponent implements OnDestroy, OnChanges {
     if (profile) {
       const groups = profile?.groups;
       if (groups[0].label === 'Item') {
-        this.metadataService.itemProfileColumns = groups[0];
+        this.itemProfileColumns = groups[0];
       } else {
-        this.metadataService.unitProfileColumns = groups;
+        this.unitProfileColumns = groups;
       }
 
       return groups?.map((group: MDProfileGroup) => ({

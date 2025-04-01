@@ -82,6 +82,7 @@ export class UnitPropertiesComponent
   private editorSelectionChangedSubscription: Subscription | undefined;
   private playerSelectionChangedSubscription: Subscription | undefined;
   private schemerSelectionChangedSubscription: Subscription | undefined;
+  private metadataSubscription: Subscription | undefined;
   private statesChangedSubscription: Subscription | undefined;
   private ngUnsubscribe = new Subject<void>();
   metadata!: UnitMetadataValues;
@@ -120,7 +121,9 @@ export class UnitPropertiesComponent
       transcript: this.fb.control(''),
       reference: this.fb.control('')
     });
-
+    this.metadataLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(metadata => { this.metadata = metadata; });
     this.addSubscriptionForUnitDefinitionChanges();
     this.unitIdChangedSubscription =
       this.workspaceService.selectedUnit$.subscribe(id => this.readDataForUnitId(id)
@@ -246,9 +249,6 @@ export class UnitPropertiesComponent
   // metadata
 
   private async loadMetaData(): Promise<void> {
-    this.metadata = await firstValueFrom(
-      this.metadataLoader.pipe(takeUntil(this.ngUnsubscribe))
-    );
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
@@ -347,6 +347,9 @@ export class UnitPropertiesComponent
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
+    if (this.metadataSubscription) {
+      this.metadataSubscription.unsubscribe();
+    }
   }
 
   deleteDeprecatedProperty(property: 'transcript' | 'reference'): void {

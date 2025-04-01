@@ -6,7 +6,7 @@ import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { AliasId } from '../../models/alias-id.interface';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
@@ -46,6 +46,9 @@ export class ItemComponent implements OnInit, OnChanges {
   @Input() itemIndex!: number;
   @Input() language!: string;
   @Input() profile!: MDProfile;
+  @Input() unitProfileColumns:MDProfileGroup[] = [];
+  @Input() itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
+
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
   model: ItemModel = {};

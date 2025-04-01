@@ -13,6 +13,7 @@ import { HttpParams } from '@angular/common/http';
 import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { MDProfile } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import {
   UnitMetadataStore
@@ -65,6 +66,8 @@ export class WorkspaceService {
   vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
   vocabularies: Vocab[] = [];
   idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
+  unitProfileColumns:MDProfileGroup[] = [];
+  itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
