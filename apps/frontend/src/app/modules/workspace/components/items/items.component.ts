@@ -8,18 +8,21 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
-
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MDProfile, MDProfileGroup } from '@iqb/metadata';
+import { VocabIdDictionaryValue } from '@iqb/ngx-metadata-components/lib/models/vocabulary.class';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 import {
   MetadataReadonlyItemsComponent
 } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
-import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
-import { VocabIdDictionaryValue } from '../../models/vocabulary.class';
+
+export interface AliasId {
+  id: string;
+  alias: string;
+}
 
 @Component({
   selector: 'studio-lite-items',

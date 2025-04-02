@@ -26,9 +26,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
+import { ProfileFormComponent } from '@iqb/ngx-metadata-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
-import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { State } from '../../../admin/models/state.type';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -37,8 +36,9 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
-import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
+import { AliasId } from '../item/item.component';
+import { ItemsComponent } from '../items/items.component';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -64,11 +64,12 @@ import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.
     SelectModuleComponent,
     MatButton,
     ProfileFormComponent,
-    ItemsComponent,
-    DatePipe,
     TranslateModule,
     MatIcon,
-    CanReturnUnitPipe
+    CanReturnUnitPipe,
+    ProfileFormComponent,
+    ItemsComponent,
+    DatePipe
   ]
 })
 export class UnitPropertiesComponent
@@ -88,7 +89,10 @@ export class UnitPropertiesComponent
   metadata!: UnitMetadataValues;
   workspaceSettings!: WorkspaceSettings | null;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
-  variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>([]);
+  variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>(
+    []
+  );
+
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
@@ -123,7 +127,9 @@ export class UnitPropertiesComponent
     });
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => { this.metadata = metadata; });
+      .subscribe(metadata => {
+        this.metadata = metadata;
+      });
     this.addSubscriptionForUnitDefinitionChanges();
     this.unitIdChangedSubscription =
       this.workspaceService.selectedUnit$.subscribe(id => this.readDataForUnitId(id)
@@ -170,20 +176,29 @@ export class UnitPropertiesComponent
       const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || '0';
       // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
+      this.unitForm.controls['key'].setValidators([
+        Validators.required,
+        Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
         Validators.maxLength(20),
         Validators.pattern('[a-zA-Z-0-9_]+'),
-        WorkspaceService.unitKeyUniquenessValidator(unitMetadata.id, this.workspaceService.unitList)]);
-      this.unitForm.setValue({
-        key: unitMetadata.key,
-        name: unitMetadata.name,
-        state: unitMetadata.state,
-        description: unitMetadata.description,
-        reference: unitMetadata.reference,
-        transcript: unitMetadata.transcript,
-        group: unitMetadata.groupName
-      }, { emitEvent: false });
+        WorkspaceService.unitKeyUniquenessValidator(
+          unitMetadata.id,
+          this.workspaceService.unitList
+        )
+      ]);
+      this.unitForm.setValue(
+        {
+          key: unitMetadata.key,
+          name: unitMetadata.name,
+          state: unitMetadata.state,
+          description: unitMetadata.description,
+          reference: unitMetadata.reference,
+          transcript: unitMetadata.transcript,
+          group: unitMetadata.groupName
+        },
+        { emitEvent: false }
+      );
       if (this.editorSelector) {
         this.editorSelector.value = unitMetadata.editor || '';
         this.editorSelectionChangedSubscription =
@@ -195,51 +210,71 @@ export class UnitPropertiesComponent
       }
       if (this.playerSelector) {
         this.playerSelector.value = unitMetadata.player || '';
-        this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
-        });
+        this.playerSelectionChangedSubscription =
+          this.playerSelector.selectionChanged.subscribe(selectedValue => {
+            this.workspaceService
+              .getUnitMetadataStore()
+              ?.setPlayer(selectedValue);
+          });
       }
       if (this.schemerSelector) {
         this.schemerSelector.value = unitMetadata.schemer || '';
-        this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
-        });
+        this.schemerSelectionChangedSubscription =
+          this.schemerSelector.selectionChanged.subscribe(selectedValue => {
+            this.workspaceService
+              .getUnitMetadataStore()
+              ?.setSchemer(selectedValue);
+          });
       }
       this.selectedStateColor = unitMetadata.state || '0';
-      this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
-        const filteredState = this.workspaceService.states
-          ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
-        filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.workspaceService.isValidFormKey.next(isValidFormKey);
-        this.workspaceService.getUnitMetadataStore()?.setBasicData(
-          this.unitForm.get('key')?.value,
-          this.unitForm.get('name')?.value,
-          this.unitForm.get('description')?.value,
-          this.unitForm.get('group')?.value,
-          this.unitForm.get('transcript')?.value,
-          this.unitForm.get('reference')?.value,
-          this.unitForm.get('state')?.value
-        );
-      });
+      this.unitFormDataChangedSubscription =
+        this.unitForm.valueChanges.subscribe(() => {
+          const filteredState =
+            this.workspaceService.states?.filter(
+              (state: State) => state.id.toString() === this.unitForm.get('state')?.value
+            ) || 0;
+          filteredState.length ?
+            (this.selectedStateColor = filteredState[0].color) :
+            (this.selectedStateColor = '');
+          // eslint-disable-next-line @typescript-eslint/dot-notation
+          const key = 'key';
+          const isValidFormKey = this.unitForm.controls[key].status === 'VALID';
+          // eslint-disable-next-line @typescript-eslint/dot-notation
+          this.workspaceService.isValidFormKey.next(isValidFormKey);
+          this.workspaceService
+            .getUnitMetadataStore()
+            ?.setBasicData(
+              this.unitForm.get('key')?.value,
+              this.unitForm.get('name')?.value,
+              this.unitForm.get('description')?.value,
+              this.unitForm.get('group')?.value,
+              this.unitForm.get('transcript')?.value,
+              this.unitForm.get('reference')?.value,
+              this.unitForm.get('state')?.value
+            );
+        });
       this.unitForm.enable();
       setTimeout(() => {
-        const filteredStates = this.workspaceService.states
-          ?.filter((state:State) => state.id.toString() === unitMetadata.state);
-        filteredStates?.length ? this.selectedStateColor = filteredStates[0].color : this.selectedStateColor = '';
+        const filteredStates = this.workspaceService.states?.filter(
+          (state: State) => state.id.toString() === unitMetadata.state
+        );
+        filteredStates?.length ?
+          (this.selectedStateColor = filteredStates[0].color) :
+          (this.selectedStateColor = '');
       }, 1);
     } else {
-      this.unitForm.setValue({
-        key: '',
-        name: '',
-        description: '',
-        group: '',
-        reference: '',
-        transcript: '',
-        state: ''
-      }, { emitEvent: false });
+      this.unitForm.setValue(
+        {
+          key: '',
+          name: '',
+          description: '',
+          group: '',
+          reference: '',
+          transcript: '',
+          state: ''
+        },
+        { emitEvent: false }
+      );
       this.unitForm.disable();
     }
     this.initialTranscript = this.unitForm.get('transcript')?.value;
@@ -300,8 +335,9 @@ export class UnitPropertiesComponent
   }
 
   private subscribeUnitDefinitionChanges() {
-    this.workspaceService.getUnitDefinitionStore()?.dataChange
-      .pipe(takeUntil(this.ngUnsubscribe))
+    this.workspaceService
+      .getUnitDefinitionStore()
+      ?.dataChange.pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.variablesLoader.next(this.getItems());
       });
@@ -311,24 +347,36 @@ export class UnitPropertiesComponent
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const defStoreVariables: VariableInfo[] = this.workspaceService
-        .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
+      const defStoreVariables: VariableInfo[] =
+        this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
+        unitSchemeVariables;
       if (defStoreVariables) {
-        const variables = defStoreVariables.filter(v => v.type !== 'no-value');
-        const variableAliasIds = variables.map(variable => ({ id: variable.id, alias: variable.alias || variable.id }));
+        const variables = defStoreVariables.filter(
+          v => v.type !== 'no-value'
+        );
+        const variableAliasIds = variables.map(variable => ({
+          id: variable.id,
+          alias: variable.alias || variable.id
+        }));
         const scheme: CodingScheme = JSON.parse(data.scheme);
         const variableCodings = scheme?.variableCodings || [];
         const variableCodingIds = variableCodings
           .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
           .map(item => ({ id: item.id, alias: item.alias || item.id }));
         // merge without duplicates
-        return [...variableAliasIds, ...variableCodingIds]
-          .reduce((acc: AliasId[], current: AliasId) => {
-            if (!acc.find(aliasId => aliasId.id === current.id && aliasId.alias === current.alias)) {
+        return [...variableAliasIds, ...variableCodingIds].reduce(
+          (acc: AliasId[], current: AliasId) => {
+            if (
+              !acc.find(
+                aliasId => aliasId.id === current.id && aliasId.alias === current.alias
+              )
+            ) {
               acc.push(current);
             }
             return acc;
-          }, []);
+          },
+          []
+        );
       }
     }
     return [];
@@ -362,29 +410,36 @@ export class UnitPropertiesComponent
   async submitUnit(): Promise<void> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
-      this.backendService.submitUnits(
-        this.workspaceService.selectedWorkspaceId,
-        this.workspaceService.dropBoxId!,
-        [this.selectedUnitId]
-      )
-        .subscribe(
-          uploadStatus => {
-            this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
-          });
+      this.backendService
+        .submitUnits(
+          this.workspaceService.selectedWorkspaceId,
+          this.workspaceService.dropBoxId!,
+          [this.selectedUnitId]
+        )
+        .subscribe(uploadStatus => {
+          this.showRequestMessage(
+            uploadStatus,
+            'workspace.unit-not-submitted',
+            'workspace.unit-submitted'
+          );
+        });
     }
   }
 
   async returnSubmittedUnit(): Promise<void> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
-      this.backendService.returnSubmittedUnits(
-        this.workspaceService.selectedWorkspaceId,
-        [this.selectedUnitId]
-      )
-        .subscribe(
-          uploadStatus => {
-            this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
-          });
+      this.backendService
+        .returnSubmittedUnits(this.workspaceService.selectedWorkspaceId, [
+          this.selectedUnitId
+        ])
+        .subscribe(uploadStatus => {
+          this.showRequestMessage(
+            uploadStatus,
+            'workspace.unit-not-returned',
+            'workspace.unit-returned'
+          );
+        });
     }
   }
 }

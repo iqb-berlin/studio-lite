@@ -266,18 +266,18 @@
             </mat-card-header>
             <mat-card-content>
               @if (workspaceSettings && workspaceSettings.unitMDProfile && metadata) {
-                <studio-lite-profile-form
-                  [vocabularies]="this.workspaceService.vocabularies"
-                  [profile]="this.workspaceService.unitProfile"
-                  [vocabulariesIdDictionary] = this.workspaceService.vocabulariesIdDictionary
-                  [itemProfileColumns] = this.workspaceService.itemProfileColumns
-                  [unitProfileColumns] = this.workspaceService.unitProfileColumns
+                <iqb-profile-form
+                  [vocabularies]="workspaceService.vocabularies"
+                  [profile]="workspaceService.unitProfile"
+                  [vocabulariesIdDictionary] = workspaceService.vocabulariesIdDictionary
+                  [itemProfileColumns] = workspaceService.itemProfileColumns
+                  [unitProfileColumns] = workspaceService.unitProfileColumns
                   [metadata]="metadata"
                   [language]="'de'"
                   [formlyWrapper]="'panel'"
                   [panelExpanded]="true"
                   (metadataChange)="onMetadataChange($event)">
-                </studio-lite-profile-form>
+                </iqb-profile-form>
               }
             </mat-card-content>
           </mat-card>

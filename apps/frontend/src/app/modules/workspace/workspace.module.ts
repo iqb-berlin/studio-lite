@@ -23,10 +23,18 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { MatSortModule } from '@angular/material/sort';
 import { MatTabsModule } from '@angular/material/tabs';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MAT_DATE_LOCALE, MatRippleModule } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { FormlyMaterialModule } from '@ngx-formly/material';
+import { FormlyModule } from '@ngx-formly/core';
+import {
+  FormlyChipsComponent,
+  FormlyDurationComponent,
+  FormlyToggleComponent,
+  FormlyWrapperPanel
+} from '@iqb/ngx-metadata-components';
 import { CommentsModule } from '../comments/comments.module';
 import { WorkspaceRoutingModule } from './workspace-routing.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
@@ -79,10 +87,22 @@ import { StatusIndicationComponent } from './components/status-indication/status
 import { UnitGroupsComponent } from './components/unit-groups/unit-groups.component';
 import { NamedRouterLinkPipe } from './pipes/named-router-link.pipe';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
-import { MetadataModule } from '../metadata/metadata.module';
 import { StatePipe } from './pipes/state.pipe';
 import { ShowMetadataComponent } from './components/show-metadata/show-metadata.component';
 import { PrintUnitsDialogComponent } from './components/print-units-dialog/print-units-dialog.component';
+
+export function formlyValidationConfig(translate: TranslateService) {
+  return {
+    validationMessages: [
+      {
+        name: 'required',
+        message() {
+          return translate.stream('metadata.formly-field-required');
+        }
+      }
+    ]
+  };
+}
 
 @NgModule({
   exports: [
@@ -92,8 +112,39 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     UnitTableComponent,
     SelectUnitListComponent
   ],
-  imports: [CommonModule,
-    MetadataModule,
+  imports: [
+    FormlyModule.forRoot({
+      wrappers: [
+        {
+          name: 'panel',
+          component: FormlyWrapperPanel
+        }
+      ],
+      types: [
+        {
+          name: 'chips',
+          wrappers: ['form-field'],
+          component: FormlyChipsComponent,
+          defaultOptions: {
+            defaultValue: []
+          }
+        },
+        {
+          name: 'formlyToggle',
+          wrappers: ['form-field'],
+          component: FormlyToggleComponent,
+          defaultOptions: {
+            defaultValue: false
+          }
+        },
+        {
+          name: 'duration',
+          component: FormlyDurationComponent
+        }
+      ]
+    }),
+    FormlyMaterialModule,
+    CommonModule,
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,

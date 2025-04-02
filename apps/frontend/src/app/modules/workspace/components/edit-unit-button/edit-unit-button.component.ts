@@ -31,8 +31,6 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { AppService } from '../../../../services/app.service';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
-import { TableViewComponent } from '../../../metadata/components/table-view/table-view.component';
-import { MetadataService } from '../../../metadata/services/metadata.service';
 import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 import { CodingReportComponent } from '../coding-report/coding-report.component';
 import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
@@ -40,6 +38,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 import { WorkspaceSettings } from '../../../wsg-admin/models/workspace-settings.interface';
+import { TableViewComponent } from '../table-view/table-view.component';
 
 @Component({
   selector: 'studio-lite-edit-unit-button',
@@ -67,7 +66,6 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
     private groupDialog: MatDialog,
     private reviewsDialog: MatDialog,
     private showMetadataDialog: MatDialog,
-    private metadataService: MetadataService,
     private codingReportDialog: MatDialog
   ) {
     super();
@@ -375,7 +373,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         width: '800px',
         data: { warning: '' }
       }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport()
+        this.backendService.createMetadataReport(this.workspaceService.selectedWorkspaceId)
           .subscribe((units: UnitPropertiesDto[] | boolean) => {
             if (res) {
               const selectedUnits = (units as UnitPropertiesDto[])

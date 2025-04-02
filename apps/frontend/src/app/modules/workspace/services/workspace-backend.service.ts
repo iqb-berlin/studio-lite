@@ -8,11 +8,19 @@ import {
   CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
-  RequestReportDto, ReviewFullDto, ReviewInListDto,
-  UnitDefinitionDto, UnitDownloadSettingsDto,
+  RequestReportDto,
+  ReviewFullDto,
+  ReviewInListDto,
+  UnitDefinitionDto,
+  UnitDownloadSettingsDto,
   UnitInListDto,
   UnitPropertiesDto,
-  UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto, MetadataProfileDto, MetadataVocabularyDto
+  UnitSchemeDto,
+  UsersInWorkspaceDto,
+  WorkspaceGroupFullDto,
+  MetadataProfileDto,
+  MetadataVocabularyDto,
+  RegisteredMetadataProfileDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -23,6 +31,42 @@ export class WorkspaceBackendService {
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
   ) {}
+
+  downloadMetadataReport(type: string, columns: string[], units: number[], workspaceId: number): Observable<Blob> {
+    const queryParams = new HttpParams()
+      .set('type', type)
+      .appendAll({
+        column: columns,
+        id: units
+      });
+
+    const url = `${this.serverUrl}workspaces/${workspaceId}/units/properties`;
+
+    return this.http.get<Blob>(url, {
+      headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+      params: queryParams,
+      responseType: 'blob' as 'json'
+    });
+  }
+
+  createMetadataReport(workspaceId: number): Observable<boolean | UnitPropertiesDto[]> {
+    return this.http
+      // eslint-disable-next-line max-len
+      .get<UnitPropertiesDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/properties`)
+      .pipe(
+        catchError(() => of(false)),
+        map(report => report)
+      );
+  }
+
+  getRegisteredProfiles():Observable<RegisteredMetadataProfileDto[] | boolean> {
+    return this.http
+      .get(`${this.serverUrl}metadata/registry`)
+      .pipe(
+        catchError(() => of(false)),
+        map(vocab => vocab as RegisteredMetadataProfileDto[])
+      );
+  }
 
   getWorkspaceGroupStates(workspaceGroupId: number):Observable<WorkspaceGroupFullDto> {
     return this.http

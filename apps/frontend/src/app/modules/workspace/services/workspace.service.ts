@@ -16,13 +16,18 @@ import { MDProfile } from '@iqb/metadata';
 import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import {
+  Vocab,
+  VocabData,
+  VocabIdDictionaryValue
+} from '@iqb/ngx-metadata-components/lib/models/vocabulary.class';
+import { BackendService } from './backend.service';
+import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
 import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { State } from '../../admin/models/state.type';
-import { Vocab, VocabData, VocabIdDictionaryValue } from '../../metadata/models/vocabulary.class';
 import { WorkspaceSettings } from '../../wsg-admin/models/workspace-settings.interface';
 
 @Injectable({
@@ -43,6 +48,19 @@ export class WorkspaceService {
   private unitMetadataStore: UnitMetadataStore | undefined;
   private unitDefinitionStore: UnitDefinitionStore | undefined;
   private unitSchemeStore: UnitSchemeStore | undefined;
+  private vocabulariesSubject = new BehaviorSubject<Vocab[]>([]);
+  vocabularies$ = this.vocabulariesSubject.asObservable(); // Observable für Subscribers
+
+  // Getter für aktuelle Werte
+  get vocabularies(): Vocab[] {
+    return this.vocabulariesSubject.value;
+  }
+
+  // Setter, um Änderungen zu benachrichtigen
+  set vocabularies(newVocabularies: Vocab[]) {
+    this.vocabulariesSubject.next(newVocabularies);
+  }
+
   groupId!: number;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
@@ -64,7 +82,6 @@ export class WorkspaceService {
   itemProfile!: MDProfile;
   unitProfile!: MDProfile;
   vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
-  vocabularies: Vocab[] = [];
   idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
   unitProfileColumns:MDProfileGroup[] = [];
   itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;

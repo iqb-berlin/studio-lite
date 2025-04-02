@@ -18,9 +18,9 @@ import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@st
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { BackendService } from '../../services/backend.service';
 
 interface ColumnValues {
   key?: string;
@@ -64,9 +64,9 @@ interface ColumnValues {
 })
 export class TableViewComponent implements OnInit {
   constructor(
-    private metadataService: MetadataService,
     private workspaceService: WorkspaceService,
     private translateService: TranslateService,
+    private backendService: BackendService,
     @Inject(MAT_DIALOG_DATA)
     public data: { units: UnitPropertiesDto[]; warning: string }
   ) {}
@@ -241,12 +241,14 @@ export class TableViewComponent implements OnInit {
   downloadMetadata(): void {
     const datePipe = new DatePipe('de-DE');
     if (this.viewMode === 'units') {
-      this.metadataService
-        .downloadMetadataReport(
-          'unit',
-          this.getTableUnitsColumnsDefinitions(),
-          this.data.units.map(unit => unit.id)
-        )
+      this.backendService.downloadMetadataReport(
+        'unit',
+        this.getTableUnitsColumnsDefinitions(),
+        this.data.units.map(unit => unit.id,
+          this.workspaceService.selectedWorkspaceId
+        ),
+        this.workspaceService.selectedWorkspaceId
+      )
         .subscribe(b => {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
@@ -259,11 +261,13 @@ export class TableViewComponent implements OnInit {
         });
     }
     if (this.viewMode === 'items') {
-      this.metadataService
+      this.backendService
         .downloadMetadataReport(
           'item',
           this.getTableItemsColumnsDefinitions(),
-          this.data.units.map(unit => unit.id)
+          this.data.units.map(unit => unit.id,
+            this.workspaceService.selectedWorkspaceId),
+          this.workspaceService.selectedWorkspaceId
         )
         .subscribe(b => {
           const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
