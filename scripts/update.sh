@@ -118,12 +118,12 @@ validate_source_and_target_release_tag() {
   return 0
 }
 
-run_optional_migration_scripts() {
-  printf "3. Optional migration scripts check\n"
+run_complementary_migration_scripts() {
+  printf "3. Complementary migration scripts check\n"
 
   if ! validate_source_and_target_release_tag; then
     printf "  The existence of possible migration scripts could not be determined.\n"
-    printf "Optional migration scripts check done.\n\n"
+    printf "Complementary migration scripts check done.\n\n"
 
     return
   fi
@@ -160,7 +160,7 @@ run_optional_migration_scripts() {
   fi
 
   if [ -z "${release_tags}" ]; then
-    printf -- "- No additional migration scripts to execute.\n"
+    printf -- "- No complementary migration scripts to execute.\n"
 
   else
     declare release_tag
@@ -175,10 +175,10 @@ run_optional_migration_scripts() {
     done
 
     if [ ${#migration_scripts[@]} -eq 0 ]; then
-      printf -- "- No additional migration scripts to execute.\n"
+      printf -- "- No complementary migration scripts to execute.\n"
 
     else
-      printf -- "- Additional Migration script(s) available.\n\n"
+      printf -- "- Complementary Migration script(s) available.\n\n"
       printf "3.1 Migration script download\n"
       mkdir -p "${APP_DIR}/scripts/migration"
       declare migration_script
@@ -206,7 +206,7 @@ run_optional_migration_scripts() {
         printf "  To do this, change to directory './scripts/migration' and execute the above scripts in ascending "
         printf "order!\n\n"
 
-        printf "Optional migration scripts check done.\n\n"
+        printf "Complementary migration scripts check done.\n\n"
 
         printf "Since the migration scripts have not been executed, "
         printf "it is not recommended to proceed with the update procedure.\n"
@@ -264,7 +264,7 @@ run_optional_migration_scripts() {
 
   fi
 
-  printf "Optional migration scripts check done.\n\n"
+  printf "Complementary migration scripts check done.\n\n"
 }
 
 load_docker_environment_variables() {
@@ -843,7 +843,7 @@ main() {
 
         get_new_release_version
         create_app_dir_backup
-        run_optional_migration_scripts
+        run_complementary_migration_scripts
         load_docker_environment_variables
         create_data_backup
         run_update_script_in_selected_version
