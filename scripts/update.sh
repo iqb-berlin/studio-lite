@@ -302,16 +302,16 @@ data_services_down() {
 }
 
 dump_db() {
-  declare db_name="all" # for a single db, adapt 'pg_dumpall' options and "${POSTGRES_DB}" of docker environment file!
-  declare db_dump_file="${BACKUP_DIR}/${db_name}.sql"
+  declare db_user=${POSTGRES_USER}
+  declare db_name=${POSTGRES_DB}
+  declare db_dump_file="${BACKUP_DIR}/${db_name}_dump"
 
   if docker compose \
     --env-file "${APP_DIR}/.env.${APP_NAME}" \
     --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
     --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
     exec -it "${DB_SERVICE_NAME}" \
-    pg_dumpall --username="${POSTGRES_USER}" >"${APP_DIR}/${db_dump_file}"; then
-
+    pg_dump --username="${db_user}" --format=c "${db_name}" >"${APP_DIR}/${db_dump_file}"; then
     printf -- "  - Current db dump has been saved at: '%s'\n" "${db_dump_file}"
 
   else
