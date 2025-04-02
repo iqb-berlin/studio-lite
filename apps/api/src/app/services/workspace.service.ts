@@ -4,11 +4,11 @@ import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
   UnitPropertiesDto, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto, UnitFullMetadataDto
+  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto, UnitFullMetadataDto, ItemsMetadataValues
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
-  VariableCodingData, RuleSet, CodeData
+  VariableCodingData, RuleSet, CodeData, CodingScheme
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -221,9 +221,10 @@ export class WorkspaceService {
 
   async create(workspace: CreateWorkspaceDto): Promise<number> {
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
-    const newWorkspace = await this.workspacesRepository.create(workspace);
-    await this.workspacesRepository.save(newWorkspace);
-    return newWorkspace.id;
+    const newWorkspace = this.workspacesRepository.create(workspace);
+    const savedWorkspace = await this.workspacesRepository.save(newWorkspace);
+    this.logger.log(`Workspace created successfully with ID: ${savedWorkspace.id}`);
+    return savedWorkspace.id;
   }
 
   private async createGroup(id: number, newGroup: string): Promise<void> {
@@ -245,78 +246,119 @@ export class WorkspaceService {
   }
 
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
-    const unitDataRows:CodingReportDto[] = [];
+    const unitDataRows: CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithProperties(id);
-    if (unitListWithMetadata) {
-      unitListWithMetadata?.forEach((unit: UnitPropertiesDto) => {
-        if (unit.scheme && unit.scheme !== 'undefined' && unit.schemer.split('@')[1] >= '1.5') {
-          const parsedUnitScheme = JSON.parse(unit.scheme as string);
-          let codingType:string;
-          if (parsedUnitScheme) {
-            const validation = CodingSchemeFactory
-              .validate(unit.variables, parsedUnitScheme.variableCodings);
-            let validationResultText: string;
-            parsedUnitScheme.variableCodings?.forEach((codingVariable: VariableCodingData) => {
-              const validationResult = validation
-                .find((v: CodingSchemeProblem) => {
-                  // fallback to id if alias is not set
-                  const codingVariableId = codingVariable.alias || codingVariable.id;
-                  return v.variableId === codingVariableId;
-                });
-              if (validationResult) {
-                if (validationResult.breaking) {
-                  validationResultText = 'Fehler';
-                } else validationResultText = 'Warnung';
-              } else {
-                validationResultText = 'OK';
-              }
-              // fallback to id if alias is not set
-              const codingVariableId = codingVariable.alias || codingVariable.id;
-              const foundItem = unit.metadata.items?.find(item => item.variableId === codingVariableId);
-              let closedCoding = false;
-              let manualCodingOnly = true;
-              let hasRules = false;
-              if (codingVariable.codes?.length > 0) {
-                codingVariable.codes.forEach((code: CodeData) => {
-                  if (code.manualInstruction.length === 0)manualCodingOnly = false;
-                  code.ruleSets.forEach((ruleSet: RuleSet) => {
-                    if (code.manualInstruction.length > 0 && ruleSet.rules.length > 0) manualCodingOnly = false;
-                    hasRules = ruleSet.rules.length > 0;
-                  });
-                  closedCoding = code.type === 'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE';
-                });
-              }
-              if (closedCoding) {
-                codingType = 'geschlossen';
-              } else if (manualCodingOnly) {
-                codingType = 'manuell';
-              } else if (hasRules) {
-                codingType = 'regelbasiert';
-              } else {
-                codingType = 'keine Regeln';
-              }
-              unitDataRows.push({
-                unit: `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
-                variable: codingVariableId || '–',
-                item: foundItem?.id || '–',
-                validation: validationResultText,
-                codingType: codingType
-              });
-            });
-          }
-        } else {
-          unitDataRows.push({
-            unit: `<a href=#/a/${id}/${unit.id}>${unit.id}#${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-',
-            variable: '',
-            item: '',
-            validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
-            codingType: ''
-          });
+    if (!unitListWithMetadata) return [];
+
+    unitListWithMetadata.forEach((unit: UnitPropertiesDto) => {
+      if (WorkspaceService.isValidScheme(unit.scheme, unit.schemer)) {
+        const parsedUnitScheme = WorkspaceService.parseScheme(unit.scheme);
+        if (parsedUnitScheme) {
+          const validationResults = CodingSchemeFactory
+            .validate(unit.variables, parsedUnitScheme.variableCodings);
+          WorkspaceService
+            .processVariableCodings(parsedUnitScheme, validationResults, unit, id, unitDataRows);
         }
-      });
-      return unitDataRows as CodingReportDto[];
+      } else {
+        WorkspaceService.addInvalidSchemeRow(unit, id, unitDataRows);
+      }
+    });
+
+    return unitDataRows;
+  }
+
+  private static isValidScheme(scheme: string | undefined, schemer: string): boolean {
+    return scheme && scheme !== 'undefined' && schemer.split('@')[1] >= '1.5';
+  }
+
+  private static parseScheme(scheme: string): CodingScheme | null {
+    try {
+      return JSON.parse(scheme);
+    } catch {
+      return null; // Catch JSON parsing errors gracefully
     }
-    return [];
+  }
+
+  static processVariableCodings(
+    parsedUnitScheme: CodingScheme,
+    validationResults: CodingSchemeProblem[],
+    unit: UnitPropertiesDto,
+    workspaceId: number,
+    unitDataRows: CodingReportDto[]
+  ): void {
+    parsedUnitScheme.variableCodings?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
+      .forEach((codingVariable: VariableCodingData) => {
+        const validationResultText = WorkspaceService.getValidationResult(validationResults, codingVariable);
+        const codingType = WorkspaceService.determineCodingType(codingVariable);
+        const foundItem = WorkspaceService.findMatchingItem(unit, codingVariable);
+
+        unitDataRows.push({
+          unit: WorkspaceService.generateUnitLink(workspaceId, unit),
+          variable: codingVariable.alias || codingVariable.id || '–',
+          item: foundItem?.id || '–',
+          validation: validationResultText,
+          codingType: codingType
+        });
+      });
+  }
+
+  static getValidationResult(
+    validationResults: CodingSchemeProblem[],
+    codingVariable: VariableCodingData
+  ): string {
+    const codingVariableId = codingVariable.alias || codingVariable.id;
+    const validationResult = validationResults
+      .find(v => v.variableId === codingVariableId);
+
+    if (validationResult) {
+      return validationResult.breaking ? 'Fehler' : 'Warnung';
+    }
+    return 'OK';
+  }
+
+  static determineCodingType(codingVariable: VariableCodingData): string {
+    let closedCoding = false;
+    let manualCodingOnly = true;
+    let hasRules = false;
+
+    codingVariable.codes?.forEach((code: CodeData) => {
+      if (code.manualInstruction.length === 0) manualCodingOnly = false;
+
+      code.ruleSets.forEach((ruleSet: RuleSet) => {
+        hasRules ||= ruleSet.rules.length > 0;
+        manualCodingOnly &&= code.manualInstruction.length > 0 && ruleSet.rules.length === 0;
+      });
+
+      closedCoding ||= ['RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(code.type);
+    });
+
+    if (closedCoding) return 'geschlossen';
+    if (manualCodingOnly) return 'manuell';
+    if (hasRules) return 'regelbasiert';
+    return 'keine Regeln';
+  }
+
+  static findMatchingItem(unit: UnitPropertiesDto, codingVariable: VariableCodingData): ItemsMetadataValues {
+    const codingVariableId = codingVariable.alias || codingVariable.id;
+    return unit.metadata.items?.find(item => item.variableId === codingVariableId);
+  }
+
+  static generateUnitLink(id: number, unit: UnitPropertiesDto): string {
+    return `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-';
+  }
+
+  static addInvalidSchemeRow(
+    unit: UnitPropertiesDto,
+    id: number,
+    unitDataRows: CodingReportDto[]
+  ): void {
+    unitDataRows.push({
+      unit: WorkspaceService.generateUnitLink(id, unit),
+      variable: '',
+      item: '',
+      validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+      codingType: ''
+    });
   }
 
   async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
@@ -574,7 +616,6 @@ export class WorkspaceService {
       schemer: unitImportData.schemer,
       description: unitImportData.description,
       transcript: unitImportData.transcript,
-      reference: unitImportData.reference,
       lastChangedMetadata: unitImportData.lastChangedMetadata,
       lastChangedDefinition: unitImportData.lastChangedDefinition,
       lastChangedScheme: unitImportData.lastChangedScheme,

@@ -12,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useStaticAssets('./packages', { prefix: '/api/packages' });
   const configService = app.get(ConfigService);
-  const host = configService.get('API_HOST') || 'localhost';
+  const host = configService.get('API_HOST') || '127.0.0.1';
   const port = 3333;
   const globalPrefix = 'api';
 

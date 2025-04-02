@@ -8,7 +8,7 @@ import {
   CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
-  RequestReportDto, ReviewFullDto, ReviewInListDto, ReviewSettingsDto,
+  RequestReportDto, ReviewFullDto, ReviewInListDto,
   UnitDefinitionDto, UnitDownloadSettingsDto,
   UnitInListDto,
   UnitPropertiesDto,
@@ -285,17 +285,7 @@ export class BackendService {
     return this.http
       .get<ReviewFullDto>(`${this.serverUrl}workspaces/${workspaceId}/reviews/${reviewId}`)
       .pipe(
-        map(r => {
-          if (r.settings) {
-            if (!r.settings.bookletConfig) {
-              r.settings = <ReviewSettingsDto>{
-                bookletConfig: r.settings,
-                reviewConfig: {}
-              };
-            }
-          }
-          return r;
-        }),
+        map(r => r),
         catchError(() => of(null))
       );
   }
@@ -384,16 +374,11 @@ export class BackendService {
       );
   }
 
-  static utf8AsHexString(s: string): string {
-    const uInt8Array = new TextEncoder().encode(s);
-    let result = '';
-    uInt8Array.forEach(v => {
-      result += v.toString(16).padStart(2, '0');
-    });
-    return result;
-  }
-
-  getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
-    return this.http.get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`);
+  getCodingReport(workspaceId: number): Observable<CodingReportDto[] | []> {
+    return this.http
+      .get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`)
+      .pipe(
+        catchError(() => of([]))
+      );
   }
 }

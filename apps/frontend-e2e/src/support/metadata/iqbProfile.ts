@@ -7,12 +7,15 @@ export enum IqbProfile {
 // eslint-disable-next-line
 export const IqbProfileExamples = new Map <string, any>([
   ['uMA', new Map<string, string>([['Entwickler:in', 'Elsa Mignon'], ['Für SPF geeignet', '1'],
-    ['Leitidee', 'Größen und Messen'], ['Aufgabenzeit', '1:30'], ['Stimuluszeit', '1:00'],
-    ['Quellenangaben', 'Es war einmal Mathe'], ['Unverträgliche Aufgaben', 'Ja']])],
+    ['Kopfhörereinsatz', 'nein'], ['Leitidee', 'Größen und Messen'], ['Aufgabenzeit', '1:30'],
+    ['Stimuluszeit', '1:00'], ['Quellenangaben', 'Es war einmal Mathe'], ['Unverträgliche Aufgaben', 'Ja'],
+    ['Techinische Besonderheiten der Antwortoptionen', 'Bild']])],
   ['uDE', new Map<string, string>([['Entwickler:in', 'Elsa Magna'], ['Für SPF geeignet', '1'],
+    ['Kopfhörereinsatz', 'optional'],
     ['Kompetenzbereich', 'Schreiben'], ['Aufgabenzeit', '2:30'], ['Quellenangaben', 'Es war einmal Deutsch'],
     ['Textsorte', 'expositorisch'], ['Wortanzahl', '100'], ['Stimuluszeit', '2:00'],
-    ['Hörsequenz Transkript', 'Die Gesichte vom...'], ['Unverträgliche Aufgaben', 'Ja']])],
+    ['Hörsequenz Transkript', 'Die Gesichte vom...'], ['Unverträgliche Aufgaben', 'Ja'],
+    ['Techinische Besonderheiten der Antwortoptionen', 'Bild']])],
   ['uEN', new Map<string, string>([['Textniveau (GeR)', 'A1'],
     ['Lexiko-Grammatik', 'einzelne komplexe Elemente'], ['Abstraktionsgrad', 'einzelne abstrakte Elemente'],
     ['Thematischer Vertrautheitsgrad', 'weitestgehend vertraut'], ['Textsorte', 'Bookstagram'],

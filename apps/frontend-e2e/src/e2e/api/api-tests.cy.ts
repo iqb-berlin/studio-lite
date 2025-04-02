@@ -15,9 +15,9 @@ function getNameAt(initialName: string): string {
 }
 describe('Studio API tests', () => {
   const noId: string = '9988';
-  const modules:string[] = ['iqb-schemer-2.0.0-beta.html',
-    'iqb-editor-aspect-2.5.0-beta5.html',
-    'iqb-player-aspect-2.5.0-beta5.html'];
+  const modules:string[] = ['iqb-schemer-2.5.3.html',
+    'iqb-editor-aspect-2.9.1.html',
+    'iqb-player-aspect-2.9.1.html'];
   const fakeUser: UserData = {
     username: 'falseuser',
     password: 'paso',
@@ -91,9 +91,9 @@ describe('Studio API tests', () => {
   // };
 
   const setEditor: WsSettings = {
-    defaultEditor: 'iqb-editor-aspect@2.5.0-beta5',
-    defaultPlayer: 'iqb-player-aspect@2.5.0-beta5',
-    defaultSchemer: 'iqb-schemer@2.0.0-beta',
+    defaultEditor: 'iqb-editor-aspect@2.9',
+    defaultPlayer: 'iqb-player-aspect@2.9',
+    defaultSchemer: 'iqb-schemer@2.5',
     unitGroups: ['Bista1', 'Bista2'],
     stableModulesOnly: false,
     unitMDProfile: '',
@@ -802,7 +802,7 @@ describe('Studio API tests', () => {
 
       describe('27. GET /api/verona-modules/{key}', () => {
         it('200 positive test', () => {
-          cy.getModuleAPI('iqb-schemer%402.0.0-beta', Cypress.env(`token_${Cypress.env('username')}`))
+          cy.getModuleAPI('iqb-schemer%402.5', Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
               // const parser = new DOMParser();
@@ -1040,11 +1040,11 @@ describe('Studio API tests', () => {
             });
         });
 
-        // Should be Internal Server error 500
         it('500/200 negative test: should fail if we ask for an inexistent profile', () => {
           cy.getMetadataAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); should
             });
         });
       });
@@ -1121,9 +1121,9 @@ describe('Studio API tests', () => {
         let newSettings: WsSettings;
         before(() => {
           newSettings = {
-            defaultEditor: 'iqb-editor-aspect@2.5.0-beta5',
-            defaultPlayer: 'iqb-player-aspect@2.5.0-beta5',
-            defaultSchemer: 'iqb-schemer@2.0.0-beta',
+            defaultEditor: 'iqb-editor-aspect@2.9',
+            defaultPlayer: 'iqb-player-aspect@2.9',
+            defaultSchemer: 'iqb-schemer@2.5',
             stableModulesOnly: false,
             unitMDProfile: Cypress.env('profile1'),
             itemMDProfile: Cypress.env('profile2')
@@ -1179,7 +1179,7 @@ describe('Studio API tests', () => {
           Cypress.env(unit1.shortname),
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
-            Cypress.env('metadata1', resp.body);
+            Cypress.env('unit1_properties', resp.body);
             expect(resp.status).to.equal(200);
           });
       });
@@ -1215,20 +1215,17 @@ describe('Studio API tests', () => {
     });
 
     describe('41. PATCH /api/workspaces/{workspace_id}/units/{id}/properties', () => {
-      // TO DO It does not work, all values we changes get undefined.
       let entry1: DefinitionUnit;
       before(() => {
         entry1 = {
           id: parseInt(`${Cypress.env(unit1.shortname)}`, 10),
-          key: unit1.shortname,
-          groupName: 'Group New'
+          groupName: 'Bista'
         };
       });
 
       it('200 positive test: should be possible update unit definition', () => {
         cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
-          Cypress.env('profile1'),
           entry1,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1239,7 +1236,6 @@ describe('Studio API tests', () => {
       it('500 negative test: should return error 500 not passing the ws', () => {
         cy.updateUnitPropertiesAPI(noId,
           Cypress.env(unit1.shortname),
-          Cypress.env('profile1'),
           entry1,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1250,7 +1246,6 @@ describe('Studio API tests', () => {
       it('500 negative test: should return error 500 not passing the the unit id', () => {
         cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           noId,
-          Cypress.env('profile1'),
           entry1,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1262,18 +1257,17 @@ describe('Studio API tests', () => {
         // Should not allow to pass incorrect structure
         cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
-          Cypress.env('profile1'),
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
+            // expect(resp.status).to.equal(500); should
           });
       });
 
       it('401 negative test: should return error with no credentials', () => {
         cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
-          Cypress.env('profile1'),
           entry1,
           noId)
           .then(resp => {
@@ -1284,7 +1278,6 @@ describe('Studio API tests', () => {
       it('401 negative test: should return error with user with no credentials on the ws', () => {
         cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
-          Cypress.env('profile1'),
           entry1,
           Cypress.env(`token_${user3.username}`))
           .then(resp => {
@@ -1295,7 +1288,7 @@ describe('Studio API tests', () => {
 
     describe('42. GET /api/workspaces/{workspace_id}/units', () => {
       it('200 positive test: should get the units from a workspace', () => {
-        // Sweagger has other parameter
+        // Sweagger has other parameter and we get error 521, sweagger needs the version
         // TO ASK parameters
         cy.getUnitsByWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp1 => {
@@ -1438,49 +1431,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe.skip('53. GET /api/download/xlsx/workspaces/{workspace_group_id}', () => {
-      it('200 positive test: should able download a workspace with credentials', () => {
-        cy.downloadWsAPI(Cypress.env(ws1.id),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not download a workspace with no credentials', () => {
-        cy.downloadWsAPI(Cypress.env(ws1.id),
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('200/500 negative test: should not download any ws without valid id', () => {
-        // Should it not check that it returns a valid file.
-        cy.downloadWsAPI(noId,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-    });
-
-    describe.skip('54. GET /api/download/xlsx/workspaces', () => {
-      it('200 positive test: should able download a workspace with credentials', () => {
-        cy.downloadWsAllAPI(Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not download a workspace with no credentials', () => {
-        cy.downloadWsAllAPI(noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-    });
-
     describe('55. GET /api/workspaces/{workspace_id}/groups', () => {
       before(() => {
         cy.createUnitAPI(Cypress.env(ws1.id), unit3, Cypress.env(`token_${Cypress.env('username')}`))
@@ -1515,6 +1465,343 @@ describe('Studio API tests', () => {
       });
     });
 
+    describe('55a. GET /api/workspaces/{workspace_id}/units/{id}/scheme', () => {
+      it('200 positive test: should retrieve the scheme for a unit with credentials', () => {
+        cy.getUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+
+      it('500 negative test: should not retrieve scheme without a valid unit id ', () => {
+        cy.getUnitSchemeAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not retrieve scheme without a valid ws id ', () => {
+        cy.getUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not retrieve scheme with credentials', () => {
+        cy.getUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+    });
+
+    describe('55b. PATH /api/workspaces/{workspace_id}/units/{id}/definition', () => {
+      before(() => {
+        // 41, but with different parameters in body
+        const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
+        const nu = parseInt(`${Cypress.env(unit4.shortname)}`, 10);
+        cy.request({
+          method: 'PATCH',
+          url: `/api/workspaces/${Cypress.env(ws1.id)}/units/${Cypress.env(unit4.shortname)}/properties`,
+          headers: {
+            'app-version': Cypress.env('version'),
+            authorization
+          },
+          body: {
+            id: nu,
+            editor: setEditor.defaultEditor,
+            player: setEditor.defaultPlayer,
+            schemer: setEditor.defaultSchemer
+          }
+        }).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+
+      it('500 negative test: should not add any text_area in the editor without a valid unit id ', () => {
+        cy.updateUnitDefinitionAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not add any text_area in the editor without a valid ws id ', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not add any textarea in the editor without credentials', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('401 negative test: should not add any text area in the editor without a user with non credentials', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should be able to add a text area in the editor and save', () => {
+        cy.updateUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+    });
+
+    describe('55c. GET /api/workspaces/{workspace_id}/units/{id}/definition', () => {
+      it('500 negative test: should not retrieve an unit definition without a valid unit id ', () => {
+        cy.getUnitDefinitionAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not retrieve an unit definition without a valid ws id ', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not retrieve an unit definition without credentials', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('401 positive test: should not retrieve an unit definition a user without credentials in the ws', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should retrieve an unit definition', () => {
+        cy.getUnitDefinitionAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+    });
+
+    describe('55d. UPDATE /api/workspaces/{workspace_id}/units/{id}/scheme', () => {
+      it('500 negative test: should not code variable without a valid unit id ', () => {
+        cy.updateUnitSchemeAPI(
+          noId,
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('500 negative test: should not code variable without a valid ws id ', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+      });
+
+      it('401 positive test: should not code variable without credentials', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          noId
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('401 negative test: should not code variable with a user with non credentials', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should code variable with right credentials, unit, and ws', () => {
+        cy.updateUnitSchemeAPI(
+          Cypress.env(unit4.shortname),
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+    });
+
+    describe('55e GET /api/workspaces/{workspace_id}/units/properties', () => {
+      it('500 negative test: should not generate metadata report without a valid ws id ', () => {
+        cy.getWsMetadataAPI(
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('401 positive test: should not generate metadata report without credentials', () => {
+        cy.getWsMetadataAPI(
+          Cypress.env(ws1.id),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401 negative test: should not generate metadata report with a user with non credentials', () => {
+        cy.getWsMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should generate metadata report with right credentials, unit, and ws', () => {
+        cy.getWsMetadataAPI(
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          // console.log(resp.body);
+          expect(resp.body[0].name).to.equal('Tier3');
+        });
+      });
+    });
+
+    describe('55f GET /api/workspaces/{workspace_id}/units/scheme', () => {
+      it('500 negative test: should not generate code variable report without a valid ws id ', () => {
+        cy.getWsSchemeAPI(
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('401 positive test: should not generate code variable report without credentials', () => {
+        cy.getWsSchemeAPI(
+          Cypress.env(ws1.id),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401 negative test: should not generate code variable report with a user with non credentials', () => {
+        cy.getWsSchemeAPI(
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should generate code variable report with right credentials, unit, and ws', () => {
+        cy.getWsSchemeAPI(
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body[1].validation).to.equal('OK');
+        });
+      });
+    });
+
+    describe('55g PATH /api/workspaces/{workspace_id}/units/coding-book', () => {
+      it('500 negative test: should not generate ws coding book without a valid ws id ', () => {
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('401 positive test: should not generate ws coding book without credentials', () => {
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
+          Cypress.env(ws1.id),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401 negative test: should not generate ws coding book with a user with non credentials', () => {
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+
+      it('200 positive test: should generate ws coding book with right credentials, unit, and ws', () => {
+        cy.getWsCodingBookAPI([Cypress.env(unit3.shortname), Cypress.env(unit4.shortname)],
+          Cypress.env(ws1.id),
+          Cypress.env(`token_${Cypress.env('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          // console.log(resp.body);
+        });
+      });
+    });
     // STATES
     describe('States block', () => {
       describe('58. PATCH /api/workspace-groups/{workspace_group_id}', () => {
@@ -1560,10 +1847,12 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
+          cy.pause();
         });
       });
 
-      describe.skip('59. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
+      // 41
+      describe('59. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
         it('200 positive test: should assign the state 1 to the unit', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
@@ -1572,6 +1861,7 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
+          cy.pause();
         });
 
         it('401 negative test: should not assign the state 0 without credentials', () => {
@@ -1613,29 +1903,35 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(500);
             });
+          cy.pause();
         });
       });
 
-      describe.skip('61. GET /api/workspaces/{workspace_id}/units/{unit_id}/metadata', () => {
+      describe('61. GET /api/workspaces/{workspace_id}/units/{id}/metadata', () => {
         // I can not find the use in studio.
+        // To delete, in sweagger, results are always two empty arrays: profiles and items
         it('200 positive test: should get the metadata of a workspace.', () => {
-          cy.getMetadataWsAPI(Cypress.env(ws1.id),
+          cy.getUnitMetadataAPI(Cypress.env(ws2.id),
+            Cypress.env(unit1.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
-              expect(resp.body.length).to.equal(3);
+              // console.log(resp.body);
             });
         });
 
         it('401 negative test: should not return the metadata of a ws without credentials', () => {
-          cy.getMetadataWsAPI(Cypress.env(ws1.id), noId)
+          cy.getUnitMetadataAPI(Cypress.env(ws1.id),
+            Cypress.env(unit1.shortname),
+            noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
         });
 
         it('500 negative test: should not return the metadata without specify an existent ws Id', () => {
-          cy.getMetadataWsAPI(noId,
+          cy.getUnitMetadataAPI(noId,
+            Cypress.env(unit1.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(500);
@@ -2230,36 +2526,6 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe.skip('75. GET /api/reviews/{review_id}/units/{id}/properties', () => {
-        it('200 positive test: should the metadata with credentials', () => {
-          cy.getReviewMetadataAPI(Cypress.env('id_review1'),
-            Cypress.env(unit2.shortname),
-            Cypress.env(`token_${user2.username}`))
-            .then(resp => {
-              expect(resp.status).to.equal(200);
-              expect(resp.body.editor).equal(setEditor.defaultEditor);
-            });
-        });
-
-        it('500 negative test: should not get reviews without ws id', () => {
-          cy.getReviewMetadataAPI(noId,
-            Cypress.env(unit2.shortname),
-            Cypress.env(`token_${user2.username}`))
-            .then(resp => {
-              expect(resp.status).to.equal(500);
-            });
-        });
-
-        it('401 negative test: should not retrieve reviews without credentials', () => {
-          cy.getReviewMetadataAPI(Cypress.env('id_review1'),
-            Cypress.env(unit2.shortname),
-            noId)
-            .then(resp => {
-              expect(resp.status).to.equal(401);
-            });
-        });
-      });
-
       describe('76. GET /api/reviews/{review_id}/units/{id}/definition', () => {
         it('200 positive test: should the metadata with credentials', () => {
           cy.getReviewDefinitionAPI(Cypress.env('id_review1'),
@@ -2327,6 +2593,43 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(401);
             });
         });
+      });
+    });
+
+    describe('82. GET /api/workspaces/{workspace_id}/users/{user_id}', () => {
+      it('401 negative test: should not retrieve the ws data for the user without token ', () => {
+        cy.getWsForUserAPI(Cypress.env(ws1.id),
+          Cypress.env(`id_${Cypress.env('username')}`),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should not retrieve with non existent workspace', () => {
+        cy.getWsForUserAPI(noId,
+          Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('500 negative test: should not retrieve without a valid workspace', () => {
+        cy.getWsForUserAPI(noId,
+          noId,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+      it('200 positive test: should a user get the workspace by ws id', () => {
+        cy.getWsForUserAPI(Cypress.env(ws1.id),
+          Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
       });
     });
 
@@ -2556,6 +2859,50 @@ describe('Studio API tests', () => {
       });
     });
 
+    describe('86a. UPDATE /api/group-admin/users/{id}/workspaces', () => {
+      it('200 positive test: should an group-admin user modify the access level for other users', () => {
+        // The body structure id different to sweagger.
+        cy.updateWsByUserAPI(Cypress.env(`id_${user2.username}`),
+          Cypress.env(group1.id),
+          [Cypress.env(ws2.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
+      it('401 positive test: a non-eligible user should not modify the access level for other users.', () => {
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(group1.id),
+          [Cypress.env(ws1.id)],
+          Cypress.env(`token_${user3.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should an group-admin user not modify ' +
+        'the access level for a workspace without a valid groupId', () => {
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          noId,
+          [Cypress.env(ws1.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('500 negative test: should an group-admin user not modify the access level for no-existent user', () => {
+        cy.updateWsByUserAPI(noId,
+          Cypress.env(group1.id),
+          [Cypress.env(ws1.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
+
     describe('87. GET /api/admin/users/{id}/workspace-groups', () => {
       it('200 positive test: should get the workspace-group by admin user id', () => {
         cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
@@ -2592,7 +2939,53 @@ describe('Studio API tests', () => {
           });
       });
     });
+    describe('87a. PATCH /api/admin/users/{id}/workspace-groups', () => {
+      it('200 positive test: should update the workspace-groups accessible for the user', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [Cypress.env(group2.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
 
+      it('401 negative test: should not update the workspace-groups accessible for a user a normal user', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [Cypress.env(group2.id)],
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401 negative test: should not update the workspace-groups accessible' +
+        ' for a user without a valid token', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [Cypress.env(group1.id)],
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should not update the user s workspace-groups without group ids', () => {
+        cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          [noId],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('500 negative test: should not get the workspace-groups with a false user Id', () => {
+        cy.updateGroupsByUserAPI(noId,
+          [Cypress.env(group1.id)],
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
     describe('88. DELETE /api/group-admin/workspaces/{ids}', () => {
       it('200/500 negative test: should fail by not passing the workspace', () => {
         cy.deleteWsAPI([noId], Cypress.env(`token_${Cypress.env('username')}`))

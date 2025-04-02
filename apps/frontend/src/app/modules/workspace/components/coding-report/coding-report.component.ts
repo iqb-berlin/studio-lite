@@ -1,12 +1,14 @@
 import {
-  Component, Inject, OnInit, ViewChild
+  Component,
+  Inject,
+  OnInit,
+  ViewChild
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
@@ -19,7 +21,7 @@ import { BackendService } from '../../services/backend.service';
 @Component({
   selector: 'studio-lite-coding-report',
   templateUrl: './coding-report.component.html',
-  styleUrls: ['coding-report.component.scss'],
+  styleUrls: ['./coding-report.component.scss'],
   imports: [
     TranslateModule,
     MatDialogModule,
@@ -34,55 +36,84 @@ import { BackendService } from '../../services/backend.service';
     MatLabel
   ]
 })
-
 export class CodingReportComponent implements OnInit {
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
-    public workspaceService: WorkspaceService,
-    public backendService: BackendService
-  ) {
-  }
-
+  // Columns to display in the table
   displayedColumns: string[] = ['unit', 'variable', 'item', 'validation', 'codingType'];
-  dataSource!: MatTableDataSource<CodingReportDto>;
-  isLoading = false;
-  codedVariablesOnly = true;
-  unitDataRows: CodingReportDto[] | never = [];
+  dataSource!: MatTableDataSource<CodingReportDto>; // Datasource for the table
+  isLoading = false; // Indicates if data is currently loading
+  codedVariablesOnly = true; // Filter: Display only coded variables
+  unitDataRows: CodingReportDto[] = []; // All rows of data received from the backend
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
+    // Attach table sorting functionality to the data source
     if (this.dataSource) {
       this.dataSource.sort = sort;
     }
   }
 
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
+    public workspaceService: WorkspaceService,
+    public backendService: BackendService
+  ) {}
+
   ngOnInit(): void {
+    this.loadCodingReport();
+  }
+
+  /**
+   * Fetches the coding report from the backend and initializes the data source.
+   */
+  private loadCodingReport(): void {
     this.isLoading = true;
     this.backendService.getCodingReport(this.workspaceService.selectedWorkspaceId)
-      .subscribe((codingReport: CodingReportDto[]) => {
-        this.unitDataRows = codingReport;
-        if (this.codedVariablesOnly) {
-          const filteredRows = codingReport
-            .filter((row: CodingReportDto) => row.codingType !== 'keine Regeln');
-          this.dataSource = new MatTableDataSource(filteredRows);
-        } else {
-          this.dataSource = new MatTableDataSource(codingReport);
+      .subscribe({
+        next: (codingReport: CodingReportDto[]) => {
+          this.unitDataRows = codingReport;
+          this.updateDataSource();
+        },
+        error: err => {
+          // eslint-disable-next-line no-console
+          console.error('Error loading the coding report:', err);
+        },
+        complete: () => {
+          this.isLoading = false;
         }
-        this.isLoading = false;
       });
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  /**
+   * Updates the data source based on the `codedVariablesOnly` setting.
+   * This is triggered when data is loaded or the filter changes.
+   */
+  private updateDataSource(): void {
+    const filteredRows = this.codedVariablesOnly ?
+      this.unitDataRows.filter((row: CodingReportDto) => row.codingType !== 'keine Regeln') :
+      this.unitDataRows;
+
+    this.dataSource = new MatTableDataSource(filteredRows); // Refresh the data source
   }
 
-  toggleChange() {
-    this.codedVariablesOnly = !this.codedVariablesOnly;
-    if (this.codedVariablesOnly) {
-      this.dataSource.data = this.unitDataRows
-        .filter((row: CodingReportDto) => row.codingType !== 'keine Regeln');
+  /**
+   * Applies a text filter on the table's data source.
+   * @param event The input event triggered by the filter field.
+   */
+  applyFilter(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+
+    if (inputElement) {
+      this.dataSource.filter = inputElement.value.trim().toLowerCase();
     } else {
-      this.dataSource.data = this.unitDataRows;
+      // eslint-disable-next-line no-console
+      console.warn('Invalid filter input element.');
     }
+  }
+
+  /**
+   * Toggles the coded variables filter and updates the data source.
+   */
+  toggleChange(): void {
+    this.codedVariablesOnly = !this.codedVariablesOnly;
+    this.updateDataSource();
   }
 }

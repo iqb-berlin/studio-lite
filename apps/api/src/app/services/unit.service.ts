@@ -169,6 +169,7 @@ export class UnitService {
         newUnit.transcript = unitSourceData.transcript;
         newUnit.reference = unitSourceData.reference;
         newUnit.player = unitSourceData.player;
+        newUnit.metadata = unitSourceData.metadata;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
         newUnit.schemeType = unitSourceData.schemeType;
@@ -177,9 +178,9 @@ export class UnitService {
         newUnit.lastChangedSchemeUser = displayName;
         await this.unitsRepository.save(newUnit);
 
-        const metadata = await this.getMetadataOfUnit(unit);
+        const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-        newUnit.metadata = UnitService.setCurrentProfiles(
+        UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
           metadata as UnitFullMetadataDto
@@ -705,10 +706,10 @@ export class UnitService {
     return unit;
   }
 
-  private async getMetadataOfUnit(unit: CreateUnitDto): Promise<UnitMetadataValues | UnitFullMetadataDto> {
-    const unitMetadataToDelete = this.unitMetadataToDeleteService.getOneByUnit(unit.createFrom);
+  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(createFrom);
     if (unitMetadataToDelete) {
-      return this.findOnesMetadata(unit.createFrom);
+      return this.findOnesMetadata(createFrom);
     }
     return unit.metadata;
   }

@@ -17,8 +17,11 @@ export class UnitItemService {
     private unitItemMetadataService: UnitItemMetadataService
   ) {}
 
-  async getAllByUnitId(unitId: number): Promise<UnitItemDto[]> {
-    return this.unitItemRepository.findBy({ unitId: unitId });
+  // eslint-disable-next-line max-len
+  async getAllByUnitId(unitId: number, orderKey: string = 'id', direction: 'DESC' | 'ASC' = 'ASC'): Promise<UnitItemDto[]> {
+    return this.unitItemRepository
+      .find(
+        { where: { unitId: unitId }, order: { [orderKey]: direction } });
   }
 
   async getOneByUuid(uuid: string): Promise<UnitItemDto> {

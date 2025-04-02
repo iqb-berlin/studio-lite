@@ -10,7 +10,7 @@ FROM $BASE_IMAGE_NAME AS base
 FROM base AS dev
 ARG PROJECT
 
-RUN sed -i "s/localhost.*$/backend:3333\",/" apps/${PROJECT}/proxy.conf.json
+RUN sed -i "s/127.0.0.1.*$/backend:3333\",/" apps/${PROJECT}/proxy.conf.json
 
 EXPOSE 80
 

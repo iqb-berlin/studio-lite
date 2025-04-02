@@ -21,15 +21,13 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
     const minAuf = time.split(':')[0];
     const secAuf = time.split(':')[1];
     if (moreThanOne) {
-      cy.get('div.label.ng-star-inserted')
-        .contains(propName)
+      cy.contains(propName)
         .prevUntil('.duration-container > div > mat-form-field > div')
         .find('input')
         .eq(-1)
         .as('aufgabenzeit');
     } else {
-      cy.get('div.label.ng-star-inserted')
-        .contains(propName)
+      cy.contains(propName)
         .prevUntil('.duration-container > div > mat-form-field > div')
         .find('input')
         .as('aufgabenzeit');
@@ -50,7 +48,10 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 }
 
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
-  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -83,12 +84,10 @@ export function selectProfileForArea(profile:IqbProfile) {
     .click();
   cy.get('span:contains("Einstellungen")')
     .click();
-  cy.get('svg').eq(1).click();
+  cy.contains('div', 'Aufgaben Profil').find('svg').click();
   cy.get('mat-option>span').contains(profile).click();
-  // cy.wait(400);
-  cy.get('svg').eq(2).click();
+  cy.contains('div', 'Item Profil').find('svg').click();
   cy.get('mat-option>span').contains(profile).click();
-
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }
 
@@ -176,7 +175,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
       .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type:string, fieldName:string) => {
       cy.log(IqbProfileExamples.get(profile).get(fieldName));
-      if (IqbProfileExamples.get(profile).get(fieldName) !== ('undefined' && '')) {
+      if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
           case 'number': {
             getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile, moreThanOne);

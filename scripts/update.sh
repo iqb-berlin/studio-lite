@@ -118,12 +118,12 @@ validate_source_and_target_release_tag() {
   return 0
 }
 
-run_optional_migration_scripts() {
-  printf "3. Optional migration scripts check\n"
+run_complementary_migration_scripts() {
+  printf "3. Complementary migration scripts check\n"
 
   if ! validate_source_and_target_release_tag; then
     printf "  The existence of possible migration scripts could not be determined.\n"
-    printf "Optional migration scripts check done.\n\n"
+    printf "Complementary migration scripts check done.\n\n"
 
     return
   fi
@@ -144,23 +144,23 @@ run_optional_migration_scripts() {
     # source < target
     if [ "${normalized_source_release_tag}" != "${normalized_target_release_tag}" ]; then
       release_tags=$(
-        curl --silent ${REPO_API}/releases?per_page=100 |                                    # get all releases in json format
-          grep tag_name |                                                                    # extract 'tag_name' key and value ("key":"value")
-          cut -d : -f 2,3 |                                                                  # cut off key and delimiter ("value")
-          tr -d \" |                                                                         # truncate quotes  (value)
-          tr -d , |                                                                          # truncate end comma
-          tr -d " " |                                                                        # truncate start space
-          grep -Po "${ALL_RELEASE_REGEX}" |                                                  # use only release and pre-release versions
-          sed -ne "/${normalized_target_release_tag}/,/${normalized_source_release_tag}/p" | # use only versions between source and target version
-          head -n -1 |                                                                       # remove source version
-          cut -d '-' -f 1 |                                                                  # cut off pre-release suffixes
-          sort -u -V                                                                         # remove duplicates and sort versions ascending
+        curl --silent ${REPO_API}/releases?per_page=100 |                                       # get all releases in json format
+          grep tag_name |                                                                       # extract 'tag_name' key and value ("key":"value")
+          cut -d : -f 2,3 |                                                                     # cut off key and delimiter ("value")
+          tr -d \" |                                                                            # truncate quotes  (value)
+          tr -d , |                                                                             # truncate end comma
+          tr -d " " |                                                                           # truncate start space
+          grep -Po "${ALL_RELEASE_REGEX}" |                                                     # use only release and pre-release versions
+          cut -d '-' -f 1 |                                                                     # cut off pre-release suffixes
+          sort -u -V |                                                                          # remove duplicates and sort versions ascending
+          sed -ne "\|${normalized_source_release_tag}|,\|${normalized_target_release_tag}|p" |  # use only versions between source and target version
+          tail -n +2                                                                            # exclude source version
       )
     fi
   fi
 
   if [ -z "${release_tags}" ]; then
-    printf -- "- No additional migration scripts to execute.\n"
+    printf -- "- No complementary migration scripts to execute.\n"
 
   else
     declare release_tag
@@ -175,10 +175,10 @@ run_optional_migration_scripts() {
     done
 
     if [ ${#migration_scripts[@]} -eq 0 ]; then
-      printf -- "- No additional migration scripts to execute.\n"
+      printf -- "- No complementary migration scripts to execute.\n"
 
     else
-      printf -- "- Additional Migration script(s) available.\n\n"
+      printf -- "- Complementary Migration script(s) available.\n\n"
       printf "3.1 Migration script download\n"
       mkdir -p "${APP_DIR}/scripts/migration"
       declare migration_script
@@ -206,7 +206,7 @@ run_optional_migration_scripts() {
         printf "  To do this, change to directory './scripts/migration' and execute the above scripts in ascending "
         printf "order!\n\n"
 
-        printf "Optional migration scripts check done.\n\n"
+        printf "Complementary migration scripts check done.\n\n"
 
         printf "Since the migration scripts have not been executed, "
         printf "it is not recommended to proceed with the update procedure.\n"
@@ -264,10 +264,11 @@ run_optional_migration_scripts() {
 
   fi
 
-  printf "Optional migration scripts check done.\n\n"
+  printf "Complementary migration scripts check done.\n\n"
 }
 
 load_docker_environment_variables() {
+  # shellcheck source=.env.studio-lite
   source ".env.${APP_NAME}"
 }
 
@@ -301,16 +302,16 @@ data_services_down() {
 }
 
 dump_db() {
-  declare db_name="all" # for a single db, adapt 'pg_dumpall' options and "${POSTGRES_DB}" of docker environment file!
-  declare db_dump_file="${BACKUP_DIR}/${db_name}.sql"
+  declare db_user=${POSTGRES_USER}
+  declare db_name=${POSTGRES_DB}
+  declare db_dump_file="${BACKUP_DIR}/${db_name}_dump"
 
   if docker compose \
     --env-file "${APP_DIR}/.env.${APP_NAME}" \
     --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
     --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
     exec -it "${DB_SERVICE_NAME}" \
-    pg_dumpall --username="${POSTGRES_USER}" >"${APP_DIR}/${db_dump_file}"; then
-
+    pg_dump --username="${db_user}" --format=c "${db_name}" >"${APP_DIR}/${db_dump_file}"; then
     printf -- "  - Current db dump has been saved at: '%s'\n" "${db_dump_file}"
 
   else
@@ -572,6 +573,9 @@ customize_settings() {
   sed -i.bak "s|scripts/update.sh|scripts/update_${APP_NAME}.sh|" "${APP_DIR}/scripts/make/${APP_NAME}.mk" &&
     rm "${APP_DIR}/scripts/make/${APP_NAME}.mk.bak"
   update_makefile
+
+  # Update environment variables
+  load_docker_environment_variables
 }
 
 finalize_update() {
@@ -843,7 +847,7 @@ main() {
 
         get_new_release_version
         create_app_dir_backup
-        run_optional_migration_scripts
+        run_complementary_migration_scripts
         load_docker_environment_variables
         create_data_backup
         run_update_script_in_selected_version

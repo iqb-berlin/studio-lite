@@ -11,7 +11,7 @@ import {
 } from '../../support/util';
 import { UserData } from '../../support/testData';
 
-describe.skip('UI User Management', () => {
+describe('UI User Management', () => {
   const newUser: UserData = {
     username: 'normaluser',
     password: '5678'
@@ -37,8 +37,11 @@ describe.skip('UI User Management', () => {
   });
 
   it('should not be able to find admin user setting button', () => {
-    cy.get('[data-cy="goto-admin"]')
+    cy.get('div')
+      .contains('studio-lite-wrapped-icon', 'settings')
       .should('not.exist');
+    // cy.get('[data-cy="goto-admin"]')
+    //   .should('not.exist');
   });
 
   it('should be able to modify personal data', () => {

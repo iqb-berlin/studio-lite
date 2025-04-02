@@ -8,7 +8,7 @@ import {
 } from '../../support/util';
 import { AccessLevel, UnitData } from '../../support/testData';
 
-describe.skip('UI check: workspace', () => {
+describe('UI check: workspace', () => {
   const group1:string = 'UI_BG';
   const ws1:string = '01Vorlage';
   const ws2:string = '07Final';

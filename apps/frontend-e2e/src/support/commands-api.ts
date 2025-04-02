@@ -14,7 +14,7 @@ import {
   DefinitionUnit, CopyUnit, WsSettings
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
-import { buildQueryParameters } from './utilAPI';
+import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
 // import { HttpParams } from '@angular/common/http';
 
 // General
@@ -545,17 +545,7 @@ Cypress.Commands.add('getUnitPropertiesAPI', (wsId:string, unitId:string, token:
 // 41
 Cypress.Commands.add(
   'updateUnitPropertiesAPI',
-  (wsId: string, unitId: string, profile:string, entry: DefinitionUnit, token: string) => {
-    // console.log(entry);
-    // eslint-disable-next-line max-len
-    // const jsonObj = JSON.parse('[{"id":"a1","label":[{"lang":"de","value":"Für SPF geeignet"}],"value":"false","valueAsText":{"lang":"de","value":"ja"}},{"id":"iqb_phones","label":[{"lang":"de","value":"Kopfhörer"}],"value":[],"valueAsText":[]},{"id":"w8","label":[{"lang":"de","value":"Leitidee"}],"value":[],"valueAsText":[]},{"id":"iqb_author","label":[{"lang":"de","value":"Entwickler:in"}],"value":[{"lang":"de","value":"Ana Maier"}],"valueAsText":[{"lang":"de","value":"Ana Maier"}]}]');
-    // metadata: {
-    //   profiles: [{
-    //     entries: `${jsonObj}`,
-    //     profileId: `${profile}`,
-    //     isCurrent: true
-    //   }]
-    // }
+  (wsId: string, unitId: string, entry: DefinitionUnit, token: string) => {
     const authorization = `bearer ${token}`;
     const nu = parseInt(`${unitId}`, 10);
     cy.request({
@@ -567,7 +557,7 @@ Cypress.Commands.add(
       },
       body: {
         id: nu,
-        groupName: `${entry.groupName}`
+        groupName: entry.groupName
       },
       failOnStatusCode: false
     });
@@ -646,40 +636,312 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   });
 });
 
-// 53 skipped
-Cypress.Commands.add('downloadWsAPI', (wsId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/download/xlsx/workspaces/${wsId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 54 skipped
-Cypress.Commands.add('downloadWsAllAPI', (token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: '/api/download/xlsx/workspaces',
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 55
 Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
     url: `/api/workspaces/${wsId}/groups`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55a
+Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// 55b
+Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  // eslint-disable-next-line max-len
+  // const definition = '{"type":"aspect-unit-definition","stateVariables":[],"enableSectionNumbering":false,"sectionNumberingPosition":"left","showUnitNavNext":false,"version":"4.9.0","pages":[{"sections":[{"elements":[{"isRelevantForPresentationComplete":true,"id":"text_1743412177740_1","alias":"text_1","position":{"xPosition":0,"yPosition":0,"gridColumn":1,"gridColumnRange":1,"gridRow":1,"gridRowRange":1,"marginLeft":{"value":0,"unit":"px"},"marginRight":{"value":0,"unit":"px"},"marginTop":{"value":0,"unit":"px"},"marginBottom":{"value":10,"unit":"px"},"zIndex":0},"dimensions":{"width":180,"height":98,"isWidthFixed":false,"isHeightFixed":false,"minWidth":null,"maxWidth":null,"minHeight":null,"maxHeight":null},"type":"text","text":"<p style=\"padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0\" indentsize=\"20\">Wie viele Monde hat Jupiter?</p>","markingMode":"selection","markingPanels":[],"highlightableOrange":false,"highlightableTurquoise":false,"highlightableYellow":false,"hasSelectionPopup":false,"columnCount":1,"styling":{"backgroundColor":"transparent","fontColor":"#000000","font":"NunitoSans","fontSize":20,"bold":false,"italic":false,"underline":false,"lineHeight":135}},{"isRelevantForPresentationComplete":true,"id":"text-area_1743412202936_1","alias":"text-area_1","position":{"xPosition":0,"yPosition":0,"gridColumn":1,"gridColumnRange":1,"gridRow":2,"gridRowRange":1,"marginLeft":{"value":0,"unit":"px"},"marginRight":{"value":0,"unit":"px"},"marginTop":{"value":0,"unit":"px"},"marginBottom":{"value":0,"unit":"px"},"zIndex":0},"dimensions":{"width":230,"height":132,"isWidthFixed":false,"isHeightFixed":false,"minWidth":null,"maxWidth":null,"minHeight":null,"maxHeight":null},"label":"","value":"Jupiter hat ... Monde.","required":false,"requiredWarnMessage":"Eingabe erforderlich","readOnly":false,"inputAssistancePreset":null,"inputAssistanceCustomKeys":"","inputAssistancePosition":"floating","inputAssistanceFloatingStartPosition":"startBottom","restrictedToInputAssistanceChars":false,"hasArrowKeys":false,"hasBackspaceKey":false,"showSoftwareKeyboard":true,"addInputAssistanceToKeyboard":true,"hideNativeKeyboard":true,"type":"text-area","appearance":"outline","resizeEnabled":false,"hasDynamicRowCount":true,"hasAutoHeight":false,"rowCount":3,"expectedCharactersCount":135,"hasReturnKey":false,"hasKeyboardIcon":false,"styling":{"backgroundColor":"transparent","fontColor":"#000000","font":"NunitoSans","fontSize":20,"bold":false,"italic":false,"underline":false,"lineHeight":135}}],"height":400,"backgroundColor":"#ffffff","dynamicPositioning":true,"autoColumnSize":true,"autoRowSize":true,"gridColumnSizes":[{"value":1,"unit":"fr"}],"gridRowSizes":[{"value":1,"unit":"fr"}],"visibilityDelay":0,"animatedVisibility":false,"enableReHide":false,"logicalConnectiveOfRules":"disjunction","visibilityRules":[],"ignoreNumbering":false}],"hasMaxWidth":true,"maxWidth":750,"margin":30,"backgroundColor":"#ffffff","alwaysVisible":false,"alwaysVisiblePagePosition":"left","alwaysVisibleAspectRatio":50}]}';
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      definition: {
+        type: 'aspect-unit-definition',
+        stateVariables: [],
+        enableSectionNumbering: false,
+        sectionNumberingPosition: 'left',
+        version: '4.6.0',
+        pages: [
+          {
+            sections: [
+              {
+                elements: [
+                  {
+                    id: 'text_1',
+                    isRelevantForPresentationComplete: true,
+                    position: {
+                      xPosition: 0,
+                      yPosition: 0,
+                      gridColumn: 1,
+                      gridColumnRange: 1,
+                      gridRow: 1,
+                      gridRowRange: 1,
+                      marginLeft: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginRight: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginTop: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginBottom: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      zIndex: 0
+                    },
+                    dimensions: {
+                      width: 180,
+                      height: 98,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
+                    type: 'text',
+                    // eslint-disable-next-line max-len
+                    text: '<p>Wie viele Monde hat Jupiter?</p>',
+                    highlightableOrange: false,
+                    highlightableTurquoise: false,
+                    highlightableYellow: false,
+                    hasSelectionPopup: false,
+                    columnCount: 1,
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
+                    }
+                  },
+                  {
+                    id: 'text-area_1',
+                    isRelevantForPresentationComplete: true,
+                    position: {
+                      xPosition: 0,
+                      yPosition: 0,
+                      gridColumn: 1,
+                      gridColumnRange: 1,
+                      gridRow: 2,
+                      gridRowRange: 1,
+                      marginLeft: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginRight: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginTop: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginBottom: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      zIndex: 0
+                    },
+                    dimensions: {
+                      width: 230,
+                      height: 132,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
+                    label: '',
+                    value: 'Jupiter hat ... Monde.',
+                    required: false,
+                    requiredWarnMessage: 'Eingabe erforderlich',
+                    readOnly: false,
+                    inputAssistancePreset: null,
+                    inputAssistanceCustomKeys: '',
+                    inputAssistancePosition: 'floating',
+                    inputAssistanceFloatingStartPosition: 'startBottom',
+                    restrictedToInputAssistanceChars: false,
+                    hasArrowKeys: false,
+                    hasBackspaceKey: false,
+                    showSoftwareKeyboard: true,
+                    addInputAssistanceToKeyboard: true,
+                    hideNativeKeyboard: true,
+                    type: 'text-area',
+                    appearance: 'outline',
+                    resizeEnabled: false,
+                    hasDynamicRowCount: false,
+                    hasAutoHeight: false,
+                    rowCount: 3,
+                    expectedCharactersCount: 300,
+                    hasReturnKey: false,
+                    hasKeyboardIcon: false,
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
+                    }
+                  }
+                ],
+                height: 400,
+                backgroundColor: '#ffffff',
+                dynamicPositioning: true,
+                autoColumnSize: true,
+                autoRowSize: true,
+                gridColumnSizes: [
+                  {
+                    value: 1,
+                    unit: 'fr'
+                  }
+                ],
+                gridRowSizes: [
+                  {
+                    value: 1,
+                    unit: 'fr'
+                  }
+                ],
+                visibilityDelay: 0,
+                animatedVisibility: false,
+                enableReHide: false,
+                logicalConnectiveOfRules: 'disjunction',
+                visibilityRules: [],
+                ignoreNumbering: false
+              }
+            ],
+            hasMaxWidth: true,
+            maxWidth: 750,
+            margin: 30,
+            backgroundColor: '#ffffff',
+            alwaysVisible: false,
+            alwaysVisiblePagePosition: 'left',
+            alwaysVisibleAspectRatio: 50
+          }
+        ]
+      },
+      variables: [
+        {
+          format: '',
+          id: 'text-area_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'string',
+          valuePositionLabels: [],
+          values: [],
+          valuesComplete: false
+        }
+      ]
+    },
+    failOnStatusCode: false
+  });
+});
+// 55c
+Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// 55d
+Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  // eslint-disable-next-line max-len
+  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      scheme: scheme1,
+      schemeType: 'iqb@3.0'
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55e
+Cypress.Commands.add('getWsMetadataAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/properties`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55f
+Cypress.Commands.add('getWsSchemeAPI', (wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 55g
+Cypress.Commands.add('getWsCodingBookAPI', (ids: string[], wsId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  const parameters = ['format', 'missingsProfile', 'generalInstructions',
+    'onlyManual', 'closed', 'derived', 'showScore', 'codeLabelToUpper', 'hideItemVarRelation', 'hasOnlyVarsWithCodes'];
+  const values = ['docx', true, true, true,
+    true, true, true, true, true, true, true];
+  const qp = buildQueryParametersComplex(parameters, values, ids);
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/coding-book${qp}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -761,11 +1023,11 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
 });
 
 // 61
-Cypress.Commands.add('getMetadataWsAPI', (wsId: string, token:string) => {
+Cypress.Commands.add('getUnitMetadataAPI', (wsId: string, unitId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspaces/${wsId}/units/metadata`,
+    url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -985,20 +1247,6 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   });
 });
 
-// 75
-Cypress.Commands.add('getReviewMetadataAPI', (reviewId:string, unitId:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/reviews/${reviewId}/units/${unitId}/properties`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 76
 Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1107,6 +1355,29 @@ Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
   });
 });
 
+// 86a
+Cypress.Commands.add('updateWsByUserAPI', (userId:string, groupId: string, wsIds:string[], token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/group-admin/users/${userId}/workspaces`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      groupId: parseInt(groupId, 10),
+      workspaces: [
+        {
+          accessLevel: 2,
+          id: wsIds[0]
+        }
+      ]
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 87
 Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1116,6 +1387,23 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 87a
+Cypress.Commands.add('updateGroupsByUserAPI', (userId:string, groupIds: string[], token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/users/${userId}/workspace-groups`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      ids: groupIds
     },
     failOnStatusCode: false
   });
