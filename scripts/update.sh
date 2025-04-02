@@ -573,6 +573,9 @@ customize_settings() {
   sed -i.bak "s|scripts/update.sh|scripts/update_${APP_NAME}.sh|" "${APP_DIR}/scripts/make/${APP_NAME}.mk" &&
     rm "${APP_DIR}/scripts/make/${APP_NAME}.mk.bak"
   update_makefile
+
+  # Update environment variables
+  load_docker_environment_variables
 }
 
 finalize_update() {
