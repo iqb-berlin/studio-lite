@@ -268,6 +268,7 @@ run_complementary_migration_scripts() {
 }
 
 load_docker_environment_variables() {
+  # shellcheck source=.env.studio-lite
   source ".env.${APP_NAME}"
 }
 
