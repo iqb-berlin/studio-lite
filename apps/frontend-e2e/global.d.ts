@@ -87,6 +87,7 @@ declare namespace Cypress {
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 65
     getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 66
     updateCommentTimeAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 67
+    getCommentTimeAPI(wsId: string, unitId: string, token:string): Chainable<Response>;
     updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
     Chainable<Response>; // 68
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 69
@@ -95,7 +96,9 @@ declare namespace Cypress {
     updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 72
     getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 73
     getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 74
+    getReviewPropertiesAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 75
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 76
+    getReviewSchemeAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 76
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 81
     getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 83

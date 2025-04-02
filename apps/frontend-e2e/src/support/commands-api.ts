@@ -681,15 +681,27 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
         stateVariables: [],
         enableSectionNumbering: false,
         sectionNumberingPosition: 'left',
-        version: '4.6.0',
+        showUnitNavNext: false,
+        version: '4.9.0',
         pages: [
           {
             sections: [
               {
                 elements: [
                   {
-                    id: 'text_1',
                     isRelevantForPresentationComplete: true,
+                    id: 'text_1',
+                    alias: 'text_1',
+                    dimensions: {
+                      width: 180,
+                      height: 98,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
                     position: {
                       xPosition: 0,
                       yPosition: 0,
@@ -715,24 +727,6 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       },
                       zIndex: 0
                     },
-                    dimensions: {
-                      width: 180,
-                      height: 98,
-                      isWidthFixed: false,
-                      isHeightFixed: false,
-                      minWidth: null,
-                      maxWidth: null,
-                      minHeight: null,
-                      maxHeight: null
-                    },
-                    type: 'text',
-                    // eslint-disable-next-line max-len
-                    text: '<p>Wie viele Monde hat Jupiter?</p>',
-                    highlightableOrange: false,
-                    highlightableTurquoise: false,
-                    highlightableYellow: false,
-                    hasSelectionPopup: false,
-                    columnCount: 1,
                     styling: {
                       backgroundColor: 'transparent',
                       fontColor: '#000000',
@@ -742,11 +736,31 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       italic: false,
                       underline: false,
                       lineHeight: 135
-                    }
+                    },
+                    type: 'text',
+                    text: '<p>Wie viele Monde hat Jupiter?</p>',
+                    markingMode: 'selection',
+                    markingPanels: [],
+                    highlightableOrange: false,
+                    highlightableTurquoise: false,
+                    highlightableYellow: false,
+                    hasSelectionPopup: false,
+                    columnCount: 1
                   },
                   {
-                    id: 'text-area_1',
                     isRelevantForPresentationComplete: true,
+                    id: 'text-area_1',
+                    alias: 'text-area_1',
+                    dimensions: {
+                      width: 230,
+                      height: 132,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
                     position: {
                       xPosition: 0,
                       yPosition: 0,
@@ -772,18 +786,18 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       },
                       zIndex: 0
                     },
-                    dimensions: {
-                      width: 230,
-                      height: 132,
-                      isWidthFixed: false,
-                      isHeightFixed: false,
-                      minWidth: null,
-                      maxWidth: null,
-                      minHeight: null,
-                      maxHeight: null
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
                     },
                     label: '',
-                    value: 'Jupiter hat ... Monde.',
+                    value: 'Jupiter hat ... Monde',
                     required: false,
                     requiredWarnMessage: 'Eingabe erforderlich',
                     readOnly: false,
@@ -805,17 +819,7 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                     rowCount: 3,
                     expectedCharactersCount: 300,
                     hasReturnKey: false,
-                    hasKeyboardIcon: false,
-                    styling: {
-                      backgroundColor: 'transparent',
-                      fontColor: '#000000',
-                      font: 'NunitoSans',
-                      fontSize: 20,
-                      bold: false,
-                      italic: false,
-                      underline: false,
-                      lineHeight: 135
-                    }
+                    hasKeyboardIcon: false
                   }
                 ],
                 height: 400,
@@ -855,6 +859,19 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
       },
       variables: [
         {
+          alias: 'text_1',
+          format: '',
+          id: 'text_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'no-value',
+          valuePositionLabels: [],
+          values: [],
+          valuesComplete: false
+        },
+        {
+          alias: 'text-area_1',
           format: '',
           id: 'text-area_1',
           multiple: false,
@@ -1128,6 +1145,20 @@ Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comm
   });
 });
 
+// 67a
+Cypress.Commands.add('getCommentTimeAPI', (wsId: string, unitId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/${unitId}/comments/last-seen`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 68
 Cypress.Commands.add('updateCommentAPI',
   (wsId: string, unitId: string, commentId:string, comment: CommentData, token:string) => {
@@ -1247,12 +1278,40 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   });
 });
 
+// 75
+Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}/units/${unitId}/properties`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 76
 Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
     url: `/api/reviews/${reviewId}/units/${unitId}/definition`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 77
+Cypress.Commands.add('getReviewSchemeAPI', (reviewId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}/units/${unitId}/scheme`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
