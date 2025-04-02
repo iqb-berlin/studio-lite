@@ -11,7 +11,7 @@ import { MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
-import { BackendService } from '../../../metadata/services/backend.service';
+import { BackendService as WsBackendService } from '../../../workspace/services/backend.service';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
@@ -34,7 +34,7 @@ export class ProfilesComponent implements OnInit {
   @Input() profiles!: Profile[];
   constructor(
     private wsgAdminService: WsgAdminService,
-    private backendService: BackendService
+    private workspaceBackendService: WsBackendService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -43,7 +43,7 @@ export class ProfilesComponent implements OnInit {
 
   private loadProfiles(): void {
     this.isLoading = true;
-    this.backendService.getRegisteredProfiles()
+    this.workspaceBackendService.getRegisteredProfiles()
       .subscribe(registeredProfiles => {
         if (registeredProfiles && registeredProfiles !== true) {
           registeredProfiles.forEach(async registeredProfile => {
@@ -73,9 +73,9 @@ export class ProfilesComponent implements OnInit {
 
   async getProfile(profileUrl:string): Promise<MDProfile | null> {
     return new Promise(resolve => {
-      this.backendService.getMetadataProfile(profileUrl)
+      this.workspaceBackendService.getMetadataProfile(profileUrl)
         .subscribe(profile => {
-          if (profile && profile !== true) {
+          if (profile) {
             return resolve(new MDProfile(profile));
           }
           return resolve(null);

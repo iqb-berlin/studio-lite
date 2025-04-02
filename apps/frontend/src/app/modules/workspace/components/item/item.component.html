@@ -12,14 +12,14 @@
        (modelChange)="onModelChange()">
      </formly-form>
     </form>
-    <studio-lite-profile-form
-      [vocabularies]="this.workspaceService.vocabularies"
+    <iqb-profile-form
+      [vocabularies]= "vocabularies"
       [profile]="profile"
      [metadata]="metadata[itemIndex]"
      [language]="language"
      [formlyWrapper]="''"
      [panelExpanded]="false"
      (metadataChange)="onMetadataChange($event)">
-  </studio-lite-profile-form>
+  </iqb-profile-form>
 </mat-expansion-panel>
 
