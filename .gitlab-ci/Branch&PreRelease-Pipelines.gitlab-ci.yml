@@ -516,6 +516,10 @@ test-app-e2e:
     - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-api:
   stage: test-e2e
@@ -554,6 +558,10 @@ test-app-e2e-api:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-chrome:
   stage: test-e2e
@@ -592,6 +600,10 @@ test-app-e2e-ui-chrome:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-chrome-mobile:
   stage: test-e2e
@@ -631,6 +643,10 @@ test-app-e2e-ui-chrome-mobile:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-firefox:
   stage: test-e2e
@@ -669,6 +685,10 @@ test-app-e2e-ui-firefox:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-firefox-mobile:
   stage: test-e2e
@@ -708,6 +728,10 @@ test-app-e2e-ui-firefox-mobile:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-edge:
   stage: test-e2e
@@ -746,6 +770,10 @@ test-app-e2e-ui-edge:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-edge-mobile:
   stage: test-e2e
@@ -785,6 +813,10 @@ test-app-e2e-ui-edge-mobile:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 lint-app:
   stage: lint

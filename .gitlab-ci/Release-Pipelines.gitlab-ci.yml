@@ -564,6 +564,10 @@ test-main-pr-e2e:
               --classpath=changelog
             history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-api:
   stage: test-e2e
@@ -605,6 +609,10 @@ test-main-pr-e2e-api:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-ui-chrome:
   stage: test-e2e
@@ -647,6 +655,10 @@ test-main-pr-e2e-ui-chrome:
               --classpath=changelog
             history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-ui-chrome-mobile:
   stage: test-e2e
@@ -690,6 +702,10 @@ test-main-pr-e2e-ui-chrome-mobile:
             history
     - docker compose -f docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-ui-firefox:
   stage: test-e2e
@@ -732,6 +748,10 @@ test-main-pr-e2e-ui-firefox:
               --classpath=changelog
             history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-ui-firefox-mobile:
   stage: test-e2e
@@ -775,6 +795,10 @@ test-main-pr-e2e-ui-firefox-mobile:
             history
     - docker compose -f docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-ui-edge:
   stage: test-e2e
@@ -817,6 +841,10 @@ test-main-pr-e2e-ui-edge:
               --classpath=changelog
             history
     - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-main-pr-e2e-ui-edge-mobile:
   stage: test-e2e
@@ -880,6 +908,10 @@ lint-main-pr-backend:
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test lint api
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 lint-main-pr-frontend:
   stage: lint
