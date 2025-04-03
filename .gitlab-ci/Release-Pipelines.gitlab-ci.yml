@@ -523,58 +523,58 @@ test-main-pr-frontend:
   script:
     - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test frontend
 
-test-main-pr-e2e:
-  stage: test-e2e
-  interruptible: true
-  allow_failure: true
-  rules:
-    - !reference [ .main_pr_rules, rules ]
-  needs:
-    - test-main-pr-db
-    - build-main-pr-backend-image
-    - build-main-pr-frontend-image
-    - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
-  services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
-      alias: docker
-  before_script:
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
-    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
-    - export $(grep -v '^#' .env.studio-lite.template | xargs)
-    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
-  script:
-    - docker network create app-net
-    - docker compose
-          --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
-    - docker compose
-          --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        run --rm liquibase
-          liquibase
-              --changelogFile=studio-lite.changelog-root.xml
-              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
-              --username=${POSTGRES_USER}
-              --password=${POSTGRES_PASSWORD}
-              --classpath=changelog
-            history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
-  artifacts:
-    paths:
-      - dist/cypress/apps/*
-    expire_in: 60 minutes
+#test-main-pr-e2e:
+#  stage: test-e2e
+#  interruptible: true
+#  allow_failure: true
+#  rules:
+#    - !reference [ .main_pr_rules, rules ]
+#  needs:
+#    - test-main-pr-db
+#    - build-main-pr-backend-image
+#    - build-main-pr-frontend-image
+#    - build-main-pr-frontend-e2e-test-image
+#  image: $DOCKER_IMAGE
+#  services:
+#    - name: $DOCKER_SERVICE
+#      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+#      alias: docker
+#  before_script:
+#    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+#    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+#    - export $(grep -v '^#' .env.studio-lite.template | xargs)
+#    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+#  script:
+#    - docker network create app-net
+#    - docker compose
+#          --env-file .env.studio-lite.template
+#          -f docker-compose.studio-lite.yaml
+#          -f docker-compose.studio-lite.prod.yaml
+#        up -d --quiet-pull
+#    - docker compose
+#          --env-file .env.studio-lite.template
+#          -f docker-compose.studio-lite.yaml
+#          -f docker-compose.studio-lite.prod.yaml
+#        run --rm liquibase
+#          liquibase
+#              --changelogFile=studio-lite.changelog-root.xml
+#              --url=jdbc:postgresql://db:5432/${POSTGRES_DB}
+#              --username=${POSTGRES_USER}
+#              --password=${POSTGRES_PASSWORD}
+#              --classpath=changelog
+#            history
+#    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
+#  artifacts:
+#    paths:
+#      - dist/cypress/apps/*
+#    expire_in: 60 minutes
 
 test-main-pr-e2e-api:
   stage: test-e2e
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_manual_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - test-main-pr-db
     - build-main-pr-backend-image
@@ -619,7 +619,7 @@ test-main-pr-e2e-ui-chrome:
   interruptible: true
   allow_failure: true
   rules:
-    - !reference [ .main_pr_manual_rules, rules ]
+    - !reference [ .main_pr_rules, rules ]
   needs:
     - test-main-pr-db
     - build-main-pr-backend-image
