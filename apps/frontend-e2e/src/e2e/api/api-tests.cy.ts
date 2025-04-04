@@ -2687,7 +2687,7 @@ describe('Studio API tests', () => {
           };
         });
 
-        it('201/500 negative test: should not create comment review without review id', () => {
+        it('201/500 negative test: should not create comment in review without review id', () => {
           // It creates a comment in the db. But it should be 500 instead of 201
           cd.body = 'New comment review created without review id in the path';
           cy.createCommentReviewAPI(noId,
@@ -2702,7 +2702,7 @@ describe('Studio API tests', () => {
           cy.pause();
         });
 
-        it('201/500 negative test: should not create comment review without unit id', () => {
+        it('201/500 negative test: should not create comment in review without unit id', () => {
           // It creates a comment in the db. But it should be 500 instead of 201
           cd.body = 'New comment review created without unit id in the path';
           cy.createCommentReviewAPI(Cypress.env('id_review1'),
@@ -2716,7 +2716,7 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('401 negative test: should not retrieve review scheme without credentials', () => {
+        it('401 negative test: should not create comment in review without credentials', () => {
           cy.createCommentReviewAPI(Cypress.env('id_review1'),
             Cypress.env(unit4.shortname),
             cd,
@@ -2726,7 +2726,7 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('201 positive test: should create a comment review with credentials', () => {
+        it('201 positive test: should create a comment in review with credentials', () => {
           cd.body = 'New comment review';
           cy.createCommentReviewAPI(Cypress.env('id_review1'),
             Cypress.env(unit4.shortname),
@@ -2740,7 +2740,7 @@ describe('Studio API tests', () => {
       });
 
       describe('79. GET /api/reviews/{review_id}/units/{unit_id}/comments}', () => {
-        it('500 negative test: should not get comment review without review id', () => {
+        it('500 negative test: should not get comment in review without review id', () => {
           cy.getCommentReviewAPI(noId,
             Cypress.env(unit4.shortname),
             Cypress.env(`token_${Cypress.env('username')}`))
@@ -2760,7 +2760,7 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(200);
               expect(resp.body.length).to.equal(0);
               // expect(resp.status).to.equal(500); //should
-              // it returns a empty array and should return an error
+              // it returns an empty array and should return an error
             });
         });
 
@@ -2780,6 +2780,148 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
               expect(resp.body.length).to.equal(3);
+            });
+          cy.pause();
+        });
+      });
+
+      describe('80. PATCH /api/reviews/{review_id}/units/{unit_id}/comments/{id}', () => {
+        let mcd: CommentData;
+        before(() => {
+          mcd = {
+            body: 'New comment from review',
+            userId: parseInt(Cypress.env(`id_${Cypress.env('username')}`), 10)
+          };
+        });
+        it('200/500 negative test: should not update comment review without review id', () => {
+          mcd.body = 'Update comment review created without review id in the path';
+          cy.updateCommentReviewAPI(noId,
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview_neg1'),
+            mcd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); //should
+            });
+        });
+
+        it('200/500 negative test: should ot update comment review without unit id', () => {
+          mcd.body = 'Update comment review created without unit id in the path';
+          cy.updateCommentReviewAPI(Cypress.env('id_review1'),
+            noId,
+            Cypress.env('id_commentReview_neg2'),
+            mcd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); //should
+            });
+          cy.pause();
+        });
+
+        it('404 negative test: should not update comment review without comment id', () => {
+          cy.updateCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            noId,
+            mcd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(404);
+            });
+        });
+
+        it('200/500 negative test: should not update comment review without comment data', () => {
+          // It does not update the database, but it should return an error 400
+          cy.updateCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview_neg2'),
+            noId,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(400); should
+            });
+          cy.pause();
+        });
+
+        it('401 negative test: should not update comment review without credentials', () => {
+          cy.updateCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview'),
+            mcd,
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+
+        it('200 positive test: should update comment review with credentials', () => {
+          mcd.body = 'Update comment from review';
+          cy.updateCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview'),
+            mcd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+        });
+      });
+
+      describe('80A. DELETE /api/reviews/{review_id}/units/{unit_id}/comments/{id}', () => {
+        it('200/500 negative test: should not delete comment review without review id', () => {
+          // The test deletes record in the db
+          cy.deleteCommentReviewAPI(noId,
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview_neg1'),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); //should
+            });
+        });
+
+        it('200/500 negative test: should ot update comment review without unit id', () => {
+          // The test deletes record in the db
+          cy.deleteCommentReviewAPI(Cypress.env('id_review1'),
+            noId,
+            Cypress.env('id_commentReview_neg2'),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); //should
+            });
+        });
+
+        it('200 negative test: should not delete comment review without comment id', () => {
+          // The test deletes record in the db
+          cy.deleteCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            noId,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+            });
+        });
+
+        it('401 negative test: should not delete comment review without credentials', () => {
+          cy.deleteCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview'),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+
+        it('200 positive test: should update comment review with credentials', () => {
+          cy.deleteCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            Cypress.env('id_commentReview'),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
             });
           cy.pause();
         });

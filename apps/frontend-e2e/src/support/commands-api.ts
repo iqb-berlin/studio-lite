@@ -1333,7 +1333,7 @@ Cypress.Commands.add('createCommentReviewAPI', (reviewId:string, unitId: string,
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: `/api/reviews/${reviewId}/units/${cd.unitId}/comments`,
+    url: `/api/reviews/${reviewId}/units/${unitId}/comments`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
@@ -1362,6 +1362,40 @@ Cypress.Commands.add('getCommentReviewAPI', (reviewId:string, unitId: string, to
     failOnStatusCode: false
   });
 });
+
+// 80
+Cypress.Commands.add('updateCommentReviewAPI',
+  (reviewId:string, unitId: string, commentId: string, c:CommentData, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        body: c.body,
+        userId: c.userId
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 80A
+Cypress.Commands.add('deleteCommentReviewAPI',
+  (reviewId:string, unitId: string, commentId: string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'DELETE',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
 
 // 81
 Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:string) => {
