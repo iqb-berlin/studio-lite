@@ -101,6 +101,9 @@ declare namespace Cypress {
     getReviewSchemeAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 77
     createCommentReviewAPI(reviewId:string, unitId: string, c:CommentData, token:string): Chainable<Response>; // 78
     getCommentReviewAPI(reviewId:string, unitId: string, token:string): Chainable<Response>; // 79
+    // eslint-disable-next-line max-len
+    updateCommentReviewAPI(reviewId:string, unitId: string, commentId:string, c:CommentData, token:string): Chainable<Response>; // 80
+    deleteCommentReviewAPI(reviewId:string, unitId: string, commentId:string, token: string): Chainable<Response> // 80A
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 81
     getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 83
