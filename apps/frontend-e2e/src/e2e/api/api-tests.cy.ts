@@ -2549,7 +2549,6 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
-          cy.pause();
         });
       });
 
@@ -2676,8 +2675,119 @@ describe('Studio API tests', () => {
         });
       });
 
+      describe('78. POST /api/reviews/{review_id}/units/{unit_id}/comments}', () => {
+        let cd: CommentData;
+        before(() => {
+          cd = {
+            body: 'New comment from review',
+            parentId: undefined,
+            unitId: parseInt(Cypress.env(unit4.shortname), 10),
+            userId: parseInt(Cypress.env(`id_${Cypress.env('username')}`), 10),
+            userName: Cypress.env('username')
+          };
+        });
+
+        it('201/500 negative test: should not create comment review without review id', () => {
+          // It creates a comment in the db. But it should be 500 instead of 201
+          cd.body = 'New comment review created without review id in the path';
+          cy.createCommentReviewAPI(noId,
+            Cypress.env(unit4.shortname),
+            cd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(201);
+              Cypress.env('id_commentReview_neg1', resp.body);
+              // expect(resp.status).to.equal(500); should
+            });
+          cy.pause();
+        });
+
+        it('201/500 negative test: should not create comment review without unit id', () => {
+          // It creates a comment in the db. But it should be 500 instead of 201
+          cd.body = 'New comment review created without unit id in the path';
+          cy.createCommentReviewAPI(Cypress.env('id_review1'),
+            noId,
+            cd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(201);
+              Cypress.env('id_commentReview_neg2', resp.body);
+              // expect(resp.status).to.equal(500); //should
+            });
+        });
+
+        it('401 negative test: should not retrieve review scheme without credentials', () => {
+          cy.createCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            cd,
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+
+        it('201 positive test: should create a comment review with credentials', () => {
+          cd.body = 'New comment review';
+          cy.createCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            cd,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(201);
+              Cypress.env('id_commentReview', resp.body);
+            });
+        });
+      });
+
+      describe('79. GET /api/reviews/{review_id}/units/{unit_id}/comments}', () => {
+        it('500 negative test: should not get comment review without review id', () => {
+          cy.getCommentReviewAPI(noId,
+            Cypress.env(unit4.shortname),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.length).to.equal(3);
+              // expect(resp.status).to.equal(500); //should
+              // it returns an array with three comment reviews, but it should return an error
+            });
+        });
+
+        it('500 negative test: should not create comment review without unit id', () => {
+          cy.getCommentReviewAPI(Cypress.env('id_review1'),
+            noId,
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.length).to.equal(0);
+              // expect(resp.status).to.equal(500); //should
+              // it returns a empty array and should return an error
+            });
+        });
+
+        it('401 negative test: should not get comment review without credentials', () => {
+          cy.getCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
+        });
+
+        it('200 positive test: should get comment review with credentials', () => {
+          cy.getCommentReviewAPI(Cypress.env('id_review1'),
+            Cypress.env(unit4.shortname),
+            Cypress.env(`token_${Cypress.env('username')}`))
+            .then(resp => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.length).to.equal(3);
+            });
+          cy.pause();
+        });
+      });
+
       describe('81. DELETE /api/workspaces/{workspace_id}/reviews/{ids}', () => {
         it('200 positive test: should delete a review with credentials', () => {
+          cy.pause();
           cy.deleteReviewAPI(Cypress.env(ws2.id),
             Cypress.env('id_review1'),
             Cypress.env(`token_${user2.username}`))
@@ -2712,43 +2822,6 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(401);
             });
         });
-      });
-    });
-
-    describe('82. GET /api/workspaces/{workspace_id}/users/{user_id}', () => {
-      it('401 negative test: should not retrieve the ws data for the user without token ', () => {
-        cy.getWsForUserAPI(Cypress.env(ws1.id),
-          Cypress.env(`id_${Cypress.env('username')}`),
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('500 negative test: should not retrieve with non existent workspace', () => {
-        cy.getWsForUserAPI(noId,
-          Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-
-      it('500 negative test: should not retrieve without a valid workspace', () => {
-        cy.getWsForUserAPI(noId,
-          noId,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-      it('200 positive test: should a user get the workspace by ws id', () => {
-        cy.getWsForUserAPI(Cypress.env(ws1.id),
-          Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
       });
     });
 

@@ -967,20 +967,6 @@ Cypress.Commands.add('getWsCodingBookAPI', (ids: string[], wsId: string, token:s
   });
 });
 
-// 58a
-Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspace-groups/${groupId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 58
 Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1015,6 +1001,20 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
             label: 'Finale'
           }]
       }
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 58a
+Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
     },
     failOnStatusCode: false
   });
@@ -1243,6 +1243,14 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
         id: nu,
         link: review.link,
         name: review.name,
+        settings: {
+          reviewConfig: {
+            canComment: true,
+            showCoding: true,
+            showMetadata: true,
+            showOthersComments: true
+          }
+        },
         units: [review.units[0]]
       },
       failOnStatusCode: false
@@ -1312,6 +1320,41 @@ Cypress.Commands.add('getReviewSchemeAPI', (reviewId:string, unitId:string, toke
   cy.request({
     method: 'GET',
     url: `/api/reviews/${reviewId}/units/${unitId}/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 78
+Cypress.Commands.add('createCommentReviewAPI', (reviewId:string, unitId: string, cd: CommentData, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: `/api/reviews/${reviewId}/units/${cd.unitId}/comments`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      body: cd.body,
+      parentId: cd.parentId,
+      unitId: cd.unitId,
+      userId: cd.userId,
+      userName: cd.userName
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 79
+Cypress.Commands.add('getCommentReviewAPI', (reviewId:string, unitId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}/units/${unitId}/comments`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
