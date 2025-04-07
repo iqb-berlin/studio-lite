@@ -1431,7 +1431,7 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('55. GET /api/workspaces/{workspace_id}/groups', () => {
+    describe('54. GET /api/workspaces/{workspace_id}/groups', () => {
       before(() => {
         cy.createUnitAPI(Cypress.env(ws1.id), unit3, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
@@ -1459,6 +1459,29 @@ describe('Studio API tests', () => {
       });
       it('500 negative test: should not get the groups on a ws without a valid ws id', () => {
         cy.getGroupsOfWsAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+    });
+
+    describe('55. PATCH /api/workspaces/{workspace_id}/group-name', () => {
+      it('200 positive test: should add a group name for a workspace', () => {
+        cy.updateGroupNameOfWsAPI(Cypress.env(ws1.id),
+          'new group for w1',
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+      it('401 negative test: should not add a groups name for a workspace without credentials', () => {
+        cy.updateGroupNameOfWsAPI(Cypress.env(ws1.id), 'no credentials Group', noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+      it('500 negative test: should not add a groups name for a workspace without a valid ws id', () => {
+        cy.updateGroupNameOfWsAPI(noId, 'no valid Ws Group', Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(500);
           });

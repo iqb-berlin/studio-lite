@@ -394,7 +394,7 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
   const authorization = `bearer ${token}`;
   cy.readFile(`../frontend-e2e/src/fixtures/${module}`)
     .then(aspect => {
-      console.log(aspect);
+      // console.log(aspect);
       // Maybe I have converted first the html into
       // [
       //   {
@@ -419,7 +419,8 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
           'app-version': Cypress.env('version'),
           authorization
         },
-        body: [aspect]
+        body: [aspect],
+        failOnStatusCode: false
       });
     });
 });
@@ -645,7 +646,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   });
 });
 
-// 55
+// 54
 Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -654,6 +655,22 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// 55
+Cypress.Commands.add('updateGroupNameOfWsAPI', (wsId: string, groupName: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/group-name`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      groupName: groupName
     },
     failOnStatusCode: false
   });

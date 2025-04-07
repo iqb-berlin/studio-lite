@@ -32,7 +32,6 @@ describe('Admin settings API tests', () => {
       });
   });
   after(() => {
-    cy.pause();
     cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         expect(resp.status).to.equal(200);
@@ -48,6 +47,5 @@ describe('Admin settings API tests', () => {
       .then(resp => {
         expect(resp.status).to.equal(500);
       });
-    cy.pause();
   });
 });

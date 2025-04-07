@@ -199,9 +199,15 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
   });
 }
 
-export function getItem(profile:string, moreThanOne: boolean) {
+export function getItem(profile:string, moreThanOne: boolean, copyItem?: string) {
   cy.get('.add-button > .mdc-button__label').click();
-  if (moreThanOne) {
+  if (copyItem) {
+    cy.pause();
+    // getStructure(profile, moreThanOne);
+    cy.contains('div', 'Inhalt für Item übernehmen').find('svg').click();
+    cy.contains('mat-option', '02').click();
+    cy.clickButton('Bestätigen');
+  } else if (moreThanOne) {
     cy.clickButton('Bestätigen');
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
     cy.get('mat-label:contains("Item ID *")').eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
