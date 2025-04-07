@@ -26,14 +26,6 @@ declare namespace Cypress {
     updateWsMetadataAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 39
 
     // commands-api.ts
-    runAndIgnore(testFn: () => void): void;
-
-    getUsersAPI(): Chainable<Response>;
-    setGroupFromAdminsAPI(userIds: string[], groupId: string, token: string): Chainable<Response>;
-    // commands-verona-api.ts
-    addModuleAPI(module: string);
-    getModuleAPI(module: string);
-    // commands-api
     addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
     loginAPI(username: string, password: string): Chainable<Response>; // 2
     getUserIdAPI(token: string): Chainable<Response>; // 3
@@ -42,7 +34,6 @@ declare namespace Cypress {
     createUserAPI(userData: UserData, token: string): Chainable<Response>; // 6
     getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 7
     updateUserAPI(id:string, user: UserData, credentials: boolean, token: string): Chainable<Response>; // 10
-    // TO DE deleteUserNoIdAPI(id: string, token: string): Chainable<Response>; // 11
     createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 12
     getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 13
     getGroupAPI(token: string): Chainable<Response>; // 14
@@ -53,9 +44,10 @@ declare namespace Cypress {
     moveWsAPI(ws: string, newGroup: string, token: string): Chainable<Response>; // 19
     getWsAPI(wsId: string, token: string): Chainable<Response>; // 20
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 21
-    updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 21
+    updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 21a
     getUsersOfWsAdminAPI(wsId: string, token: string): Chainable<Response>; // 22
     getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 23
+    addModuleAPI(module:string, token:string): Chainable<Response>; // 25
     getModulesAPI(token: string): Chainable<Response>; // 26
     getModuleAPI(module: string, token: string): Chainable<Response>; // 27
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
@@ -78,8 +70,8 @@ declare namespace Cypress {
     getWsMetadataAPI(wsId: string, token:string): Chainable<Response>; // 55e
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 55f
     getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 55g
-    getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 57
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
+    getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58a
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
     getUnitMetadataAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 61
     dropboxWsAPI(wsId: string, wsDe: string, token:string): Chainable<Response>; // 62
@@ -87,7 +79,7 @@ declare namespace Cypress {
     postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 65
     getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 66
     updateCommentTimeAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 67
-    getCommentTimeAPI(wsId: string, unitId: string, token:string): Chainable<Response>;
+    getCommentTimeAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 67a
     updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
     Chainable<Response>; // 68
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 69
@@ -115,7 +107,7 @@ declare namespace Cypress {
     updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 87a
     deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 88
     deleteGroupsAPI(qs: string[], token: string): Chainable<Response>; // 89
-    deleteModulesAPI(modules: string[], token: string): Chainable<Response>; // 91a
+    deleteModulesAPI(modules: string[], token: string): Chainable<Response>; // 90
     deleteUserAPI(id:string, token: string): Chainable<Response>; // 91
     deleteUsersAPI(qs: string[], token: string): Chainable<Response>; // 91
     deleteFirstUserAPI(): Chainable<Response>; // 110
@@ -131,8 +123,6 @@ declare namespace Cypress {
     getPackageAPI(token:string): Chainable<Response>; // 109
     deletePackageAPI(token:string, packageId:string): Chainable<Response>; // 110
 
-    updateWsNameAPI(name: WsData, token: string): Chainable<Response>; // 24a
-    createGroupWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // b5
-    uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6
+    uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6 not used
   }
 }

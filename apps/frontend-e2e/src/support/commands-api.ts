@@ -15,13 +15,7 @@ import {
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
-// import { HttpParams } from '@angular/common/http';
 
-// General
-Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
-  testFn();
-  throw new Error('Skipping test count');
-});
 // 1
 Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {
   cy.request({
@@ -396,24 +390,39 @@ Cypress.Commands.add('getWsByGroupAPI',
   });
 
 // 25
-// Cypress.Commands.add('addModuleAPI', (module:string) => {
-//   const authorization = `bearer ${Cypress.env('token_admin')}`;
-//   cy.readFile(`../frontend-e2e/src/fixtures/${module}`)
-//     .then(aspect => {
-//       const bodyToSend = {
-//         aspect
-//       };
-//       cy.request({
-//         method: 'POST',
-//         url: '/api/admin/verona-modules',
-//         headers: {
-//           'app-version': Cypress.env('version'),
-//           authorization
-//         },
-//         body: bodyToSend
-//       });
-//     });
-// });
+Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.readFile(`../frontend-e2e/src/fixtures/${module}`)
+    .then(aspect => {
+      console.log(aspect);
+      // Maybe I have converted first the html into
+      // [
+      //   {
+      //     "key": "string",
+      //     "sortKey": "string",
+      //     "metadata": {
+      //       "type": "string",
+      //       "id": "string",
+      //       "name": "string",
+      //       "version": "string",
+      //       "specVersion": "string",
+      //       "isStable": true
+      //     },
+      //     "fileSize": 0,
+      //     "fileDateTime": 0
+      //   }
+      // ]
+      cy.request({
+        method: 'POST',
+        url: '/api/admin/verona-modules',
+        headers: {
+          'app-version': Cypress.env('version'),
+          authorization
+        },
+        body: [aspect]
+      });
+    });
+});
 
 // 26
 Cypress.Commands.add('getModulesAPI', (token:string) => {
@@ -679,7 +688,7 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
       definition: {
         type: 'aspect-unit-definition',
         stateVariables: [],
-        enableSectionNumbering: false,
+        enableSectionNumbering: true,
         sectionNumberingPosition: 'left',
         showUnitNavNext: false,
         version: '4.9.0',
@@ -845,6 +854,161 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                 logicalConnectiveOfRules: 'disjunction',
                 visibilityRules: [],
                 ignoreNumbering: false
+              },
+              {
+                elements: [
+                  {
+                    isRelevantForPresentationComplete: true,
+                    id: 'text_1744012056375_1',
+                    alias: 'text_2',
+                    position: {
+                      xPosition: 0,
+                      yPosition: 0,
+                      gridColumn: 1,
+                      gridColumnRange: 1,
+                      gridRow: 1,
+                      gridRowRange: 1,
+                      marginLeft: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginRight: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginTop: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginBottom: {
+                        value: 10,
+                        unit: 'px'
+                      },
+                      zIndex: 0
+                    },
+                    dimensions: {
+                      width: 180,
+                      height: 98,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
+                    type: 'text',
+                    text: 'Wie viele Trabanten hat Neptuni?',
+                    markingMode: 'selection',
+                    markingPanels: [],
+                    highlightableOrange: false,
+                    highlightableTurquoise: false,
+                    highlightableYellow: false,
+                    hasSelectionPopup: false,
+                    columnCount: 1,
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
+                    }
+                  },
+                  {
+                    isRelevantForPresentationComplete: true,
+                    id: 'radio_1744012095680_1',
+                    alias: 'radio_1',
+                    position: {
+                      xPosition: 0,
+                      yPosition: 0,
+                      gridColumn: 1,
+                      gridColumnRange: 1,
+                      gridRow: 2,
+                      gridRowRange: 1,
+                      marginLeft: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginRight: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginTop: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginBottom: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      zIndex: 0
+                    },
+                    dimensions: {
+                      width: 180,
+                      height: 100,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
+                    label: '',
+                    value: null,
+                    required: false,
+                    requiredWarnMessage: 'Eingabe erforderlich',
+                    readOnly: false,
+                    type: 'radio',
+                    options: [
+                      {
+                        text: '1 Trabant'
+                      },
+                      {
+                        text: '0 Trabant'
+                      },
+                      {
+                        text: '16 Trabanten'
+                      }
+                    ],
+                    alignment: 'column',
+                    strikeOtherOptions: false,
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
+                    }
+                  }
+                ],
+                height: 400,
+                backgroundColor: '#ffffff',
+                dynamicPositioning: true,
+                autoColumnSize: true,
+                autoRowSize: true,
+                gridColumnSizes: [
+                  {
+                    value: 1,
+                    unit: 'fr'
+                  }
+                ],
+                gridRowSizes: [
+                  {
+                    value: 1,
+                    unit: 'fr'
+                  }
+                ],
+                visibilityDelay: 0,
+                animatedVisibility: false,
+                enableReHide: false,
+                logicalConnectiveOfRules: 'disjunction',
+                visibilityRules: [],
+                ignoreNumbering: false
               }
             ],
             hasMaxWidth: true,
@@ -881,6 +1045,43 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
           valuePositionLabels: [],
           values: [],
           valuesComplete: false
+        },
+        {
+          alias: 'text_2',
+          format: '',
+          id: 'text_1744012056375_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'no-value',
+          valuePositionLabels: [],
+          values: [],
+          valuesComplete: false
+        },
+        {
+          alias: 'radio_1',
+          format: '',
+          id: 'radio_1744012095680_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'integer',
+          valuePositionLabels: [],
+          values: [
+            {
+              label: '1 Trabant',
+              value: '1'
+            },
+            {
+              label: '0 Trabant',
+              value: '2'
+            },
+            {
+              label: '16 Trabanten',
+              value: '3'
+            }
+          ],
+          valuesComplete: true
         }
       ]
     },
@@ -904,7 +1105,9 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   // eslint-disable-next-line max-len
-  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
+  // const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
+  // eslint-disable-next-line max-len
+  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]},{"id":"text_1","alias":"text_1","label":"","sourceType":"BASE_NO_VALUE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[]},{"id":"text_1744012056375_1","alias":"text_2","label":"","sourceType":"BASE_NO_VALUE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[]},{"id":"radio_1744012095680_1","alias":"radio_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":true,"ruleSets":[{"ruleOperatorAnd":false,"rules":[{"method":"MATCH","parameters":["3"]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL_AUTO","label":"","score":0,"ruleSetOperatorAnd":true,"ruleSets":[],"manualInstruction":""}]}],"version":"3.0"}';
   cy.request({
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,

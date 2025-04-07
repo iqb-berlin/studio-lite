@@ -2699,7 +2699,6 @@ describe('Studio API tests', () => {
               Cypress.env('id_commentReview_neg1', resp.body);
               // expect(resp.status).to.equal(500); should
             });
-          cy.pause();
         });
 
         it('201/500 negative test: should not create comment in review without unit id', () => {
@@ -2781,7 +2780,6 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(200);
               expect(resp.body.length).to.equal(3);
             });
-          cy.pause();
         });
       });
 
@@ -2817,7 +2815,6 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(200);
               // expect(resp.status).to.equal(500); //should
             });
-          cy.pause();
         });
 
         it('404 negative test: should not update comment review without comment id', () => {
@@ -2842,7 +2839,6 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(200);
               // expect(resp.status).to.equal(400); should
             });
-          cy.pause();
         });
 
         it('401 negative test: should not update comment review without credentials', () => {
@@ -2866,6 +2862,7 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
+          cy.pause();
         });
       });
 
@@ -2923,13 +2920,11 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
       });
 
       describe('81. DELETE /api/workspaces/{workspace_id}/reviews/{ids}', () => {
         it('200 positive test: should delete a review with credentials', () => {
-          cy.pause();
           cy.deleteReviewAPI(Cypress.env(ws2.id),
             Cypress.env('id_review1'),
             Cypress.env(`token_${user2.username}`))
