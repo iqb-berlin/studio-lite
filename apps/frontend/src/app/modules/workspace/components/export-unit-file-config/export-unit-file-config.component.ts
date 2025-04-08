@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatCard } from '@angular/material/card';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
 
@@ -28,7 +28,7 @@ export class ExportUnitFileConfigComponent implements OnInit {
   constructor(
     public workspaceService: WorkspaceService,
     private moduleService: ModuleService,
-    private backendService: BackendService
+    private backendService: WorkspaceBackendService
   ) {}
 
   ngOnInit(): void {

@@ -31,7 +31,7 @@ import { ProfileFormComponent } from '../../../metadata/components/profile-form/
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { State } from '../../../admin/models/state.type';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../shared/services/module.service';
@@ -77,7 +77,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
-    public backendService: BackendService,
+    public backendService: WorkspaceBackendService,
     public router: Router,
     public route: ActivatedRoute,
     public snackBar: MatSnackBar,

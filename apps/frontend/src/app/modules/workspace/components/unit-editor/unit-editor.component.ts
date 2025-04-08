@@ -7,7 +7,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ModuleService } from '../../../shared/services/module.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
@@ -34,7 +34,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   message = '';
 
   constructor(
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
     private moduleService: ModuleService,

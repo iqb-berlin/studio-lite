@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
@@ -32,7 +32,7 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
   message = '';
 
   constructor(
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
     private moduleService: ModuleService,

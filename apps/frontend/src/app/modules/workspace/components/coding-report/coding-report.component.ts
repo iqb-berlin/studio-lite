@@ -16,7 +16,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 
 @Component({
   selector: 'studio-lite-coding-report',
@@ -54,7 +54,7 @@ export class CodingReportComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService,
-    public backendService: BackendService
+    public backendService: WorkspaceBackendService
   ) {}
 
   ngOnInit(): void {

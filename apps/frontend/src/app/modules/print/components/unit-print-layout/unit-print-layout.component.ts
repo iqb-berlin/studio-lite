@@ -9,7 +9,7 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 
 import { ModuleService } from '../../../shared/services/module.service';
-import { BackendService } from '../../../workspace/services/backend.service';
+import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { PrintOption } from '../../models/print-options.interface';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
@@ -40,7 +40,7 @@ export class UnitPrintLayoutComponent implements OnInit {
 
   constructor(
     private appService: AppService,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private moduleService: ModuleService
   ) {}
 

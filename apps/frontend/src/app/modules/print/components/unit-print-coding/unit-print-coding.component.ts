@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { BackendService } from '../../../workspace/services/backend.service';
+import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 
 @Component({
@@ -16,7 +16,7 @@ export class UnitPrintCodingComponent implements OnInit {
   @Input() workspaceId!: number;
   codings!: VariableCodingData[];
 
-  constructor(private backendService: BackendService) {
+  constructor(private backendService: WorkspaceBackendService) {
   }
 
   ngOnInit(): void {

@@ -2,7 +2,7 @@ import { Directive, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../services/workspace.service';
-import { BackendService } from '../services/backend.service';
+import { WorkspaceBackendService } from '../services/workspace-backend.service';
 import { RoutingHelperService } from '../services/routing-helper.service';
 
 @Directive()
@@ -14,7 +14,7 @@ export abstract class SelectUnitDirective {
   abstract router: Router;
   abstract route: ActivatedRoute;
 
-  abstract backendService: BackendService;
+  abstract backendService: WorkspaceBackendService;
 
   secondaryRoutingOutlet: string = 'secondary';
   routingOutlet: string = 'primary';
