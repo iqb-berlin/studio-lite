@@ -32,11 +32,6 @@ describe('UnitInfoComponent', () => {
     @Input() lastChangedSchemeUser!: string | undefined | null;
   }
 
-  @Component({ selector: 'studio-lite-unit-info-comments', template: '', standalone: false })
-  class MockUnitInfoComments {
-    @Input() unitId!: number;
-  }
-
   @Component({ selector: 'studio-lite-unit-info-coding', template: '', standalone: false })
   class MockUnitInfoCoding {
     @Input() unitId!: number;
@@ -46,7 +41,6 @@ describe('UnitInfoComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [
         MockUnitMetaDataComponent,
-        MockUnitInfoComments,
         MockUnitInfoCoding
       ],
       imports: [

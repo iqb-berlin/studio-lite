@@ -45,10 +45,13 @@
         [unitId]="id">
       </studio-lite-unit-info-coding>
     }
+
     @if (reviewService.reviewConfig.showOthersComments && properties) {
-      <studio-lite-unit-info-comments
-        [unitId]="id" [allComments]="reviewService.allComments">
-      </studio-lite-unit-info-comments>
+      <studio-lite-unit-print-comments
+        [unitId]="properties.id"
+        [reviewId]="reviewService.reviewId"
+        [comments]="reviewService.allComments">
+      </studio-lite-unit-print-comments>
     }
   </div>
 </div>

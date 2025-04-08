@@ -7,12 +7,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { of } from 'rxjs';
 import { ReviewService } from '../../services/review.service';
-import { UnitInfoCommentsComponent } from '../unit-info-comments/unit-info-comments.component';
 import { UnitInfoCodingComponent } from '../unit-info-coding/unit-info-coding.component';
 import { UnitPropertiesComponent } from '../../../shared/components/unit-properties/unit-properties.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { PrintMetadataComponent } from '../../../print/components/print-metadata/print-metadata.component';
+import {
+  UnitPrintCommentsComponent
+} from '../../../print/components/unit-print-comments/unit-print-comments.component';
 
 const PanelWidthOffset = 40;
 
@@ -21,7 +24,7 @@ const PanelWidthOffset = 40;
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, UnitInfoCommentsComponent, TranslateModule, PrintMetadataComponent]
+  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitInfoCodingComponent, TranslateModule, PrintMetadataComponent, UnitPrintCommentsComponent]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;
@@ -87,4 +90,6 @@ export class UnitInfoComponent implements AfterViewInit, OnDestroy {
       this.elementRef.nativeElement.onmouseup = null;
     }
   }
+
+  protected readonly of = of;
 }
