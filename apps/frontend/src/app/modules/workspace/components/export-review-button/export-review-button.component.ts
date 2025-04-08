@@ -9,7 +9,7 @@ import { MatButton } from '@angular/material/button';
 import { ExportUnitComponent } from '../export-unit/export-unit.component';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
@@ -26,7 +26,7 @@ export class ExportReviewButtonComponent {
   constructor(
     private dialog: MatDialog,
     public workspaceService: WorkspaceService,
-    public backendService: BackendService,
+    public backendService: WorkspaceBackendService,
     private appService: AppService) {}
 
   exportReview(): void {

@@ -12,7 +12,7 @@ import { Comment } from '../../comments/models/comment.interface';
 @Injectable({
   providedIn: 'root'
 })
-export class BackendService {
+export class ReviewBackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient
@@ -43,7 +43,7 @@ export class BackendService {
       );
   }
 
-  getUnitCoding(reviewId: number, unitId: number): Observable<UnitSchemeDto | null> {
+  getUnitScheme(reviewId: number, unitId: number): Observable<UnitSchemeDto | null> {
     return this.http
       .get<UnitSchemeDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/scheme`)
       .pipe(

@@ -16,7 +16,7 @@ import { MatBadge } from '@angular/material/badge';
 import {
   MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
@@ -49,7 +49,7 @@ export class GroupManageComponent implements OnInit {
   constructor(
     public workspaceService: WorkspaceService,
     public appService: AppService,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar
   ) {}
 

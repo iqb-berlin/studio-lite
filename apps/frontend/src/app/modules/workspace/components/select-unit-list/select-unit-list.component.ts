@@ -13,7 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 import { HttpParams } from '@angular/common/http';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
@@ -135,7 +135,7 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
 
   @ViewChild(MatSort) sort = new MatSort();
 
-  constructor(private backendService: BackendService) {
+  constructor(private backendService: WorkspaceBackendService) {
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed
       .subscribe(() => this.selectionChanged.emit(this.selectedUnitIds));
   }

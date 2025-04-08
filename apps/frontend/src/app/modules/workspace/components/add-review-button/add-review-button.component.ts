@@ -7,7 +7,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
@@ -26,7 +26,7 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
 
   constructor(
     private inputTextDialog: MatDialog,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar,
     protected translateService: TranslateService,
     protected confirmDiscardChangesDialog: MatDialog

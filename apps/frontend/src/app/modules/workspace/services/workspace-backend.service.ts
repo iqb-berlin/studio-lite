@@ -18,7 +18,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class BackendService {
+export class WorkspaceBackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient

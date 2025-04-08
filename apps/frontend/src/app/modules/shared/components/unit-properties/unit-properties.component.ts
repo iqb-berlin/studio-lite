@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { BackendService } from '../../../workspace/services/backend.service';
+import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { State } from '../../../admin/models/state.type';
 
 @Component({
@@ -34,7 +34,7 @@ export class UnitPropertiesComponent implements OnChanges {
   states: State[] = [];
   stateLabel: string = '';
 
-  constructor(private backendService: BackendService) {
+  constructor(private backendService: WorkspaceBackendService) {
   }
 
   ngOnChanges(changes:SimpleChanges): void {

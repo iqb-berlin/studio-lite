@@ -27,7 +27,7 @@ import {
   EditWorkspaceSettingsComponent
 } from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
 import { ShowMetadataComponent } from '../show-metadata/show-metadata.component';
@@ -54,7 +54,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
     public route: ActivatedRoute,
     public snackBar: MatSnackBar,
     public selectUnitDialog: MatDialog,
-    public backendService: BackendService,
+    public backendService: WorkspaceBackendService,
     public uploadReportDialog: MatDialog,
     public translateService: TranslateService,
     private appService: AppService,

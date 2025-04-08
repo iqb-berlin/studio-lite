@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { TranslateModule } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from './save-or-discard.component';
 import { environment } from '../../../../../environments/environment';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 
 describe('SaveOrDiscardComponent', () => {
   let component: SaveOrDiscardComponent;
@@ -21,7 +21,7 @@ describe('SaveOrDiscardComponent', () => {
           useValue: {}
         },
         {
-          provide: BackendService,
+          provide: WorkspaceBackendService,
           useValue: {}
         },
         {

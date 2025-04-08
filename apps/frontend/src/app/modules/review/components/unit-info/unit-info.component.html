@@ -36,16 +36,24 @@
         [lastChangedMetadataUser]="properties ? properties.lastChangedMetadataUser : null"
         [lastChangedSchemeUser]="properties ? properties.lastChangedSchemeUser : null">
       </studio-lite-unit-properties>
+      <studio-lite-print-metadata
+        [metadata] = "properties && properties.metadata || null">
+      </studio-lite-print-metadata>
     }
+
     @if (reviewService.reviewConfig.showCoding && properties) {
-      <studio-lite-unit-info-coding
-        [unitId]="id">
-      </studio-lite-unit-info-coding>
+      <studio-lite-unit-print-coding
+        [unitId]="properties.id"
+        [reviewId]="reviewService.reviewId">
+      </studio-lite-unit-print-coding>
     }
+
     @if (reviewService.reviewConfig.showOthersComments && properties) {
-      <studio-lite-unit-info-comments
-        [unitId]="id" [allComments]="reviewService.allComments">
-      </studio-lite-unit-info-comments>
+      <studio-lite-unit-print-comments
+        [unitId]="properties.id"
+        [reviewId]="reviewService.reviewId"
+        [comments]="reviewService.allComments">
+      </studio-lite-unit-print-comments>
     }
   </div>
 </div>

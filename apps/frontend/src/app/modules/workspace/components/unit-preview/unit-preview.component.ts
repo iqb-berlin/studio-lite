@@ -16,7 +16,7 @@ import { Response } from '@iqbspecs/response/response.interface';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
@@ -56,7 +56,7 @@ export class UnitPreviewComponent
   constructor(
     private appService: AppService,
     private snackBar: MatSnackBar,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
     private moduleService: ModuleService,
     public previewService: PreviewService,

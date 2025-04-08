@@ -13,7 +13,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { KeyValuePipe } from '@angular/common';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { UnitTableComponent } from '../unit-table/unit-table.component';
 import { UnitGroupComponent } from '../unit-group/unit-group.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
@@ -60,7 +60,7 @@ export class UnitSelectionComponent extends SelectUnitDirective implements OnIni
     public workspaceService: WorkspaceService,
     public router: Router,
     public route: ActivatedRoute,
-    public backendService: BackendService,
+    public backendService: WorkspaceBackendService,
     private translateService: TranslateService
   ) {
     super();

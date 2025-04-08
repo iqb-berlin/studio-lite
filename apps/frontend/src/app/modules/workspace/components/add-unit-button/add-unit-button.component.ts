@@ -14,7 +14,7 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
 import { WorkspaceService } from '../../services/workspace.service';
 import { NewUnitComponent } from '../new-unit/new-unit.component';
 import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import {
   RequestMessageComponent
@@ -38,7 +38,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     public router: Router,
     public route: ActivatedRoute,
     private appService: AppService,
-    public backendService: BackendService,
+    public backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar,
     private appBackendService: AppBackendService,
     private selectUnitDialog: MatDialog,
