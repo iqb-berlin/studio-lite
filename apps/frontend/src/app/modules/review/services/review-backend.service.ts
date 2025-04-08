@@ -12,7 +12,7 @@ import { Comment } from '../../comments/models/comment.interface';
 @Injectable({
   providedIn: 'root'
 })
-export class BackendService {
+export class ReviewBackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient

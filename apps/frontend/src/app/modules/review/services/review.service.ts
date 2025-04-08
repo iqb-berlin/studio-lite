@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import { ModuleService } from '../../shared/services/module.service';
 import { UnitData } from '../models/unit-data.class';
-import { BackendService } from './backend.service';
+import { ReviewBackendService } from './review-backend.service';
 import { AppService } from '../../../services/app.service';
 import { Comment } from '../../comments/models/comment.interface';
 
@@ -36,7 +36,7 @@ export class ReviewService {
   constructor(
     private translateService: TranslateService,
     private moduleService: ModuleService,
-    private backendService: BackendService,
+    private backendService: ReviewBackendService,
     public appService: AppService,
     private router: Router
   ) {}

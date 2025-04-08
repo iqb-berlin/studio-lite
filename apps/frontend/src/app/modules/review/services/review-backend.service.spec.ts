@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { BackendService } from './backend.service';
+import { ReviewBackendService } from './review-backend.service';
 
-describe('BackendService', () => {
-  let service: BackendService;
+describe('ReviewBackendService', () => {
+  let service: ReviewBackendService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -15,7 +15,7 @@ describe('BackendService', () => {
           useValue: environment.backendUrl
         }]
     });
-    service = TestBed.inject(BackendService);
+    service = TestBed.inject(ReviewBackendService);
   });
 
   it('should be created', () => {

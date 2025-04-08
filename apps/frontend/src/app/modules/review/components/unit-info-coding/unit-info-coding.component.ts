@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { BackendService } from '../../services/backend.service';
+import { ReviewBackendService } from '../../services/review-backend.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
 
@@ -29,7 +29,7 @@ export class UnitInfoCodingComponent {
   allVariables: VariableCodingData[] = [];
 
   constructor(
-    private backendService: BackendService,
+    private backendService: ReviewBackendService,
     public reviewService: ReviewService
   ) {
   }

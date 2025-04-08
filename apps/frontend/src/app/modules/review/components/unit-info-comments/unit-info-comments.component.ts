@@ -4,7 +4,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
-import { BackendService } from '../../services/backend.service';
+import { ReviewBackendService } from '../../services/review-backend.service';
 import { ReviewService } from '../../services/review.service';
 import { Comment } from '../../../comments/models/comment.interface';
 import { UnitInfoLoaderComponent } from '../unit-info-loader/unit-info-loader.component';
@@ -32,7 +32,7 @@ export class UnitInfoCommentsComponent {
   }
 
   constructor(
-    private backendService: BackendService,
+    private backendService: ReviewBackendService,
     public reviewService: ReviewService
   ) {}
 
