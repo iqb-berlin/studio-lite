@@ -14,7 +14,7 @@ describe('UnitInfoComponent', () => {
   let fixture: ComponentFixture<UnitInfoComponent>;
 
   @Component({ selector: 'studio-lite-unit-properties', template: '', standalone: false })
-  class MockUnitMetaDataComponent {
+  class MockUnitPropertiesComponent {
     @Input() name!: string | undefined | null;
     @Input() key!: string | undefined | null;
     @Input() description!: string | undefined | null;
@@ -35,7 +35,7 @@ describe('UnitInfoComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        MockUnitMetaDataComponent
+        MockUnitPropertiesComponent
       ],
       imports: [
         TranslateModule.forRoot(),
