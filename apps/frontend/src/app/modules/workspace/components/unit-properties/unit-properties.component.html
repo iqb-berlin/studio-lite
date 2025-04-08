@@ -44,7 +44,7 @@
                         [style.border-bottom-color]="selectedStateColor"
                         [placeholder]="'workspace.unit-state' | translate">
                         <mat-option [value]="0"></mat-option>
-                        @for (state of this.workspaceService.workspaceSettings.states; track state) {
+                        @for (state of this.workspaceService.workspaceSettings.states; track state.id) {
                           <mat-option class="state-option"
                                       [value]="state.id.toString()">
                             <div class="fx-row-center-center">

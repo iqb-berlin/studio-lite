@@ -1,4 +1,4 @@
-@for (issue of issues; track issue) {
+@for (issue of issues; track issue.link) {
   <a
     [class]="'issue-item ' + layout"
     [routerLink]="issue.link"
