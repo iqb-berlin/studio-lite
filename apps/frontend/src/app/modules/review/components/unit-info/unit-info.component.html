@@ -40,10 +40,12 @@
         [metadata] = "properties && properties.metadata || null">
       </studio-lite-print-metadata>
     }
+
     @if (reviewService.reviewConfig.showCoding && properties) {
-      <studio-lite-unit-info-coding
-        [unitId]="id">
-      </studio-lite-unit-info-coding>
+      <studio-lite-unit-print-coding
+        [unitId]="properties.id"
+        [reviewId]="reviewService.reviewId">
+      </studio-lite-unit-print-coding>
     }
 
     @if (reviewService.reviewConfig.showOthersComments && properties) {

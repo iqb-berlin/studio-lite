@@ -32,16 +32,10 @@ describe('UnitInfoComponent', () => {
     @Input() lastChangedSchemeUser!: string | undefined | null;
   }
 
-  @Component({ selector: 'studio-lite-unit-info-coding', template: '', standalone: false })
-  class MockUnitInfoCoding {
-    @Input() unitId!: number;
-  }
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        MockUnitMetaDataComponent,
-        MockUnitInfoCoding
+        MockUnitMetaDataComponent
       ],
       imports: [
         TranslateModule.forRoot(),

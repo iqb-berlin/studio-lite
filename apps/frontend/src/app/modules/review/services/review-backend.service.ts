@@ -43,7 +43,7 @@ export class ReviewBackendService {
       );
   }
 
-  getUnitCoding(reviewId: number, unitId: number): Observable<UnitSchemeDto | null> {
+  getUnitScheme(reviewId: number, unitId: number): Observable<UnitSchemeDto | null> {
     return this.http
       .get<UnitSchemeDto>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/scheme`)
       .pipe(
