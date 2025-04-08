@@ -22,7 +22,7 @@
 </div>
 @if (!isTextOnlyView) {
   <div>
-    @for (item of items; track item; let i = $index) {
+    @for (item of items; let i = $index; track i;) {
       <div>
         <div class="fx-row-space-between-start">
           <studio-lite-item

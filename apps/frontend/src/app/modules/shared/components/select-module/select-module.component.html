@@ -25,7 +25,7 @@
         <mat-select
           [placeholder]="'modules.'+moduleType+'-name' | translate"
           formControlName="moduleSelector">
-          @for (m of moduleList; track m) {
+          @for (m of moduleList; track m.key) {
             <mat-option
               [value]="m.key">
               {{m.metadata.name}} {{m.metadata.version}}

@@ -100,10 +100,16 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
       this.addItem({
         ...item,
         id: undefined,
+        uuid: undefined,
+        order: undefined,
+        position: undefined,
+        locked: undefined,
         variableId: undefined,
         variableReadOnlyId: undefined,
         weighting: undefined,
-        description: undefined
+        description: undefined,
+        createdAt: undefined,
+        changedAt: undefined
       });
     }
   }
