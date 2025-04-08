@@ -36,6 +36,9 @@
         [lastChangedMetadataUser]="properties ? properties.lastChangedMetadataUser : null"
         [lastChangedSchemeUser]="properties ? properties.lastChangedSchemeUser : null">
       </studio-lite-unit-properties>
+      <studio-lite-print-metadata
+        [metadata] = "properties && properties.metadata || null">
+      </studio-lite-print-metadata>
     }
     @if (reviewService.reviewConfig.showCoding && properties) {
       <studio-lite-unit-info-coding
