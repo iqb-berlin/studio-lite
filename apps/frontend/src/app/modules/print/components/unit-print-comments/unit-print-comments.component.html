@@ -4,7 +4,7 @@
 @if (comments && comments.length) {
   <h3>{{'print.comments' | translate}}</h3>
 }
-@for (comment of comments; track comment; let first = $first) {
+@for (comment of comments; track comment.id; let first = $first) {
   <div class="comment">
     @if (!comment.parentId && !first) {
       <hr>
