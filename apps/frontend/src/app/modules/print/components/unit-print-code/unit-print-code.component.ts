@@ -1,4 +1,6 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import {
+  Component, Input, OnChanges, SimpleChanges
+} from '@angular/core';
 import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
 import { CodeAsText, ToTextFactory } from '@iqb/responses';
@@ -17,7 +19,7 @@ interface CodeInfo {
   styleUrls: ['./unit-print-code.component.scss'],
   imports: [TranslateModule]
 })
-export class UnitPrintCodeComponent {
+export class UnitPrintCodeComponent implements OnChanges {
   @Input() codeData!: CodeData;
 
   codeAsText!: CodeInfo;
@@ -37,7 +39,7 @@ export class UnitPrintCodeComponent {
 
     // Map the properties into the CodeInfo structure
     return {
-      id: Number(`${code.id}`),
+      id: code.id,
       label: codeAsText.label,
       description: rulesDescription,
       manualInstruction: code.manualInstruction,
