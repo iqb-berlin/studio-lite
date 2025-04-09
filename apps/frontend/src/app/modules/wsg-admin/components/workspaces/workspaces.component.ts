@@ -19,7 +19,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
-import { BackendService as WorkspaceBackendService } from '../../../workspace/services/backend.service';
+import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';

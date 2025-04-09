@@ -12,7 +12,7 @@ import { ReviewService } from '../../services/review.service';
 import { UnitPage } from '../../models/unit-page.interface';
 import { PageData } from '../../../workspace/models/page-data.interface';
 import { UnitData } from '../../models/unit-data.class';
-import { BackendService } from '../../services/backend.service';
+import { ReviewBackendService } from '../../services/review-backend.service';
 import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 
@@ -46,7 +46,7 @@ export class UnitsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
-    private backendService: BackendService,
+    private backendService: ReviewBackendService,
     public appService: AppService,
     private moduleService: ModuleService,
     public reviewService: ReviewService

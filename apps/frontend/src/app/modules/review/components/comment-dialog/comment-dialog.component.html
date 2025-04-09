@@ -1,6 +1,12 @@
 <div class="fx-column-start-stretch full-height" >
   <div class="fx-row-space-between-center">
-    <h1 mat-dialog-title>{{'review.comment' | translate}}</h1>
+    <div mat-dialog-title
+        cdkDrag
+        cdkDragRootElement=".cdk-overlay-pane"
+        cdkDragHandle
+        class="dialog-title">
+      {{'review.comment' | translate}}
+    </div>
     @if (!this.appService.authData.userId) {
       <mat-form-field>
         <mat-label>{{'review.comment-name' | translate}}</mat-label>
@@ -25,13 +31,12 @@
       </studio-lite-comments>
     }
   </mat-dialog-content>
-  <div class="fx-row-space-around-center">
-    <mat-dialog-actions align="end">
-      <button mat-raised-button
-        [mat-dialog-close]="false">
-        {{'dialogs.close' | translate }}
-      </button>
-    </mat-dialog-actions>
-  </div>
+  <mat-dialog-actions align="end">
+    <button mat-raised-button
+            color="primary"
+            [mat-dialog-close]="false">
+      {{'dialogs.close' | translate }}
+    </button>
+  </mat-dialog-actions>
 
 </div>

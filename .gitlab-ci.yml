@@ -39,6 +39,7 @@ variables:
   DOCKER_SERVICE_MTU: 1442
   DOCKER_TLS_CERTDIR: ''
   TRIVY_IMAGE: ${DOCKER_HUB_PROXY}aquasec/trivy:latest
+  TRAEFIK_BASE_IMAGE: ${DOCKER_HUB_PROXY}traefik:v2.11
 
 include:
   - local: ".gitlab-ci/*.gitlab-ci.yml"

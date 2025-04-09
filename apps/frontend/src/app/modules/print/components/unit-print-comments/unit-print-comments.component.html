@@ -1,26 +1,24 @@
-@if (comments | async; as unitComments) {
-  @if (unitComments && !unitComments.length) {
-    <h3>{{'print.no-comments' | translate}}</h3>
-  }
-  @if (unitComments && unitComments.length) {
-    <h3>{{'print.comments' | translate}}</h3>
-  }
-  @for (comment of unitComments; track comment; let first = $first) {
-    <div
-      class="comment">
-      @if (!comment.parentId && !first) {
-        <hr>
-        }
-        <h4 class="comment-user">
-          @if (comment.parentId) {
-            <mat-icon>subdirectory_arrow_right</mat-icon>
-          }
-          {{comment.userName}}
-          <span class="comment-date">{{comment.changedAt | date : 'dd.MM.yyyy HH:mm' }}</span>
-        </h4>
-        <div [innerHTML]="comment.body"
-          [class.reply]="comment.parentId">
-        </div>
-      </div>
+@if (comments && !comments.length) {
+  <h3>{{'print.no-comments' | translate}}</h3>
+}
+@if (comments && comments.length) {
+  <h3>{{'print.comments' | translate}}</h3>
+}
+@for (comment of comments; track comment.id; let first = $first) {
+  <div class="comment">
+    @if (!comment.parentId && !first) {
+      <hr>
     }
-  }
+    <h4 class="comment-user">
+      @if (comment.parentId) {
+        <mat-icon>subdirectory_arrow_right</mat-icon>
+      }
+      {{comment.userName}}
+      <span class="comment-date">{{comment.changedAt | date : 'dd.MM.yyyy HH:mm' }}</span>
+    </h4>
+    <div [innerHTML]="comment.body"
+      [class.reply]="comment.parentId">
+    </div>
+  </div>
+}
+

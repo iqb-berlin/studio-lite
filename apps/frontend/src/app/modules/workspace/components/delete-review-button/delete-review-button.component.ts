@@ -8,7 +8,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
@@ -25,7 +25,7 @@ export class DeleteReviewButtonComponent {
 
   constructor(
     public appService: AppService,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar,
     protected translateService: TranslateService,
     private confirmDiscardChangesDialog: MatDialog

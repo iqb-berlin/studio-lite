@@ -11,10 +11,7 @@
     <table class="codings">
       <tr>
         <td class="left-cell">
-          <h4>{{coding.alias || coding.id}}</h4>
-        </td>
-        <td>
-          {{coding.sourceType === 'BASE' ? 'B' : 'A'}}
+          <h4>{{coding.alias || coding.id}} {{coding.sourceType === 'BASE' ? 'Basisvariable' : 'Abgeleitete Variable'}}</h4>
         </td>
       </tr>
       @if (coding.label) {

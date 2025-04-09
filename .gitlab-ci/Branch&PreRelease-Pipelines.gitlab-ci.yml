@@ -483,39 +483,43 @@ test-app:
   script:
     - npx nx affected --base=HEAD~1 --target=test --parallel=2
 
-test-app-e2e:
-  stage: test-e2e
-  interruptible: true
-  allow_failure: true
-  extends: .distributed
-  rules:
-    - !reference [ .develop_pr_rules, rules ]
-  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
-  services:
-      - name: $DOCKER_SERVICE
-        entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
-        alias: docker
-  before_script:
-    - docker network create app-net
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
-    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
-    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
-    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
-    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
-    - mv .env.dev.template .env.dev
-    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
-    - npx cypress cache path # show where the Cypress test runner binaries are cached
-    - npx cypress cache list # show all installed versions of Cypress binary
-    - npx cypress verify
-    - export POSTGRES_HOST=docker
-  script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-#    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-#      do sleep 1;
-#      done
-    - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
-  after_script:
-    - docker logout $REGISTRY
+#test-app-e2e:
+#  stage: test-e2e
+#  interruptible: true
+#  allow_failure: true
+#  extends: .distributed
+#  rules:
+#    - !reference [ .develop_pr_rules, rules ]
+#  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
+#  services:
+#      - name: $DOCKER_SERVICE
+#        entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+#        alias: docker
+#  before_script:
+#    - docker network create app-net
+#    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+#    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+#    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+#    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+#    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+#    - mv .env.dev.template .env.dev
+#    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
+#    - npx cypress cache path # show where the Cypress test runner binaries are cached
+#    - npx cypress cache list # show all installed versions of Cypress binary
+#    - npx cypress verify
+#    - export POSTGRES_HOST=docker
+#  script:
+#    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
+##    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
+##      do sleep 1;
+##      done
+#    - npx nx e2e frontend-e2e --prod --browser chrome || ( pkill npx && exit 1 )
+#  after_script:
+#    - docker logout $REGISTRY
+#  artifacts:
+#    paths:
+#      - dist/cypress/apps/*
+#    expire_in: 60 minutes
 
 test-app-e2e-api:
   stage: test-e2e
@@ -523,7 +527,7 @@ test-app-e2e-api:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .develop_pr_manual_rules, rules ]
+    - !reference [ .develop_pr_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
       - name: $DOCKER_SERVICE
@@ -554,6 +558,10 @@ test-app-e2e-api:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-chrome:
   stage: test-e2e
@@ -561,7 +569,7 @@ test-app-e2e-ui-chrome:
   allow_failure: true
   extends: .distributed
   rules:
-    - !reference [ .develop_pr_manual_rules, rules ]
+    - !reference [ .develop_pr_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
   services:
     - name: $DOCKER_SERVICE
@@ -592,6 +600,10 @@ test-app-e2e-ui-chrome:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-chrome-mobile:
   stage: test-e2e
@@ -631,6 +643,10 @@ test-app-e2e-ui-chrome-mobile:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-firefox:
   stage: test-e2e
@@ -669,6 +685,10 @@ test-app-e2e-ui-firefox:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-firefox-mobile:
   stage: test-e2e
@@ -708,6 +728,10 @@ test-app-e2e-ui-firefox-mobile:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-edge:
   stage: test-e2e
@@ -746,6 +770,10 @@ test-app-e2e-ui-edge:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 test-app-e2e-ui-edge-mobile:
   stage: test-e2e
@@ -785,6 +813,10 @@ test-app-e2e-ui-edge-mobile:
       ( pkill npx && exit 1 )
   after_script:
     - docker logout $REGISTRY
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
 
 lint-app:
   stage: lint
@@ -1208,6 +1240,65 @@ scan-develop-commit-frontend-image:
     when: always
     reports:
       container_scanning: gl-container-scanning-report.json
+
+scan-develop-commit-traefik-image:
+  stage: scan-images
+  allow_failure: true
+  rules:
+    - !reference [ .develop_commit_rules, rules ]
+  needs:
+    - build-develop-commit-frontend-image
+  image:
+    name: $TRIVY_IMAGE
+    entrypoint: [ "" ]
+  variables:
+    # No need to clone the repo, we exclusively work on artifacts.  See
+    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "$TRAEFIK_BASE_IMAGE"
+  script:
+    - trivy --version
+    # cache cleanup is needed when scanning images with the same tags, it does not remove the database
+    - trivy clean --scan-cache
+    # update vulnerabilities db
+    - trivy image --download-db-only --no-progress
+    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+          --format template
+          --template "@/contrib/gitlab.tpl"
+          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+        "$FULL_IMAGE_NAME"
+    # Prints full report
+    - trivy image
+          --exit-code 0
+          --timeout 30m
+          --scanners vuln
+        "$FULL_IMAGE_NAME"
+    # Fail on critical vulnerabilities
+    - trivy image
+          --exit-code 1
+          --timeout 30m
+          --scanners vuln
+          --ignore-unfixed
+          --severity CRITICAL
+        "$FULL_IMAGE_NAME"
+  cache:
+    paths:
+      - .trivycache/
+  # Enables https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
+
 
 build-pre-release:
   stage: build-images

@@ -4,7 +4,7 @@ import {
 import { Subject, takeUntil } from 'rxjs';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../../workspace/services/backend.service';
+import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-store';
 
@@ -30,7 +30,7 @@ export class UnitPrintPlayerComponent implements AfterViewInit {
 
   constructor(
     private appService: AppService,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private workspaceService: WorkspaceService,
     private moduleService: ModuleService
   ) {

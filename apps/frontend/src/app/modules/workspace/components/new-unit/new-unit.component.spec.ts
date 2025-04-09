@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AppService } from '../../../../services/app.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { NewUnitComponent } from './new-unit.component';
 
@@ -41,7 +41,7 @@ describe('NewUnitComponent', () => {
           }
         },
         {
-          provide: BackendService,
+          provide: WorkspaceBackendService,
           useValue: {}
         },
         {

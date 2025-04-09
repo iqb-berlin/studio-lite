@@ -9,7 +9,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { BackendService } from './backend.service';
+import { WorkspaceBackendService } from './workspace-backend.service';
 import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
@@ -52,7 +52,7 @@ export class WorkspaceService {
   @Output() unitPropertiesChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private appService: AppService
   ) {
     this.workspaceSettings = {

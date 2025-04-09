@@ -16,7 +16,7 @@ import {
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatButton } from '@angular/material/button';
 
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../../services/app.service';
 import { CheckForChangesDirective } from '../../directives/check-for-changes.directive';
@@ -49,7 +49,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   constructor(
     public workspaceService: WorkspaceService,
     public appService: AppService,
-    private backendService: BackendService,
+    private backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar,
     protected translateService: TranslateService,
     protected confirmDiscardChangesDialog: MatDialog
