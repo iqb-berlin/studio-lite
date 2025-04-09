@@ -61,9 +61,6 @@ export class CodingReportComponent implements OnInit {
     this.loadCodingReport();
   }
 
-  /**
-   * Fetches the coding report from the backend and initializes the data source.
-   */
   private loadCodingReport(): void {
     this.isLoading = true;
     this.backendService.getCodingReport(this.workspaceService.selectedWorkspaceId)
@@ -91,13 +88,11 @@ export class CodingReportComponent implements OnInit {
       this.unitDataRows.filter((row: CodingReportDto) => row.codingType !== 'keine Regeln') :
       this.unitDataRows;
 
-    this.dataSource = new MatTableDataSource(filteredRows); // Refresh the data source
+    this.markDuplicateVariables();
+
+    this.dataSource = new MatTableDataSource(filteredRows);
   }
 
-  /**
-   * Applies a text filter on the table's data source.
-   * @param event The input event triggered by the filter field.
-   */
   applyFilter(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
 
@@ -109,9 +104,33 @@ export class CodingReportComponent implements OnInit {
     }
   }
 
-  /**
-   * Toggles the coded variables filter and updates the data source.
-   */
+  private markDuplicateVariables(): void {
+    const variableMap: Record<number, Set<string>> = {};
+    const duplicates: Set<number> = new Set();
+
+    this.unitDataRows.forEach((row, index) => {
+      if (row.unit) {
+        const unitKey = row.unit as unknown as number;
+
+        if (!variableMap[unitKey]) {
+          variableMap[unitKey] = new Set();
+        }
+
+        if (variableMap[unitKey].has(row.variable)) {
+          duplicates.add(index);
+        } else {
+          variableMap[unitKey].add(row.variable);
+        }
+      }
+    });
+
+    this.unitDataRows = this.unitDataRows
+      .map((row, index) => ({
+        ...row,
+        isDuplicate: duplicates.has(index)
+      }));
+  }
+
   toggleChange(): void {
     this.codedVariablesOnly = !this.codedVariablesOnly;
     this.updateDataSource();
