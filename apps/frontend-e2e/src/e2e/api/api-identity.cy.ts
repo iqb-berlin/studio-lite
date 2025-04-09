@@ -68,7 +68,7 @@ describe('Identity tests users API tests', () => {
             });
         });
     });
-    it('201 positive test: should create a user typing correctly the parameter but identity and name.', () => {
+    it('201 positive test: should create a user typing correctly some parameter but identity and name.', () => {
       // It does not create the user, if we don't type identity parameter correctly but other parameters.
       cy.request({
         method: 'POST',
@@ -79,7 +79,7 @@ describe('Identity tests users API tests', () => {
         body: {
           description: '',
           email: `${fakeCloakUser3.username}@hu-berlin.com`,
-          firstName: `${fakeCloakUser3.username}`,
+          firstNameq: `${fakeCloakUser3.username}`,
           identity: `${fakeCloakUser3.username}`,
           isAdmin: 'false',
           issuer: 'https://www.iqb-login.de/realms/iqb',
@@ -97,7 +97,7 @@ describe('Identity tests users API tests', () => {
           });
       });
     });
-    it('200 negative test identity: should not create' +
+    it('500/201 negative test identity: should not create' +
       ' a user if we do not type correctly the parameter identity.', () => {
       // It does not create the user, if we don't type identity parameter correctly but other parameters.
       // create the token but not the id
@@ -120,6 +120,7 @@ describe('Identity tests users API tests', () => {
         }
       }).then(resp => {
         expect(resp.status).to.equal(201);
+        // expect(resp.status).to.equal(500); // should be
         cy.getUserIdAPI(resp.body)
           .then(resp2 => {
             expect(resp2.status).to.equal(200);
@@ -127,7 +128,6 @@ describe('Identity tests users API tests', () => {
       });
     });
     it('500 negative test: should not create a user if we do not type correctly the parameter name.', () => {
-      // sometimes it returns 201
       cy.request({
         method: 'POST',
         url: '/api/keycloak-login',
@@ -151,11 +151,12 @@ describe('Identity tests users API tests', () => {
         expect(resp.status).to.equal(500);
       });
     });
-    it('201 negative test: should not create a user with the same email twice.', () => {
-      // But, it does not create a same user twice, but there is no way to get a bad 4xx response.
+    it('500/201 negative test: should not create a user with the same email twice.', () => {
+      // But, it does not create a same user twice, but there is no way to get a bad  response.
       cy.keycloakAPI(cloakUser1)
         .then(resp => {
           expect(resp.status).to.equal(201);
+          // expect(resp.status).to.equal(500); // should be
         });
     });
     it('Delete all users', () => {
