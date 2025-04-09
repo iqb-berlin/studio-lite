@@ -22,7 +22,7 @@ export class AddCommentButtonComponent {
   showReviewDialog() {
     const commentDialog = this.commentDialog.open(CommentDialogComponent, {
       width: '1000px',
-      height: this.showOthersComments ? '800px' : '350px'
+      height: this.showOthersComments ? '700px' : '350px'
     });
     commentDialog.afterClosed().subscribe(() => {
       this.reviewService.updateCommentsUnitInfo(this.unitDbId);
