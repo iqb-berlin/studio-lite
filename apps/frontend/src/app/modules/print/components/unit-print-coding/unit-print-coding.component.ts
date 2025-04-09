@@ -40,7 +40,8 @@ export class UnitPrintCodingComponent implements OnChanges {
     service.getUnitScheme(this.workspaceId, this.unitId)
       .subscribe(unitScheme => {
         if (unitScheme?.scheme) {
-          this.codings = JSON.parse(unitScheme.scheme).variableCodings;
+          this.codings = JSON.parse(unitScheme.scheme).variableCodings
+            .filter((vc: VariableCodingData) => vc.sourceType !== 'BASE_NO_VALUE');
         }
       });
   }
