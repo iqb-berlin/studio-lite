@@ -1,6 +1,12 @@
 <div class="fx-column-start-stretch full-height" >
   <div class="fx-row-space-between-center">
-    <h1 mat-dialog-title>{{'review.comment' | translate}}</h1>
+    <div mat-dialog-title
+        cdkDrag
+        cdkDragRootElement=".cdk-overlay-pane"
+        cdkDragHandle
+        class="dialog-title">
+      {{'review.comment' | translate}}
+    </div>
     @if (!this.appService.authData.userId) {
       <mat-form-field>
         <mat-label>{{'review.comment-name' | translate}}</mat-label>

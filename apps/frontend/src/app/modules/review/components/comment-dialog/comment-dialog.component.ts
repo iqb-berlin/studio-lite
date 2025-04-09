@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 
+import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { CommentsComponent } from '../../../comments/components/comments/comments.component';
 import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
@@ -19,7 +20,7 @@ const NAME_LOCAL_STORAGE_KEY = 'iqb-studio-user-name-for-review-comments';
   templateUrl: './comment-dialog.component.html',
   styleUrls: ['./comment-dialog.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, CdkDrag, CdkDragHandle]
 })
 export class CommentDialogComponent implements OnInit {
   userName = '';
