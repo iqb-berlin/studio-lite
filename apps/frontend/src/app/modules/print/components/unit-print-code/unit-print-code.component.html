@@ -1,44 +1,46 @@
-<table class="codes">
-  <tr>
-    <td class="left-cell">
-      <p>{{'print.id' | translate}}</p>
-    </td>
-    <td>
-      <p>{{codeAsText.id}}</p>
-    </td>
-  </tr>
-  @if (codeAsText.label) {
+@if (codeAsText) {
+  <table class="codes">
     <tr>
       <td class="left-cell">
-        <p>{{'print.label' | translate}}</p>
+        <p>{{'print.id' | translate}}</p>
       </td>
       <td>
-        <p>{{codeAsText.label}}</p>
+        <p>{{codeAsText.id}}</p>
       </td>
     </tr>
-  }
-  @if (codeAsText.description) {
-    <tr>
-      <td class="left-cell">
-        <p>{{'print.rules' | translate}}</p>
-      </td>
-      <td>
-        <p [innerHTML]="codeAsText.description"></p>
-      </td>
-    </tr>
-  }
-  @if (codeAsText.manualInstruction) {
-    <tr>
-      <td class="left-cell">
-        <p>{{'print.manual-instruction' | translate}}</p>
-      </td>
-      <td>
-        @if (codeAsText.manualInstruction) {
-          <div
-            [innerHTML]="codeAsText.manualInstruction">
-          </div>
-        }
-      </td>
-    </tr>
-  }
-</table>
+    @if (codeAsText.label) {
+      <tr>
+        <td class="left-cell">
+          <p>{{'print.label' | translate}}</p>
+        </td>
+        <td>
+          <p>{{codeAsText.label}}</p>
+        </td>
+      </tr>
+    }
+    @if (codeAsText.description) {
+      <tr>
+        <td class="left-cell">
+          <p>{{'print.rules' | translate}}</p>
+        </td>
+        <td>
+          <p [innerHTML]="codeAsText.description"></p>
+        </td>
+      </tr>
+    }
+    @if (codeAsText.manualInstruction) {
+      <tr>
+        <td class="left-cell">
+          <p>{{'print.manual-instruction' | translate}}</p>
+        </td>
+        <td>
+          @if (codeAsText.manualInstruction) {
+            <div
+              [innerHTML]="codeAsText.manualInstruction">
+            </div>
+          }
+        </td>
+      </tr>
+    }
+  </table>
+}
