@@ -3,7 +3,6 @@ import {
 } from '@angular/core';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
-
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 import { ReviewBackendService } from '../../../review/services/review-backend.service';
@@ -40,7 +39,8 @@ export class UnitPrintCodingComponent implements OnChanges {
     service.getUnitScheme(this.workspaceId, this.unitId)
       .subscribe(unitScheme => {
         if (unitScheme?.scheme) {
-          this.codings = JSON.parse(unitScheme.scheme).variableCodings;
+          this.codings = JSON.parse(unitScheme.scheme).variableCodings
+            .filter((vc: VariableCodingData) => vc.sourceType !== 'BASE_NO_VALUE');
         }
       });
   }
