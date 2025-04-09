@@ -4,28 +4,38 @@
       <p>{{'print.id' | translate}}</p>
     </td>
     <td>
-      <p>{{codeData.id}}</p>
+      <p>{{codeAsText.id}}</p>
     </td>
   </tr>
-  @if (codeData.label) {
+  @if (codeAsText.label) {
     <tr>
       <td class="left-cell">
         <p>{{'print.label' | translate}}</p>
       </td>
       <td>
-        <p>{{codeData.label}}</p>
+        <p>{{codeAsText.label}}</p>
       </td>
     </tr>
   }
-  @if (codeData.manualInstruction) {
+  @if (codeAsText.description) {
+    <tr>
+      <td class="left-cell">
+        <p>{{'print.rules' | translate}}</p>
+      </td>
+      <td>
+        <p [innerHTML]="codeAsText.description"></p>
+      </td>
+    </tr>
+  }
+  @if (codeAsText.manualInstruction) {
     <tr>
       <td class="left-cell">
         <p>{{'print.manual-instruction' | translate}}</p>
       </td>
       <td>
-        @if (codeData.manualInstruction) {
+        @if (codeAsText.manualInstruction) {
           <div
-            [innerHTML]="codeData.manualInstruction">
+            [innerHTML]="codeAsText.manualInstruction">
           </div>
         }
       </td>

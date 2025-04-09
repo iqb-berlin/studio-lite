@@ -3,7 +3,6 @@ import {
 } from '@angular/core';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
-
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { UnitPrintCodeComponent } from '../unit-print-code/unit-print-code.component';
 import { ReviewBackendService } from '../../../review/services/review-backend.service';

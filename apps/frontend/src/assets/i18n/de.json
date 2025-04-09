@@ -813,6 +813,7 @@
     "code-list": "Liste der möglichen Codes",
     "id": "ID",
     "coding": "Kodierung",
+    "rules": "Regeln",
     "no-coding": "Keine Kodierung",
     "metadata": "Metadaten",
     "no-metadata": "Keine Metadaten"
