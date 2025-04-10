@@ -16,7 +16,7 @@
     </div>
 
 
-    @for (unitGroup of unitList | keyvalue; track unitGroup.key) {
+    @for (unitGroup of unitList | keyvalue; track unitGroup) {
       <studio-lite-unit-group
         class="unit-group"
         [count]="unitGroup.value.length"
