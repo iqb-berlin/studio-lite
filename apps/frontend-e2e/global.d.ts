@@ -37,6 +37,7 @@ declare namespace Cypress {
     createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 12
     getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 13
     getGroupAPI(token: string): Chainable<Response>; // 14
+    updateGroupAPI(groupId:string, newGroupName: string, token: string): Chainable<Response>; // 14
     setAdminsOfGroupAPI(userIds: string[], groupId: string, token: string): Chainable<Response>; // 16
     getUserAPI(id: string, token: string): Chainable<Response>; // 8
     getAdminOfGroupAPI(groupId: string, token: string): Chainable<Response>; // 17
@@ -121,6 +122,7 @@ declare namespace Cypress {
     updateSettingUnitExportAPI(token:string, unitExport:UnitExport): Chainable<Response>; // 105
     getSettingMissingProfilesAPI(token:string): Chainable<Response>; // 106
     updateSettingMissingProfilesAPI(token:string, profile:string): Chainable<Response>; // 107
+    addPackageAPI(resource:string, token:string): Chainable<Response>; // 108
     getPackageAPI(token:string): Chainable<Response>; // 109
     deletePackageAPI(token:string, packageId:string): Chainable<Response>; // 110
 

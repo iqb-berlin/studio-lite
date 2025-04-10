@@ -203,6 +203,24 @@ Cypress.Commands.add('getGroupAPI', (token:string) => {
   });
 });
 
+// 14
+Cypress.Commands.add('updateGroupAPI', (groupId:string, newGroupName: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: groupId,
+      name: newGroupName
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 16
 Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -392,34 +410,19 @@ Cypress.Commands.add('getWsByGroupAPI',
 // 25
 Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
   const authorization = `bearer ${token}`;
-  cy.readFile(`../frontend-e2e/src/fixtures/${module}`)
-    .then(aspect => {
-      // console.log(aspect);
-      // Maybe I have converted first the html into
-      // [
-      //   {
-      //     "key": "string",
-      //     "sortKey": "string",
-      //     "metadata": {
-      //       "type": "string",
-      //       "id": "string",
-      //       "name": "string",
-      //       "version": "string",
-      //       "specVersion": "string",
-      //       "isStable": true
-      //     },
-      //     "fileSize": 0,
-      //     "fileDateTime": 0
-      //   }
-      // ]
+  cy.fixture(module, 'binary')
+    .then(fileContent => {
+      const formData = new FormData();
+      formData.append('file', new Blob([fileContent], { type: 'html' }), module);
       cy.request({
         method: 'POST',
         url: '/api/admin/verona-modules',
         headers: {
           'app-version': Cypress.env('version'),
+          'Content-Type': 'multipart/form-data',
           authorization
         },
-        body: [aspect],
+        body: formData,
         failOnStatusCode: false
       });
     });
@@ -1973,7 +1976,26 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
     failOnStatusCode: false
   });
 });
-
+// 108
+Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.fixture(resource, 'binary')
+    .then(fileContent => {
+      const formData = new FormData();
+      formData.append('file', new Blob([fileContent], { type: 'zip' }), resource);
+      cy.request({
+        method: 'POST',
+        url: '/api/admin/resource-packages',
+        headers: {
+          'app-version': Cypress.env('version'),
+          'Content-Type': 'multipart/form-data',
+          authorization
+        },
+        body: formData,
+        failOnStatusCode: false
+      });
+    });
+});
 // 109
 Cypress.Commands.add('getPackageAPI', (token:string) => {
   const authorization = `bearer ${token}`;

@@ -1,5 +1,5 @@
 import { UserData } from '../../support/testData';
-import { login, logout } from '../../support/util';
+import { login } from '../../support/util';
 
 describe('Admin settings API tests', () => {
   const noId: string = '9988';
@@ -32,7 +32,7 @@ describe('Admin settings API tests', () => {
   });
 
   describe('108. POST /api/admin/resource-packages', () => {
-    it('200 positive test: should add a resource package the admin', () => {
+    it.skip('200 positive test: should add a resource package the admin', () => {
       const filename = 'GeoGebra.itcr.zip';
       cy.visit('/');
       login(Cypress.env('username'), Cypress.env('password'));
@@ -46,6 +46,21 @@ describe('Admin settings API tests', () => {
           action: 'select',
           force: true
         });
+    });
+    it.skip('500 positive test: should add a resource package the admin', () => {
+      const filename = 'GeoGebra.itcr.zip';
+      cy.addPackageAPI(filename, 'noId')
+        .then(resp => {
+          expect(resp.status).to.equal(500);
+        });
+    });
+    it('201 positive test: should add a resource package the admin', () => {
+      const filename = 'GeoGebra.itcr.zip';
+      cy.addPackageAPI(filename, Cypress.env(`token_${Cypress.env('username')}`))
+        .then(resp => {
+          expect(resp.status).to.equal(201);
+        });
+      cy.pause();
     });
   });
 
@@ -107,10 +122,6 @@ describe('Admin settings API tests', () => {
           Cypress.env('token_admin', '');
           expect(resp.status).to.equal(200);
         });
-    });
-    it('Log out', () => {
-      cy.visit('/');
-      logout();
     });
   });
 });

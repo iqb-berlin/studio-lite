@@ -42,10 +42,10 @@ describe('Admin settings API tests', () => {
         expect(resp.status).to.equal(200);
       });
   });
-  it('500 positive test: load a module ', () => {
+  it('201 positive test: load a module ', () => {
     cy.addModuleAPI(modules[0], Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
-        expect(resp.status).to.equal(500);
+        expect(resp.status).to.equal(201);
       });
   });
 });

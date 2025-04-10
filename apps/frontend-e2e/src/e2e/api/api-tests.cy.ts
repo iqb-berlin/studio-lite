@@ -8,7 +8,7 @@ import {
   WsData,
   WsSettings
 } from '../../support/testData';
-import { addModules, login, logout } from '../../support/util';
+import { logout } from '../../support/util';
 
 function getNameAt(initialName: string): string {
   return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
@@ -367,44 +367,39 @@ describe('Studio API tests', () => {
 
     describe('15. PATCH /api/admin/workspace-groups', () => {
       it('200 positive test: should modify data for a workspace-group.', () => {
-        const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
-        cy.request({
-          method: 'PATCH',
-          url: `/api/admin/workspace-groups/${Cypress.env('id_group1')}`,
-          headers: {
-            'app-version': Cypress.env('version'),
-            authorization
-          },
-          body: {
-            id: `${Cypress.env('id_group1')}`,
-            name: `${vera2024}`
-          }
-        }).then(resp => {
-          expect(resp.status).to.equal(200);
-          cy.getGroupByIdAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
-            .then(resp2 => {
-              expect(resp2.status).to.equal(200);
-            });
-        });
+        cy.updateGroupAPI(Cypress.env(group1.id),
+          vera2024,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
       });
 
       it('500 negative test: should fail with a non existent workspace-group.', () => {
-        const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
-        cy.request({
-          method: 'PATCH',
-          url: `/api/admin/workspace-groups/${noId}`,
-          headers: {
-            'app-version': Cypress.env('version'),
-            authorization
-          },
-          body: {
-            id: `${noId}`,
-            name: `${vera2024}`
-          },
-          failOnStatusCode: false
-        }).then(resp => {
-          expect(resp.status).to.equal(500);
-        });
+        cy.updateGroupAPI(noId,
+          'vera2025',
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('401 negative test: should fail with a false token', () => {
+        cy.updateGroupAPI(Cypress.env(group1.id),
+          'vera2026',
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401 negative test: should fail with a false token', () => {
+        cy.updateGroupAPI(Cypress.env(group1.id),
+          'vera2027',
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
       });
     });
 
@@ -456,11 +451,12 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('200/500 negative test: should not find a non-existent user', () => {
+      it('500/200 negative test: should not find a non-existent user', () => {
         // A new user id, will return am emtpy array [].
         cy.getUserAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
+            // expect(resp.status).to.equal(500); should
             expect(resp.body.length).to.eq(0);
           });
       });
@@ -768,10 +764,19 @@ describe('Studio API tests', () => {
     /** ************************************************************************* */
     describe('Admin verona API tests', () => {
       describe('25. POST /api/verona-modules', () => {
-        it('200 positive test: Get the modules ', () => {
-          cy.visit('/');
-          login(Cypress.env('username'), Cypress.env('password'));
-          addModules(modules);
+        it('201 positive test: Add schemer, player and editor with credentials ', () => {
+          modules.forEach(m => {
+            cy.addModuleAPI(m, Cypress.env(`token_${Cypress.env('username')}`))
+              .then(resp => {
+                expect(resp.status).to.equal(201);
+              });
+          });
+        });
+        it('401 negative test: should not add a module a false user', () => {
+          cy.addModuleAPI(modules[0], noId)
+            .then(resp => {
+              expect(resp.status).to.equal(401);
+            });
         });
       });
 
@@ -834,11 +839,12 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('201/500 negative test: should return try to create a second unit with same id within a ws', () => {
+        it('500/201 negative test: should return try to create a second unit with same id within a ws', () => {
         // but it returns no error, but neither would insert a new record on the database.
           cy.createUnitAPI(Cypress.env(ws1.id), unit1, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(201);
+              // expect(resp.status).to.equal(500);  // should
             });
         });
 
@@ -889,7 +895,7 @@ describe('Studio API tests', () => {
         });
       });
 
-      describe('32. PATCH /api/workspaces/{workspace_id}/settings}', () => {
+      describe('32. PATCH /api/workspaces/{workspace_id}/settings', () => {
         it('200 positive test: should update the ws data', () => {
           cy.updateWsSettingsAPI(Cypress.env(ws1.id), setEditor, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
@@ -911,12 +917,12 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('200/500 negative test: should not update the workspace with wrong ws data format', () => {
+        it('500/200 negative test: should not update the workspace with wrong ws data format', () => {
           cy.updateWsSettingsAPI(Cypress.env(ws1.id), noId, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); should
             });
-          cy.pause();
         });
       });
     });
@@ -1397,12 +1403,13 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('201/500 negative test: should return a internal error', () => {
+      it('500/201 negative test: should return a internal error', () => {
         cy.copyToAPI(Cypress.env(ws2.id),
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(201);
+            // expect(resp.status).to.equal(500); // should
           });
       });
 
@@ -1972,12 +1979,13 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(500);
             });
         });
-        it('200/500 negative test: should not assign as dropbox a non existent ws', () => {
+        it('500/200 negative test: should not assign as dropbox a non existent ws', () => {
           cy.dropboxWsAPI(Cypress.env(ws1.id),
             noId,
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500);  // should
             });
         });
         it('200 positive test: should assign ws as dropbox ws', () => {
@@ -3411,7 +3419,7 @@ describe('Studio API tests', () => {
             expect(resp.status).to.equal(401);
           });
       });
-      it('200/500 negative test: should not allow delete a non existent module', () => {
+      it('500/200 negative test: should not allow delete a non existent module', () => {
         cy.deleteModulesAPI([noId], Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
@@ -3468,12 +3476,6 @@ describe('Studio API tests', () => {
           expect(resp.status).to.equal(401);
         });
       });
-    });
-  });
-  describe('Logout UI', () => {
-    it('This test is necessary because we user UI calls for verona module', () => {
-      cy.visit('/');
-      logout();
     });
   });
 });
