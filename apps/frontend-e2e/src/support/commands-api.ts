@@ -1633,6 +1633,28 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
   });
 });
 
+// 81a
+Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.fixture(filename, 'binary')
+    .then(fileContent => {
+      const formData = new FormData();
+      formData.append('file', new Blob([fileContent], { type: 'html' }), filename);
+      cy.request({
+        method: 'POST',
+        url: `/api/workspaces/${wsId}`,
+        headers: {
+          'app-version': Cypress.env('version'),
+          'content-type': 'binary',
+          authorization
+        },
+        body: formData
+      }).then(resp => {
+        expect(resp.status).to.equal(204);
+      });
+    });
+});
+
 // 82
 Cypress.Commands.add('getWsForUserAPI', (wsId:string, userId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -2037,39 +2059,6 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
       id: `${Cypress.env(`id_${Cypress.env('username')}`)}`
     },
     failOnStatusCode: false
-  });
-});
-
-// not used
-Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  // const path:string = `../frontend-e2e/src/fixtures/${filename}`;
-  // cy.request({
-  //   method: 'POST',
-  //   url: `/api/workspaces/${wsId}/upload`,
-  //   headers: {
-  //     'app-version': Cypress.env('version'),
-  //     authorization
-  //   },
-  //   failOnStatusCode: false
-  // }).selectFile(
-  //   path, {
-  //     action: 'select',
-  //     force: true
-  //   });
-  cy.fixture(filename).then(file => {
-    cy.request({
-      method: 'POST',
-      url: `/api/workspaces/${wsId}`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        'content-type': 'binary',
-        authorization
-      },
-      body: file
-    }).then(resp => {
-      expect(resp.status).to.equal(204);
-    });
   });
 });
 
