@@ -8,7 +8,6 @@ import {
   WsData,
   WsSettings
 } from '../../support/testData';
-import { logout } from '../../support/util';
 
 function getNameAt(initialName: string): string {
   return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.html$/, '');
@@ -872,7 +871,6 @@ describe('Studio API tests', () => {
 
       describe('31. GET /api/admin/workspace-groups/units', () => {
         it('200 positive test: should return all units and the workspaces where they are located.', () => {
-          cy.pause();
           cy.getUnitsAPI(Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
@@ -2887,7 +2885,6 @@ describe('Studio API tests', () => {
             .then(resp => {
               expect(resp.status).to.equal(200);
             });
-          cy.pause();
         });
       });
 

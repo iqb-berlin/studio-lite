@@ -1982,7 +1982,7 @@ Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
   cy.fixture(resource, 'binary')
     .then(fileContent => {
       const formData = new FormData();
-      formData.append('file', new Blob([fileContent], { type: 'zip' }), resource);
+      formData.append('file', new Blob([fileContent], { type: 'html' }), resource);
       cy.request({
         method: 'POST',
         url: '/api/admin/resource-packages',
@@ -1991,8 +1991,7 @@ Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
           'Content-Type': 'multipart/form-data',
           authorization
         },
-        body: formData,
-        failOnStatusCode: false
+        body: formData
       });
     });
 });

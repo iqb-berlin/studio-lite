@@ -32,7 +32,7 @@ describe('Admin settings API tests', () => {
   });
 
   describe('108. POST /api/admin/resource-packages', () => {
-    it.skip('200 positive test: should add a resource package the admin', () => {
+    it('200 positive test: should add a resource package the admin', () => {
       const filename = 'GeoGebra.itcr.zip';
       cy.visit('/');
       login(Cypress.env('username'), Cypress.env('password'));
@@ -54,7 +54,7 @@ describe('Admin settings API tests', () => {
           expect(resp.status).to.equal(500);
         });
     });
-    it('201 positive test: should add a resource package the admin', () => {
+    it.skip('201 positive test: should add a resource package the admin', () => {
       const filename = 'GeoGebra.itcr.zip';
       cy.addPackageAPI(filename, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
