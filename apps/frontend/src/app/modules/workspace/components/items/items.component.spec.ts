@@ -1,12 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
-import { BehaviorSubject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { ItemsComponent } from './items.component';
-import { AliasId } from '../../models/alias-id.interface';
 
 describe('ItemsComponent', () => {
   let component: ItemsComponent;
@@ -37,7 +35,6 @@ describe('ItemsComponent', () => {
 
     fixture = TestBed.createComponent(ItemsComponent);
     component = fixture.componentInstance;
-    component.variablesLoader = new BehaviorSubject<AliasId[]>([]);
     component.metadata = {};
     fixture.detectChanges();
   });
