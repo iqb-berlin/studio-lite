@@ -13,13 +13,16 @@
      </formly-form>
     </form>
     <iqb-profile-form
-      [vocabularies]= "vocabularies"
-      [profile]="profile"
-     [metadata]="metadata[itemIndex]"
-     [language]="language"
-     [formlyWrapper]="''"
-     [panelExpanded]="false"
-     (metadataChange)="onMetadataChange($event)">
+      [vocabularies]= "workspaceService.vocabularies"
+      [profile]="workspaceService.itemProfile"
+      [vocabulariesIdDictionary] = workspaceService.vocabulariesIdDictionary
+      [itemProfileColumns] = workspaceService.itemProfileColumns
+      [unitProfileColumns] = workspaceService.unitProfileColumns
+      [metadata]="metadata[itemIndex]"
+      [language]="language"
+      [formlyWrapper]="''"
+      [panelExpanded]="false"
+      (metadataChange)="onMetadataChange($event)">
   </iqb-profile-form>
 </mat-expansion-panel>
 

@@ -80,6 +80,12 @@ export class ItemComponent implements OnInit, OnChanges {
       this.updateModelVariableId();
       this.initField();
     }
+
+    const profile: string = 'profile';
+    if (changes[profile] && !changes[profile].firstChange) {
+      this.updateModelVariableId();
+      this.initField();
+    }
   }
 
   private initField(): void {
