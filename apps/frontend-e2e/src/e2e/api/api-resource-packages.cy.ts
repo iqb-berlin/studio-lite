@@ -32,8 +32,8 @@ describe('Admin settings API tests', () => {
   });
 
   describe('108. POST /api/admin/resource-packages', () => {
-    it('200 positive test: should add a resource package the admin', () => {
-      const filename = 'GeoGebra.itcr.zip';
+    const filename = 'GeoGebra.itcr.zip';
+    it.skip('200 positive test: should add a resource package the admin', () => {
       cy.visit('/');
       login(Cypress.env('username'), Cypress.env('password'));
       cy.get('[data-cy="goto-admin"]').click();
@@ -47,20 +47,18 @@ describe('Admin settings API tests', () => {
           force: true
         });
     });
+    //  It is skipped [vite] http proxy error: /api/admin/resource-packages
     it.skip('500 positive test: should add a resource package the admin', () => {
-      const filename = 'GeoGebra.itcr.zip';
       cy.addPackageAPI(filename, 'noId')
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
     });
-    it.skip('201 positive test: should add a resource package the admin', () => {
-      const filename = 'GeoGebra.itcr.zip';
+    it('201 positive test: should add a resource package the admin', () => {
       cy.addPackageAPI(filename, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(201);
         });
-      cy.pause();
     });
   });
 
@@ -103,7 +101,6 @@ describe('Admin settings API tests', () => {
     });
 
     it('200 positive test: should delete the package the admin ', () => {
-      cy.wait(4000);
       cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(200);

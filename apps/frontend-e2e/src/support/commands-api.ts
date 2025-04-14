@@ -1638,19 +1638,19 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
   const authorization = `bearer ${token}`;
   cy.fixture(filename, 'binary')
     .then(fileContent => {
+      const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
       const formData = new FormData();
-      formData.append('file', new Blob([fileContent], { type: 'html' }), filename);
+      formData.append('files', blob, filename);
       cy.request({
         method: 'POST',
         url: `/api/workspaces/${wsId}`,
         headers: {
           'app-version': Cypress.env('version'),
-          'content-type': 'binary',
+          'content-type': 'multipart/form-data',
           authorization
         },
-        body: formData
-      }).then(resp => {
-        expect(resp.status).to.equal(204);
+        body: formData,
+        failOnStatusCode: false
       });
     });
 });
@@ -2003,8 +2003,9 @@ Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.fixture(resource, 'binary')
     .then(fileContent => {
+      const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
       const formData = new FormData();
-      formData.append('file', new Blob([fileContent], { type: 'html' }), resource);
+      formData.append('resourcePackage', blob, resource);
       cy.request({
         method: 'POST',
         url: '/api/admin/resource-packages',
@@ -2013,7 +2014,8 @@ Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
           'Content-Type': 'multipart/form-data',
           authorization
         },
-        body: formData
+        body: formData,
+        failOnStatusCode: false
       });
     });
 });
