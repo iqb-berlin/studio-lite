@@ -13,7 +13,7 @@ import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
-import { DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
@@ -69,7 +69,8 @@ import { ItemsComponent } from '../items/items.component';
     CanReturnUnitPipe,
     ProfileFormComponent,
     ItemsComponent,
-    DatePipe
+    DatePipe,
+    AsyncPipe
   ]
 })
 export class UnitPropertiesComponent
@@ -139,11 +140,16 @@ export class UnitPropertiesComponent
 
   async ngOnInit(): Promise<void> {
     // load studio with selected unit
-    if (this.workspaceService.selectedUnit$.getValue()) {
-      await this.readDataForUnitId(
-        this.workspaceService.selectedUnit$.getValue()
-      );
-    }
+    this.workspaceService.selectedUnit$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(async unitId => {
+        if (unitId && unitId > 0) {
+          await this.readDataForUnitId(unitId);
+        } else {
+          console.warn('No unit selected.');
+        }
+      });
+
     await this.updateVariables();
   }
 
@@ -159,11 +165,10 @@ export class UnitPropertiesComponent
       if (Object.keys(this.moduleService.editors).length === 0) {
         await this.moduleService.loadList();
       }
-
       await this.workspaceService.loadUnitProperties();
       this.setupForm();
-      await this.updateVariables();
       await this.loadMetaData();
+      await this.updateVariables();
     } catch (error) {
       console.error('Error fetching data', error);
     }
@@ -285,15 +290,29 @@ export class UnitPropertiesComponent
 
   private async loadMetaData(): Promise<void> {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
+
+    if (!selectedUnitId || selectedUnitId <= 0) {
+      console.error('Invalid unitId, unable to load metadata.');
+      this.metadataLoader.next({});
+      return;
+    }
+
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
-    if (selectedUnitId > 0 && unitMetadataStore) {
+    if (unitMetadataStore) {
       this.workspaceSettings = await firstValueFrom(
         this.workspaceService.workspaceSettings$
       );
       const unitMetadata = unitMetadataStore.getData();
-      const metadata = JSON.parse(JSON.stringify(unitMetadata.metadata)) || {};
-      this.metadataLoader.next({ ...metadata });
+
+      if (unitMetadata && unitMetadata.metadata) {
+        console.log('Unit metadata:', unitMetadata.metadata);
+        this.metadataLoader.next({ ...unitMetadata.metadata });
+      } else {
+        console.error('No metadata found for the selected unit');
+        this.metadataLoader.next({});
+      }
     } else {
+      console.error('Metadata store not available');
       this.metadataLoader.next({});
     }
   }

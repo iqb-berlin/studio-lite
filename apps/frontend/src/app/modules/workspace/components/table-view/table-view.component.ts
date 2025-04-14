@@ -20,7 +20,7 @@ import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
 import { WorkspaceService } from '../../services/workspace.service';
-import { BackendService } from '../../services/backend.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 
 interface ColumnValues {
   key?: string;
@@ -66,7 +66,7 @@ export class TableViewComponent implements OnInit {
   constructor(
     private workspaceService: WorkspaceService,
     private translateService: TranslateService,
-    private backendService: BackendService,
+    private workspaceBackendService: WorkspaceBackendService,
     @Inject(MAT_DIALOG_DATA)
     public data: { units: UnitPropertiesDto[]; warning: string }
   ) {}
@@ -241,7 +241,7 @@ export class TableViewComponent implements OnInit {
   downloadMetadata(): void {
     const datePipe = new DatePipe('de-DE');
     if (this.viewMode === 'units') {
-      this.backendService.downloadMetadataReport(
+      this.workspaceBackendService.downloadMetadataReport(
         'unit',
         this.getTableUnitsColumnsDefinitions(),
         this.data.units.map(unit => unit.id,
@@ -261,7 +261,7 @@ export class TableViewComponent implements OnInit {
         });
     }
     if (this.viewMode === 'items') {
-      this.backendService
+      this.workspaceBackendService
         .downloadMetadataReport(
           'item',
           this.getTableItemsColumnsDefinitions(),
