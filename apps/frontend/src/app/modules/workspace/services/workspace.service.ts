@@ -11,8 +11,6 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { WorkspaceBackendService } from './workspace-backend.service';
-import { MDProfile } from '@iqb/metadata';
 import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
 import {
@@ -20,7 +18,7 @@ import {
   VocabData,
   VocabIdDictionaryValue
 } from '@iqb/ngx-metadata-components/lib/models/vocabulary.class';
-import { BackendService } from './backend.service';
+import { WorkspaceBackendService } from './workspace-backend.service';
 import {
   UnitMetadataStore
 } from '../classes/unit-metadata-store';
@@ -51,12 +49,10 @@ export class WorkspaceService {
   private vocabulariesSubject = new BehaviorSubject<Vocab[]>([]);
   vocabularies$ = this.vocabulariesSubject.asObservable(); // Observable für Subscribers
 
-  // Getter für aktuelle Werte
   get vocabularies(): Vocab[] {
     return this.vocabulariesSubject.value;
   }
 
-  // Setter, um Änderungen zu benachrichtigen
   set vocabularies(newVocabularies: Vocab[]) {
     this.vocabulariesSubject.next(newVocabularies);
   }
@@ -126,77 +122,83 @@ export class WorkspaceService {
   }
 
   async loadProfileVocabularies(profile: MDProfile): Promise<Vocab[] | boolean> {
-    return new Promise(resolve => {
-      this.backendService.getMetadataVocabulariesForProfile(profile.id)
-        .subscribe(metadataVocabularies => {
-          if (metadataVocabularies && metadataVocabularies !== true &&
-            !metadataVocabularies.some(vocabulary => vocabulary === null)) {
-            const vocabularies: Vocab[] = metadataVocabularies
-              .map(vocabulary => ({
-                data: vocabulary,
-                url: vocabulary.id
-              }));
-            if (this.vocabularies.length) {
-              this.vocabularies = [...this.vocabularies, ...vocabularies];
-            } else {
-              this.vocabularies = vocabularies;
-            }
+    try {
+      const metadataVocabularies = await lastValueFrom(
+        this.backendService.getMetadataVocabulariesForProfile(profile.id)
+      );
 
-            const vocabularyEntryParams = profile.groups
-              .flatMap(group => group.entries)
-              .filter(entry => (entry.type === 'vocabulary'))
-              .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary));
-            vocabularyEntryParams.forEach(entryParam => {
-              const matchingVocabulary = this.vocabularies.find(vocabulary => vocabulary.url === entryParam.url);
-              if (matchingVocabulary) {
-                this.vocabulariesIdDictionary = {
-                  ...this.vocabulariesIdDictionary,
-                  ...this.mapVocabularyIds(matchingVocabulary.data, entryParam)
-                };
-              }
-            });
-            resolve(true);
-          }
-          resolve(false);
-        });
-    });
+      if (
+        !metadataVocabularies ||
+        metadataVocabularies === true ||
+        metadataVocabularies.some(vocabulary => vocabulary === null)
+      ) {
+        return false;
+      }
+
+      const newVocabularies: Vocab[] = metadataVocabularies.map(vocabulary => ({
+        data: vocabulary,
+        url: vocabulary.id
+      }));
+
+      const mergedVocabularies = [...this.vocabularies, ...newVocabularies];
+      this.vocabularies = mergedVocabularies.filter(
+        (vocab, index, self) => self.findIndex(v => v.url === vocab.url) === index
+      );
+
+      const vocabularyEntryParams = profile.groups
+        .flatMap(group => group.entries)
+        .filter(entry => entry.type === 'vocabulary')
+        .map(entry => entry.parameters as ProfileEntryParametersVocabulary);
+
+      vocabularyEntryParams.forEach(entryParam => {
+        const matchingVocabulary = this.vocabularies.find(vocab => vocab.url === entryParam.url);
+        if (matchingVocabulary) {
+          this.vocabulariesIdDictionary = {
+            ...this.vocabulariesIdDictionary,
+            ...this.mapVocabularyIds(matchingVocabulary.data, entryParam)
+          };
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error loading profile vocabularies:', error);
+      return false;
+    }
   }
 
-  private mapVocabularyIds(vocabulary: VocabData, entryParams: ProfileEntryParametersVocabulary) {
-    const hasNarrower = (narrower: TopConcept[]) => {
-      narrower.forEach((vocabularyEntry: TopConcept) => {
-        this.idLabelDictionary[vocabularyEntry.id] = {
-          labels: vocabularyEntry.prefLabel,
-          notation: vocabularyEntry.notation || [],
+  private mapVocabularyIds(vocabulary: VocabData, entryParams: ProfileEntryParametersVocabulary): Record<string, VocabIdDictionaryValue> {
+    const processConcepts = (concepts: TopConcept[]) => {
+      concepts.forEach((concept: TopConcept) => {
+        this.idLabelDictionary[concept.id] = {
+          labels: concept.prefLabel,
+          notation: concept.notation || [],
           ...entryParams
         };
-        if (vocabularyEntry.narrower) hasNarrower(vocabularyEntry.narrower);
+        if (concept.narrower?.length) {
+          processConcepts(concept.narrower);
+        }
       });
     };
-
-    if (vocabulary.hasTopConcept) {
-      vocabulary.hasTopConcept.forEach((topConcept: TopConcept) => {
-        this.idLabelDictionary[topConcept.id] = {
-          labels: topConcept.prefLabel, notation: topConcept.notation || [], ...entryParams
-        };
-        if (topConcept.narrower) hasNarrower(topConcept.narrower);
-      });
+    if (vocabulary.hasTopConcept?.length) {
+      processConcepts(vocabulary.hasTopConcept);
     }
     return this.idLabelDictionary;
   }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: { [key: string]: UnitInListDto[] }): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const newKeyNormalised = control.value.toUpperCase().trim();
-      let allUnits: UnitInListDto[] = [];
-      Object.values(unitList).forEach(units => {
-        allUnits = [...allUnits, ...units];
-      });
-      const allreadyIn = allUnits.filter(u => u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId);
-      if (allreadyIn && allreadyIn.length > 0) {
-        return { keyNotUnique: 'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.' };
+      if (!control.value) {
+        return null;
       }
-      return null;
+      const newKeyNormalised = control.value.toUpperCase().trim();
+      const allUnits = Object.values(unitList).flat();
+      const duplicate = allUnits.some(
+        unit => unit.key.toUpperCase().trim() === newKeyNormalised && unit.id !== unitId
+      );
+      return duplicate ?
+        { keyNotUnique: 'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.' } :
+        null;
     };
   }
 
