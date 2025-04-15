@@ -3462,13 +3462,10 @@ describe('Studio API tests', () => {
           });
       });
       it('200 positive test: should delete the list of modules', () => {
-        cy.pause();
-        console.log(qs);
         cy.deleteModulesAPI(qs, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
-        cy.pause();
       });
     });
 
