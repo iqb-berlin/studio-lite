@@ -97,6 +97,7 @@ describe('Metadata Management', () => {
     getStructure('uDE', false);
     getItem('iDE', false);
     getItem('iDE', true);
+    getItem('iDE', true, 'iDE');
     cy.contains('Speichern').click();
   });
 
