@@ -12,7 +12,14 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth,
+  ApiCreatedResponse, ApiInternalServerErrorResponse,
+  ApiNonAuthoritativeInformationResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiTags
 } from '@nestjs/swagger';
 import {
   WorkspaceFullDto,
@@ -54,6 +61,9 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiNotFoundResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiQuery({
     name: 'download',
     type: Boolean,
@@ -96,6 +106,8 @@ export class WorkspaceController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
   @ApiOkResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiTags('workspace')
   async findByUser(@WorkspaceId() workspaceId: number,
     @Param('user_id') userId: number
@@ -108,6 +120,8 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiTags('workspace')
   async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
     return this.usersService.findAllWorkspaceUsers(workspaceId);
@@ -118,6 +132,8 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiTags('workspace')
   async findGroups(@WorkspaceId() workspaceId: number): Promise<string[]> {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
@@ -127,6 +143,8 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
@@ -145,6 +163,8 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: RequestReportDto
   })
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   async addUnitFiles(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @UploadedFiles() files): Promise<RequestReportDto> {
@@ -166,6 +186,8 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchName(@WorkspaceId() workspaceId: number, @Body() body: NameDto) {
@@ -176,6 +198,8 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
+  @ApiNonAuthoritativeInformationResponse()
+  @ApiInternalServerErrorResponse()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxId') dropBoxId: number) {
