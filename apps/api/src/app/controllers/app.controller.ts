@@ -3,7 +3,14 @@ import {
 } from '@nestjs/common';
 
 import {
-  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiHeader,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   AuthDataDto
@@ -45,7 +52,8 @@ export class AppController {
     required: true,
     allowEmptyValue: false
   })
-  @ApiOkResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
+  @ApiCreatedResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
+  @ApiUnauthorizedResponse({ description: 'The user is not registered. ' })
   async login(@Request() req) {
     const token = await this.authService.login(req.user);
     return `"${token}"`;
@@ -60,7 +68,8 @@ export class AppController {
     allowEmptyValue: false
   })
   @ApiTags('auth')
-  @ApiOkResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
+  @ApiCreatedResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
+  @ApiForbiddenResponse({ description: 'First user already created.' })
   async initLogin(@Body() body: { username: string, password: string }
   ) {
     const token = await this.authService.initLogin(body.username, body.password);
@@ -71,6 +80,7 @@ export class AppController {
   @UseGuards(AppVersionGuard)
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Keycloak login successful.' })
+  @ApiInternalServerErrorResponse({ description: 'The body request has wrong format.' })
   async keycloakLogin(@Body() user: CreateUserDto) {
     const token = await this.authService.keycloakLogin(user);
     return `"${token}"`;
@@ -86,6 +96,7 @@ export class AppController {
   })
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'User auth data successfully retrieved.' }) // TODO: Add Exception
+  @ApiUnauthorizedResponse({ description: 'User is not authorized.' })
   @ApiTags('auth')
   async findCanDos(
     @UserId() userId: number, @UserName() userName: string, @ReviewId() reviewId: number
@@ -113,6 +124,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Password successfully updated.' }) // TODO: Exception & Return Value entfernen
+  @ApiUnauthorizedResponse({ description: 'User is not authorized to update password.' })
   @ApiTags('auth')
   async setPassword(@Request() req, @Body() passwords: ChangePasswordDto): Promise<boolean> {
     return this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
@@ -129,6 +141,7 @@ export class AppController {
   @ApiBearerAuth()
   // TODO: Exception & Return Value entfernen
   @ApiOkResponse({ description: 'User personal data successfully retrieved.' })
+  @ApiUnauthorizedResponse({ description: 'The token, and user_id do not match.' })
   @ApiTags('home')
   async findMydata(@UserId() userId: number): Promise<MyDataDto> {
     return this.userService.findOne(userId).then(userData => <MyDataDto>{
@@ -146,6 +159,7 @@ export class AppController {
   @ApiBearerAuth()
   // TODO: Exception & Return Value entfernen
   @ApiOkResponse({ description: 'User personal data successfully updated.' })
+  @ApiUnauthorizedResponse({ description: 'The token, and user_id do not match.' })
   @ApiTags('home')
   async setMyData(@Request() req, @Body() myNewData: MyDataDto): Promise<boolean> {
     if (req.user.id !== myNewData.id) throw new UnauthorizedException();

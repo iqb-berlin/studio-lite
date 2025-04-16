@@ -3,7 +3,14 @@ import {
   Controller, Get, Patch, Query, Res, StreamableFile, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags
+  ApiBearerAuth,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
 
@@ -35,7 +42,9 @@ export class WorkspaceGroupController {
     type: Boolean,
     required: false
   })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace-group' })
   @ApiNotFoundResponse({ description: 'Workspace-group not found.' })
+  @ApiInternalServerErrorResponse({ description: 'Invalid workspace-group. ' })
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('workspace-group')
   async findOne(
@@ -59,6 +68,8 @@ export class WorkspaceGroupController {
   @Patch()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace-group' })
+  @ApiInternalServerErrorResponse({ description: 'Invalid workspace-group. ' })
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('workspace-group')

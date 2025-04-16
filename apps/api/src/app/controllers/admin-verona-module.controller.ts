@@ -9,7 +9,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -41,6 +41,7 @@ export class AdminVeronaModuleController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona modules deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiTags('admin verona-module')
   @ApiQuery({
     name: 'key',

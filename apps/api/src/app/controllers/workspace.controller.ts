@@ -13,13 +13,14 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse, ApiInternalServerErrorResponse,
-  ApiNonAuthoritativeInformationResponse,
+  ApiCreatedResponse, ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
   ApiQuery,
-  ApiTags
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   WorkspaceFullDto,
@@ -61,9 +62,9 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiNotFoundResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiForbiddenResponse({ description: 'Forbidden.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'The requested workspace_id does not exist.' })
   @ApiQuery({
     name: 'download',
     type: Boolean,
@@ -106,8 +107,8 @@ export class WorkspaceController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
   @ApiOkResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace')
   async findByUser(@WorkspaceId() workspaceId: number,
     @Param('user_id') userId: number
@@ -120,8 +121,8 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace')
   async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
     return this.usersService.findAllWorkspaceUsers(workspaceId);
@@ -132,8 +133,8 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace')
   async findGroups(@WorkspaceId() workspaceId: number): Promise<string[]> {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
@@ -143,8 +144,8 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
@@ -163,8 +164,8 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: RequestReportDto
   })
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async addUnitFiles(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @UploadedFiles() files): Promise<RequestReportDto> {
@@ -176,6 +177,8 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
     @Body() workspaceSetting: WorkspaceSettingsDto) {
@@ -186,8 +189,8 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchName(@WorkspaceId() workspaceId: number, @Body() body: NameDto) {
@@ -198,8 +201,8 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiNonAuthoritativeInformationResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async patchDropBox(@WorkspaceId() workspaceId: number, @Body('dropBoxId') dropBoxId: number) {

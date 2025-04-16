@@ -8,7 +8,7 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { Express } from 'express';
 import 'multer';
@@ -36,6 +36,7 @@ export class AdminResourcePackageController {
     required: true
   })
   @ApiOkResponse({ description: 'Resource-packages deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   async removeIds(
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) id: number[]
   ) : Promise<void> {

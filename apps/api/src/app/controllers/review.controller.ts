@@ -2,7 +2,12 @@ import {
   Controller, Get, Param, ParseIntPipe, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   ReviewFullDto
@@ -20,6 +25,8 @@ export class ReviewController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges.' })
+  @ApiNotFoundResponse({ description: 'Review does not exist.' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiTags('review')
   async findOne(

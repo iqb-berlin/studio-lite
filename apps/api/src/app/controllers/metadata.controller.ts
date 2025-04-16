@@ -2,7 +2,7 @@ import {
   Controller, Get, Query, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
@@ -27,6 +27,7 @@ export class MetadataController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Metadata profile retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges to retrieve metadata profile.' })
   @ApiTags('metadata')
   async getMetadataProfileByUrl(@Query('url') url: string) {
     return this.metadataProfileService.getMetadataProfile(url);
@@ -40,6 +41,7 @@ export class MetadataController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'List of vocabularies retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges to retrieve vocabularies.' })
   @ApiTags('metadata')
   async getMetadataVocabulariesForProfile(@Query('url') url: string): Promise<MetadataVocabularyDto[]> {
     return this.metadataProfileService.getProfileVocabularies(url);
@@ -49,6 +51,7 @@ export class MetadataController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'List of registered metadata profiles retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges to retrieve profile registry. ' })
   @ApiTags('metadata')
   async getRegistry() {
     return this.registeredMetadataProfileService.getRegisteredMetadataProfiles();

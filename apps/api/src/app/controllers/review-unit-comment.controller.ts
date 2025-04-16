@@ -21,6 +21,7 @@ export class ReviewUnitCommentController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges to retrieve comments for the unit.' })
   @ApiTags('review unit comment')
   async findOnesComments(@Param('id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitCommentService.findOnesComments(unitId);
@@ -33,6 +34,7 @@ export class ReviewUnitCommentController {
     description: 'Sends back the id of the new comment in database',
     type: Number
   })
+  @ApiUnauthorizedResponse({ description: 'No privileges to post comment for the unit.' })
   @ApiTags('review unit comment')
   async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
     return this.unitCommentService.createComment(createUnitCommentDto);

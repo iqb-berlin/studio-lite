@@ -181,7 +181,7 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('200/500 negative test: should not update user password with false old pass', () => {
+      it('500/200 negative test: should not update user password with false old pass', () => {
         cy.updatePasswordAPI(Cypress.env(`token_${Cypress.env('username')}`), '1111', '4567')
           .then(resp => {
             expect(resp.status).to.equal(200);
@@ -810,14 +810,14 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('401 negative test', () => {
+        it('401 negative test: ', () => {
           cy.getModuleAPI('iqb-schemer%402.0.0-beta', noId)
             .then(resp => {
               expect(resp.status).to.equal(401);
             });
         });
 
-        it('404 negative test', () => {
+        it('404 negative test: Verona module not found', () => {
           cy.getModuleAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(404);
@@ -2782,7 +2782,7 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('500 negative test: should not create comment review without unit id', () => {
+        it('500/200 negative test: should not create comment review without unit id', () => {
           cy.getCommentReviewAPI(Cypress.env('id_review1'),
             noId,
             Cypress.env(`token_${Cypress.env('username')}`))
@@ -2833,6 +2833,7 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(200);
               // expect(resp.status).to.equal(500); //should
             });
+          cy.pause();
         });
 
         it('500/200 negative test: should ot update comment review without unit id', () => {
@@ -2921,14 +2922,14 @@ describe('Studio API tests', () => {
             });
         });
 
-        it('200 negative test: should not delete comment review without comment id', () => {
-          // The test deletes record in the db
+        it('500/200 negative test: should not delete comment review without comment id', () => {
           cy.deleteCommentReviewAPI(Cypress.env('id_review1'),
             Cypress.env(unit4.shortname),
             noId,
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500); //should
             });
         });
 
@@ -3474,7 +3475,7 @@ describe('Studio API tests', () => {
         cy.deleteUserAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-            // expect(resp.status).to.equal(404); should
+            // expect(resp.status).to.equal(404); // should
           });
       });
 
