@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
+  ApiCreatedResponse, ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
@@ -35,6 +35,8 @@ export class WorkspaceUnitCommentController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit comment')
   async findOnesComments(@Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitCommentService.findOnesComments(unitId);
@@ -45,6 +47,8 @@ export class WorkspaceUnitCommentController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit comment')
   async findLastSeenTimestamp(@Req() request, @Param('unit_id', ParseIntPipe) unitId: number): Promise<Date> {
     return this.unitUserService.findLastSeenCommentTimestamp(request.user.id, unitId);
@@ -55,6 +59,8 @@ export class WorkspaceUnitCommentController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit comment')
   async patchOnesUnitUserLastSeen(
     @Param('unit_id', ParseIntPipe) unitId: number,
@@ -71,6 +77,8 @@ export class WorkspaceUnitCommentController {
     description: 'Sends back the id of the new comment in database',
     type: Number
   })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit comment')
   async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
     return this.unitCommentService.createComment(createUnitCommentDto);

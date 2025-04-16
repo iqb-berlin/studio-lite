@@ -2,7 +2,7 @@ import {
   Body, Controller, Get, Inject, Patch, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags
+  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto
@@ -36,6 +36,7 @@ export class SettingController {
   @Patch('config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Config settings updated successfully.' }) // TODO Exception?
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchConfig(@Body() settingData: ConfigDto) {
@@ -52,6 +53,7 @@ export class SettingController {
   @Patch('app-logo')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'App logo updated successfully.' }) // TODO Exception?
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchAppLogo(@Body() newLogo: AppLogoDto) {
@@ -68,6 +70,7 @@ export class SettingController {
   @Patch('unit-export-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit export config updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
@@ -86,6 +89,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Missings profiles config updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   @ApiTags('admin settings')
   async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
     return this.settingService.patchMissingsProfiles(newMissingsProfiles);

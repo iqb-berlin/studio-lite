@@ -2,7 +2,13 @@ import {
   Body, Controller, Delete, Get, Param, ParseArrayPipe, Patch, Post, Query, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth,
+  ApiCreatedResponse, ApiForbiddenResponse, ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceDto,
@@ -30,6 +36,7 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiNotFoundResponse({ description: 'Admin Workspace not found.' })
   @ApiTags('group-admin workspace')
   async findOne(@Param('id') id: number): Promise<WorkspaceFullDto> {
@@ -50,6 +57,8 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace users updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id was not given or id was not given.' })
   @ApiTags('group-admin workspace')
   async patchOnesUsers(@Param('id') id: number,
     @Body() users: UserWorkspaceAccessDto[]) {
@@ -60,6 +69,7 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspaces deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiTags('group-admin workspace')
   @ApiQuery({
     name: 'id',
@@ -75,7 +85,9 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace moved successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace not found.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
+  @ApiForbiddenResponse({ description: 'Forbidden. No privileges in origin group' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. No group-admin was given.' })
   @ApiTags('group-admin workspace')
   async patchGroups(@User() user: UserEntity, @Body() body: MoveToDto): Promise<void> {
     return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
@@ -88,6 +100,8 @@ export class GroupAdminWorkspaceController {
     description: 'Sends back the id of the new Workspace in database',
     type: Number
   })
+  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. No group-admin was given.' })
   @ApiTags('group-admin workspace')
   async create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
     return this.workspaceService.create(createWorkspaceDto);

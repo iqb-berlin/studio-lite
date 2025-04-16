@@ -6,7 +6,7 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags
+  ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { VeronaModuleFileDto, VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
@@ -29,6 +29,7 @@ export class VeronaModuleController {
     required: false
   })
   @ApiOkResponse({ description: 'Verona modules retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   @ApiTags('verona-module')
   async findAllByType(@Query('type') type: string): Promise<VeronaModuleInListDto[]> {
     return this.veronaModulesService.findAll(type);
@@ -38,6 +39,7 @@ export class VeronaModuleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
   @ApiNotFoundResponse({ description: 'Verona module not found.' })
   @ApiTags('verona-module')
   @ApiQuery({

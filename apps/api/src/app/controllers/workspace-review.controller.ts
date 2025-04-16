@@ -2,7 +2,13 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   ReviewInListDto,
@@ -25,6 +31,8 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Reviews retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace review')
   async findAll(@WorkspaceId() workspaceId: number): Promise<ReviewInListDto[]> {
     return this.reviewService.findAll(workspaceId);
@@ -34,6 +42,8 @@ export class WorkspaceReviewController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace review')
   async findOne(
     @Param('id', ParseIntPipe) reviewId: number
@@ -46,6 +56,8 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace review')
   async patchOnesUnits(
     @Param('id', ParseIntPipe) reviewId: number,
@@ -62,6 +74,8 @@ export class WorkspaceReviewController {
     description: 'Sends back the id of the new review in database',
     type: Number
   })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace review')
   async create(@Body() createReviewDto: CreateReviewDto) {
     return this.reviewService.create(createReviewDto);
@@ -72,6 +86,8 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace review')
   async remove(
     @Param('id', ParseIntPipe) reviewId: number): Promise<void> {
