@@ -39,11 +39,11 @@ export class MetadataService {
                 data: vocabulary,
                 url: vocabulary.id
               }));
-            if (this.vocabularies.length) {
-              this.vocabularies = [...this.vocabularies, ...vocabularies];
-            } else {
-              this.vocabularies = vocabularies;
-            }
+            vocabularies.forEach(vocabulary => {
+              if (!this.vocabularies.find(v => v.url === vocabulary.url)) {
+                this.vocabularies.push(vocabulary);
+              }
+            });
             const vocabularyEntryParams = profile.groups
               .map(group => group.entries)
               .flat()
