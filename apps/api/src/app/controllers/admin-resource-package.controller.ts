@@ -36,7 +36,7 @@ export class AdminResourcePackageController {
     required: true
   })
   @ApiOkResponse({ description: 'Resource-packages deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   async removeIds(
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) id: number[]
   ) : Promise<void> {

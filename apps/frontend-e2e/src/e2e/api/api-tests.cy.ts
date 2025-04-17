@@ -3221,8 +3221,9 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('200/401 negative test: should not get the workspaces of which you are not a user', () => {
+      it('401/200 negative test: should not get the workspaces of which you are not a user', () => {
         // This test should be negative 401, we can not retrieve if we only have the token from other user
+        // I know the userId of another user, and I can get the info of the workspaces he has.
         cy.getWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
           Cypress.env(`token_${user2.username}`))
           .then(resp => {
@@ -3263,13 +3264,24 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('401 positive test: a non-eligible user should not modify the access level for other users.', () => {
+      it('401 negative test: a not group-admin user should not modify the access level for other users.', () => {
         cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
           Cypress.env(group1.id),
           [Cypress.env(ws1.id)],
           Cypress.env(`token_${user3.username}`))
           .then(resp => {
             expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401/200 negative test: another group-admin user should not modify the access ' +
+        'level for other workspace-group, in which he is not group-admin.', () => {
+        cy.updateWsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.env(group2.id),
+          [Cypress.env(ws3.id)],
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
           });
       });
 
