@@ -29,7 +29,7 @@ export class VeronaModuleController {
     required: false
   })
   @ApiOkResponse({ description: 'Verona modules retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   @ApiTags('verona-module')
   async findAllByType(@Query('type') type: string): Promise<VeronaModuleInListDto[]> {
     return this.veronaModulesService.findAll(type);
@@ -39,7 +39,7 @@ export class VeronaModuleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona module retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
   @ApiNotFoundResponse({ description: 'Verona module not found.' })
   @ApiTags('verona-module')
   @ApiQuery({

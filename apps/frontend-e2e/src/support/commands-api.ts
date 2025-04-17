@@ -1633,28 +1633,6 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
   });
 });
 
-// 81a
-Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.fixture(filename, 'binary')
-    .then(fileContent => {
-      const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
-      const formData = new FormData();
-      formData.append('files', blob, filename);
-      cy.request({
-        method: 'POST',
-        url: `/api/workspaces/${wsId}`,
-        headers: {
-          'app-version': Cypress.env('version'),
-          'content-type': 'multipart/form-data',
-          authorization
-        },
-        body: formData,
-        failOnStatusCode: false
-      });
-    });
-});
-
 // 82
 Cypress.Commands.add('getWsForUserAPI', (wsId:string, userId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1758,6 +1736,27 @@ Cypress.Commands.add('updateWsByUserAPI', (userId:string, groupId: string, wsIds
   });
 });
 
+// 81b
+Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.fixture(filename, 'binary')
+    .then(fileContent => {
+      const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
+      const formData = new FormData();
+      formData.append('files', blob, filename);
+      cy.request({
+        method: 'POST',
+        url: `/api/workspaces/${wsId}`,
+        headers: {
+          'app-version': Cypress.env('version'),
+          'content-type': 'multipart/form-data',
+          authorization
+        },
+        body: formData,
+        failOnStatusCode: false
+      });
+    });
+});
 // 87
 Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;

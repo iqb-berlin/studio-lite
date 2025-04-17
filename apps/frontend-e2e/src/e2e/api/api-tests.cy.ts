@@ -2833,7 +2833,6 @@ describe('Studio API tests', () => {
               expect(resp.status).to.equal(200);
               // expect(resp.status).to.equal(500); //should
             });
-          cy.pause();
         });
 
         it('500/200 negative test: should ot update comment review without unit id', () => {
@@ -2993,36 +2992,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('81a. POST /api/workspaces/{workspace_id}', () => {
-      const units = 'test_studio_units_download.zip';
-      it('401 negative test: should not upload units without token ', () => {
-        cy.uploadUnitsAPI(Cypress.env(ws1.id),
-          units,
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('500 negative test: should not upload units without a  workspace', () => {
-        cy.uploadUnitsAPI(noId,
-          units,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-
-      it('201 positive test: should uploads units with credentials', () => {
-        cy.uploadUnitsAPI(Cypress.env(ws1.id),
-          units,
-          Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(201);
-          });
-      });
-    });
-
     describe('82. GET /api/workspaces/{workspace_id}/users/{user_id}', () => {
       it('401 negative test: should not retrieve the ws data for the user without token ', () => {
         cy.getWsForUserAPI(Cypress.env(ws1.id),
@@ -3042,14 +3011,15 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('500 negative test: should not retrieve without a valid workspace', () => {
-        cy.getWsForUserAPI(noId,
+      it('404 negative test: should not retrieve without a valid user id', () => {
+        cy.getWsForUserAPI(Cypress.env(ws1.id),
           noId,
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
-            expect(resp.status).to.equal(500);
+            expect(resp.status).to.equal(404);
           });
       });
+
       it('200 positive test: should a user get the workspace by ws id', () => {
         cy.getWsForUserAPI(Cypress.env(ws1.id),
           Cypress.env(`id_${Cypress.env('username')}`),
@@ -3303,6 +3273,54 @@ describe('Studio API tests', () => {
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(500);
+          });
+      });
+    });
+
+    describe('86b. POST /api/workspaces/{workspace_id}', () => {
+      const units = 'test_studio_units_download.zip';
+      it('401 negative test: should not upload units without token ', () => {
+        cy.uploadUnitsAPI(Cypress.env(ws1.id),
+          units,
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500 negative test: should not upload units without a workspace', () => {
+        cy.uploadUnitsAPI(noId,
+          units,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('201 positive test: should uploads units with credentials(admin)', () => {
+        cy.uploadUnitsAPI(Cypress.env(ws1.id),
+          units,
+          Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(201);
+          });
+      });
+
+      it('403 negative test: should not upload units with developer credentials', () => {
+        cy.uploadUnitsAPI(Cypress.env(ws2.id),
+          units,
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(403);
+          });
+      });
+
+      it('401 positive test: should not upload units with other group-admin privileges', () => {
+        cy.uploadUnitsAPI(Cypress.env(ws3.id),
+          units,
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
           });
       });
     });
