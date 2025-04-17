@@ -20,7 +20,7 @@ export class SettingController {
   ) {}
 
   @Get('config')
-  @UseGuards(AppVersionGuard)
+  @UseGuards(AppVersionGuard, JwtAuthGuard)
   @ApiHeader({
     name: 'app-version',
     description: 'version of frontend',
@@ -36,7 +36,7 @@ export class SettingController {
   @Patch('config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Config settings updated successfully.' }) // TODO Exception?
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchConfig(@Body() settingData: ConfigDto) {
@@ -44,6 +44,7 @@ export class SettingController {
   }
 
   @Get('app-logo')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'App logo retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findAppLogo(): Promise<AppLogoDto> {
@@ -53,7 +54,7 @@ export class SettingController {
   @Patch('app-logo')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'App logo updated successfully.' }) // TODO Exception?
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchAppLogo(@Body() newLogo: AppLogoDto) {
@@ -61,6 +62,7 @@ export class SettingController {
   }
 
   @Get('unit-export-config')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Unit export config retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findUnitExportConfig(): Promise<UnitExportConfigDto> {
@@ -70,7 +72,7 @@ export class SettingController {
   @Patch('unit-export-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit export config updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
@@ -78,6 +80,7 @@ export class SettingController {
   }
 
   @Get('missings-profiles')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Missings profiles config retrieved successfully.' }) // TODO Exception
   @ApiBearerAuth()
   @ApiTags('admin settings')
@@ -89,7 +92,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Missings profiles config updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiTags('admin settings')
   async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
     return this.settingService.patchMissingsProfiles(newMissingsProfiles);

@@ -77,7 +77,7 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('200/401 negative test:  should get a resource package text settings without token', () => {
+    it('401/200 negative test:  should get a resource package text settings without token', () => {
       cy.getPackageAPI(noId)
         .then(resp => {
           expect(resp.status).to.equal(200);

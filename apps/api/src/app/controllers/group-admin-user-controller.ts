@@ -2,7 +2,7 @@ import {
   Body, Controller, Get, Param, Patch, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse,
+  ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse,
   ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
@@ -26,7 +26,7 @@ export class GroupAdminUserController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin users retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges in the group admin.' })
+  @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
   @ApiTags('group-admin user')
   @ApiQuery({
     name: 'full',
@@ -44,9 +44,9 @@ export class GroupAdminUserController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges in the group admin.' })
-  @ApiNotFoundResponse({ description: 'Group admin user not found.' }) // TODO: Exception implementieren?
-  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
+  @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
+  // @ApiNotFoundResponse({ description: 'Group admin user not found.' }) // TODO: Exception implementieren?
+  @ApiInternalServerErrorResponse({ description: 'Internal error. The user_id not found.' })
   @ApiTags('group-admin user')
   async patchOnesWorkspaces(@Param('id') id: number,
     @Body() body: UserWorkspaceAccessForGroupDto) {
@@ -57,8 +57,8 @@ export class GroupAdminUserController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges in the group admin.' })
-  @ApiNotFoundResponse({ description: 'User not found.' }) // TODO: Exception implementieren?
+  @ApiUnauthorizedResponse({ description: 'No group-admin privileges. ' })
+  // @ApiNotFoundResponse({ description: 'User not found.' }) // TODO: Exception implementieren?
   @ApiTags('group-admin user')
   async findOnesWorkspaces(@Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
     return this.workspaceService.findAll(id);
