@@ -63,24 +63,24 @@ describe('Admin settings API tests', () => {
   });
 
   describe('109. GET /api/resource-packages', () => {
-    it('200 positive test: should get a resource package the admin', () => {
+    it('200 positive test: should get resource package the admin', () => {
       cy.getPackageAPI(Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
 
-    it('200 positive test: should not update the configuration text settings a normal user', () => {
+    it('200 positive test: should not get resource package a normal user', () => {
       cy.getPackageAPI(Cypress.env(`token_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
 
-    it('401/200 negative test:  should get a resource package text settings without token', () => {
+    it('401 negative test: should get resource package without token', () => {
       cy.getPackageAPI(noId)
         .then(resp => {
-          expect(resp.status).to.equal(200);
+          expect(resp.status).to.equal(401);
         });
     });
   });
