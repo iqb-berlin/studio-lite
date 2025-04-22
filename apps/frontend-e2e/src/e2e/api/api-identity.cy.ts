@@ -164,14 +164,12 @@ describe('Identity tests users API tests', () => {
         Cypress.env(`id_${cloakUser1.username}`),
         Cypress.env(`id_${cloakUser2.username}`),
         Cypress.env(`id_${fakeCloakUser3.username}`)];
-      cy.pause();
       cy.deleteUsersAPI(
         ids,
         Cypress.env(`token_${Cypress.env('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
-      cy.pause();
     });
   });
 });
