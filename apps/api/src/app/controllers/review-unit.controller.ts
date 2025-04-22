@@ -22,8 +22,8 @@ export class ReviewUnitController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit metadata retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error: review_id or unit_id are invalid. ' })
+  @ApiUnauthorizedResponse({ description: 'No privileges. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. Review_id or unit_id are invalid. ' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
@@ -38,8 +38,8 @@ export class ReviewUnitController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit definition retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error: unit_id is invalid. ' })
+  @ApiUnauthorizedResponse({ description: 'No privileges.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. Unit_id is invalid. ' })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
   async getUnitDefinition(
@@ -52,8 +52,8 @@ export class ReviewUnitController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit scheme retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error: unit_id is invalid. ' })
+  @ApiUnauthorizedResponse({ description: 'No privileges.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. Unit_id is invalid. ' })
   @ApiTags('review unit')
   async findOnesScheme(
     @Param('id', ParseIntPipe) unitId: number

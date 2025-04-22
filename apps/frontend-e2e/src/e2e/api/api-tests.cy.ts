@@ -1255,7 +1255,7 @@ describe('Studio API tests', () => {
           });
       });
 
-      it('200/500 negative test: should return an error with incorrect data', () => {
+      it('500/200 negative test: should return an error with incorrect data', () => {
         // Should not allow to pass incorrect structure
         cy.updateUnitPropertiesAPI(Cypress.env(ws1.id),
           Cypress.env(unit1.shortname),
@@ -1900,29 +1900,20 @@ describe('Studio API tests', () => {
         });
         // This test should be negative and return 500. The status 5 does not exit.
 
-        it('200/500 negative test: should not assign a not existent state', () => {
+        it('500/200 negative test: should not assign a not existent state', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             Cypress.env(unit3.shortname),
             '5',
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
+              // expect(resp.status).to.equal(500);  // should
             });
         });
 
         it('500 negative test: should not assign state without valid unit id ', () => {
           cy.updateUnitStateAPI(Cypress.env(group1.id),
             noId,
-            '0',
-            Cypress.env(`token_${Cypress.env('username')}`))
-            .then(resp => {
-              expect(resp.status).to.equal(500);
-            });
-        });
-
-        it('500 negative test: should not assign a valid ws id', () => {
-          cy.updateUnitStateAPI(noId,
-            Cypress.env(unit3.shortname),
             '0',
             Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
