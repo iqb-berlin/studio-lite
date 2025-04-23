@@ -258,47 +258,58 @@
               }
             </mat-card-content>
           </mat-card>
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>
-                {{ 'metadata.unit-title' | translate }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              @if (workspaceSettings && workspaceSettings.unitMDProfile && metadata) {
-                <studio-lite-profile-form
-                  [profileUrl]="workspaceSettings && workspaceSettings.unitMDProfile"
-                  [metadata]="metadata"
-                  [language]="'de'"
-                  [formlyWrapper]="'panel'"
-                  [panelExpanded]="true"
-                  (metadataChange)="onMetadataChange($event)">
-                </studio-lite-profile-form>
-              }
-            </mat-card-content>
-          </mat-card>
+          @if (workspaceService.unitMetadataStore &&
+            workspaceSettings &&
+            workspaceSettings.unitMDProfile &&
+            metadata &&
+            unitProfile) {
+              <mat-card>
+                <mat-card-header>
+                  <mat-card-title>
+                    {{ 'metadata.unit-title' | translate }}
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <studio-lite-profile-form
+                      [metadata]="metadata"
+                      [profile]="unitProfile"
+                      [language]="'de'"
+                      [formlyWrapper]="'panel'"
+                      [panelExpanded]="true"
+                      (metadataChange)="onMetadataChange($event)">
+                    </studio-lite-profile-form>
+                </mat-card-content>
+              </mat-card>
+          } @else {
+            <mat-spinner class="wait-animation"></mat-spinner>
+          }
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>
-                {{ 'metadata.items-title' | translate }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content
-              [class.metadata-items]="workspaceSettings && workspaceSettings.itemMDProfile">
-              @if (workspaceSettings && workspaceSettings.itemMDProfile && metadata) {
-                <studio-lite-items
-                  class="fx-flex-row-50"
-                  [profileUrl]="workspaceSettings && workspaceSettings.itemMDProfile"
-                  [metadata]="metadata"
-                  [language]="'de'"
-                  [variablesLoader]="variablesLoader"
-                  (metadataChange)="onMetadataChange($event)">
-                </studio-lite-items>
-              }
-            </mat-card-content>
-          </mat-card>
+          @if (workspaceService.unitMetadataStore &&
+            workspaceSettings &&
+            workspaceSettings.itemMDProfile &&
+            metadata &&
+            itemProfile) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>
+                  {{ 'metadata.items-title' | translate }}
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="metadata-items">
+                  <studio-lite-items
+                    class="fx-flex-row-50"
+                    [profile]="itemProfile"
+                    [metadata]="metadata"
+                    [language]="'de'"
+                    [variablesLoader]="variablesLoader"
+                    (metadataChange)="onMetadataChange($event)">
+                  </studio-lite-items>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <mat-spinner class="wait-animation"></mat-spinner>
+          }
         </div>
       </div>
     </form>

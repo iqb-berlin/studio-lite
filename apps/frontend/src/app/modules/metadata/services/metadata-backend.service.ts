@@ -13,7 +13,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class BackendService {
+export class MetadataBackendService {
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private http: HttpClient

@@ -5,7 +5,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TopConcept, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { BackendService } from './backend.service';
+import { MetadataBackendService } from './metadata-backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 import {
   Vocab, VocabData, VocabIdDictionaryValue
@@ -23,7 +23,7 @@ export class MetadataService {
   itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
 
   constructor(@Inject('SERVER_URL') private readonly serverUrl: string,
-              private backendService: BackendService,
+              private backendService: MetadataBackendService,
               private workspaceService: WorkspaceService,
               private http: HttpClient) {
   }

@@ -11,7 +11,7 @@ import { MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
-import { BackendService } from '../../../metadata/services/backend.service';
+import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 
@@ -34,7 +34,7 @@ export class ProfilesComponent implements OnInit {
   @Input() profiles!: Profile[];
   constructor(
     private wsgAdminService: WsgAdminService,
-    private backendService: BackendService
+    private backendService: MetadataBackendService
   ) {}
 
   async ngOnInit(): Promise<void> {
