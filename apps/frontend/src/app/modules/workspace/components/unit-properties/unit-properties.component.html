@@ -73,7 +73,7 @@
                       </mat-select>
                     </mat-form-field>
                     <studio-lite-new-group-button [disabled]="unitForm.disabled"
-                                                  (groupNameChange)="unitForm.get('group')?.setValue($event)">
+                                                  (groupNameChange)="onGroupNameChange($event)">
                     </studio-lite-new-group-button>
                   </div>
                   <mat-form-field>

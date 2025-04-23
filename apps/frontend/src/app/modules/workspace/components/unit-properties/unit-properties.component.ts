@@ -324,6 +324,10 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
   }
 
+  onGroupNameChange(name: string): void {
+    this.unitForm.get('group')?.setValue(name);
+  }
+
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
