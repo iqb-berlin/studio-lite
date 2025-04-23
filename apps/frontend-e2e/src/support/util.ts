@@ -130,12 +130,12 @@ export function login(username: string, password = '') {
   cy.buttonToContinue('Weiter', 201, '/api/login', 'POST', 'responseLogin');
 }
 
-export function addModules(filenames:string[]):void {
+export function addModules(filenames:string[], type:string):void {
   // cy.get('[data-cy="goto-admin"]').click();
   cy.get('div')
     .contains('studio-lite-wrapped-icon', 'settings')
     .click();
-  cy.get('span:contains("Module")')
+  cy.get(`span:contains("${type}")`)
     .eq(0)
     .click();
   filenames.forEach(filename => {
@@ -158,6 +158,24 @@ export function deleteModule():void {
     .contains('delete')
     .click();
   cy.buttonToContinue('Löschen', 200, '/api/verona-modules', 'GET', 'deleteModule');
+}
+
+export function deleteResource():void {
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
+  cy.get('span:contains("Pakete")')
+    .eq(0)
+    .click();
+  cy.get('mat-cell:contains("GeoGebra")')
+    .parent()
+    .prev()
+    .click();
+  cy.get('mat-checkbox').eq(1).click(); // clicks the checkbox
+  cy.get('div > mat-icon')
+    .contains('delete')
+    .click();
 }
 
 export function deleteGroup(group: string):void {

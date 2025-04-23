@@ -101,6 +101,10 @@ describe('Metadata Management', () => {
     cy.contains('Speichern').click();
   });
 
+  it('creates a definition for the unit1', () => {
+    cy.visitWs(ws1);
+  });
+
   it('deletes the data', () => {
     cy.visitWs(ws1);
     deleteUnit2('D1_001');

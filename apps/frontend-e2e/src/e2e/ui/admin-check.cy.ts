@@ -5,7 +5,7 @@ import {
   createNewUser,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule,
+  deleteGroup, deleteModule, deleteResource,
   deleteUser,
   grantRemovePrivilege
 } from '../../support/util';
@@ -16,6 +16,7 @@ describe('UI Administration Management', () => {
   const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.1.html', 'iqb-player-aspect-2.9.1.html'];
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
+  const resource = 'GeoGebra.itcr.zip';
   const newUser: UserData = {
     username: 'normaluser',
     password: '5678'
@@ -44,11 +45,19 @@ describe('UI Administration Management', () => {
   });
 
   it('user with admin credentials can Modules upload', () => {
-    addModules(modules);
+    addModules(modules, 'Module');
+  });
+
+  it('user with admin credentials can upload the resource package', () => {
+    addModules([resource], 'Pakete');
   });
 
   it('user with admin credentials deletes Modules', () => {
     deleteModule();
+  });
+
+  it('user with admin credentials deletes package resource', () => {
+    deleteResource();
   });
 
   it('user with admin credentials can deletes groups', () => {
