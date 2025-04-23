@@ -98,6 +98,10 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
       this.addItem({});
     } else {
       const item = structuredClone(this.items[result]);
+      if (item.profiles) {
+        item.profiles = item.profiles
+          .map(profile => (profile.isCurrent ? profile : {}));
+      }
       this.addItem({
         ...item,
         id: undefined,
