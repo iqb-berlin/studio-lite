@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import {
   addFirstUser,
-  addUnit,
+  addUnit, clickSave,
   createGroup,
   createWs,
   deleteFirstUser,
@@ -37,11 +37,13 @@ describe('Metadata Management', () => {
     createGroup(group);
     cy.visit('/');
     createWs(ws1, group);
-    grantRemovePrivilege(Cypress.env('username'), ws1, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], ws1, [AccessLevel.Admin]);
+    clickSave();
 
     cy.visit('/');
     createWs(ws2, group);
-    grantRemovePrivilege(Cypress.env('username'), ws2, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], ws2, [AccessLevel.Admin]);
+    clickSave();
   });
 
   it('chooses profiles from the group ', () => {

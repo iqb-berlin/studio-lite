@@ -81,43 +81,47 @@ export function createWs(ws:string, group:string):void {
   // cy.clickButton('Anlegen');
 }
 
-export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {
+export function grantRemovePrivilege(users:string[], ws: string, rights:AccessLevel[]):void {
   cy.get('mat-table')
     .contains(`${ws}`)
     .should('exist')
     .click();
-  switch (rights) {
-    case AccessLevel.Basic: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(0).click();
-        });
-      break;
+  users.forEach((user, index) => {
+    switch (rights[index]) {
+      case AccessLevel.Basic: {
+        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(0).click();
+          });
+        break;
+      }
+      case AccessLevel.Developer: {
+        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(1).click();
+          });
+        break;
+      }
+      default: {
+        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(2).click();
+          });
+        break;
+      }
     }
-    case AccessLevel.Developer: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(1).click();
-        });
-      break;
-    }
-    default: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(2).click();
-        });
-      break;
-    }
-  }
+  });
+}
+
+export function clickSave() {
   cy.get('mat-icon:contains("save")')
     .eq(1)
     .should('exist')
     .click();
 }
-
 export function deleteFirstUser() {
   cy.visit('/');
   deleteUser(Cypress.env('username'));

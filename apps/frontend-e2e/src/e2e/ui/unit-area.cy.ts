@@ -4,7 +4,7 @@ import {
   createWs,
   createGroup,
   deleteFirstUser, deleteGroup,
-  grantRemovePrivilege, importExercise, deleteUnit, moveUnit
+  grantRemovePrivilege, importExercise, deleteUnit, moveUnit, clickSave
 } from '../../support/util';
 import { AccessLevel, UnitData } from '../../support/testData';
 
@@ -46,7 +46,8 @@ describe('UI check: workspace', () => {
     createGroup(group1);
     cy.visit('/');
     createWs(ws1, group1);
-    grantRemovePrivilege(Cypress.env('username'), ws1, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], ws1, [AccessLevel.Admin]);
+    clickSave();
   });
 
   it('should the add button be present and we could add new exercises', () => {
@@ -77,7 +78,8 @@ describe('UI check: workspace', () => {
 
   it('should be able to assign group to the units', () => {
     createWs(ws2, group1);
-    grantRemovePrivilege(Cypress.env('username'), ws2, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], ws2, [AccessLevel.Admin]);
+    clickSave();
     moveUnit(ws1, ws2, unit2);
   });
 
