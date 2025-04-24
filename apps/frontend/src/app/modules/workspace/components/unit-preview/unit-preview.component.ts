@@ -530,18 +530,11 @@ export class UnitPreviewComponent
   }
 
   async checkCodingChanged() {
-    const data = await new Promise<UnitSchemeDto | undefined>(resolve => {
-      resolve(this.workspaceService.getUnitSchemeStore()?.getData());
-    });
-    if (data && !this.workspaceService.isChanged()) {
-      this.checkCoding(data);
-    } else {
-      this.backendService
-        .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
-        .subscribe(schemeData => {
-          this.checkCoding(schemeData);
-        });
-    }
+    this.backendService
+      .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+      .subscribe(schemeData => {
+        this.checkCoding(schemeData);
+      });
   }
 
   private checkCoding(schemeData: UnitSchemeDto | null): void {
