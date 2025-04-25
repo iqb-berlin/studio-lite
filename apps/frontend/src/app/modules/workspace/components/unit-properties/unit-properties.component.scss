@@ -35,4 +35,10 @@
 
 .wait-animation {
   align-self: center;
+
+}
+
+.wait-animation-center {
+  @extend .wait-animation;
+  flex: auto;
 }

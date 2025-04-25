@@ -78,6 +78,8 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   initialReference = '';
   unitProfile!: MDProfile;
   itemProfile!: MDProfile;
+  variablesLoaded: boolean = false;
+  metadataLoaded: boolean = false;
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -106,17 +108,26 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     });
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => { this.metadata = metadata; });
+      .subscribe(metadata => {
+        this.metadata = metadata;
+        this.metadataLoaded = true;
+      });
+    this.variablesLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.variablesLoaded = true;
+      });
     this.addSubscriptionForUnitDefinitionChanges();
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
       .subscribe(id => {
         this.readDataForUnitId(id);
-        this.updateVariables();
       });
   }
 
   private readDataForUnitId(unitId: number): void {
     this.selectedUnitId = unitId;
+    this.variablesLoaded = false;
+    this.metadataLoaded = false;
     this.readData();
   }
 
