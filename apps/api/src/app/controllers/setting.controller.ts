@@ -61,6 +61,7 @@ export class SettingController {
   }
 
   @Get('unit-export-config')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Unit export config retrieved successfully.' }) // TODO Exception
   @ApiTags('admin settings')
   async findUnitExportConfig(): Promise<UnitExportConfigDto> {
@@ -78,6 +79,7 @@ export class SettingController {
   }
 
   @Get('missings-profiles')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Missings profiles config retrieved successfully.' }) // TODO Exception
   @ApiBearerAuth()
   @ApiTags('admin settings')

@@ -202,8 +202,6 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
 export function getItem(profile:string, moreThanOne: boolean, copyItem?: string) {
   cy.get('.add-button > .mdc-button__label').click();
   if (copyItem) {
-    cy.pause();
-    // getStructure(profile, moreThanOne);
     cy.contains('div', 'Inhalt für Item übernehmen').find('svg').click();
     cy.contains('mat-option', '02').click();
     cy.clickButton('Bestätigen');

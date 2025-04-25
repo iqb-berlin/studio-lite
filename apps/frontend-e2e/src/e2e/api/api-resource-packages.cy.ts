@@ -77,11 +77,10 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('401/200 negative test: should get resource package without token', () => {
+    it('401 negative test: should not get resource package without token', () => {
       cy.getPackageAPI(noId)
         .then(resp => {
-          expect(resp.status).to.equal(200);
-        // expect(resp.status).to.equal(401); // should
+          expect(resp.status).to.equal(401);
         });
     });
   });
