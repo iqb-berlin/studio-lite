@@ -265,11 +265,11 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         .subscribe(ues => {
           if (ues) {
             this.workspaceService.setUnitSchemeStore(new UnitSchemeStore(unitId, ues));
-            this.variablesLoader.next(this.getItems());
+            this.variablesLoader.next(this.getVariableIds());
           }
         });
     } else {
-      this.variablesLoader.next(this.getItems());
+      this.variablesLoader.next(this.getVariableIds());
     }
   }
 
@@ -289,11 +289,11 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     this.workspaceService.getUnitDefinitionStore()?.dataChange
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.variablesLoader.next(this.getItems());
+        this.variablesLoader.next(this.getVariableIds());
       });
   }
 
-  private getItems(): AliasId[] {
+  private getVariableIds(): AliasId[] {
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
