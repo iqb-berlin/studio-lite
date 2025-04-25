@@ -148,6 +148,7 @@ export class WorkspaceService {
   }
 
   async loadUnitProperties(): Promise<UnitMetadataStore | undefined> {
+    if (this.unitMetadataStore) return this.unitMetadataStore;
     const selectedUnitId = this.selectedUnit$.getValue();
     return lastValueFrom(this.backendService.getUnitProperties(this.selectedWorkspaceId, selectedUnitId)
       .pipe(
