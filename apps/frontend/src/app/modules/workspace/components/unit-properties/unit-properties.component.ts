@@ -310,7 +310,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         // merge without duplicates
         return [...variableAliasIds, ...variableCodingIds]
           .reduce((acc: AliasId[], current: AliasId) => {
-            if (!acc.find(aliasId => aliasId.id === current.id && aliasId.alias === current.alias)) {
+            if (!acc.find(aliasId => aliasId.id === current.id)) {
               acc.push(current);
             }
             return acc;
