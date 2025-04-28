@@ -71,7 +71,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
 
   ngOnInit() {
-    this.loadProfile();
+    if (this.profile) this.loadProfile();
   }
 
   private loadProfile() {
