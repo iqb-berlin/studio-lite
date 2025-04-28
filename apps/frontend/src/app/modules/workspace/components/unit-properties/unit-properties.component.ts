@@ -325,7 +325,15 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
               acc.push(current);
             }
             return acc;
-          }, []);
+          }, [])
+          // sort by alias
+          .sort((a, b) => {
+            const idA = a.alias.toUpperCase();
+            const idB = b.alias.toUpperCase();
+            if (idA < idB) return -1;
+            if (idA > idB) return 1;
+            return 0;
+          });
       }
     }
     return [];
