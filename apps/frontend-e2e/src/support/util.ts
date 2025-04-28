@@ -64,6 +64,17 @@ export function createGroup(group:string):void {
   cy.buttonToContinue('Anlegen', 201, '/api/admin/workspace-groups', 'POST', 'createWsGroup');
 }
 
+export function makeAdminOfGroup(group:string, admins: string[]):void  {
+  cy.get(`mat-row:contains("${group}")`)
+    .find('mat-checkbox')
+    .click();
+  admins.forEach(user => {
+    cy.contains('mat-checkbox', `(${user})`)
+      .find('svg')
+      .click();
+  });
+}
+
 export function createWs(ws:string, group:string):void {
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)

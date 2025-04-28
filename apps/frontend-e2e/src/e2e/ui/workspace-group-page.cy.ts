@@ -5,7 +5,7 @@ import {
   deleteFirstUser,
   deleteUser,
   login,
-  createGroup, createWs, grantRemovePrivilege, deleteGroup, clickSave
+  createGroup, createWs, grantRemovePrivilege, deleteGroup, clickSave, logout
 } from '../../support/util';
 import { AccessLevel, UserData } from '../../support/testData';
 
@@ -16,12 +16,12 @@ describe('UI Group admin workspace check', () => {
     username: 'normaluser',
     password: '5678'
   };
-  before(() => {
-    addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
-  });
+  // before(() => {
+  //   addFirstUser();
+  // });
+  // after(() => {
+  //   deleteFirstUser();
+  // });
   beforeEach(() => {
     cy.visit('/');
   });
@@ -45,11 +45,20 @@ describe('UI Group admin workspace check', () => {
   //  logout();
   });
 
-  it.skip('should be possible login with credentials', () => {
+  it('should be possible to add a new user to the group', () => {
+
+  });
+
+  it('checks that normal user has no admin setting button. ', () => {
+    logout();
     login(newUser.username, newUser.password);
+    cy.get('studio-lite-wrapped-icon')
+      .contains('mat-icon', 'settings')
+      .should('not.exist');
     // check that he can not see the button setting for the workspace group
     cy.pause();
   });
+
 
   it('deletes the user, group', () => {
     // login(Cypress.env('username'), Cypress.env('password'));
