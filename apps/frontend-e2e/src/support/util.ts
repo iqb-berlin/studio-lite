@@ -64,17 +64,6 @@ export function createGroup(group:string):void {
   cy.buttonToContinue('Anlegen', 201, '/api/admin/workspace-groups', 'POST', 'createWsGroup');
 }
 
-export function makeAdminOfGroup(group:string, admins: string[]):void  {
-  cy.get(`mat-row:contains("${group}")`)
-    .find('mat-checkbox')
-    .click();
-  admins.forEach(user => {
-    cy.contains('mat-checkbox', `(${user})`)
-      .find('svg')
-      .click();
-  });
-}
-
 export function createWs(ws:string, group:string):void {
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
@@ -125,6 +114,26 @@ export function grantRemovePrivilege(users:string[], ws: string, rights:AccessLe
       }
     }
   });
+}
+
+export function makeAdminOfGroup(group:string, admins: string[]):void {
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
+  cy.get('span:contains("Bereichsgruppen")')
+    .eq(0)
+    .click();
+  cy.get(`mat-row:contains("${group}")`)
+    .click();
+  admins.forEach(user => {
+    cy.get(`mat-checkbox:contains((${user}))`)
+      .find('label')
+      .click();
+  });
+  cy.get('mat-icon:contains("save")')
+    .eq(1)
+    .should('exist')
+    .click();
 }
 
 export function clickSave() {
@@ -266,23 +275,15 @@ export function updatePersonalData():void {
   cy.buttonToContinue('Speichern', 200, '/api/my-data', 'PATCH', 'updateData');
 }
 
-export function deleteUnit(unit: UnitData):void {
+export function deleteUnit(shortname:string):void {
   cy.get('mat-icon:contains("delete")')
     .click();
   cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
     .should('exist')
     .click()
-    .type(unit.shortname);
-  cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
+    .type(shortname);
+  cy.get(`mat-cell:contains("${shortname}")`).prev().click();
   cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units*', 'DELETE', 'deleteUnit');
-  // cy.clickButton('Löschen');
-}
-
-export function deleteUnit2(kurzname: string):void {
-  cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
-  cy.get('mat-icon:contains("delete")').eq(0)
-    .click();
-  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Löschen")').click();
 }
 
 export function addUnit(kurzname: string):void {

@@ -73,7 +73,7 @@ describe('UI check: workspace', () => {
 
   it('should be able to delete Unit', () => {
     cy.visitWs(ws1);
-    deleteUnit(unit1);
+    deleteUnit(unit1.shortname);
   });
 
   it('should be able to assign group to the units', () => {

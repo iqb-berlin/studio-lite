@@ -6,7 +6,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteUnit2,
+  deleteUnit,
   grantRemovePrivilege
 } from '../../../support/util';
 import {
@@ -52,7 +52,6 @@ describe('Metadata Management', () => {
     cy.visit('/');
     selectProfileForGroup(group, IqbProfile.MA);
   });
-  // Execute only one of the two test: the previous oder this, not both together
 
   it('chooses profile for an area from a group', () => {
     cy.visit('/');
@@ -109,11 +108,11 @@ describe('Metadata Management', () => {
 
   it('deletes the data', () => {
     cy.visitWs(ws1);
-    deleteUnit2('D1_001');
-    deleteUnit2('D1_002');
+    deleteUnit('D1_001');
+    deleteUnit('D1_002');
     cy.visit('/');
     cy.visitWs(ws2);
-    deleteUnit2('M1_001');
+    deleteUnit('M1_001');
     cy.visit('/');
     deleteGroup(group);
     cy.visit('/');

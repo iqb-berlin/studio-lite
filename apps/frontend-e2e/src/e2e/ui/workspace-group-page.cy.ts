@@ -5,7 +5,7 @@ import {
   deleteFirstUser,
   deleteUser,
   login,
-  createGroup, createWs, grantRemovePrivilege, deleteGroup, clickSave, logout
+  createGroup, createWs, grantRemovePrivilege, deleteGroup, clickSave, logout, makeAdminOfGroup
 } from '../../support/util';
 import { AccessLevel, UserData } from '../../support/testData';
 
@@ -16,12 +16,12 @@ describe('UI Group admin workspace check', () => {
     username: 'normaluser',
     password: '5678'
   };
-  // before(() => {
-  //   addFirstUser();
-  // });
-  // after(() => {
-  //   deleteFirstUser();
-  // });
+  before(() => {
+    addFirstUser();
+  });
+  after(() => {
+    deleteFirstUser();
+  });
   beforeEach(() => {
     cy.visit('/');
   });
@@ -42,26 +42,30 @@ describe('UI Group admin workspace check', () => {
     cy.get('studio-lite-wrapped-icon')
       .contains('mat-icon', 'settings')
       .should('exist');
-  //  logout();
   });
 
-  it('should be possible to add a new user to the group', () => {
-
+  it('should be possible make users as admin of a workspace group ', () => {
+    makeAdminOfGroup(group1, [Cypress.env('username')]);
   });
 
   it('checks that normal user has no admin setting button. ', () => {
     logout();
     login(newUser.username, newUser.password);
-    cy.get('studio-lite-wrapped-icon')
+    cy.get('studio-lite-user-workspaces-groups')
       .contains('mat-icon', 'settings')
       .should('not.exist');
-    // check that he can not see the button setting for the workspace group
-    cy.pause();
   });
 
+  it('checks that workspace admin has setting button for the workspace', () => {
+    logout();
+    login(Cypress.env('username'), Cypress.env('password'));
+    cy.get('studio-lite-user-workspaces-groups')
+      .contains('mat-icon', 'settings')
+      .should('exist');
+  });
 
-  it('deletes the user, group', () => {
-    // login(Cypress.env('username'), Cypress.env('password'));
+  it('deletes the group, and user', () => {
+    cy.pause();
     deleteGroup(group1);
     cy.visit('/');
     deleteUser('normaluser');
