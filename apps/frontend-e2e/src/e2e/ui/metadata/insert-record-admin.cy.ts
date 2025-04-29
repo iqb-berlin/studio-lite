@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser,
+  addFirstUser, clickSave,
   createGroup,
   createWs,
   deleteFirstUser,
@@ -29,10 +29,12 @@ describe('UI Metadata Management from administration', () => {
     createGroup(group);
     cy.visit('/');
     createWs(area, group);
-    grantRemovePrivilege(Cypress.env('username'), area, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], area, [AccessLevel.Admin]);
+    clickSave();
     cy.visit('/');
     createWs(mathArea, group);
-    grantRemovePrivilege(Cypress.env('username'), mathArea, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
+    clickSave();
   });
   it('chooses profiles for a Group from the administration settings ', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);

@@ -81,43 +81,67 @@ export function createWs(ws:string, group:string):void {
   // cy.clickButton('Anlegen');
 }
 
-export function grantRemovePrivilege(user:string, ws: string, rights:AccessLevel):void {
+export function grantRemovePrivilege(users:string[], ws: string, rights:AccessLevel[]):void {
   cy.get('mat-table')
     .contains(`${ws}`)
     .should('exist')
     .click();
-  switch (rights) {
-    case AccessLevel.Basic: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(0).click();
-        });
-      break;
+  users.forEach((user, index) => {
+    switch (rights[index]) {
+      case AccessLevel.Basic: {
+        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(0).click();
+          });
+        break;
+      }
+      case AccessLevel.Developer: {
+        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(1).click();
+          });
+        break;
+      }
+      default: {
+        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(2).click();
+          });
+        break;
+      }
     }
-    case AccessLevel.Developer: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(1).click();
-        });
-      break;
-    }
-    default: {
-      cy.get(`[data-cy="access-rights"]:contains(${user} (${user}))`)
-        .prev()
-        .within(() => {
-          cy.get('mat-checkbox').eq(2).click();
-        });
-      break;
-    }
-  }
+  });
+}
+
+export function makeAdminOfGroup(group:string, admins: string[]):void {
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
+  cy.get('span:contains("Bereichsgruppen")')
+    .eq(0)
+    .click();
+  cy.get(`mat-row:contains("${group}")`)
+    .click();
+  admins.forEach(user => {
+    cy.get(`mat-checkbox:contains((${user}))`)
+      .find('label')
+      .click();
+  });
   cy.get('mat-icon:contains("save")')
     .eq(1)
     .should('exist')
     .click();
 }
 
+export function clickSave() {
+  cy.get('mat-icon:contains("save")')
+    .eq(1)
+    .should('exist')
+    .click();
+}
 export function deleteFirstUser() {
   cy.visit('/');
   deleteUser(Cypress.env('username'));
@@ -130,12 +154,12 @@ export function login(username: string, password = '') {
   cy.buttonToContinue('Weiter', 201, '/api/login', 'POST', 'responseLogin');
 }
 
-export function addModules(filenames:string[]):void {
+export function addModules(filenames:string[], type:string):void {
   // cy.get('[data-cy="goto-admin"]').click();
   cy.get('div')
     .contains('studio-lite-wrapped-icon', 'settings')
     .click();
-  cy.get('span:contains("Module")')
+  cy.get(`span:contains("${type}")`)
     .eq(0)
     .click();
   filenames.forEach(filename => {
@@ -158,6 +182,24 @@ export function deleteModule():void {
     .contains('delete')
     .click();
   cy.buttonToContinue('Löschen', 200, '/api/verona-modules', 'GET', 'deleteModule');
+}
+
+export function deleteResource():void {
+  // cy.get('[data-cy="goto-admin"]').click();
+  cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings')
+    .click();
+  cy.get('span:contains("Pakete")')
+    .eq(0)
+    .click();
+  cy.get('mat-cell:contains("GeoGebra")')
+    .parent()
+    .prev()
+    .click();
+  cy.get('mat-checkbox').eq(1).click(); // clicks the checkbox
+  cy.get('div > mat-icon')
+    .contains('delete')
+    .click();
 }
 
 export function deleteGroup(group: string):void {
@@ -233,23 +275,15 @@ export function updatePersonalData():void {
   cy.buttonToContinue('Speichern', 200, '/api/my-data', 'PATCH', 'updateData');
 }
 
-export function deleteUnit(unit: UnitData):void {
+export function deleteUnit(shortname:string):void {
   cy.get('mat-icon:contains("delete")')
     .click();
   cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
     .should('exist')
     .click()
-    .type(unit.shortname);
-  cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
+    .type(shortname);
+  cy.get(`mat-cell:contains("${shortname}")`).prev().click();
   cy.buttonToContinue('Löschen', 200, '/api/workspaces/*/units*', 'DELETE', 'deleteUnit');
-  // cy.clickButton('Löschen');
-}
-
-export function deleteUnit2(kurzname: string):void {
-  cy.get('studio-lite-unit-table mat-table mat-row').contains(kurzname).click();
-  cy.get('mat-icon:contains("delete")').eq(0)
-    .click();
-  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Löschen")').click();
 }
 
 export function addUnit(kurzname: string):void {
