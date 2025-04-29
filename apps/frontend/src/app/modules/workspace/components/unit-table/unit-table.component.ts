@@ -8,7 +8,8 @@ import {
 } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { MatTooltip } from '@angular/material/tooltip';
 import { State } from '../../../admin/models/state.type';
 import { StatePipe } from '../../pipes/state.pipe';
@@ -42,6 +43,15 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
 
   dataSource!: MatTableDataSource<UnitInListDto>;
   displayedColumns: string[] = ['key', 'name'];
+  private selectUnitSubject: Subject<number> = new Subject<number>();
+
+  constructor() {
+    this.selectUnitSubject.pipe(
+      debounceTime(300)
+    ).subscribe((id: number) => {
+      this.selectUnit.emit(id);
+    });
+  }
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sortTable;
@@ -68,6 +78,10 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
         .some(column => (unitList[column as keyof UnitInListDto] as string)
           .toLowerCase()
           .includes(filter));
+  }
+
+  onUnitClick(id: number): void {
+    this.selectUnitSubject.next(id);
   }
 
   onSortChange($event: Sort): void {

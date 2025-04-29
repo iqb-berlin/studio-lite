@@ -48,9 +48,9 @@
                           <mat-option class="state-option"
                                       [value]="state.id.toString()">
                             <div class="fx-row-center-center">
-                              <span [style.background-color]="state?.color"
-                                    class="state-color">
-                              </span>
+                            <span [style.background-color]="state?.color"
+                                  class="state-color">
+                            </span>
                               {{ state.label }}
                             </div>
                           </mat-option>
@@ -73,7 +73,7 @@
                       </mat-select>
                     </mat-form-field>
                     <studio-lite-new-group-button [disabled]="unitForm.disabled"
-                                                  (groupNameChange)="unitForm.get('group')?.setValue($event)">
+                                                  (groupNameChange)="onGroupNameChange($event)">
                     </studio-lite-new-group-button>
                   </div>
                   <mat-form-field>
@@ -258,47 +258,56 @@
               }
             </mat-card-content>
           </mat-card>
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>
-                {{ 'metadata.unit-title' | translate }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              @if (workspaceSettings && workspaceSettings.unitMDProfile && metadata) {
+          @if (workspaceService.unitMetadataStore &&
+          workspaceSettings && variablesLoaded && metadataLoaded &&
+          ((workspaceSettings.unitMDProfile && metadata && unitProfile) ||
+            !workspaceSettings.unitMDProfile)) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>
+                  {{ 'metadata.unit-title' | translate }}
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
                 <studio-lite-profile-form
-                  [profileUrl]="workspaceSettings && workspaceSettings.unitMDProfile"
                   [metadata]="metadata"
+                  [profile]="unitProfile"
                   [language]="'de'"
                   [formlyWrapper]="'panel'"
                   [panelExpanded]="true"
                   (metadataChange)="onMetadataChange($event)">
                 </studio-lite-profile-form>
-              }
-            </mat-card-content>
-          </mat-card>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <mat-spinner class="wait-animation"></mat-spinner>
+          }
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>
-                {{ 'metadata.items-title' | translate }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content
-              [class.metadata-items]="workspaceSettings && workspaceSettings.itemMDProfile">
-              @if (workspaceSettings && workspaceSettings.itemMDProfile && metadata) {
+          @if (workspaceService.unitMetadataStore &&
+          workspaceSettings && variablesLoaded && metadataLoaded &&
+          ((workspaceSettings.itemMDProfile && metadata && itemProfile)
+            || !workspaceSettings.itemMDProfile)) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>
+                  {{ 'metadata.items-title' | translate }}
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="metadata-items">
                 <studio-lite-items
                   class="fx-flex-row-50"
-                  [profileUrl]="workspaceSettings && workspaceSettings.itemMDProfile"
+                  [profile]="itemProfile"
                   [metadata]="metadata"
                   [language]="'de'"
                   [variablesLoader]="variablesLoader"
                   (metadataChange)="onMetadataChange($event)">
                 </studio-lite-items>
-              }
-            </mat-card-content>
-          </mat-card>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <mat-spinner class="wait-animation"></mat-spinner>
+          }
         </div>
       </div>
     </form>
