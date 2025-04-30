@@ -1,19 +1,15 @@
 import { AccessLevel, UnitData, UserData } from './testData';
+import Chainable = Cypress.Chainable;
 
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
   cy.buttonToContinue('Weiter', 201, '/api/init-login', 'POST', 'responseLogin');
-  // cy.clickButton('Weiter');
-  // cy.wait(100);
 }
 
 export function createNewUser(newUser: UserData):void {
   cy.visit('/');
-  // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
     .should('exist')
@@ -36,9 +32,7 @@ export function createNewUser(newUser: UserData):void {
 
 export function deleteUser(user: string):void {
   // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('mat-cell')
     .contains(`${user}`)
     .should('exist')
@@ -52,9 +46,7 @@ export function deleteUser(user: string):void {
 
 export function createGroup(group:string):void {
   // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -64,11 +56,23 @@ export function createGroup(group:string):void {
   cy.buttonToContinue('Anlegen', 201, '/api/admin/workspace-groups', 'POST', 'createWsGroup');
 }
 
+export function findWorkspaceGroupSettings(group:string): Chainable {
+  return cy.get('studio-lite-user-workspaces-groups')
+    .get(`div>div>div>div:contains("${group}")`)
+    .parent()
+    .contains('mat-icon', 'settings');
+}
+
+export function findAdminSettings(): Chainable {
+  // return cy.get('div>studio-lite-area-little>div:contains("Arbeitsbereich wählen")')
+  //   .parent().parent()
+  //   .contains('studio-lite-wrapped-icon', 'settings');
+  return cy.get('div')
+    .contains('studio-lite-wrapped-icon', 'settings');
+}
+
 export function createWs(ws:string, group:string):void {
-  cy.get(`div>div>div>div:contains("${group}")`)
-    .eq(0)
-    .next()
-    .click();
+  findWorkspaceGroupSettings(group).click();
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();
@@ -117,9 +121,7 @@ export function grantRemovePrivilege(users:string[], ws: string, rights:AccessLe
 }
 
 export function makeAdminOfGroup(group:string, admins: string[]):void {
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -130,13 +132,9 @@ export function makeAdminOfGroup(group:string, admins: string[]):void {
       .find('label')
       .click();
   });
-  cy.get('mat-icon:contains("save")')
-    .eq(1)
-    .should('exist')
-    .click();
 }
 
-export function clickSave() {
+export function clickSaveButtonRight() {
   cy.get('mat-icon:contains("save")')
     .eq(1)
     .should('exist')
@@ -155,10 +153,7 @@ export function login(username: string, password = '') {
 }
 
 export function addModules(filenames:string[], type:string):void {
-  // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get(`span:contains("${type}")`)
     .eq(0)
     .click();
@@ -168,10 +163,7 @@ export function addModules(filenames:string[], type:string):void {
 }
 
 export function deleteModule():void {
-  // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
@@ -186,9 +178,7 @@ export function deleteModule():void {
 
 export function deleteResource():void {
   // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('span:contains("Pakete")')
     .eq(0)
     .click();
@@ -204,9 +194,7 @@ export function deleteResource():void {
 
 export function deleteGroup(group: string):void {
   // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
-    .click();
+  findAdminSettings().click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
