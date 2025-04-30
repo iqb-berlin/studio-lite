@@ -6,7 +6,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup, deleteModule, deleteResource,
-  deleteUser,
+  deleteUser, findAdminSettings,
   grantRemovePrivilege
 } from '../../support/util';
 import { AccessLevel, UserData } from '../../support/testData';
@@ -27,6 +27,10 @@ describe('UI Administration Management', () => {
   beforeEach(() => {
     cy.visit('/');
   });
+  it('user with admin credentials has admin setting button', () => {
+    findAdminSettings().should('exist');
+  });
+
   it('user with admin credentials can add new user', () => {
     createNewUser(newUser);
   });
