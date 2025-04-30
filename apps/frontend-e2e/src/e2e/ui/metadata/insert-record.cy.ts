@@ -1,12 +1,12 @@
 /// <reference types="cypress" />
 import {
   addFirstUser,
-  addUnit,
+  addUnit, clickSave,
   createGroup,
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteUnit2,
+  deleteUnit,
   grantRemovePrivilege
 } from '../../../support/util';
 import {
@@ -37,11 +37,13 @@ describe('Metadata Management', () => {
     createGroup(group);
     cy.visit('/');
     createWs(ws1, group);
-    grantRemovePrivilege(Cypress.env('username'), ws1, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], ws1, [AccessLevel.Admin]);
+    clickSave();
 
     cy.visit('/');
     createWs(ws2, group);
-    grantRemovePrivilege(Cypress.env('username'), ws2, AccessLevel.Admin);
+    grantRemovePrivilege([Cypress.env('username')], ws2, [AccessLevel.Admin]);
+    clickSave();
   });
 
   it('chooses profiles from the group ', () => {
@@ -50,7 +52,6 @@ describe('Metadata Management', () => {
     cy.visit('/');
     selectProfileForGroup(group, IqbProfile.MA);
   });
-  // Execute only one of the two test: the previous oder this, not both together
 
   it('chooses profile for an area from a group', () => {
     cy.visit('/');
@@ -97,16 +98,21 @@ describe('Metadata Management', () => {
     getStructure('uDE', false);
     getItem('iDE', false);
     getItem('iDE', true);
+    getItem('iDE', true, 'iDE');
     cy.contains('Speichern').click();
+  });
+
+  it('creates a definition for the unit1', () => {
+    cy.visitWs(ws1);
   });
 
   it('deletes the data', () => {
     cy.visitWs(ws1);
-    deleteUnit2('D1_001');
-    deleteUnit2('D1_002');
+    deleteUnit('D1_001');
+    deleteUnit('D1_002');
     cy.visit('/');
     cy.visitWs(ws2);
-    deleteUnit2('M1_001');
+    deleteUnit('M1_001');
     cy.visit('/');
     deleteGroup(group);
     cy.visit('/');

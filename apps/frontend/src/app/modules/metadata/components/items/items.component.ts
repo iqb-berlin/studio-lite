@@ -11,6 +11,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
+import { MDProfile } from '@iqb/metadata';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 import {
@@ -34,7 +35,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
 
   @Input() variablesLoader!: BehaviorSubject<AliasId[]>;
-  @Input() profileUrl!: string | undefined;
+  @Input() profile!: MDProfile;
   @Input() metadata: Partial<UnitMetadataValues> = {};
   @Input() language!: string;
 
@@ -97,6 +98,10 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
       this.addItem({});
     } else {
       const item = structuredClone(this.items[result]);
+      if (item.profiles) {
+        item.profiles = item.profiles
+          .map(profile => (profile.isCurrent ? profile : {}));
+      }
       this.addItem({
         ...item,
         id: undefined,

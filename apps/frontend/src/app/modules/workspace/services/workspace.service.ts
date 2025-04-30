@@ -22,7 +22,7 @@ import { State } from '../../admin/models/state.type';
   providedIn: 'root'
 })
 export class WorkspaceService {
-  private unitMetadataStore: UnitMetadataStore | undefined;
+  unitMetadataStore: UnitMetadataStore | undefined;
   private unitDefinitionStore: UnitDefinitionStore | undefined;
   private unitSchemeStore: UnitSchemeStore | undefined;
   groupId!: number;

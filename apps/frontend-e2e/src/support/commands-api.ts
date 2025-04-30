@@ -15,13 +15,7 @@ import {
 } from './testData';
 import { UnitExport } from '../e2e/api/api-settings.cy';
 import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
-// import { HttpParams } from '@angular/common/http';
 
-// General
-Cypress.Commands.add('runAndIgnore', (testFn: () => void) => {
-  testFn();
-  throw new Error('Skipping test count');
-});
 // 1
 Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {
   cy.request({
@@ -204,6 +198,24 @@ Cypress.Commands.add('getGroupAPI', (token:string) => {
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 14
+Cypress.Commands.add('updateGroupAPI', (groupId:string, newGroupName: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/admin/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      id: groupId,
+      name: newGroupName
     },
     failOnStatusCode: false
   });
@@ -396,24 +408,25 @@ Cypress.Commands.add('getWsByGroupAPI',
   });
 
 // 25
-// Cypress.Commands.add('addModuleAPI', (module:string) => {
-//   const authorization = `bearer ${Cypress.env('token_admin')}`;
-//   cy.readFile(`../frontend-e2e/src/fixtures/${module}`)
-//     .then(aspect => {
-//       const bodyToSend = {
-//         aspect
-//       };
-//       cy.request({
-//         method: 'POST',
-//         url: '/api/admin/verona-modules',
-//         headers: {
-//           'app-version': Cypress.env('version'),
-//           authorization
-//         },
-//         body: bodyToSend
-//       });
-//     });
-// });
+Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.fixture(module, 'binary')
+    .then(fileContent => {
+      const formData = new FormData();
+      formData.append('file', new Blob([fileContent], { type: 'html' }), module);
+      cy.request({
+        method: 'POST',
+        url: '/api/admin/verona-modules',
+        headers: {
+          'app-version': Cypress.env('version'),
+          'Content-Type': 'multipart/form-data',
+          authorization
+        },
+        body: formData,
+        failOnStatusCode: false
+      });
+    });
+});
 
 // 26
 Cypress.Commands.add('getModulesAPI', (token:string) => {
@@ -493,8 +506,7 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
       unitGroups: ws.unitGroups,
       stableModulesOnly: ws.stableModulesOnly,
       unitMDProfile: ws.unitMDProfile,
-      itemMDProfile: ws.itemMDProfile,
-      states: ws.states
+      itemMDProfile: ws.itemMDProfile
     },
     failOnStatusCode: false
   });
@@ -636,7 +648,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
   });
 });
 
-// 55
+// 54
 Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -645,6 +657,22 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
     headers: {
       'app-version': Cypress.env('version'),
       authorization
+    },
+    failOnStatusCode: false
+  });
+});
+// 55
+Cypress.Commands.add('updateGroupNameOfWsAPI', (wsId: string, groupName: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/group-name`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      groupName: groupName
     },
     failOnStatusCode: false
   });
@@ -679,17 +707,29 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
       definition: {
         type: 'aspect-unit-definition',
         stateVariables: [],
-        enableSectionNumbering: false,
+        enableSectionNumbering: true,
         sectionNumberingPosition: 'left',
-        version: '4.6.0',
+        showUnitNavNext: false,
+        version: '4.9.0',
         pages: [
           {
             sections: [
               {
                 elements: [
                   {
-                    id: 'text_1',
                     isRelevantForPresentationComplete: true,
+                    id: 'text_1',
+                    alias: 'text_1',
+                    dimensions: {
+                      width: 180,
+                      height: 98,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
                     position: {
                       xPosition: 0,
                       yPosition: 0,
@@ -715,6 +755,156 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       },
                       zIndex: 0
                     },
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
+                    },
+                    type: 'text',
+                    text: '<p>Wie viele Monde hat Jupiter?</p>',
+                    markingMode: 'selection',
+                    markingPanels: [],
+                    highlightableOrange: false,
+                    highlightableTurquoise: false,
+                    highlightableYellow: false,
+                    hasSelectionPopup: false,
+                    columnCount: 1
+                  },
+                  {
+                    isRelevantForPresentationComplete: true,
+                    id: 'text-area_1',
+                    alias: 'text-area_1',
+                    dimensions: {
+                      width: 230,
+                      height: 132,
+                      isWidthFixed: false,
+                      isHeightFixed: false,
+                      minWidth: null,
+                      maxWidth: null,
+                      minHeight: null,
+                      maxHeight: null
+                    },
+                    position: {
+                      xPosition: 0,
+                      yPosition: 0,
+                      gridColumn: 1,
+                      gridColumnRange: 1,
+                      gridRow: 2,
+                      gridRowRange: 1,
+                      marginLeft: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginRight: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginTop: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginBottom: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      zIndex: 0
+                    },
+                    styling: {
+                      backgroundColor: 'transparent',
+                      fontColor: '#000000',
+                      font: 'NunitoSans',
+                      fontSize: 20,
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                      lineHeight: 135
+                    },
+                    label: '',
+                    value: 'Jupiter hat ... Monde',
+                    required: false,
+                    requiredWarnMessage: 'Eingabe erforderlich',
+                    readOnly: false,
+                    inputAssistancePreset: null,
+                    inputAssistanceCustomKeys: '',
+                    inputAssistancePosition: 'floating',
+                    inputAssistanceFloatingStartPosition: 'startBottom',
+                    restrictedToInputAssistanceChars: false,
+                    hasArrowKeys: false,
+                    hasBackspaceKey: false,
+                    showSoftwareKeyboard: true,
+                    addInputAssistanceToKeyboard: true,
+                    hideNativeKeyboard: true,
+                    type: 'text-area',
+                    appearance: 'outline',
+                    resizeEnabled: false,
+                    hasDynamicRowCount: false,
+                    hasAutoHeight: false,
+                    rowCount: 3,
+                    expectedCharactersCount: 300,
+                    hasReturnKey: false,
+                    hasKeyboardIcon: false
+                  }
+                ],
+                height: 400,
+                backgroundColor: '#ffffff',
+                dynamicPositioning: true,
+                autoColumnSize: true,
+                autoRowSize: true,
+                gridColumnSizes: [
+                  {
+                    value: 1,
+                    unit: 'fr'
+                  }
+                ],
+                gridRowSizes: [
+                  {
+                    value: 1,
+                    unit: 'fr'
+                  }
+                ],
+                visibilityDelay: 0,
+                animatedVisibility: false,
+                enableReHide: false,
+                logicalConnectiveOfRules: 'disjunction',
+                visibilityRules: [],
+                ignoreNumbering: false
+              },
+              {
+                elements: [
+                  {
+                    isRelevantForPresentationComplete: true,
+                    id: 'text_1744012056375_1',
+                    alias: 'text_2',
+                    position: {
+                      xPosition: 0,
+                      yPosition: 0,
+                      gridColumn: 1,
+                      gridColumnRange: 1,
+                      gridRow: 1,
+                      gridRowRange: 1,
+                      marginLeft: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginRight: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginTop: {
+                        value: 0,
+                        unit: 'px'
+                      },
+                      marginBottom: {
+                        value: 10,
+                        unit: 'px'
+                      },
+                      zIndex: 0
+                    },
                     dimensions: {
                       width: 180,
                       height: 98,
@@ -726,8 +916,9 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       maxHeight: null
                     },
                     type: 'text',
-                    // eslint-disable-next-line max-len
-                    text: '<p>Wie viele Monde hat Jupiter?</p>',
+                    text: 'Wie viele Trabanten hat Neptuni?',
+                    markingMode: 'selection',
+                    markingPanels: [],
                     highlightableOrange: false,
                     highlightableTurquoise: false,
                     highlightableYellow: false,
@@ -745,8 +936,9 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                     }
                   },
                   {
-                    id: 'text-area_1',
                     isRelevantForPresentationComplete: true,
+                    id: 'radio_1744012095680_1',
+                    alias: 'radio_1',
                     position: {
                       xPosition: 0,
                       yPosition: 0,
@@ -773,8 +965,8 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       zIndex: 0
                     },
                     dimensions: {
-                      width: 230,
-                      height: 132,
+                      width: 180,
+                      height: 100,
                       isWidthFixed: false,
                       isHeightFixed: false,
                       minWidth: null,
@@ -783,29 +975,24 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
                       maxHeight: null
                     },
                     label: '',
-                    value: 'Jupiter hat ... Monde.',
+                    value: null,
                     required: false,
                     requiredWarnMessage: 'Eingabe erforderlich',
                     readOnly: false,
-                    inputAssistancePreset: null,
-                    inputAssistanceCustomKeys: '',
-                    inputAssistancePosition: 'floating',
-                    inputAssistanceFloatingStartPosition: 'startBottom',
-                    restrictedToInputAssistanceChars: false,
-                    hasArrowKeys: false,
-                    hasBackspaceKey: false,
-                    showSoftwareKeyboard: true,
-                    addInputAssistanceToKeyboard: true,
-                    hideNativeKeyboard: true,
-                    type: 'text-area',
-                    appearance: 'outline',
-                    resizeEnabled: false,
-                    hasDynamicRowCount: false,
-                    hasAutoHeight: false,
-                    rowCount: 3,
-                    expectedCharactersCount: 300,
-                    hasReturnKey: false,
-                    hasKeyboardIcon: false,
+                    type: 'radio',
+                    options: [
+                      {
+                        text: '1 Trabant'
+                      },
+                      {
+                        text: '0 Trabant'
+                      },
+                      {
+                        text: '16 Trabanten'
+                      }
+                    ],
+                    alignment: 'column',
+                    strikeOtherOptions: false,
                     styling: {
                       backgroundColor: 'transparent',
                       fontColor: '#000000',
@@ -855,6 +1042,19 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
       },
       variables: [
         {
+          alias: 'text_1',
+          format: '',
+          id: 'text_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'no-value',
+          valuePositionLabels: [],
+          values: [],
+          valuesComplete: false
+        },
+        {
+          alias: 'text-area_1',
           format: '',
           id: 'text-area_1',
           multiple: false,
@@ -864,6 +1064,43 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
           valuePositionLabels: [],
           values: [],
           valuesComplete: false
+        },
+        {
+          alias: 'text_2',
+          format: '',
+          id: 'text_1744012056375_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'no-value',
+          valuePositionLabels: [],
+          values: [],
+          valuesComplete: false
+        },
+        {
+          alias: 'radio_1',
+          format: '',
+          id: 'radio_1744012095680_1',
+          multiple: false,
+          nullable: false,
+          page: '',
+          type: 'integer',
+          valuePositionLabels: [],
+          values: [
+            {
+              label: '1 Trabant',
+              value: '1'
+            },
+            {
+              label: '0 Trabant',
+              value: '2'
+            },
+            {
+              label: '16 Trabanten',
+              value: '3'
+            }
+          ],
+          valuesComplete: true
         }
       ]
     },
@@ -887,7 +1124,9 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   // eslint-disable-next-line max-len
-  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
+  // const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
+  // eslint-disable-next-line max-len
+  const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]},{"id":"text_1","alias":"text_1","label":"","sourceType":"BASE_NO_VALUE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[]},{"id":"text_1744012056375_1","alias":"text_2","label":"","sourceType":"BASE_NO_VALUE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[]},{"id":"radio_1744012095680_1","alias":"radio_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":true,"ruleSets":[{"ruleOperatorAnd":false,"rules":[{"method":"MATCH","parameters":["3"]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL_AUTO","label":"","score":0,"ruleSetOperatorAnd":true,"ruleSets":[],"manualInstruction":""}]}],"version":"3.0"}';
   cy.request({
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
@@ -950,20 +1189,6 @@ Cypress.Commands.add('getWsCodingBookAPI', (ids: string[], wsId: string, token:s
   });
 });
 
-// 58a
-Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/workspace-groups/${groupId}`,
-    headers: {
-      'app-version': Cypress.env('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 58
 Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -998,6 +1223,20 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
             label: 'Finale'
           }]
       }
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 58a
+Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
     },
     failOnStatusCode: false
   });
@@ -1128,6 +1367,20 @@ Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comm
   });
 });
 
+// 67a
+Cypress.Commands.add('getCommentTimeAPI', (wsId: string, unitId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/${unitId}/comments/last-seen`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 68
 Cypress.Commands.add('updateCommentAPI',
   (wsId: string, unitId: string, commentId:string, comment: CommentData, token:string) => {
@@ -1212,6 +1465,14 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
         id: nu,
         link: review.link,
         name: review.name,
+        settings: {
+          reviewConfig: {
+            canComment: true,
+            showCoding: true,
+            showMetadata: true,
+            showOthersComments: true
+          }
+        },
         units: [review.units[0]]
       },
       failOnStatusCode: false
@@ -1247,6 +1508,20 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   });
 });
 
+// 75
+Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}/units/${unitId}/properties`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 76
 Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1261,6 +1536,89 @@ Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, 
   });
 });
 
+// 77
+Cypress.Commands.add('getReviewSchemeAPI', (reviewId:string, unitId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}/units/${unitId}/scheme`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 78
+Cypress.Commands.add('createCommentReviewAPI', (reviewId:string, unitId: string, cd: CommentData, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: `/api/reviews/${reviewId}/units/${unitId}/comments`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    body: {
+      body: cd.body,
+      parentId: cd.parentId,
+      unitId: cd.unitId,
+      userId: cd.userId,
+      userName: cd.userName
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 79
+Cypress.Commands.add('getCommentReviewAPI', (reviewId:string, unitId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}/units/${unitId}/comments`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 80
+Cypress.Commands.add('updateCommentReviewAPI',
+  (reviewId:string, unitId: string, commentId: string, c:CommentData, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      body: {
+        body: c.body,
+        userId: c.userId
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 80A
+Cypress.Commands.add('deleteCommentReviewAPI',
+  (reviewId:string, unitId: string, commentId: string, token:string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'DELETE',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}`,
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
 // 81
 Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1273,6 +1631,28 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
     },
     failOnStatusCode: false
   });
+});
+
+// 81a
+Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.fixture(filename, 'binary')
+    .then(fileContent => {
+      const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
+      const formData = new FormData();
+      formData.append('files', blob, filename);
+      cy.request({
+        method: 'POST',
+        url: `/api/workspaces/${wsId}`,
+        headers: {
+          'app-version': Cypress.env('version'),
+          'content-type': 'multipart/form-data',
+          authorization
+        },
+        body: formData,
+        failOnStatusCode: false
+      });
+    });
 });
 
 // 82
@@ -1618,7 +1998,27 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
     failOnStatusCode: false
   });
 });
-
+// 108
+Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.fixture(resource, 'binary')
+    .then(fileContent => {
+      const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
+      const formData = new FormData();
+      formData.append('resourcePackage', blob, resource);
+      cy.request({
+        method: 'POST',
+        url: '/api/admin/resource-packages',
+        headers: {
+          'app-version': Cypress.env('version'),
+          'Content-Type': 'multipart/form-data',
+          authorization
+        },
+        body: formData,
+        failOnStatusCode: false
+      });
+    });
+});
 // 109
 Cypress.Commands.add('getPackageAPI', (token:string) => {
   const authorization = `bearer ${token}`;
@@ -1661,39 +2061,6 @@ Cypress.Commands.add('deleteFirstUserAPI', () => {
       id: `${Cypress.env(`id_${Cypress.env('username')}`)}`
     },
     failOnStatusCode: false
-  });
-});
-
-// not used
-Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
-  const authorization = `bearer ${token}`;
-  // const path:string = `../frontend-e2e/src/fixtures/${filename}`;
-  // cy.request({
-  //   method: 'POST',
-  //   url: `/api/workspaces/${wsId}/upload`,
-  //   headers: {
-  //     'app-version': Cypress.env('version'),
-  //     authorization
-  //   },
-  //   failOnStatusCode: false
-  // }).selectFile(
-  //   path, {
-  //     action: 'select',
-  //     force: true
-  //   });
-  cy.fixture(filename).then(file => {
-    cy.request({
-      method: 'POST',
-      url: `/api/workspaces/${wsId}`,
-      headers: {
-        'app-version': Cypress.env('version'),
-        'content-type': 'binary',
-        authorization
-      },
-      body: file
-    }).then(resp => {
-      expect(resp.status).to.equal(204);
-    });
   });
 });
 

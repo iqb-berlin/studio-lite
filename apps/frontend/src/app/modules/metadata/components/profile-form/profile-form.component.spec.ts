@@ -28,6 +28,7 @@ describe('ProfileFormComponent', () => {
 
     fixture = TestBed.createComponent(ProfileFormComponent);
     component = fixture.componentInstance;
+    component.metadata = {};
     fixture.detectChanges();
   });
 

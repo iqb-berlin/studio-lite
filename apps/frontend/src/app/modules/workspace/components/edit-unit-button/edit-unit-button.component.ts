@@ -81,7 +81,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         .instant('workspace.user-list-no-selection');
   }
 
-  settings(): void {
+  async settings(): Promise<void> {
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
       width: '700px',
       data: {
@@ -89,9 +89,16 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         selectedRow: { id: this.workspaceService.selectedWorkspaceId }
       }
     });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+    const result = await lastValueFrom(dialogRef.afterClosed());
+    if (result) {
+      let routingOk: boolean;
+      if ((result.unitMDProfile !== this.workspaceService.workspaceSettings.unitMDProfile) ||
+      (result.itemMDProfile !== this.workspaceService.workspaceSettings.itemMDProfile)) {
+        routingOk = await this.selectUnit(0);
+      } else {
+        routingOk = true;
+      }
+      if (routingOk) {
         this.workspaceService.workspaceSettings.defaultEditor = result.defaultEditor;
         this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
         this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
@@ -102,23 +109,24 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
 
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-        ).subscribe(isOK => {
-          if (isOK) {
-            this.snackBar.open(
-              this.translateService.instant('workspace.settings-saved'),
-              '',
-              { duration: 1000 }
-            );
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('workspace.settings-not-saved'),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
+        )
+          .subscribe(isOK => {
+            if (isOK) {
+              this.snackBar.open(
+                this.translateService.instant('workspace.settings-saved'),
+                '',
+                { duration: 1000 }
+              );
+            } else {
+              this.snackBar.open(
+                this.translateService.instant('workspace.settings-not-saved'),
+                this.translateService.instant('workspace.error'),
+                { duration: 3000 }
+              );
+            }
+          });
       }
-    });
+    }
   }
 
   async moveOrCopyUnit(moveOnly: boolean): Promise<void> {

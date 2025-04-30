@@ -49,6 +49,6 @@
   <mat-row class="unit-row"
     [class.selected]="selectedUnitId===row.id"
     *matRowDef="let row; columns: displayedColumns;"
-    (click)="selectUnit.emit(row.id)">
+    (click)="onUnitClick(row.id)">
   </mat-row>
 </mat-table>

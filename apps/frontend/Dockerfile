@@ -12,7 +12,7 @@ ARG PROJECT
 
 RUN sed -i "s/127.0.0.1.*$/backend:3333\",/" apps/${PROJECT}/proxy.conf.json
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["npx", "nx"]
 

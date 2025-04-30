@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { BackendService } from './backend.service';
+import { MetadataBackendService } from './metadata-backend.service';
 
 describe('BackendService', () => {
-  let service: BackendService;
+  let service: MetadataBackendService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,7 +16,7 @@ describe('BackendService', () => {
         }
       ]
     });
-    service = TestBed.inject(BackendService);
+    service = TestBed.inject(MetadataBackendService);
   });
 
   it('should be created', () => {

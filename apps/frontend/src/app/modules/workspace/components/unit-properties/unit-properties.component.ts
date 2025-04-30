@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, ViewChild
 } from '@angular/core';
 import {
   FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
@@ -26,6 +26,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
+import { MDProfile } from '@iqb/metadata';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -38,6 +40,8 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
+import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
+import { MetadataService } from '../../../metadata/services/metadata.service';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -46,10 +50,10 @@ import { AliasId } from '../../../metadata/models/alias-id.interface';
     MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
     MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
     CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
-    TranslateModule, MatIcon, CanReturnUnitPipe]
+    TranslateModule, MatIcon, CanReturnUnitPipe, MatProgressSpinner]
 })
 
-export class UnitPropertiesComponent extends RequestMessageDirective implements OnInit, OnDestroy {
+export class UnitPropertiesComponent extends RequestMessageDirective implements OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
@@ -72,6 +76,10 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   selectedUnitId = 0;
   initialTranscript = '';
   initialReference = '';
+  unitProfile!: MDProfile;
+  itemProfile!: MDProfile;
+  variablesLoaded: boolean = false;
+  metadataLoaded: boolean = false;
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -83,7 +91,9 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     public snackBar: MatSnackBar,
     public selectUnitDialog: MatDialog,
     public uploadReportDialog: MatDialog,
-    public translateService: TranslateService
+    public translateService: TranslateService,
+    private metadataBackendService: MetadataBackendService,
+    private metadataService: MetadataService
   ) {
     super();
     this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -98,23 +108,26 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     });
     this.metadataLoader
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => { this.metadata = metadata; });
+      .subscribe(metadata => {
+        this.metadata = metadata;
+        this.metadataLoaded = true;
+      });
+    this.variablesLoader
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.variablesLoaded = true;
+      });
     this.addSubscriptionForUnitDefinitionChanges();
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
-      .subscribe(id => this.readDataForUnitId(id));
-    this.updateVariables();
-  }
-
-  async ngOnInit(): Promise<void> {
-    // load studio with selected unit
-    if (this.workspaceService.selectedUnit$.getValue()) {
-      this.readDataForUnitId(this.workspaceService.selectedUnit$.getValue());
-    }
-    this.updateVariables();
+      .subscribe(id => {
+        this.readDataForUnitId(id);
+      });
   }
 
   private readDataForUnitId(unitId: number): void {
     this.selectedUnitId = unitId;
+    this.variablesLoaded = false;
+    this.metadataLoaded = false;
     this.readData();
   }
 
@@ -126,7 +139,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
-    this.workspaceService.loadUnitProperties().then(() => {
+    await this.workspaceService.loadUnitProperties().then(() => {
       this.setupForm();
       this.updateVariables();
       this.loadMetaData();
@@ -222,6 +235,37 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       this.workspaceSettings = this.workspaceService.workspaceSettings;
       const unitMetadata = unitMetadataStore.getData();
       this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
+      this.getProfiles();
+    }
+  }
+
+  private getProfiles(): void {
+    if (this.workspaceSettings && this.workspaceSettings.unitMDProfile && !this.unitProfile) {
+      this.metadataBackendService
+        .getMetadataProfile(this.workspaceSettings.unitMDProfile)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(profile => {
+          const unitProfile = new MDProfile(profile);
+          this.metadataService
+            .loadProfileVocabularies(unitProfile)
+            .then(() => {
+              this.unitProfile = unitProfile;
+            });
+        });
+    }
+
+    if (this.workspaceSettings && this.workspaceSettings.itemMDProfile && !this.itemProfile) {
+      this.metadataBackendService
+        .getMetadataProfile(this.workspaceSettings.itemMDProfile)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(profile => {
+          const itemProfile = new MDProfile(profile);
+          this.metadataService
+            .loadProfileVocabularies(itemProfile)
+            .then(() => {
+              this.itemProfile = itemProfile;
+            });
+        });
     }
   }
 
@@ -232,11 +276,11 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         .subscribe(ues => {
           if (ues) {
             this.workspaceService.setUnitSchemeStore(new UnitSchemeStore(unitId, ues));
-            this.variablesLoader.next(this.getItems());
+            this.variablesLoader.next(this.getVariableIds());
           }
         });
     } else {
-      this.variablesLoader.next(this.getItems());
+      this.variablesLoader.next(this.getVariableIds());
     }
   }
 
@@ -256,11 +300,11 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     this.workspaceService.getUnitDefinitionStore()?.dataChange
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.variablesLoader.next(this.getItems());
+        this.variablesLoader.next(this.getVariableIds());
       });
   }
 
-  private getItems(): AliasId[] {
+  private getVariableIds(): AliasId[] {
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
@@ -277,11 +321,19 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         // merge without duplicates
         return [...variableAliasIds, ...variableCodingIds]
           .reduce((acc: AliasId[], current: AliasId) => {
-            if (!acc.find(aliasId => aliasId.id === current.id && aliasId.alias === current.alias)) {
+            if (!acc.find(aliasId => aliasId.id === current.id)) {
               acc.push(current);
             }
             return acc;
-          }, []);
+          }, [])
+          // sort by alias
+          .sort((a, b) => {
+            const idA = a.alias.toUpperCase();
+            const idB = b.alias.toUpperCase();
+            if (idA < idB) return -1;
+            if (idA > idB) return 1;
+            return 0;
+          });
       }
     }
     return [];
@@ -289,6 +341,10 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
 
   onMetadataChange(metadata: UnitMetadataValues): void {
     this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
+  }
+
+  onGroupNameChange(name: string): void {
+    this.unitForm.get('group')?.setValue(name);
   }
 
   ngOnDestroy(): void {

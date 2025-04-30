@@ -6,6 +6,7 @@ import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
+import { MDProfile } from '@iqb/metadata';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { AliasId } from '../../models/alias-id.interface';
 
@@ -29,7 +30,7 @@ export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }
   @Input() variables!: AliasId[];
   @Input() metadata!: ItemsMetadataValues[];
-  @Input() profileUrl!: string | undefined;
+  @Input() profile!: MDProfile;
   @Input() itemIndex!: number;
   @Input() language!: string;
   form = new FormGroup({});
@@ -39,10 +40,8 @@ export class ItemComponent implements OnInit, OnChanges {
   @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.initModel();
-      this.initField();
-    });
+    this.initModel();
+    this.initField();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
