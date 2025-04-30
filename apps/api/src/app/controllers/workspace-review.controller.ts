@@ -32,7 +32,7 @@ export class WorkspaceReviewController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Reviews retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async findAll(@WorkspaceId() workspaceId: number): Promise<ReviewInListDto[]> {
     return this.reviewService.findAll(workspaceId);
@@ -43,7 +43,7 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async findOne(
     @Param('id', ParseIntPipe) reviewId: number
@@ -57,7 +57,7 @@ export class WorkspaceReviewController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async patchOnesUnits(
     @Param('id', ParseIntPipe) reviewId: number,
@@ -75,7 +75,7 @@ export class WorkspaceReviewController {
     type: Number
   })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async create(@Body() createReviewDto: CreateReviewDto) {
     return this.reviewService.create(createReviewDto);
@@ -87,7 +87,7 @@ export class WorkspaceReviewController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async remove(
     @Param('id', ParseIntPipe) reviewId: number): Promise<void> {

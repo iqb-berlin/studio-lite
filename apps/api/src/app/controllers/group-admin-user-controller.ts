@@ -46,7 +46,7 @@ export class GroupAdminUserController {
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
   // @ApiNotFoundResponse({ description: 'Group admin user not found.' }) // TODO: Exception implementieren?
-  @ApiInternalServerErrorResponse({ description: 'Internal error. The user_id not found.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin user')
   async patchOnesWorkspaces(@Param('id') id: number,
     @Body() body: UserWorkspaceAccessForGroupDto) {

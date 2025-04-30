@@ -36,7 +36,7 @@ export class WorkspaceUnitCommentController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async findOnesComments(@Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitCommentService.findOnesComments(unitId);
@@ -48,7 +48,7 @@ export class WorkspaceUnitCommentController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async findLastSeenTimestamp(@Req() request, @Param('unit_id', ParseIntPipe) unitId: number): Promise<Date> {
     return this.unitUserService.findLastSeenCommentTimestamp(request.user.id, unitId);
@@ -60,7 +60,7 @@ export class WorkspaceUnitCommentController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async patchOnesUnitUserLastSeen(
     @Param('unit_id', ParseIntPipe) unitId: number,
@@ -78,7 +78,7 @@ export class WorkspaceUnitCommentController {
     type: Number
   })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
     return this.unitCommentService.createComment(createUnitCommentDto);
@@ -91,7 +91,7 @@ export class WorkspaceUnitCommentController {
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
   @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async patchCommentBody(@Param('id', ParseIntPipe) id: number, @Body() comment: UpdateUnitCommentDto) {
     return this.unitCommentService.patchCommentBody(id, comment);
@@ -105,7 +105,7 @@ export class WorkspaceUnitCommentController {
   @ApiOkResponse({ description: 'Comment successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
   @ApiUnauthorizedResponse({ description: 'Not authorized to delete comment.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id not found. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async removeComment(@Param('id', ParseIntPipe) id: number) {
     return this.unitCommentService.removeComment(id);

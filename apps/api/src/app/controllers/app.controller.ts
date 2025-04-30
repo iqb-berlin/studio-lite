@@ -80,7 +80,7 @@ export class AppController {
   @UseGuards(AppVersionGuard)
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Keycloak login successful.' })
-  @ApiInternalServerErrorResponse({ description: 'The body request has wrong format.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async keycloakLogin(@Body() user: CreateUserDto) {
     const token = await this.authService.keycloakLogin(user);
     return `"${token}"`;

@@ -58,7 +58,7 @@ export class GroupAdminWorkspaceController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace users updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Workspace_id was not given or id was not given.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')
   async patchOnesUsers(@Param('id') id: number,
     @Body() users: UserWorkspaceAccessDto[]) {
@@ -87,7 +87,7 @@ export class GroupAdminWorkspaceController {
   @ApiOkResponse({ description: 'Workspace moved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in origin group' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. No group-admin was given.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')
   async patchGroups(@User() user: UserEntity, @Body() body: MoveToDto): Promise<void> {
     return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
@@ -101,7 +101,7 @@ export class GroupAdminWorkspaceController {
     type: Number
   })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. No group-admin was given.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')
   async create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
     return this.workspaceService.create(createWorkspaceDto);

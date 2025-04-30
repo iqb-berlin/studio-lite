@@ -44,7 +44,7 @@ export class AdminUserController {
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Workspace group updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. No workspace group id was given.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async patchOnesWorkspaceGroups(@Param('id') id: number,
     @Body() body: IdArrayDto): Promise<void> {
     return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, body.ids);

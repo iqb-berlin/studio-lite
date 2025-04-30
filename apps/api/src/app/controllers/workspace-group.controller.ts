@@ -44,7 +44,7 @@ export class WorkspaceGroupController {
   })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace-group' })
   @ApiNotFoundResponse({ description: 'Workspace-group not found.' })
-  @ApiInternalServerErrorResponse({ description: 'Invalid workspace-group. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('workspace-group')
   async findOne(
@@ -69,7 +69,7 @@ export class WorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace-group' })
-  @ApiInternalServerErrorResponse({ description: 'Invalid workspace-group. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('workspace-group')

@@ -23,7 +23,7 @@ export class ReviewUnitController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit metadata retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges. ' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Review_id or unit_id are invalid. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
@@ -39,7 +39,7 @@ export class ReviewUnitController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit definition retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Unit_id is invalid. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
   async getUnitDefinition(
@@ -53,7 +53,7 @@ export class ReviewUnitController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit scheme retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error. Unit_id is invalid. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('review unit')
   async findOnesScheme(
     @Param('id', ParseIntPipe) unitId: number
