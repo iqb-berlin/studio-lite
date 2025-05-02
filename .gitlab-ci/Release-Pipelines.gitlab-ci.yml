@@ -17,13 +17,16 @@
 
 .main_commit_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH && ($CI_COMMIT_BRANCH == "main") && ($CI_PIPELINE_SOURCE != "external_pull_request_event")
+    - if: $CI_COMMIT_BRANCH &&
+          $CI_COMMIT_BRANCH == "main" &&
+          $CI_PIPELINE_SOURCE != "external_pull_request_event"
     - if: $CI_COMMIT_TAG
       when: never
 
 .release_rules:
   rules:
     - if: $CI_COMMIT_TAG =~ /^(?<MAJOR>(?:0|(?:[1-9]\d*)))\.(?<MINOR>(?:0|(?:[1-9]\d*)))\.(?<PATCH>(?:0|(?:[1-9]\d*)))$/
+
 
 check-main-pr-rules:
   stage: .pre
@@ -32,20 +35,20 @@ check-main-pr-rules:
   rules:
     - !reference [ .main_pr_rules, rules ]
   script:
-    - echo $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME
-    - echo $CI_COMMIT_TAG
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" != "main" ];
+    - echo "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}"
+    - echo "${CI_COMMIT_TAG}"
+    - if [ "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}" != "main" ];
       then echo "pull request target branch is not 'main'";
-      else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' == 'main'"; fi
-    - if [ "$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME" == "main" ];
+      else echo "pull request target branch '${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}' == 'main'"; fi
+    - if [ "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}" == "main" ];
       then echo "pull request target branch is 'main'";
-      else echo "pull request target branch '$CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME' != 'main'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ];
+      else echo "pull request target branch '${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}' != 'main'"; fi
+    - if [ -n "${CI_COMMIT_TAG}" ];
       then echo "commit tag string length is nonzero";
-      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ];
+      else echo "commit tag = '${CI_COMMIT_TAG}'"; fi
+    - if [ -z "${CI_COMMIT_TAG}" ];
       then echo "commit tag string length is zero";
-      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+      else echo "commit tag = '${CI_COMMIT_TAG}'"; fi
 
 check-main-commit-rules:
   stage: .pre
@@ -54,39 +57,39 @@ check-main-commit-rules:
   rules:
     - !reference [ .main_commit_rules, rules ]
   script:
-    - echo $CI_COMMIT_BRANCH
-    - echo $CI_PIPELINE_SOURCE
-    - echo $CI_COMMIT_TAG
-    - if [ -n "$CI_COMMIT_BRANCH" ];
+    - echo "${CI_COMMIT_BRANCH}"
+    - echo "${CI_PIPELINE_SOURCE}"
+    - echo "${CI_COMMIT_TAG}"
+    - if [ -n "${CI_COMMIT_BRANCH}" ];
       then echo "commit branch string length is nonzero";
-      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ];
+      else echo "commit branch = '${CI_COMMIT_BRANCH}'"; fi
+    - if [ -z "${CI_COMMIT_BRANCH}" ];
       then echo "commit branch string length is zero";
-      else echo "commit branch = '$CI_COMMIT_BRANCH'"; fi
-    - if [ "$CI_COMMIT_BRANCH" = "main" ];
+      else echo "commit branch = '${CI_COMMIT_BRANCH}'"; fi
+    - if [ "${CI_COMMIT_BRANCH}" = "main" ];
       then echo "commit branch is 'main'";
-      else echo "'$CI_COMMIT_BRANCH' != 'main'"; fi
-    - if [ "$CI_COMMIT_BRANCH" != "main" ];
+      else echo "'${CI_COMMIT_BRANCH}' != 'main'"; fi
+    - if [ "${CI_COMMIT_BRANCH}" != "main" ];
       then echo "commit branch is not 'main'";
-      else echo "'$CI_COMMIT_BRANCH' == 'main'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+      else echo "'${CI_COMMIT_BRANCH}' == 'main'"; fi
+    - if [ "${CI_PIPELINE_SOURCE}" = "external_pull_request_event" ];
       then echo "pipeline source is 'external_pull_request_event'";
-      else echo "'$CI_PIPELINE_SOURCE' != 'external_pull_request_event'"; fi
-    - if [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+      else echo "'${CI_PIPELINE_SOURCE}' != 'external_pull_request_event'"; fi
+    - if [ "${CI_PIPELINE_SOURCE}" != "external_pull_request_event" ];
       then echo "pipeline source is not 'external_pull_request_event'";
-      else echo "'$CI_PIPELINE_SOURCE' == 'external_pull_request_event'"; fi
-    - if [ -n "$CI_COMMIT_BRANCH" ] && [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ];
+      else echo "'${CI_PIPELINE_SOURCE}' == 'external_pull_request_event'"; fi
+    - if [ -n "${CI_COMMIT_BRANCH}" ] && [ "${CI_COMMIT_BRANCH}" = "main" ] && [ "${CI_PIPELINE_SOURCE}" = "external_pull_request_event" ];
       then echo "commit branch exists, is 'main', and it's an external_pull_request_event";
-      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_BRANCH" ] || [ "$CI_COMMIT_BRANCH" != "main" ] || [ "$CI_PIPELINE_SOURCE" != "external_pull_request_event" ];
+      else echo "commit branch = '${CI_COMMIT_BRANCH}', pipeline source = '${CI_PIPELINE_SOURCE}'"; fi
+    - if [ -z "${CI_COMMIT_BRANCH}" ] || [ "${CI_COMMIT_BRANCH}" != "main" ] || [ "${CI_PIPELINE_SOURCE}" != "external_pull_request_event" ];
       then echo "commit branch doesn't exist or isn't 'main' or it isn't an external_pull_request_event";
-      else echo "commit branch = '$CI_COMMIT_BRANCH', pipeline source = '$CI_PIPELINE_SOURCE'"; fi
-    - if [ -z "$CI_COMMIT_TAG" ];
+      else echo "commit branch = '${CI_COMMIT_BRANCH}', pipeline source = '${CI_PIPELINE_SOURCE}'"; fi
+    - if [ -z "${CI_COMMIT_TAG}" ];
       then echo "commit tag string length is zero";
-      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
-    - if [ -n "$CI_COMMIT_TAG" ];
+      else echo "commit tag = '${CI_COMMIT_TAG}'"; fi
+    - if [ -n "${CI_COMMIT_TAG}" ];
       then echo "commit tag string length is nonzero";
-      else echo "commit tag = '$CI_COMMIT_TAG'"; fi
+      else echo "commit tag = '${CI_COMMIT_TAG}'"; fi
 
 check-release-rules:
   stage: .pre
@@ -97,28 +100,30 @@ check-release-rules:
   before_script:
     - RELEASE_REGEX="^((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))$"
   script:
-    - echo $PRERELEASE_REGEX
-    - if [[ $CI_COMMIT_TAG =~ $RELEASE_REGEX ]];
-      then echo "$CI_COMMIT_TAG is a valid release tag.";
-      else echo "$CI_COMMIT_TAG is not a valid release tag!"; fi
+    - echo ${RELEASE_REGEX}
+    - if [[ ${CI_COMMIT_TAG} =~ ${RELEASE_REGEX} ]];
+      then echo "${CI_COMMIT_TAG} is a valid release tag.";
+      else echo "${CI_COMMIT_TAG} is not a valid release tag!"; fi
 
 build-main-pr-base-image:
   stage: build
   interruptible: true
   rules:
     - !reference [ .main_pr_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -127,10 +132,10 @@ build-main-pr-base-image:
           --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${BASE_IMAGE_NAME}:latest
         .
-    - docker push -q -a ${BASE_IMAGE_NAME}
+    - docker push --quiet --all ${BASE_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-pr-backend-test-image:
   stage: build
@@ -139,10 +144,12 @@ build-main-pr-backend-test-image:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -150,8 +157,8 @@ build-main-pr-backend-test-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -162,13 +169,13 @@ build-main-pr-backend-test-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:latest
-          -f apps/api/Dockerfile
-          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+          --file apps/api/Dockerfile
+          --tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
         .
-    - docker push -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker push --quiet ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-pr-frontend-test-image:
   stage: build
@@ -177,10 +184,12 @@ build-main-pr-frontend-test-image:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -188,8 +197,8 @@ build-main-pr-frontend-test-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -202,13 +211,13 @@ build-main-pr-frontend-test-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_IMAGE_NAME}:latest
-          -f apps/frontend/Dockerfile
-          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+          --file apps/frontend/Dockerfile
+          --tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
         .
-    - docker push -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker push --quiet ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-pr-frontend-e2e-test-image:
   stage: build
@@ -217,10 +226,12 @@ build-main-pr-frontend-e2e-test-image:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-base-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -228,8 +239,8 @@ build-main-pr-frontend-e2e-test-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -238,32 +249,34 @@ build-main-pr-frontend-e2e-test-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_E2E_IMAGE_NAME}:latest
-          -f apps/frontend-e2e/Dockerfile
-          -t ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
-          -t ${FRONTEND_E2E_IMAGE_NAME}:latest
+          --file apps/frontend-e2e/Dockerfile
+          --tag ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --tag ${FRONTEND_E2E_IMAGE_NAME}:latest
         .
-    - docker push -q -a ${FRONTEND_E2E_IMAGE_NAME}
+    - docker push --quiet --all ${FRONTEND_E2E_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-pr-db-image:
   stage: build
   interruptible: true
   rules:
     - !reference [ .main_pr_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -271,32 +284,34 @@ build-main-pr-db-image:
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${DB_IMAGE_NAME}:latest
-          -f database/Postgres.Dockerfile
-          -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
-          -t ${DB_IMAGE_NAME}:main
+          --file database/Postgres.Dockerfile
+          --tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --tag ${DB_IMAGE_NAME}:main
         .
-    - docker push -q -a ${DB_IMAGE_NAME}
+    - docker push --quiet --all ${DB_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-pr-liquibase-image:
   stage: build
   interruptible: true
   rules:
     - !reference [ .main_pr_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin $REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
   script:
     - docker build
           --progress plain
@@ -304,14 +319,14 @@ build-main-pr-liquibase-image:
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${LIQUIBASE_IMAGE_NAME}:latest
-          -f database/Liquibase.Dockerfile
-          -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
-          -t ${LIQUIBASE_IMAGE_NAME}:main
+          --file database/Liquibase.Dockerfile
+          --tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --tag ${LIQUIBASE_IMAGE_NAME}:main
         .
-    - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
+    - docker push --quiet --all ${LIQUIBASE_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${REGISTRY}
 
 build-main-pr-backend-image:
   stage: build
@@ -321,10 +336,12 @@ build-main-pr-backend-image:
   needs:
     - build-main-pr-base-image
     - build-main-pr-backend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -332,8 +349,8 @@ build-main-pr-backend-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
   script:
     - docker build
           --progress plain
@@ -344,14 +361,14 @@ build-main-pr-backend-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
-          -f apps/api/Dockerfile
-          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
-          -t ${BACKEND_IMAGE_NAME}:main
+          --file apps/api/Dockerfile
+          --tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --tag ${BACKEND_IMAGE_NAME}:main
         .
-    - docker push -q -a ${BACKEND_IMAGE_NAME}
+    - docker push --quiet --all ${BACKEND_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-pr-frontend-image:
   stage: build
@@ -361,10 +378,12 @@ build-main-pr-frontend-image:
   needs:
     - build-main-pr-base-image
     - build-main-pr-frontend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -372,8 +391,8 @@ build-main-pr-frontend-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
   script:
     - docker build
           --progress plain
@@ -384,14 +403,14 @@ build-main-pr-frontend-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
-          -f apps/frontend/Dockerfile
-          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
-          -t ${FRONTEND_IMAGE_NAME}:main
+          --file apps/frontend/Dockerfile
+          --tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --tag ${FRONTEND_IMAGE_NAME}:main
         .
-    - docker push -q -a ${FRONTEND_IMAGE_NAME}
+    - docker push --quiet --all ${FRONTEND_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 test-main-pr-db:
   stage: test-db
@@ -401,10 +420,12 @@ test-main-pr-db:
   needs:
     - build-main-pr-db-image
     - build-main-pr-liquibase-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -412,19 +433,19 @@ test-main-pr-db:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        pull -q db liquibase
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        pull ---quiet db liquibase
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d db
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach db
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -435,8 +456,8 @@ test-main-pr-db:
             status
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -447,8 +468,8 @@ test-main-pr-db:
             validate
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -460,8 +481,8 @@ test-main-pr-db:
   script:
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -472,8 +493,8 @@ test-main-pr-db:
             updateTestingRollback
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -491,15 +512,17 @@ test-main-pr-backend:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-backend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker pull --quiet ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test api
 
@@ -511,15 +534,17 @@ test-main-pr-frontend:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker pull --quiet ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test frontend
 
@@ -534,10 +559,12 @@ test-main-pr-frontend:
 #    - build-main-pr-backend-image
 #    - build-main-pr-frontend-image
 #    - build-main-pr-frontend-e2e-test-image
-#  image: $DOCKER_IMAGE
+#  image: ${DOCKER_IMAGE}
 #  services:
-#    - name: $DOCKER_SERVICE
-#      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+#    - name: ${DOCKER_SERVICE}
+#      variables:
+#        HEALTHCHECK_TCP_PORT: "2375"
+#      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
 #      alias: docker
 #  before_script:
 #    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -548,13 +575,13 @@ test-main-pr-frontend:
 #    - docker network create app-net
 #    - docker compose
 #          --env-file .env.studio-lite.template
-#          -f docker-compose.studio-lite.yaml
-#          -f docker-compose.studio-lite.prod.yaml
-#        up -d --quiet-pull
+#          --file docker-compose.studio-lite.yaml
+#          --file docker-compose.studio-lite.prod.yaml
+#        up --detach --quiet-pull
 #    - docker compose
 #          --env-file .env.studio-lite.template
-#          -f docker-compose.studio-lite.yaml
-#          -f docker-compose.studio-lite.prod.yaml
+#          --file docker-compose.studio-lite.yaml
+#          --file docker-compose.studio-lite.prod.yaml
 #        run --rm liquibase
 #          liquibase
 #              --changelogFile=studio-lite.changelog-root.xml
@@ -563,7 +590,7 @@ test-main-pr-frontend:
 #              --password=${POSTGRES_PASSWORD}
 #              --classpath=changelog
 #            history
-#    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
+#    - docker compose --file docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
 #  artifacts:
 #    paths:
 #      - dist/cypress/apps/*
@@ -580,10 +607,12 @@ test-main-pr-e2e-api:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -594,13 +623,13 @@ test-main-pr-e2e-api:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -608,7 +637,9 @@ test-main-pr-e2e-api:
               --username=${POSTGRES_USER}
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-api test-e2e-api
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-api
+          test-e2e-api
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -625,10 +656,12 @@ test-main-pr-e2e-ui-chrome:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -639,13 +672,13 @@ test-main-pr-e2e-ui-chrome:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -654,7 +687,9 @@ test-main-pr-e2e-ui-chrome:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-chrome test-e2e-ui-chrome
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-chrome
+          test-e2e-ui-chrome
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -671,10 +706,12 @@ test-main-pr-e2e-ui-chrome-mobile:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -685,13 +722,13 @@ test-main-pr-e2e-ui-chrome-mobile:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -700,8 +737,9 @@ test-main-pr-e2e-ui-chrome-mobile:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
-    - docker compose -f docker-compose.e2e.yaml
-        up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile test-e2e-ui-chrome-mobile
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile
+          test-e2e-ui-chrome-mobile
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -718,10 +756,12 @@ test-main-pr-e2e-ui-firefox:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -732,13 +772,13 @@ test-main-pr-e2e-ui-firefox:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -747,7 +787,9 @@ test-main-pr-e2e-ui-firefox:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-firefox test-e2e-ui-firefox
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-firefox
+          test-e2e-ui-firefox
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -764,10 +806,12 @@ test-main-pr-e2e-ui-firefox-mobile:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -778,13 +822,13 @@ test-main-pr-e2e-ui-firefox-mobile:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -793,8 +837,9 @@ test-main-pr-e2e-ui-firefox-mobile:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
-    - docker compose -f docker-compose.e2e.yaml
-        up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile test-e2e-ui-firefox-mobile
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile
+          test-e2e-ui-firefox-mobile
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -811,10 +856,12 @@ test-main-pr-e2e-ui-edge:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -825,13 +872,13 @@ test-main-pr-e2e-ui-edge:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -840,7 +887,9 @@ test-main-pr-e2e-ui-edge:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
-    - docker compose -f docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e-ui-edge test-e2e-ui-edge
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-edge
+          test-e2e-ui-edge
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -857,10 +906,12 @@ test-main-pr-e2e-ui-edge-mobile:
     - build-main-pr-backend-image
     - build-main-pr-frontend-image
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
@@ -871,13 +922,13 @@ test-main-pr-e2e-ui-edge-mobile:
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
-        up -d --quiet-pull
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
+        up --detach --quiet-pull
     - docker compose
           --env-file .env.studio-lite.template
-          -f docker-compose.studio-lite.yaml
-          -f docker-compose.studio-lite.prod.yaml
+          --file docker-compose.studio-lite.yaml
+          --file docker-compose.studio-lite.prod.yaml
         run --rm liquibase
           liquibase
               --changelogFile=studio-lite.changelog-root.xml
@@ -886,8 +937,9 @@ test-main-pr-e2e-ui-edge-mobile:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
-    - docker compose -f docker-compose.e2e.yaml
-        up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile test-e2e-ui-edge-mobile
+    - docker compose --file docker-compose.e2e.yaml
+        up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile
+          test-e2e-ui-edge-mobile
 
 lint-main-pr-backend:
   stage: lint
@@ -897,10 +949,12 @@ lint-main-pr-backend:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-backend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
@@ -921,15 +975,17 @@ lint-main-pr-frontend:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
-    - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker pull --quiet ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test lint frontend
 
@@ -941,15 +997,17 @@ lint-main-pr-frontend-e2e:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-e2e-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     FRONTEND_E2E_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e"
   before_script:
-    - docker pull -q ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker pull --quiet ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
   script:
     - docker run ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA} lint frontend-e2e
 
@@ -960,15 +1018,17 @@ audit-main-pr-backend:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-backend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
-    - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
+    - docker pull --quiet ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run --entrypoint npm ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test audit --audit-level critical
 
@@ -979,10 +1039,12 @@ audit-main-pr-frontend:
     - !reference [ .main_pr_rules, rules ]
   needs:
     - build-main-pr-frontend-test-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
@@ -995,18 +1057,20 @@ build-main-commit-db-image:
   stage: build-images
   rules:
     - !reference [ .main_commit_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -1014,30 +1078,32 @@ build-main-commit-db-image:
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${DB_IMAGE_NAME}:main
-          -f database/Postgres.Dockerfile
-          -t ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --file database/Postgres.Dockerfile
+          --tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
         .
-    - docker push -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker push --quiet ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-commit-liquibase-image:
   stage: build-images
   rules:
     - !reference [ .main_commit_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -1045,30 +1111,32 @@ build-main-commit-liquibase-image:
           --build-arg REGISTRY_PATH=${DOCKER_HUB_PROXY}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${LIQUIBASE_IMAGE_NAME}:main
-          -f database/Liquibase.Dockerfile
-          -t ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --file database/Liquibase.Dockerfile
+          --tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
         .
-    - docker push -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
+    - docker push --quiet ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${REGISTRY}
 
 build-main-commit-base-image:
   stage: build-images
   rules:
     - !reference [ .main_commit_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
       --progress plain
@@ -1079,10 +1147,10 @@ build-main-commit-base-image:
       --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
       --tag ${BASE_IMAGE_NAME}:latest
       .
-    - docker push -q -a ${BASE_IMAGE_NAME}
+    - docker push --quiet --all ${BASE_IMAGE_NAME}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-commit-backend-image:
   stage: build-images
@@ -1090,10 +1158,12 @@ build-main-commit-backend-image:
     - !reference [ .main_commit_rules, rules ]
   needs:
     - build-main-commit-base-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -1101,8 +1171,8 @@ build-main-commit-backend-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -1113,13 +1183,13 @@ build-main-commit-backend-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:main
-          -f apps/api/Dockerfile
-          -t ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --file apps/api/Dockerfile
+          --tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
         .
     - docker push ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 build-main-commit-frontend-image:
   stage: build-images
@@ -1127,10 +1197,12 @@ build-main-commit-frontend-image:
     - !reference [ .main_commit_rules, rules ]
   needs:
     - build-main-commit-base-image
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
@@ -1138,8 +1210,8 @@ build-main-commit-frontend-image:
   before_script:
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker build
           --progress plain
@@ -1150,13 +1222,13 @@ build-main-commit-frontend-image:
           --build-arg BASE_IMAGE_NAME=${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --build-arg BUILDKIT_INLINE_CACHE=1
           --cache-from ${BACKEND_IMAGE_NAME}:main
-          -f apps/frontend/Dockerfile
-          -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
+          --file apps/frontend/Dockerfile
+          --tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
         .
     - docker push ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
   after_script:
-    - docker logout $CI_DEPENDENCY_PROXY_SERVER
-    - docker logout $CI_REGISTRY
+    - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
+    - docker logout ${CI_REGISTRY}
 
 scan-main-commit-db-image:
   stage: scan-images
@@ -1166,15 +1238,15 @@ scan-main-commit-db-image:
   needs:
     - build-main-commit-db-image
   image:
-    name: $TRIVY_IMAGE
+    name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
   variables:
     # No need to clone the repo, we exclusively work on artifacts.  See
     # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
     GIT_STRATEGY: none
-    TRIVY_USERNAME: "$CI_REGISTRY_USER"
-    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
-    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_USERNAME: "${CI_REGISTRY_USER}"
+    TRIVY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
+    TRIVY_AUTH_URL: "${CI_REGISTRY}"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
     FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}"
@@ -1184,21 +1256,21 @@ scan-main-commit-db-image:
     - trivy clean --scan-cache
     # update vulnerabilities db
     - trivy image --download-db-only --no-progress
-    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    # Builds report and puts it in the default workdir ${CI_PROJECT_DIR}, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
           --format template
           --template "@/contrib/gitlab.tpl"
-          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
-        "$FULL_IMAGE_NAME"
+          --output "${CI_PROJECT_DIR}/gl-container-scanning-report.json"
+        "${FULL_IMAGE_NAME}"
     # Prints full report
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
     # Fail on critical vulnerabilities
     - trivy image
           --exit-code 1
@@ -1206,7 +1278,7 @@ scan-main-commit-db-image:
           --scanners vuln
           --ignore-unfixed
           --severity
-        CRITICAL $FULL_IMAGE_NAME
+        CRITICAL ${FULL_IMAGE_NAME}
   cache:
     paths:
       - .trivycache/
@@ -1224,15 +1296,15 @@ scan-main-commit-liquibase-image:
   needs:
     - build-main-commit-liquibase-image
   image:
-    name: $TRIVY_IMAGE
+    name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
   variables:
     # No need to clone the repo, we exclusively work on artifacts.  See
     # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
     GIT_STRATEGY: none
-    TRIVY_USERNAME: "$CI_REGISTRY_USER"
-    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
-    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_USERNAME: "${CI_REGISTRY_USER}"
+    TRIVY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
+    TRIVY_AUTH_URL: "${CI_REGISTRY}"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
     FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}"
@@ -1242,21 +1314,21 @@ scan-main-commit-liquibase-image:
     - trivy clean --scan-cache
     # update vulnerabilities db
     - trivy image --download-db-only --no-progress
-    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    # Builds report and puts it in the default workdir ${CI_PROJECT_DIR}, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
           --format template
           --template "@/contrib/gitlab.tpl"
-          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
-        "$FULL_IMAGE_NAME"
+          --output "${CI_PROJECT_DIR}/gl-container-scanning-report.json"
+        "${FULL_IMAGE_NAME}"
     # Prints full report
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
     # Fail on critical vulnerabilities
     - trivy image
           --exit-code 1
@@ -1264,7 +1336,7 @@ scan-main-commit-liquibase-image:
           --scanners vuln
           --ignore-unfixed
           --severity CRITICAL
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
   cache:
     paths:
       - .trivycache/
@@ -1282,15 +1354,15 @@ scan-main-commit-backend-image:
   needs:
     - build-main-commit-backend-image
   image:
-    name: $TRIVY_IMAGE
+    name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
   variables:
     # No need to clone the repo, we exclusively work on artifacts.  See
     # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
     GIT_STRATEGY: none
-    TRIVY_USERNAME: "$CI_REGISTRY_USER"
-    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
-    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_USERNAME: "${CI_REGISTRY_USER}"
+    TRIVY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
+    TRIVY_AUTH_URL: "${CI_REGISTRY}"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
     FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend:${CI_COMMIT_SHA}"
@@ -1300,21 +1372,21 @@ scan-main-commit-backend-image:
     - trivy clean --scan-cache
     # update vulnerabilities db
     - trivy image --download-db-only --no-progress
-    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    # Builds report and puts it in the default workdir ${CI_PROJECT_DIR}, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
           --format template
           --template "@/contrib/gitlab.tpl"
-          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
-        "$FULL_IMAGE_NAME"
+          --output "${CI_PROJECT_DIR}/gl-container-scanning-report.json"
+        "${FULL_IMAGE_NAME}"
     # Prints full report
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
     # Fail on critical vulnerabilities
     - trivy image
           --exit-code 1
@@ -1322,7 +1394,7 @@ scan-main-commit-backend-image:
           --scanners vuln
           --ignore-unfixed
           --severity CRITICAL
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
   cache:
     paths:
       - .trivycache/
@@ -1340,15 +1412,15 @@ scan-main-commit-frontend-image:
   needs:
     - build-main-commit-frontend-image
   image:
-    name: $TRIVY_IMAGE
+    name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
   variables:
     # No need to clone the repo, we exclusively work on artifacts.  See
     # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
     GIT_STRATEGY: none
-    TRIVY_USERNAME: "$CI_REGISTRY_USER"
-    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
-    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_USERNAME: "${CI_REGISTRY_USER}"
+    TRIVY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
+    TRIVY_AUTH_URL: "${CI_REGISTRY}"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
     FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend:${CI_COMMIT_SHA}"
@@ -1358,21 +1430,21 @@ scan-main-commit-frontend-image:
     - trivy clean --scan-cache
     # update vulnerabilities db
     - trivy image --download-db-only --no-progress
-    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    # Builds report and puts it in the default workdir ${CI_PROJECT_DIR}, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
           --format template
           --template "@/contrib/gitlab.tpl"
-          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
-        "$FULL_IMAGE_NAME"
+          --output "${CI_PROJECT_DIR}/gl-container-scanning-report.json"
+        "${FULL_IMAGE_NAME}"
     # Prints full report
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
     # Fail on critical vulnerabilities
     - trivy image
           --exit-code 1
@@ -1380,7 +1452,7 @@ scan-main-commit-frontend-image:
           --scanners vuln
           --ignore-unfixed
           --severity CRITICAL
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
   cache:
     paths:
       - .trivycache/
@@ -1397,39 +1469,39 @@ scan-main-commit-traefik-image:
   rules:
     - !reference [ .main_commit_rules, rules ]
   image:
-    name: $TRIVY_IMAGE
+    name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
   variables:
     # No need to clone the repo, we exclusively work on artifacts.  See
     # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
     GIT_STRATEGY: none
-    TRIVY_USERNAME: "$CI_REGISTRY_USER"
-    TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
-    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_USERNAME: "${CI_REGISTRY_USER}"
+    TRIVY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
+    TRIVY_AUTH_URL: "${CI_REGISTRY}"
     TRIVY_NO_PROGRESS: "true"
     TRIVY_CACHE_DIR: ".trivycache/"
-    FULL_IMAGE_NAME: "$TRAEFIK_BASE_IMAGE"
+    FULL_IMAGE_NAME: "${TRAEFIK_BASE_IMAGE}"
   script:
     - trivy --version
     # cache cleanup is needed when scanning images with the same tags, it does not remove the database
     - trivy clean --scan-cache
     # update vulnerabilities db
     - trivy image --download-db-only --no-progress
-    # Builds report and puts it in the default workdir $CI_PROJECT_DIR, so `artifacts:` can take it from there
+    # Builds report and puts it in the default workdir ${CI_PROJECT_DIR}, so `artifacts:` can take it from there
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
           --format template
           --template "@/contrib/gitlab.tpl"
-          --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
-        "$FULL_IMAGE_NAME"
+          --output "${CI_PROJECT_DIR}/gl-container-scanning-report.json"
+        "${FULL_IMAGE_NAME}"
     # Prints full report
     - trivy image
           --exit-code 0
           --timeout 30m
           --scanners vuln
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
     # Fail on critical vulnerabilities
     - trivy image
           --exit-code 1
@@ -1437,7 +1509,7 @@ scan-main-commit-traefik-image:
           --scanners vuln
           --ignore-unfixed
           --severity CRITICAL
-        "$FULL_IMAGE_NAME"
+        "${FULL_IMAGE_NAME}"
   cache:
     paths:
       - .trivycache/
@@ -1451,10 +1523,12 @@ build-release:
   stage: build-images
   rules:
     - !reference [ .release_rules, rules ]
-  image: $DOCKER_IMAGE
+  image: ${DOCKER_IMAGE}
   services:
-    - name: $DOCKER_SERVICE
-      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   variables:
     DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
@@ -1462,7 +1536,7 @@ build-release:
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
-    - echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USER --password-stdin
+    - echo "${DOCKERHUB_PASSWORD}" | docker login -u ${DOCKERHUB_USER} --password-stdin
     - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
     - docker pull -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
