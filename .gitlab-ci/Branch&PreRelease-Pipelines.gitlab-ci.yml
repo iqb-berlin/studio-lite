@@ -1002,7 +1002,7 @@ build-develop-commit-backend-image:
           --tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${BACKEND_IMAGE_NAME}:latest
         .
-    - docker push --quiet --all ${BACKEND_IMAGE_NAME}
+    - docker push --quiet --all-tags ${BACKEND_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
