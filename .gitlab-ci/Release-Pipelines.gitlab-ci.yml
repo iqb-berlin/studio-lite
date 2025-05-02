@@ -132,7 +132,7 @@ build-main-pr-base-image:
           --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${BASE_IMAGE_NAME}:latest
         .
-    - docker push --quiet --all ${BASE_IMAGE_NAME}
+    - docker push --quiet --all-tags ${BASE_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -253,7 +253,7 @@ build-main-pr-frontend-e2e-test-image:
           --tag ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${FRONTEND_E2E_IMAGE_NAME}:latest
         .
-    - docker push --quiet --all ${FRONTEND_E2E_IMAGE_NAME}
+    - docker push --quiet --all-tags ${FRONTEND_E2E_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -288,7 +288,7 @@ build-main-pr-db-image:
           --tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${DB_IMAGE_NAME}:main
         .
-    - docker push --quiet --all ${DB_IMAGE_NAME}
+    - docker push --quiet --all-tags ${DB_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -323,7 +323,7 @@ build-main-pr-liquibase-image:
           --tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${LIQUIBASE_IMAGE_NAME}:main
         .
-    - docker push --quiet --all ${LIQUIBASE_IMAGE_NAME}
+    - docker push --quiet --all-tags ${LIQUIBASE_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${REGISTRY}
@@ -365,7 +365,7 @@ build-main-pr-backend-image:
           --tag ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${BACKEND_IMAGE_NAME}:main
         .
-    - docker push --quiet --all ${BACKEND_IMAGE_NAME}
+    - docker push --quiet --all-tags ${BACKEND_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -407,7 +407,7 @@ build-main-pr-frontend-image:
           --tag ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${FRONTEND_IMAGE_NAME}:main
         .
-    - docker push --quiet --all ${FRONTEND_IMAGE_NAME}
+    - docker push --quiet --all-tags ${FRONTEND_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -1147,7 +1147,7 @@ build-main-commit-base-image:
       --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
       --tag ${BASE_IMAGE_NAME}:latest
       .
-    - docker push --quiet --all ${BASE_IMAGE_NAME}
+    - docker push --quiet --all-tags ${BASE_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
