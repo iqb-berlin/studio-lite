@@ -897,7 +897,7 @@ build-develop-commit-db-image:
           --tag ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${DB_IMAGE_NAME}:latest
         .
-    - docker push -q -a ${DB_IMAGE_NAME}
+    - docker push --quiet --all-tags ${DB_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -931,7 +931,7 @@ build-develop-commit-liquibase-image:
           --tag ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
           --tag ${LIQUIBASE_IMAGE_NAME}:latest
         .
-    - docker push -q -a ${LIQUIBASE_IMAGE_NAME}
+    - docker push --quiet --all-tags ${LIQUIBASE_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -962,7 +962,7 @@ build-develop-commit-base-image:
       --tag ${BASE_IMAGE_NAME}:${CI_COMMIT_SHA}
       --tag ${BASE_IMAGE_NAME}:latest
       .
-    - docker push -q -a ${BASE_IMAGE_NAME}
+    - docker push --quiet --all-tags ${BASE_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
@@ -1042,7 +1042,7 @@ build-develop-commit-frontend-image:
           -t ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}
           -t ${FRONTEND_IMAGE_NAME}:latest
         .
-    - docker push -q -a ${FRONTEND_IMAGE_NAME}
+    - docker push --quiet --all-tags ${FRONTEND_IMAGE_NAME}
   after_script:
     - docker logout ${CI_DEPENDENCY_PROXY_SERVER}
     - docker logout ${CI_REGISTRY}
