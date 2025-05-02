@@ -435,7 +435,7 @@ test-main-pr-db:
           --env-file .env.studio-lite.template
           --file docker-compose.studio-lite.yaml
           --file docker-compose.studio-lite.prod.yaml
-        pull ---quiet db liquibase
+        pull --quiet db liquibase
     - docker compose
           --env-file .env.studio-lite.template
           --file docker-compose.studio-lite.yaml
