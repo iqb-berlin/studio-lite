@@ -2,7 +2,7 @@ import {
   Controller, Get, Param, ParseIntPipe, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags
+  ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiParam, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   UnitDefinitionDto, UnitPropertiesDto, UnitSchemeDto
@@ -22,6 +22,8 @@ export class ReviewUnitController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit metadata retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges. ' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
@@ -36,6 +38,8 @@ export class ReviewUnitController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit definition retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'id', type: Number })
   @ApiTags('review unit')
   async getUnitDefinition(
@@ -48,6 +52,8 @@ export class ReviewUnitController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit scheme retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('review unit')
   async findOnesScheme(
     @Param('id', ParseIntPipe) unitId: number
