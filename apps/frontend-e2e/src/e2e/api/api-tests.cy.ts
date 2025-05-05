@@ -762,7 +762,7 @@ describe('Studio API tests', () => {
 
     /** ************************************************************************* */
     describe('Admin verona API tests', () => {
-      describe('25. POST /api/verona-modules', () => {
+      describe('25. POST /api/admin/verona-modules', () => {
         it('201 positive test: Add schemer, player and editor with credentials ', () => {
           modules.forEach(m => {
             cy.addModuleAPI(m, Cypress.env(`token_${Cypress.env('username')}`))
@@ -771,9 +771,8 @@ describe('Studio API tests', () => {
               });
           });
         });
-        it.skip('401 negative test: should not add a module a false user', () => {
-          // It results in [vite] http proxy error: /api/admin/verona-modules also in local
-          // But the result the test pass.
+        it.skip('500 negative test: should not add a module a false user', () => {
+          // It is skipped because it results in [vite] http proxy error: /api/admin/verona-modules
           cy.addModuleAPI(modules[0], noId)
             .then(resp => {
               expect(resp.status).to.be.oneOf([401, 500]);
@@ -789,6 +788,7 @@ describe('Studio API tests', () => {
               expect(resp.status).to.be.oneOf([200, 304]);
               expect(resp.body.length).equal(3);
             });
+          cy.pause();
         });
 
         it('401 negative test: should not get modules without token', () => {
@@ -1923,7 +1923,7 @@ describe('Studio API tests', () => {
       });
 
       describe('61. GET /api/workspaces/{workspace_id}/units/{id}/metadata', () => {
-        // I can not find the use in studio.
+        // I cannot find the use in Studio.
         // To delete, in sweagger, results are always two empty arrays: profiles and items
         it('200 positive test: should get the metadata of a workspace.', () => {
           cy.getUnitMetadataAPI(Cypress.env(ws2.id),
@@ -2373,9 +2373,7 @@ describe('Studio API tests', () => {
         });
 
         it('404/200 negative test: using false unit id, should us not allow to delete the comment', () => {
-          // This test get 200, but maybe should be 500, because we are using a no existent unit.
-          // It does not need the unit.
-          // to delete the comment. The check was only the right workspace and have the credentials
+          // This test get 200, but maybe should be 404, because we are using a non-existent unit.
           cy.deleteCommentAPI(Cypress.env(ws2.id),
             noId,
             Cypress.env('comment2'),

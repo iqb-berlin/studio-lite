@@ -5,7 +5,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  grantRemovePrivilege
+  grantRemovePrivilegeAtWs
 } from '../../../support/util';
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
@@ -29,12 +29,10 @@ describe('UI Metadata Management from administration', () => {
     createGroup(group);
     cy.visit('/');
     createWs(area, group);
-    grantRemovePrivilege([Cypress.env('username')], area, [AccessLevel.Admin]);
-    clickSaveButtonRight();
+    grantRemovePrivilegeAtWs([Cypress.env('username')], area, [AccessLevel.Admin]);
     cy.visit('/');
     createWs(mathArea, group);
-    grantRemovePrivilege([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
-    clickSaveButtonRight();
+    grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
   });
   it('chooses profiles for a Group from the administration settings ', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);

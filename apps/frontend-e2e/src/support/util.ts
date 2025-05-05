@@ -85,7 +85,7 @@ export function createWs(ws:string, group:string):void {
   // cy.clickButton('Anlegen');
 }
 
-export function grantRemovePrivilege(users:string[], ws: string, rights:AccessLevel[]):void {
+export function grantRemovePrivilegeAtWs(users:string[], ws: string, rights:AccessLevel[]):void {
   cy.get('mat-table')
     .contains(`${ws}`)
     .should('exist')
@@ -118,6 +118,42 @@ export function grantRemovePrivilege(users:string[], ws: string, rights:AccessLe
       }
     }
   });
+  clickSaveButtonRight();
+}
+export function grantRemovePrivilegeAtUser(user:string, wss: string[], rights:AccessLevel[]):void {
+  cy.get('mat-table')
+    .contains(`${user}`)
+    .should('exist')
+    .click();
+  wss.forEach((ws, index) => {
+    switch (rights[index]) {
+      case AccessLevel.Basic: {
+        cy.get(`div>div>div>div>div:contains(${ws})`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(0).click();
+          });
+        break;
+      }
+      case AccessLevel.Developer: {
+        cy.get(`div>div>div>div>div:contains(${ws})`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(1).click();
+          });
+        break;
+      }
+      default: {
+        cy.get(`div>div>div>div>div:contains(${ws})`)
+          .prev()
+          .within(() => {
+            cy.get('mat-checkbox').eq(2).click();
+          });
+        break;
+      }
+    }
+  });
+  clickSaveButtonRight();
 }
 
 export function makeAdminOfGroup(group:string, admins: string[]):void {
@@ -132,13 +168,17 @@ export function makeAdminOfGroup(group:string, admins: string[]):void {
       .find('label')
       .click();
   });
+  clickSaveButtonRight();
 }
 
 export function clickSaveButtonRight() {
-  cy.get('mat-icon:contains("save")')
-    .eq(1)
-    .should('exist')
-    .click();
+  cy.get('mat-icon:contains("save")').then($elements => {
+    if ($elements.length === 1) {
+      cy.get('mat-icon:contains("save")').click();
+    } else {
+      cy.get('mat-icon:contains("save")').eq(1).click();
+    }
+  });
 }
 export function deleteFirstUser() {
   cy.visit('/');

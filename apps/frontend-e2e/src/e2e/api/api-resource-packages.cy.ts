@@ -1,5 +1,4 @@
 import { UserData } from '../../support/testData';
-import { login } from '../../support/util';
 
 describe('Admin settings API tests', () => {
   const noId: string = '9988';
@@ -33,22 +32,8 @@ describe('Admin settings API tests', () => {
 
   describe('108. POST /api/admin/resource-packages', () => {
     const filename = 'GeoGebra.itcr.zip';
-    it.skip('200 positive test: should add a resource package the admin', () => {
-      cy.visit('/');
-      login(Cypress.env('username'), Cypress.env('password'));
-      cy.get('[data-cy="goto-admin"]').click();
-      cy.get('span:contains("Pakete")')
-        .eq(0)
-        .click();
-      const path:string = `../frontend-e2e/src/fixtures/${filename}`;
-      cy.get('input[type=file]')
-        .selectFile(path, {
-          action: 'select',
-          force: true
-        });
-    });
-    //  It is skipped [vite] http proxy error: /api/admin/resource-packages
-    it.skip('500 positive test: should add a resource package the admin', () => {
+    // It is skipped because it results in [vite] http proxy error: /api/admin/resource-packages
+    it.skip('500 negative test: should not add a resource package a false user', () => {
       cy.addPackageAPI(filename, 'noId')
         .then(resp => {
           expect(resp.status).to.equal(500);
