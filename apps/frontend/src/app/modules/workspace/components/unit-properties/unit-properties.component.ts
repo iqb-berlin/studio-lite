@@ -7,7 +7,7 @@ import {
 import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
-import { UnitMetadataValues, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues, UnitPropertiesDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -167,24 +167,6 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         transcript: unitMetadata.transcript,
         group: unitMetadata.groupName
       }, { emitEvent: false });
-      if (this.editorSelector) {
-        this.editorSelector.value = unitMetadata.editor || '';
-        this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
-        });
-      }
-      if (this.playerSelector) {
-        this.playerSelector.value = unitMetadata.player || '';
-        this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
-        });
-      }
-      if (this.schemerSelector) {
-        this.schemerSelector.value = unitMetadata.schemer || '';
-        this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
-        });
-      }
       this.selectedStateColor = unitMetadata.state || '0';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
@@ -205,6 +187,8 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         );
       });
       this.unitForm.enable();
+      // timeout because we access ViewChildren
+      setTimeout(() => this.initVeronaModules(unitMetadata));
       setTimeout(() => {
         const filteredStates = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === unitMetadata.state);
@@ -226,7 +210,26 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     this.initialReference = this.unitForm.get('reference')?.value;
   }
 
-  // metadata
+  private initVeronaModules(unitMetadata: UnitPropertiesDto): void {
+    if (this.editorSelector) {
+      this.editorSelector.value = unitMetadata.editor || '';
+      this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
+        this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
+      });
+    }
+    if (this.playerSelector) {
+      this.playerSelector.value = unitMetadata.player || '';
+      this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
+        this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
+      });
+    }
+    if (this.schemerSelector) {
+      this.schemerSelector.value = unitMetadata.schemer || '';
+      this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
+        this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
+      });
+    }
+  }
 
   private loadMetaData() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
