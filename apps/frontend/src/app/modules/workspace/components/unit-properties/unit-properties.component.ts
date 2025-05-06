@@ -71,7 +71,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
-  selectedStateId = '0';
+  selectedStateId: string | null = null;
   selectedStateColor = '';
   selectedUnitId = 0;
   initialTranscript = '';
@@ -101,7 +101,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
-      state: this.fb.control('0'),
+      state: this.fb.control(''),
       group: this.fb.control(''),
       transcript: this.fb.control(''),
       reference: this.fb.control('')
@@ -151,7 +151,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
-      this.selectedStateId = unitMetadata.state || '0';
+      this.selectedStateId = unitMetadata.state || null;
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
@@ -167,7 +167,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         transcript: unitMetadata.transcript,
         group: unitMetadata.groupName
       }, { emitEvent: false });
-      this.selectedStateColor = unitMetadata.state || '0';
+      this.selectedStateColor = unitMetadata.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
