@@ -15,8 +15,8 @@ function getNameAt(initialName: string): string {
 describe('Studio API tests', () => {
   const noId: string = '9988';
   const modules:string[] = ['iqb-schemer-2.5.3.html',
-    'iqb-editor-aspect-2.9.1.html',
-    'iqb-player-aspect-2.9.1.html'];
+    'iqb-editor-aspect-2.9.3.html',
+    'iqb-player-aspect-2.9.3.html'];
   const fakeUser: UserData = {
     username: 'falseuser',
     password: 'paso',

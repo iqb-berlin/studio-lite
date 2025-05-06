@@ -85,6 +85,15 @@ export function createWs(ws:string, group:string):void {
   // cy.clickButton('Anlegen');
 }
 
+export function clickIndexTab(name:string):void {
+  cy.get(`span:contains(${name})`).click();
+}
+
+export function addStatus(statusName:string, position:number){
+  cy.contains('button', 'Status hinzufügen').click();
+  cy.get('div.state').eq(position).find('input[type="text"]').click().type(statusName);
+}
+
 export function grantRemovePrivilegeAtWs(users:string[], ws: string, rights:AccessLevel[]):void {
   cy.get('mat-table')
     .contains(`${ws}`)
@@ -200,6 +209,23 @@ export function addModules(filenames:string[], type:string):void {
   filenames.forEach(filename => {
     cy.loadModule(filename, filename);
   });
+}
+
+export function setVeronaWs(ws:string):void {
+  cy.visitWs(ws);
+  goToWsMenu();
+  clickButton('Einstellungen');
+  cy.contains('div', 'Voreingestellter Editor').find('svg').click();
+  cy.get('mat-option>span').contains('Aspect').click();
+  cy.contains('div', 'Voreingestellter Player').find('svg').click();
+  cy.get('mat-option>span').contains('Aspect').click();
+  cy.contains('div', 'Voreingestellter Schemer').find('svg').click();
+  cy.get('mat-option>span').contains('Schemer').click();
+  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+}
+
+export function clickButton(name:string):void {
+  cy.contains('button', name).click();
 }
 
 export function deleteModule():void {
@@ -409,6 +435,11 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
     }
   });
   cy.dialogButtonToContinue('Speichern', 201, '/api/workspaces/*/units', 'POST', 'createUnitFromExisting');
+}
+
+export function goToWsMenu():void {
+  cy.get('mat-icon:contains("menu")')
+    .click();
 }
 
 export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):void {
