@@ -39,7 +39,7 @@ describe('Identity tests users API tests', () => {
       });
   });
   after(() => {
-    cy.deleteUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
+    cy.deleteUsersAPI([Cypress.env(`id_${Cypress.env('username')}`)], Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         Cypress.env('token_admin', '');
         expect(resp.status).to.equal(200);
@@ -164,7 +164,6 @@ describe('Identity tests users API tests', () => {
         Cypress.env(`id_${cloakUser1.username}`),
         Cypress.env(`id_${cloakUser2.username}`),
         Cypress.env(`id_${fakeCloakUser3.username}`)];
-
       cy.deleteUsersAPI(
         ids,
         Cypress.env(`token_${Cypress.env('username')}`)

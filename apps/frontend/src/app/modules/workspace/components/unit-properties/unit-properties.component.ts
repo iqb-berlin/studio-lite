@@ -7,7 +7,7 @@ import {
 import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
-import { UnitMetadataValues, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues, UnitPropertiesDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -71,7 +71,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   unitForm: UntypedFormGroup;
   timeZone = 'Europe/Berlin';
   form = new FormGroup({});
-  selectedStateId = '0';
+  selectedStateId: string | null = null;
   selectedStateColor = '';
   selectedUnitId = 0;
   initialTranscript = '';
@@ -101,7 +101,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       key: this.fb.control(''),
       name: this.fb.control(''),
       description: this.fb.control(''),
-      state: this.fb.control('0'),
+      state: this.fb.control(''),
       group: this.fb.control(''),
       transcript: this.fb.control(''),
       reference: this.fb.control('')
@@ -151,7 +151,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
-      this.selectedStateId = unitMetadata.state || '0';
+      this.selectedStateId = unitMetadata.state || null;
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([Validators.required, Validators.pattern('[a-zA-Z-0-9_]+'),
         Validators.minLength(3),
@@ -167,25 +167,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         transcript: unitMetadata.transcript,
         group: unitMetadata.groupName
       }, { emitEvent: false });
-      if (this.editorSelector) {
-        this.editorSelector.value = unitMetadata.editor || '';
-        this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
-        });
-      }
-      if (this.playerSelector) {
-        this.playerSelector.value = unitMetadata.player || '';
-        this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
-        });
-      }
-      if (this.schemerSelector) {
-        this.schemerSelector.value = unitMetadata.schemer || '';
-        this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
-        });
-      }
-      this.selectedStateColor = unitMetadata.state || '0';
+      this.selectedStateColor = unitMetadata.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
@@ -205,6 +187,8 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         );
       });
       this.unitForm.enable();
+      // timeout because we access ViewChildren
+      setTimeout(() => this.initVeronaModules(unitMetadata));
       setTimeout(() => {
         const filteredStates = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === unitMetadata.state);
@@ -226,7 +210,26 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     this.initialReference = this.unitForm.get('reference')?.value;
   }
 
-  // metadata
+  private initVeronaModules(unitMetadata: UnitPropertiesDto): void {
+    if (this.editorSelector) {
+      this.editorSelector.value = unitMetadata.editor || '';
+      this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
+        this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
+      });
+    }
+    if (this.playerSelector) {
+      this.playerSelector.value = unitMetadata.player || '';
+      this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
+        this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
+      });
+    }
+    if (this.schemerSelector) {
+      this.schemerSelector.value = unitMetadata.schemer || '';
+      this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
+        this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
+      });
+    }
+  }
 
   private loadMetaData() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();

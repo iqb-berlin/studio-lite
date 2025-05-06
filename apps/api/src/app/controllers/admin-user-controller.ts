@@ -2,8 +2,15 @@ import {
   Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam,
-  ApiQuery, ApiTags
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   CreateUserDto, IdArrayDto,
@@ -25,6 +32,7 @@ export class AdminUserController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace groups retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
   @ApiTags('admin user')
   async findOnesWorkspaceGroups(@Param('id') id: number): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll(id);
@@ -35,6 +43,8 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Workspace group updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async patchOnesWorkspaceGroups(@Param('id') id: number,
     @Body() body: IdArrayDto): Promise<void> {
     return this.workspaceGroupService.setWorkspaceGroupAdminsByUser(id, body.ids);
@@ -45,6 +55,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Users deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
   @ApiQuery({
     name: 'id',
     type: Number,
@@ -62,6 +73,7 @@ export class AdminUserController {
     description: 'Sends back the id of the new user in database',
     type: Number
   })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
   @ApiTags('admin user')
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -70,6 +82,8 @@ export class AdminUserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'User updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiNotFoundResponse({ description: 'User_id not found.' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBearerAuth()
   @ApiTags('admin user')
