@@ -1,17 +1,34 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addUnitFromExisting, addUnitPred,
+  addFirstUser,
+  addUnitFromExisting,
+  addUnitPred,
   createWs,
   createGroup,
-  deleteFirstUser, deleteGroup,
-  grantRemovePrivilegeAtWs, importExercise, deleteUnit, moveUnit, clickSaveButtonRight
+  deleteFirstUser,
+  deleteGroup,
+  grantRemovePrivilegeAtWs,
+  importExercise,
+  deleteUnit,
+  moveUnit,
+  addModules,
+  createNewUser,
+  setVeronaWs,
+  findWorkspaceGroupSettings, clickIndexTab, addStatus, clickSaveButtonRight
 } from '../../support/util';
-import { AccessLevel, UnitData } from '../../support/testData';
+import { AccessLevel, UnitData, UserData } from '../../support/testData';
+import { selectProfileForAreaFromGroup, selectProfileForGroup } from '../../support/metadata/metadata-util';
+import { IqbProfile } from '../../support/metadata/iqbProfile';
 
 describe('UI check: workspace', () => {
+  const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const group1:string = 'UI_BG';
   const ws1:string = '01Vorlage';
   const ws2:string = '07Final';
+  const newUser: UserData = {
+    username: 'normaluser',
+    password: '5678'
+  };
   const unit1: UnitData = {
     shortname: 'AUF_D1',
     name: 'Name Auf 1',
@@ -43,10 +60,29 @@ describe('UI check: workspace', () => {
   });
 
   it('prepares the context for unit test', () => {
+    cy.visit('/');
+    addModules(modules, 'Module');
+    cy.visit('/');
     createGroup(group1);
     cy.visit('/');
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
+  });
+
+  it('should set player, editor and schemer for the ws', () => {
+    setVeronaWs(ws1);
+    cy.visit('/');
+    selectProfileForGroup(group1, IqbProfile.DE);
+    cy.visit('/');
+    selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
+  });
+
+  it('should add state to the workspace', () => {
+    findWorkspaceGroupSettings(group1).click();
+    clickIndexTab('Einstellungen');
+    addStatus('In Bearbeitung', 0);
+    addStatus('Finale', 1);
+    clickSaveButtonRight();
   });
 
   it('should the add button be present and we could add new exercises', () => {
@@ -77,8 +113,19 @@ describe('UI check: workspace', () => {
 
   it('should be able to assign group to the units', () => {
     createWs(ws2, group1);
+    cy.visit('/');
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
+  });
+
+  it('should add a user to the ws1 with basic creedentials', () => {
+    createNewUser(newUser);
+    findWorkspaceGroupSettings(group1).click();
+    grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
+  });
+
+  it('should able to comment a unit', () => {
+
   });
 
   it('deletes the context ', () => {
