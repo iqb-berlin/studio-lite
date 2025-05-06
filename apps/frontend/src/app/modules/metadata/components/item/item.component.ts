@@ -125,6 +125,11 @@ export class ItemComponent implements OnInit, OnChanges {
       this.model.variableId = this.variables
         .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
     }
+    // update the variableId of the stored metadata
+    if (!!this.model.variableId && this.metadata[this.itemIndex].variableId !== this.model.variableId) {
+      this.metadata[this.itemIndex].variableId = this.model.variableId;
+      this.emitMetadata();
+    }
   }
 
   onModelChange(): void {
