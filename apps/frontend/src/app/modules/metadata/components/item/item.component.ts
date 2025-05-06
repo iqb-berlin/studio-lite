@@ -40,14 +40,18 @@ export class ItemComponent implements OnInit, OnChanges {
   @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
 
   ngOnInit(): void {
-    this.initModel();
-    this.initField();
+    setTimeout(() => {
+      this.initModel();
+      this.initField();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+
     const variables: string = 'variables';
     if (changes[variables] &&
       !changes[variables].firstChange) {
+      console.log('changes', changes);
       this.updateModelVariableId();
       this.initField();
     }
@@ -122,6 +126,7 @@ export class ItemComponent implements OnInit, OnChanges {
         .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
     } else if (this.metadata[this.itemIndex].variableId) { // old Metadata
       this.model.variableReadOnlyId = this.metadata[this.itemIndex].variableId;
+      this.metadata[this.itemIndex].variableReadOnlyId = this.model.variableReadOnlyId;
       this.model.variableId = this.variables
         .find(variable => variable.id === this.model.variableReadOnlyId)?.alias;
     }
