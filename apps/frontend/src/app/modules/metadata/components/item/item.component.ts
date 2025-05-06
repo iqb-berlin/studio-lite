@@ -40,18 +40,14 @@ export class ItemComponent implements OnInit, OnChanges {
   @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.initModel();
-      this.initField();
-    });
+    this.initModel();
+    this.initField();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-
     const variables: string = 'variables';
     if (changes[variables] &&
       !changes[variables].firstChange) {
-      console.log('changes', changes);
       this.updateModelVariableId();
       this.initField();
     }
