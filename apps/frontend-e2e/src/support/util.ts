@@ -86,12 +86,13 @@ export function createWs(ws:string, group:string):void {
 }
 
 export function clickIndexTab(name:string):void {
-  cy.get(`span:contains(${name})`).click();
+  cy.get(`span:contains(${name})`).eq(0).click();
 }
 
-export function addStatus(statusName:string, position:number){
+export function addStatus(statusName:string, position:number) {
   cy.contains('button', 'Status hinzufügen').click();
-  cy.get('div.state').eq(position).find('input[type="text"]').click().type(statusName);
+  cy.get('div.state').eq(position).find('input[type="text"]').click()
+    .type(statusName);
 }
 
 export function grantRemovePrivilegeAtWs(users:string[], ws: string, rights:AccessLevel[]):void {
@@ -327,6 +328,10 @@ export function updatePersonalData():void {
     .clear()
     .type('adam.muller@iqb.hu-berlin.de');
   cy.buttonToContinue('Speichern', 200, '/api/my-data', 'PATCH', 'updateData');
+}
+
+export function selectUnit(unitName:string) {
+  cy.contains(unitName).should('exist').click();
 }
 
 export function deleteUnit(shortname:string):void {

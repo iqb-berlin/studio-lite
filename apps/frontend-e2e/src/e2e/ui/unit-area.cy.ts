@@ -14,7 +14,7 @@ import {
   addModules,
   createNewUser,
   setVeronaWs,
-  findWorkspaceGroupSettings, clickIndexTab, addStatus, clickSaveButtonRight
+  findWorkspaceGroupSettings, clickIndexTab, addStatus, clickSaveButtonRight, deleteUser, logout, login, selectUnit
 } from '../../support/util';
 import { AccessLevel, UnitData, UserData } from '../../support/testData';
 import { selectProfileForAreaFromGroup, selectProfileForGroup } from '../../support/metadata/metadata-util';
@@ -113,22 +113,35 @@ describe('UI check: workspace', () => {
 
   it('should be able to assign group to the units', () => {
     createWs(ws2, group1);
-    cy.visit('/');
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
   });
 
-  it('should add a user to the ws1 with basic creedentials', () => {
+  it('should add an:  user to the ws1 with basic credentials', () => {
     createNewUser(newUser);
+    cy.visit('/');
     findWorkspaceGroupSettings(group1).click();
+    clickIndexTab('Arbeitsbereiche');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
+    cy.visit('/');
+    logout();
   });
 
-  it('should able to comment a unit', () => {
-
+  it('should able to comment an unit a normal user', () => {
+    login(newUser.username, newUser.password);
+    cy.visitWs(ws1);
+    selectUnit(unit3.shortname);
+    clickIndexTab('Kommentare');
+    cy.get('tiptap-editor').type('Neue Kommentar zu unit2');
+    cy.contains('button', 'send').click();
+    cy.visit('/');
+    logout();
   });
 
   it('deletes the context ', () => {
+    login(Cypress.env('username'), Cypress.env('password'));
     deleteGroup(group1);
+    cy.visit('/');
+    deleteUser(newUser.username);
   });
 });
