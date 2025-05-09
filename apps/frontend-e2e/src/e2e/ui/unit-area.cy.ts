@@ -14,7 +14,15 @@ import {
   addModules,
   createNewUser,
   setVeronaWs,
-  findWorkspaceGroupSettings, clickIndexTab, addStatus, clickSaveButtonRight, deleteUser, logout, login, selectUnit
+  findWorkspaceGroupSettings,
+  clickIndexTab,
+  addStatus,
+  clickSaveButtonRight,
+  deleteUser,
+  logout,
+  login,
+  selectUnit,
+  deleteModule
 } from '../../support/util';
 import { AccessLevel, UnitData, UserData } from '../../support/testData';
 import { selectProfileForAreaFromGroup, selectProfileForGroup } from '../../support/metadata/metadata-util';
@@ -134,6 +142,17 @@ describe('UI check: workspace', () => {
     clickIndexTab('Kommentare');
     cy.get('tiptap-editor').type('Neue Kommentar zu unit2');
     cy.contains('button', 'send').click();
+  });
+
+  it('should reply to a comment, and delete a comment', () => {
+    cy.visitWs(ws1);
+    selectUnit(unit3.shortname);
+    clickIndexTab('Kommentare');
+    cy.contains('button', 'reply').click();
+    cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar zu unit2');
+    cy.contains('button', 'send').click();
+    cy.get('studio-lite-comments').find('mat-icon:contains("delete")').eq(0).click();
+    cy.get('studio-lite-delete-dialog').find('button:contains("Löschen")').click();
     cy.visit('/');
     logout();
   });
@@ -143,5 +162,7 @@ describe('UI check: workspace', () => {
     deleteGroup(group1);
     cy.visit('/');
     deleteUser(newUser.username);
+    cy.visit('/');
+    deleteModule();
   });
 });
