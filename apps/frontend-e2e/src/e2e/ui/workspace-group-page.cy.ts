@@ -103,7 +103,6 @@ describe('UI Group admin workspace check', () => {
       .eq(0)
       .click();
     grantRemovePrivilegeAtUser(newUser.username, [ws1, ws2], [AccessLevel.Basic, AccessLevel.Developer]);
-    cy.pause();
   });
 
   it('checks that workspace is editable for the group admin user ', () => {
