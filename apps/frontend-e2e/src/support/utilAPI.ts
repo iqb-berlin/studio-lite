@@ -23,3 +23,22 @@ export function buildQueryParametersComplex(parameters: string[], values: (boole
   }
   return output;
 }
+
+export function buildDownloadQuery(unitIds: string[]):string {
+  if (unitIds.length > 0) {
+    const [first, ...rest] = unitIds;
+    let output:string;
+    output = `{"unitIdList":[${first}`;
+    if (unitIds.length > 1) {
+      rest.forEach(v => {
+        (output += `,${v}`);
+      });
+    }
+    output += '],"addComments":false,"addPlayers":false,"addTestTakersReview":0,' +
+      '"addTestTakersMonitor":0,"addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}';
+    return output;
+  }
+
+  return '{"unitIdList":[],"addComments":false,"addPlayers":false,"addTestTakersReview":0,' +
+      '"addTestTakersMonitor":0,"addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}';
+}

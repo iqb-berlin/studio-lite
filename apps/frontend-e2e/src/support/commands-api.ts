@@ -203,7 +203,21 @@ Cypress.Commands.add('getGroupAPI', (token:string) => {
   });
 });
 
-// 14
+// 14a
+Cypress.Commands.add('getReportAPI', (token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/workspace-groups?download=true',
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 15
 Cypress.Commands.add('updateGroupAPI', (groupId:string, newGroupName: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -518,6 +532,20 @@ Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
   cy.request({
     method: 'GET',
     url: `/api/workspaces/${wsId}`,
+    headers: {
+      'app-version': Cypress.env('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 33a
+Cypress.Commands.add('downloadWsAPI', (wsId:string, downloadQuery:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}?download=true&settings=${downloadQuery}`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
