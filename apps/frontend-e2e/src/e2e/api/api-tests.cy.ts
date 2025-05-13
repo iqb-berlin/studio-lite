@@ -383,29 +383,6 @@ describe('Studio API tests', () => {
       });
     });
 
-    describe('14a. GET /api/admin/workspace-groups download', () => {
-      it('200 positive test: should get workspace report an admin user', () => {
-        cy.getReportAPI(Cypress.env(`token_${Cypress.env('username')}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not get workspace report a normal user', () => {
-        cy.getReportAPI(Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('401 negative test: should not get workspace report an unauthorized user', () => {
-        cy.getReportAPI(noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-    });
-
     describe('15. PATCH /api/admin/workspace-groups', () => {
       it('200 positive test: should modify data for a workspace-group.', () => {
         cy.updateGroupAPI(Cypress.env(group1.id),
@@ -1002,58 +979,6 @@ describe('Studio API tests', () => {
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp2 => {
             expect(resp2.status).to.equal(403);
-          });
-      });
-    });
-
-    describe('33a. GET /api/workspaces/{workspace_id} download=true', () => {
-      it('200 positive test: should download ws by id', () => {
-        const unitIds = [Cypress.env(unit2.shortname)];
-        cy.downloadWsAPI(Cypress.env(ws2.id),
-          buildDownloadQuery(unitIds),
-          Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(200);
-          });
-      });
-
-      it('401 negative test: should not download a ws if we do not pass a correct token', () => {
-        const unitIds = [Cypress.env(unit2.shortname)];
-        cy.downloadWsAPI(Cypress.env(ws2.id),
-          buildDownloadQuery(unitIds),
-          noId)
-          .then(resp => {
-            expect(resp.status).to.equal(401);
-          });
-      });
-
-      it('404 negative test: should not download a ws if we do not pass a unit that is not in the ws ', () => {
-        const unitIds = [Cypress.env(unit2.shortname), Cypress.env(unit1.shortname)];
-        cy.downloadWsAPI(Cypress.env(ws2.id),
-          buildDownloadQuery(unitIds),
-          Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(404);
-          });
-      });
-
-      it('500 negative test: should not download a ws if we do not pass a correct ws id ', () => {
-        const unitIds = [Cypress.env(unit2.shortname)];
-        cy.downloadWsAPI(noId,
-          buildDownloadQuery(unitIds),
-          Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(500);
-          });
-      });
-
-      it('401 negative test: should not return data if we are not users of that ws', () => {
-        const unitIds:string[] = [];
-        cy.downloadWsAPI(Cypress.env(ws3.id),
-          buildDownloadQuery(unitIds),
-          Cypress.env(`token_${user2.username}`))
-          .then(resp => {
-            expect(resp.status).to.equal(401);
           });
       });
     });
@@ -3111,6 +3036,107 @@ describe('Studio API tests', () => {
           Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
+          });
+      });
+    });
+
+    describe('82a. GET /api/admin/workspace-groups download', () => {
+      it('200 positive test: should get workspace report an admin user', () => {
+        cy.pause();
+        cy.getReportAPI(Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
+      it('401 negative test: should not get workspace report a normal user', () => {
+        cy.getReportAPI(Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('401 negative test: should not get workspace report an unauthorized user', () => {
+        cy.getReportAPI(noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+    });
+
+    describe('82b. GET /api/workspace-groups/{workspace_group_id} download=true', () => {
+      it('200 positive test: should download the ws of a group with credentials', () => {
+        cy.downloadWsAPI(Cypress.env(group1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
+      it('401 negative test: should not download the ws within a group without credentials', () => {
+        cy.downloadWsAPI(Cypress.env(group2.id), noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('500/200 negative test: should not download with an invalid group id', () => {
+        cy.downloadWsAPI(noId, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            // It downloads an empty file with only headers
+          });
+      });
+    });
+
+    describe('82c. GET /api/workspaces/{workspace_id} download=true', () => {
+      it('200 positive test: should download ws by id', () => {
+        cy.pause();
+        const unitIds = [Cypress.env(unit2.shortname)];
+        cy.downloadWsUnitsAPI(Cypress.env(ws2.id),
+          buildDownloadQuery(unitIds),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+      });
+
+      it('401 negative test: should not download a ws if we do not pass a correct token', () => {
+        const unitIds = [Cypress.env(unit2.shortname)];
+        cy.downloadWsUnitsAPI(Cypress.env(ws2.id),
+          buildDownloadQuery(unitIds),
+          noId)
+          .then(resp => {
+            expect(resp.status).to.equal(401);
+          });
+      });
+
+      it('404 negative test: should not download a ws if we do not pass a unit that is not in the ws ', () => {
+        const unitIds = [Cypress.env(unit2.shortname), Cypress.env(unit3.shortname)];
+        cy.downloadWsUnitsAPI(Cypress.env(ws2.id),
+          buildDownloadQuery(unitIds),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(404);
+          });
+      });
+
+      it('500 negative test: should not download a ws if we do not pass a correct ws id ', () => {
+        const unitIds = [Cypress.env(unit2.shortname)];
+        cy.downloadWsUnitsAPI(noId,
+          buildDownloadQuery(unitIds),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(500);
+          });
+      });
+
+      it('401 negative test: should not return data if we are not users of that ws', () => {
+        const unitIds:string[] = [];
+        cy.downloadWsUnitsAPI(Cypress.env(ws3.id),
+          buildDownloadQuery(unitIds),
+          Cypress.env(`token_${user2.username}`))
+          .then(resp => {
+            expect(resp.status).to.equal(401);
           });
       });
     });

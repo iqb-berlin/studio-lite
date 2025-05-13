@@ -37,7 +37,7 @@ declare namespace Cypress {
     createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 12
     getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 13
     getGroupAPI(token: string): Chainable<Response>; // 14
-    getReportAPI(token: string): Chainable<Response> // 15
+
     updateGroupAPI(groupId:string, newGroupName: string, token: string): Chainable<Response>; // 14
     setAdminsOfGroupAPI(userIds: string[], groupId: string, token: string): Chainable<Response>; // 16
     getUserAPI(id: string, token: string): Chainable<Response>; // 8
@@ -56,7 +56,6 @@ declare namespace Cypress {
     getUnitsAPI(token: string): Chainable<Response>; // 31
     updateWsSettingsAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 32
     getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 33
-    downloadWsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>; // 33a
     getUsersByWsAPI(wsId: string, token: string): Chainable<Response>; // 34
     getUnitPropertiesAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 40
     updateUnitPropertiesAPI(wsId: string, unitId: string, entry: DefinitionUnit, token: string):
@@ -102,6 +101,10 @@ declare namespace Cypress {
     deleteCommentReviewAPI(reviewId:string, unitId: string, commentId:string, token: string): Chainable<Response> // 80A
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 81
     getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82
+    getReportAPI(token: string): Chainable<Response> // 82a
+    getReportAPI(groupId:string, token: string): Chainable<Response> // 82a
+    downloadWsAPI(groupId: string, token: string): Chainable<Response>; // 82b
+    downloadWsUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>; // 82c
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 83
     getMyData(token:string): Chainable<Response>; // 84
     updateMyData(token:string, data:MyData): Chainable<Response>; // 85
