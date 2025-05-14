@@ -19,11 +19,11 @@ declare namespace Cypress {
     visitWs(ws: string): void;
     // Commands API
     // commands-metadata.ts
-    getRegistryAPI(token: string): Chainable<Response>; // 35
-    getMetadataAPI(profile: string, token: string): Chainable<Response>; // 36
-    updateGroupMetadataAPI(groupId: string, token: string): Chainable<Response>; // 37
-    getVocabularyMetadataAPI(profile: string, token: string): Chainable<Response>; // 38
-    updateWsMetadataAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 39
+    getRegistryAPI(token: string): Chainable<Response>; // 30
+    getMetadataAPI(profile: string, token: string): Chainable<Response>; // 31
+    updateGroupMetadataAPI(groupId: string, token: string): Chainable<Response>; // 32
+    getVocabularyMetadataAPI(profile: string, token: string): Chainable<Response>; // 33
+    updateWsMetadataAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 34
 
     // commands-api.ts
     addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
@@ -32,48 +32,47 @@ declare namespace Cypress {
     updatePasswordAPI(token: string, oldPass: string, newPass: string): Chainable<Response>; // 4
     keycloakAPI(user: UserData): Chainable<Response>; // 5
     createUserAPI(userData: UserData, token: string): Chainable<Response>; // 6
-    getUsersAPI(token: string): Chainable<Response>; // 7b
-    getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 7
-    updateUserAPI(id:string, user: UserData, credentials: boolean, token: string): Chainable<Response>; // 10
-    createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 12
-    getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 13
-    getGroupAPI(token: string): Chainable<Response>; // 14
+    getUsersAPI(token: string): Chainable<Response>; // 7
+    getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 8
+    updateUserAPI(id:string, user: UserData, credentials: boolean, token: string): Chainable<Response>; // 9
+    createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 10
+    getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 11
+    getWsGroupsAPI(token: string): Chainable<Response>; // 12
 
-    updateGroupAPI(groupId:string, newGroupName: string, token: string): Chainable<Response>; // 14
-    setAdminsOfGroupAPI(userIds: string[], groupId: string, token: string): Chainable<Response>; // 16
-    getUserAPI(id: string, token: string): Chainable<Response>; // 8
-    getAdminOfGroupAPI(groupId: string, token: string): Chainable<Response>; // 17
-    createWsAPI(groupId: string, ws: WsData, token: string): Chainable<Response>; // 18
-    moveWsAPI(ws: string, newGroup: string, token: string): Chainable<Response>; // 19
-    getWsAPI(wsId: string, token: string): Chainable<Response>; // 20
-    updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 21
-    updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 21a
-    getUsersOfWsAdminAPI(wsId: string, token: string): Chainable<Response>; // 22
-    getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 23
-    addModuleAPI(module:string, token:string): Chainable<Response>; // 25
-    getModulesAPI(token: string): Chainable<Response>; // 26
-    getModuleAPI(module: string, token: string): Chainable<Response>; // 27
-    createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 30
-    getUnitsAPI(token: string): Chainable<Response>; // 31
-    updateWsSettingsAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 32
-    getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 33
-    getUsersByWsAPI(wsId: string, token: string): Chainable<Response>; // 34
-    getUnitPropertiesAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 40
+    updateGroupAPI(groupId:string, newGroupName: string, token: string): Chainable<Response>; // 13
+    setAdminsOfGroupAPI(userIds: string[], groupId: string, token: string): Chainable<Response>; // 14
+    getAdminOfGroupAPI(groupId: string, token: string): Chainable<Response>; // 15
+    createWsAPI(groupId: string, ws: WsData, token: string): Chainable<Response>; // 16
+    moveWsAPI(ws: string, newGroup: string, token: string): Chainable<Response>; // 17
+    getWsAPI(wsId: string, token: string): Chainable<Response>; // 18
+    updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 19
+    updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 19a
+    getUsersOfWsAPI(wsId: string, token: string): Chainable<Response>; // 20
+    getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 21
+    addModuleAPI(module:string, token:string): Chainable<Response>; // 22
+    getModulesAPI(token: string): Chainable<Response>; // 23
+    getModuleAPI(module: string, token: string): Chainable<Response>; // 24
+    createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 25
+    getUnitsAPI(token: string): Chainable<Response>; // 26
+    updateWsSettingsAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 27
+    getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 28
+    getUsersByWsAPI(wsId: string, token: string): Chainable<Response>; // 29
+    getUnitPropertiesAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 35
     updateUnitPropertiesAPI(wsId: string, unitId: string, entry: DefinitionUnit, token: string):
-    Chainable<Response>; // 41
-    getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 42
-    moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 50
-    renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // 51
-    copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 52
-    getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 54
-    updateGroupNameOfWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // 55
-    getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55a
-    updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55b
-    getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55c
-    updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 55d
-    getWsMetadataAPI(wsId: string, token:string): Chainable<Response>; // 55e
-    getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 55f
-    getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 55g
+    Chainable<Response>; // 36
+    getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 37
+    moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 38
+    renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // 39
+    copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 40
+    getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 41
+    updateGroupNameOfWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // 42
+    getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 43
+    updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 44
+    getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 45
+    updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 46
+    generateMetadataReportAPI(wsId: string, token:string): Chainable<Response>; // 47
+    getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 48
+    getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 49
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
     getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58a
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
