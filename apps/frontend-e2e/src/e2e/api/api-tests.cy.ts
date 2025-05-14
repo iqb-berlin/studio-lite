@@ -16,8 +16,8 @@ function getNameAt(initialName: string): string {
 describe('Studio API tests', () => {
   const noId: string = '9988';
   const modules:string[] = ['iqb-schemer-2.5.3.html',
-    'iqb-editor-aspect-2.9.1.html',
-    'iqb-player-aspect-2.9.1.html'];
+    'iqb-editor-aspect-2.9.3.html',
+    'iqb-player-aspect-2.9.3.html'];
   const fakeUser: UserData = {
     username: 'falseuser',
     password: 'paso',
@@ -229,9 +229,8 @@ describe('Studio API tests', () => {
     });
 
     describe('7. GET /api/group-admin/users', () => {
-      // TO DO check the difference between full and not full
       it('200 positive test: admin user can retrieve all users data', () => {
-        cy.getUsersFullAPI(false, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.getUsersAPI(Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
             expect(resp.body.length).to.equal(2);
@@ -239,21 +238,32 @@ describe('Studio API tests', () => {
       });
 
       it('401 negative test: normal user can not use this api call', () => {
-        cy.getUsersFullAPI(false, Cypress.env(`token_${user2.username}`))
+        cy.getUsersAPI(Cypress.env(`token_${user2.username}`))
           .then(resp2 => {
             expect(resp2.status).to.equal(401);
           });
       });
     });
 
-    describe('7a. GET /api/group-admin/users', () => {
-      // TO DO check the difference between full and not full
+    describe('7a. GET /api/group-admin/users full=true', () => {
       it('200 positive test: admin user can retrieve all users data', () => {
+        let resp1;
+        let resp2;
         cy.getUsersFullAPI(false, Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
             expect(resp.body.length).to.equal(2);
+            resp1 = resp.body;
           });
+        cy.getUsersFullAPI(true, Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body.length).to.equal(2);
+            resp2 = resp.body;
+          });
+        if (resp1 === resp2) {
+          cy.log('Same value');
+        }
       });
 
       it('401 negative test: normal user can not use this api call', () => {
@@ -1309,8 +1319,8 @@ describe('Studio API tests', () => {
 
     describe('42. GET /api/workspaces/{workspace_id}/units', () => {
       it('200 positive test: should get the units from a workspace', () => {
-        // Sweagger has other parameter and we get error 521, sweagger needs the version
-        // TO ASK parameters
+        // Sweagger has other parameter, and we get error 521, sweagger needs the version
+        // And there is no parameter for version.
         cy.getUnitsByWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp1 => {
             expect(resp1.status).to.equal(200);

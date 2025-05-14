@@ -122,7 +122,22 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
   });
 });
 
-// 7.
+// 7a
+Cypress.Commands.add('getUsersAPI',
+  (token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: '/api/group-admin/users',
+      headers: {
+        'app-version': Cypress.env('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 7b
 Cypress.Commands.add('getUsersFullAPI',
   (full: boolean, token: string) => {
     const authorization = `bearer ${token}`;

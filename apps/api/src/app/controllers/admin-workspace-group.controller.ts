@@ -98,7 +98,7 @@ export class AdminWorkspaceGroupController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Workspaces of workspace-group retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'UNo admin privileges.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAllByGroup(id);
