@@ -73,51 +73,52 @@ declare namespace Cypress {
     generateMetadataReportAPI(wsId: string, token:string): Chainable<Response>; // 47
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 48
     getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 49
-    updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58
-    getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 58a
-    updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 59
-    getUnitMetadataAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 61
-    dropboxWsAPI(wsId: string, wsDe: string, token:string): Chainable<Response>; // 62
-    submitUnitsAPI(wsId: string, wsDe: string, unit:string, token:string): Chainable<Response>; // 63, 63b
-    postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 65
-    getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 66
-    updateCommentTimeAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 67
-    getCommentTimeAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 67a
+    updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 50
+    getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 51
+    updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 52
+    getUnitMetadataAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 53
+    dropboxWsAPI(wsId: string, wsDe: string, token:string): Chainable<Response>; // 54
+    submitUnitsAPI(wsId: string, wsDe: string, unit:string, token:string): Chainable<Response>; // 55, 55a
+    postCommentAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 56
+    getCommentsAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 57
+    updateCommentTimeAPI(wsId: string, unitId: string, comment: CommentData, token:string): Chainable<Response>; // 58
+    getCommentTimeAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 59
     updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
-    Chainable<Response>; // 68
-    deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 69
-    addReviewAPI(wsId:string, reviewName: string, token:string): Chainable<Response>; // 70
-    getReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response>; // 71
-    updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 72
-    getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 73
-    getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 74
-    getReviewPropertiesAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 75
-    getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 76
-    getReviewSchemeAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 77
-    createCommentReviewAPI(reviewId:string, unitId: string, c:CommentData, token:string): Chainable<Response>; // 78
-    getCommentReviewAPI(reviewId:string, unitId: string, token:string): Chainable<Response>; // 79
+    Chainable<Response>; // 60
+    deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 61
+    addReviewAPI(wsId:string, reviewName: string, token:string): Chainable<Response>; // 62
+    getReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response>; // 63
+    updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 64
+    getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 65
+    getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 66
+    getReviewPropertiesAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 67
+    getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 68
+    getReviewSchemeAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 69
+    createCommentReviewAPI(reviewId:string, unitId: string, c:CommentData, token:string): Chainable<Response>; // 70
+    getCommentReviewAPI(reviewId:string, unitId: string, token:string): Chainable<Response>; // 71
     // eslint-disable-next-line max-len
-    updateCommentReviewAPI(reviewId:string, unitId: string, commentId:string, c:CommentData, token:string): Chainable<Response>; // 80
-    deleteCommentReviewAPI(reviewId:string, unitId: string, commentId:string, token: string): Chainable<Response> // 80A
-    deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 81
-    getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 82
-    getReportAPI(token: string): Chainable<Response> // 82a
-    getReportAPI(groupId:string, token: string): Chainable<Response> // 82a
-    downloadWsAPI(groupId: string, token: string): Chainable<Response>; // 82b
-    downloadWsUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>; // 82c
-    deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 83
-    getMyData(token:string): Chainable<Response>; // 84
-    updateMyData(token:string, data:MyData): Chainable<Response>; // 85
-    getWsByUserAPI(id: string, token: string): Chainable<Response>; // 86
-    updateWsByUserAPI(id: string, groupId: string, wsIds: string[], token: string): Chainable<Response>; // 86a
-    getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 87
-    updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 87a
-    deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 88
-    deleteGroupsAPI(qs: string[], token: string): Chainable<Response>; // 89
-    deleteModulesAPI(modules: string[], token: string): Chainable<Response>; // 90
-    deleteUserAPI(id:string, token: string): Chainable<Response>; // 91
-    deleteUsersAPI(qs: string[], token: string): Chainable<Response>; // 91
-    deleteFirstUserAPI(): Chainable<Response>; // 110
+    updateCommentReviewAPI(reviewId:string, unitId: string, commentId:string, c:CommentData, token:string): Chainable<Response>; // 72
+    deleteCommentReviewAPI(reviewId:string, unitId: string, commentId:string, token: string): Chainable<Response> // 73
+    deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 74
+    getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 75
+    getReportAPI(token: string): Chainable<Response> // 76
+    getReportAPI(groupId:string, token: string): Chainable<Response> // 76
+    downloadWsAPI(groupId: string, token: string): Chainable<Response>; // 77
+    downloadWsUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>; // 78
+    deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 79
+    getMyData(token:string): Chainable<Response>; // 80
+    updateMyData(token:string, data:MyData): Chainable<Response>; // 81
+    getWsByUserAPI(id: string, token: string): Chainable<Response>; // 82
+    updateWsByUserAPI(id: string, groupId: string, wsIds: string[], token: string): Chainable<Response>; // 83
+    uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // 84
+    getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 85
+    updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 86
+    deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 87
+    deleteGroupsAPI(qs: string[], token: string): Chainable<Response>; // 88
+    deleteModulesAPI(modules: string[], token: string): Chainable<Response>; // 89
+    deleteUserAPI(id:string, token: string): Chainable<Response>; // 90
+    deleteFirstUserAPI(): Chainable<Response>; // 90
+    deleteUsersAPI(qs: string[], token: string): Chainable<Response>; // 90a
 
     getSettingConfigAPI(token:string): Chainable<Response>; // 100
     updateSettingConfigAPI(token:string, hour: number): Chainable<Response>; // 101
@@ -130,7 +131,5 @@ declare namespace Cypress {
     addPackageAPI(resource:string, token:string): Chainable<Response>; // 108
     getPackageAPI(token:string): Chainable<Response>; // 109
     deletePackageAPI(token:string, packageId:string): Chainable<Response>; // 110
-
-    uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // b6 not used
   }
 }
