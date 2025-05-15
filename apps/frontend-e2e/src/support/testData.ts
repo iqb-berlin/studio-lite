@@ -27,15 +27,6 @@ export interface UserData {
   identity?: string;
 }
 
-export interface InterceptData {
-  operation: Operation;
-  name: string;
-  url: string;
-  status: string;
-  headers: string;
-  body: string;
-}
-
 export interface WsSettings {
   defaultEditor?: string;
   defaultPlayer?: string;
@@ -46,20 +37,6 @@ export interface WsSettings {
   itemMDProfile?: string;
   states?: string[];
 }
-
-export interface DownloadSettings {
-  unitList: number[];
-  addPlayers: boolean;
-  addTestTakersReview: number;
-  addTestTakersMonitor: number;
-  addTestTakersHot:number;
-  passwordLess: boolean;
-  bookletSettings:string[];
-}
-// export interface MetaValue {
-//   name: string,
-//   value: string
-// }
 
 export interface CommentData {
   body?: string;
@@ -101,9 +78,7 @@ export interface CopyUnit {
   key: string;
   name: string;
 }
-export interface DynamicSetting {
-  [key: string]: string;
-}
+
 export interface DefinitionUnit {
   id: number;
   key?: string;
@@ -111,10 +86,6 @@ export interface DefinitionUnit {
   state?: string;
   variables?: string[];
 }
-// export interface ProfileData {
-//   profile: string;
-//   label: string;
-// }
 
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 export enum Operation { GET, POST, PATCH, DELETE }
