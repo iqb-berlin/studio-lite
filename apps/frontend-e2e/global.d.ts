@@ -109,16 +109,14 @@ declare namespace Cypress {
     getMyData(token:string): Chainable<Response>; // 80
     updateMyData(token:string, data:MyData): Chainable<Response>; // 81
     getWsByUserAPI(id: string, token: string): Chainable<Response>; // 82
-    updateWsByUserAPI(id: string, groupId: string, wsIds: string[], token: string): Chainable<Response>; // 83
+    updateWsByUserAPI(id: string, groupId: string, levels: number[], wsIds: string[], token: string): Chainable<Response>; // 83
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // 84
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 85
     updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 86
     deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 87
     deleteGroupsAPI(qs: string[], token: string): Chainable<Response>; // 88
     deleteModulesAPI(modules: string[], token: string): Chainable<Response>; // 89
-    deleteUserAPI(id:string, token: string): Chainable<Response>; // 90
-    deleteFirstUserAPI(): Chainable<Response>; // 90
-    deleteUsersAPI(qs: string[], token: string): Chainable<Response>; // 90a
+    deleteUsersAPI(qs: string[], token: string): Chainable<Response>; // 90
 
     getSettingConfigAPI(token:string): Chainable<Response>; // 100
     updateSettingConfigAPI(token:string, hour: number): Chainable<Response>; // 101
