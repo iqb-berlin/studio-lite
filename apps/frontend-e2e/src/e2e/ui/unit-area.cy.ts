@@ -22,7 +22,7 @@ import {
   logout,
   login,
   selectUnit,
-  deleteModule
+  deleteModule, selectListUnits, focusOnMenu
 } from '../../support/util';
 import { AccessLevel, UnitData, UserData } from '../../support/testData';
 import { selectProfileForAreaFromGroup, selectProfileForGroup } from '../../support/metadata/metadata-util';
@@ -123,6 +123,7 @@ describe('UI check: workspace', () => {
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
+    cy.pause();
   });
 
   it('should add an:  user to the ws1 with basic credentials', () => {
@@ -155,10 +156,40 @@ describe('UI check: workspace', () => {
     cy.get('studio-lite-delete-dialog').find('button:contains("Löschen")').click();
     cy.visit('/');
     logout();
+    login(Cypress.env('username'), Cypress.env('password'));
+  });
+
+  it.skip('should export selected units', () => {
+    cy.pause();
+    cy.visitWs(ws1);
+    // selectFromMenu('Export');
+    cy.get('mat-icon:contains("menu")')
+      .click();
+    cy.get('span:contains("Export")')
+      .click();
+    cy.pause();
+    selectListUnits([unit3.shortname, newUnit.shortname]);
+    cy.buttonToContinue('Herunterladen', 200, '/api/workspaces/*', 'GET', 'export');
+  });
+
+  it('should show metadata', () => {
+    cy.pause();
+    cy.visitWs(ws1);
+    focusOnMenu('Berichte', 'Metadaten');
+    selectListUnits([unit3.shortname, newUnit.shortname]);
+    cy.buttonToContinue('Anzeigen', 200, '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    cy.clickButton('Herunterladen');
+  });
+
+  it('should export the codebook', () => {
+    cy.pause();
+    cy.visitWs(ws1);
+    focusOnMenu('Berichte', 'Metadaten');
+    selectListUnits([newUnit.shortname]);
+    cy.buttonToContinue('Exportieren', 200, '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
   });
 
   it('deletes the context ', () => {
-    login(Cypress.env('username'), Cypress.env('password'));
     deleteGroup(group1);
     cy.visit('/');
     deleteUser(newUser.username);

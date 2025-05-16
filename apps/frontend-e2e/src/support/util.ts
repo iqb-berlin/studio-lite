@@ -461,6 +461,7 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
   cy.buttonToContinue('Verschieben', 200, '/api/workspaces/*/units/workspace-id', 'PATCH', 'createUnitFromExisting');
   // cy.clickButton('Verschieben');
 }
+
 export function importExercise(): void {
   cy.get('[data-cy="workspace-add-units"]')
     .click();
@@ -471,4 +472,29 @@ export function importExercise(): void {
     });
   cy.contains('M6_AK0011')
     .should('exist');
+}
+
+// workspace menu options
+export function selectFromMenu(option: string): void {
+  cy.get('mat-icon:contains("menu")')
+    .click();
+  cy.get(`span:contains("${option}")`)
+    .click();
+}
+
+export function focusOnMenu(hoverString: string, option: string): void {
+  cy.get('mat-icon:contains("menu")')
+    .click();
+  cy.get(`span:contains("${hoverString}")`)
+    .trigger('hover');
+  cy.contains('button', option)
+    .find('mat-icon')
+    .click();
+}
+
+export function selectListUnits(unitNames: string[]): void {
+  unitNames.forEach(name => {
+    cy.contains('mat-row', name)
+      .find('mat-checkbox').click();
+  });
 }
