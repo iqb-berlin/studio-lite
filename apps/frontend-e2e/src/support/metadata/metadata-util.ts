@@ -113,7 +113,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
   cy.get(`span:contains(${profile})`)
     .contains('Item')
     .click();
-  cy.buttonToContinue('Speichern', 200, '/api/workspaces/*/settings', 'PATCH', 'setProfileArea');
+  cy.buttonToContinue('Speichern', [200], '/api/workspaces/*/settings', 'PATCH', 'setProfileArea');
 }
 
 export function checkProfile(profile: string):void {

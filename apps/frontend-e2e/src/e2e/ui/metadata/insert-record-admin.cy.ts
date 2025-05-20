@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, clickSaveButtonRight,
+  addFirstUser,
   createGroup,
   createWs,
   deleteFirstUser,

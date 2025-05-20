@@ -78,6 +78,7 @@ describe('UI check: workspace', () => {
   });
 
   it('should set player, editor and schemer for the ws', () => {
+    cy.visit('/');
     setVeronaWs(ws1);
     cy.visit('/');
     selectProfileForGroup(group1, IqbProfile.DE);
@@ -86,6 +87,7 @@ describe('UI check: workspace', () => {
   });
 
   it('should add state to the workspace', () => {
+    cy.visit('/');
     findWorkspaceGroupSettings(group1).click();
     clickIndexTab('Einstellungen');
     addStatus('In Bearbeitung', 0);
@@ -123,7 +125,34 @@ describe('UI check: workspace', () => {
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
-    cy.pause();
+  });
+
+  it('should export selected units', () => {
+    cy.visitWs(ws1);
+    cy.wait(500);
+    cy.get('mat-icon:contains("menu")')
+      .click();
+    cy.get('span:contains("Export")')
+      .click();
+    selectListUnits([unit3.shortname, newUnit.shortname]);
+    cy.buttonToContinue('Herunterladen', [200, 304], '/api/workspaces/*', 'GET', 'export');
+  });
+
+  it('should show metadata', () => {
+    cy.visitWs(ws1);
+    cy.wait(500);
+    focusOnMenu('Berichte', 'Metadaten');
+    selectListUnits([unit3.shortname, newUnit.shortname]);
+    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    cy.clickButton('Herunterladen');
+  });
+
+  it('should export the codebook', () => {
+    cy.visitWs(ws1);
+    cy.wait(500);
+    focusOnMenu('Berichte', 'Codebook');
+    selectListUnits([newUnit.shortname]);
+    cy.buttonToContinue('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
   });
 
   it('should add an:  user to the ws1 with basic credentials', () => {
@@ -157,36 +186,6 @@ describe('UI check: workspace', () => {
     cy.visit('/');
     logout();
     login(Cypress.env('username'), Cypress.env('password'));
-  });
-
-  it.skip('should export selected units', () => {
-    cy.pause();
-    cy.visitWs(ws1);
-    // selectFromMenu('Export');
-    cy.get('mat-icon:contains("menu")')
-      .click();
-    cy.get('span:contains("Export")')
-      .click();
-    cy.pause();
-    selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.buttonToContinue('Herunterladen', 200, '/api/workspaces/*', 'GET', 'export');
-  });
-
-  it('should show metadata', () => {
-    cy.pause();
-    cy.visitWs(ws1);
-    focusOnMenu('Berichte', 'Metadaten');
-    selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.buttonToContinue('Anzeigen', 200, '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.clickButton('Herunterladen');
-  });
-
-  it('should export the codebook', () => {
-    cy.pause();
-    cy.visitWs(ws1);
-    focusOnMenu('Berichte', 'Metadaten');
-    selectListUnits([newUnit.shortname]);
-    cy.buttonToContinue('Exportieren', 200, '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
   });
 
   it('deletes the context ', () => {
