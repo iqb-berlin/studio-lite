@@ -113,7 +113,9 @@ describe('UI check: workspace', () => {
 
   it('should the add button, and the button to import file be present', () => {
     cy.visitWs(ws1);
-    importExercise();
+    importExercise('test_studio_units_download.zip');
+    cy.contains('M6_AK0011')
+      .should('exist');
   });
 
   it('should be able to delete Unit', () => {
@@ -155,7 +157,7 @@ describe('UI check: workspace', () => {
     cy.buttonToContinue('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
   });
 
-  it('should add an:  user to the ws1 with basic credentials', () => {
+  it('should add an user to the ws1 with basic credentials', () => {
     createNewUser(newUser);
     cy.visit('/');
     findWorkspaceGroupSettings(group1).click();
@@ -189,6 +191,7 @@ describe('UI check: workspace', () => {
   });
 
   it('deletes the context ', () => {
+    cy.pause();
     deleteGroup(group1);
     cy.visit('/');
     deleteUser(newUser.username);

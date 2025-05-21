@@ -462,16 +462,15 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
   // cy.clickButton('Verschieben');
 }
 
-export function importExercise(): void {
+export function importExercise(filename: string): void {
+  const path:string = `../frontend-e2e/src/fixtures/${filename}`;
   cy.get('[data-cy="workspace-add-units"]')
     .click();
   cy.get('input[type=file]')
-    .selectFile('../frontend-e2e/src/fixtures/test_studio_units_download.zip', {
+    .selectFile(path, {
       action: 'select',
       force: true
     });
-  cy.contains('M6_AK0011')
-    .should('exist');
 }
 
 // workspace menu options
@@ -496,4 +495,16 @@ export function selectListUnits(unitNames: string[]): void {
   unitNames.forEach(name => {
     cy.get(`mat-cell:contains("${name}")`).prev().click();
   });
+}
+
+export function selectVariableAtCoding(variableName:string) {
+  cy.contains('mat-nav-list', variableName).click();
+}
+
+export function createSimpleCoding(trueValue: string) {
+  cy.get('button > mat-icon > svg > path').click();
+  cy.contains('mat-icon', 'done_all').click();
+  cy.contains('code-rule-list').find('textarea').type(trueValue);
+  cy.contains('mat-icon', 'done_all').click();
+  cy.contains('Speichern').click();
 }
