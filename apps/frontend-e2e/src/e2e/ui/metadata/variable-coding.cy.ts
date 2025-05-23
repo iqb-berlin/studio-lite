@@ -1,11 +1,11 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addModules,
-  createGroup, createSimpleCoding,
+  addFirstUser, addModules, assignVariableToItem,
+  createGroup, createItem,
   createWs,
   deleteFirstUser,
   deleteGroup, deleteModule,
-  grantRemovePrivilegeAtWs, importExercise, selectUnit, selectVariableAtCoding, setVeronaWs
+  grantRemovePrivilegeAtWs, importExercise, selectUnit, setVeronaWs
 } from '../../../support/util';
 import {
   selectProfileForArea,
@@ -39,17 +39,19 @@ describe('UI Variable in Scheme and Metadata', () => {
     setVeronaWs(mathArea);
     selectProfileForArea(IqbProfile.MA);
     importExercise('variable_metadata.zip');
-    cy.contains('MA_01')
-      .should('exist');
   });
 
-  it.skip('adds a new item and select the corresponding variable', () => {
+  it('adds new items, and select the corresponding variable', () => {
+    cy.visit('/');
+    cy.visitWs(mathArea);
     selectUnit('MA_01');
-    cy.wait(1000);
-    cy.pause();
-    cy.contains('span', 'Kodierung').click();
-    selectVariableAtCoding('math-table_1');
-    createSimpleCoding('240');
+    cy.get('mat-expansion-panel:contains("01")').click();
+    assignVariableToItem('text-field_1');
+    createItem('02');
+    assignVariableToItem('radio_1');
+    createItem('03');
+    assignVariableToItem('drop-list_1');
+    cy.contains('Speichern').click();
   });
 
   it('deletes the data', () => {

@@ -497,14 +497,14 @@ export function selectListUnits(unitNames: string[]): void {
   });
 }
 
-export function selectVariableAtCoding(variableName:string) {
-  cy.contains('mat-nav-list', variableName).click();
+export function createItem(itemId: string) {
+  cy.get('.add-button > .mdc-button__label').click();
+  cy.clickButton('Bestätigen');
+  cy.get('mat-expansion-panel:contains("ohne ID")').click();
+  cy.get('mat-label:contains("Item ID *")').eq(-1).type(itemId);
 }
 
-export function createSimpleCoding(trueValue: string) {
-  cy.get('button > mat-icon > svg > path').click();
-  cy.contains('mat-icon', 'done_all').click();
-  cy.contains('code-rule-list').find('textarea').type(trueValue);
-  cy.contains('mat-icon', 'done_all').click();
-  cy.contains('Speichern').click();
+export function assignVariableToItem(variableName: string) {
+  cy.get('mat-select:contains("Variable auswählen")').eq(-1).find('svg').click();
+  cy.get(`mat-option:contains("${variableName}")`).click();
 }
