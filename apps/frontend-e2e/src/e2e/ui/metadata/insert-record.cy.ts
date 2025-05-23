@@ -1,13 +1,12 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser,
-  addUnit, clickSave,
+  addFirstUser, addUnit,
   createGroup,
   createWs,
   deleteFirstUser,
   deleteGroup,
   deleteUnit,
-  grantRemovePrivilege
+  grantRemovePrivilegeAtWs
 } from '../../../support/util';
 import {
   getItem,
@@ -37,13 +36,11 @@ describe('Metadata Management', () => {
     createGroup(group);
     cy.visit('/');
     createWs(ws1, group);
-    grantRemovePrivilege([Cypress.env('username')], ws1, [AccessLevel.Admin]);
-    clickSave();
+    grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
 
     cy.visit('/');
     createWs(ws2, group);
-    grantRemovePrivilege([Cypress.env('username')], ws2, [AccessLevel.Admin]);
-    clickSave();
+    grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
   });
 
   it('chooses profiles from the group ', () => {

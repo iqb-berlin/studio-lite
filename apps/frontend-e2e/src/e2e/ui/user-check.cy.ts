@@ -7,7 +7,7 @@ import {
   deleteFirstUser,
   deleteUser,
   login,
-  logout
+  logout, findAdminSettings
 } from '../../support/util';
 import { UserData } from '../../support/testData';
 
@@ -37,11 +37,7 @@ describe('UI User Management', () => {
   });
 
   it('should not be able to find admin user setting button', () => {
-    cy.get('div')
-      .contains('studio-lite-wrapped-icon', 'settings')
-      .should('not.exist');
-    // cy.get('[data-cy="goto-admin"]')
-    //   .should('not.exist');
+    findAdminSettings().should('not.exist');
   });
 
   it('should be able to modify personal data', () => {
@@ -62,7 +58,7 @@ describe('UI User Management', () => {
 
   it('should not be able to login with incorrect credentials', () => {
     cy.login(newUser.username, 'nopass');
-    cy.buttonToContinue('Weiter', 401, '/api/login', 'POST', 'loginFail');
+    cy.buttonToContinue('Weiter', [401], '/api/login', 'POST', 'loginFail');
   });
 
   it('deletes the user', () => {

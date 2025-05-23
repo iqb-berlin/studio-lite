@@ -18,18 +18,18 @@ Cypress.Commands.add('clickButton', (text: string) => {
 });
 
 Cypress.Commands.add('buttonToContinue',
-  (text: string, code: number, url: string, rest: string, alias:string) => {
+  (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url).as(alias);
     cy.get('button')
       .contains(text)
       .should('exist')
       .click();
     cy.wait(`@${alias}`)
-      .its('response.statusCode').should('eq', code);
+      .its('response.statusCode').should('be.oneOf', code);
   });
 
 Cypress.Commands.add('dialogButtonToContinue',
-  (text: string, code: number, url: string, rest: string, alias:string) => {
+  (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url)
       .as(alias);
     cy.get('mat-dialog-actions button')
@@ -38,7 +38,7 @@ Cypress.Commands.add('dialogButtonToContinue',
       .click();
     cy.wait(`@${alias}`)
       .its('response.statusCode')
-      .should('eq', code);
+      .should('be.oneOf', code);
   });
 
 Cypress.Commands.add('loadModule', (filename:string) => {
