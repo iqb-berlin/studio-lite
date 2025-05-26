@@ -6,8 +6,8 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup, deleteModule, deleteResource,
-  deleteUser,
-  grantRemovePrivilege
+  deleteUser, findAdminSettings,
+  grantRemovePrivilegeAtWs
 } from '../../support/util';
 import { AccessLevel, UserData } from '../../support/testData';
 
@@ -27,6 +27,10 @@ describe('UI Administration Management', () => {
   beforeEach(() => {
     cy.visit('/');
   });
+  it('user with admin credentials has admin setting button', () => {
+    findAdminSettings().should('exist');
+  });
+
   it('user with admin credentials can add new user', () => {
     createNewUser(newUser);
   });
@@ -41,7 +45,7 @@ describe('UI Administration Management', () => {
 
   it('user with admin credentials can create a workspace(Arbeitsbereich) within its Bereichsgruppe', () => {
     createWs(ws1, group1);
-    grantRemovePrivilege([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
+    grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
   it('user with admin credentials can Modules upload', () => {
