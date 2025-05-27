@@ -71,6 +71,23 @@
       },
       "defaultConfiguration": "development"
     },
+    "serve-e2e": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "frontend:build:production"
+        },
+        "development": {
+          "buildTarget": "frontend:build:development"
+        }
+      },
+      "options": {
+        "proxyConfig": "apps/frontend/proxy.conf.json",
+        "buildTarget": "frontend:build:development",
+        "extraWebpackConfig":  "./../webpack.coverage.js"
+      },
+      "defaultConfiguration": "development"
+    },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {

@@ -1,0 +1,16 @@
+{
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "all": true,
+  "include":  [
+    "apps/api/**/*.ts",
+    "apps/frontend/**/*.ts"
+  ],
+  "exclude": [
+    "coverage/**",
+    "apps/frontend-e2e/**",
+    "backup/**",
+    "**/*.spec.ts",
+    "**/*.conf.ts",
+    "**/*.conf.js"
+  ]
+}

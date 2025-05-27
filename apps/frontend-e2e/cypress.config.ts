@@ -19,6 +19,10 @@ export default defineConfig({
   },
   e2e: {
     ...nxE2EPreset(__dirname),
+    setupNodeEvents(on, config) {
+      require('@cypress/code-coverage/task')(on, config);
+      return config;
+    },
     ...cypressJsonConfig,
     viewportWidth: 1600,
     viewportHeight: 900,

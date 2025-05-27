@@ -14,6 +14,9 @@
       "configurations": {
         "production": {
           "devServerTarget": "frontend:serve:production"
+        },
+        "coverage-api": {
+          "devServerTarget": "frontend:serve-e2e"
         }
       }
     },
