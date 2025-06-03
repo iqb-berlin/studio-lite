@@ -4,7 +4,7 @@ import {
   createGroup, createItem,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule,
+  deleteGroup, deleteModule, goToItem,
   grantRemovePrivilegeAtWs, importExercise, selectUnit, setVeronaWs
 } from '../../../support/util';
 import {
@@ -45,13 +45,35 @@ describe('UI Variable in Scheme and Metadata', () => {
     cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
-    cy.get('mat-expansion-panel:contains("01")').click();
+    goToItem('01');
     assignVariableToItem('text-field_1');
     createItem('02');
     assignVariableToItem('radio_1');
     createItem('03');
     assignVariableToItem('drop-list_1');
     cy.contains('Speichern').click();
+  });
+
+  it('ends the connection the variable drop_list_1 with item 03', () => {
+    cy.visit('/');
+    cy.visitWs(mathArea);
+    selectUnit('MA_01');
+    goToItem('03');
+    assignVariableToItem('');
+    cy.contains('Speichern').click();
+    cy.pause();
+  });
+
+  it('checks the connection the variable drop_list_1 with item 03 is still active', () => {
+    cy.visit('/');
+    cy.visitWs(mathArea);
+    selectUnit('MA_01');
+    goToItem('03');
+    cy.get('mat-select[placeholder="Variable auswählen"]')
+      .eq(-1).find('svg').click()
+      .then(() => {
+        cy.get('mat-select:contains("drop-list_1")').should('have.length', 1);
+      });
   });
 
   it('deletes the data', () => {
