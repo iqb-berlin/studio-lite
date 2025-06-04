@@ -14,7 +14,7 @@ import {
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import { AccessLevel } from '../../../support/testData';
 
-describe('UI Variable in Scheme and Metadata', () => {
+describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const mathArea = 'Mathematik Primar I';
   const group = 'Bista III';
@@ -61,7 +61,6 @@ describe('UI Variable in Scheme and Metadata', () => {
     goToItem('03');
     assignVariableToItem('');
     cy.contains('Speichern').click();
-    cy.pause();
   });
 
   it('checks the connection the variable drop_list_1 with item 03 is still active', () => {

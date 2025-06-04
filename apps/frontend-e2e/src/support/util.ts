@@ -497,17 +497,17 @@ export function selectListUnits(unitNames: string[]): void {
   });
 }
 
-export function createItemAndAssignVariable(itemId: string, variableName: string) {
-  cy.get('.add-button > .mdc-button__label').click();
-  cy.clickButton('Bestätigen');
-  cy.get('mat-expansion-panel:contains("ohne ID")').click();
-  cy.get('mat-label:contains("Item ID *")').eq(-1).type(itemId);
-  cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).within(() => {
-    cy.get('svg').click();
-  });
-  cy.pause();
-  cy.get(`mat-option:contains("${variableName}")`).eq(0).click();
-}
+// export function createItemAndAssignVariable(itemId: string, variableName: string) {
+//   cy.get('.add-button > .mdc-button__label').click();
+//   cy.clickButton('Bestätigen');
+//   cy.get('mat-expansion-panel:contains("ohne ID")').click();
+//   cy.get('mat-label:contains("Item ID *")').eq(-1).type(itemId);
+//   cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).within(() => {
+//     cy.get('svg').click();
+//   });
+//   cy.pause();
+//   cy.get(`mat-option:contains("${variableName}")`).eq(0).click();
+// }
 
 // export function modifyItem(itemId: string, variableName: string) {
 //   cy.get(`studio-lite-item:contains("${itemId}")`).click(); within(()=>{
