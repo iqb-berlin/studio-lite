@@ -43,11 +43,11 @@ export function buildDownloadQuery(unitIds: string[]):string {
       '"addTestTakersMonitor":0,"addTestTakersHot":0,"passwordLess":false,"bookletSettings":[]}';
 }
 
-export function deleteTextField() {
+export function deleteTextField(wsId:string, unitId: string) {
   const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/workspaces/1/units/1/definition',
+    url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
     headers: {
       'app-version': Cypress.env('version'),
       authorization
