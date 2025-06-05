@@ -2,8 +2,11 @@ import {
   AccessLevel, GroupData, WsData, WsSettings
 } from '../../support/testData';
 import { deleteTextField } from '../../support/utilAPI';
+import {
+  deleteGroup, deleteModule, goToItem, login, logout, selectUnit
+} from '../../support/util';
 
-describe.skip('API variable coherence in Scheme, Aspect and Metadata', () => {
+describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const ws1: WsData = {
     id: 'id_ws1',
@@ -36,15 +39,16 @@ describe.skip('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  // after(() => {
-  //   cy.deleteUsersAPI([Cypress.env(`id_${Cypress.env('username')}`)], Cypress.env(`token_${Cypress.env('username')}`))
-  //     .then(resp => {
-  //       Cypress.env('token_admin', '');
-  //       expect(resp.status).to.equal(200);
-  //     });
-  // });
+  after(() => {
+    cy.deleteUsersAPI([Cypress.env(`id_${Cypress.env('username')}`)], Cypress.env(`token_${Cypress.env('username')}`))
+      .then(resp => {
+        Cypress.env('token_admin', '');
+        expect(resp.status).to.equal(200);
+      });
+    cy.visit('/');
+  });
 
-  it('prepare the api context', () => {
+  it('prepares api context', () => {
     modules.forEach(m => {
       cy.addModuleAPI(m, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
@@ -53,7 +57,7 @@ describe.skip('API variable coherence in Scheme, Aspect and Metadata', () => {
     });
   });
 
-  it(' creates group', () => {
+  it('creates group', () => {
     cy.createGroupAPI(group1, Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         Cypress.env(group1.id, resp.body);
@@ -93,7 +97,7 @@ describe.skip('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('Set verona in the ws', () => {
+  it('sets verona in the ws', () => {
     cy.updateWsMetadataAPI(
       Cypress.env(ws1.id),
       newSettings,
@@ -103,23 +107,49 @@ describe.skip('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('Import exercise', () => {
+  it('imports exercise', () => {
+    cy.pause();
     cy.uploadUnitsAPI(Cypress.env(ws1.id),
       'variable_metadata.zip',
       Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         expect(resp.status).to.equal(201);
+        cy.getUnitsByWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
+          .then(resp1 => {
+            expect(resp1.status).to.equal(200);
+            console.log(resp1.body[0].id);
+            Cypress.env('unit1', resp1.body[0].id);
+            cy.pause();
+          });
       });
   });
 
   it('deletes a text-field_1 in aspect', () => {
-    deleteTextField();
+    deleteTextField(Cypress.env(ws1.id), Cypress.env('unit1'));
   });
 
   it('checks text-field_1 is still present', () => {
-
+    // We do ui check
+    cy.visit('/');
+    login(Cypress.env('username'), Cypress.env('password'));
+    cy.visitWs(ws1.name);
+    selectUnit('MA_01');
+    goToItem('01');
+    cy.pause();
+    cy.get('mat-select[placeholder="Variable auswählen"]')
+      .eq(-1).find('svg').click()
+      .then(() => {
+        cy.get('mat-option:contains("text-field_1")').should('have.length', 1);
+      });
+    cy.pause();
   });
 
-  it('delete the data', () => {
+  it('deletes the data', () => {
+    cy.visit('/');
+    deleteGroup(group1.name);
+    cy.visit('/');
+    deleteModule();
+    cy.visit('/');
+    logout();
   });
 });

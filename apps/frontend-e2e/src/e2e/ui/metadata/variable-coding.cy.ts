@@ -73,6 +73,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
       .then(() => {
         cy.get('mat-select:contains("drop-list_1")').should('have.length', 1);
       });
+    cy.pause();
   });
 
   it('deletes the data', () => {
