@@ -4,8 +4,8 @@ import {
   createGroup, createItem,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule, goToItem,
-  grantRemovePrivilegeAtWs, importExercise, selectUnit, setVeronaWs
+  deleteGroup, deleteModule, focusOnMenu, goToItem,
+  grantRemovePrivilegeAtWs, importExercise, selectListUnits, selectUnit, setVeronaWs
 } from '../../../support/util';
 import {
   selectProfileForArea,
@@ -63,7 +63,8 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.contains('Speichern').click();
   });
 
-  it('checks the connection the variable drop_list_1 with item 03 is still active', () => {
+  // With bugfix should not work
+  it('checks the connection the variable drop_list_1 with item 03 is still active at properties', () => {
     cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
@@ -73,7 +74,26 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
       .then(() => {
         cy.get('mat-select:contains("drop-list_1")').should('have.length', 1);
       });
+  });
+
+  it('checks that the menu->berichte->metadata is right', () => {
+    focusOnMenu('Berichte', 'Metadaten');
+    selectListUnits(['MA_01']);
+    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.pause();
+    cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
+    cy.clickButton('Schließen');
+  });
+
+  it('checks that the eye shows correctly', () => {
+    cy.visit('/');
+    cy.visitWs(mathArea);
+    selectUnit('MA_01');
+    goToItem('03');
+    assignVariableToItem('');
+    cy.contains('mat-icon', 'visibility').click({ force: true });
+    cy.contains('span.item_value', 'drop-list_1').should('not.exist');
   });
 
   it('deletes the data', () => {
