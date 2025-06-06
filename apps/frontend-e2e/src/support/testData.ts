@@ -87,6 +87,11 @@ export interface DefinitionUnit {
   variables?: string[];
 }
 
+export const modules:string[] = [
+  'iqb-schemer-2.5.3.html',
+  'iqb-editor-aspect-2.9.4.html',
+  'iqb-player-aspect-2.9.4.html'];
+
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 export enum Operation { GET, POST, PATCH, DELETE }
 

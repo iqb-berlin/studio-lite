@@ -1,5 +1,5 @@
 import {
-  AccessLevel, GroupData, WsData, WsSettings
+  AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
 import { deleteTextField } from '../../support/utilAPI';
 import {
@@ -7,7 +7,6 @@ import {
 } from '../../support/util';
 
 describe('API variable coherence in Scheme, Aspect and Metadata', () => {
-  const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const ws1: WsData = {
     id: 'id_ws1',
     name: 'Mathematik Primar I'
@@ -61,7 +60,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     cy.createGroupAPI(group1, Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         Cypress.env(group1.id, resp.body);
-        console.log(resp.body);
         expect(resp.status).to.equal(201);
       });
   });
@@ -108,7 +106,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('imports exercise', () => {
-    cy.pause();
     cy.uploadUnitsAPI(Cypress.env(ws1.id),
       'variable_metadata.zip',
       Cypress.env(`token_${Cypress.env('username')}`))
@@ -117,9 +114,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
         cy.getUnitsByWsAPI(Cypress.env(ws1.id), Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp1 => {
             expect(resp1.status).to.equal(200);
-            console.log(resp1.body[0].id);
             Cypress.env('unit1', resp1.body[0].id);
-            cy.pause();
           });
       });
   });
@@ -128,20 +123,17 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     deleteTextField(Cypress.env(ws1.id), Cypress.env('unit1'));
   });
 
-  it('checks text-field_1 is still present', () => {
-    // We do ui check
+  it('checks text-field_1 is not present at properties', () => {
     cy.visit('/');
     login(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1.name);
     selectUnit('MA_01');
     goToItem('01');
-    cy.pause();
     cy.get('mat-select[placeholder="Variable auswählen"]')
       .eq(-1).find('svg').click()
       .then(() => {
-        cy.get('mat-option:contains("text-field_1")').should('have.length', 1);
+        cy.get('mat-option:contains("text-field_1")').should('have.length', 0);
       });
-    cy.pause();
   });
 
   it('deletes the data', () => {
