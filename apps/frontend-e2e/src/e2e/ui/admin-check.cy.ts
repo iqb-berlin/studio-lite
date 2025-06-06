@@ -9,11 +9,10 @@ import {
   deleteUser, findAdminSettings,
   grantRemovePrivilegeAtWs
 } from '../../support/util';
-import { AccessLevel, UserData } from '../../support/testData';
+import { AccessLevel, modules, UserData } from '../../support/testData';
 
 describe('UI Administration Management', () => {
   // eslint-disable-next-line max-len
-  const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
   const resource = 'GeoGebra.itcr.zip';

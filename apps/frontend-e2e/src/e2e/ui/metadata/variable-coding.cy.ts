@@ -12,10 +12,9 @@ import {
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { AccessLevel } from '../../../support/testData';
+import { AccessLevel, modules } from '../../../support/testData';
 
 describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
-  const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const mathArea = 'Mathematik Primar I';
   const group = 'Bista III';
 
@@ -61,10 +60,10 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     goToItem('03');
     assignVariableToItem('');
     cy.contains('Speichern').click();
+    cy.pause();
   });
 
-  // With bugfix should not work
-  it('checks the connection the variable drop_list_1 with item 03 is still active at properties', () => {
+  it('checks the connection the variable drop_list_1 with item 03 is not active at properties', () => {
     cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
@@ -72,16 +71,15 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('mat-select[placeholder="Variable auswählen"]')
       .eq(-1).find('svg').click()
       .then(() => {
-        cy.get('mat-select:contains("drop-list_1")').should('have.length', 1);
+        cy.get('mat-select:contains("drop-list_1")').should('have.length', 0);
       });
   });
 
-  it('checks that the menu->berichte->metadata is right', () => {
+  it('checks that the Menu -> Berichte -> Metadaten is correct', () => {
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits(['MA_01']);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
-    cy.pause();
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
     cy.clickButton('Schließen');
   });

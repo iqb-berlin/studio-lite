@@ -2,7 +2,7 @@ import {
   AccessLevel,
   AccessUser,
   CommentData, CopyUnit, DefinitionUnit,
-  GroupData, MyData, ReviewData,
+  GroupData, modules, MyData, ReviewData,
   UnitData,
   UserData,
   WsData,
@@ -15,9 +15,6 @@ function getNameAt(initialName: string): string {
 }
 describe('Studio API tests', () => {
   const noId: string = '9988';
-  const modules:string[] = ['iqb-schemer-2.5.3.html',
-    'iqb-editor-aspect-2.9.3.html',
-    'iqb-player-aspect-2.9.3.html'];
   const fakeUser: UserData = {
     username: 'falseuser',
     password: 'paso',
