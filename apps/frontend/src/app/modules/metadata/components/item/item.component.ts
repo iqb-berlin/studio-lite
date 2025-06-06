@@ -12,11 +12,11 @@ import { AliasId } from '../../models/alias-id.interface';
 
 interface ItemModel {
   id?: string;
-  variableId?: string;
-  variableReadOnlyId?: string;
+  variableId?: string | null;
+  variableReadOnlyId?: string | null;
   description?: string;
   weighting?: number;
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | null | undefined;
 }
 
 @Component({
@@ -133,14 +133,17 @@ export class ItemComponent implements OnInit, OnChanges {
     if (!!this.model.variableId && this.metadata[this.itemIndex].variableId !== this.model.variableId) {
       this.metadata[this.itemIndex].variableId = this.model.variableId;
       this.emitMetadata();
+    } else if (!this.model.variableId && this.metadata[this.itemIndex].variableId) {
+      // variable was removed
+      this.metadata[this.itemIndex].variableId = null;
+      this.metadata[this.itemIndex].variableReadOnlyId = null;
+      this.emitMetadata();
     }
   }
 
   onModelChange(): void {
     Object.entries(this.model).forEach((entry => {
-      if (entry[1] !== undefined) {
-        this.metadata[this.itemIndex][entry[0]] = entry[1];
-      }
+      this.metadata[this.itemIndex][entry[0]] = entry[1];
     }));
     this.emitMetadata();
   }

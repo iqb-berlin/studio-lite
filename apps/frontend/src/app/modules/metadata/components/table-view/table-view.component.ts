@@ -25,10 +25,10 @@ import { WorkspaceService } from '../../../workspace/services/workspace.service'
 interface ColumnValues {
   key?: string;
   id?: string;
-  variableId?: string,
+  variableId?: string | null,
   weighting?: string,
   description?: string,
-  [key: string]: string | undefined
+  [key: string]: string | null | undefined
 }
 
 @Component({
