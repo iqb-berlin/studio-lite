@@ -72,14 +72,17 @@ export class ItemComponent implements OnInit, OnChanges {
             props: {
               placeholder: this.translateService.instant('metadata.choose-item-variable'),
               label: this.translateService.instant('metadata.choose-item-variable'),
-              options: [{ value: '', label: '' }, ...this.variables.map(variable => ({
-                value: variable.alias,
-                label: variable.alias
-              }))]
+              options: [
+                { value: null, label: '' },
+                ...this.variables.map(variable => ({
+                  value: variable.alias,
+                  label: variable.alias
+                }))
+              ]
             },
             expressions: {
               'model.variableReadOnlyId': (field: FormlyFieldConfig) => this.variables
-                .find(variable => variable.alias === field.model.variableId)?.id
+                .find(variable => variable.alias === field.model.variableId)?.id || null
             }
           },
           {
