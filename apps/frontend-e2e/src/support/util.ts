@@ -444,7 +444,7 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
 
 export function goToWsMenu():void {
   cy.get('mat-icon:contains("menu")')
-    .click();
+    .click({ force: true });
 }
 
 export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):void {
@@ -483,7 +483,7 @@ export function selectFromMenu(option: string): void {
 
 export function focusOnMenu(hoverString: string, option: string): void {
   cy.get('mat-icon:contains("menu")')
-    .click();
+    .click({ force: true });
   cy.get(`span:contains("${hoverString}")`)
     .click();
   cy.contains('button', option)
