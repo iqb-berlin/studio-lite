@@ -7,6 +7,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqb/metadata';
+import { MatIcon } from '@angular/material/icon';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { AliasId } from '../../models/alias-id.interface';
 
@@ -24,7 +25,7 @@ interface ItemModel {
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule]
+  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule, MatIcon]
 })
 export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }
