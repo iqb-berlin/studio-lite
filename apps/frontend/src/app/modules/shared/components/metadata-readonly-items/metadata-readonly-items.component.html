@@ -1,13 +1,14 @@
-@for (item of items; track item) {
+@for (item of items; track item;  let i = $index) {
   <div class="item">
     <h5 class="item-id">{{ item.id || 'metadata.without-id' | translate }}</h5>
     <div class="fx-row-space-between-start">
-      <span class="item-key">Wichtung</span>
-      <span class="item-value">{{ item.weighting || '-' }}</span>
+      <span class="item-key">Variablen Id</span>
+      <span class="item-value">
+        {{ item.variableReadOnlyId | variableId : item.variableId : variables }}</span>
     </div>
     <div class="fx-row-space-between-start">
-      <span class="item-key">Variablen Id</span>
-      <span class="item-value">{{ item.variableId || '-' }}</span>
+      <span class="item-key">Wichtung</span>
+      <span class="item-value">{{ item.weighting || '-' }}</span>
     </div>
     <div class="fx-row-space-between-start">
       <span class="item-key">Notiz</span>
