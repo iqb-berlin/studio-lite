@@ -24,12 +24,13 @@ import {
   selectUnit,
   deleteModule, selectListUnits, focusOnMenu
 } from '../../support/util';
-import { AccessLevel, UnitData, UserData } from '../../support/testData';
+import {
+  AccessLevel, modules, UnitData, UserData
+} from '../../support/testData';
 import { selectProfileForAreaFromGroup, selectProfileForGroup } from '../../support/metadata/metadata-util';
 import { IqbProfile } from '../../support/metadata/iqbProfile';
 
 describe('UI check: workspace', () => {
-  const modules:string[] = ['iqb-schemer-2.5.3.html', 'iqb-editor-aspect-2.9.3.html', 'iqb-player-aspect-2.9.3.html'];
   const group1:string = 'UI_BG';
   const ws1:string = '01Vorlage';
   const ws2:string = '07Final';
