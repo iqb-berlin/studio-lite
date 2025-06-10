@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -31,7 +30,6 @@ describe('UnitPreviewComponent', () => {
         MockPreviewBarComponent],
       imports: [
         CommonModule,
-        MatSnackBarModule,
         TranslateModule.forRoot()
       ],
       providers: [
