@@ -530,11 +530,19 @@ export class UnitPreviewComponent
   }
 
   async checkCodingChanged() {
-    this.backendService
-      .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
-      .subscribe(schemeData => {
-        this.checkCoding(schemeData);
-      });
+    if (this.workspaceService.isChanged()) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.save-unit-before-check'),
+        this.translateService.instant('workspace.error'),
+        { duration: 3000 }
+      );
+    } else {
+      this.backendService
+        .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .subscribe(schemeData => {
+          this.checkCoding(schemeData);
+        });
+    }
   }
 
   private checkCoding(schemeData: UnitSchemeDto | null): void {
@@ -580,23 +588,15 @@ export class UnitPreviewComponent
     responses: Response[],
     varsWithCodes: string[]
   ): void {
-    if (this.workspaceService.isChanged()) {
-      this.snackBar.open(
-        this.translateService.instant('workspace.save-unit-before-check'),
-        this.translateService.instant('workspace.error'),
-        { duration: 3000 }
-      );
-    } else {
-      this.dialog
-        .open(ShowCodingResultsComponent, {
-          data: { responses: responses, varsWithCodes: varsWithCodes },
-          height: '80%',
-          width: '60%'
-        })
-        .afterClosed()
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => {});
-    }
+    this.dialog
+      .open(ShowCodingResultsComponent, {
+        data: { responses: responses, varsWithCodes: varsWithCodes },
+        height: '80%',
+        width: '60%'
+      })
+      .afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {});
   }
 
   private static getSessionId(): string {
