@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -41,7 +40,6 @@ describe('PreviewBarComponent', () => {
         MatIconModule,
         MatSelectModule,
         FormsModule,
-        MatDialogModule,
         MatTooltipModule,
         TranslateModule.forRoot()
       ],

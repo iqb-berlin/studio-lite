@@ -320,6 +320,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         const variableCodings = scheme?.variableCodings || [];
         const variableCodingIds = variableCodings
           .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
+          .filter(vc => !(vc.sourceType === 'BASE' && !variableAliasIds.find(aliasId => aliasId.id === vc.id)))
           .map(item => ({ id: item.id, alias: item.alias || item.id }));
         // merge without duplicates
         return [...variableAliasIds, ...variableCodingIds]

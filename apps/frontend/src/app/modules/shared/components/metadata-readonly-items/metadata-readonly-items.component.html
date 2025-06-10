@@ -1,16 +1,17 @@
-@for (item of items; track item) {
+@for (item of items; track item;  let i = $index) {
   <div class="item">
     <h5 class="item-id">{{ item.id || 'metadata.without-id' | translate }}</h5>
     <div class="fx-row-space-between-start">
-      <span class="item-key">Wichtung</span>
+      <span class="item-key">{{ 'metadata.variable-id' | translate }}</span>
+      <span class="item-value">
+        {{ item.variableReadOnlyId | variableId : item.variableId : variables }}</span>
+    </div>
+    <div class="fx-row-space-between-start">
+      <span class="item-key">{{ 'metadata.weighting' | translate }}</span>
       <span class="item-value">{{ item.weighting || '-' }}</span>
     </div>
     <div class="fx-row-space-between-start">
-      <span class="item-key">Variablen Id</span>
-      <span class="item-value">{{ item.variableId || '-' }}</span>
-    </div>
-    <div class="fx-row-space-between-start">
-      <span class="item-key">Notiz</span>
+      <span class="item-key">{{ 'metadata.description' | translate }}</span>
       <div class="item-value">{{ item.description || '-' }}</div>
     </div>
     <studio-lite-metadata-profile-entries [profiles]="item.profiles || []">

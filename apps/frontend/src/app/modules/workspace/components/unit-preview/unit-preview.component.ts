@@ -13,6 +13,7 @@ import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
+import { Router } from '@angular/router';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -24,6 +25,9 @@ import { Progress } from '../../models/types';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
+import {
+  PrintOptionsDialogComponent
+} from '../../../print/components/print-options-dialog/print-options-dialog.component';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -61,7 +65,8 @@ export class UnitPreviewComponent
     private moduleService: ModuleService,
     public previewService: PreviewService,
     private translateService: TranslateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {
     super();
     this.subscribeForMessages();
@@ -530,11 +535,58 @@ export class UnitPreviewComponent
   }
 
   async checkCodingChanged() {
-    this.backendService
-      .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
-      .subscribe(schemeData => {
-        this.checkCoding(schemeData);
-      });
+    if (this.workspaceService.isChanged()) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.save-unit-before-check'),
+        this.translateService.instant('workspace.error'),
+        { duration: 3000 }
+      );
+    } else {
+      this.backendService
+        .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .subscribe(schemeData => {
+          this.checkCoding(schemeData);
+        });
+    }
+  }
+
+  showPrintOptions(): void {
+    if (this.workspaceService.isChanged()) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.save-unit-before-check'),
+        this.translateService.instant('workspace.error'),
+        { duration: 3000 }
+      );
+    } else {
+      const dialogRef = this.dialog
+        .open(PrintOptionsDialogComponent);
+      dialogRef.afterClosed()
+        .subscribe(result => {
+          if (result) {
+            this.openPrintView(result);
+          }
+        });
+    }
+  }
+
+  openPrintView(options: { key: string; value: boolean | number }[]): void {
+    const printOptions = options
+      .filter((option: { key: string; value: boolean | number }) => option.value === true)
+      .map((option: { key: string; value: boolean | number }) => option.key);
+    const printPreviewHeight = options
+      .find(option => option.key === 'printPreviewHeight')?.value || 0;
+    const url = this.router
+      .serializeUrl(this.router
+        .createUrlTree(['/print'], {
+          queryParams: {
+            printPreviewHeight: printPreviewHeight,
+            printOptions: printOptions,
+            unitIds: [this.unitId],
+            workspaceId: this.workspaceService.selectedWorkspaceId,
+            workspaceGroupId: this.workspaceService.groupId
+          }
+        }));
+    window.open(`#${url}`, '_blank');
   }
 
   private checkCoding(schemeData: UnitSchemeDto | null): void {
@@ -580,23 +632,15 @@ export class UnitPreviewComponent
     responses: Response[],
     varsWithCodes: string[]
   ): void {
-    if (this.workspaceService.isChanged()) {
-      this.snackBar.open(
-        this.translateService.instant('workspace.save-unit-before-check'),
-        this.translateService.instant('workspace.error'),
-        { duration: 3000 }
-      );
-    } else {
-      this.dialog
-        .open(ShowCodingResultsComponent, {
-          data: { responses: responses, varsWithCodes: varsWithCodes },
-          height: '80%',
-          width: '60%'
-        })
-        .afterClosed()
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => {});
-    }
+    this.dialog
+      .open(ShowCodingResultsComponent, {
+        data: { responses: responses, varsWithCodes: varsWithCodes },
+        height: '80%',
+        width: '60%'
+      })
+      .afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {});
   }
 
   private static getSessionId(): string {
