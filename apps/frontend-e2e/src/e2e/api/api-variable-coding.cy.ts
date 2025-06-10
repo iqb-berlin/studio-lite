@@ -3,7 +3,7 @@ import {
 } from '../../support/testData';
 import { deleteTextField } from '../../support/utilAPI';
 import {
-  deleteGroup, deleteModule, goToItem, login, logout, selectUnit
+  deleteGroup, deleteModule, focusOnMenu, goToItem, login, logout, selectListUnits, selectUnit
 } from '../../support/util';
 
 describe('API variable coherence in Scheme, Aspect and Metadata', () => {
@@ -134,6 +134,21 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       .then(() => {
         cy.get('mat-option:contains("text-field_1")').should('have.length', 0);
       });
+  });
+
+  it('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
+    focusOnMenu('Berichte', 'Metadaten');
+    selectListUnits(['MA_01']);
+    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
+    cy.get('mat-dialog-container:contains("text-field_1")').should('have.length', 0);
+    cy.clickButton('Schließen');
+  });
+
+  // TODO Fix Schemer
+  it.skip('checks that text-field_1 is not present at Menu > Berichte > Kodierung does not exist', () => {
+    focusOnMenu('Berichte', 'Kodierung');
+    cy.contains('td', 'text-field_1').should('not.exist');
   });
 
   it('deletes the data', () => {

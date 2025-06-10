@@ -60,10 +60,9 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     goToItem('03');
     assignVariableToItem('');
     cy.contains('Speichern').click();
-    cy.pause();
   });
 
-  it('checks the connection the variable drop_list_1 with item 03 is not active at properties', () => {
+  it('checks the connection the variable drop-list_1 with item 03 is not active at properties', () => {
     cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
@@ -75,7 +74,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('checks that the Menu -> Berichte -> Metadaten is correct', () => {
+  it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits(['MA_01']);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
@@ -84,7 +83,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.clickButton('Schließen');
   });
 
-  it('checks that the eye shows correctly', () => {
+  it('checks that drop-list_1 is not present at eye view', () => {
     cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
